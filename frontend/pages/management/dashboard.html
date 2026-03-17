@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ANIMUA — Management Console</title>
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Dashboard Styles -->
+  <link rel="stylesheet" href="/src/css/management/admin-dashboard.css" />
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ═══════════════════════════════════════════════
+       SIDEBAR — sticky, never scrolls
+  ════════════════════════════════════════════════ -->
+  <aside class="sidebar">
+
+    <!-- Logo -->
+    <div class="sidebar-logo">
+      <a href="#" class="logo-mark">
+        <div class="logo-icon">
+          <i class="bi bi-heart-fill"></i>
+        </div>
+        <span class="logo-text">ANIMUA</span>
+      </a>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="sidebar-nav">
+
+      <div class="nav-label">Main</div>
+
+      <a href="#" class="nav-item active">
+        <i class="bi bi-grid-1x2-fill"></i>
+        Dashboard
+      </a>
+      <a href="#" class="nav-item">
+        <i class="bi bi-collection-fill"></i>
+        Animal Records
+        <span class="nav-badge">12</span>
+      </a>
+      <a href="#" class="nav-item">
+        <i class="bi bi-house-door-fill"></i>
+        Surrenders
+      </a>
+      <a href="#" class="nav-item">
+        <i class="bi bi-heart-arrow"></i>
+        Adoptions
+        <span class="nav-badge">5</span>
+      </a>
+
+      <div class="nav-label" style="margin-top:8px;">Operations</div>
+
+      <a href="#" class="nav-item">
+        <i class="bi bi-box-seam-fill"></i>
+        Inventory
+      </a>
+      <a href="#" class="nav-item">
+        <i class="bi bi-bar-chart-fill"></i>
+        Reports
+      </a>
+      <a href="#" class="nav-item">
+        <i class="bi bi-cpu-fill"></i>
+        Matching AI
+      </a>
+
+      <div class="nav-label" style="margin-top:8px;">System</div>
+
+      <a href="#" class="nav-item">
+        <i class="bi bi-people-fill"></i>
+        Team
+      </a>
+      <a href="#" class="nav-item">
+        <i class="bi bi-calendar3"></i>
+        Schedule
+      </a>
+      <a href="#" class="nav-item">
+        <i class="bi bi-gear-fill"></i>
+        Settings
+      </a>
+      <a href="#" class="nav-item">
+        <i class="bi bi-question-circle-fill"></i>
+        Help
+      </a>
+
+    </nav>
+
+    <!-- Sidebar Footer: User + Logout -->
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="s-avatar" id="sidebar-initials">AU</div>
+        <div style="flex:1;min-width:0;">
+          <div class="s-name" id="sidebar-name">Admin User</div>
+          <div class="s-role" id="sidebar-role">Administrator</div>
+        </div>
+        <i class="bi bi-chevron-expand s-caret"></i>
+      </div>
+      <button class="btn-logout-sm" onclick="logout()">
+        <i class="bi bi-box-arrow-left"></i> Sign Out
+      </button>
+    </div>
+
+  </aside>
+  <!-- /SIDEBAR -->
+
+
+  <!-- ═══════════════════════════════════════════════
+       MAIN AREA
+  ════════════════════════════════════════════════ -->
+  <div class="main-area">
+
+    <!-- Top Bar -->
+    <header class="topbar">
+      <div class="search-wrap">
+        <i class="bi bi-search"></i>
+        <input type="text" class="search-input" placeholder="Search animals, cases, volunteers…" />
+      </div>
+
+      <div class="topbar-spacer"></div>
+
+      <a href="#" class="topbar-icon-btn" title="Calendar">
+        <i class="bi bi-calendar3"></i>
+      </a>
+      <a href="#" class="topbar-icon-btn" title="Messages">
+        <i class="bi bi-chat-dots-fill"></i>
+      </a>
+      <a href="#" class="topbar-icon-btn" title="Notifications">
+        <i class="bi bi-bell-fill"></i>
+        <span class="notif-badge"></span>
+      </a>
+
+      <div class="topbar-user">
+        <div class="t-avatar" id="topbar-initials">AU</div>
+        <div>
+          <div class="t-name" id="display-name">Admin User</div>
+          <div class="t-role" id="display-role">Administrator</div>
+        </div>
+        <i class="bi bi-chevron-down t-caret"></i>
+      </div>
+    </header>
+
+
+    <!-- Scrollable Content + Right Panel -->
+    <div class="content-body">
+
+      <!-- ── Main Column ── -->
+      <div class="main-col">
+
+        <!-- Section: Animal Summary -->
+        <div class="section-head au">
+          <div>
+            <div class="section-title">Animal Summary</div>
+            <div class="section-sub">Overview of all active shelter cases and rescue operations.</div>
+          </div>
+          <a href="#" class="btn-add">
+            <i class="bi bi-plus-lg"></i> Add New Record
+          </a>
+        </div>
+
+        <!-- 3 Summary Cards -->
+        <div class="summary-grid">
+
+          <!-- Card 1 — Steel -->
+          <div class="animal-card card-type-steel au d1">
+            <div class="card-top">
+              <div class="card-icon-wrap">
+                <i class="bi bi-shield-fill-check"></i>
+              </div>
+              <div class="card-priority">
+                <i class="bi bi-fire"></i> High
+              </div>
+              <div class="card-name">Rescue &amp;<br>Intake Unit</div>
+              <div class="card-cat">Active Rescue Operations</div>
+            </div>
+            <div class="card-bottom">
+              <div class="card-meta-row">
+                <div class="card-comments">
+                  <i class="bi bi-chat-left-text"></i> 20
+                </div>
+                <div class="card-avatars">
+                  <div class="c-av">AP</div>
+                  <div class="c-av">MR</div>
+                  <div class="c-av">JL</div>
+                  <div class="c-av">RC</div>
+                  <div class="c-av c-av-more">+6</div>
+                </div>
+              </div>
+              <div class="progress-label">
+                <span class="lbl">Progress</span>
+                <span class="pct">60%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill" style="width:60%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2 — Wine/Dark -->
+          <div class="animal-card card-type-wine au d2">
+            <div class="card-top">
+              <div class="card-icon-wrap">
+                <i class="bi bi-heart-pulse-fill"></i>
+              </div>
+              <div class="card-priority">
+                <i class="bi bi-fire"></i> High
+              </div>
+              <div class="card-name">Medical &amp;<br>Vet Care</div>
+              <div class="card-cat">Ongoing Treatment Plans</div>
+            </div>
+            <div class="card-bottom">
+              <div class="card-meta-row">
+                <div class="card-comments">
+                  <i class="bi bi-chat-left-text"></i> 30
+                </div>
+                <div class="card-avatars">
+                  <div class="c-av">SB</div>
+                  <div class="c-av">AP</div>
+                  <div class="c-av">RC</div>
+                  <div class="c-av c-av-more">+5</div>
+                </div>
+              </div>
+              <div class="progress-label">
+                <span class="lbl">Progress</span>
+                <span class="pct">70%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill" style="width:70%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3 — Orange/Amber -->
+          <div class="animal-card card-type-orange au d3">
+            <div class="card-top">
+              <div class="card-icon-wrap">
+                <i class="bi bi-house-heart-fill"></i>
+              </div>
+              <div class="card-priority">
+                <i class="bi bi-fire"></i> Medium
+              </div>
+              <div class="card-name">Adoption<br>Pipeline</div>
+              <div class="card-cat">Pending &amp; Approved Cases</div>
+            </div>
+            <div class="card-bottom">
+              <div class="card-meta-row">
+                <div class="card-comments">
+                  <i class="bi bi-chat-left-text"></i> 25
+                </div>
+                <div class="card-avatars">
+                  <div class="c-av">JL</div>
+                  <div class="c-av">MR</div>
+                  <div class="c-av">SB</div>
+                  <div class="c-av c-av-more">+3</div>
+                </div>
+              </div>
+              <div class="progress-label">
+                <span class="lbl">Progress</span>
+                <span class="pct">40%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill" style="width:40%;"></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <!-- /summary grid -->
+
+
+        <!-- Bottom Grid: Activity + Stats -->
+        <div class="bottom-grid">
+
+          <!-- Activity Timeline -->
+          <div class="dash-card au d5">
+            <div class="dc-header">
+              <div>
+                <div class="dc-title">Activity Timeline</div>
+                <div class="dc-sub">Today's shelter events</div>
+              </div>
+              <button class="more-btn"><i class="bi bi-three-dots"></i></button>
+            </div>
+            <div class="dc-body">
+              <div class="timeline-list">
+
+                <div class="tl-item">
+                  <div class="tl-dot d-amber"><i class="bi bi-plus-circle-fill"></i></div>
+                  <div class="tl-content">
+                    <div class="tl-title">New intake — Golden Retriever</div>
+                    <div class="tl-sub">Intake #IN-0482 · Brgy. Dolores</div>
+                  </div>
+                  <div class="tl-time">9:14 AM</div>
+                </div>
+
+                <div class="tl-item">
+                  <div class="tl-dot d-steel"><i class="bi bi-file-check-fill"></i></div>
+                  <div class="tl-content">
+                    <div class="tl-title">Adoption approved — Coco</div>
+                    <div class="tl-sub">Applicant: Maria Santos</div>
+                  </div>
+                  <div class="tl-time">10:02 AM</div>
+                </div>
+
+                <div class="tl-item">
+                  <div class="tl-dot d-orange"><i class="bi bi-exclamation-triangle-fill"></i></div>
+                  <div class="tl-content">
+                    <div class="tl-title">Vaccine stock running low</div>
+                    <div class="tl-sub">Parvovirus · 6 doses remaining</div>
+                  </div>
+                  <div class="tl-time">10:45 AM</div>
+                </div>
+
+                <div class="tl-item">
+                  <div class="tl-dot d-crimson"><i class="bi bi-house-fill"></i></div>
+                  <div class="tl-content">
+                    <div class="tl-title">Surrender request submitted</div>
+                    <div class="tl-sub">Juan Dela Cruz · 2 cats</div>
+                  </div>
+                  <div class="tl-time">11:30 AM</div>
+                </div>
+
+                <div class="tl-item">
+                  <div class="tl-dot d-wine"><i class="bi bi-cpu-fill"></i></div>
+                  <div class="tl-content">
+                    <div class="tl-title">Matching algorithm completed</div>
+                    <div class="tl-sub">4 new matches suggested</div>
+                  </div>
+                  <div class="tl-time">12:00 PM</div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- Donut Stats -->
+          <div class="dash-card au d6">
+            <div class="dc-header">
+              <div>
+                <div class="dc-title">Shelter Statistics</div>
+                <div class="dc-sub">Activity records · March 2026</div>
+              </div>
+              <button class="more-btn"><i class="bi bi-three-dots"></i></button>
+            </div>
+            <div class="dc-body">
+              <div class="donut-wrap">
+                <!-- SVG Donut -->
+                <div class="donut-svg-wrap">
+                  <svg viewBox="0 0 36 36">
+                    <!-- Background track -->
+                    <circle cx="18" cy="18" r="15.5"
+                      fill="none"
+                      stroke="#F0EBE6"
+                      stroke-width="3.5"
+                    />
+                    <!-- Steel: Adopted (45%) -->
+                    <circle cx="18" cy="18" r="15.5"
+                      fill="none"
+                      stroke="#5786BC"
+                      stroke-width="3.5"
+                      stroke-dasharray="43.7 53.8"
+                      stroke-linecap="round"
+                    />
+                    <!-- Orange: In Care (30%) -->
+                    <circle cx="18" cy="18" r="15.5"
+                      fill="none"
+                      stroke="#D1601E"
+                      stroke-width="3.5"
+                      stroke-dasharray="29.2 68.3"
+                      stroke-dashoffset="-43.7"
+                      stroke-linecap="round"
+                    />
+                    <!-- Wine: Surrendered (25%) -->
+                    <circle cx="18" cy="18" r="15.5"
+                      fill="none"
+                      stroke="#FECD6E"
+                      stroke-width="3.5"
+                      stroke-dasharray="24.3 73.2"
+                      stroke-dashoffset="-72.9"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                  <div class="donut-center">
+                    <div class="donut-big">76%</div>
+                    <div class="donut-label">Placed</div>
+                  </div>
+                </div>
+
+                <div class="donut-stats">
+                  <div class="ds-item completed">
+                    <div class="ds-num">45%</div>
+                    <div class="ds-lbl">Adopted</div>
+                  </div>
+                  <div class="ds-item inprog">
+                    <div class="ds-num">30%</div>
+                    <div class="ds-lbl">In Care</div>
+                  </div>
+                  <div class="ds-item">
+                    <div class="ds-num" style="color:var(--amber);">25%</div>
+                    <div class="ds-lbl">Surrendered</div>
+                  </div>
+                </div>
+
+                <div class="donut-note">
+                  <i class="bi bi-info-circle"></i>
+                  You placed <strong>4% more</strong> animals this month vs last month.
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <!-- /bottom grid -->
+
+      </div>
+      <!-- /main-col -->
+
+
+      <!-- ═══════════════════════════════════════════════
+           RIGHT PANEL
+      ════════════════════════════════════════════════ -->
+      <aside class="right-panel">
+
+        <!-- Shelter Overview -->
+        <div class="rp-section au d4">
+          <div class="rp-head">
+            <div class="rp-title">Shelter Overview</div>
+            <button class="more-btn"><i class="bi bi-three-dots"></i></button>
+          </div>
+
+          <div class="overview-card">
+            <div class="overview-badge">
+              <i class="bi bi-fire"></i> High Priority Active
+            </div>
+            <div class="overview-body">
+              <div class="ov-title">Angeles City<br>Animal Shelter</div>
+              <div class="ov-desc">Shelter operations across rescue, medical, adoption, and inventory divisions — all centrally managed.</div>
+
+              <div class="ov-row">
+                <span class="ov-key"><i class="bi bi-activity"></i> Status</span>
+                <span class="status-chip sc-inprog">In Operation</span>
+              </div>
+              <div class="ov-row">
+                <span class="ov-key"><i class="bi bi-calendar3"></i> Since</span>
+                <span class="ov-val">Jan 2024</span>
+              </div>
+              <div class="ov-row">
+                <span class="ov-key"><i class="bi bi-people-fill"></i> Team</span>
+                <div class="assignee-avs">
+                  <div class="a-av">AP</div>
+                  <div class="a-av">MR</div>
+                  <div class="a-av">JL</div>
+                </div>
+              </div>
+              <div class="ov-row">
+                <span class="ov-key"><i class="bi bi-tag-fill"></i> Label</span>
+                <span class="ov-val" style="color:var(--txt-m);font-size:0.73rem;">+ Add Label</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Today's Tasks -->
+        <div class="rp-section au d7">
+          <div class="rp-head">
+            <div class="rp-title">Today's Tasks</div>
+            <button class="more-btn"><i class="bi bi-three-dots"></i></button>
+          </div>
+
+          <div class="task-list">
+
+            <div class="task-item">
+              <div class="task-check done">
+                <i class="bi bi-check-lg"></i>
+              </div>
+              <span class="task-text done-text">Process morning feeding rounds</span>
+            </div>
+
+            <div class="task-item">
+              <div class="task-check done">
+                <i class="bi bi-check-lg"></i>
+              </div>
+              <span class="task-text done-text">Review 3 pending adoption apps</span>
+            </div>
+
+            <div class="task-item">
+              <div class="task-check"></div>
+              <span class="task-text">Update medical records — Block C</span>
+            </div>
+
+            <div class="task-item">
+              <div class="task-check"></div>
+              <span class="task-text">Reorder parvovirus vaccine stock</span>
+            </div>
+
+            <div class="task-item">
+              <div class="task-check"></div>
+              <span class="task-text">Schedule vet visit — 4 new intakes</span>
+            </div>
+
+            <div class="task-item">
+              <div class="task-check"></div>
+              <span class="task-text">Run AI matching for March batch</span>
+            </div>
+
+            <div class="task-item">
+              <div class="task-check"></div>
+              <span class="task-text">Post weekly shelter update</span>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Quick KPI strip -->
+        <div class="au d8">
+          <div class="rp-head">
+            <div class="rp-title">Quick Stats</div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+
+            <div style="background:var(--surface-2);border:1px solid var(--bdr);border-radius:12px;padding:12px;text-align:center;">
+              <div style="font-family:var(--font-h);font-size:1.35rem;font-weight:800;color:var(--wine);">248</div>
+              <div style="font-size:0.65rem;font-weight:700;color:var(--txt-m);text-transform:uppercase;letter-spacing:0.06em;margin-top:2px;">Animals</div>
+            </div>
+
+            <div style="background:var(--surface-2);border:1px solid var(--bdr);border-radius:12px;padding:12px;text-align:center;">
+              <div style="font-family:var(--font-h);font-size:1.35rem;font-weight:800;color:var(--steel);">45</div>
+              <div style="font-size:0.65rem;font-weight:700;color:var(--txt-m);text-transform:uppercase;letter-spacing:0.06em;margin-top:2px;">Adoptions</div>
+            </div>
+
+            <div style="background:var(--surface-2);border:1px solid var(--bdr);border-radius:12px;padding:12px;text-align:center;">
+              <div style="font-family:var(--font-h);font-size:1.35rem;font-weight:800;color:var(--orange);">8</div>
+              <div style="font-size:0.65rem;font-weight:700;color:var(--txt-m);text-transform:uppercase;letter-spacing:0.06em;margin-top:2px;">Pending</div>
+            </div>
+
+            <div style="background:var(--surface-2);border:1px solid var(--bdr);border-radius:12px;padding:12px;text-align:center;">
+              <div style="font-family:var(--font-h);font-size:1.35rem;font-weight:800;color:var(--crimson);">78%</div>
+              <div style="font-size:0.65rem;font-weight:700;color:var(--txt-m);text-transform:uppercase;letter-spacing:0.06em;margin-top:2px;">Resources</div>
+            </div>
+
+          </div>
+        </div>
+
+      </aside>
+      <!-- /right-panel -->
+
+    </div>
+    <!-- /content-body -->
+
+  </div>
+  <!-- /main-area -->
+
+</div>
+<!-- /app-shell -->
+
+
+<script>
+  /* ── ROUTE GUARD (original logic preserved) ── */
+  const token = localStorage.getItem('animua_token');
+  const role  = localStorage.getItem('user_role');
+
+  if (!token || (role !== 'Admin' && role !== 'Staff')) {
+    alert('Access Denied.');
+    window.location.href = 'admin-login.html';
+  } else {
+    const name    = localStorage.getItem('user_name') || 'Administrator';
+    const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+
+    ['display-name',  'sidebar-name']    .forEach(id => document.getElementById(id).innerText = name);
+    ['display-role',  'sidebar-role']    .forEach(id => document.getElementById(id).innerText = role);
+    ['topbar-initials','sidebar-initials'].forEach(id => document.getElementById(id).innerText = initials);
+  }
+
+  /* ── LOGOUT (original logic preserved) ── */
+  function logout() {
+    localStorage.removeItem('animua_token');
+    localStorage.removeItem('user_role');
+    localStorage.removeItem('user_name');
+    window.location.href = '/pages/management/admin-login.html';
+  }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+/* ── Global Tokens ───────────────────────────────────────────── */
+:root {
+  --amber: #FECD6E;
+  --orange: #D1601E;
+  --crimson: #970A12;
+  --wine: #6F191C;
+  --steel: #5786BC;
+  --white: #ffffff;
+  --black: #0a0a0a;
+
+  --bg: #F5F3F0;
+  --surface: #ffffff;
+  --surface-2: #FAF8F6;
+
+  --txt-h: #1A1210;
+  --txt-b: #4A3F38;
+  --txt-m: #9A8D84;
+  --txt-g: #C5B8AF;
+
+  --bdr: rgba(111, 25, 28, 0.09);
+  --bdr-med: rgba(111, 25, 28, 0.14);
+
+  --sh-xs: 0 1px 3px rgba(20,10,8,0.05), 0 1px 2px rgba(20,10,8,0.04);
+  --sh-sm: 0 2px 8px rgba(20,10,8,0.07), 0 1px 3px rgba(20,10,8,0.04);
+  --sh-md: 0 6px 20px rgba(20,10,8,0.09), 0 2px 6px rgba(20,10,8,0.05);
+  --sh-lg: 0 16px 40px rgba(20,10,8,0.12), 0 4px 12px rgba(20,10,8,0.06);
+
+  --sidebar-w: 220px;
+  --rightpanel-w: 280px;
+
+  --font-h: 'Outfit', sans-serif;
+  --font-b: 'DM Sans', sans-serif;
+
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur: 180ms;
+
+  /* Legacy aliases from your existing styles */
+  --primary-red: #7D0A0A;
+  --primary-red-hover: #590505;
+  --accent-yellow: #FFD700;
+  --bg-color: #FDFBF7;
+  --surface-white: #FFFFFF;
+  --text-main: #2D2D2D;
+  --text-muted: #666666;
+  --radius-lg: 24px;
+  --radius-md: 12px;
+  --radius-pill: 50px;
+  --shadow-soft: 0 12px 30px rgba(125, 10, 10, 0.06);
+  --shadow-hover: 0 20px 40px rgba(125, 10, 10, 0.12);
+}
+
+/* ── Reset ───────────────────────────────────────────────────── */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-b);
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  line-height: 1.6;
+}
+
+a {
+  text-decoration: none;
+}
+
+button,
+.btn-outline {
+  font-family: var(--font-b);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+/* ── Utility Classes ─────────────────────────────────────────── */
+.text-center { text-align: center; }
+.mt-4 { margin-top: 2rem; }
+.me-2 { margin-right: 0.5rem; }
+
+.hidden {
+  display: none !important;
+}

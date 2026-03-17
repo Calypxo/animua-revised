@@ -1,0 +1,1 @@
+/*Standardized server error logic*/
