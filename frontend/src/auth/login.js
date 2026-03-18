@@ -15,7 +15,7 @@ export async function handleLogin(event) {
     }
 
     try {
-        const response = await fetch("http://192.168.100.227:5000/api/auth/login", {
+        const response = await fetch("https://animua.onrender.com/api/auth/login", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
