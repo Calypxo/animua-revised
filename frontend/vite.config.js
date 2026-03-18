@@ -10,6 +10,7 @@ export default defineConfig({
         // Main Entry
         main: resolve(__dirname, 'index.html'),
         // Management Pages
+        adminLogin: resolve(__dirname, 'pages/management/admin-login.html'),
         dashboard: resolve(__dirname, 'pages/management/dashboard.html'),
         // Public Pages
         home: resolve(__dirname, 'pages/public/home.html'),
