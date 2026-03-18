@@ -43,3 +43,27 @@ export async function handleRegistration(event) {
         alert("Cannot connect to the server. Please make sure the backend is running.");
     }
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+    const passwordInput = document.getElementById("reg-password");
+    if (!passwordInput) return;
+
+    const inputGroup = passwordInput.closest(".input-group");
+    if (!inputGroup) return;
+
+    const toggleButton = inputGroup.querySelector(".input-group-text");
+    const toggleIcon = toggleButton?.querySelector("i");
+
+    if (!toggleButton || !toggleIcon) return;
+
+    toggleButton.style.cursor = "pointer";
+
+    toggleButton.addEventListener("click", () => {
+        const isHidden = passwordInput.type === "password";
+
+        passwordInput.type = isHidden ? "text" : "password";
+
+        toggleIcon.classList.remove("bi-eye", "bi-eye-slash");
+        toggleIcon.classList.add(isHidden ? "bi-eye" : "bi-eye-slash");
+    });
+});

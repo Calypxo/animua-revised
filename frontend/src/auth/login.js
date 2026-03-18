@@ -1,4 +1,4 @@
-// frontend/src/auth/login.js
+// frontend/src/auth/login.js 
 
 export async function handleLogin(event) {
     event.preventDefault();
@@ -73,3 +73,27 @@ export async function handleLogin(event) {
         alert("Unable to connect to the server. Please check your internet or try again later.");
     }
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+    const passwordInput = document.getElementById("login-password");
+    if (!passwordInput) return;
+
+    const inputGroup = passwordInput.closest(".input-group");
+    if (!inputGroup) return;
+
+    const toggleButton = inputGroup.querySelector(".input-group-text");
+    const toggleIcon = toggleButton?.querySelector("i");
+
+    if (!toggleButton || !toggleIcon) return;
+
+    toggleButton.style.cursor = "pointer";
+
+    toggleButton.addEventListener("click", () => {
+        const isHidden = passwordInput.type === "password";
+
+        passwordInput.type = isHidden ? "text" : "password";
+
+        toggleIcon.classList.remove("bi-eye", "bi-eye-slash");
+        toggleIcon.classList.add(isHidden ? "bi-eye" : "bi-eye-slash");
+    });
+});
