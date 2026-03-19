@@ -18,7 +18,7 @@ exports.register = async (req, res) => {
             return res.status(409).json({ message: "Email already registered." });
         }
 
-        const salt = await bcrypt.genSalt(10);
+        const salt = await bcrypt.genSalt(12); // Increased salt rounds for better security 10 to 12
         const hashedPassword = await bcrypt.hash(password, salt);
 
         await db.collection("users").doc(email).set({

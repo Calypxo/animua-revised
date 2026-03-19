@@ -68,7 +68,7 @@ function checkAuthStatus() {
         currentPath.endsWith("/index.html") ||
         currentPath.includes("index.html");
 
-    const isAdminLoginPage = currentPath.includes("admin-login.html");
+    const isAdminLoginPage = currentPath.includes("/pages/management/admin-login.html");
     const isDashboardPage = currentPath.includes("/pages/management/dashboard.html");
     const isHomePage = currentPath.includes("/pages/public/home.html");
 
