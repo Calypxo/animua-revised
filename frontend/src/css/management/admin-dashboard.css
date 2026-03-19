@@ -887,3 +887,121 @@ body {
   .bottom-grid  { grid-template-columns: 1fr; }
   .main-col { padding: 16px; }
 }
+
+
+/* ══════════════════════════════════════════════════════════════
+   SIDEBAR — COLLAPSIBLE
+   ══════════════════════════════════════════════════════════════ */
+
+/* Sidebar and main-area both transition width/margin smoothly */
+.sidebar {
+  transition: width 260ms var(--ease);
+}
+.main-area {
+  transition: none; /* flex handles this automatically */
+}
+
+/* ── Collapsed state ── */
+.sidebar.collapsed {
+  width: 64px;
+  min-width: 64px;
+}
+
+/* Hide text-only elements when collapsed */
+.sidebar.collapsed .logo-text,
+.sidebar.collapsed .nav-label,
+.sidebar.collapsed .nav-badge,
+.sidebar.collapsed .s-name,
+.sidebar.collapsed .s-role,
+.sidebar.collapsed .s-caret,
+.sidebar.collapsed .btn-logout-sm {
+  display: none;
+}
+
+/* Center the logo icon */
+.sidebar.collapsed .sidebar-logo {
+  padding: 20px 0;
+  display: flex;
+  justify-content: center;
+}
+.sidebar.collapsed .logo-mark {
+  justify-content: center;
+}
+
+/* Center each nav item and show tooltip on hover */
+.sidebar.collapsed .sidebar-nav {
+  padding: 16px 8px;
+}
+.sidebar.collapsed .nav-item {
+  justify-content: center;
+  padding: 10px 0;
+  gap: 0;
+  border-radius: 8px;
+  position: relative;
+}
+.sidebar.collapsed .nav-item i {
+  width: auto;
+  font-size: 1.15rem;
+}
+
+/* Tooltip on hover when collapsed */
+.sidebar.collapsed .nav-item::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--txt-h);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 7px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 140ms;
+  z-index: 999;
+}
+.sidebar.collapsed .nav-item:hover::after {
+  opacity: 1;
+}
+
+/* Active indicator still works */
+.sidebar.collapsed .nav-item.active::before {
+  top: 4px; bottom: 4px;
+}
+
+/* Footer — only show avatar, centered */
+.sidebar.collapsed .sidebar-footer {
+  padding: 12px 8px;
+  display: flex;
+  justify-content: center;
+}
+.sidebar.collapsed .sidebar-user {
+  padding: 8px;
+  justify-content: center;
+  gap: 0;
+}
+
+/* ── Toggle button in topbar ── */
+.sidebar-toggle {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1.5px solid var(--bdr);
+  background: var(--surface);
+  color: var(--txt-m);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1rem;
+  flex-shrink: 0;
+  transition: background var(--dur), color var(--dur), border-color var(--dur);
+}
+.sidebar-toggle:hover {
+  background: var(--surface-2);
+  border-color: var(--bdr-med);
+  color: var(--wine);
+}
