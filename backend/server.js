@@ -11,11 +11,16 @@ const authenticateToken = require("./src/middleware/authMiddleware");
 const authorizeRole = require("./src/middleware/roleMiddleware");
 
 // --- UPDATED CORS CONFIGURATION ---
-// This allows your Firebase frontend to actually talk to this Render backend.
+// Added localhost:5173 to allow your Vite development server to connect
 app.use(cors({
-    origin: ["https://animua-angelescity.web.app"], 
+    origin: [
+        "https://animua-angelescity.web.app", 
+        "http://localhost:5173", 
+        "http://127.0.0.1:5173"
+    ], 
     methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"]
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true
 }));
 
 app.use(express.json());
@@ -48,7 +53,6 @@ app.get("/api/public-user", authenticateToken, authorizeRole("Public", "Admin", 
 });
 
 // --- UPDATED PORT LOGIC ---
-// Render uses a dynamic port. process.env.PORT is mandatory.
 const PORT = process.env.PORT || 10000; 
 
 app.listen(PORT, "0.0.0.0", () => {
