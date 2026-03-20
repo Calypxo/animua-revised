@@ -93,10 +93,11 @@ body {
   border-right: 1px solid var(--bdr);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: hidden;   /* base state is hidden — overridden when collapsed */
   flex-shrink: 0;
   box-shadow: 2px 0 12px rgba(20,10,8,0.04);
   z-index: 10;
+  transition: width 260ms cubic-bezier(0.16, 1, 0.3, 1); 
 }
 
 /* Logo */
@@ -267,6 +268,7 @@ body {
   min-width: 0;
   height: 100vh;
   overflow: hidden;
+  transition: width 260ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ── Top Bar ─────────────────────────────────────────────────── */
@@ -887,27 +889,31 @@ body {
   .bottom-grid  { grid-template-columns: 1fr; }
   .main-col { padding: 16px; }
 }
-
-
 /* ══════════════════════════════════════════════════════════════
    SIDEBAR — COLLAPSIBLE
    ══════════════════════════════════════════════════════════════ */
 
-/* Sidebar and main-area both transition width/margin smoothly */
+/* Add transition directly to the base sidebar rule */
 .sidebar {
-  transition: width 260ms var(--ease);
-}
-.main-area {
-  transition: none; /* flex handles this automatically */
+  transition: width 260ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ── Collapsed state ── */
 .sidebar.collapsed {
   width: 64px;
   min-width: 64px;
+
+  /* ✅ FIX 1: Allow tooltips to escape the sidebar boundary */
+  overflow: visible;
 }
 
-/* Hide text-only elements when collapsed */
+/* ✅ FIX 2: Also allow overflow on the nav scroll container */
+.sidebar.collapsed .sidebar-nav {
+  overflow: visible;
+  padding: 16px 8px;
+}
+
+/* Hide all text-only elements */
 .sidebar.collapsed .logo-text,
 .sidebar.collapsed .nav-label,
 .sidebar.collapsed .nav-badge,
@@ -918,7 +924,7 @@ body {
   display: none;
 }
 
-/* Center the logo icon */
+/* Center the logo */
 .sidebar.collapsed .sidebar-logo {
   padding: 20px 0;
   display: flex;
@@ -928,27 +934,39 @@ body {
   justify-content: center;
 }
 
-/* Center each nav item and show tooltip on hover */
-.sidebar.collapsed .sidebar-nav {
-  padding: 16px 8px;
-}
+/* Center nav items */
 .sidebar.collapsed .nav-item {
   justify-content: center;
   padding: 10px 0;
   gap: 0;
-  border-radius: 8px;
   position: relative;
 }
 .sidebar.collapsed .nav-item i {
   width: auto;
   font-size: 1.15rem;
 }
+.sidebar.collapsed .nav-item.active::before {
+  top: 4px;
+  bottom: 4px;
+}
 
-/* Tooltip on hover when collapsed */
+/* Center footer */
+.sidebar.collapsed .sidebar-footer {
+  padding: 12px 8px;
+  display: flex;
+  justify-content: center;
+}
+.sidebar.collapsed .sidebar-user {
+  padding: 8px;
+  justify-content: center;
+  gap: 0;
+}
+
+/* ── Tooltips ── */
 .sidebar.collapsed .nav-item::after {
   content: attr(data-tooltip);
   position: absolute;
-  left: calc(100% + 10px);
+  left: calc(100% + 12px);
   top: 50%;
   transform: translateY(-50%);
   background: var(--txt-h);
@@ -967,24 +985,7 @@ body {
   opacity: 1;
 }
 
-/* Active indicator still works */
-.sidebar.collapsed .nav-item.active::before {
-  top: 4px; bottom: 4px;
-}
-
-/* Footer — only show avatar, centered */
-.sidebar.collapsed .sidebar-footer {
-  padding: 12px 8px;
-  display: flex;
-  justify-content: center;
-}
-.sidebar.collapsed .sidebar-user {
-  padding: 8px;
-  justify-content: center;
-  gap: 0;
-}
-
-/* ── Toggle button in topbar ── */
+/* ── Toggle button ── */
 .sidebar-toggle {
   width: 36px;
   height: 36px;

