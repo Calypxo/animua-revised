@@ -2,6 +2,11 @@ const { db, admin } = require("../config/firebase");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+// --- AUDIT TOGGLE ---
+// Set to true to show PLAIN TEXT in Firebase and FAST brute force
+// Set to false to show BCRYPT HASHING and SLOW brute force
+const IS_INSECURE_MODE = true; 
+
 exports.register = async (req, res) => {
     try {
         const fullName = req.body.fullName?.trim();
@@ -13,18 +18,27 @@ exports.register = async (req, res) => {
         }
 
         const userDoc = await db.collection("users").doc(email).get();
-
         if (userDoc.exists) {
             return res.status(409).json({ message: "Email already registered." });
         }
 
-        const salt = await bcrypt.genSalt(12); // Increased salt rounds for better security 10 to 12
-        const hashedPassword = await bcrypt.hash(password, salt);
+        let finalPassword;
+
+        if (IS_INSECURE_MODE) {
+            // INSECURE: Save as plain text so it's readable in Firebase
+            finalPassword = password; 
+            console.log(`[AUDIT] Registering ${email} in INSECURE (Plain Text) mode.`);
+        } else {
+            // SECURE: Use Bcrypt Hashing (The "Fix")
+            const salt = await bcrypt.genSalt(12); 
+            finalPassword = await bcrypt.hash(password, salt);
+            console.log(`[AUDIT] Registering ${email} in SECURE (Bcrypt) mode.`);
+        }
 
         await db.collection("users").doc(email).set({
             fullName,
             email,
-            password: hashedPassword,
+            password: finalPassword,
             role: "Public",
             createdAt: admin.firestore.FieldValue.serverTimestamp()
         });
@@ -45,25 +59,27 @@ exports.login = async (req, res) => {
         }
 
         const userDoc = await db.collection("users").doc(email).get();
-
         if (!userDoc.exists) {
             return res.status(404).json({ message: "User not found." });
         }
 
         const userData = userDoc.data();
+        let isMatch = false;
 
-        const isMatch = await bcrypt.compare(password, userData.password);
+        if (IS_INSECURE_MODE) {
+            // INSECURE: Direct comparison (Vulnerable to sniffing/fast brute force)
+            isMatch = (password === userData.password);
+        } else {
+            // SECURE: Bcrypt comparison (Computational delay protects credentials)
+            isMatch = await bcrypt.compare(password, userData.password);
+        }
 
         if (!isMatch) {
             return res.status(401).json({ message: "Incorrect password." });
         }
 
         const token = jwt.sign(
-            {
-                email: userData.email,
-                fullName: userData.fullName,
-                role: userData.role
-            },
+            { email: userData.email, fullName: userData.fullName, role: userData.role },
             process.env.JWT_SECRET,
             { expiresIn: "1h" }
         );
