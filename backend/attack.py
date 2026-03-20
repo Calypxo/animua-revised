@@ -4,7 +4,7 @@ import time
 # --- CONFIGURATION ---
 # Use your live Render API link
 login_url = "https://animua.onrender.com/api/auth/login"
-target_email = "yanapangan@gmail.com"  # The account you are "auditing"
+target_email = "brags@gmail.com"  # The account you are "auditing"
 
 # Load the password dictionary
 try:
