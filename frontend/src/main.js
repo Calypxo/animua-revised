@@ -1,12 +1,11 @@
 import { handleRegistration } from "./auth/register.js";
 import { handleLogin } from "./auth/login.js";
 
-// ─── 1. CONFIGURATION & AUDIT TOGGLES ───
-// Set IS_FRONTEND_INSECURE to 'true' to allow the Console Hack.
+// ─── 1. PRODUCTION CONFIGURATION ───
+// Set to FALSE so the hosted site is SECURE by default.
 const IS_FRONTEND_INSECURE = false; 
 
-// Toggle between Localhost and Render
-//const API_URL = "http://localhost:5000"; 
+// The live URL of your Render Backend
 const API_URL = "https://animua.onrender.com";
 
 window.toggleView = function () {
@@ -63,9 +62,10 @@ document.addEventListener("DOMContentLoaded", () => {
  */
 async function checkAuthStatus() {
     const token = localStorage.getItem("animua_token");
-    const role = localStorage.getItem("user_role"); // This is your "Console Hack" variable
+    const role = localStorage.getItem("user_role");
     const currentPath = window.location.pathname;
 
+    // If no one is logged in, we don't need to ping the server
     if (!token || !role) return;
 
     try {
@@ -77,22 +77,25 @@ async function checkAuthStatus() {
             }
         });
 
+        // Handle case where server rejects the token
+        if (!response.ok) {
+            console.error("Session Invalid or Expired.");
+            localStorage.clear();
+            if (currentPath.includes("/pages/management/")) {
+                window.location.href = "/";
+            }
+            return;
+        }
+
         const data = await response.json();
 
-        // STEP A: SECURITY CHECK
+        // STEP A: INTEGRITY CHECK (Ensures role wasn't tampered with)
         if (!IS_FRONTEND_INSECURE) {
-            // SECURED MODE: Check if LocalStorage role matches Server's Signed Role
-            if (!response.ok || data.user.role !== role) {
-                console.error("JWT Verification Failed.");
+            if (data.user.role !== role) {
                 localStorage.clear();
-                if (currentPath.includes("/pages/management/")) {
-                    window.location.href = "/";
-                }
+                window.location.href = "/";
                 return;
             }
-        } else {
-            // INSECURE AUDIT MODE: Allow the fetch to fail or mismatch, but keep the role you set
-            console.warn("AUDIT MODE: Bypassing Integrity Check.");
         }
 
         // STEP B: ROUTING LOGIC
@@ -100,22 +103,19 @@ async function checkAuthStatus() {
         const isDashboard = currentPath.includes("dashboard.html");
         const isLoginOrIndex = currentPath === "/" || currentPath.endsWith("index.html") || currentPath.includes("admin-login.html");
 
-        // Logic for Management (Admin/Staff)
         if (role === "Admin" || role === "Staff") {
-            // Only redirect if they are NOT already on the dashboard
             if (isLoginOrIndex && !isDashboard) {
                 window.location.href = "/pages/management/dashboard.html";
             }
-            return; // STOP here. Allow access.
+            return;
         }
 
-        // Logic for Public Users
         if (role === "Public" && isManagementPath) {
-            alert("Access Denied: Management credentials required.");
             window.location.href = "/";
         }
 
     } catch (error) {
-        console.error("Connection error:", error);
+        // This usually triggers if Render is still "waking up"
+        console.warn("Backend connection pending... (Render Cold Start)");
     }
 }
