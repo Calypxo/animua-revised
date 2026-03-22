@@ -32,7 +32,7 @@ export async function handleLogin(event) {
         // --- API REQUEST ---
         // Switch to http://localhost:5000/api/auth/login for your Wireshark Laptop Audit
         // https://animua.onrender.com/api/auth/login
-        const response = await fetch("http://localhost:5000/api/auth/login", {
+        const response = await fetch("https://animua.onrender.com/api/auth/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, password })
