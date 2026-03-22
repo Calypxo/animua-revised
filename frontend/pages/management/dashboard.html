@@ -14,10 +14,21 @@
     /* 1. PRE-RENDER CLOAK: Hide the UI until security is verified */
     body { display: none; background-color: #f8f9fa; }
   </style>
-
-  <script>
+<script>
     (function() {
-      // 2. IMMEDIATE STATIC CHECK
+      // --- CONFIGURATION FOR AUDIT ---
+      // Set this to TRUE to show "No JWT" (The Vulnerability)
+      // Set this to FALSE to show "With JWT" (The Effectiveness)
+      const IS_AUDIT_MODE = false; 
+
+      if (IS_AUDIT_MODE) {
+        console.warn("AUDIT MODE: JWT Verification Skipped.");
+        document.documentElement.style.display = "block";
+        document.body.style.display = "block";
+        return; // Stop here, don't check the token
+      }
+
+      // 1. IMMEDIATE STATIC CHECK
       const token = localStorage.getItem('animua_token');
       const role  = localStorage.getItem('user_role');
 
@@ -26,27 +37,29 @@
         return;
       }
 
-      // 3. SERVER-SIDE SIGNATURE VERIFICATION
+      // 2. SERVER-SIDE SIGNATURE VERIFICATION
+      // This proves the JWT is effective because the server checks the Secret Key
       fetch("https://animua.onrender.com/api/protected", {
         method: "GET",
         headers: { "Authorization": `Bearer ${token}` }
       })
       .then(response => {
-        if (!response.ok) throw new Error("Unauthorized");
+        if (!response.ok) throw new Error("Invalid or Tampered Token");
         return response.json();
       })
       .then(data => {
-        // SECURITY TRAP: If the real role inside the JWT doesn't match the browser's role string
+        // THE EFFECTIVENESS TEST: 
+        // Even if the user edits LocalStorage, the JWT Payload from the server won't match.
         if (data.user.role !== role) {
-          throw new Error("Role Mismatch Detected");
+          throw new Error("Integrity Breach: Role Mismatch");
         }
         
-        // SUCCESS: Reveal the page
+        // SUCCESS: The "Gate" opens
         document.documentElement.style.display = "block";
         document.body.style.display = "block";
       })
       .catch(err => {
-        console.error("JWT Tamper Detected:", err.message);
+        console.error("JWT Security Action:", err.message);
         localStorage.clear(); 
         window.location.replace('/pages/management/admin-login.html');
       });
