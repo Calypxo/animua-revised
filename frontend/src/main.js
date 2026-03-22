@@ -39,29 +39,29 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Logout button
-    // Logout button with professional SweetAlert2 Toast
+  // Logout button
 const logoutBtn = document.getElementById("logout-btn");
 if (logoutBtn) {
     logoutBtn.addEventListener("click", async (event) => {
         event.preventDefault();
 
-        // 1. Clear all session data to protect the stateless session 
+        // Clear session data 
         localStorage.removeItem("animua_token");
         localStorage.removeItem("user_role");
         localStorage.removeItem("user_name");
         localStorage.removeItem("user_email");
+        localStorage.removeItem("show_welcome_toast");
 
-        // 2. Trigger a professional "Goodbye" Toast
+        // Professional Goodbye
         await Swal.fire({
             icon: 'info',
             title: 'Logged Out',
-            text: 'You have been safely logged out of Animua.',
+            text: 'You have been safely logged out.',
             timer: 2000,
             showConfirmButton: false,
             timerProgressBar: true
         });
 
-        // 3. Redirect to the landing page
         window.location.href = "/";
     });
 }

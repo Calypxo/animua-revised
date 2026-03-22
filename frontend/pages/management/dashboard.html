@@ -484,18 +484,21 @@
   const token = localStorage.getItem('animua_token');
   const role  = localStorage.getItem('user_role');
 
+  // If no token or wrong role, kick them out immediately without an alert
   if (!token || (role !== 'Admin' && role !== 'Staff')) {
-    alert('Access Denied.');
-    window.location.href = '/pages/management/admin-login.html';
+    window.location.replace('/pages/management/admin-login.html');
+  } else {
+    // Populate topbar user info
+    const name     = localStorage.getItem('user_name') || 'Administrator';
+    const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    
+    // We use defer or wait for DOM because these IDs exist in the body
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('display-name').innerText = name;
+      document.getElementById('display-role').innerText = role;
+      document.getElementById('topbar-initials').innerText = initials;
+    });
   }
-
-  // Populate topbar user info
-  // (sidebar user info is handled inside sidebar.js)
-  const name     = localStorage.getItem('user_name') || 'Administrator';
-  const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-  document.getElementById('display-name').innerText    = name;
-  document.getElementById('display-role').innerText    = role;
-  document.getElementById('topbar-initials').innerText = initials;
 </script>
 
 <!-- 2. Centralized sidebar loader
