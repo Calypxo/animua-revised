@@ -26,7 +26,7 @@ export async function handleRegistration(event) {
         // 2. API Call (CHANGE THIS TO LOCALHOST FOR WIRESHARK AUDIT)
         // Production: https://animua.onrender.com/api/auth/register
         // Local Audit: http://localhost:5000/api/auth/register
-        const response = await fetch("https://animua.onrender.com/api/auth/register", {
+        const response = await fetch("http://localhost:5000/api/auth/register", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
