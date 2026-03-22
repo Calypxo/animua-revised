@@ -6,6 +6,7 @@ import { handleLogin } from "./auth/login.js";
 const IS_FRONTEND_INSECURE = false; 
 
 // The live URL of your Render Backend
+// const API_URL = "http://localhost:5000";
 const API_URL = "https://animua.onrender.com";
 
 window.toggleView = function () {
