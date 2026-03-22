@@ -39,20 +39,32 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Logout button
-    const logoutBtn = document.getElementById("logout-btn");
-    if (logoutBtn) {
-        logoutBtn.addEventListener("click", (event) => {
-            event.preventDefault();
+    // Logout button with professional SweetAlert2 Toast
+const logoutBtn = document.getElementById("logout-btn");
+if (logoutBtn) {
+    logoutBtn.addEventListener("click", async (event) => {
+        event.preventDefault();
 
-            localStorage.removeItem("animua_token");
-            localStorage.removeItem("user_role");
-            localStorage.removeItem("user_name");
-            localStorage.removeItem("user_email");
+        // 1. Clear all session data to protect the stateless session 
+        localStorage.removeItem("animua_token");
+        localStorage.removeItem("user_role");
+        localStorage.removeItem("user_name");
+        localStorage.removeItem("user_email");
 
-            alert("You have been logged out.");
-            window.location.href = "/";
+        // 2. Trigger a professional "Goodbye" Toast
+        await Swal.fire({
+            icon: 'info',
+            title: 'Logged Out',
+            text: 'You have been safely logged out of Animua.',
+            timer: 2000,
+            showConfirmButton: false,
+            timerProgressBar: true
         });
-    }
+
+        // 3. Redirect to the landing page
+        window.location.href = "/";
+    });
+}
 });
 
 // Auto-redirect users if already logged in
