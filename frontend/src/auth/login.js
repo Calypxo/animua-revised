@@ -20,8 +20,13 @@ export async function handleLogin(event) {
     }
 
     try {
+
+        // LOCAL AUDIT (Use this for Wireshark on your laptop):
+        const response = await fetch("http://localhost:5000/api/auth/login", {
+
+        // PRODUCTION (Use this for the final live demo):
         // Connects to your Render Backend [cite: 75, 107]
-        const response = await fetch("https://animua.onrender.com/api/auth/login", {
+        //const response = await fetch("https://animua.onrender.com/api/auth/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, password })

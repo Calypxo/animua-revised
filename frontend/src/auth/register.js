@@ -11,13 +11,21 @@ export async function handleRegistration(event) {
     const email = emailInput?.value.trim().toLowerCase();
     const password = passwordInput?.value;
 
+    // 1. Frontend Validation
     if (!fullName || !email || !password) {
-        alert("Please fill in all fields.");
+        Swal.fire({
+            icon: 'warning',
+            title: 'Missing Fields',
+            text: 'Please fill in all fields to join Animua.'
+        });
         return;
     }
 
     try {
-        const response = await fetch("https://animua.onrender.com/api/auth/register", {
+        // 2. API Call (CHANGE THIS TO LOCALHOST FOR WIRESHARK AUDIT)
+        // Production: https://animua.onrender.com/api/auth/register
+        // Local Audit: http://localhost:5000/api/auth/register
+        const response = await fetch("http://localhost:5000/api/auth/register", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -28,22 +36,42 @@ export async function handleRegistration(event) {
         const data = await response.json();
 
         if (response.ok) {
-            alert("Registration successful! You are now a Public Member. Please log in.");
+            // 3. Success Feedback
+            await Swal.fire({
+                icon: 'success',
+                title: 'Welcome to the Family!',
+                text: 'Registration successful! You can now log in as a Public Member.',
+                timer: 3500,
+                showConfirmButton: false,
+                timerProgressBar: true
+            });
 
+            // Clear inputs
             if (fullNameInput) fullNameInput.value = "";
             if (emailInput) emailInput.value = "";
             if (passwordInput) passwordInput.value = "";
 
+            // Refresh to show login section
             location.reload();
         } else {
-            alert("Registration failed: " + (data.message || "Unknown error."));
+            // 4. Server-side Error Handling (e.g., Email already exists)
+            Swal.fire({
+                icon: 'error',
+                title: 'Registration Failed',
+                text: data.message || "An error occurred during registration."
+            });
         }
     } catch (error) {
         console.error("Registration Error:", error);
-        alert("Cannot connect to the server. Please make sure the backend is running.");
+        Swal.fire({
+            icon: 'error',
+            title: 'Connection Error',
+            text: 'Cannot connect to the backend. Please check your internet or server status.'
+        });
     }
 }
 
+// 🔐 Password Visibility Toggle Logic
 document.addEventListener("DOMContentLoaded", () => {
     const passwordInput = document.getElementById("reg-password");
     if (!passwordInput) return;
@@ -60,9 +88,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     toggleButton.addEventListener("click", () => {
         const isHidden = passwordInput.type === "password";
-
         passwordInput.type = isHidden ? "text" : "password";
 
+        // Toggle Bootstrap Icons
         toggleIcon.classList.remove("bi-eye", "bi-eye-slash");
         toggleIcon.classList.add(isHidden ? "bi-eye" : "bi-eye-slash");
     });
