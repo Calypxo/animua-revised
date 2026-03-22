@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 // --- AUDIT TOGGLE ---
 // Set to true to show PLAIN TEXT in Firebase and FAST brute force
 // Set to false to show BCRYPT HASHING and SLOW brute force
-const IS_INSECURE_MODE = false; 
+const IS_INSECURE_MODE = true; 
 
 exports.register = async (req, res) => {
     try {
