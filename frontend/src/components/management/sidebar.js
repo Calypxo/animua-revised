@@ -4,50 +4,75 @@ async function loadSidebar() {
   const container = document.getElementById('sidebar-container');
   if (!container) return;
 
-  // Fetch and inject the sidebar HTML
-  const res = await fetch('/src/components/management/sidebar.html');
-  const html = await res.text();
-  container.innerHTML = html;
+  try {
+    // 1. Fetch and inject the sidebar HTML
+    const res = await fetch('/src/components/management/sidebar.html');
+    if (!res.ok) throw new Error("Sidebar HTML not found");
+    
+    const html = await res.text();
+    container.innerHTML = html;
 
-  // ── Active nav item — highlight based on current page ──
-  const currentPath = window.location.pathname;
-  document.querySelectorAll('.nav-item').forEach(link => {
-    if (link.getAttribute('href') === currentPath) {
-      link.classList.add('active');
-    }
-  });
+    // --- CRITICAL: All code below must stay INSIDE this function ---
+    // This ensures the elements exist before we try to touch them.
 
-  // ── Populate user info from localStorage ──
-  const name     = localStorage.getItem('user_name') || 'Administrator';
-  const role     = localStorage.getItem('user_role') || 'Staff';
-  const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-
-  document.getElementById('sidebar-name').innerText     = name;
-  document.getElementById('sidebar-role').innerText     = role;
-  document.getElementById('sidebar-initials').innerText = initials;
-
-  // ── Logout ──
-  document.getElementById('sidebar-logout').addEventListener('click', () => {
-    localStorage.removeItem('animua_token');
-    localStorage.removeItem('user_role');
-    localStorage.removeItem('user_name');
-    window.location.href = '/pages/management/admin-login.html';
-  });
-
-  // ── Collapsible sidebar ──
-  const sidebar   = document.getElementById('sidebar');
-  const toggleBtn = document.getElementById('sidebarToggle');
-
-  if (localStorage.getItem('sidebar_collapsed') === 'true') {
-    sidebar.classList.add('collapsed');
-  }
-
-  if (toggleBtn) {
-    toggleBtn.addEventListener('click', () => {
-      sidebar.classList.toggle('collapsed');
-      localStorage.setItem('sidebar_collapsed', sidebar.classList.contains('collapsed'));
+    // 2. Active nav item highlight
+    const currentPath = window.location.pathname;
+    document.querySelectorAll('.nav-link, .nav-item').forEach(link => {
+      const href = link.getAttribute('href');
+      if (href && currentPath.includes(href)) {
+        link.classList.add('active');
+      }
     });
+
+    // 3. Populate user info from localStorage
+    const name = localStorage.getItem('user_name') || 'Administrator';
+    const role = localStorage.getItem('user_role') || 'Staff';
+    const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+
+    // Selectors check (Prevents "cannot set property of null" errors)
+    const nameEl = document.getElementById('sidebar-name');
+    const roleEl = document.getElementById('sidebar-role');
+    const initEl = document.getElementById('sidebar-initials');
+
+    if (nameEl) nameEl.innerText = name;
+    if (roleEl) roleEl.innerText = role;
+    if (initEl) initEl.innerText = initials;
+
+    // 4. Logout Logic
+    const logoutBtn = document.getElementById('sidebar-logout');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        // Clear all session data
+        localStorage.removeItem('animua_token');
+        localStorage.removeItem('user_role');
+        localStorage.removeItem('user_name');
+        localStorage.removeItem('user_email');
+        localStorage.removeItem('show_welcome_toast');
+        
+        window.location.replace('/pages/management/admin-login.html');
+      });
+    }
+
+    // 5. Collapsible sidebar logic
+    const sidebar = document.getElementById('sidebar');
+    const toggleBtn = document.getElementById('sidebarToggle');
+
+    if (sidebar && localStorage.getItem('sidebar_collapsed') === 'true') {
+      sidebar.classList.add('collapsed');
+    }
+
+    if (toggleBtn && sidebar) {
+      toggleBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('collapsed');
+        localStorage.setItem('sidebar_collapsed', sidebar.classList.contains('collapsed'));
+      });
+    }
+
+  } catch (error) {
+    console.error("Error loading sidebar:", error);
   }
 }
 
+// Initialize
 loadSidebar();
