@@ -10,17 +10,14 @@ export async function handleLogin(event) {
     const password = passwordInput?.value;
 
     if (!email || !password) {
-        alert("Please enter both email and password.");
+        Swal.fire({ icon: 'warning', title: 'Oops...', text: 'Please enter both email and password.' });
         return;
     }
 
     try {
-        // Ensure this URL exactly matches your Render External URL
         const response = await fetch("https://animua.onrender.com/api/auth/login", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, password })
         });
 
@@ -28,22 +25,19 @@ export async function handleLogin(event) {
 
         if (response.ok) {
             const currentPath = window.location.pathname;
-
-            // Detection logic for Admin vs Public portals
             const isAdminPage = currentPath.includes("admin-login.html");
             const isPublicPage = currentPath === "/" || currentPath.includes("index.html");
-
             const isAuthorizedStaff = data.role === "Admin" || data.role === "Staff";
 
-            // Guard: Prevent Public users from entering Admin portal
+            // Guard: Admin Portal
             if (isAdminPage && !isAuthorizedStaff) {
-                alert("Access Denied: Management credentials required.");
+                Swal.fire({ icon: 'error', title: 'Access Denied', text: 'Management credentials required.' });
                 return;
             }
 
-            // Guard: Prevent Staff from using the standard Public login
+            // Guard: Public Portal
             if (isPublicPage && isAuthorizedStaff) {
-                alert("Staff detected: Please use the Management Portal.");
+                Swal.fire({ icon: 'info', title: 'Staff Detected', text: 'Please use the Management Portal.' });
                 return;
             }
 
@@ -53,24 +47,38 @@ export async function handleLogin(event) {
             localStorage.setItem("user_name", data.fullName);
             localStorage.setItem("user_email", email);
 
-            alert(`Login Successful! Welcome, ${data.fullName}`);
+            // --- SWEETALERT2 PERSONALIZED TOAST --- [cite: 43]
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2500,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
+
+            await Toast.fire({
+                icon: 'success',
+                title: `Welcome back, ${data.fullName}!` // Personalized name from your database
+            });
 
             // --- REDIRECT LOGIC ---
-            // We use window.location.replace to prevent users from clicking "Back" to the login form
             if (isAuthorizedStaff) {
-                // Ensure this matches your Vite config input name
                 window.location.replace("/pages/management/dashboard.html");
             } else {
                 window.location.replace("/pages/public/home.html");
             }
 
         } else {
-            alert(data.message || "Invalid email or password.");
+            Swal.fire({ icon: 'error', title: 'Login Failed', text: data.message || "Invalid email or password." });
         }
 
     } catch (error) {
         console.error("Login Error:", error);
-        alert("Unable to connect to the server. Please check your internet or try again later.");
+        Swal.fire({ icon: 'error', title: 'Connection Error', text: 'Unable to connect to the server.' });
     }
 }
 
