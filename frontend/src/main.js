@@ -3,7 +3,7 @@ import { handleLogin } from "./auth/login.js";
 
 // ─── 1. CONFIGURATION & AUDIT TOGGLES ───
 // Set IS_FRONTEND_INSECURE to 'true' only during the "Broken Auth" demo for Sir Kiko.
-const IS_FRONTEND_INSECURE = false; 
+const IS_FRONTEND_INSECURE = true; 
 
 // Toggle between Localhost (for your Laptop Audit) and Render (for Live Production)
 const API_URL = "http://localhost:5000"; 
