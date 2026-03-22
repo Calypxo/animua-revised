@@ -1,9 +1,17 @@
 import { handleRegistration } from "./auth/register.js";
 import { handleLogin } from "./auth/login.js";
 
+// ─── CONFIGURATION & AUDIT TOGGLES ───
+// Switch this to true to demonstrate the "Broken Auth" vulnerability for Sir Kiko.
+const IS_FRONTEND_INSECURE = true; 
+
+// Switch between Localhost (Audit) and Render (Production)
+const API_URL = "http://localhost:5000"; 
+// const API_URL = "https://animua.onrender.com";
+
 /**
  * Toggle between login and register sections in the UI.
- * Ensure your index/login page has elements with these IDs.
+ * Connects to the "Sign Up" / "Back to Login" links on your index page.
  */
 window.toggleView = function () {
     const loginSection = document.getElementById("login-section");
@@ -17,11 +25,10 @@ window.toggleView = function () {
 
 document.addEventListener("DOMContentLoaded", () => {
     // 1. IMMEDIATE SECURITY CHECK
-    // This runs before the splash screen finishes to ensure unauthorized users are redirected.
+    // Runs before the splash screen finishes to ensure unauthorized users are caught.
     checkAuthStatus();
 
     // 2. SPLASH SCREEN LOGIC
-    // Matches the ID in your home.html
     const splash = document.getElementById("splash-screen");
     if (splash) {
         setTimeout(() => {
@@ -44,16 +51,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // 4. CENTRALIZED LOGOUT LOGIC
-    // This works for both home.html and dashboard.html
     const logoutBtn = document.getElementById("logout-btn");
     if (logoutBtn) {
         logoutBtn.addEventListener("click", async (event) => {
             event.preventDefault();
 
-            // Completely wipe the session to prevent lingering data
+            // Clear all session data to ensure a clean slate
             localStorage.clear();
 
-            // Professional Feedback
+            // Professional Feedback using SweetAlert2
             await Swal.fire({
                 icon: 'info',
                 title: 'Logged Out',
@@ -63,7 +69,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 timerProgressBar: true
             });
 
-            // Redirect to the landing page
             window.location.href = "/";
         });
     }
@@ -85,9 +90,7 @@ async function checkAuthStatus() {
     try {
         // ─── THE JWT EFFECTIVENESS TEST ───
         // We ping the protected route to see if the server accepts this token's signature.
-        // This stops hackers from manually editing their role in the browser console.
-        // use this if local: http://localhost:5000/api/protected
-        const response = await fetch("http://localhost:5000/api/protected", {
+        const response = await fetch(`${API_URL}/api/protected`, {
             method: "GET",
             headers: { 
                 "Authorization": `Bearer ${token}`,
@@ -100,7 +103,7 @@ async function checkAuthStatus() {
             console.warn("Security Alert: Invalid JWT detected. Terminating session.");
             localStorage.clear();
             
-            // If the user was trying to be in a management page, kick them to the root
+            // If the user was trying to access management pages, kick them to the root
             if (currentPath.includes("/pages/management/")) {
                 window.location.href = "/";
             }
@@ -109,13 +112,17 @@ async function checkAuthStatus() {
 
         const data = await response.json();
 
-        // ─── INTEGRITY CHECK ───
-        // Verify that the role in LocalStorage matches the role INSIDE the signed JWT payload.
-        if (data.user.role !== role) {
-            console.error("Integrity Mismatch: Local role does not match JWT claim.");
-            localStorage.clear();
-            window.location.href = "/";
-            return;
+        // ─── INTEGRITY CHECK (MODIFIED FOR AUDIT) ───
+        // In SECURED mode, we check if the role in LocalStorage matches the JWT Payload.
+        if (!IS_FRONTEND_INSECURE) {
+            if (data.user.role !== role) {
+                console.error("Integrity Mismatch: Local role does not match JWT claim.");
+                localStorage.clear();
+                window.location.href = "/";
+                return;
+            }
+        } else {
+            console.warn("AUDIT MODE: Frontend Integrity Check is BYPASSED.");
         }
 
         // ─── REDIRECT LOGIC (Role-Based Access Control) ───
@@ -125,7 +132,7 @@ async function checkAuthStatus() {
 
         // Management Personnel (Admin/Staff)
         if (role === "Admin" || role === "Staff") {
-            // Push them to the dashboard if they are lurking on login or landing pages
+            // Push them to the dashboard if they are on landing/login pages
             if (isIndexPage || isAdminLoginPage) {
                 window.location.href = "/pages/management/dashboard.html";
                 return;
@@ -134,7 +141,7 @@ async function checkAuthStatus() {
 
         // Public Users
         if (role === "Public") {
-            // Strictly block Public users from the Admin Login URL
+            // Block Public users from accessing the Management Login URL
             if (isAdminLoginPage) {
                 alert("Access Denied: Management credentials required.");
                 window.location.href = "/";
@@ -144,6 +151,5 @@ async function checkAuthStatus() {
 
     } catch (error) {
         console.error("Auth System Error:", error);
-        // We don't clear localStorage here to handle temporary internet drops gracefully.
     }
 }
