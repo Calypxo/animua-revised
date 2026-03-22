@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 
 // Use the same toggle here as in your authController.js
-const IS_INSECURE_MODE = true; 
+const IS_INSECURE_MODE = false; 
 
 const authenticateToken = (req, res, next) => {
     // If we are in Insecure Mode, skip the token check entirely
