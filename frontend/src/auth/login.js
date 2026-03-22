@@ -1,8 +1,16 @@
 // frontend/src/auth/login.js 
 import Swal from 'sweetalert2';
 
+/**
+ * Handle the login process for both Admin and Public portals.
+ * Implements Multi-Layered Guarding to prevent unauthorized access.
+ */
 export async function handleLogin(event) {
     event.preventDefault();
+
+    // --- SECURITY: SESSION RESET ---
+    // Clears any existing data to prevent Session Fixation or data leaking between users.
+    localStorage.clear();
 
     const emailInput = document.getElementById("login-email");
     const passwordInput = document.getElementById("login-password");
@@ -10,7 +18,7 @@ export async function handleLogin(event) {
     const email = emailInput?.value.trim().toLowerCase();
     const password = passwordInput?.value;
 
-    // Basic validation before reaching the server
+    // 1. Client-Side Validation
     if (!email || !password) {
         Swal.fire({ 
             icon: 'warning', 
@@ -21,12 +29,8 @@ export async function handleLogin(event) {
     }
 
     try {
-
-        // LOCAL AUDIT (Use this for Wireshark on your laptop):
-        //const response = await fetch("http://localhost:5000/api/auth/login", {
-
-        // PRODUCTION (Use this for the final live demo):
-        // Connects to your Render Backend [cite: 75, 107]
+        // --- API REQUEST ---
+        // Switch to http://localhost:5000/api/auth/login for your Wireshark Laptop Audit
         const response = await fetch("https://animua.onrender.com/api/auth/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -38,52 +42,51 @@ export async function handleLogin(event) {
         if (response.ok) {
             const currentPath = window.location.pathname;
             
-            // Detection logic for Admin vs Public portals [cite: 67, 109]
+            // 2. PORTAL DETECTION LOGIC
             const isAdminPage = currentPath.includes("admin-login.html");
             const isPublicPage = currentPath === "/" || currentPath.includes("index.html");
             const isAuthorizedStaff = data.role === "Admin" || data.role === "Staff";
 
-            // Guard: Prevent Public users from entering Admin portal [cite: 109]
+            // --- SECURITY GUARD A: PREVENT PUBLIC USERS FROM ADMIN PORTAL ---
             if (isAdminPage && !isAuthorizedStaff) {
                 Swal.fire({ 
                     icon: 'error', 
                     title: 'Access Denied', 
-                    text: 'Management credentials required.' 
+                    text: 'You do not have the required permissions for the Management Console.' 
                 });
                 return;
             }
 
-            // Guard: Prevent Staff from using the standard Public login [cite: 109]
+            // --- SECURITY GUARD B: PREVENT STAFF FROM PUBLIC LOGIN ---
             if (isPublicPage && isAuthorizedStaff) {
                 Swal.fire({ 
                     icon: 'info', 
                     title: 'Staff Detected', 
-                    text: 'Please use the Management Portal.' 
+                    text: 'Please log in via the Management Portal to access admin tools.' 
                 });
                 return;
             }
 
-            // --- SAVE SESSION DATA ---
-            // Storing JWT and identity claims for stateless authorization [cite: 20, 21]
+            // --- 3. SAVE STATELESS SESSION DATA ---
+            // We store the JWT and claims in LocalStorage for persistence across page loads.
             localStorage.setItem("animua_token", data.token);
             localStorage.setItem("user_role", data.role);
             localStorage.setItem("user_name", data.fullName);
             localStorage.setItem("user_email", email);
 
-            // --- SET THE TOAST FLAG ---
-            // This flag is picked up by welcome.js on the next page load
+            // Set the flag for welcome.js to trigger the toast on the next page
             localStorage.setItem("show_welcome_toast", "true");
 
-            // --- REDIRECT LOGIC ---
-            // Using replace to prevent the user from clicking "Back" to the login form
+            // --- 4. SECURE REDIRECT ---
+            // 'replace' is used so the login page is removed from the browser's history stack.
             if (isAuthorizedStaff) {
-                window.location.replace("/pages/management/dashboard.html"); // [cite: 57]
+                window.location.replace("/pages/management/dashboard.html");
             } else {
-                window.location.replace("/pages/public/home.html"); // [cite: 65]
+                window.location.replace("/pages/public/home.html");
             }
 
         } else {
-            // Displays error if Bcrypt comparison or user lookup fails [cite: 12, 40]
+            // Error handling for incorrect credentials (Bcrypt mismatch)
             Swal.fire({ 
                 icon: 'error', 
                 title: 'Login Failed', 
@@ -92,20 +95,24 @@ export async function handleLogin(event) {
         }
 
     } catch (error) {
-        console.error("Login Error:", error);
+        console.error("Critical Login Error:", error);
         Swal.fire({ 
             icon: 'error', 
             title: 'Connection Error', 
-            text: 'Unable to connect to the server. Please check your internet.' 
+            text: 'The server is unreachable. Please verify your connection or check the backend status.' 
         });
     }
 }
 
-// Password Visibility Toggle Logic
+/**
+ * Password Visibility Toggle Logic
+ * Standard UI security feature to allow users to verify their input.
+ */
 document.addEventListener("DOMContentLoaded", () => {
     const passwordInput = document.getElementById("login-password");
     if (!passwordInput) return;
 
+    // Find the nearest input group and its associated icon
     const inputGroup = passwordInput.closest(".input-group");
     if (!inputGroup) return;
 
@@ -120,6 +127,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const isHidden = passwordInput.type === "password";
         passwordInput.type = isHidden ? "text" : "password";
 
+        // Switch Icons (Bootstrap Icons)
         toggleIcon.classList.remove("bi-eye", "bi-eye-slash");
         toggleIcon.classList.add(isHidden ? "bi-eye" : "bi-eye-slash");
     });
