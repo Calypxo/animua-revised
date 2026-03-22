@@ -1,17 +1,17 @@
 import { handleRegistration } from "./auth/register.js";
 import { handleLogin } from "./auth/login.js";
 
-// ─── CONFIGURATION & AUDIT TOGGLES ───
-// Switch this to true to demonstrate the "Broken Auth" vulnerability for Sir Kiko.
-const IS_FRONTEND_INSECURE = true; 
+// ─── 1. CONFIGURATION & AUDIT TOGGLES ───
+// Set IS_FRONTEND_INSECURE to 'true' only during the "Broken Auth" demo for Sir Kiko.
+const IS_FRONTEND_INSECURE = false; 
 
-// Switch between Localhost (Audit) and Render (Production)
+// Toggle between Localhost (for your Laptop Audit) and Render (for Live Production)
 const API_URL = "http://localhost:5000"; 
 // const API_URL = "https://animua.onrender.com";
 
 /**
- * Toggle between login and register sections in the UI.
- * Connects to the "Sign Up" / "Back to Login" links on your index page.
+ * Global Toggle View
+ * Switches between Login and Register forms on index.html
  */
 window.toggleView = function () {
     const loginSection = document.getElementById("login-section");
@@ -24,22 +24,24 @@ window.toggleView = function () {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. IMMEDIATE SECURITY CHECK
-    // Runs before the splash screen finishes to ensure unauthorized users are caught.
+    // ─── 2. SECURITY GATEKEEPER ───
+    // Runs immediately to check if the current user belongs on this page.
     checkAuthStatus();
 
-    // 2. SPLASH SCREEN LOGIC
+    // ─── 3. SPLASH SCREEN LOGIC ───
+    // This ensures the splash screen fades out after 2 seconds.
     const splash = document.getElementById("splash-screen");
     if (splash) {
+        console.log("Animua System Initializing...");
         setTimeout(() => {
             splash.classList.add("fade-out");
             setTimeout(() => {
                 splash.style.display = "none";
-            }, 800);
-        }, 2000);
+            }, 800); // Wait for the CSS opacity transition
+        }, 2000); 
     }
 
-    // 3. AUTHENTICATION FORM LISTENERS
+    // ─── 4. FORM EVENT LISTENERS ───
     const regForm = document.getElementById("register-form");
     if (regForm) {
         regForm.addEventListener("submit", handleRegistration);
@@ -50,46 +52,46 @@ document.addEventListener("DOMContentLoaded", () => {
         loginForm.addEventListener("submit", handleLogin);
     }
 
-    // 4. CENTRALIZED LOGOUT LOGIC
+    // ─── 5. SECURE LOGOUT HANDLER ───
     const logoutBtn = document.getElementById("logout-btn");
     if (logoutBtn) {
         logoutBtn.addEventListener("click", async (event) => {
             event.preventDefault();
 
-            // Clear all session data to ensure a clean slate
+            // Total Wipeout: Clears Token, Role, Name, and Email
             localStorage.clear();
 
-            // Professional Feedback using SweetAlert2
             await Swal.fire({
                 icon: 'info',
                 title: 'Logged Out',
                 text: 'Your session has been securely terminated.',
-                timer: 2000,
+                timer: 1500,
                 showConfirmButton: false,
                 timerProgressBar: true
             });
 
+            // Redirect back to the entry point
             window.location.href = "/";
         });
     }
 });
 
 /**
- * RBAC & JWT Verification Logic
- * This is the CORE of your security demo. 
- * It proves JWT effectiveness by validating the cryptographic signature.
+ * ─── 6. RBAC & JWT VERIFICATION ENGINE ───
+ * This is the primary proof that your JWT is EFFECTIVE.
+ * It performs a cryptographic handshake with the backend on every page load.
  */
 async function checkAuthStatus() {
     const token = localStorage.getItem("animua_token");
     const role = localStorage.getItem("user_role");
     const currentPath = window.location.pathname;
 
-    // If no session exists, we stay in Guest Mode (No redirect needed for public pages)
+    // If no session exists, we treat them as a Guest
     if (!token || !role) return;
 
     try {
-        // ─── THE JWT EFFECTIVENESS TEST ───
-        // We ping the protected route to see if the server accepts this token's signature.
+        // --- STEP A: THE SILENT HANDSHAKE ---
+        // Verify the token signature against the Server's Secret Key
         const response = await fetch(`${API_URL}/api/protected`, {
             method: "GET",
             headers: { 
@@ -98,12 +100,11 @@ async function checkAuthStatus() {
             }
         });
 
-        // If the server rejects the token (Expired, Fake, or Tampered)
+        // --- STEP B: TERMINATION ON FAILURE ---
+        // If the server rejects the token (Expired or Fake), wipe the session.
         if (!response.ok) {
-            console.warn("Security Alert: Invalid JWT detected. Terminating session.");
+            console.error("JWT Verification Failed: Invalid Signature.");
             localStorage.clear();
-            
-            // If the user was trying to access management pages, kick them to the root
             if (currentPath.includes("/pages/management/")) {
                 window.location.href = "/";
             }
@@ -112,44 +113,43 @@ async function checkAuthStatus() {
 
         const data = await response.json();
 
-        // ─── INTEGRITY CHECK (MODIFIED FOR AUDIT) ───
-        // In SECURED mode, we check if the role in LocalStorage matches the JWT Payload.
+        // --- STEP C: INTEGRITY GUARD (THE "HACK" PROTECTOR) ---
+        // If the role in LocalStorage was edited in the console, it won't match the signed JWT.
         if (!IS_FRONTEND_INSECURE) {
             if (data.user.role !== role) {
-                console.error("Integrity Mismatch: Local role does not match JWT claim.");
+                console.error("Integrity Mismatch: Local role tampered.");
                 localStorage.clear();
                 window.location.href = "/";
                 return;
             }
         } else {
-            console.warn("AUDIT MODE: Frontend Integrity Check is BYPASSED.");
+            console.warn("AUDIT MODE ENABLED: Frontend Integrity Check Bypassed.");
         }
 
-        // ─── REDIRECT LOGIC (Role-Based Access Control) ───
+        // --- STEP D: ROUTING LOGIC (RBAC) ---
         const isIndexPage = currentPath === "/" || currentPath.endsWith("/index.html") || currentPath.includes("index.html");
         const isAdminLoginPage = currentPath.includes("/pages/management/admin-login.html");
         const isDashboardPage = currentPath.includes("/pages/management/dashboard.html");
 
-        // Management Personnel (Admin/Staff)
+        // Logic for Management (Admin/Staff)
         if (role === "Admin" || role === "Staff") {
-            // Push them to the dashboard if they are on landing/login pages
             if (isIndexPage || isAdminLoginPage) {
                 window.location.href = "/pages/management/dashboard.html";
                 return;
             }
         }
 
-        // Public Users
+        // Logic for Public Users
         if (role === "Public") {
-            // Block Public users from accessing the Management Login URL
-            if (isAdminLoginPage) {
-                alert("Access Denied: Management credentials required.");
+            if (isAdminLoginPage || isDashboardPage) {
+                alert("Access Denied: High-privilege credentials required.");
                 window.location.href = "/";
                 return;
             }
         }
 
     } catch (error) {
-        console.error("Auth System Error:", error);
+        console.error("Auth System Error (Network/Server):", error);
+        // We do not clear storage here to prevent kicking users out during 1-second signal drops.
     }
 }
