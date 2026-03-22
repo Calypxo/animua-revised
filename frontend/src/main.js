@@ -3,11 +3,11 @@ import { handleLogin } from "./auth/login.js";
 
 // ─── 1. CONFIGURATION & AUDIT TOGGLES ───
 // Set IS_FRONTEND_INSECURE to 'true' to allow the Console Hack.
-const IS_FRONTEND_INSECURE = true; 
+const IS_FRONTEND_INSECURE = false; 
 
 // Toggle between Localhost and Render
-const API_URL = "http://localhost:5000"; 
-// const API_URL = "https://animua.onrender.com";
+//const API_URL = "http://localhost:5000"; 
+const API_URL = "https://animua.onrender.com";
 
 window.toggleView = function () {
     const loginSection = document.getElementById("login-section");
