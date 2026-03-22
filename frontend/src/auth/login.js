@@ -1,4 +1,5 @@
 // frontend/src/auth/login.js 
+import Swal from 'sweetalert2';
 
 export async function handleLogin(event) {
     event.preventDefault();

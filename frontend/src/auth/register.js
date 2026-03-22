@@ -1,4 +1,5 @@
 // frontend/src/auth/register.js
+import Swal from 'sweetalert2';
 
 export async function handleRegistration(event) {
     event.preventDefault();
