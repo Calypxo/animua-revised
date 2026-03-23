@@ -8,31 +8,32 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/src/css/management/admin-dashboard.css" />
-  <link rel="stylesheet" href="/src/css/management/sidebar.css" />
+
+  <!-- FIX: Relative paths so it works both locally and on hosted environments -->
+  <link rel="stylesheet" href="../../src/css/management/admin-dashboard.css" />
+  <link rel="stylesheet" href="../../src/css/management/sidebar.css" />
 
   <style>
-    /* 1. PRE-RENDER CLOAK: Hide the UI until security is verified */
+    /* PRE-RENDER CLOAK: Hide the UI until JWT is verified */
     body { display: none; background-color: #f8f9fa; }
   </style>
 
   <script>
     (function() {
-      // --- CONFIGURATION FOR AUDIT ---
-      // Set this to TRUE  to show "No JWT" (The Vulnerability  — Phase 3)
-      // Set this to FALSE to show "With JWT" (The Effectiveness — Phase 4)
+      // --- AUDIT TOGGLE ---
+      // TRUE  = No JWT check (Phase 3 — Vulnerable)
+      // FALSE = Full JWT verification (Phase 4 — Secure)
       const IS_AUDIT_MODE = false;
 
-      // ── FIX: IS_AUDIT_MODE now waits for DOMContentLoaded before touching document.body ──
       if (IS_AUDIT_MODE) {
         console.warn("AUDIT MODE: JWT Verification Skipped. (Phase 3 — Vulnerable)");
         document.addEventListener("DOMContentLoaded", () => {
           document.body.style.display = "block";
         });
-        return; // Stop here — skip token check entirely
+        return;
       }
 
-      // 1. IMMEDIATE STATIC CHECK (runs before page renders)
+      // 1. STATIC CHECK — before page renders
       const token = localStorage.getItem('animua_token');
       const role  = localStorage.getItem('user_role');
 
@@ -41,10 +42,8 @@
         return;
       }
 
-      // 2. SERVER-SIDE SIGNATURE VERIFICATION (Phase 4 — Secure Fix)
-      // render: fetch("https://animua.onrender.com/api/protected", {
-      // The server verifies the HMAC-SHA256 signature against JWT_SECRET.
-      // This is what blocks the "Algorithm: None" attack shown in the lab.
+      // 2. SERVER-SIDE SIGNATURE VERIFICATION
+      // Switch to http://localhost:5000/api/protected for local testing
       fetch("https://animua.onrender.com/api/protected", {
         method: "GET",
         headers: { "Authorization": `Bearer ${token}` }
@@ -54,13 +53,10 @@
         return response.json();
       })
       .then(data => {
-        // INTEGRITY CHECK:
-        // Even if the user edits localStorage role via DevTools,
-        // the server-verified JWT payload exposes the real role.
+        // INTEGRITY CHECK: Catches localStorage role tampering via DevTools
         if (data.user.role !== role) {
           throw new Error("Integrity Breach: Role Mismatch");
         }
-
         // SUCCESS: Reveal the dashboard
         document.body.style.display = "block";
       })
@@ -76,6 +72,7 @@
 
 <div class="app-shell" id="appShell">
 
+  <!-- Sidebar injected here by sidebar.js -->
   <div id="sidebar-container"></div>
 
   <div class="main-area">
@@ -102,7 +99,6 @@
       <div class="topbar-user">
         <div class="t-avatar" id="topbar-initials">AS</div>
         <div>
-          <!-- FIX: Added missing id="display-name" and id="display-role" -->
           <div class="t-name" id="display-name">Animua Super Admin</div>
           <div class="t-role" id="display-role">Admin</div>
         </div>
@@ -253,6 +249,12 @@
   </div>
 </div>
 
+<!-- Scripts — all relative paths, no duplicates -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="../../src/components/management/sidebar.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script type="module" src="../../src/components/global/welcome.js"></script>
+
 <script>
   window.addEventListener('DOMContentLoaded', () => {
     const name     = localStorage.getItem('user_name') || 'Administrator';
@@ -268,11 +270,6 @@
     if (topbarInit)  topbarInit.innerText  = initials;
   });
 </script>
-
-<script src="/src/components/management/sidebar.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script type="module" src="../../src/components/global/welcome.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>
