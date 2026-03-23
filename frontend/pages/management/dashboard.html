@@ -9,6 +9,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/src/css/management/admin-dashboard.css" />
+  <link rel="stylesheet" href="/src/css/management/sidebar.css" />
 
   <style>
     /* 1. PRE-RENDER CLOAK: Hide the UI until security is verified */
@@ -68,14 +69,14 @@
 </head>
 <body>
 
-<div class="app-shell">
+<div class="app-shell" id="appShell">
 
   <div id="sidebar-container"></div>
 
   <div class="main-area">
 
     <header class="topbar">
-      <button class="sidebar-toggle" id="sidebarToggle" title="Toggle sidebar">
+      <button class="sidebar-toggle" id="sidebarToggle">
         <i class="bi bi-layout-sidebar"></i>
       </button>
 
@@ -86,27 +87,25 @@
 
       <div class="topbar-spacer"></div>
 
-      <a href="#" class="topbar-icon-btn" title="Calendar"><i class="bi bi-calendar3"></i></a>
-      <a href="#" class="topbar-icon-btn" title="Messages"><i class="bi bi-chat-dots-fill"></i></a>
-      <a href="#" class="topbar-icon-btn" title="Notifications">
+      <a href="#" class="topbar-icon-btn"><i class="bi bi-calendar3"></i></a>
+      <a href="#" class="topbar-icon-btn"><i class="bi bi-chat-dots-fill"></i></a>
+      <a href="#" class="topbar-icon-btn">
         <i class="bi bi-bell-fill"></i>
         <span class="notif-badge"></span>
       </a>
 
       <div class="topbar-user">
-        <div class="t-avatar" id="topbar-initials">AU</div>
+        <div class="t-avatar" id="topbar-initials">AS</div>
         <div>
-          <div class="t-name" id="display-name">Admin User</div>
-          <div class="t-role" id="display-role">Administrator</div>
+          <div class="t-name">Animua Super Admin</div>
+          <div class="t-role">Admin</div>
         </div>
         <i class="bi bi-chevron-down t-caret"></i>
       </div>
     </header>
 
     <div class="content-body">
-
       <div class="main-col">
-
         <div class="section-head au">
           <div>
             <div class="section-title">Animal Summary</div>
@@ -120,7 +119,7 @@
             <div class="card-top">
               <div class="card-icon-wrap"><i class="bi bi-shield-fill-check"></i></div>
               <div class="card-priority"><i class="bi bi-fire"></i> High</div>
-              <div class="card-name">Rescue &amp;<br>Intake Unit</div>
+              <div class="card-name">Rescue & Intake Unit</div>
               <div class="card-cat">Active Rescue Operations</div>
             </div>
             <div class="card-bottom">
@@ -139,7 +138,7 @@
             <div class="card-top">
               <div class="card-icon-wrap"><i class="bi bi-heart-pulse-fill"></i></div>
               <div class="card-priority"><i class="bi bi-fire"></i> High</div>
-              <div class="card-name">Medical &amp;<br>Vet Care</div>
+              <div class="card-name">Medical & Vet Care</div>
               <div class="card-cat">Ongoing Treatment Plans</div>
             </div>
             <div class="card-bottom">
@@ -158,8 +157,8 @@
             <div class="card-top">
               <div class="card-icon-wrap"><i class="bi bi-house-heart-fill"></i></div>
               <div class="card-priority"><i class="bi bi-fire"></i> Medium</div>
-              <div class="card-name">Adoption<br>Pipeline</div>
-              <div class="card-cat">Pending &amp; Approved Cases</div>
+              <div class="card-name">Adoption Pipeline</div>
+              <div class="card-cat">Pending & Approved Cases</div>
             </div>
             <div class="card-bottom">
               <div class="card-meta-row">
@@ -184,30 +183,27 @@
               <div class="timeline-list">
                 <div class="tl-item">
                   <div class="tl-dot d-amber"><i class="bi bi-plus-circle-fill"></i></div>
-                  <div class="tl-content"><div class="tl-title">New intake — Golden Retriever</div><div class="tl-sub">Intake #IN-0482</div></div>
+                  <div class="tl-content"><div class="tl-title">New intake — Golden Retriever</div><div class="tl-sub">Intake #IN-0482 · Brgy. Dolores</div></div>
                   <div class="tl-time">9:14 AM</div>
                 </div>
-                <div class="tl-item">
-                  <div class="tl-dot d-steel"><i class="bi bi-file-check-fill"></i></div>
-                  <div class="tl-content"><div class="tl-title">Adoption approved — Coco</div><div class="tl-sub">Applicant: Maria Santos</div></div>
-                  <div class="tl-time">10:02 AM</div>
                 </div>
-              </div>
             </div>
           </div>
 
           <div class="dash-card au d6">
             <div class="dc-header">
-              <div><div class="dc-title">Shelter Statistics</div><div class="dc-sub">March 2026</div></div>
+              <div><div class="dc-title">Shelter Statistics</div><div class="dc-sub">Activity records · March 2026</div></div>
+              <button class="more-btn"><i class="bi bi-three-dots"></i></button>
             </div>
-            <div class="dc-body">
+            <div class="dc-body text-center">
               <div class="donut-wrap">
                 <div class="donut-svg-wrap">
-                  <svg viewBox="0 0 36 36">
-                    <circle cx="18" cy="18" r="15.5" fill="none" stroke="#F0EBE6" stroke-width="3.5" />
-                    <circle cx="18" cy="18" r="15.5" fill="none" stroke="#5786BC" stroke-width="3.5" stroke-dasharray="43.7 53.8" stroke-linecap="round" />
-                  </svg>
-                  <div class="donut-center"><div class="donut-big">76%</div><div class="donut-label">Placed</div></div>
+                   <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.5" fill="none" stroke="#F0EBE6" stroke-width="3.5"/><circle cx="18" cy="18" r="15.5" fill="none" stroke="#5786BC" stroke-width="3.5" stroke-dasharray="45 55" stroke-linecap="round"/></svg>
+                   <div class="donut-center"><div class="donut-big">76%</div><div class="donut-label">Placed</div></div>
+                </div>
+                <div class="donut-stats">
+                  <div class="ds-item completed"><div class="ds-num">45%</div><div class="ds-lbl">Adopted</div></div>
+                  <div class="ds-item inprog"><div class="ds-num">30%</div><div class="ds-lbl">In Care</div></div>
                 </div>
               </div>
             </div>
@@ -217,37 +213,24 @@
 
       <aside class="right-panel">
         <div class="rp-section au d4">
-          <div class="rp-head"><div class="rp-title">Shelter Overview</div><button class="more-btn"><i class="bi bi-three-dots"></i></button></div>
+          <div class="rp-title">Shelter Overview</div>
           <div class="overview-card">
             <div class="overview-badge"><i class="bi bi-fire"></i> High Priority Active</div>
-            <div class="overview-body"><div class="ov-title">Angeles City<br>Shelter</div><div class="ov-desc">Secured via stateless JWT authorization.</div></div>
+            <div class="overview-body">
+              <div class="ov-title">Angeles City Animal Shelter</div>
+              <div class="ov-desc">Shelter operations across rescue, medical, adoption...</div>
+              <div class="ov-row"><span>Status</span><span class="status-chip sc-inprog">In Operation</span></div>
+            </div>
           </div>
         </div>
 
         <div class="rp-section au d7">
-          <div class="rp-head"><div class="rp-title">Today's Tasks</div></div>
+          <div class="rp-title">Today's Tasks</div>
           <div class="task-list">
-            <div class="task-item"><div class="task-check done"><i class="bi bi-check-lg"></i></div><span class="task-text done-text">Feeding rounds completed</span></div>
-            <div class="task-item"><div class="task-check"></div><span class="task-text">Update medical records</span></div>
-            <div class="task-item"><div class="task-check"></div><span class="task-text">Reorder vaccines</span></div>
-          </div>
-        </div>
-
-        <div class="au d8">
-          <div class="rp-head"><div class="rp-title">Quick Stats</div></div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-            <div style="background:var(--surface-2);border:1px solid var(--bdr);border-radius:12px;padding:12px;text-align:center;">
-              <div style="font-family:var(--font-h);font-size:1.35rem;font-weight:800;color:var(--wine);">248</div>
-              <div style="font-size:0.65rem;font-weight:700;color:var(--txt-m);text-transform:uppercase;">Animals</div>
-            </div>
-            <div style="background:var(--surface-2);border:1px solid var(--bdr);border-radius:12px;padding:12px;text-align:center;">
-              <div style="font-family:var(--font-h);font-size:1.35rem;font-weight:800;color:var(--steel);">45</div>
-              <div style="font-size:0.65rem;font-weight:700;color:var(--txt-m);text-transform:uppercase;">Adoptions</div>
-            </div>
+            <div class="task-item"><div class="task-check done"><i class="bi bi-check-lg"></i></div><span class="task-text done-text">Process feeding rounds</span></div>
           </div>
         </div>
       </aside>
-
     </div>
   </div>
 </div>

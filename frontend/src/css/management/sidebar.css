@@ -1,0 +1,407 @@
+/* ═══════════════════════════════════════════════════════════════
+   ANIMUA — Sidebar  |  sidebar.css
+   Static sidebar — no collapse. Clean, modern, transition-rich.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════════════════════════
+   SIDEBAR SHELL
+   ══════════════════════════════════════════════════════════════ */
+.sidebar {
+  width: var(--sidebar-w);           /* 220px from admin-dashboard.css */
+  min-width: var(--sidebar-w);
+  height: 100vh;
+  background: var(--surface);
+  border-right: 1px solid var(--bdr);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow: hidden;
+  z-index: 100;
+
+  /* Subtle entry animation when page loads */
+  animation: sidebarEntry 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes sidebarEntry {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   LOGO
+   ══════════════════════════════════════════════════════════════ */
+.sidebar-logo {
+  height: 64px;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--bdr);
+  flex-shrink: 0;
+}
+
+.logo-mark {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  text-decoration: none;
+}
+
+.logo-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--orange) 0%, var(--wine) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 3px 10px rgba(111,25,28,0.35);
+  transition: box-shadow 0.3s, transform 0.3s cubic-bezier(0.16,1,0.3,1);
+}
+.logo-mark:hover .logo-icon {
+  box-shadow: 0 5px 16px rgba(111,25,28,0.45);
+  transform: scale(1.05);
+}
+.logo-icon i {
+  color: var(--amber);
+  font-size: 0.95rem;
+}
+
+.logo-text {
+  font-family: var(--font-h);
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--wine);
+  letter-spacing: 0.04em;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   NAVIGATION
+   ══════════════════════════════════════════════════════════════ */
+.sidebar-nav {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 12px 10px;
+  scrollbar-width: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.sidebar-nav::-webkit-scrollbar { display: none; }
+
+/* Section grouping */
+.nav-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-bottom: 6px;
+}
+
+/* Section label */
+.nav-label {
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--txt-g);
+  padding: 10px 10px 5px;
+  user-select: none;
+}
+
+/* ── Nav Item ── */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 9px;
+  color: var(--txt-m);
+  text-decoration: none;
+  font-size: 0.835rem;
+  font-weight: 500;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+
+  /* Smooth all colour + background transitions */
+  transition:
+    background 200ms cubic-bezier(0.16,1,0.3,1),
+    color 200ms,
+    transform 150ms cubic-bezier(0.16,1,0.3,1),
+    box-shadow 200ms;
+}
+
+/* Icon wrapper */
+.nav-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+  background: transparent;
+  transition:
+    background 200ms cubic-bezier(0.16,1,0.3,1),
+    color 200ms,
+    transform 200ms cubic-bezier(0.16,1,0.3,1);
+}
+
+.nav-text {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Hover ── */
+.nav-item:hover {
+  background: #faf3ee;
+  color: var(--orange);
+  transform: translateX(2px);
+}
+.nav-item:hover .nav-icon {
+  background: rgba(209,96,30,0.1);
+  color: var(--orange);
+  transform: scale(1.1);
+}
+
+/* ── Active ── */
+.nav-item.active {
+  background: linear-gradient(
+    135deg,
+    rgba(151,10,18,0.09) 0%,
+    rgba(209,96,30,0.05) 100%
+  );
+  color: var(--crimson);
+  font-weight: 700;
+  transform: translateX(0);  /* no shift when active */
+}
+.nav-item.active .nav-icon {
+  background: rgba(151,10,18,0.1);
+  color: var(--crimson);
+}
+
+/* Active left bar */
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 7px;
+  bottom: 7px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: linear-gradient(180deg, var(--crimson), var(--orange));
+  box-shadow: 0 0 8px rgba(151,10,18,0.4);
+}
+
+/* Badge */
+.nav-badge {
+  margin-left: auto;
+  min-width: 19px;
+  height: 19px;
+  border-radius: 10px;
+  background: var(--crimson);
+  color: #fff;
+  font-size: 0.58rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(151,10,18,0.3);
+  transition: transform 200ms cubic-bezier(0.16,1,0.3,1);
+}
+.nav-item:hover .nav-badge {
+  transform: scale(1.1);
+}
+
+/* ── Ripple effect on click ── */
+.nav-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(209,96,30,0.15);
+  transform: scale(0);
+  animation: rippleAnim 500ms linear forwards;
+  pointer-events: none;
+}
+@keyframes rippleAnim {
+  to {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+/* ── Staggered load animation for nav items ── */
+.nav-item:nth-child(1)  { animation: navItemIn 0.35s 0.08s cubic-bezier(0.16,1,0.3,1) both; }
+.nav-item:nth-child(2)  { animation: navItemIn 0.35s 0.12s cubic-bezier(0.16,1,0.3,1) both; }
+.nav-item:nth-child(3)  { animation: navItemIn 0.35s 0.16s cubic-bezier(0.16,1,0.3,1) both; }
+.nav-item:nth-child(4)  { animation: navItemIn 0.35s 0.20s cubic-bezier(0.16,1,0.3,1) both; }
+.nav-item:nth-child(5)  { animation: navItemIn 0.35s 0.24s cubic-bezier(0.16,1,0.3,1) both; }
+.nav-item:nth-child(6)  { animation: navItemIn 0.35s 0.28s cubic-bezier(0.16,1,0.3,1) both; }
+.nav-item:nth-child(7)  { animation: navItemIn 0.35s 0.32s cubic-bezier(0.16,1,0.3,1) both; }
+.nav-item:nth-child(8)  { animation: navItemIn 0.35s 0.36s cubic-bezier(0.16,1,0.3,1) both; }
+.nav-item:nth-child(9)  { animation: navItemIn 0.35s 0.40s cubic-bezier(0.16,1,0.3,1) both; }
+.nav-item:nth-child(10) { animation: navItemIn 0.35s 0.44s cubic-bezier(0.16,1,0.3,1) both; }
+
+@keyframes navItemIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   FOOTER — user card + logout
+   ══════════════════════════════════════════════════════════════ */
+.sidebar-footer {
+  padding: 12px 10px 16px;
+  border-top: 1px solid var(--bdr);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* User card */
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 10px;
+  border-radius: 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--bdr);
+  cursor: pointer;
+  transition:
+    background 200ms,
+    box-shadow 200ms cubic-bezier(0.16,1,0.3,1),
+    border-color 200ms;
+}
+.sidebar-user:hover {
+  background: #faf3ee;
+  border-color: rgba(209,96,30,0.2);
+  box-shadow: 0 3px 12px rgba(111,25,28,0.08);
+}
+
+.s-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--orange), var(--wine));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(111,25,28,0.3);
+  transition: transform 200ms cubic-bezier(0.16,1,0.3,1);
+}
+.sidebar-user:hover .s-avatar {
+  transform: scale(1.08);
+}
+
+.s-info { flex: 1; min-width: 0; }
+.s-name {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--txt-h);
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.s-role {
+  font-size: 0.63rem;
+  color: var(--txt-m);
+  white-space: nowrap;
+}
+
+.s-caret {
+  color: var(--txt-g);
+  font-size: 0.7rem;
+  flex-shrink: 0;
+  transition: color 200ms;
+}
+.sidebar-user:hover .s-caret { color: var(--txt-m); }
+
+/* Logout button */
+.btn-logout-sm {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 9px;
+  background: transparent;
+  border: 1px solid var(--bdr);
+  color: var(--txt-m);
+  font-family: var(--font-b);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 200ms cubic-bezier(0.16,1,0.3,1),
+    color 200ms,
+    border-color 200ms,
+    box-shadow 200ms;
+}
+.btn-logout-sm:hover {
+  background: #fce9e9;
+  border-color: rgba(151,10,18,0.22);
+  color: var(--crimson);
+  box-shadow: 0 2px 8px rgba(151,10,18,0.1);
+}
+.btn-logout-sm i {
+  font-size: 0.9rem;
+  transition: transform 200ms cubic-bezier(0.16,1,0.3,1);
+}
+.btn-logout-sm:hover i {
+  transform: translateX(-2px);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   TOGGLE BUTTON (in topbar — still present, no collapse logic)
+   Just used to highlight/pin future features if needed
+   ══════════════════════════════════════════════════════════════ */
+.sidebar-toggle {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1.5px solid var(--bdr);
+  background: var(--surface);
+  color: var(--txt-m);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1rem;
+  flex-shrink: 0;
+  transition:
+    background 200ms,
+    color 200ms,
+    border-color 200ms,
+    box-shadow 200ms;
+}
+.sidebar-toggle:hover {
+  background: var(--surface-2);
+  border-color: var(--bdr-med);
+  color: var(--wine);
+  box-shadow: var(--sh-xs);
+}

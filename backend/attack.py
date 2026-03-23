@@ -9,7 +9,7 @@ import time
 # TO THIS (Localhost):
 
 login_url = "https://animua.onrender.com/api/auth/login"
-target_email = "juju1225@gmail.com"  # The account you are "auditing"
+target_email = "localhost@gmail.com"  # The account you are "auditing"
 
 # Load the password dictionary
 try:
