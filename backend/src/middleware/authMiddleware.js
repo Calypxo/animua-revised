@@ -1,29 +1,49 @@
 const jwt = require("jsonwebtoken");
 
-// Use the same toggle here as in your authController.js
-const IS_INSECURE_MODE = false; 
+// Keep this in sync with authController.js
+const IS_INSECURE_MODE = false;
 
+/**
+ * authenticateToken
+ *
+ * INSECURE MODE (Phase 3 of the Lab):
+ *   - Skips ALL signature verification — mirrors the "Algorithm: None" spoof
+ *   - Any request passes as a fake Public user
+ *
+ * SECURE MODE (Phase 4 Fix):
+ *   - Extracts the Bearer token from the Authorization header
+ *   - Verifies HMAC-SHA256 signature against process.env.JWT_SECRET
+ *   - Rejects expired, tampered, or missing tokens with HTTP 401/403
+ */
 const authenticateToken = (req, res, next) => {
-    // If we are in Insecure Mode, skip the token check entirely
+
     if (IS_INSECURE_MODE) {
-        req.user = { role: "Public", email: "fake@account.com" }; // Mock user data
+        // ⚠️  PHASE 3: Signature check bypassed — exactly like the lab's vulnerable login()
+        console.warn("[AUDIT - INSECURE] Token verification SKIPPED. Using mock user.");
+        req.user = { email: "mock@insecure.com", role: "Public", fullName: "Mock User" };
         return next();
     }
 
+    // ✅  PHASE 4: Extract Bearer token from Authorization header
     const authHeader = req.headers["authorization"];
-    const token = authHeader && authHeader.split(" ")[1];
+    const token      = authHeader && authHeader.split(" ")[1]; // "Bearer <token>"
 
     if (!token) {
-        return res.status(401).json({ message: "Access denied. No token provided." });
+        return res.status(401).json({
+            message: "Access denied. No token provided."
+        });
     }
 
-    // SECURE: Verify the Stateless JWT using your 256-bit Secret Key
-    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    // ✅  PHASE 4: Verify cryptographic signature — rejects "Algorithm: None" attacks
+    jwt.verify(token, process.env.JWT_SECRET, { algorithms: ["HS256"] }, (err, decoded) => {
         if (err) {
-            return res.status(403).json({ message: "Invalid or expired token." });
+            const reason = err.name === "TokenExpiredError"
+                ? "Token has expired. Please log in again."
+                : "Invalid or tampered token. Access denied.";
+            return res.status(403).json({ message: reason });
         }
 
-        req.user = user;
+        req.user = decoded; // { email, fullName, role, iat, exp }
         next();
     });
 };

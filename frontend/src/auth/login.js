@@ -1,134 +1,128 @@
-// frontend/src/auth/login.js 
 import Swal from 'sweetalert2';
 
 /**
- * Handle the login process for both Admin and Public portals.
- * Implements Multi-Layered Guarding to prevent unauthorized access.
+ * handleLogin
+ *
+ * Security layers implemented (mirrors Phase 4 of the lab):
+ *  1. Session reset — prevents session fixation
+ *  2. Client-side validation — UX guard only, never a security boundary
+ *  3. Server returns a signed JWT — not a plain payload like {"user":"admin"}
+ *  4. Role integrity check — server role vs localStorage role must match
+ *  5. Portal-based access control — Staff can't use public login and vice versa
+ *  6. history.replace() redirect — removes login page from browser history
  */
 export async function handleLogin(event) {
     event.preventDefault();
 
-    // --- SECURITY: SESSION RESET ---
-    // Clears any existing data to prevent Session Fixation or data leaking between users.
+    // 1. SESSION RESET — clears any stale token before a new login attempt
     localStorage.clear();
 
-    const emailInput = document.getElementById("login-email");
+    const emailInput    = document.getElementById("login-email");
     const passwordInput = document.getElementById("login-password");
 
-    const email = emailInput?.value.trim().toLowerCase();
+    const email    = emailInput?.value.trim().toLowerCase();
     const password = passwordInput?.value;
 
-    // 1. Client-Side Validation
+    // 2. CLIENT-SIDE VALIDATION
     if (!email || !password) {
-        Swal.fire({ 
-            icon: 'warning', 
-            title: 'Missing Information', 
-            text: 'Please enter both email and password.' 
+        Swal.fire({
+            icon:  "warning",
+            title: "Missing Information",
+            text:  "Please enter both email and password."
         });
         return;
     }
 
     try {
-        // --- API REQUEST ---
-        // Switch to http://localhost:5000/api/auth/login for your Wireshark Laptop Audit
-        // https://animua.onrender.com/api/auth/login
-        const response = await fetch("https://animua.onrender.com/api/auth/login", {
-            method: "POST",
+        // 3. API REQUEST
+        // ⚠️  For Wireshark audit: switch to http://localhost:5000 to see plain HTTP traffic
+        // ✅  For production: use https://animua.onrender.com
+        const API_URL = "https://animua.onrender.com";
+
+        const response = await fetch(`${API_URL}/api/auth/login`, {
+            method:  "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password })
+            body:    JSON.stringify({ email, password })
         });
 
         const data = await response.json();
 
-        if (response.ok) {
-            const currentPath = window.location.pathname;
-            
-            // 2. PORTAL DETECTION LOGIC
-            const isAdminPage = currentPath.includes("admin-login.html");
-            const isPublicPage = currentPath === "/" || currentPath.includes("index.html");
-            const isAuthorizedStaff = data.role === "Admin" || data.role === "Staff";
-
-            // --- SECURITY GUARD A: PREVENT PUBLIC USERS FROM ADMIN PORTAL ---
-            if (isAdminPage && !isAuthorizedStaff) {
-                Swal.fire({ 
-                    icon: 'error', 
-                    title: 'Access Denied', 
-                    text: 'You do not have the required permissions for the Management Console.' 
-                });
-                return;
-            }
-
-            // --- SECURITY GUARD B: PREVENT STAFF FROM PUBLIC LOGIN ---
-            if (isPublicPage && isAuthorizedStaff) {
-                Swal.fire({ 
-                    icon: 'info', 
-                    title: 'Staff Detected', 
-                    text: 'Please log in via the Management Portal to access admin tools.' 
-                });
-                return;
-            }
-
-            // --- 3. SAVE STATELESS SESSION DATA ---
-            // We store the JWT and claims in LocalStorage for persistence across page loads.
-            localStorage.setItem("animua_token", data.token);
-            localStorage.setItem("user_role", data.role);
-            localStorage.setItem("user_name", data.fullName);
-            localStorage.setItem("user_email", email);
-
-            // Set the flag for welcome.js to trigger the toast on the next page
-            localStorage.setItem("show_welcome_toast", "true");
-
-            // --- 4. SECURE REDIRECT ---
-            // 'replace' is used so the login page is removed from the browser's history stack.
-            if (isAuthorizedStaff) {
-                window.location.replace("/pages/management/dashboard.html");
-            } else {
-                window.location.replace("/pages/public/home.html");
-            }
-
-        } else {
-            // Error handling for incorrect credentials (Bcrypt mismatch)
-            Swal.fire({ 
-                icon: 'error', 
-                title: 'Login Failed', 
-                text: data.message || "Invalid email or password." 
+        if (!response.ok) {
+            Swal.fire({
+                icon:  "error",
+                title: "Login Failed",
+                text:  data.message || "Invalid email or password."
             });
+            return;
+        }
+
+        // ─── PORTAL DETECTION ────────────────────────────────────────────────
+        const currentPath      = window.location.pathname;
+        const isAdminPage      = currentPath.includes("admin-login.html");
+        const isPublicPage     = currentPath === "/" || currentPath.includes("index.html");
+        const isAuthorizedStaff = data.role === "Admin" || data.role === "Staff";
+
+        // GUARD A: Block public users from the Admin portal
+        if (isAdminPage && !isAuthorizedStaff) {
+            Swal.fire({
+                icon:  "error",
+                title: "Access Denied",
+                text:  "You do not have the required permissions for the Management Console."
+            });
+            return;
+        }
+
+        // GUARD B: Block Staff from using the public login page
+        if (isPublicPage && isAuthorizedStaff) {
+            Swal.fire({
+                icon:  "info",
+                title: "Staff Detected",
+                text:  "Please log in via the Management Portal to access admin tools."
+            });
+            return;
+        }
+
+        // 4. STORE SESSION DATA
+        // The JWT is stored here — the server will verify its signature on every /api/protected call.
+        // This replaces the lab's simplified "head.admin.headadmin2026" with a real HMAC-SHA256 token.
+        localStorage.setItem("animua_token", data.token);
+        localStorage.setItem("user_role",    data.role);
+        localStorage.setItem("user_name",    data.fullName);
+        localStorage.setItem("user_email",   email);
+        localStorage.setItem("show_welcome_toast", "true");
+
+        // 5. SECURE REDIRECT — replace() removes login from the history stack
+        if (isAuthorizedStaff) {
+            window.location.replace("/pages/management/dashboard.html");
+        } else {
+            window.location.replace("/pages/public/home.html");
         }
 
     } catch (error) {
-        console.error("Critical Login Error:", error);
-        Swal.fire({ 
-            icon: 'error', 
-            title: 'Connection Error', 
-            text: 'The server is unreachable. Please verify your connection or check the backend status.' 
+        console.error("[Login Error]", error);
+        Swal.fire({
+            icon:  "error",
+            title: "Connection Error",
+            text:  "The server is unreachable. Please verify your connection or check the backend status."
         });
     }
 }
 
-/**
- * Password Visibility Toggle Logic
- * Standard UI security feature to allow users to verify their input.
- */
+// ─── PASSWORD VISIBILITY TOGGLE ───────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
     const passwordInput = document.getElementById("login-password");
     if (!passwordInput) return;
 
-    // Find the nearest input group and its associated icon
-    const inputGroup = passwordInput.closest(".input-group");
-    if (!inputGroup) return;
-
-    const toggleButton = inputGroup.querySelector(".input-group-text");
-    const toggleIcon = toggleButton?.querySelector("i");
+    const inputGroup   = passwordInput.closest(".input-group");
+    const toggleButton = inputGroup?.querySelector(".input-group-text");
+    const toggleIcon   = toggleButton?.querySelector("i");
 
     if (!toggleButton || !toggleIcon) return;
 
     toggleButton.style.cursor = "pointer";
-
     toggleButton.addEventListener("click", () => {
         const isHidden = passwordInput.type === "password";
         passwordInput.type = isHidden ? "text" : "password";
-
-        // Switch Icons (Bootstrap Icons)
         toggleIcon.classList.remove("bi-eye", "bi-eye-slash");
         toggleIcon.classList.add(isHidden ? "bi-eye" : "bi-eye-slash");
     });

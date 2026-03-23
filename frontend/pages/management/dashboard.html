@@ -15,21 +15,24 @@
     /* 1. PRE-RENDER CLOAK: Hide the UI until security is verified */
     body { display: none; background-color: #f8f9fa; }
   </style>
-<script>
+
+  <script>
     (function() {
       // --- CONFIGURATION FOR AUDIT ---
-      // Set this to TRUE to show "No JWT" (The Vulnerability)
-      // Set this to FALSE to show "With JWT" (The Effectiveness)
-      const IS_AUDIT_MODE = false; 
+      // Set this to TRUE  to show "No JWT" (The Vulnerability  — Phase 3)
+      // Set this to FALSE to show "With JWT" (The Effectiveness — Phase 4)
+      const IS_AUDIT_MODE = false;
 
+      // ── FIX: IS_AUDIT_MODE now waits for DOMContentLoaded before touching document.body ──
       if (IS_AUDIT_MODE) {
-        console.warn("AUDIT MODE: JWT Verification Skipped.");
-        document.documentElement.style.display = "block";
-        document.body.style.display = "block";
-        return; // Stop here, don't check the token
+        console.warn("AUDIT MODE: JWT Verification Skipped. (Phase 3 — Vulnerable)");
+        document.addEventListener("DOMContentLoaded", () => {
+          document.body.style.display = "block";
+        });
+        return; // Stop here — skip token check entirely
       }
 
-      // 1. IMMEDIATE STATIC CHECK
+      // 1. IMMEDIATE STATIC CHECK (runs before page renders)
       const token = localStorage.getItem('animua_token');
       const role  = localStorage.getItem('user_role');
 
@@ -38,8 +41,10 @@
         return;
       }
 
-      // 2. SERVER-SIDE SIGNATURE VERIFICATION
-      // This proves the JWT is effective because the server checks the Secret Key
+      // 2. SERVER-SIDE SIGNATURE VERIFICATION (Phase 4 — Secure Fix)
+      // render: fetch("https://animua.onrender.com/api/protected", {
+      // The server verifies the HMAC-SHA256 signature against JWT_SECRET.
+      // This is what blocks the "Algorithm: None" attack shown in the lab.
       fetch("https://animua.onrender.com/api/protected", {
         method: "GET",
         headers: { "Authorization": `Bearer ${token}` }
@@ -49,19 +54,19 @@
         return response.json();
       })
       .then(data => {
-        // THE EFFECTIVENESS TEST: 
-        // Even if the user edits LocalStorage, the JWT Payload from the server won't match.
+        // INTEGRITY CHECK:
+        // Even if the user edits localStorage role via DevTools,
+        // the server-verified JWT payload exposes the real role.
         if (data.user.role !== role) {
           throw new Error("Integrity Breach: Role Mismatch");
         }
-        
-        // SUCCESS: The "Gate" opens
-        document.documentElement.style.display = "block";
+
+        // SUCCESS: Reveal the dashboard
         document.body.style.display = "block";
       })
       .catch(err => {
         console.error("JWT Security Action:", err.message);
-        localStorage.clear(); 
+        localStorage.clear();
         window.location.replace('/pages/management/admin-login.html');
       });
     })();
@@ -97,8 +102,9 @@
       <div class="topbar-user">
         <div class="t-avatar" id="topbar-initials">AS</div>
         <div>
-          <div class="t-name">Animua Super Admin</div>
-          <div class="t-role">Admin</div>
+          <!-- FIX: Added missing id="display-name" and id="display-role" -->
+          <div class="t-name" id="display-name">Animua Super Admin</div>
+          <div class="t-role" id="display-role">Admin</div>
         </div>
         <i class="bi bi-chevron-down t-caret"></i>
       </div>
@@ -183,10 +189,13 @@
               <div class="timeline-list">
                 <div class="tl-item">
                   <div class="tl-dot d-amber"><i class="bi bi-plus-circle-fill"></i></div>
-                  <div class="tl-content"><div class="tl-title">New intake — Golden Retriever</div><div class="tl-sub">Intake #IN-0482 · Brgy. Dolores</div></div>
+                  <div class="tl-content">
+                    <div class="tl-title">New intake — Golden Retriever</div>
+                    <div class="tl-sub">Intake #IN-0482 · Brgy. Dolores</div>
+                  </div>
                   <div class="tl-time">9:14 AM</div>
                 </div>
-                </div>
+              </div>
             </div>
           </div>
 
@@ -198,8 +207,14 @@
             <div class="dc-body text-center">
               <div class="donut-wrap">
                 <div class="donut-svg-wrap">
-                   <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.5" fill="none" stroke="#F0EBE6" stroke-width="3.5"/><circle cx="18" cy="18" r="15.5" fill="none" stroke="#5786BC" stroke-width="3.5" stroke-dasharray="45 55" stroke-linecap="round"/></svg>
-                   <div class="donut-center"><div class="donut-big">76%</div><div class="donut-label">Placed</div></div>
+                  <svg viewBox="0 0 36 36">
+                    <circle cx="18" cy="18" r="15.5" fill="none" stroke="#F0EBE6" stroke-width="3.5"/>
+                    <circle cx="18" cy="18" r="15.5" fill="none" stroke="#5786BC" stroke-width="3.5" stroke-dasharray="45 55" stroke-linecap="round"/>
+                  </svg>
+                  <div class="donut-center">
+                    <div class="donut-big">76%</div>
+                    <div class="donut-label">Placed</div>
+                  </div>
                 </div>
                 <div class="donut-stats">
                   <div class="ds-item completed"><div class="ds-num">45%</div><div class="ds-lbl">Adopted</div></div>
@@ -227,7 +242,10 @@
         <div class="rp-section au d7">
           <div class="rp-title">Today's Tasks</div>
           <div class="task-list">
-            <div class="task-item"><div class="task-check done"><i class="bi bi-check-lg"></i></div><span class="task-text done-text">Process feeding rounds</span></div>
+            <div class="task-item">
+              <div class="task-check done"><i class="bi bi-check-lg"></i></div>
+              <span class="task-text done-text">Process feeding rounds</span>
+            </div>
           </div>
         </div>
       </aside>
@@ -237,13 +255,17 @@
 
 <script>
   window.addEventListener('DOMContentLoaded', () => {
-    const name = localStorage.getItem('user_name') || 'Administrator';
-    const role = localStorage.getItem('user_role') || 'Staff';
+    const name     = localStorage.getItem('user_name') || 'Administrator';
+    const role     = localStorage.getItem('user_role') || 'Staff';
     const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-    
-    document.getElementById('display-name').innerText = name;
-    document.getElementById('display-role').innerText = role;
-    document.getElementById('topbar-initials').innerText = initials;
+
+    const displayName = document.getElementById('display-name');
+    const displayRole = document.getElementById('display-role');
+    const topbarInit  = document.getElementById('topbar-initials');
+
+    if (displayName) displayName.innerText = name;
+    if (displayRole) displayRole.innerText = role;
+    if (topbarInit)  topbarInit.innerText  = initials;
   });
 </script>
 

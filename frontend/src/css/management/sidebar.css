@@ -375,11 +375,159 @@
 .btn-logout-sm:hover i {
   transform: translateX(-2px);
 }
+/* ══════════════════════════════════════════════════════════════
+   SIDEBAR — MODERN COLLAPSIBLE
+   Replace the old collapsible block at the bottom of
+   admin-dashboard.css with this entire block
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Smooth transition ── */
+.sidebar {
+  transition:
+    width 280ms cubic-bezier(0.16, 1, 0.3, 1),
+    min-width 280ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ── nav-text fade ── */
+.nav-text {
+  opacity: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: opacity 180ms ease;
+  flex: 1;
+}
 
 /* ══════════════════════════════════════════════════════════════
-   TOGGLE BUTTON (in topbar — still present, no collapse logic)
-   Just used to highlight/pin future features if needed
+   COLLAPSED STATE
    ══════════════════════════════════════════════════════════════ */
+.sidebar.collapsed {
+  width: 68px;
+  min-width: 68px;
+  overflow: visible;
+}
+
+.sidebar.collapsed .sidebar-nav {
+  overflow: visible;
+  padding: 16px 0;
+}
+
+/* ── Hide all text ── */
+.sidebar.collapsed .nav-text,
+.sidebar.collapsed .nav-label,
+.sidebar.collapsed .nav-badge,
+.sidebar.collapsed .logo-text,
+.sidebar.collapsed .s-name,
+.sidebar.collapsed .s-role,
+.sidebar.collapsed .s-caret,
+.sidebar.collapsed .s-user-info {
+  display: none;
+}
+
+/* ── Logo: center the icon ── */
+.sidebar.collapsed .sidebar-logo {
+  padding: 20px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.sidebar.collapsed .logo-mark {
+  justify-content: center;
+  width: 100%;
+}
+
+/* ── Nav items: perfectly centered ── */
+.sidebar.collapsed .nav-item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 0;
+  margin: 2px 8px;
+  gap: 0;
+  width: calc(100% - 16px);
+}
+.sidebar.collapsed .nav-item i {
+  font-size: 1.2rem;
+  width: auto;
+  text-align: center;
+  margin: 0;
+}
+
+/* Keep active indicator */
+.sidebar.collapsed .nav-item.active::before {
+  top: 6px;
+  bottom: 6px;
+}
+
+/* ── Footer: center avatar ── */
+.sidebar.collapsed .sidebar-footer {
+  padding: 12px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.sidebar.collapsed .sidebar-user {
+  justify-content: center;
+  padding: 8px 0;
+  gap: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+.sidebar.collapsed .s-avatar {
+  margin: 0 auto;
+}
+.sidebar.collapsed .btn-logout-sm {
+  justify-content: center;
+  padding: 8px 0;
+  gap: 0;
+  width: calc(100% - 16px);
+  margin: 4px 8px 0;
+}
+
+/* ── Tooltips ── */
+.sidebar.collapsed .nav-item {
+  position: relative;
+}
+.sidebar.collapsed .nav-item::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: calc(100% + 14px);
+  top: 50%;
+  transform: translateY(-50%) scale(0.95);
+  background: var(--txt-h);
+  color: #fff;
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 8px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 150ms ease, transform 150ms ease;
+  z-index: 9999;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+/* Tooltip arrow */
+.sidebar.collapsed .nav-item::before {
+  content: '';
+  position: absolute;
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  border: 5px solid transparent;
+  border-right-color: var(--txt-h);
+  opacity: 0;
+  transition: opacity 150ms ease;
+  z-index: 9999;
+  pointer-events: none;
+}
+.sidebar.collapsed .nav-item:hover::after,
+.sidebar.collapsed .nav-item:hover::before {
+  opacity: 1;
+  transform: translateY(-50%) scale(1);
+}
+
+/* ── Toggle button ── */
 .sidebar-toggle {
   width: 36px;
   height: 36px;
@@ -394,14 +542,20 @@
   font-size: 1rem;
   flex-shrink: 0;
   transition:
-    background 200ms,
-    color 200ms,
-    border-color 200ms,
-    box-shadow 200ms;
+    background var(--dur),
+    color var(--dur),
+    border-color var(--dur),
+    box-shadow var(--dur);
 }
 .sidebar-toggle:hover {
-  background: var(--surface-2);
-  border-color: var(--bdr-med);
-  color: var(--wine);
+  background: linear-gradient(135deg, rgba(151,10,18,0.06), rgba(209,96,30,0.04));
+  border-color: rgba(151,10,18,0.2);
+  color: var(--crimson);
   box-shadow: var(--sh-xs);
+}
+.sidebar-toggle i {
+  transition: transform 280ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sidebar-toggle.is-collapsed i {
+  transform: rotate(180deg);
 }
