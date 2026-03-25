@@ -3,13 +3,13 @@ import { handleLogin }        from "./auth/login.js";
 
 // =============================================================================
 // SECURITY TOGGLE — mirrors IS_INSECURE_MODE in the backend
-// false = SECURE (Phase 4): Role integrity check is enforced
-// true  = INSECURE (Phase 3): Role check skipped — spoofable via DevTools
-// render: https://animua.onrender.com to see the secure version in action
-// local:   http://localhost:5000 to test the insecure version (Wireshark-friendly)
+// false = SECURE (Phase 4)
+// true  = INSECURE (Phase 3)
+// render: https://animua.onrender.com 
+// local:   http://localhost:5000
 // =============================================================================
 const IS_FRONTEND_INSECURE = false;
-// =============================================================================
+
 const API_URL = "https://animua.onrender.com";
 
 // ─── GLOBAL HELPERS ───────────────────────────────────────────────────────────
@@ -50,19 +50,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// ─── JWT VERIFICATION ENGINE ──────────────────────────────────────────────────
-/**
- * checkAuthStatus
- *
- * On every page load:
- *  1. Reads the stored JWT from localStorage
- *  2. Sends it to /api/protected — the server verifies the HMAC-SHA256 signature
- *  3. Compares the server-returned role with localStorage (tamper detection)
- *  4. Redirects based on role and current path
- *
- * This is the real-world equivalent of the lab's Phase 4 "Security Fix" —
- * the server, not the client, decides who is authorized.
- */
+// ─── JWT VERIFICATION ──────────────────────────────────────────────────
+
 async function checkAuthStatus() {
     const token       = localStorage.getItem("animua_token");
     const role        = localStorage.getItem("user_role");
@@ -92,7 +81,6 @@ async function checkAuthStatus() {
         const data = await response.json();
 
         // INTEGRITY CHECK — detects DevTools role tampering in localStorage
-        // (mirrors the lab's "Algorithm: None" check — trust the server, not the client)
         if (!IS_FRONTEND_INSECURE && data.user.role !== role) {
             console.error("[Auth] Role mismatch! Possible localStorage tampering.");
             localStorage.clear();
@@ -118,7 +106,6 @@ async function checkAuthStatus() {
         }
 
     } catch (error) {
-        // Backend cold start (Render free tier) — fail silently, don't boot the user
         console.warn("[Auth] Backend connection pending...", error.message);
     }
 }

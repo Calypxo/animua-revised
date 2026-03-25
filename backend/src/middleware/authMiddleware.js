@@ -1,30 +1,32 @@
 const jwt = require("jsonwebtoken");
 
-// Keep this in sync with authController.js
+// same condition as authController.js
+//IS_INSECURE_MODE = true: plain text + no signature check
+// IS_INSECURE_MODE = false: Bcrypt + signed JWT
 const IS_INSECURE_MODE = false;
 
-/**
- * authenticateToken
- *
- * INSECURE MODE (Phase 3 of the Lab):
- *   - Skips ALL signature verification — mirrors the "Algorithm: None" spoof
- *   - Any request passes as a fake Public user
- *
- * SECURE MODE (Phase 4 Fix):
- *   - Extracts the Bearer token from the Authorization header
- *   - Verifies HMAC-SHA256 signature against process.env.JWT_SECRET
- *   - Rejects expired, tampered, or missing tokens with HTTP 401/403
- */
+
 const authenticateToken = (req, res, next) => {
 
-    if (IS_INSECURE_MODE) {
-        // ⚠️  PHASE 3: Signature check bypassed — exactly like the lab's vulnerable login()
-        console.warn("[AUDIT - INSECURE] Token verification SKIPPED. Using mock user.");
-        req.user = { email: "mock@insecure.com", role: "Public", fullName: "Mock User" };
-        return next();
-    }
+// src/middleware/authMiddleware.js
 
-    // ✅  PHASE 4: Extract Bearer token from Authorization header
+if (IS_INSECURE_MODE) {
+    const spoofedRole = req.headers['x-user-role'] || "Public";
+
+    // ADD THESE TWO LOGS:
+    console.log("--- DEBUG START ---");
+    console.log("Header Received:", req.headers['x-user-role']);
+    console.log("Role being injected:", spoofedRole);
+
+    req.user = { 
+        email: "mock@insecure.com", 
+        role: spoofedRole, 
+        fullName: "Mock User" 
+    };
+    return next();
+}
+
+    // Extract Bearer token from Authorization header
     const authHeader = req.headers["authorization"];
     const token      = authHeader && authHeader.split(" ")[1]; // "Bearer <token>"
 
@@ -34,7 +36,7 @@ const authenticateToken = (req, res, next) => {
         });
     }
 
-    // ✅  PHASE 4: Verify cryptographic signature — rejects "Algorithm: None" attacks
+    // Verify cryptographic signature — rejects "Algorithm: None" attacks
     jwt.verify(token, process.env.JWT_SECRET, { algorithms: ["HS256"] }, (err, decoded) => {
         if (err) {
             const reason = err.name === "TokenExpiredError"

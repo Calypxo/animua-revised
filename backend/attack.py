@@ -9,8 +9,7 @@ import time
 # TO THIS (Localhost):
 
 login_url = "https://animua.onrender.com/api/auth/login"
-target_email = "localhost@gmail.com"  # The account you are "auditing"
-
+target_email = "animua.angelescity@.gmail.com"  
 # Load the password dictionary
 try:
     with open("passwords.txt", "r") as file:

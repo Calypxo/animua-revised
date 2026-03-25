@@ -21,8 +21,8 @@ export async function handleRegistration(event) {
     }
 
     try {
-        // ⚠️  For Wireshark audit: http://localhost:5000 (plain HTTP, visible in packet capture)
-        // ✅  For production:       https://animua.onrender.com (TLS-encrypted, hidden from sniff)
+        // For Wireshark audit: http://localhost:5000 (plain HTTP, visible in packet capture)
+        // For production:       https://animua.onrender.com (TLS-encrypted, hidden from sniff)
         const API_URL = "https://animua.onrender.com";
 
         const response = await fetch(`${API_URL}/api/auth/register`, {

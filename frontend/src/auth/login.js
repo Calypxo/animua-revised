@@ -1,20 +1,9 @@
 import Swal from 'sweetalert2';
 
-/**
- * handleLogin
- *
- * Security layers implemented (mirrors Phase 4 of the lab):
- *  1. Session reset — prevents session fixation
- *  2. Client-side validation — UX guard only, never a security boundary
- *  3. Server returns a signed JWT — not a plain payload like {"user":"admin"}
- *  4. Role integrity check — server role vs localStorage role must match
- *  5. Portal-based access control — Staff can't use public login and vice versa
- *  6. history.replace() redirect — removes login page from browser history
- */
 export async function handleLogin(event) {
     event.preventDefault();
 
-    // 1. SESSION RESET — clears any stale token before a new login attempt
+    // clears any stale token before a new login attempt
     localStorage.clear();
 
     const emailInput    = document.getElementById("login-email");
@@ -23,7 +12,7 @@ export async function handleLogin(event) {
     const email    = emailInput?.value.trim().toLowerCase();
     const password = passwordInput?.value;
 
-    // 2. CLIENT-SIDE VALIDATION
+    // CLIENT-SIDE VALIDATION
     if (!email || !password) {
         Swal.fire({
             icon:  "warning",
@@ -34,9 +23,9 @@ export async function handleLogin(event) {
     }
 
     try {
-        // 3. API REQUEST
-        // ⚠️  For Wireshark audit: switch to http://localhost:5000 to see plain HTTP traffic
-        // ✅  For production: use https://animua.onrender.com
+        // API REQUEST
+        // For Wireshark audit: switch to http://localhost:5000 to see plain HTTP traffic
+        // For production: use https://animua.onrender.com
         const API_URL = "https://animua.onrender.com";
 
         const response = await fetch(`${API_URL}/api/auth/login`, {
@@ -84,7 +73,6 @@ export async function handleLogin(event) {
 
         // 4. STORE SESSION DATA
         // The JWT is stored here — the server will verify its signature on every /api/protected call.
-        // This replaces the lab's simplified "head.admin.headadmin2026" with a real HMAC-SHA256 token.
         localStorage.setItem("animua_token", data.token);
         localStorage.setItem("user_role",    data.role);
         localStorage.setItem("user_name",    data.fullName);
