@@ -5,272 +5,304 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ANIMUA — Management Console</title>
 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
-
-  <!-- CSS: relative paths work both locally and after Vite build -->
-  <link rel="stylesheet" href="../../src/css/management/admin-dashboard.css" />
-  <link rel="stylesheet" href="../../src/css/management/sidebar.css" />
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+    rel="stylesheet"
+  />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
 
   <style>
-    body { display: none; background-color: #f8f9fa; }
+    body {
+      display: none;
+      background-color: #f8f9fa;
+    }
   </style>
-
-  <script>
-    (function() {
-      // AUDIT TOGGLE
-      // TRUE  = No JWT (Vulnerable)
-      // FALSE = JWT verified (Secure)
-      const IS_AUDIT_MODE = false;
-
-      if (IS_AUDIT_MODE) {
-        console.warn("AUDIT MODE: JWT Verification Skipped. (Phase 3 — Vulnerable)");
-        document.addEventListener("DOMContentLoaded", () => {
-          document.body.style.display = "block";
-        });
-        return;
-      }
-
-      const token = localStorage.getItem('animua_token');
-      const role  = localStorage.getItem('user_role');
-
-      if (!token || (role !== 'Admin' && role !== 'Staff')) {
-        window.location.replace('/pages/management/admin-login.html');
-        return;
-      }
-
-      // Switch to http://localhost:5000/api/protected for local testing
-      fetch("https://animua.onrender.com/api/protected", {
-        method: "GET",
-        headers: { "Authorization": `Bearer ${token}` }
-      })
-      .then(response => {
-        if (!response.ok) throw new Error("Invalid or Tampered Token");
-        return response.json();
-      })
-      .then(data => {
-        if (data.user.role !== role) {
-          throw new Error("Integrity Breach: Role Mismatch");
-        }
-        document.body.style.display = "block";
-      })
-      .catch(err => {
-        console.error("JWT Security Action:", err.message);
-        localStorage.clear();
-        window.location.replace('/pages/management/admin-login.html');
-      });
-    })();
-  </script>
 </head>
 <body>
+  <div class="app-shell" id="appShell">
+    <div id="sidebar-container"></div>
 
-<div class="app-shell" id="appShell">
+    <div class="main-area">
+      <header class="topbar">
+        <button class="sidebar-toggle" id="sidebarToggle" type="button">
+          <i class="bi bi-layout-sidebar"></i>
+        </button>
 
-  <div id="sidebar-container"></div>
-
-  <div class="main-area">
-
-    <header class="topbar">
-      <button class="sidebar-toggle" id="sidebarToggle">
-        <i class="bi bi-layout-sidebar"></i>
-      </button>
-
-      <div class="search-wrap">
-        <i class="bi bi-search"></i>
-        <input type="text" class="search-input" placeholder="Search animals, cases, volunteers…" />
-      </div>
-
-      <div class="topbar-spacer"></div>
-
-      <a href="#" class="topbar-icon-btn"><i class="bi bi-calendar3"></i></a>
-      <a href="#" class="topbar-icon-btn"><i class="bi bi-chat-dots-fill"></i></a>
-      <a href="#" class="topbar-icon-btn">
-        <i class="bi bi-bell-fill"></i>
-        <span class="notif-badge"></span>
-      </a>
-
-      <div class="topbar-user">
-        <div class="t-avatar" id="topbar-initials">AS</div>
-        <div>
-          <div class="t-name" id="display-name">Animua Super Admin</div>
-          <div class="t-role" id="display-role">Admin</div>
+        <div class="search-wrap">
+          <i class="bi bi-search"></i>
+          <input
+            type="text"
+            class="search-input"
+            placeholder="Search animals, cases, volunteers…"
+          />
         </div>
-        <i class="bi bi-chevron-down t-caret"></i>
-      </div>
-    </header>
 
-    <div class="content-body">
-      <div class="main-col">
-        <div class="section-head au">
+        <div class="topbar-spacer"></div>
+
+        <a href="#" class="topbar-icon-btn"><i class="bi bi-calendar3"></i></a>
+        <a href="#" class="topbar-icon-btn"><i class="bi bi-chat-dots-fill"></i></a>
+        <a href="#" class="topbar-icon-btn">
+          <i class="bi bi-bell-fill"></i>
+          <span class="notif-badge"></span>
+        </a>
+
+        <div class="topbar-user">
+          <div class="t-avatar" id="topbar-initials">AS</div>
           <div>
-            <div class="section-title">Animal Summary</div>
-            <div class="section-sub">Overview of all active shelter cases and rescue operations.</div>
+            <div class="t-name" id="display-name">Animua Super Admin</div>
+            <div class="t-role" id="display-role">Admin</div>
           </div>
-          <a href="#" class="btn-add"><i class="bi bi-plus-lg"></i> Add New Record</a>
+          <i class="bi bi-chevron-down t-caret"></i>
         </div>
+      </header>
 
-        <div class="summary-grid">
-          <div class="animal-card card-type-steel au d1">
-            <div class="card-top">
-              <div class="card-icon-wrap"><i class="bi bi-shield-fill-check"></i></div>
-              <div class="card-priority"><i class="bi bi-fire"></i> High</div>
-              <div class="card-name">Rescue & Intake Unit</div>
-              <div class="card-cat">Active Rescue Operations</div>
-            </div>
-            <div class="card-bottom">
-              <div class="card-meta-row">
-                <div class="card-comments"><i class="bi bi-chat-left-text"></i> 20</div>
-                <div class="card-avatars">
-                  <div class="c-av">AP</div><div class="c-av">MR</div><div class="c-av">JL</div><div class="c-av">RC</div><div class="c-av c-av-more">+6</div>
-                </div>
+      <div class="content-body">
+        <div class="main-col">
+          <div class="section-head au">
+            <div>
+              <div class="section-title">Animal Summary</div>
+              <div class="section-sub">
+                Overview of all active shelter cases and rescue operations.
               </div>
-              <div class="progress-label"><span class="lbl">Progress</span><span class="pct">60%</span></div>
-              <div class="progress-track"><div class="progress-fill" style="width:60%;"></div></div>
             </div>
+            <a href="#" class="btn-add">
+              <i class="bi bi-plus-lg"></i> Add New Record
+            </a>
           </div>
 
-          <div class="animal-card card-type-wine au d2">
-            <div class="card-top">
-              <div class="card-icon-wrap"><i class="bi bi-heart-pulse-fill"></i></div>
-              <div class="card-priority"><i class="bi bi-fire"></i> High</div>
-              <div class="card-name">Medical & Vet Care</div>
-              <div class="card-cat">Ongoing Treatment Plans</div>
-            </div>
-            <div class="card-bottom">
-              <div class="card-meta-row">
-                <div class="card-comments"><i class="bi bi-chat-left-text"></i> 30</div>
-                <div class="card-avatars">
-                  <div class="c-av">SB</div><div class="c-av">AP</div><div class="c-av">RC</div><div class="c-av c-av-more">+5</div>
+          <div class="summary-grid">
+            <div class="animal-card card-type-steel au d1">
+              <div class="card-top">
+                <div class="card-icon-wrap">
+                  <i class="bi bi-shield-fill-check"></i>
                 </div>
+                <div class="card-priority"><i class="bi bi-fire"></i> High</div>
+                <div class="card-name">Rescue & Intake Unit</div>
+                <div class="card-cat">Active Rescue Operations</div>
               </div>
-              <div class="progress-label"><span class="lbl">Progress</span><span class="pct">70%</span></div>
-              <div class="progress-track"><div class="progress-fill" style="width:70%;"></div></div>
-            </div>
-          </div>
 
-          <div class="animal-card card-type-orange au d3">
-            <div class="card-top">
-              <div class="card-icon-wrap"><i class="bi bi-house-heart-fill"></i></div>
-              <div class="card-priority"><i class="bi bi-fire"></i> Medium</div>
-              <div class="card-name">Adoption Pipeline</div>
-              <div class="card-cat">Pending & Approved Cases</div>
-            </div>
-            <div class="card-bottom">
-              <div class="card-meta-row">
-                <div class="card-comments"><i class="bi bi-chat-left-text"></i> 25</div>
-                <div class="card-avatars">
-                  <div class="c-av">JL</div><div class="c-av">MR</div><div class="c-av">SB</div><div class="c-av c-av-more">+3</div>
-                </div>
-              </div>
-              <div class="progress-label"><span class="lbl">Progress</span><span class="pct">40%</span></div>
-              <div class="progress-track"><div class="progress-fill" style="width:40%;"></div></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="bottom-grid">
-          <div class="dash-card au d5">
-            <div class="dc-header">
-              <div><div class="dc-title">Activity Timeline</div><div class="dc-sub">Today's shelter events</div></div>
-              <button class="more-btn"><i class="bi bi-three-dots"></i></button>
-            </div>
-            <div class="dc-body">
-              <div class="timeline-list">
-                <div class="tl-item">
-                  <div class="tl-dot d-amber"><i class="bi bi-plus-circle-fill"></i></div>
-                  <div class="tl-content">
-                    <div class="tl-title">New intake — Golden Retriever</div>
-                    <div class="tl-sub">Intake #IN-0482 · Brgy. Dolores</div>
+              <div class="card-bottom">
+                <div class="card-meta-row">
+                  <div class="card-comments">
+                    <i class="bi bi-chat-left-text"></i> 20
                   </div>
-                  <div class="tl-time">9:14 AM</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="dash-card au d6">
-            <div class="dc-header">
-              <div><div class="dc-title">Shelter Statistics</div><div class="dc-sub">Activity records · March 2026</div></div>
-              <button class="more-btn"><i class="bi bi-three-dots"></i></button>
-            </div>
-            <div class="dc-body text-center">
-              <div class="donut-wrap">
-                <div class="donut-svg-wrap">
-                  <svg viewBox="0 0 36 36">
-                    <circle cx="18" cy="18" r="15.5" fill="none" stroke="#F0EBE6" stroke-width="3.5"/>
-                    <circle cx="18" cy="18" r="15.5" fill="none" stroke="#5786BC" stroke-width="3.5" stroke-dasharray="45 55" stroke-linecap="round"/>
-                  </svg>
-                  <div class="donut-center">
-                    <div class="donut-big">76%</div>
-                    <div class="donut-label">Placed</div>
+                  <div class="card-avatars">
+                    <div class="c-av">AP</div>
+                    <div class="c-av">MR</div>
+                    <div class="c-av">JL</div>
+                    <div class="c-av">RC</div>
+                    <div class="c-av c-av-more">+6</div>
                   </div>
                 </div>
-                <div class="donut-stats">
-                  <div class="ds-item completed"><div class="ds-num">45%</div><div class="ds-lbl">Adopted</div></div>
-                  <div class="ds-item inprog"><div class="ds-num">30%</div><div class="ds-lbl">In Care</div></div>
+
+                <div class="progress-label">
+                  <span class="lbl">Progress</span>
+                  <span class="pct">60%</span>
+                </div>
+                <div class="progress-track">
+                  <div class="progress-fill" style="width: 60%"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="animal-card card-type-wine au d2">
+              <div class="card-top">
+                <div class="card-icon-wrap">
+                  <i class="bi bi-heart-pulse-fill"></i>
+                </div>
+                <div class="card-priority"><i class="bi bi-fire"></i> High</div>
+                <div class="card-name">Medical & Vet Care</div>
+                <div class="card-cat">Ongoing Treatment Plans</div>
+              </div>
+
+              <div class="card-bottom">
+                <div class="card-meta-row">
+                  <div class="card-comments">
+                    <i class="bi bi-chat-left-text"></i> 30
+                  </div>
+                  <div class="card-avatars">
+                    <div class="c-av">SB</div>
+                    <div class="c-av">AP</div>
+                    <div class="c-av">RC</div>
+                    <div class="c-av c-av-more">+5</div>
+                  </div>
+                </div>
+
+                <div class="progress-label">
+                  <span class="lbl">Progress</span>
+                  <span class="pct">70%</span>
+                </div>
+                <div class="progress-track">
+                  <div class="progress-fill" style="width: 70%"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="animal-card card-type-orange au d3">
+              <div class="card-top">
+                <div class="card-icon-wrap">
+                  <i class="bi bi-house-heart-fill"></i>
+                </div>
+                <div class="card-priority"><i class="bi bi-fire"></i> Medium</div>
+                <div class="card-name">Adoption Pipeline</div>
+                <div class="card-cat">Pending & Approved Cases</div>
+              </div>
+
+              <div class="card-bottom">
+                <div class="card-meta-row">
+                  <div class="card-comments">
+                    <i class="bi bi-chat-left-text"></i> 25
+                  </div>
+                  <div class="card-avatars">
+                    <div class="c-av">JL</div>
+                    <div class="c-av">MR</div>
+                    <div class="c-av">SB</div>
+                    <div class="c-av c-av-more">+3</div>
+                  </div>
+                </div>
+
+                <div class="progress-label">
+                  <span class="lbl">Progress</span>
+                  <span class="pct">40%</span>
+                </div>
+                <div class="progress-track">
+                  <div class="progress-fill" style="width: 40%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bottom-grid">
+            <div class="dash-card au d5">
+              <div class="dc-header">
+                <div>
+                  <div class="dc-title">Activity Timeline</div>
+                  <div class="dc-sub">Today's shelter events</div>
+                </div>
+                <button class="more-btn" type="button">
+                  <i class="bi bi-three-dots"></i>
+                </button>
+              </div>
+
+              <div class="dc-body">
+                <div class="timeline-list">
+                  <div class="tl-item">
+                    <div class="tl-dot d-amber">
+                      <i class="bi bi-plus-circle-fill"></i>
+                    </div>
+                    <div class="tl-content">
+                      <div class="tl-title">New intake — Golden Retriever</div>
+                      <div class="tl-sub">Intake #IN-0482 · Brgy. Dolores</div>
+                    </div>
+                    <div class="tl-time">9:14 AM</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="dash-card au d6">
+              <div class="dc-header">
+                <div>
+                  <div class="dc-title">Shelter Statistics</div>
+                  <div class="dc-sub">Activity records · March 2026</div>
+                </div>
+                <button class="more-btn" type="button">
+                  <i class="bi bi-three-dots"></i>
+                </button>
+              </div>
+
+              <div class="dc-body text-center">
+                <div class="donut-wrap">
+                  <div class="donut-svg-wrap">
+                    <svg viewBox="0 0 36 36">
+                      <circle
+                        cx="18"
+                        cy="18"
+                        r="15.5"
+                        fill="none"
+                        stroke="#F0EBE6"
+                        stroke-width="3.5"
+                      />
+                      <circle
+                        cx="18"
+                        cy="18"
+                        r="15.5"
+                        fill="none"
+                        stroke="#5786BC"
+                        stroke-width="3.5"
+                        stroke-dasharray="45 55"
+                        stroke-linecap="round"
+                      />
+                    </svg>
+
+                    <div class="donut-center">
+                      <div class="donut-big">76%</div>
+                      <div class="donut-label">Placed</div>
+                    </div>
+                  </div>
+
+                  <div class="donut-stats">
+                    <div class="ds-item completed">
+                      <div class="ds-num">45%</div>
+                      <div class="ds-lbl">Adopted</div>
+                    </div>
+                    <div class="ds-item inprog">
+                      <div class="ds-num">30%</div>
+                      <div class="ds-lbl">In Care</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
+        <aside class="right-panel">
+          <div class="rp-section au d4">
+            <div class="rp-title">Shelter Overview</div>
+            <div class="overview-card">
+              <div class="overview-badge">
+                <i class="bi bi-fire"></i> High Priority Active
+              </div>
+              <div class="overview-body">
+                <div class="ov-title">Angeles City Animal Shelter</div>
+                <div class="ov-desc">
+                  Shelter operations across rescue, medical, adoption...
+                </div>
+                <div class="ov-row">
+                  <span>Status</span>
+                  <span class="status-chip sc-inprog">In Operation</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="rp-section au d7">
+            <div class="rp-title">Today's Tasks</div>
+            <div class="task-list">
+              <div class="task-item">
+                <div class="task-check done">
+                  <i class="bi bi-check-lg"></i>
+                </div>
+                <span class="task-text done-text">Process feeding rounds</span>
+              </div>
+            </div>
+          </div>
+        </aside>
       </div>
-
-      <aside class="right-panel">
-        <div class="rp-section au d4">
-          <div class="rp-title">Shelter Overview</div>
-          <div class="overview-card">
-            <div class="overview-badge"><i class="bi bi-fire"></i> High Priority Active</div>
-            <div class="overview-body">
-              <div class="ov-title">Angeles City Animal Shelter</div>
-              <div class="ov-desc">Shelter operations across rescue, medical, adoption...</div>
-              <div class="ov-row"><span>Status</span><span class="status-chip sc-inprog">In Operation</span></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="rp-section au d7">
-          <div class="rp-title">Today's Tasks</div>
-          <div class="task-list">
-            <div class="task-item">
-              <div class="task-check done"><i class="bi bi-check-lg"></i></div>
-              <span class="task-text done-text">Process feeding rounds</span>
-            </div>
-          </div>
-        </div>
-      </aside>
     </div>
   </div>
-</div>
 
-<!-- SweetAlert2 must load BEFORE sidebar.js so logout can use it -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script type="module" src="../../src/components/global/welcome.js"></script>
-
-<!-- Topbar user info -->
-<script>
-  window.addEventListener('DOMContentLoaded', () => {
-    const name     = localStorage.getItem('user_name') || 'Administrator';
-    const role     = localStorage.getItem('user_role') || 'Staff';
-    const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-
-    const displayName = document.getElementById('display-name');
-    const displayRole = document.getElementById('display-role');
-    const topbarInit  = document.getElementById('topbar-initials');
-
-    if (displayName) displayName.innerText = name;
-    if (displayRole) displayRole.innerText = role;
-    if (topbarInit)  topbarInit.innerText  = initials;
-  });
-</script>
-
-<!--
-  sidebar.js loaded via absolute path /assets/js/sidebar.js
-  This path is created by vite.config.js copyStaticFiles plugin at build time.
-  Works on: localhost (Vite dev server) ✅ | Firebase hosted ✅
--->
-<script src="/assets/js/sidebar.js"></script>
-
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+  ></script>
+  <script type="module" src="../../src/management/dashboard.js"></script>
 </body>
 </html>

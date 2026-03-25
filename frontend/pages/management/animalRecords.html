@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ANIMUA — Animal Records</title>
+
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+    rel="stylesheet"
+  />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    body {
+      display: none;
+      background: #f8f9fa;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell" id="appShell">
+    <div id="sidebar-container"></div>
+
+    <div class="main-area">
+      <header class="topbar">
+        <button class="sidebar-toggle" id="sidebarToggle" type="button">
+          <i class="bi bi-layout-sidebar"></i>
+        </button>
+
+        <div class="search-wrap">
+          <i class="bi bi-search"></i>
+          <input
+            type="text"
+            class="search-input"
+            placeholder="Search animals, cases, volunteers…"
+          />
+        </div>
+
+        <div class="topbar-spacer"></div>
+
+        <a href="#" class="topbar-icon-btn"><i class="bi bi-calendar3"></i></a>
+        <a href="#" class="topbar-icon-btn"><i class="bi bi-chat-dots-fill"></i></a>
+        <a href="#" class="topbar-icon-btn">
+          <i class="bi bi-bell-fill"></i>
+          <span class="notif-badge"></span>
+        </a>
+
+        <div class="topbar-user">
+          <div class="t-avatar" id="topbar-initials">AU</div>
+          <div>
+            <div class="t-name" id="display-name">Admin User</div>
+            <div class="t-role" id="display-role">Administrator</div>
+          </div>
+          <i class="bi bi-chevron-down t-caret"></i>
+        </div>
+      </header>
+
+      <div class="content-body">
+        <div class="main-col">
+          <div class="page-header au">
+            <div>
+              <div class="page-title">Animal Records</div>
+              <div class="page-subtitle">
+                Manage animal profiles and compatibility dimensions for matching.
+              </div>
+            </div>
+
+            <button class="btn-primary" id="btnAddPet" type="button">
+              <i class="bi bi-plus-lg"></i> Add New Pet
+            </button>
+          </div>
+
+          <div class="filter-bar au d1">
+            <div class="filter-search-wrap">
+              <i class="bi bi-search"></i>
+              <input
+                type="text"
+                class="filter-search"
+                id="searchInput"
+                placeholder="Search by name, breed, species…"
+              />
+            </div>
+
+            <select class="filter-select" id="filterSpecies">
+              <option value="">All Species</option>
+              <option value="Dog">Dog</option>
+              <option value="Cat">Cat</option>
+              <option value="Bird">Bird</option>
+              <option value="Rabbit">Rabbit</option>
+              <option value="Other">Other</option>
+            </select>
+
+            <select class="filter-select" id="filterSex">
+              <option value="">All Sex</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+            </select>
+
+            <select class="filter-select" id="filterSize">
+              <option value="">All Sizes</option>
+              <option value="Small">Small</option>
+              <option value="Medium">Medium</option>
+              <option value="Large">Large</option>
+              <option value="X-Large">X-Large</option>
+            </select>
+
+            <div class="filter-spacer"></div>
+            <div class="filter-count">
+              Showing <strong id="petCount">0</strong> pets
+            </div>
+          </div>
+
+          <div class="table-card au d2">
+            <div class="table-wrap">
+              <table class="pet-table">
+                <thead>
+                  <tr>
+                    <th>Pet</th>
+                    <th>Species</th>
+                    <th>Breed</th>
+                    <th>Sex</th>
+                    <th>Age</th>
+                    <th>Size</th>
+                    <th>Barangay</th>
+                    <th>Color</th>
+                    <th>Weight</th>
+                    <th>Status</th>
+                    <th style="text-align:center;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="petTableBody"></tbody>
+              </table>
+            </div>
+
+            <div class="table-footer">
+              <div class="page-info" id="pageInfo">Showing 0–0 of 0 pets</div>
+              <div class="pagination">
+                <button class="pg-btn" disabled type="button">
+                  <i class="bi bi-chevron-left"></i>
+                </button>
+                <button class="pg-btn active" type="button">1</button>
+                <button class="pg-btn" disabled type="button">
+                  <i class="bi bi-chevron-right"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         PET MODAL — side panel
+    ════════════════════════════════════════════════ -->
+    <div class="modal-overlay" id="petModal">
+      <div class="modal-panel">
+        <div class="modal-header" id="petModalHeader">
+          <div>
+            <div class="modal-topline">
+              <span class="modal-mode-badge" id="modalModeBadge">
+                <i class="bi bi-plus-circle-fill"></i>
+                Add Mode
+              </span>
+            </div>
+
+            <div class="modal-title" id="modalTitle">Add New Pet</div>
+            <div class="modal-desc" id="modalDesc">
+              Fill in the animal profile and compatibility dimensions.
+            </div>
+          </div>
+
+          <button class="modal-close" id="modalClose" type="button">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+
+        <div class="record-meta-strip" id="recordMetaStrip" style="display:none;">
+          <div class="record-meta-item">
+            <span class="rmi-label">Record ID</span>
+            <span class="rmi-value" id="recordMetaId">#PET-0001</span>
+          </div>
+
+          <div class="record-meta-item">
+            <span class="rmi-label">Mode</span>
+            <span class="rmi-value" id="recordMetaMode">Editing Existing Record</span>
+          </div>
+
+          <div class="record-meta-item">
+            <span class="rmi-label">Status</span>
+            <span class="rmi-value" id="recordMetaStatus">Available</span>
+          </div>
+        </div>
+
+        <div class="modal-body">
+          <form id="petForm" novalidate>
+            <!-- ══ A: Basic Info ══ -->
+            <div class="form-section open" id="secBasic">
+              <div class="fs-header" data-section-toggle="secBasic">
+                <div class="fs-left">
+                  <div class="fs-icon fsi-basic">
+                    <i class="bi bi-info-circle-fill"></i>
+                  </div>
+                  <div>
+                    <div class="fs-title">Basic Information</div>
+                    <div class="fs-sub">Name, species, breed, and identity</div>
+                  </div>
+                </div>
+                <i class="bi bi-chevron-down fs-chevron"></i>
+              </div>
+
+              <div class="fs-body">
+                <div class="photo-upload-wrap" id="photoUploadWrap">
+                  <div class="photo-preview" id="photoPreview">
+                    <i class="bi bi-camera-fill photo-placeholder-icon"></i>
+                    <span class="photo-placeholder-text">No photo yet</span>
+                  </div>
+
+                  <div class="photo-upload-actions">
+                    <div class="photo-upload-info">
+                      <div class="photo-upload-title">Pet Photo</div>
+                      <div class="photo-upload-sub">JPG, PNG or WEBP · Max 5MB</div>
+                    </div>
+
+                    <div style="display:flex; gap:8px;">
+                      <label class="btn-upload" for="fPhoto">
+                        <i class="bi bi-upload"></i> Upload Photo
+                      </label>
+                      <button
+                        type="button"
+                        class="btn-remove-photo"
+                        id="btnRemovePhoto"
+                        style="display:none;"
+                      >
+                        <i class="bi bi-x-lg"></i>
+                      </button>
+                    </div>
+                  </div>
+
+                  <input
+                    type="file"
+                    id="fPhoto"
+                    accept="image/jpeg,image/png,image/webp"
+                    style="display:none;"
+                  />
+                </div>
+
+                <div class="fg fg-2">
+                  <div class="form-group">
+                    <label class="form-label">Name <span class="req">*</span></label>
+                    <input
+                      type="text"
+                      class="form-input"
+                      id="fName"
+                      placeholder="e.g. Bantay"
+                    />
+                    <span class="err-msg">Name is required</span>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Species <span class="req">*</span></label>
+                    <select class="form-select" id="fSpeciesForm">
+                      <option value="">Select…</option>
+                      <option value="Dog">Dog</option>
+                      <option value="Cat">Cat</option>
+                      <option value="Bird">Bird</option>
+                      <option value="Rabbit">Rabbit</option>
+                      <option value="Other">Other</option>
+                    </select>
+                    <span class="err-msg">Species is required</span>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Breed <span class="req">*</span></label>
+                    <input
+                      type="text"
+                      class="form-input"
+                      id="fBreed"
+                      placeholder="e.g. Aspin"
+                    />
+                    <span class="err-msg">Breed is required</span>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Sex <span class="req">*</span></label>
+                    <select class="form-select" id="fSexForm">
+                      <option value="">Select…</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                    </select>
+                    <span class="err-msg">Sex is required</span>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Age (years)</label>
+                    <input
+                      type="number"
+                      class="form-input"
+                      id="fAge"
+                      placeholder="e.g. 3.5"
+                      step="0.1"
+                      min="0"
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Size</label>
+                    <select class="form-select" id="formSize">
+                      <option value="">Select…</option>
+                      <option value="Small">Small</option>
+                      <option value="Medium">Medium</option>
+                      <option value="Large">Large</option>
+                      <option value="X-Large">X-Large</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group span-2">
+                    <label class="form-label">Barangay <span class="req">*</span></label>
+                    <select class="form-select" id="fBarangay">
+                      <option value="">Select barangay…</option>
+                      <option value="Balibago">Balibago</option>
+                      <option value="Pampang">Pampang</option>
+                      <option value="Malabañas">Malabañas</option>
+                      <option value="Pulung Maragul">Pulung Maragul</option>
+                      <option value="Anunas">Anunas</option>
+                      <option value="Cutcut">Cutcut</option>
+                      <option value="Other">Other</option>
+                    </select>
+                    <span class="err-msg">Barangay is required</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ══ B: Compatibility ══ -->
+            <div class="form-section compat-section open" id="secCompat">
+              <div class="fs-header" data-section-toggle="secCompat">
+                <div class="fs-left">
+                  <div class="fs-icon fsi-compat">
+                    <i class="bi bi-sliders"></i>
+                  </div>
+                  <div>
+                    <div class="fs-title">Compatibility Dimensions</div>
+                    <div class="fs-sub">Used for cosine similarity matching</div>
+                  </div>
+                </div>
+                <i class="bi bi-chevron-down fs-chevron"></i>
+              </div>
+
+              <div class="fs-body">
+                <div class="compat-note">
+                  <i class="bi bi-stars"></i>
+                  <span>
+                    Rate each dimension from <strong>1 (low)</strong> to
+                    <strong>5 (high)</strong>. These values feed directly into the
+                    AI matching algorithm that pairs pets with compatible adopters.
+                  </span>
+                </div>
+
+                <div class="fg fg-2" id="compatGrid"></div>
+              </div>
+            </div>
+
+            <!-- ══ C: Physical Details ══ -->
+            <div class="form-section" id="secPhysical">
+              <div class="fs-header" data-section-toggle="secPhysical">
+                <div class="fs-left">
+                  <div class="fs-icon fsi-physical">
+                    <i class="bi bi-rulers"></i>
+                  </div>
+                  <div>
+                    <div class="fs-title">Physical Details</div>
+                    <div class="fs-sub">Appearance and measurements</div>
+                  </div>
+                </div>
+                <i class="bi bi-chevron-down fs-chevron"></i>
+              </div>
+
+              <div class="fs-body">
+                <div class="fg fg-2">
+                  <div class="form-group">
+                    <label class="form-label">Primary Color</label>
+                    <input
+                      type="text"
+                      class="form-input"
+                      id="fColor"
+                      placeholder="e.g. Brown"
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Secondary Color</label>
+                    <input
+                      type="text"
+                      class="form-input"
+                      id="fColor2"
+                      placeholder="e.g. White"
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Weight (kg)</label>
+                    <input
+                      type="number"
+                      class="form-input"
+                      id="fWeight"
+                      placeholder="e.g. 14.2"
+                      step="0.1"
+                      min="0"
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Height (cm)</label>
+                    <input
+                      type="number"
+                      class="form-input"
+                      id="fHeight"
+                      placeholder="e.g. 45"
+                      min="0"
+                    />
+                  </div>
+
+                  <div class="form-group span-2">
+                    <label class="form-label">Distinct Features</label>
+                    <textarea
+                      class="form-textarea"
+                      id="fDistinct"
+                      placeholder="e.g. White patch on chest, curled tail, heterochromia"
+                    ></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ══ D: Flags & Conditions ══ -->
+            <div class="form-section" id="secFilters">
+              <div class="fs-header" data-section-toggle="secFilters">
+                <div class="fs-left">
+                  <div class="fs-icon fsi-filters">
+                    <i class="bi bi-funnel-fill"></i>
+                  </div>
+                  <div>
+                    <div class="fs-title">Flags & Conditions</div>
+                    <div class="fs-sub">Matching and care-related flags</div>
+                  </div>
+                </div>
+                <i class="bi bi-chevron-down fs-chevron"></i>
+              </div>
+
+              <div class="fs-body">
+                <div class="fg fg-1" style="gap:8px;">
+                  <label class="toggle-row">
+                    <div class="toggle-info">
+                      <div class="tl">Allergy-Friendly</div>
+                      <div class="ts">Low dander or hypoallergenic traits</div>
+                    </div>
+                    <span class="sw">
+                      <input type="checkbox" id="fAllergy" />
+                      <span class="sw-track"></span>
+                    </span>
+                  </label>
+
+                  <label class="toggle-row">
+                    <div class="toggle-info">
+                      <div class="tl">Aggressive Behaviour</div>
+                      <div class="ts">History of aggression or high reactivity</div>
+                    </div>
+                    <span class="sw">
+                      <input type="checkbox" id="fAggressive" />
+                      <span class="sw-track"></span>
+                    </span>
+                  </label>
+
+                  <label class="toggle-row">
+                    <div class="toggle-info">
+                      <div class="tl">Special Needs</div>
+                      <div class="ts">
+                        Requires special care, treatment, or monitoring
+                      </div>
+                    </div>
+                    <span class="sw">
+                      <input type="checkbox" id="fSpecialNeeds" />
+                      <span class="sw-track"></span>
+                    </span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn-cancel" id="btnCancel" type="button">Cancel</button>
+          <button class="btn-save" id="btnSave" type="button">
+            <i class="bi bi-check-lg"></i> Save Pet Profile
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="../../src/management/animalRecords.js"></script>
+</body>
+</html>
