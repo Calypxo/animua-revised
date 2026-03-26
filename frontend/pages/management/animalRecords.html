@@ -112,6 +112,50 @@
               <option value="X-Large">X-Large</option>
             </select>
 
+            <select class="filter-select" id="filterStatus">
+              <option value="">All Statuses</option>
+              <option value="Intake">Intake</option>
+              <option value="Quarantine">Quarantine</option>
+              <option value="Ready for Adoption">Ready for Adoption</option>
+            </select>
+
+            <select class="filter-select" id="filterBarangay">
+              <option value="">All Barangays</option>
+              <option value="Agapito del Rosario">Agapito del Rosario</option>
+              <option value="Amsic">Amsic</option>
+              <option value="Anunas">Anunas</option>
+              <option value="Balibago">Balibago</option>
+              <option value="Capaya">Capaya</option>
+              <option value="Claro M. Recto">Claro M. Recto</option>
+              <option value="Cuayan">Cuayan</option>
+              <option value="Cutcut">Cutcut</option>
+              <option value="Cutud">Cutud</option>
+              <option value="Lourdes North West">Lourdes North West</option>
+              <option value="Lourdes Sur East">Lourdes Sur East</option>
+              <option value="Lourdes Sur">Lourdes Sur</option>
+              <option value="Malabañas">Malabañas</option>
+              <option value="Margot">Margot</option>
+              <option value="Mining">Mining</option>
+              <option value="Ninoy Aquino (Marisol)">Ninoy Aquino (Marisol)</option>
+              <option value="Pampang">Pampang</option>
+              <option value="Pandan">Pandan</option>
+              <option value="Pulungbulu">Pulungbulu</option>
+              <option value="Pulung Cacutud">Pulung Cacutud</option>
+              <option value="Pulung Maragul">Pulung Maragul</option>
+              <option value="Salapungan">Salapungan</option>
+              <option value="San Jose">San Jose</option>
+              <option value="San Nicolas">San Nicolas</option>
+              <option value="Santa Teresita">Santa Teresita</option>
+              <option value="Santa Trinidad">Santa Trinidad</option>
+              <option value="Santo Cristo">Santo Cristo</option>
+              <option value="Santo Domingo">Santo Domingo</option>
+              <option value="Sapangbato">Sapangbato</option>
+              <option value="Tabun">Tabun</option>
+              <option value="Virgen Delos Remedios">Virgen Delos Remedios</option>
+              <option value="Other">Other</option>
+            </select>
+
+
             <div class="filter-spacer"></div>
             <div class="filter-count">
               Showing <strong id="petCount">0</strong> pets
@@ -129,10 +173,10 @@
                     <th>Sex</th>
                     <th>Age</th>
                     <th>Size</th>
+                    <th>Status</th>
                     <th>Barangay</th>
                     <th>Color</th>
                     <th>Weight</th>
-                    <th>Status</th>
                     <th style="text-align:center;">Actions</th>
                   </tr>
                 </thead>
@@ -253,6 +297,8 @@
                 </div>
 
                 <div class="fg fg-2">
+
+                  <!-- Row 1 -->
                   <div class="form-group">
                     <label class="form-label">Name <span class="req">*</span></label>
                     <input
@@ -277,6 +323,7 @@
                     <span class="err-msg">Species is required</span>
                   </div>
 
+                  <!-- Row 2 -->
                   <div class="form-group">
                     <label class="form-label">Breed <span class="req">*</span></label>
                     <input
@@ -298,6 +345,7 @@
                     <span class="err-msg">Sex is required</span>
                   </div>
 
+                  <!-- Row 3 -->
                   <div class="form-group">
                     <label class="form-label">Age (years)</label>
                     <input
@@ -308,6 +356,7 @@
                       step="0.1"
                       min="0"
                     />
+                     <span class="err-msg">Age is required</span>
                   </div>
 
                   <div class="form-group">
@@ -319,18 +368,55 @@
                       <option value="Large">Large</option>
                       <option value="X-Large">X-Large</option>
                     </select>
+                     <span class="err-msg">Size is required</span>
                   </div>
 
-                  <div class="form-group span-2">
+                  <div class="form-group">
+                    <label class="form-label">Status Phase <span class="req">*</span></label>
+                    <select class="form-select" id="fStatus">
+                      <option value="">Select status…</option>
+                      <option value="Intake">Intake</option>
+                      <option value="Quarantine">Quarantine</option>
+                      <option value="Ready for Adoption">Ready for Adoption</option>
+                    </select>
+                    <span class="err-msg">Status is required</span>
+                  </div>
+
+                  <div class="form-group">
                     <label class="form-label">Barangay <span class="req">*</span></label>
                     <select class="form-select" id="fBarangay">
                       <option value="">Select barangay…</option>
-                      <option value="Balibago">Balibago</option>
-                      <option value="Pampang">Pampang</option>
-                      <option value="Malabañas">Malabañas</option>
-                      <option value="Pulung Maragul">Pulung Maragul</option>
+                      <option value="Agapito del Rosario">Agapito del Rosario</option>
+                      <option value="Amsic">Amsic</option>
                       <option value="Anunas">Anunas</option>
+                      <option value="Balibago">Balibago</option>
+                      <option value="Capaya">Capaya</option>
+                      <option value="Claro M. Recto">Claro M. Recto</option>
+                      <option value="Cuayan">Cuayan</option>
                       <option value="Cutcut">Cutcut</option>
+                      <option value="Cutud">Cutud</option>
+                      <option value="Lourdes North West">Lourdes North West</option>
+                      <option value="Lourdes Sur East">Lourdes Sur East</option>
+                      <option value="Lourdes Sur">Lourdes Sur</option>
+                      <option value="Malabañas">Malabañas</option>
+                      <option value="Margot">Margot</option>
+                      <option value="Mining">Mining</option>
+                      <option value="Ninoy Aquino (Marisol)">Ninoy Aquino (Marisol)</option>
+                      <option value="Pampang">Pampang</option>
+                      <option value="Pandan">Pandan</option>
+                      <option value="Pulungbulu">Pulungbulu</option>
+                      <option value="Pulung Cacutud">Pulung Cacutud</option>
+                      <option value="Pulung Maragul">Pulung Maragul</option>
+                      <option value="Salapungan">Salapungan</option>
+                      <option value="San Jose">San Jose</option>
+                      <option value="San Nicolas">San Nicolas</option>
+                      <option value="Santa Teresita">Santa Teresita</option>
+                      <option value="Santa Trinidad">Santa Trinidad</option>
+                      <option value="Santo Cristo">Santo Cristo</option>
+                      <option value="Santo Domingo">Santo Domingo</option>
+                      <option value="Sapangbato">Sapangbato</option>
+                      <option value="Tabun">Tabun</option>
+                      <option value="Virgen Delos Remedios">Virgen Delos Remedios</option>
                       <option value="Other">Other</option>
                     </select>
                     <span class="err-msg">Barangay is required</span>
@@ -386,13 +472,14 @@
               <div class="fs-body">
                 <div class="fg fg-2">
                   <div class="form-group">
-                    <label class="form-label">Primary Color</label>
+                    <label class="form-label">Primary Color <span class="req">*</span></label>
                     <input
                       type="text"
                       class="form-input"
                       id="fColor"
                       placeholder="e.g. Brown"
                     />
+                    <span class="err-msg">Primary color is required</span>
                   </div>
 
                   <div class="form-group">
@@ -406,7 +493,7 @@
                   </div>
 
                   <div class="form-group">
-                    <label class="form-label">Weight (kg)</label>
+                   <label class="form-label">Weight (kg) <span class="req">*</span></label>
                     <input
                       type="number"
                       class="form-input"
@@ -415,18 +502,9 @@
                       step="0.1"
                       min="0"
                     />
+                    <span class="err-msg">Weight is required</span>
                   </div>
 
-                  <div class="form-group">
-                    <label class="form-label">Height (cm)</label>
-                    <input
-                      type="number"
-                      class="form-input"
-                      id="fHeight"
-                      placeholder="e.g. 45"
-                      min="0"
-                    />
-                  </div>
 
                   <div class="form-group span-2">
                     <label class="form-label">Distinct Features</label>

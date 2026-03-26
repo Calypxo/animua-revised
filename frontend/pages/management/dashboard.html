@@ -18,287 +18,449 @@
     rel="stylesheet"
   />
 
-  <style>
-    body {
-      display: none;
-      background-color: #f8f9fa;
-    }
+   <style>
+    body { display: none; background-color: #F7F7F8; }
   </style>
 </head>
 <body>
-  <div class="app-shell" id="appShell">
-    <div id="sidebar-container"></div>
-
-    <div class="main-area">
-      <header class="topbar">
-        <button class="sidebar-toggle" id="sidebarToggle" type="button">
-          <i class="bi bi-layout-sidebar"></i>
-        </button>
-
-        <div class="search-wrap">
-          <i class="bi bi-search"></i>
-          <input
-            type="text"
-            class="search-input"
-            placeholder="Search animals, cases, volunteers…"
-          />
+ 
+<div class="app-shell" id="appShell">
+ 
+  <div id="sidebar-container"></div>
+ 
+  <div class="main-area">
+ 
+    <!-- ── TOP BAR ── -->
+    <header class="topbar">
+      <button class="sidebar-toggle" id="sidebarToggle" type="button">
+        <i class="bi bi-layout-sidebar"></i>
+      </button>
+ 
+      <div class="search-wrap">
+        <i class="bi bi-search"></i>
+        <input type="text" class="search-input"
+          placeholder="Search animals, cases, volunteers…" />
+      </div>
+ 
+      <div class="topbar-spacer"></div>
+ 
+      <a href="#" class="topbar-icon-btn" title="Calendar">
+        <i class="bi bi-calendar3"></i>
+      </a>
+      <a href="#" class="topbar-icon-btn" title="Messages">
+        <i class="bi bi-chat-dots"></i>
+      </a>
+      <a href="#" class="topbar-icon-btn" title="Notifications">
+        <i class="bi bi-bell"></i>
+        <span class="notif-badge"></span>
+      </a>
+ 
+      <div class="topbar-divider"></div>
+ 
+      <div class="topbar-user">
+        <div class="t-avatar" id="topbar-initials">AS</div>
+        <div>
+          <div class="t-name" id="display-name">Animua Super Admin</div>
+          <div class="t-role" id="display-role">Admin</div>
         </div>
+        <i class="bi bi-chevron-down t-caret"></i>
+      </div>
+    </header>
+ 
+    <!-- ── SCROLLABLE CONTENT ── -->
+    <div class="content-body">
+ 
+      <!-- Main Column -->
+      <div class="main-col">
+ 
+    
+ 
+       
+ 
+       
+       <!-- Page Heading -->
+<div class="page-heading au">
+  <div class="page-heading-left">
+    <div class="page-date" id="live-date">Thursday, March 26, 2026</div>
+    <div class="page-title">Dashboard <span>Overview</span></div>
+  </div>
+  <a href="animalRecords.html" class="btn-add">
+    <i class="bi bi-plus-lg"></i> Add New Record
+  </a>
+</div>
 
-        <div class="topbar-spacer"></div>
+<!-- Alert Banner -->
+<div class="alert-banner alert-warn au d1">
+  <i class="bi bi-exclamation-triangle-fill"></i>
+  <span><strong>5 adoption applications</strong> are awaiting your review. Vaccine stock for Parvovirus is critically low (6 doses remaining).</span>
+</div>
 
-        <a href="#" class="topbar-icon-btn"><i class="bi bi-calendar3"></i></a>
-        <a href="#" class="topbar-icon-btn"><i class="bi bi-chat-dots-fill"></i></a>
-        <a href="#" class="topbar-icon-btn">
-          <i class="bi bi-bell-fill"></i>
-          <span class="notif-badge"></span>
-        </a>
+<!-- KPI CARDS -->
+<div class="kpi-grid au d2">
+  <div class="kpi-card k-animals">
+    <div class="kpi-top">
+      <div class="kpi-icon"><i class="bi bi-heart-pulse-fill"></i></div>
+      <span class="kpi-trend trend-up">↑ 4%</span>
+    </div>
+    <div class="kpi-num">124</div>
+    <div class="kpi-label">Total Animals</div>
+    <div class="kpi-sub">In active shelter care</div>
+  </div>
 
-        <div class="topbar-user">
-          <div class="t-avatar" id="topbar-initials">AS</div>
-          <div>
-            <div class="t-name" id="display-name">Animua Super Admin</div>
-            <div class="t-role" id="display-role">Admin</div>
-          </div>
-          <i class="bi bi-chevron-down t-caret"></i>
+  <div class="kpi-card k-adopted">
+    <div class="kpi-top">
+      <div class="kpi-icon"><i class="bi bi-house-heart-fill"></i></div>
+      <span class="kpi-trend trend-up">↑ 12%</span>
+    </div>
+    <div class="kpi-num">45</div>
+    <div class="kpi-label">Adopted This Month</div>
+    <div class="kpi-sub">248 total this year</div>
+  </div>
+
+  <div class="kpi-card k-pending">
+    <div class="kpi-top">
+      <div class="kpi-icon"><i class="bi bi-clipboard2-check-fill"></i></div>
+      <span class="kpi-trend trend-warn">5 new</span>
+    </div>
+    <div class="kpi-num">8</div>
+    <div class="kpi-label">Pending Applications</div>
+    <div class="kpi-sub">Awaiting staff review</div>
+  </div>
+
+  <div class="kpi-card k-staff">
+    <div class="kpi-top">
+      <div class="kpi-icon"><i class="bi bi-people-fill"></i></div>
+      <span class="kpi-trend trend-neu">Active</span>
+    </div>
+    <div class="kpi-num">12</div>
+    <div class="kpi-label">Active Volunteers</div>
+    <div class="kpi-sub">On shift today</div>
+  </div>
+</div>
+
+<!-- MAIN ANALYTICS GRID -->
+<div class="analytics-grid au d4">
+
+  <div class="dash-card">
+    <div class="dc-header">
+      <div>
+        <div class="dc-title">Activity Overview</div>
+        <div class="dc-sub">Shelter operations for the week</div>
+      </div>
+      <button class="more-btn" type="button"><i class="bi bi-three-dots"></i></button>
+    </div>
+
+    <div class="dc-body">
+      <div class="bars-chart">
+        <div class="bar-group">
+          <div class="bar-fill" style="height:48%;"></div>
+          <span>Mon</span>
         </div>
-      </header>
-
-      <div class="content-body">
-        <div class="main-col">
-          <div class="section-head au">
-            <div>
-              <div class="section-title">Animal Summary</div>
-              <div class="section-sub">
-                Overview of all active shelter cases and rescue operations.
-              </div>
-            </div>
-            <a href="#" class="btn-add">
-              <i class="bi bi-plus-lg"></i> Add New Record
-            </a>
-          </div>
-
-          <div class="summary-grid">
-            <div class="animal-card card-type-steel au d1">
-              <div class="card-top">
-                <div class="card-icon-wrap">
-                  <i class="bi bi-shield-fill-check"></i>
-                </div>
-                <div class="card-priority"><i class="bi bi-fire"></i> High</div>
-                <div class="card-name">Rescue & Intake Unit</div>
-                <div class="card-cat">Active Rescue Operations</div>
-              </div>
-
-              <div class="card-bottom">
-                <div class="card-meta-row">
-                  <div class="card-comments">
-                    <i class="bi bi-chat-left-text"></i> 20
-                  </div>
-                  <div class="card-avatars">
-                    <div class="c-av">AP</div>
-                    <div class="c-av">MR</div>
-                    <div class="c-av">JL</div>
-                    <div class="c-av">RC</div>
-                    <div class="c-av c-av-more">+6</div>
-                  </div>
-                </div>
-
-                <div class="progress-label">
-                  <span class="lbl">Progress</span>
-                  <span class="pct">60%</span>
-                </div>
-                <div class="progress-track">
-                  <div class="progress-fill" style="width: 60%"></div>
-                </div>
-              </div>
-            </div>
-
-            <div class="animal-card card-type-wine au d2">
-              <div class="card-top">
-                <div class="card-icon-wrap">
-                  <i class="bi bi-heart-pulse-fill"></i>
-                </div>
-                <div class="card-priority"><i class="bi bi-fire"></i> High</div>
-                <div class="card-name">Medical & Vet Care</div>
-                <div class="card-cat">Ongoing Treatment Plans</div>
-              </div>
-
-              <div class="card-bottom">
-                <div class="card-meta-row">
-                  <div class="card-comments">
-                    <i class="bi bi-chat-left-text"></i> 30
-                  </div>
-                  <div class="card-avatars">
-                    <div class="c-av">SB</div>
-                    <div class="c-av">AP</div>
-                    <div class="c-av">RC</div>
-                    <div class="c-av c-av-more">+5</div>
-                  </div>
-                </div>
-
-                <div class="progress-label">
-                  <span class="lbl">Progress</span>
-                  <span class="pct">70%</span>
-                </div>
-                <div class="progress-track">
-                  <div class="progress-fill" style="width: 70%"></div>
-                </div>
-              </div>
-            </div>
-
-            <div class="animal-card card-type-orange au d3">
-              <div class="card-top">
-                <div class="card-icon-wrap">
-                  <i class="bi bi-house-heart-fill"></i>
-                </div>
-                <div class="card-priority"><i class="bi bi-fire"></i> Medium</div>
-                <div class="card-name">Adoption Pipeline</div>
-                <div class="card-cat">Pending & Approved Cases</div>
-              </div>
-
-              <div class="card-bottom">
-                <div class="card-meta-row">
-                  <div class="card-comments">
-                    <i class="bi bi-chat-left-text"></i> 25
-                  </div>
-                  <div class="card-avatars">
-                    <div class="c-av">JL</div>
-                    <div class="c-av">MR</div>
-                    <div class="c-av">SB</div>
-                    <div class="c-av c-av-more">+3</div>
-                  </div>
-                </div>
-
-                <div class="progress-label">
-                  <span class="lbl">Progress</span>
-                  <span class="pct">40%</span>
-                </div>
-                <div class="progress-track">
-                  <div class="progress-fill" style="width: 40%"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="bottom-grid">
-            <div class="dash-card au d5">
-              <div class="dc-header">
-                <div>
-                  <div class="dc-title">Activity Timeline</div>
-                  <div class="dc-sub">Today's shelter events</div>
-                </div>
-                <button class="more-btn" type="button">
-                  <i class="bi bi-three-dots"></i>
-                </button>
-              </div>
-
-              <div class="dc-body">
-                <div class="timeline-list">
-                  <div class="tl-item">
-                    <div class="tl-dot d-amber">
-                      <i class="bi bi-plus-circle-fill"></i>
-                    </div>
-                    <div class="tl-content">
-                      <div class="tl-title">New intake — Golden Retriever</div>
-                      <div class="tl-sub">Intake #IN-0482 · Brgy. Dolores</div>
-                    </div>
-                    <div class="tl-time">9:14 AM</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="dash-card au d6">
-              <div class="dc-header">
-                <div>
-                  <div class="dc-title">Shelter Statistics</div>
-                  <div class="dc-sub">Activity records · March 2026</div>
-                </div>
-                <button class="more-btn" type="button">
-                  <i class="bi bi-three-dots"></i>
-                </button>
-              </div>
-
-              <div class="dc-body text-center">
-                <div class="donut-wrap">
-                  <div class="donut-svg-wrap">
-                    <svg viewBox="0 0 36 36">
-                      <circle
-                        cx="18"
-                        cy="18"
-                        r="15.5"
-                        fill="none"
-                        stroke="#F0EBE6"
-                        stroke-width="3.5"
-                      />
-                      <circle
-                        cx="18"
-                        cy="18"
-                        r="15.5"
-                        fill="none"
-                        stroke="#5786BC"
-                        stroke-width="3.5"
-                        stroke-dasharray="45 55"
-                        stroke-linecap="round"
-                      />
-                    </svg>
-
-                    <div class="donut-center">
-                      <div class="donut-big">76%</div>
-                      <div class="donut-label">Placed</div>
-                    </div>
-                  </div>
-
-                  <div class="donut-stats">
-                    <div class="ds-item completed">
-                      <div class="ds-num">45%</div>
-                      <div class="ds-lbl">Adopted</div>
-                    </div>
-                    <div class="ds-item inprog">
-                      <div class="ds-num">30%</div>
-                      <div class="ds-lbl">In Care</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div class="bar-group">
+          <div class="bar-fill" style="height:66%;"></div>
+          <span>Tue</span>
         </div>
-
-        <aside class="right-panel">
-          <div class="rp-section au d4">
-            <div class="rp-title">Shelter Overview</div>
-            <div class="overview-card">
-              <div class="overview-badge">
-                <i class="bi bi-fire"></i> High Priority Active
-              </div>
-              <div class="overview-body">
-                <div class="ov-title">Angeles City Animal Shelter</div>
-                <div class="ov-desc">
-                  Shelter operations across rescue, medical, adoption...
-                </div>
-                <div class="ov-row">
-                  <span>Status</span>
-                  <span class="status-chip sc-inprog">In Operation</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="rp-section au d7">
-            <div class="rp-title">Today's Tasks</div>
-            <div class="task-list">
-              <div class="task-item">
-                <div class="task-check done">
-                  <i class="bi bi-check-lg"></i>
-                </div>
-                <span class="task-text done-text">Process feeding rounds</span>
-              </div>
-            </div>
-          </div>
-        </aside>
+        <div class="bar-group">
+          <div class="bar-fill" style="height:59%;"></div>
+          <span>Wed</span>
+        </div>
+        <div class="bar-group">
+          <div class="bar-fill" style="height:78%;"></div>
+          <span>Thu</span>
+        </div>
+        <div class="bar-group">
+          <div class="bar-fill" style="height:70%;"></div>
+          <span>Fri</span>
+        </div>
+        <div class="bar-group">
+          <div class="bar-fill" style="height:84%;"></div>
+          <span>Sat</span>
+        </div>
+        <div class="bar-group">
+          <div class="bar-fill" style="height:62%;"></div>
+          <span>Sun</span>
+        </div>
       </div>
     </div>
   </div>
+
+  <div class="dash-card">
+    <div class="dc-header">
+      <div>
+        <div class="dc-title">Recent Activity</div>
+        <div class="dc-sub">Latest shelter events today</div>
+      </div>
+      <button class="more-btn" type="button"><i class="bi bi-three-dots"></i></button>
+    </div>
+
+    <div class="dc-body">
+      <div class="timeline-list compact">
+        <div class="tl-item">
+          <div class="tl-dot d-amber"><i class="bi bi-plus-circle-fill"></i></div>
+          <div class="tl-content">
+            <div class="tl-title">New intake — Golden Retriever</div>
+            <div class="tl-sub">Intake #IN-0482 · Brgy. Balibago</div>
+          </div>
+          <div class="tl-time">9:14 AM</div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot d-steel"><i class="bi bi-file-check-fill"></i></div>
+          <div class="tl-content">
+            <div class="tl-title">Adoption approved — Coco</div>
+            <div class="tl-sub">Applicant: Maria Santos</div>
+          </div>
+          <div class="tl-time">10:02 AM</div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot d-orange"><i class="bi bi-exclamation-triangle-fill"></i></div>
+          <div class="tl-content">
+            <div class="tl-title">Vaccine stock running low</div>
+            <div class="tl-sub">Parvovirus · 6 doses remaining</div>
+          </div>
+          <div class="tl-time">10:45 AM</div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot d-crimson"><i class="bi bi-house-fill"></i></div>
+          <div class="tl-content">
+            <div class="tl-title">Surrender request submitted</div>
+            <div class="tl-sub">Juan Dela Cruz · 2 cats · Brgy. Pampang</div>
+          </div>
+          <div class="tl-time">11:30 AM</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- TABLE PANEL -->
+<div class="dash-card table-card au d5">
+  <div class="dc-header">
+    <div>
+      <div class="dc-title">Recent Records</div>
+      <div class="dc-sub">Latest intake, adoption, and medical entries</div>
+    </div>
+    <button class="more-btn" type="button"><i class="bi bi-three-dots"></i></button>
+  </div>
+
+  <div class="dc-body table-wrap">
+    <table class="records-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Animal / Case</th>
+          <th>Category</th>
+          <th>Status</th>
+          <th>Assigned</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>#IN-0482</td>
+          <td>Golden Retriever</td>
+          <td>Intake</td>
+          <td><span class="status-badge pending">Pending</span></td>
+          <td>Maria R.</td>
+          <td>Mar 26, 2026</td>
+        </tr>
+        <tr>
+          <td>#AD-0311</td>
+          <td>Coco</td>
+          <td>Adoption</td>
+          <td><span class="status-badge active">Approved</span></td>
+          <td>Juliana L.</td>
+          <td>Mar 25, 2026</td>
+        </tr>
+        <tr>
+          <td>#MD-0189</td>
+          <td>Persian Cat</td>
+          <td>Medical</td>
+          <td><span class="status-badge review">In Review</span></td>
+          <td>Stephen B.</td>
+          <td>Mar 24, 2026</td>
+        </tr>
+        <tr>
+          <td>#SR-0094</td>
+          <td>Owner Surrender</td>
+          <td>Request</td>
+          <td><span class="status-badge danger">Urgent</span></td>
+          <td>Admin Team</td>
+          <td>Mar 24, 2026</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+ 
+       
+ 
+         
+ 
+      </div>
+      <!-- /main-col -->
+ 
+ 
+      <!-- ── RIGHT PANEL ── -->
+      <aside class="right-panel">
+ 
+        <!-- Alert info -->
+        <div class="alert-banner alert-info au" style="margin-bottom:20px;">
+          <i class="bi bi-info-circle-fill"></i>
+          <span>System sync with Firestore last ran <strong>2 mins ago</strong>.</span>
+        </div>
+ 
+        <!-- Shelter Overview -->
+        <div class="rp-section au d4">
+          <div class="rp-head">
+            <div class="rp-title">Shelter Overview</div>
+            <button class="more-btn" type="button"><i class="bi bi-three-dots"></i></button>
+          </div>
+          <div class="overview-card">
+            <div class="overview-badge">
+              <i class="bi bi-lightning-charge-fill"></i> High Priority Active
+            </div>
+            <div class="overview-body">
+              <div class="ov-title">Angeles City Animal Shelter</div>
+              <div class="ov-desc">Shelter operations across rescue, medical, adoption, and inventory divisions — centrally managed.</div>
+ 
+              <div class="ov-row">
+                <span class="ov-key"><i class="bi bi-activity"></i> Status</span>
+                <span class="status-chip sc-inprog">● In Operation</span>
+              </div>
+              <div class="ov-row">
+                <span class="ov-key"><i class="bi bi-calendar3"></i> Operating Since</span>
+                <span class="ov-val">Jan 2024</span>
+              </div>
+              <div class="ov-row">
+                <span class="ov-key"><i class="bi bi-geo-alt-fill"></i> Location</span>
+                <span class="ov-val">Angeles City, PH</span>
+              </div>
+              <div class="ov-row">
+                <span class="ov-key"><i class="bi bi-people-fill"></i> Team</span>
+                <div class="assignee-avs">
+                  <div class="a-av">AP</div>
+                  <div class="a-av">MR</div>
+                  <div class="a-av">JL</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+ 
+        <!-- Quick Stats -->
+        <div class="rp-section au d5">
+          <div class="rp-head">
+            <div class="rp-title">Quick Stats</div>
+          </div>
+          <div class="quick-stats">
+            <div class="qs-item">
+              <div class="qs-num" style="color:var(--wine);">124</div>
+              <div class="qs-lbl">Animals</div>
+            </div>
+            <div class="qs-item">
+              <div class="qs-num" style="color:var(--green);">45</div>
+              <div class="qs-lbl">Adopted</div>
+            </div>
+            <div class="qs-item">
+              <div class="qs-num" style="color:var(--yellow);">8</div>
+              <div class="qs-lbl">Pending</div>
+            </div>
+            <div class="qs-item">
+              <div class="qs-num" style="color:var(--steel);">78%</div>
+              <div class="qs-lbl">Resources</div>
+            </div>
+          </div>
+        </div>
+ 
+        <!-- Today's Tasks -->
+        <div class="rp-section au d6">
+          <div class="rp-head">
+            <div class="rp-title">Today's Tasks</div>
+            <a href="#" class="section-link" style="font-size:0.7rem;">View all</a>
+          </div>
+          <div class="task-list">
+ 
+            <div class="task-item">
+              <div class="task-check done"><i class="bi bi-check-lg"></i></div>
+              <span class="task-text done-text">Morning feeding rounds</span>
+            </div>
+ 
+            <div class="task-item">
+              <div class="task-check done"><i class="bi bi-check-lg"></i></div>
+              <span class="task-text done-text">Review 3 adoption applications</span>
+            </div>
+ 
+            <div class="task-item">
+              <div class="task-check"></div>
+              <span class="task-text">Update medical records — Block C</span>
+            </div>
+ 
+            <div class="task-item">
+              <div class="task-check"></div>
+              <span class="task-text">Reorder parvovirus vaccine stock</span>
+            </div>
+ 
+            <div class="task-item">
+              <div class="task-check"></div>
+              <span class="task-text">Schedule vet visit — 4 new intakes</span>
+            </div>
+ 
+            <div class="task-item">
+              <div class="task-check"></div>
+              <span class="task-text">Run AI matching for March batch</span>
+            </div>
+ 
+            <div class="task-item">
+              <div class="task-check"></div>
+              <span class="task-text">Post weekly shelter update</span>
+            </div>
+ 
+          </div>
+        </div>
+ 
+      </aside>
+      <!-- /right-panel -->
+ 
+    </div>
+    <!-- /content-body -->
+ 
+  </div>
+  <!-- /main-area -->
+ 
+</div>
+<!-- /app-shell -->
+ 
+ 
+<!-- ── Scripts — DO NOT CHANGE PATHS ────────────────────────── -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+ 
+<!-- Topbar + date -->
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    const name     = localStorage.getItem('user_name') || 'Administrator';
+    const role     = localStorage.getItem('user_role') || 'Staff';
+    const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+ 
+    const el = id => document.getElementById(id);
+    if (el('display-name'))    el('display-name').innerText    = name;
+    if (el('display-role'))    el('display-role').innerText    = role;
+    if (el('topbar-initials')) el('topbar-initials').innerText = initials;
+ 
+    // Live date
+    const dateEl = el('live-date');
+    if (dateEl) {
+      const now = new Date();
+      dateEl.innerText = now.toLocaleDateString('en-US', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+      });
+    }
+  });
+</script>
 
   <script
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
