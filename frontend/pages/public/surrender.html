@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Animua | Surrender Request</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="../../src/css/public/surrender.css">
+<link rel="stylesheet" href="../../src/css/global.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header" id="top">
+    <div class="container nav-shell">
+      <a href="home.html" class="logo">
+        <div class="logo-icon">
+          <i class="fa-solid fa-heart"></i>
+          <i class="fa-solid fa-paw paw-mini"></i>
+        </div>
+        <div class="logo-text">
+          <h2>Animua</h2>
+          <p>Connect. Learn. Adopt.</p>
+        </div>
+      </a>
+
+       <nav class="navbar" id="navbar">
+  <a href="home.html">Home</a>
+  <a href="find-furbabies.html">Find Furbabies</a>
+  <a href="surrender.html" class="active">Surrender</a>
+  <a href="contact.html">Contact Us</a>
+</nav>
+
+<div class="nav-actions">
+  <div class="notification-wrap">
+    <button class="notification-btn" id="notificationBtn" aria-label="Notifications">
+      <i class="fa-regular fa-bell"></i>
+      <span class="notification-dot"></span>
+    </button>
+
+    <div class="notification-popup" id="notificationPopup">
+      <div class="notification-popup-head">
+        <h4>Notifications</h4>
+      </div>
+      <ul class="notification-list">
+        <li>New animals were recently added for adoption.</li>
+        <li>Please complete forms carefully before submission.</li>
+        <li>Shelter announcements will appear here.</li>
+      </ul>
+    </div>
+  </div>
+
+  <a href="#" class="chatbot-btn" aria-label="Chatbot">
+    <i class="fa-regular fa-comment-dots"></i>
+  </a>
+
+ <a href="login.html" class="login-btn" id="openAuthModal" aria-label="Login">
+  <i class="fa-regular fa-user"></i>
+</a>
+  <button class="menu-toggle" id="menuToggle" aria-label="Toggle Navigation">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+</div>
+  </header>
+
+  <!-- Surrender Hero -->
+  <section class="surrender-page-hero">
+    <div class="container surrender-page-hero-grid">
+      <div class="surrender-page-text reveal">
+        <span class="section-label">Animal Surrender</span>
+        <h1>Request for Animal Surrender</h1>
+        <p>
+          Before submitting a request, please understand that shelter space is limited.
+          Surrendering an animal means a permanent transfer of ownership.
+        </p>
+        <p>
+          We strongly encourage owners to first explore rehoming through trusted family,
+          friends, or personal networks before proceeding with shelter surrender.
+        </p>
+      </div>
+
+      <div class="surrender-page-image reveal">
+        <img src="../../src/assets/images/surrender.jpg" alt="Dog waiting for surrender support">
+      </div>
+    </div>
+  </section>
+
+  <!-- Important Notice -->
+  <section class="surrender-notice-section">
+    <div class="container">
+      <div class="surrender-notice-box reveal">
+        <h2>Important Reminders</h2>
+        <div class="surrender-notice-grid">
+          <div class="notice-item">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span>Shelter intake depends on available space and evaluation.</span>
+          </div>
+          <div class="notice-item">
+            <i class="fa-solid fa-house-circle-exclamation"></i>
+            <span>Rehoming through personal networks is encouraged first.</span>
+          </div>
+          <div class="notice-item">
+            <i class="fa-solid fa-file-circle-check"></i>
+            <span>Submitting this form does not guarantee automatic acceptance.</span>
+          </div>
+          <div class="notice-item">
+            <i class="fa-solid fa-paw"></i>
+            <span>Please provide honest and complete animal information.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Surrender Form -->
+  <section class="surrender-form-section">
+    <div class="container">
+      <div class="surrender-form-wrap reveal">
+        <div class="section-heading center-heading">
+          <span class="section-label">Surrender Form</span>
+          <h2>City Veterinarian Surrender Form</h2>
+          <p>Please fill out the form completely for proper assessment.</p>
+        </div>
+
+        <form class="surrender-form">
+          <!-- Top Control Fields -->
+          <div class="surrender-form-grid">
+            <div class="form-group">
+              <label for="controlNo">Control No.</label>
+              <input type="text" id="controlNo" name="controlNo">
+            </div>
+
+            <div class="form-group">
+              <label for="dateFiled">Date</label>
+              <input type="date" id="dateFiled" name="dateFiled">
+            </div>
+
+            <div class="form-group">
+              <label for="timeFiled">Time</label>
+              <input type="time" id="timeFiled" name="timeFiled">
+            </div>
+          </div>
+
+          <!-- Pet Owner Information -->
+          <div class="document-form-section">
+            <h3>Pet Owner Information</h3>
+
+            <div class="surrender-form-grid">
+              <div class="form-group full">
+                <label for="ownerName">Name</label>
+                <input type="text" id="ownerName" name="ownerName" required>
+              </div>
+
+              <div class="form-group full">
+                <label for="ownerAddress">Address</label>
+                <input type="text" id="ownerAddress" name="ownerAddress" required>
+              </div>
+
+              <div class="form-group">
+                <label for="contactNo">Contact No.</label>
+                <input type="text" id="contactNo" name="contactNo" required>
+              </div>
+
+              <div class="form-group">
+                <label for="ownerEmail">Email</label>
+                <input type="email" id="ownerEmail" name="ownerEmail">
+              </div>
+            </div>
+          </div>
+
+          <!-- Pet Information -->
+          <div class="document-form-section">
+            <h3>Pet Information</h3>
+
+            <div class="surrender-form-grid">
+              <div class="form-group">
+                <label for="petName">Name</label>
+                <input type="text" id="petName" name="petName">
+              </div>
+
+              <div class="form-group">
+                <label for="species">Species</label>
+                <input type="text" id="species" name="species" placeholder="Dog / Cat">
+              </div>
+
+              <div class="form-group">
+                <label for="breed">Breed</label>
+                <input type="text" id="breed" name="breed">
+              </div>
+
+              <div class="form-group">
+                <label for="petAge">Age</label>
+                <input type="text" id="petAge" name="petAge">
+              </div>
+
+              <div class="form-group">
+                <label for="petSex">Sex</label>
+                <input type="text" id="petSex" name="petSex">
+              </div>
+
+              <div class="form-group full">
+                <label for="colorMarkings">Color Markings</label>
+                <input type="text" id="colorMarkings" name="colorMarkings">
+              </div>
+
+              <div class="form-group full">
+                <label>Status</label>
+                <div class="surrender-check-row">
+                  <label class="check-option">
+                    <input type="checkbox" name="status" value="Intact">
+                    <span>Intact</span>
+                  </label>
+
+                  <label class="check-option">
+                    <input type="checkbox" name="status" value="Neutered">
+                    <span>Neutered</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-group full">
+                <label for="vaccinationHistory">Vaccination History</label>
+                <input type="text" id="vaccinationHistory" name="vaccinationHistory">
+              </div>
+            </div>
+          </div>
+
+          <!-- Reasons -->
+          <div class="document-form-section">
+            <h3>Reasons for Surrendering</h3>
+            <div class="form-group full">
+              <textarea id="reasons" name="reasons" rows="6" required></textarea>
+            </div>
+          </div>
+
+          <!-- Waiver -->
+          <div class="document-form-section">
+            <h3>Waiver</h3>
+
+            <div class="form-group full">
+              <label for="waiverName">Ako si</label>
+              <input type="text" id="waiverName" name="waiverName">
+            </div>
+
+            <div class="form-group full">
+              <label for="waiverAddress">May sapat na gulang, Pilipino at kasalukuyang naninirahan sa</label>
+              <input type="text" id="waiverAddress" name="waiverAddress">
+            </div>
+
+            <div class="waiver-box">
+              <p>
+                ay kusang loob na nagsasaad ng mga sumusunod:
+              </p>
+              <p>
+                Aking pinapatunayan na boluntaryong sinusuko ang aking karapatan sa pag-aari ng
+                nasabing alaga at hindi ako maghahabla o manghahabol sa Angeles City Veterinary Office
+                patungkol sa naturang pagsuko.
+              </p>
+              <p>
+                Aking inihahayag na, aking nabasa at naintindahan ang kasulatang ito bago ko lagdaan
+                at buong kalooban akong naglapat ng “Release Waiver” ng aking Karapatan na naayon sa batas.
+              </p>
+              <p>
+                Sa katunayan ng lahat, ako ay lumalagda sa ibaba nito ngayong ika _____ araw,
+                buwan ng __________ sa Angeles City Veterinary Office.
+              </p>
+            </div>
+
+            <div class="surrender-form-grid">
+              <div class="form-group">
+                <label for="waiverDay">Araw</label>
+                <input type="text" id="waiverDay" name="waiverDay">
+              </div>
+
+              <div class="form-group">
+                <label for="waiverMonth">Buwan</label>
+                <input type="text" id="waiverMonth" name="waiverMonth">
+              </div>
+
+              <div class="form-group full">
+                <label for="ownerSignature">Name and Signature of Owner</label>
+                <input type="text" id="ownerSignature" name="ownerSignature">
+              </div>
+            </div>
+          </div>
+
+          <!-- Evaluation -->
+          <div class="document-form-section">
+            <h3>Office Use</h3>
+
+            <div class="surrender-form-grid">
+              <div class="form-group full">
+                <label for="evaluation">Evaluation</label>
+                <textarea id="evaluation" name="evaluation" rows="3"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="evaluator">Evaluator</label>
+                <input type="text" id="evaluator" name="evaluator">
+              </div>
+
+              <div class="form-group">
+                <label for="evaluatorSignature">Name and Signature</label>
+                <input type="text" id="evaluatorSignature" name="evaluatorSignature">
+              </div>
+            </div>
+
+            <div class="approval-grid">
+              <div class="approval-box">
+                <label>Approved By:</label>
+                <input type="text" value="Eder I. Pasamonte" readonly>
+                <small>Team Leader</small>
+              </div>
+
+              <div class="approval-box">
+                <label>Noted By:</label>
+                <input type="text" value="Dr. Joanna D. Marimla" readonly>
+                <small>Veterinarian</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn primary-btn">Submit Request</button>
+            <a href="home.html" class="btn secondary-btn">Back to Home</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer" id="contact">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <a href="home.html" class="logo footer-logo">
+          <div class="logo-icon">
+            <i class="fa-solid fa-heart"></i>
+            <i class="fa-solid fa-paw paw-mini"></i>
+          </div>
+          <div class="logo-text">
+            <h2>Animua</h2>
+            <p>Connect. Learn. Adopt.</p>
+          </div>
+        </a>
+        <p>
+          A partnership project dedicated to rehoming rescued animals, promoting
+          responsible adoption, and creating safer futures for shelter pets.
+        </p>
+      </div>
+
+       <div class="footer-links">
+        <h4>Quick Links</h4>
+        <a href="home.html">Home</a>
+        <a href="find-furbabies.html">Find Furbabies</a>
+        <a href="surrender.html">Surrender</a>
+         <a href="contact.html">Contact</a>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>© 2026 Animua. All Rights Reserved.</p>
+    </div>
+  </footer>
+
+  <!-- AUTH MODAL -->
+<div class="auth-modal-overlay hidden" id="authModal">
+  <div class="auth-modal-card auth-modal-small" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
+
+    <button class="auth-close-btn" type="button" id="closeAuthModal" aria-label="Close">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+
+    <div class="auth-modal-left auth-modal-left-simple">
+      <div class="auth-brand-badge">ANIMUA</div>
+      <span class="auth-side-tag" id="authSideTag">Welcome Back</span>
+      <h1 id="authModalTitle">Hello,<br>Welcome back to Animua!</h1>
+      <p id="authSideText">
+        Log in to continue exploring rescued animals and shelter services.
+      </p>
+    </div>
+
+    <div class="auth-modal-right">
+      <div id="login-section">
+        <h2 class="auth-title">Login</h2>
+
+        <form id="login-form" novalidate>
+          <div class="auth-field">
+            <input type="email" id="login-email" placeholder="Email" required>
+            <span><i class="fa-regular fa-envelope"></i></span>
+          </div>
+          <small class="auth-error" id="login-email-error"></small>
+
+          <div class="auth-field">
+            <input type="password" id="login-password" placeholder="Password" required minlength="6">
+            <span class="toggle-password" data-target="login-password">
+              <i class="fa-regular fa-eye-slash"></i>
+            </span>
+          </div>
+          <small class="auth-error" id="login-password-error"></small>
+
+          <div class="auth-extra-row">
+            <a href="#" class="auth-muted-link">Forgot password?</a>
+          </div>
+
+          <button type="submit" class="auth-submit-btn">Login</button>
+        </form>
+
+        <div class="auth-switch-text">
+          Don’t have an account?
+          <button type="button" class="auth-switch-btn" onclick="toggleAuthView()">Register here</button>
+        </div>
+      </div>
+
+      <div id="register-section" class="hidden">
+        <h2 class="auth-title">Create Account</h2>
+
+        <form id="register-form" novalidate>
+          <div class="auth-field">
+            <input type="text" id="reg-name" placeholder="Full Name" required minlength="2">
+            <span><i class="fa-regular fa-user"></i></span>
+          </div>
+          <small class="auth-error" id="reg-name-error"></small>
+
+          <div class="auth-field">
+            <input type="email" id="reg-email" placeholder="Email Address" required>
+            <span><i class="fa-regular fa-envelope"></i></span>
+          </div>
+          <small class="auth-error" id="reg-email-error"></small>
+
+          <div class="auth-field">
+            <input type="password" id="reg-password" placeholder="Create Password" required minlength="6">
+            <span class="toggle-password" data-target="reg-password">
+              <i class="fa-regular fa-eye-slash"></i>
+            </span>
+          </div>
+          <small class="auth-error" id="reg-password-error"></small>
+
+          <button type="submit" class="auth-submit-btn">Sign Up</button>
+        </form>
+
+        <div class="auth-switch-text">
+          Already a member?
+          <button type="button" class="auth-switch-btn" onclick="toggleAuthView()">Login here</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="../../src/public/js/public-ui.js"></script>
+<script type="module" src="../../src/auth/authModal.js"></script></body>
+</html>
