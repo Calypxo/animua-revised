@@ -110,16 +110,20 @@ function renderTable(data) {
 
       <td>
         <div class="act-btns" style="justify-content:center;">
-          <button class="btn-act view" type="button" data-action="view" data-id="${request.id}">
+          <button class="btn-act view" type="button" data-action="view" data-id="${request.id}" title="View">
             <i class="bi bi-eye-fill"></i>
           </button>
 
-          <button class="btn-act edit" type="button" data-action="approve" data-id="${request.id}">
+          <button class="btn-act edit" type="button" data-action="approve" data-id="${request.id}" title="Approve">
             <i class="bi bi-check-lg"></i>
           </button>
 
-          <button class="btn-act delete" type="button" data-action="reject" data-id="${request.id}">
+          <button class="btn-act" type="button" data-action="reject" data-id="${request.id}" title="Reject">
             <i class="bi bi-x-lg"></i>
+          </button>
+
+          <button class="btn-act delete" type="button" data-action="delete" data-id="${request.id}" title="Delete">
+            <i class="bi bi-trash-fill"></i>
           </button>
         </div>
       </td>
@@ -368,7 +372,26 @@ function bindEvents() {
       }
       return;
     }
+
+    if (action === "delete") {
+      const result = await Swal.fire({
+        icon: "warning",
+        title: "Delete adoption request?",
+        text: `This will permanently remove the request of ${request.full_name || "this applicant"}.`,
+        showCancelButton: true,
+        confirmButtonText: "Delete",
+        confirmButtonColor: "#dc3545",
+      });
+
+      if (result.isConfirmed) {
+        await deleteRequest(requestId);
+      }
+      return;
+    }
+
   });
+
+  
 
   document.getElementById("btnApproveRequest")?.addEventListener("click", async () => {
     if (!selectedRequest) return;
