@@ -778,3 +778,88 @@ body.auth-open {
   transform: none !important;
   visibility: visible !important;
 }
+
+/* SweetAlert ANIMUA Theme */
+.animua-popup {
+  border-radius: 28px !important;
+  padding: 24px !important;
+  background: #fffaf8 !important;
+  box-shadow: 0 20px 60px rgba(151, 10, 18, 0.14) !important;
+}
+
+.animua-popup .swal2-title {
+  color: #7f2018 !important;
+  font-weight: 800 !important;
+  font-family: 'League Spartan', sans-serif !important;
+}
+
+.animua-popup .swal2-html-container {
+  color: #6e6765 !important;
+  font-size: 1rem !important;
+  font-family: 'Inter', sans-serif !important;
+}
+
+.animua-confirm {
+  background: linear-gradient(135deg, #970A12, #d1601e) !important;
+  border: none !important;
+  border-radius: 999px !important;
+  padding: 12px 26px !important;
+  font-weight: 700 !important;
+  box-shadow: 0 10px 24px rgba(151, 10, 18, 0.22) !important;
+}
+
+.animua-cancel {
+  background: #f3ece9 !important;
+  color: #7f2018 !important;
+  border: none !important;
+  border-radius: 999px !important;
+  padding: 12px 26px !important;
+  font-weight: 700 !important;
+}
+
+.animua-toast {
+  border-radius: 18px !important;
+  background: #fffaf8 !important;
+  color: #7f2018 !important;
+  box-shadow: 0 16px 35px rgba(151, 10, 18, 0.14) !important;
+}
+
+#userLoggedInBox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#userLoggedInBox.hidden {
+  display: none !important;
+}
+
+#loggedUserName {
+  font-weight: 700;
+  color: #7f2018;
+  font-family: 'Inter', sans-serif;
+}
+
+.logout-icon-btn {
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #970A12, #d1601e);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(151, 10, 18, 0.22);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.logout-icon-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px rgba(151, 10, 18, 0.28);
+}
+
+.logout-icon-btn i {
+  font-size: 15px;
+}

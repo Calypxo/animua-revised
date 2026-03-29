@@ -16,7 +16,12 @@ export async function handleLogin(event) {
     Swal.fire({
       icon: "warning",
       title: "Missing Email",
-      text: "Please enter your email."
+      text: "Please enter your email.",
+      customClass: {
+        popup: "animua-popup",
+        confirmButton: "animua-confirm"
+      },
+      buttonsStyling: false
     });
     return;
   }
@@ -26,7 +31,12 @@ export async function handleLogin(event) {
     Swal.fire({
       icon: "warning",
       title: "Invalid Email",
-      text: "Please enter a valid email address."
+      text: "Please enter a valid email address.",
+      customClass: {
+        popup: "animua-popup",
+        confirmButton: "animua-confirm"
+      },
+      buttonsStyling: false
     });
     return;
   }
@@ -36,7 +46,12 @@ export async function handleLogin(event) {
     Swal.fire({
       icon: "warning",
       title: "Missing Password",
-      text: "Please enter your password."
+      text: "Please enter your password.",
+      customClass: {
+        popup: "animua-popup",
+        confirmButton: "animua-confirm"
+      },
+      buttonsStyling: false
     });
     return;
   }
@@ -46,7 +61,12 @@ export async function handleLogin(event) {
     Swal.fire({
       icon: "warning",
       title: "Invalid Password",
-      text: "Password must be at least 6 characters."
+      text: "Password must be at least 6 characters.",
+      customClass: {
+        popup: "animua-popup",
+        confirmButton: "animua-confirm"
+      },
+      buttonsStyling: false
     });
     return;
   }
@@ -67,7 +87,12 @@ export async function handleLogin(event) {
       Swal.fire({
         icon: "error",
         title: "Login Failed",
-        text: data.message || "Incorrect email or password."
+        text: data.message || "Incorrect email or password.",
+        customClass: {
+          popup: "animua-popup",
+          confirmButton: "animua-confirm"
+        },
+        buttonsStyling: false
       });
       return;
     }
@@ -90,7 +115,10 @@ export async function handleLogin(event) {
       text: `Welcome back, ${userFullName}!`,
       timer: 1800,
       showConfirmButton: false,
-      timerProgressBar: true
+      timerProgressBar: true,
+      customClass: {
+        popup: "animua-popup"
+      }
     });
 
     if (userRole === "Admin" || userRole === "Staff") {
@@ -104,7 +132,12 @@ export async function handleLogin(event) {
     Swal.fire({
       icon: "error",
       title: "Connection Error",
-      text: "Cannot connect to the backend. Please check your internet or server status."
+      text: "Cannot connect to the backend. Please check your internet or server status.",
+      customClass: {
+        popup: "animua-popup",
+        confirmButton: "animua-confirm"
+      },
+      buttonsStyling: false
     });
   }
 }

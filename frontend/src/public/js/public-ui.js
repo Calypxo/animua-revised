@@ -124,13 +124,19 @@ function updateAuthUI() {
     logoutBtn.dataset.bound = "true";
     logoutBtn.addEventListener("click", async () => {
       const result = await Swal.fire({
-        icon: "question",
-        title: "Logout",
-        text: "Are you sure you want to log out?",
-        showCancelButton: true,
-        confirmButtonText: "Yes, logout",
-        cancelButtonText: "Cancel"
-      });
+  icon: "question",
+  title: "Logout",
+  text: "Are you sure you want to log out?",
+  showCancelButton: true,
+  confirmButtonText: "Yes",
+  cancelButtonText: "Cancel",
+  customClass: {
+    popup: "animua-popup",
+    confirmButton: "animua-confirm",
+    cancelButton: "animua-cancel"
+  },
+  buttonsStyling: false
+});
 
       if (!result.isConfirmed) return;
 

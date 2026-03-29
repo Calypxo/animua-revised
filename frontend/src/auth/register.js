@@ -18,7 +18,12 @@ export async function handleRegistration(event) {
     Swal.fire({
       icon: "warning",
       title: "Missing Name",
-      text: "Please enter your full name."
+      text: "Please enter your full name.",
+      customClass: {
+        popup: "animua-popup",
+        confirmButton: "animua-confirm"
+      },
+      buttonsStyling: false
     });
     return;
   }
@@ -28,7 +33,12 @@ export async function handleRegistration(event) {
     Swal.fire({
       icon: "warning",
       title: "Invalid Name",
-      text: "Full name must be at least 2 characters."
+      text: "Full name must be at least 2 characters.",
+      customClass: {
+        popup: "animua-popup",
+        confirmButton: "animua-confirm"
+      },
+      buttonsStyling: false
     });
     return;
   }
@@ -38,7 +48,12 @@ export async function handleRegistration(event) {
     Swal.fire({
       icon: "warning",
       title: "Missing Email",
-      text: "Please enter your email."
+      text: "Please enter your email.",
+      customClass: {
+        popup: "animua-popup",
+        confirmButton: "animua-confirm"
+      },
+      buttonsStyling: false
     });
     return;
   }
@@ -48,7 +63,12 @@ export async function handleRegistration(event) {
     Swal.fire({
       icon: "warning",
       title: "Invalid Email",
-      text: "Please enter a valid email address."
+      text: "Please enter a valid email address.",
+      customClass: {
+        popup: "animua-popup",
+        confirmButton: "animua-confirm"
+      },
+      buttonsStyling: false
     });
     return;
   }
@@ -58,7 +78,12 @@ export async function handleRegistration(event) {
     Swal.fire({
       icon: "warning",
       title: "Missing Password",
-      text: "Please enter your password."
+      text: "Please enter your password.",
+      customClass: {
+        popup: "animua-popup",
+        confirmButton: "animua-confirm"
+      },
+      buttonsStyling: false
     });
     return;
   }
@@ -68,7 +93,12 @@ export async function handleRegistration(event) {
     Swal.fire({
       icon: "warning",
       title: "Invalid Password",
-      text: "Password must be at least 6 characters."
+      text: "Password must be at least 6 characters.",
+      customClass: {
+        popup: "animua-popup",
+        confirmButton: "animua-confirm"
+      },
+      buttonsStyling: false
     });
     return;
   }
@@ -89,7 +119,12 @@ export async function handleRegistration(event) {
       Swal.fire({
         icon: "error",
         title: "Registration Failed",
-        text: data.message || "An error occurred during registration."
+        text: data.message || "An error occurred during registration.",
+        customClass: {
+          popup: "animua-popup",
+          confirmButton: "animua-confirm"
+        },
+        buttonsStyling: false
       });
       return;
     }
@@ -106,7 +141,10 @@ export async function handleRegistration(event) {
       text: "Your account has been created successfully.",
       timer: 2200,
       showConfirmButton: false,
-      timerProgressBar: true
+      timerProgressBar: true,
+      customClass: {
+        popup: "animua-popup"
+      }
     });
   } catch (error) {
     console.error("[Register Error]", error);
@@ -114,7 +152,12 @@ export async function handleRegistration(event) {
     Swal.fire({
       icon: "error",
       title: "Connection Error",
-      text: "Cannot connect to the backend. Please check your internet or server status."
+      text: "Cannot connect to the backend. Please check your internet or server status.",
+      customClass: {
+        popup: "animua-popup",
+        confirmButton: "animua-confirm"
+      },
+      buttonsStyling: false
     });
   }
 }
