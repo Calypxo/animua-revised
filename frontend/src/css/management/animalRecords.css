@@ -132,7 +132,12 @@
   box-shadow: var(--sh-sm);
   overflow: hidden;
 }
-.table-wrap { overflow-x: auto; }
+.table-wrap { 
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-height: none;
+  height: auto;
+ }
 
 .pet-table {
   width: 100%;
@@ -257,7 +262,7 @@
 .page-info { font-size: 0.73rem; color: var(--txt-m); }
 .pagination { display: flex; align-items: center; gap: 4px; }
 .pg-btn {
-  width: 30px; height: 30px;
+  width: 20px; height: 20px;
   border-radius: 7px;
   border: 1.5px solid var(--bdr);
   background: var(--surface);
@@ -1170,6 +1175,48 @@
   background: rgba(40, 167, 69, 0.14);
   color: #218838;
   border: 1px solid rgba(40, 167, 69, 0.18);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Pagination
+   ══════════════════════════════════════════════════════════════ */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pg-btn {
+  width: 33px;
+  height: 33px;
+  border-radius: 6px;
+  border: 1px solid #e3e7ee;
+  background: #fff;
+  color: #2c3444;
+  font-size: 0.95rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.18s ease;
+}
+
+.pg-btn:hover:not(:disabled) {
+  border-color: #f98a4b;
+  transform: translateY(-1px);
+}
+
+.pg-btn.active {
+  background: #f98a4b;
+  border-color: #f98a4b;
+  color: #fff;
+}
+
+.pg-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 /* ══════════════════════════════════════════════════════════════

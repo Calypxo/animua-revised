@@ -97,45 +97,43 @@
 
 <!-- KPI CARDS -->
 <div class="kpi-grid au d2">
+
+  <!-- Total Pets -->
   <div class="kpi-card k-animals">
     <div class="kpi-top">
       <div class="kpi-icon"><i class="bi bi-heart-pulse-fill"></i></div>
-      <span class="kpi-trend trend-up">↑ 4%</span>
     </div>
-    <div class="kpi-num">124</div>
+    <div class="kpi-num" id="totalPetsCount">0</div>
     <div class="kpi-label">Total Animals</div>
-    <div class="kpi-sub">In active shelter care</div>
   </div>
 
-  <div class="kpi-card k-adopted">
-    <div class="kpi-top">
-      <div class="kpi-icon"><i class="bi bi-house-heart-fill"></i></div>
-      <span class="kpi-trend trend-up">↑ 12%</span>
-    </div>
-    <div class="kpi-num">45</div>
-    <div class="kpi-label">Adopted This Month</div>
-    <div class="kpi-sub">248 total this year</div>
-  </div>
-
+  <!-- Intake -->
   <div class="kpi-card k-pending">
     <div class="kpi-top">
-      <div class="kpi-icon"><i class="bi bi-clipboard2-check-fill"></i></div>
-      <span class="kpi-trend trend-warn">5 new</span>
+      <div class="kpi-icon"><i class="bi bi-box-arrow-in-down"></i></div>
     </div>
-    <div class="kpi-num">8</div>
-    <div class="kpi-label">Pending Applications</div>
-    <div class="kpi-sub">Awaiting staff review</div>
+    <div class="kpi-num" id="intakeCount">0</div>
+    <div class="kpi-label">Intake</div>
   </div>
 
+  <!-- Quarantine -->
+  <div class="kpi-card k-adopted">
+    <div class="kpi-top">
+      <div class="kpi-icon"><i class="bi bi-shield-plus"></i></div>
+    </div>
+    <div class="kpi-num" id="quarantineCount">0</div>
+    <div class="kpi-label">Quarantine</div>
+  </div>
+
+  <!-- Ready -->
   <div class="kpi-card k-staff">
     <div class="kpi-top">
-      <div class="kpi-icon"><i class="bi bi-people-fill"></i></div>
-      <span class="kpi-trend trend-neu">Active</span>
+      <div class="kpi-icon"><i class="bi bi-house-heart"></i></div>
     </div>
-    <div class="kpi-num">12</div>
-    <div class="kpi-label">Active Volunteers</div>
-    <div class="kpi-sub">On shift today</div>
+    <div class="kpi-num" id="readyCount">0</div>
+    <div class="kpi-label">Ready for Adoption</div>
   </div>
+
 </div>
 
 <!-- MAIN ANALYTICS GRID -->

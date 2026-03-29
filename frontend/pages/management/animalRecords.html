@@ -157,8 +157,8 @@
 
 
             <div class="filter-spacer"></div>
-            <div class="filter-count">
-              Showing <strong id="petCount">0</strong> pets
+            <div class="filter-count" style="display:none;">
+              <strong id="petCount">0</strong>
             </div>
           </div>
 
@@ -173,10 +173,10 @@
                     <th>Sex</th>
                     <th>Age</th>
                     <th>Size</th>
-                    <th>Status</th>
                     <th>Barangay</th>
                     <th>Color</th>
                     <th>Weight</th>
+                    <th>Status</th>
                     <th style="text-align:center;">Actions</th>
                   </tr>
                 </thead>
@@ -425,7 +425,74 @@
               </div>
             </div>
 
-            <!-- ══ B: Compatibility ══ -->
+           <!-- Intake Information -->
+            <div class="form-section">
+              <div class="fs-header">
+                <div class="fs-title">Intake Information</div>
+              </div>
+
+              <div class="fg fg-2">
+
+                <div class="form-group">
+                  <label class="form-label">Source Type</label>
+                  <select id="fIntakeType" class="form-select">
+                    <option value="">Select…</option>
+                    <option value="Barangay">Barangay</option>
+                    <option value="Owner">Owner</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Source Name</label>
+                  <input type="text" id="fIntakeName" class="form-input" placeholder="Barangay or Owner name" />
+                </div>
+
+                <div class="form-group span-2">
+                  <label class="form-label">Intake Date</label>
+                  <input type="date" id="fIntakeDate" class="form-input" />
+                </div>
+
+              </div>
+            </div>
+
+            <!-- C. Medical / Quarantine -->
+            <div class="form-section">
+              <div class="fs-header">
+                <div class="fs-title">Medical & Quarantine</div>
+              </div>
+
+              <div class="fg fg-2">
+
+                <div class="form-group">
+                  <label class="form-label">Vaccination Status</label>
+                  <select id="fVaccinated" class="form-select">
+                    <option value="">Select…</option>
+                    <option value="true">Vaccinated</option>
+                    <option value="false">Not Vaccinated</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Medical Status</label>
+                  <select id="fMedicalStatus" class="form-select">
+                    <option value="">Select…</option>
+                    <option value="Under Observation">Under Observation</option>
+                    <option value="Sick">Sick</option>
+                    <option value="Recovering">Recovering</option>
+                    <option value="Cleared">Cleared</option>
+                  </select>
+                </div>
+
+                <div class="form-group span-2">
+                  <label class="form-label">Quarantine Notes</label>
+                  <textarea id="fNotes" class="form-textarea"></textarea>
+                </div>
+
+              </div>
+            </div>
+            
+
+            <!-- ══ D: Compatibility ══ -->
             <div class="form-section compat-section open" id="secCompat">
               <div class="fs-header" data-section-toggle="secCompat">
                 <div class="fs-left">
@@ -454,7 +521,7 @@
               </div>
             </div>
 
-            <!-- ══ C: Physical Details ══ -->
+            <!-- ══ E: Physical Details ══ -->
             <div class="form-section" id="secPhysical">
               <div class="fs-header" data-section-toggle="secPhysical">
                 <div class="fs-left">
@@ -518,7 +585,7 @@
               </div>
             </div>
 
-            <!-- ══ D: Flags & Conditions ══ -->
+            <!-- ══ F: Flags & Conditions ══ -->
             <div class="form-section" id="secFilters">
               <div class="fs-header" data-section-toggle="secFilters">
                 <div class="fs-left">

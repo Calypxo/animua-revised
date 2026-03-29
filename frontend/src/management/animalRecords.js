@@ -16,6 +16,9 @@ let displayedPets = [];
 let editingId = null;
 let currentPhotoBase64 = null;
 
+let currentPage = 1;
+const ROWS_PER_PAGE = 7;
+
 async function loadPets() {
   try {
     const token = localStorage.getItem("animua_token");
@@ -63,51 +66,98 @@ function flagsHtml(flags) {
 function renderTable(data) {
   const tbody = document.getElementById("petTableBody");
   const petCount = document.getElementById("petCount");
+  
   const pageInfo = document.getElementById("pageInfo");
 
-  if (!data.length) {
+  const totalItems = data.length;
+  const totalPages = Math.ceil(totalItems / ROWS_PER_PAGE) || 1;
+
+  if (currentPage > totalPages) {
+    currentPage = totalPages;
+  }
+
+  const start = (currentPage - 1) * ROWS_PER_PAGE;
+  const end = start + ROWS_PER_PAGE;
+  const pageData = data.slice(start, end);
+
+if (petCount) {
+  petCount.textContent = String(totalItems);
+}
+
+  if (totalItems === 0) {
     tbody.innerHTML = `
       <tr>
         <td colspan="11" style="text-align:center;padding:48px 20px;">
           <div style="color:var(--txt-g);font-size:1.8rem;margin-bottom:8px;">🐾</div>
-          <div style="font-size:0.83rem;color:var(--txt-m);">No pets found matching your filters.</div>
+          <div style="font-size:0.83rem;color:var(--txt-m);">
+            No pets found matching your filters.
+          </div>
         </td>
       </tr>
     `;
-    petCount.textContent = "0";
-    pageInfo.textContent = "No results";
+    pageInfo.textContent = "Showing 0–0 of 0 pets";
+    renderPagination(0);
     return;
   }
 
-  tbody.innerHTML = data.map((pet, index) => `
+  tbody.innerHTML = pageData.map((pet, index) => `
     <tr style="animation:fadeUp .35s ${index * 0.04}s cubic-bezier(0.16,1,0.3,1) both;">
       <td>
         <div class="pet-cell">
-          <div class="pet-emoji ${speciesClass[pet.species] || "em-other"}">${speciesEmoji[pet.species] || "🐾"}</div>
+          <div class="pet-emoji ${speciesClass[pet.species] || "em-other"}">
+            ${speciesEmoji[pet.species] || "🐾"}
+          </div>
           <div>
             <div class="pet-name">${pet.name}</div>
-            <div class="pet-id-tag">#PET-${pet.id?.slice(0, 6).toUpperCase()}</div>
+            <div class="pet-id-tag">#PET-${pet.id?.slice(0, 6).toUpperCase() || "—"}</div>
           </div>
         </div>
       </td>
-      <td><span class="badge ${speciesBadge[pet.species] || "b-other"}">${pet.species}</span></td>
-      <td><span class="badge b-breed">${pet.breed}</span></td>
-      <td><span class="badge ${sexBadge[pet.sex] || ""}">${pet.sex}</span></td>
-      <td>${pet.age || "—"} yrs</td>
-      <td><span class="badge ${sizeBadge[pet.size] || ""}">${pet.size || "—"}</span></td>
-      <td><span class="badge b-breed">${pet.status || "Available"}</span></td>
+
+      <td>
+        <span class="badge ${speciesBadge[pet.species] || "b-other"}">
+          ${pet.species}
+        </span>
+      </td>
+
+      <td>
+        <span class="badge b-breed">${pet.breed || "—"}</span>
+      </td>
+
+      <td>
+        <span class="badge ${sexBadge[pet.sex] || ""}">
+          ${pet.sex || "—"}
+        </span>
+      </td>
+
+      <td>${pet.age ? `${pet.age} yrs` : "—"}</td>
+
+      <td>
+        <span class="badge ${sizeBadge[pet.size] || ""}">
+          ${pet.size || "—"}
+        </span>
+      </td>
+
       <td>${pet.barangay || "—"}</td>
       <td>${pet.coatColor || "—"}</td>
       <td>${pet.weightKg ? `${pet.weightKg} kg` : "—"}</td>
-    
+
+      <td>
+        <span class="badge ${statusBadge?.[pet.status] || "b-breed"}">
+          ${pet.status || "—"}
+        </span>
+      </td>
+
       <td>
         <div class="act-btns" style="justify-content:center;">
           <button class="btn-act view" type="button" data-action="view" data-id="${pet.id}">
             <i class="bi bi-eye-fill"></i>
           </button>
+
           <button class="btn-act edit" type="button" data-action="edit" data-id="${pet.id}">
             <i class="bi bi-pencil-fill"></i>
           </button>
+
           <button class="btn-act delete" type="button" data-action="delete" data-id="${pet.id}">
             <i class="bi bi-trash-fill"></i>
           </button>
@@ -116,8 +166,70 @@ function renderTable(data) {
     </tr>
   `).join("");
 
-  petCount.textContent = String(data.length);
-  pageInfo.textContent = `Showing 1–${data.length} of ${data.length} pet${data.length !== 1 ? "s" : ""}`;
+  pageInfo.textContent = `Showing ${start + 1}–${Math.min(end, totalItems)} of ${totalItems} pet${totalItems !== 1 ? "s" : ""}`;
+
+  renderPagination(totalItems);
+}
+
+function renderPagination(totalItems) {
+  const container = document.querySelector(".pagination");
+  if (!container) return;
+
+  const totalPages = Math.ceil(totalItems / ROWS_PER_PAGE);
+  if (totalPages <= 1) {
+    container.innerHTML = "";
+    return;
+  }
+
+  let html = `
+    <button class="pg-btn" ${currentPage === 1 ? "disabled" : ""} data-page="${currentPage - 1}">
+      ‹
+    </button>
+  `;
+
+  const maxVisible = 5;
+  let start = Math.max(1, currentPage - 2);
+  let end = Math.min(totalPages, start + maxVisible - 1);
+
+  if (end - start < maxVisible - 1) {
+    start = Math.max(1, end - maxVisible + 1);
+  }
+
+  if (start > 1) {
+    html += `<button class="pg-btn" data-page="1">1</button>`;
+    if (start > 2) html += `<span class="pg-dots">...</span>`;
+  }
+
+  for (let i = start; i <= end; i++) {
+    html += `
+      <button class="pg-btn ${i === currentPage ? "active" : ""}" data-page="${i}">
+        ${i}
+      </button>
+    `;
+  }
+
+  if (end < totalPages) {
+    if (end < totalPages - 1) html += `<span class="pg-dots">...</span>`;
+    html += `<button class="pg-btn" data-page="${totalPages}">${totalPages}</button>`;
+  }
+
+  html += `
+    <button class="pg-btn" ${currentPage === totalPages ? "disabled" : ""} data-page="${currentPage + 1}">
+      ›
+    </button>
+  `;
+
+  container.innerHTML = html;
+
+  container.querySelectorAll(".pg-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const page = Number(btn.dataset.page);
+      if (!page) return;
+
+      currentPage = page;
+      renderTable(displayedPets);
+    });
+  });
 }
 
 function buildCompatGrid(values = {}) {
@@ -183,6 +295,8 @@ function applyFilters() {
       (!barangay || (pet.barangay || "").toLowerCase().includes(barangay))
     );
   });
+
+  currentPage = 1;
 
   renderTable(displayedPets);
 }
@@ -256,11 +370,21 @@ function openModal(mode, pet = null) {
   document.getElementById("fSexForm").value = pet?.sex || "";
   document.getElementById("fAge").value = pet?.age || "";
   document.getElementById("formSize").value = pet?.size || "";
-  document.getElementById("fStatus").value = pet?.status || "";
   document.getElementById("fBarangay").value = pet?.barangay || "";
+  document.getElementById("fIntakeType").value = pet?.intakeSourceType || "";
+  document.getElementById("fIntakeName").value = pet?.intakeSourceName || "";
+  document.getElementById("fIntakeDate").value = pet?.intakeDate || "";
+
+  document.getElementById("fVaccinated").value =
+    pet?.isVaccinated === true ? "true" :
+    pet?.isVaccinated === false ? "false" : "";
+
+  document.getElementById("fMedicalStatus").value = pet?.medicalStatus || "";
+  document.getElementById("fNotes").value = pet?.quarantineNotes || "";
   document.getElementById("fColor").value = pet?.coatColor || "";
   document.getElementById("fColor2").value = pet?.secondaryColor || "";
   document.getElementById("fWeight").value = pet?.weightKg || "";
+  document.getElementById("fStatus").value = pet?.status || "";
   document.getElementById("fDistinct").value = pet?.distinctFeatures || "";
   document.getElementById("fAllergy").checked = pet?.flags?.allergyFriendly || false;
   document.getElementById("fAggressive").checked = pet?.flags?.aggressive || false;
@@ -348,10 +472,10 @@ async function savePet() {
     "fSexForm",
     "fAge",
     "formSize",
-    "fStatus",
     "fBarangay",
     "fColor",
     "fWeight",
+    "fStatus",
   ];
 
   let isValid = true;
@@ -378,6 +502,7 @@ async function savePet() {
   }
 
     const token = localStorage.getItem("animua_token");
+    const status = document.getElementById("fStatus").value;
 
     const petData = {
       name: document.getElementById("fName").value,
@@ -387,6 +512,13 @@ async function savePet() {
       age: Number(document.getElementById("fAge").value),
       size: document.getElementById("formSize").value,
       barangay: document.getElementById("fBarangay").value,
+      intakeSourceType: document.getElementById("fIntakeType").value,
+      intakeSourceName: document.getElementById("fIntakeName").value,
+      intakeDate: document.getElementById("fIntakeDate").value,
+
+      isVaccinated: document.getElementById("fVaccinated").value === "true",
+      medicalStatus: document.getElementById("fMedicalStatus").value,
+      quarantineNotes: document.getElementById("fNotes").value,
       coatColor: document.getElementById("fColor").value,
       secondaryColor: document.getElementById("fColor2").value,
       weightKg: Number(document.getElementById("fWeight").value),
@@ -398,7 +530,8 @@ async function savePet() {
         specialNeeds: document.getElementById("fSpecialNeeds").checked,
       },
       photoUrl: currentPhotoBase64 || null,
-      status: document.getElementById("fStatus").value
+      status,
+      isVisibleToPublic: status === "Ready for Adoption"
     };
 
     const url = editingId
@@ -560,7 +693,46 @@ function bindEvents() {
               </div>
               <div class="pet-stat-card">
                 <span class="stat-label">Status</span>
-                <span class="stat-value">${pet.status || "Available"}</span>
+                <span class="badge ${statusBadge?.[pet.status] || "b-breed"}">
+                  ${pet.status || "—"}
+                </span>
+              </div>
+
+              <div class="pet-stat-card">
+                <span class="stat-label">Intake Source Type</span>
+                <span class="stat-value">${pet.intakeSourceType || "—"}</span>
+              </div>
+
+              <div class="pet-stat-card">
+                <span class="stat-label">Intake Source Name</span>
+                <span class="stat-value">${pet.intakeSourceName || "—"}</span>
+              </div>
+
+              <div class="pet-stat-card">
+                <span class="stat-label">Intake Date</span>
+                <span class="stat-value">${pet.intakeDate || "—"}</span>
+              </div>
+
+              <div class="pet-stat-card">
+                <span class="stat-label">Vaccinated</span>
+                <span class="stat-value">${
+                  pet.isVaccinated === true ? "Yes" :
+                  pet.isVaccinated === false ? "No" : "—"
+                }</span>
+              </div>
+              <div class="pet-stat-card">
+                <span class="stat-label">Medical Status</span>
+                <span class="stat-value">${pet.medicalStatus || "—"}</span>
+              </div>
+              <div class="pet-stat-card">
+                <span class="stat-label">Quarantine Notes</span>
+                <span class="stat-value" style="white-space: normal; line-height: 1.4;">
+                  ${pet.quarantineNotes || "—"}
+                </span>
+              </div>
+              <div class="pet-stat-card">
+                <span class="stat-label">Visible to Public</span>
+                <span class="stat-value">${pet.isVisibleToPublic === true || pet.status === "Ready for Adoption" ? "Yes" : "No"}</span>
               </div>
             </div>
           </div>
@@ -664,10 +836,10 @@ function bindEvents() {
   "fSexForm",
   "fAge",
   "formSize",
-  "fStatus",
   "fBarangay",
   "fColor",
   "fWeight",
+  "fStatus",
 ].forEach((id) => {
   const element = document.getElementById(id);
 
