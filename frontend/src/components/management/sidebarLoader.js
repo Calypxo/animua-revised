@@ -45,7 +45,7 @@ export function loadSidebar() {
           <span class="nav-text">Surrenders</span>
         </a>
 
-        <a href="/pages/management/adoptions.html" class="nav-item" data-tooltip="Adoptions">
+        <a href="/pages/management/adoptionRequests.html" class="nav-item" data-tooltip="Adoption Requests">
           <i class="bi bi-heart-arrow"></i>
           <span class="nav-text">Adoptions</span>
           <span class="nav-badge">5</span>

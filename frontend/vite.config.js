@@ -14,7 +14,7 @@ export default defineConfig({
         adminLogin:       resolve(__dirname, 'pages/management/admin-login.html'),
         dashboard:        resolve(__dirname, 'pages/management/dashboard.html'),
         animalRecords:    resolve(__dirname, 'pages/management/animalRecords.html'),
-        adoptions:        resolve(__dirname, 'pages/management/adoptions.html'),
+        adoptions:        resolve(__dirname, 'pages/management/adoptionRequests.html'),
         surrenders:       resolve(__dirname, 'pages/management/surrenders.html'),
         inventory:        resolve(__dirname, 'pages/management/inventory.html'),
         reports:          resolve(__dirname, 'pages/management/reports.html'),

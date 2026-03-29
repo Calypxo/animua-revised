@@ -1,3 +1,5 @@
+import { API_BASE_URL } from "../../utils/api.js";
+
 const petsGrid = document.getElementById("petsGrid");
 const resultsCount = document.getElementById("resultsCount");
 const emptyState = document.getElementById("emptyState");
@@ -26,6 +28,31 @@ const formMessage = document.getElementById("formMessage");
 
 let currentFilter = "all";
 let currentPetForAdoption = null;
+
+function mapPetFromBackend(pet) {
+  const type =
+  pet.species === "Canine" ? "dog" :
+  pet.species === "Feline" ? "cat" :
+  "other";
+
+  return {
+    id: pet.id,
+    name: pet.name || "Unnamed Pet",
+    type,
+    age: pet.age ? `${pet.age} year${Number(pet.age) > 1 ? "s" : ""}` : "Unknown age",
+    sex: pet.sex || "Unknown",
+    size: pet.size || "Unknown",
+    status: pet.status || "Ready for Adoption",
+    traits: [],
+    description: pet.distinctFeatures || "This rescued pet is looking for a loving home.",
+    match: "Best for adopters ready to provide a safe, caring, and responsible home.",
+    image:
+      pet.photoUrl ||
+      (type === "dog"
+        ? "https://loremflickr.com/500/360/dog?lock=1001"
+        : "https://loremflickr.com/500/360/cat?lock=1002"),
+  };
+}
 
 const dogNames = [
   "Buddy", "Max", "Bruno", "Coco", "Rocky", "Milo", "Bingo", "Charlie", "Toby", "Simba",
@@ -111,10 +138,25 @@ function createCat(index) {
   };
 }
 
-const pets = [
-  ...Array.from({ length: 20 }, (_, index) => createDog(index)),
-  ...Array.from({ length: 20 }, (_, index) => createCat(index))
-];
+async function loadPublicPets() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/public/pets`);
+
+    if (!res.ok) {
+      throw new Error("Failed to load public pets");
+    }
+
+    const data = await res.json();
+    pets = data.map(mapPetFromBackend);
+    applyFilters();
+  } catch (error) {
+    console.error("Public pets load error:", error);
+    resultsCount.textContent = "0 pets found";
+    emptyState.classList.add("show");
+  }
+}
+
+let pets = [];
 
 function renderPets(list) {
   if (!petsGrid || !resultsCount || !emptyState) {
@@ -303,15 +345,57 @@ document.querySelectorAll("[data-close]").forEach((button) => {
 });
 
 if (adoptionForm) {
-  adoptionForm.addEventListener("submit", (event) => {
+  adoptionForm.addEventListener("submit", async (event) => {
     event.preventDefault();
-    formMessage.textContent = `Adoption form for ${petNameField.value} has been prepared successfully.`;
-    adoptionForm.reset();
-    petNameField.value = currentPetForAdoption ? currentPetForAdoption.name : "";
-    selectedPetName.textContent = currentPetForAdoption
-      ? `${currentPetForAdoption.name} (${currentPetForAdoption.type === "dog" ? "Dog" : "Cat"})`
-      : "";
+
+    try {
+      const formData = {
+        pet_name: petNameField.value,
+        full_name: document.getElementById("fullName").value,
+        age: document.getElementById("age").value,
+        birthdate: document.getElementById("birthdate").value,
+        address: document.getElementById("address").value,
+        civil_status: document.getElementById("civilStatus").value,
+        gender: document.getElementById("gender").value,
+        citizenship: document.getElementById("citizenship").value,
+        contact_number: document.getElementById("contactNumber").value,
+        occupation: document.getElementById("occupation").value,
+        spouse_name: document.getElementById("spouseName").value,
+        children_names: document.getElementById("childrenNames").value,
+        why_adopt: document.getElementById("whyAdopt").value,
+        visit_veterinarian: document.getElementById("visitVeterinarian").value,
+        existing_pets: document.getElementById("existingPets").value,
+        issued_day: document.getElementById("issuedDay").value,
+        issued_month: document.getElementById("issuedMonth").value,
+        issued_year: document.getElementById("issuedYear").value,
+        signature_name: document.getElementById("signatureName").value,
+      };
+
+      const res = await fetch(`${API_BASE_URL}/adoptions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(formData)
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to submit adoption request");
+      }
+
+      const result = await res.json();
+
+      formMessage.textContent = "Adoption request submitted successfully!";
+      formMessage.style.color = "green";
+
+      adoptionForm.reset();
+
+    } catch (error) {
+      console.error("Adoption submit error:", error);
+      formMessage.textContent = "Failed to submit. Please try again.";
+      formMessage.style.color = "red";
+    }
   });
 }
 
-renderPets(pets);
+loadPublicPets();;

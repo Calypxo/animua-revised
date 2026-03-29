@@ -8,6 +8,10 @@ const app = express();
 const authRoutes = require("./src/routes/authRoutes");
 const petRoutes = require("./src/routes/petRoutes");
 const dashboardRoutes = require("./src/routes/dashboardRoutes");
+
+const publicRoutes = require("./src/routes/publicRoutes");
+const adoptionRoutes = require("./src/routes/adoptionRoutes");
+
 const authenticateToken = require("./src/middleware/authMiddleware");
 const authorizeRole = require("./src/middleware/roleMiddleware");
 
@@ -29,6 +33,9 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/pets", petRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+
+app.use("/api/public", publicRoutes);
+app.use("/api/adoptions", adoptionRoutes);
 
 app.get("/", (req, res) => {
   res.send("ANIMUA Backend is Live!");
