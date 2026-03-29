@@ -1,7 +1,200 @@
+import Swal from "sweetalert2";
+import { handleLogin } from "../../auth/login.js";
+import { handleRegistration } from "../../auth/register.js";
+
 const menuToggle = document.getElementById("menuToggle");
 const navbar = document.getElementById("navbar");
 const body = document.body;
 const header = document.querySelector(".header");
+
+const notificationBtn = document.getElementById("notificationBtn");
+const notificationPopup = document.getElementById("notificationPopup");
+
+const authModal = document.getElementById("authModal");
+const openAuthModalBtn =
+  document.getElementById("loginNavBtn") ||
+  document.getElementById("openAuthModal");
+const closeAuthModalBtn = document.getElementById("closeAuthModal");
+
+const loginSection = document.getElementById("login-section");
+const registerSection = document.getElementById("register-section");
+
+const loginForm = document.getElementById("login-form");
+const registerForm = document.getElementById("register-form");
+
+const authSideTag = document.getElementById("authSideTag");
+const authModalTitle = document.getElementById("authModalTitle");
+const authSideText = document.getElementById("authSideText");
+
+const revealElements = document.querySelectorAll(".reveal");
+
+function clearFormErrors() {
+  const errorIds = [
+    "login-email-error",
+    "login-password-error",
+    "reg-name-error",
+    "reg-email-error",
+    "reg-password-error"
+  ];
+
+  errorIds.forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = "";
+  });
+}
+
+function openAuthModal(event) {
+  if (event) event.preventDefault();
+  if (authModal) authModal.classList.remove("hidden");
+  document.body.classList.add("modal-open");
+}
+
+function closeAuthModal() {
+  if (authModal) authModal.classList.add("hidden");
+  document.body.classList.remove("modal-open");
+}
+
+function showLoginView() {
+  clearFormErrors();
+
+  if (loginSection) loginSection.classList.remove("hidden");
+  if (registerSection) registerSection.classList.add("hidden");
+
+  if (authSideTag) authSideTag.textContent = "Welcome Back";
+  if (authModalTitle) authModalTitle.innerHTML = "Hello,<br>Welcome back to Animua!";
+  if (authSideText) {
+    authSideText.textContent =
+      "Log in to continue exploring rescued animals and shelter services.";
+  }
+}
+
+function showRegisterView() {
+  clearFormErrors();
+
+  if (registerSection) registerSection.classList.remove("hidden");
+  if (loginSection) loginSection.classList.add("hidden");
+
+  if (authSideTag) authSideTag.textContent = "New Here?";
+  if (authModalTitle) authModalTitle.innerHTML = "Create your<br>Animua account!";
+  if (authSideText) {
+    authSideText.textContent =
+      "Join Animua and start connecting with rescued animals and shelter services.";
+  }
+}
+
+function setupPasswordToggles() {
+  const toggleButtons = document.querySelectorAll(".toggle-password");
+
+  toggleButtons.forEach((toggle) => {
+    toggle.addEventListener("click", () => {
+      const targetId = toggle.getAttribute("data-target");
+      const input = document.getElementById(targetId);
+      const icon = toggle.querySelector("i");
+
+      if (!input || !icon) return;
+
+      const isHidden = input.type === "password";
+      input.type = isHidden ? "text" : "password";
+
+      icon.classList.remove("fa-eye", "fa-eye-slash");
+      icon.classList.add(isHidden ? "fa-eye" : "fa-eye-slash");
+    });
+  });
+}
+
+function updateAuthUI() {
+  const loginNavBtn = document.getElementById("loginNavBtn");
+  const userLoggedInBox = document.getElementById("userLoggedInBox");
+  const loggedUserName = document.getElementById("loggedUserName");
+  const logoutBtn = document.getElementById("logoutBtn");
+
+  const isLoggedIn = localStorage.getItem("is_logged_in") === "true";
+  const userName = localStorage.getItem("user_name") || "User";
+
+  if (isLoggedIn) {
+    if (loginNavBtn) loginNavBtn.classList.add("hidden");
+    if (userLoggedInBox) userLoggedInBox.classList.remove("hidden");
+    if (loggedUserName) loggedUserName.textContent = userName;
+  } else {
+    if (loginNavBtn) loginNavBtn.classList.remove("hidden");
+    if (userLoggedInBox) userLoggedInBox.classList.add("hidden");
+  }
+
+  if (logoutBtn && !logoutBtn.dataset.bound) {
+    logoutBtn.dataset.bound = "true";
+    logoutBtn.addEventListener("click", async () => {
+      const result = await Swal.fire({
+        icon: "question",
+        title: "Logout",
+        text: "Are you sure you want to log out?",
+        showCancelButton: true,
+        confirmButtonText: "Yes, logout",
+        cancelButtonText: "Cancel"
+      });
+
+      if (!result.isConfirmed) return;
+
+      localStorage.removeItem("animua_token");
+      localStorage.removeItem("user_role");
+      localStorage.removeItem("user_name");
+      localStorage.removeItem("user_email");
+      localStorage.removeItem("is_logged_in");
+      localStorage.removeItem("show_welcome_toast");
+
+      window.location.href = "/pages/public/home.html";
+    });
+  }
+}
+
+function showWelcomeToastIfNeeded() {
+  const shouldShow = localStorage.getItem("show_welcome_toast") === "true";
+  const userName = localStorage.getItem("user_name") || "User";
+
+  if (shouldShow) {
+    Swal.fire({
+      toast: true,
+      position: "top-end",
+      icon: "success",
+      title: `Welcome, ${userName}!`,
+      showConfirmButton: false,
+      timer: 2500,
+      timerProgressBar: true
+    });
+
+    localStorage.removeItem("show_welcome_toast");
+  }
+}
+
+function setupRevealAnimations() {
+  if ("IntersectionObserver" in window && revealElements.length) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("show");
+          }
+        });
+      },
+      {
+        threshold: 0.15
+      }
+    );
+
+    revealElements.forEach((element) => observer.observe(element));
+  } else {
+    revealElements.forEach((element) => element.classList.add("show"));
+  }
+}
+
+window.toggleAuthView = function () {
+  const loginVisible = loginSection && !loginSection.classList.contains("hidden");
+
+  if (loginVisible) {
+    showRegisterView();
+  } else {
+    showLoginView();
+  }
+};
 
 if (menuToggle && navbar) {
   menuToggle.addEventListener("click", () => {
@@ -29,30 +222,6 @@ if (header) {
   });
 }
 
-const revealElements = document.querySelectorAll(".reveal");
-
-if ("IntersectionObserver" in window && revealElements.length) {
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("show");
-        }
-      });
-    },
-    {
-      threshold: 0.15
-    }
-  );
-
-  revealElements.forEach((element) => observer.observe(element));
-} else {
-  revealElements.forEach((element) => element.classList.add("show"));
-}
-
-const notificationBtn = document.getElementById("notificationBtn");
-const notificationPopup = document.getElementById("notificationPopup");
-
 if (notificationBtn && notificationPopup) {
   notificationBtn.addEventListener("click", (event) => {
     event.stopPropagation();
@@ -68,3 +237,42 @@ if (notificationBtn && notificationPopup) {
     }
   });
 }
+
+if (openAuthModalBtn) {
+  openAuthModalBtn.addEventListener("click", openAuthModal);
+}
+
+if (closeAuthModalBtn) {
+  closeAuthModalBtn.addEventListener("click", closeAuthModal);
+}
+
+if (authModal) {
+  authModal.addEventListener("click", (event) => {
+    if (event.target === authModal) {
+      closeAuthModal();
+    }
+  });
+}
+
+if (loginForm) {
+  loginForm.addEventListener("submit", handleLogin);
+}
+
+if (registerForm) {
+  registerForm.addEventListener("submit", handleRegistration);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  setupPasswordToggles();
+  setupRevealAnimations();
+  updateAuthUI();
+  showWelcomeToastIfNeeded();
+
+  if (loginSection && registerSection) {
+    showLoginView();
+  }
+
+  if (window.location.pathname.includes("login.html") && authModal) {
+    authModal.classList.remove("hidden");
+  }
+});

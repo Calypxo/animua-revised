@@ -4,19 +4,49 @@ import { API_BASE_URL } from "../utils/api.js";
 export async function handleLogin(event) {
   event.preventDefault();
 
-  localStorage.clear();
-
   const emailInput = document.getElementById("login-email");
   const passwordInput = document.getElementById("login-password");
+  const authModal = document.getElementById("authModal");
 
   const email = emailInput?.value.trim().toLowerCase();
   const password = passwordInput?.value;
 
-  if (!email || !password) {
+  if (!email) {
+    closeModal(authModal);
     Swal.fire({
       icon: "warning",
-      title: "Missing Information",
-      text: "Please enter both email and password.",
+      title: "Missing Email",
+      text: "Please enter your email."
+    });
+    return;
+  }
+
+  if (!isValidEmail(email)) {
+    closeModal(authModal);
+    Swal.fire({
+      icon: "warning",
+      title: "Invalid Email",
+      text: "Please enter a valid email address."
+    });
+    return;
+  }
+
+  if (!password) {
+    closeModal(authModal);
+    Swal.fire({
+      icon: "warning",
+      title: "Missing Password",
+      text: "Please enter your password."
+    });
+    return;
+  }
+
+  if (password.length < 6) {
+    closeModal(authModal);
+    Swal.fire({
+      icon: "warning",
+      title: "Invalid Password",
+      text: "Password must be at least 6 characters."
     });
     return;
   }
@@ -24,86 +54,66 @@ export async function handleLogin(event) {
   try {
     const response = await fetch(`${API_BASE_URL}/auth/login`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ email, password })
     });
 
     const data = await response.json();
-    console.log("Login response:", data);
 
     if (!response.ok) {
+      closeModal(authModal);
       Swal.fire({
         icon: "error",
         title: "Login Failed",
-        text: data.message || "Invalid email or password.",
+        text: data.message || "Incorrect email or password."
       });
       return;
     }
 
-    const currentPath = window.location.pathname;
-    const isAdminPage = currentPath.includes("admin-login.html");
-    const isPublicPage =
-      currentPath === "/" || currentPath.includes("index.html");
-    const isAuthorizedStaff = data.role === "Admin" || data.role === "Staff";
+    const userRole = data.role || "Public";
+    const userFullName = data.fullName || "User";
 
-    if (isAdminPage && !isAuthorizedStaff) {
-      Swal.fire({
-        icon: "error",
-        title: "Access Denied",
-        text: "You do not have the required permissions for the Management Console.",
-      });
-      return;
-    }
-
-    if (isPublicPage && isAuthorizedStaff) {
-      Swal.fire({
-        icon: "info",
-        title: "Staff Detected",
-        text: "Please log in via the Management Portal to access admin tools.",
-      });
-      return;
-    }
-
-    localStorage.setItem("animua_token", data.token);
-    localStorage.setItem("user_role", data.role);
-    localStorage.setItem("user_name", data.fullName);
+    localStorage.setItem("animua_token", data.token || "");
+    localStorage.setItem("user_role", userRole);
+    localStorage.setItem("user_name", userFullName);
     localStorage.setItem("user_email", email);
+    localStorage.setItem("is_logged_in", "true");
     localStorage.setItem("show_welcome_toast", "true");
 
-    console.log("Saved token:", localStorage.getItem("animua_token"));
-    console.log("Saved role:", localStorage.getItem("user_role"));
-    console.log("Saved name:", localStorage.getItem("user_name"));
+    closeModal(authModal);
 
-    if (isAuthorizedStaff) {
+    await Swal.fire({
+      icon: "success",
+      title: "Login Successful",
+      text: `Welcome back, ${userFullName}!`,
+      timer: 1800,
+      showConfirmButton: false,
+      timerProgressBar: true
+    });
+
+    if (userRole === "Admin" || userRole === "Staff") {
       window.location.replace("/pages/management/dashboard.html");
     } else {
       window.location.replace("/pages/public/home.html");
     }
   } catch (error) {
     console.error("[Login Error]", error);
+    closeModal(authModal);
     Swal.fire({
       icon: "error",
       title: "Connection Error",
-      text: "The server is unreachable. Please verify your connection or check the backend status.",
+      text: "Cannot connect to the backend. Please check your internet or server status."
     });
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  const passwordInput = document.getElementById("login-password");
-  if (!passwordInput) return;
+function closeModal(authModal) {
+  if (authModal) authModal.classList.add("hidden");
+  document.body.classList.remove("modal-open");
+}
 
-  const inputGroup = passwordInput.closest(".input-group");
-  const toggleButton = inputGroup?.querySelector(".input-group-text");
-  const toggleIcon = toggleButton?.querySelector("i");
-
-  if (!toggleButton || !toggleIcon) return;
-
-  toggleButton.style.cursor = "pointer";
-  toggleButton.addEventListener("click", () => {
-    const isHidden = passwordInput.type === "password";
-    passwordInput.type = isHidden ? "text" : "password";
-    toggleIcon.classList.remove("bi-eye", "bi-eye-slash");
-    toggleIcon.classList.add(isHidden ? "bi-eye" : "bi-eye-slash");
-  });
-});
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}

@@ -424,6 +424,26 @@ button {
   display: none !important;
 }
 
+.auth-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.auth-error {
+  display: block;
+  width: 100%;
+  font-size: 13px;
+  color: #c0392b;
+  margin: 6px 0 14px;
+  line-height: 1.4;
+  text-align: left;
+}
+
+.auth-error:empty {
+  display: none;
+}
+
 body.auth-open {
   overflow: hidden;
 }
@@ -628,6 +648,11 @@ body.auth-open {
   font-family: 'Inter', sans-serif;
 }
 
+.auth-modal-card {
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
 @media (max-width: 768px) {
   .footer {
     padding-top: 32px;
@@ -721,4 +746,35 @@ body.auth-open {
   .logo-text p {
     font-size: 11px;
   }
+}
+
+#userLoggedInBox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#userLoggedInBox.hidden {
+  display: none;
+}
+
+#loggedUserName {
+  font-weight: 600;
+  color: #fff;
+}
+
+#logoutBtn {
+  border: none;
+  background: #970A12;
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.reveal {
+  opacity: 1 !important;
+  transform: none !important;
+  visibility: visible !important;
 }

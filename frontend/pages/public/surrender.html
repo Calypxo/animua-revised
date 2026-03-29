@@ -15,59 +15,66 @@
 <body>
 
   <!-- Header -->
-  <header class="header" id="top">
-    <div class="container nav-shell">
-      <a href="home.html" class="logo">
-        <div class="logo-icon">
-          <i class="fa-solid fa-heart"></i>
-          <i class="fa-solid fa-paw paw-mini"></i>
+<header class="header" id="home">
+  <div class="container nav-shell">
+    <a href="#home" class="logo">
+      <div class="logo-icon">
+        <i class="fa-solid fa-heart"></i>
+        <i class="fa-solid fa-paw paw-mini"></i>
+      </div>
+      <div class="logo-text">
+        <h2>Animua</h2>
+        <p>Connect. Learn. Adopt.</p>
+      </div>
+    </a>
+
+    <nav class="navbar" id="navbar">
+      <a href="home.html">Home</a>
+      <a href="find-furbabies.html">Find Furbabies</a>
+      <a href="surrender.html" class="active">Surrender</a>
+      <a href="contact.html">Contact Us</a>
+    </nav>
+
+    <div class="nav-actions">
+      <div class="notification-wrap">
+        <button class="notification-btn" id="notificationBtn" aria-label="Notifications">
+          <i class="fa-regular fa-bell"></i>
+          <span class="notification-dot"></span>
+        </button>
+
+        <div class="notification-popup" id="notificationPopup">
+          <div class="notification-popup-head">
+            <h4>Notifications</h4>
+          </div>
+          <ul class="notification-list">
+            <li>New animals were recently added for adoption.</li>
+            <li>Please complete forms carefully before submission.</li>
+            <li>Shelter announcements will appear here.</li>
+          </ul>
         </div>
-        <div class="logo-text">
-          <h2>Animua</h2>
-          <p>Connect. Learn. Adopt.</p>
-        </div>
+      </div>
+
+      <a href="#" class="chatbot-btn" aria-label="Chatbot">
+        <i class="fa-regular fa-comment-dots"></i>
       </a>
 
-       <nav class="navbar" id="navbar">
-  <a href="home.html">Home</a>
-  <a href="find-furbabies.html">Find Furbabies</a>
-  <a href="surrender.html" class="active">Surrender</a>
-  <a href="contact.html">Contact Us</a>
-</nav>
+      <a href="#" id="loginNavBtn" class="login-btn" aria-label="Login">
+        <i class="fa-regular fa-user"></i>
+      </a>
 
-<div class="nav-actions">
-  <div class="notification-wrap">
-    <button class="notification-btn" id="notificationBtn" aria-label="Notifications">
-      <i class="fa-regular fa-bell"></i>
-      <span class="notification-dot"></span>
-    </button>
-
-    <div class="notification-popup" id="notificationPopup">
-      <div class="notification-popup-head">
-        <h4>Notifications</h4>
+      <div id="userLoggedInBox" class="hidden">
+        <span id="loggedUserName"></span>
+        <button id="logoutBtn" type="button">Logout</button>
       </div>
-      <ul class="notification-list">
-        <li>New animals were recently added for adoption.</li>
-        <li>Please complete forms carefully before submission.</li>
-        <li>Shelter announcements will appear here.</li>
-      </ul>
+
+      <button class="menu-toggle" id="menuToggle" aria-label="Toggle Navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
     </div>
   </div>
-
-  <a href="#" class="chatbot-btn" aria-label="Chatbot">
-    <i class="fa-regular fa-comment-dots"></i>
-  </a>
-
- <a href="login.html" class="login-btn" id="openAuthModal" aria-label="Login">
-  <i class="fa-regular fa-user"></i>
-</a>
-  <button class="menu-toggle" id="menuToggle" aria-label="Toggle Navigation">
-    <span></span>
-    <span></span>
-    <span></span>
-  </button>
-</div>
-  </header>
+</header>
 
   <!-- Surrender Hero -->
   <section class="surrender-page-hero">

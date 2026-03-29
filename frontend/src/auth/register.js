@@ -1,87 +1,129 @@
-import Swal from 'sweetalert2';
+import Swal from "sweetalert2";
+import { API_BASE_URL } from "../utils/api.js";
 
 export async function handleRegistration(event) {
-    event.preventDefault();
+  event.preventDefault();
 
-    const fullNameInput = document.getElementById("reg-name");
-    const emailInput    = document.getElementById("reg-email");
-    const passwordInput = document.getElementById("reg-password");
+  const fullNameInput = document.getElementById("reg-name");
+  const emailInput = document.getElementById("reg-email");
+  const passwordInput = document.getElementById("reg-password");
+  const authModal = document.getElementById("authModal");
 
-    const fullName = fullNameInput?.value.trim();
-    const email    = emailInput?.value.trim().toLowerCase();
-    const password = passwordInput?.value;
+  const fullName = fullNameInput?.value.trim();
+  const email = emailInput?.value.trim().toLowerCase();
+  const password = passwordInput?.value;
 
-    if (!fullName || !email || !password) {
-        Swal.fire({
-            icon:  "warning",
-            title: "Missing Fields",
-            text:  "Please fill in all fields to join Animua."
-        });
-        return;
+  if (!fullName) {
+    closeModal(authModal);
+    Swal.fire({
+      icon: "warning",
+      title: "Missing Name",
+      text: "Please enter your full name."
+    });
+    return;
+  }
+
+  if (fullName.length < 2) {
+    closeModal(authModal);
+    Swal.fire({
+      icon: "warning",
+      title: "Invalid Name",
+      text: "Full name must be at least 2 characters."
+    });
+    return;
+  }
+
+  if (!email) {
+    closeModal(authModal);
+    Swal.fire({
+      icon: "warning",
+      title: "Missing Email",
+      text: "Please enter your email."
+    });
+    return;
+  }
+
+  if (!isValidEmail(email)) {
+    closeModal(authModal);
+    Swal.fire({
+      icon: "warning",
+      title: "Invalid Email",
+      text: "Please enter a valid email address."
+    });
+    return;
+  }
+
+  if (!password) {
+    closeModal(authModal);
+    Swal.fire({
+      icon: "warning",
+      title: "Missing Password",
+      text: "Please enter your password."
+    });
+    return;
+  }
+
+  if (password.length < 6) {
+    closeModal(authModal);
+    Swal.fire({
+      icon: "warning",
+      title: "Invalid Password",
+      text: "Password must be at least 6 characters."
+    });
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ fullName, email, password })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      closeModal(authModal);
+      Swal.fire({
+        icon: "error",
+        title: "Registration Failed",
+        text: data.message || "An error occurred during registration."
+      });
+      return;
     }
 
-    try {
-        // For Wireshark audit: http://localhost:5000 (plain HTTP, visible in packet capture)
-        // For production:       https://animua.onrender.com (TLS-encrypted, hidden from sniff)
-        const API_URL = "https://animua.onrender.com";
+    if (fullNameInput) fullNameInput.value = "";
+    if (emailInput) emailInput.value = "";
+    if (passwordInput) passwordInput.value = "";
 
-        const response = await fetch(`${API_URL}/api/auth/register`, {
-            method:  "POST",
-            headers: { "Content-Type": "application/json" },
-            body:    JSON.stringify({ fullName, email, password })
-        });
+    closeModal(authModal);
 
-        const data = await response.json();
-
-        if (response.ok) {
-            await Swal.fire({
-                icon:             "success",
-                title:            "Welcome to the Family!",
-                text:             "Registration successful! You can now log in as a Public Member.",
-                timer:            3500,
-                showConfirmButton: false,
-                timerProgressBar: true
-            });
-
-            if (fullNameInput)  fullNameInput.value  = "";
-            if (emailInput)     emailInput.value     = "";
-            if (passwordInput)  passwordInput.value  = "";
-
-            location.reload();
-        } else {
-            Swal.fire({
-                icon:  "error",
-                title: "Registration Failed",
-                text:  data.message || "An error occurred during registration."
-            });
-        }
-
-    } catch (error) {
-        console.error("[Register Error]", error);
-        Swal.fire({
-            icon:  "error",
-            title: "Connection Error",
-            text:  "Cannot connect to the backend. Please check your internet or server status."
-        });
-    }
+    await Swal.fire({
+      icon: "success",
+      title: "Registration Successful",
+      text: "Your account has been created successfully.",
+      timer: 2200,
+      showConfirmButton: false,
+      timerProgressBar: true
+    });
+  } catch (error) {
+    console.error("[Register Error]", error);
+    closeModal(authModal);
+    Swal.fire({
+      icon: "error",
+      title: "Connection Error",
+      text: "Cannot connect to the backend. Please check your internet or server status."
+    });
+  }
 }
 
-// ─── PASSWORD VISIBILITY TOGGLE ───────────────────────────────────────────────
-document.addEventListener("DOMContentLoaded", () => {
-    const passwordInput = document.getElementById("reg-password");
-    if (!passwordInput) return;
+function closeModal(authModal) {
+  if (authModal) authModal.classList.add("hidden");
+  document.body.classList.remove("modal-open");
+}
 
-    const inputGroup   = passwordInput.closest(".input-group");
-    const toggleButton = inputGroup?.querySelector(".input-group-text");
-    const toggleIcon   = toggleButton?.querySelector("i");
-
-    if (!toggleButton || !toggleIcon) return;
-
-    toggleButton.style.cursor = "pointer";
-    toggleButton.addEventListener("click", () => {
-        const isHidden = passwordInput.type === "password";
-        passwordInput.type = isHidden ? "text" : "password";
-        toggleIcon.classList.remove("bi-eye", "bi-eye-slash");
-        toggleIcon.classList.add(isHidden ? "bi-eye" : "bi-eye-slash");
-    });
-});
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
