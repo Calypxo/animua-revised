@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ANIMUA | Pet Compatibility Quiz</title>
+
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+    rel="stylesheet"
+  />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="/src/css/public/petCompatibility.css" />
+</head>
+<body>
+  <main class="quiz-shell">
+    <div class="bg-blob blob-1"></div>
+    <div class="bg-blob blob-2"></div>
+    <div class="bg-blob blob-3"></div>
+
+    <div class="quiz-layout">
+      <!-- LEFT / MAIN -->
+      <section class="quiz-main">
+        <div class="quiz-hero">
+          <span class="quiz-badge">
+            <i class="bi bi-stars"></i>
+            Personalized Pet Matching
+          </span>
+
+          <h1>Let’s find the right pet match.</h1>
+          <p>
+            Answer the quiz based on the adopter’s real lifestyle, environment,
+            and care capacity. ANIMUA will compare the answers with each pet’s
+            compatibility profile to recommend the strongest matches.
+          </p>
+
+          <div class="hero-tags">
+            <span><i class="bi bi-ui-checks-grid"></i> 19 Questions</span>
+            <span><i class="bi bi-funnel"></i> Smart Filters</span>
+            <span><i class="bi bi-heart-pulse"></i> Match Results</span>
+          </div>
+        </div>
+
+        <form id="pet-compatibility-form" class="quiz-form">
+          <!-- FILTERS -->
+          <section class="section-card reveal-card" data-section="filters">
+            <div class="section-header">
+              <div>
+                <span class="section-kicker">Step 1</span>
+                <h2>Choose basic filters</h2>
+                <p>
+                  Narrow down the pet pool first before matching begins.
+                </p>
+              </div>
+              <div class="section-icon icon-wine">
+                <i class="bi bi-funnel-fill"></i>
+              </div>
+            </div>
+
+            <div class="filter-grid">
+              <div class="input-tile">
+                <label for="preferred-species" class="question-label">Preferred Species</label>
+                <select id="preferred-species" name="preferredSpecies" class="form-select">
+                  <option value="Any">Any</option>
+                  <option value="Dog">Dog</option>
+                  <option value="Cat">Cat</option>
+                </select>
+              </div>
+
+              <div class="input-tile">
+                <label for="preferred-sex" class="question-label">Preferred Sex</label>
+                <select id="preferred-sex" name="preferredSex" class="form-select">
+                  <option value="Any">Any</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                </select>
+              </div>
+
+              <div class="input-tile">
+                <label for="needAllergyFriendly" class="question-label">Need Allergy-Friendly Pet?</label>
+                <select id="needAllergyFriendly" name="needAllergyFriendly" class="form-select">
+                  <option value="no">No Preference</option>
+                  <option value="yes">Yes</option>
+                </select>
+              </div>
+
+              <div class="input-tile">
+                <label for="acceptAggressive" class="question-label">Accept Aggressive Behaviour?</label>
+                <select id="acceptAggressive" name="acceptAggressive" class="form-select">
+                  <option value="yes">Yes</option>
+                  <option value="no">No</option>
+                </select>
+              </div>
+
+              <div class="input-tile">
+                <label for="acceptSpecialNeeds" class="question-label">Accept Special-Needs Pet?</label>
+                <select id="acceptSpecialNeeds" name="acceptSpecialNeeds" class="form-select">
+                  <option value="yes">Yes</option>
+                  <option value="no">No</option>
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <!-- LIFESTYLE -->
+          <section class="section-card reveal-card delay-1" data-section="lifestyle">
+            <div class="section-header">
+              <div>
+                <span class="section-kicker">Step 2</span>
+                <h2>Lifestyle & activity</h2>
+                <p>These questions reflect routine, attention, and daily energy.</p>
+              </div>
+              <div class="section-icon icon-blue">
+                <i class="bi bi-lightning-charge-fill"></i>
+              </div>
+            </div>
+
+            <div class="question-grid">
+              <div class="question-card">
+                <label class="question-label">1. Daily Activity Level</label>
+                <div class="question-help">How active are you daily?</div>
+
+                <div class="scale-group" data-name="energyLevel">
+                  <input type="radio" id="energyLevel-1" name="energyLevel" value="1" required>
+                  <label for="energyLevel-1" class="scale-option">
+                    <span class="scale-number">1</span>
+                    <span class="scale-text">Very Low</span>
+                  </label>
+
+                  <input type="radio" id="energyLevel-2" name="energyLevel" value="2">
+                  <label for="energyLevel-2" class="scale-option">
+                    <span class="scale-number">2</span>
+                    <span class="scale-text">Low</span>
+                  </label>
+
+                  <input type="radio" id="energyLevel-3" name="energyLevel" value="3">
+                  <label for="energyLevel-3" class="scale-option">
+                    <span class="scale-number">3</span>
+                    <span class="scale-text">Moderate</span>
+                  </label>
+
+                  <input type="radio" id="energyLevel-4" name="energyLevel" value="4">
+                  <label for="energyLevel-4" class="scale-option">
+                    <span class="scale-number">4</span>
+                    <span class="scale-text">Active</span>
+                  </label>
+
+                  <input type="radio" id="energyLevel-5" name="energyLevel" value="5">
+                  <label for="energyLevel-5" class="scale-option">
+                    <span class="scale-number">5</span>
+                    <span class="scale-text">Very Active</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="question-card">
+                <label for="exerciseNeeds" class="question-label">2. Exercise Commitment</label>
+                <div class="question-help">How often can you exercise a pet?</div>
+                <select id="exerciseNeeds" name="exerciseNeeds" class="form-select" required>
+                  <option value="">Select</option>
+                  <option value="1">1 - Very Rarely</option>
+                  <option value="2">2 - Rarely</option>
+                  <option value="3">3 - Sometimes</option>
+                  <option value="4">4 - Often</option>
+                  <option value="5">5 - Very Often</option>
+                </select>
+              </div>
+
+              <div class="question-card">
+                <label for="independenceLevel" class="question-label">3. Independence Preference</label>
+                <div class="question-help">Do you prefer a pet that is independent?</div>
+                <select id="independenceLevel" name="independenceLevel" class="form-select" required>
+                  <option value="">Select</option>
+                  <option value="1">1 - Very Dependent</option>
+                  <option value="2">2 - Slightly Dependent</option>
+                  <option value="3">3 - Balanced</option>
+                  <option value="4">4 - Independent</option>
+                  <option value="5">5 - Very Independent</option>
+                </select>
+              </div>
+
+              <div class="question-card">
+                <label for="attentionNeeds" class="question-label">4. Daily Attention</label>
+                <div class="question-help">How much attention can you give daily?</div>
+                <select id="attentionNeeds" name="attentionNeeds" class="form-select" required>
+                  <option value="">Select</option>
+                  <option value="1">1 - Very Little</option>
+                  <option value="2">2 - Little</option>
+                  <option value="3">3 - Moderate</option>
+                  <option value="4">4 - High</option>
+                  <option value="5">5 - Very High</option>
+                </select>
+              </div>
+
+              <div class="question-card">
+                <label for="playfulness" class="question-label">5. Playfulness Preference</label>
+                <div class="question-help">How much do you enjoy playing with pets?</div>
+                <select id="playfulness" name="playfulness" class="form-select" required>
+                  <option value="">Select</option>
+                  <option value="1">1 - Very Little</option>
+                  <option value="2">2 - Little</option>
+                  <option value="3">3 - Moderate</option>
+                  <option value="4">4 - A Lot</option>
+                  <option value="5">5 - Very Much</option>
+                </select>
+              </div>
+
+              <div class="question-card">
+                <label for="adaptability" class="question-label">6. Routine Stability</label>
+                <div class="question-help">How often does your routine change?</div>
+                <select id="adaptability" name="adaptability" class="form-select" required>
+                  <option value="">Select</option>
+                  <option value="1">1 - Very Stable</option>
+                  <option value="2">2 - Slightly Changing</option>
+                  <option value="3">3 - Moderate Changes</option>
+                  <option value="4">4 - Often Changing</option>
+                  <option value="5">5 - Very Unpredictable</option>
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <!-- SOCIAL -->
+          <section class="section-card reveal-card delay-2" data-section="social">
+            <div class="section-header">
+              <div>
+                <span class="section-kicker">Step 3</span>
+                <h2>Social environment</h2>
+                <p>These questions measure how social the home setup is.</p>
+              </div>
+              <div class="section-icon icon-gold">
+                <i class="bi bi-people-fill"></i>
+              </div>
+            </div>
+
+            <div class="question-grid">
+              <div class="question-card">
+                <label for="friendlinessToHumans" class="question-label">7. Household Social Activity</label>
+                <div class="question-help">How social is your household?</div>
+                <select id="friendlinessToHumans" name="friendlinessToHumans" class="form-select" required>
+                  <option value="">Select</option>
+                  <option value="1">1 - Very Quiet</option>
+                  <option value="2">2 - Slightly Social</option>
+                  <option value="3">3 - Moderately Social</option>
+                  <option value="4">4 - Social</option>
+                  <option value="5">5 - Very Social</option>
+                </select>
+              </div>
+
+              <div class="question-card">
+                <label for="goodWithKids" class="question-label">8. Child Interaction</label>
+                <div class="question-help">How often will the pet interact with children?</div>
+                <select id="goodWithKids" name="goodWithKids" class="form-select" required>
+                  <option value="">Select</option>
+                  <option value="1">1 - Never</option>
+                  <option value="2">2 - Rarely</option>
+                  <option value="3">3 - Sometimes</option>
+                  <option value="4">4 - Often</option>
+                  <option value="5">5 - Very Often</option>
+                </select>
+              </div>
+
+              <div class="question-card">
+                <label for="goodWithOtherPets" class="question-label">9. Other Pet Interaction</label>
+                <div class="question-help">How often will the pet interact with other pets?</div>
+                <select id="goodWithOtherPets" name="goodWithOtherPets" class="form-select" required>
+                  <option value="">Select</option>
+                  <option value="1">1 - Never</option>
+                  <option value="2">2 - Rarely</option>
+                  <option value="3">3 - Sometimes</option>
+                  <option value="4">4 - Often</option>
+                  <option value="5">5 - Very Often</option>
+                </select>
+              </div>
+
+              <div class="question-card">
+                <label for="strangerTolerance" class="question-label">10. Stranger Interaction</label>
+                <div class="question-help">How comfortable are you with pets meeting strangers?</div>
+                <select id="strangerTolerance" name="strangerTolerance" class="form-select" required>
+                  <option value="">Select</option>
+                  <option value="1">1 - Not Comfortable</option>
+                  <option value="2">2 - Slightly Comfortable</option>
+                  <option value="3">3 - Neutral</option>
+                  <option value="4">4 - Comfortable</option>
+                  <option value="5">5 - Very Comfortable</option>
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <!-- CARE -->
+          <section class="section-card reveal-card delay-3" data-section="care">
+            <div class="section-header">
+              <div>
+                <span class="section-kicker">Step 4</span>
+                <h2>Home, care & maintenance</h2>
+                <p>These measure space, grooming, readiness, and maintenance tolerance.</p>
+              </div>
+              <div class="section-icon icon-blue-soft">
+                <i class="bi bi-house-heart-fill"></i>
+              </div>
+            </div>
+
+            <div class="question-grid">
+              <div class="question-card">
+                <label for="noiseLevel" class="question-label">11. Noise Tolerance</label>
+                <div class="question-help">How tolerant are you of pet noise?</div>
+                <select id="noiseLevel" name="noiseLevel" class="form-select" required>
+                  <option value="">Select</option>
+                  <option value="1">1 - Very Low Tolerance</option>
+                  <option value="2">2 - Low Tolerance</option>
+                  <option value="3">3 - Moderate</option>
+                  <option value="4">4 - Tolerant</option>
+                  <option value="5">5 - Very Tolerant</option>
+                </select>
+              </div>
+
+              <div class="question-card">
+                <label for="spaceNeeds" class="question-label">12. Space Availability</label>
+                <div class="question-help">How much living space do you have?</div>
+                <select id="spaceNeeds" name="spaceNeeds" class="form-select" required>
+                  <option value="">Select</option>
+                  <option value="1">1 - Very Small Space</option>
+                  <option value="2">2 - Small Space</option>
+                  <option value="3">3 - Moderate Space</option>
+                  <option value="4">4 - Large Space</option>
+                  <option value="5">5 - Very Large Space</option>
+                </select>
+              </div>
+
+              <div class="question-card">
+                <label for="climateTolerance" class="question-label">13. Climate Readiness</label>
+                <div class="question-help">Can you care for a pet in warm weather?</div>
+                <select id="climateTolerance" name="climateTolerance" class="form-select" required>
+                  <option value="">Select</option>
+                  <option value="1">1 - Not Ready</option>
+                  <option value="2">2 - Slightly Ready</option>
+                  <option value="3">3 - Moderately Ready</option>
+                  <option value="4">4 - Ready</option>
+                  <option value="5">5 - Fully Ready</option>
+                </select>
+              </div>
+
+              <div class="question-card">
+                <label for="groomingNeeds" class="question-label">14. Grooming Commitment</label>
+                <div class="question-help">How willing are you to groom a pet regularly?</div>
+                <select id="groomingNeeds" name="groomingNeeds" class="form-select" required>
+                  <option value="">Select</option>
+                  <option value="1">1 - Not Willing</option>
+                  <option value="2">2 - Slightly Willing</option>
+                  <option value="3">3 - Moderately Willing</option>
+                  <option value="4">4 - Willing</option>
+                  <option value="5">5 - Very Willing</option>
+                </select>
+              </div>
+
+              <div class="question-card">
+                <label for="sheddingLevel" class="question-label">15. Shedding Tolerance</label>
+                <div class="question-help">How comfortable are you with shedding fur?</div>
+                <select id="sheddingLevel" name="sheddingLevel" class="form-select" required>
+                  <option value="">Select</option>
+                  <option value="1">1 - Not Comfortable</option>
+                  <option value="2">2 - Slightly Comfortable</option>
+                  <option value="3">3 - Neutral</option>
+                  <option value="4">4 - Comfortable</option>
+                  <option value="5">5 - Very Comfortable</option>
+                </select>
+              </div>
+
+              <div class="question-card">
+                <label for="trainingDifficulty" class="question-label">16. Training Commitment</label>
+                <div class="question-help">How willing are you to train a pet?</div>
+                <select id="trainingDifficulty" name="trainingDifficulty" class="form-select" required>
+                  <option value="">Select</option>
+                  <option value="1">1 - Not Willing</option>
+                  <option value="2">2 - Slightly Willing</option>
+                  <option value="3">3 - Moderately Willing</option>
+                  <option value="4">4 - Willing</option>
+                  <option value="5">5 - Very Willing</option>
+                </select>
+              </div>
+
+              <div class="question-card">
+                <label for="healthRiskLevel" class="question-label">17. Vet Cost Preparedness</label>
+                <div class="question-help">How prepared are you for vet costs?</div>
+                <select id="healthRiskLevel" name="healthRiskLevel" class="form-select" required>
+                  <option value="">Select</option>
+                  <option value="1">1 - Not Prepared</option>
+                  <option value="2">2 - Slightly Prepared</option>
+                  <option value="3">3 - Moderately Prepared</option>
+                  <option value="4">4 - Prepared</option>
+                  <option value="5">5 - Fully Prepared</option>
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <!-- AFFECTION -->
+          <section class="section-card reveal-card delay-4" data-section="affection">
+            <div class="section-header">
+              <div>
+                <span class="section-kicker">Step 5</span>
+                <h2>Affection & attachment</h2>
+                <p>These questions reflect closeness and attachment preference.</p>
+              </div>
+              <div class="section-icon icon-rose">
+                <i class="bi bi-heart-fill"></i>
+              </div>
+            </div>
+
+            <div class="question-grid">
+              <div class="question-card">
+                <label for="affectionLevel" class="question-label">18. Affection Preference</label>
+                <div class="question-help">How affectionate do you want your pet to be?</div>
+                <select id="affectionLevel" name="affectionLevel" class="form-select" required>
+                  <option value="">Select</option>
+                  <option value="1">1 - Very Independent</option>
+                  <option value="2">2 - Slightly Affectionate</option>
+                  <option value="3">3 - Balanced</option>
+                  <option value="4">4 - Affectionate</option>
+                  <option value="5">5 - Very Affectionate</option>
+                </select>
+              </div>
+
+              <div class="question-card">
+                <label for="separationAnxiety" class="question-label">19. Clinginess Preference</label>
+                <div class="question-help">How comfortable are you with a clingy pet?</div>
+                <select id="separationAnxiety" name="separationAnxiety" class="form-select" required>
+                  <option value="">Select</option>
+                  <option value="1">1 - Not Comfortable</option>
+                  <option value="2">2 - Slightly Comfortable</option>
+                  <option value="3">3 - Neutral</option>
+                  <option value="4">4 - Comfortable</option>
+                  <option value="5">5 - Very Comfortable</option>
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <div class="quiz-actions">
+            <a href="/pages/public/quizLanding.html" class="btn-back-outline">
+              <i class="bi bi-arrow-left"></i>
+              Back
+            </a>
+
+            <button type="submit" class="btn-find-match">
+              <i class="bi bi-stars"></i>
+              Find Matches
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- RIGHT / STICKY -->
+      <aside class="quiz-side">
+        <div class="progress-card">
+          <span class="mini-kicker">Quiz Progress</span>
+          <h3>Complete the steps</h3>
+          <p>
+            Progress updates automatically as answers are filled in.
+          </p>
+
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-fill" id="quizProgressFill"></div>
+          </div>
+          <div class="progress-text" id="quizProgressText">0% completed</div>
+
+          <div class="step-list">
+            <div class="step-item" data-step="filters">
+              <span class="step-dot"></span>
+              <span>Basic filters</span>
+            </div>
+            <div class="step-item" data-step="lifestyle">
+              <span class="step-dot"></span>
+              <span>Lifestyle & activity</span>
+            </div>
+            <div class="step-item" data-step="social">
+              <span class="step-dot"></span>
+              <span>Social environment</span>
+            </div>
+            <div class="step-item" data-step="care">
+              <span class="step-dot"></span>
+              <span>Home, care & maintenance</span>
+            </div>
+            <div class="step-item" data-step="affection">
+              <span class="step-dot"></span>
+              <span>Affection & attachment</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tip-card">
+          <span class="mini-kicker">Helpful Tip</span>
+          <h3>Answer honestly</h3>
+          <p>
+            Better answers lead to better matches. Use the adopter’s actual routine,
+            environment, and capacity for care.
+          </p>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <script type="module" src="/src/public/js/petCompatibility.js"></script>
+</body>
+</html>
