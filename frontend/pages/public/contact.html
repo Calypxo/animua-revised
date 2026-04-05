@@ -15,7 +15,7 @@
 <body>
 
   <!-- Header -->
-  <header class="header" id="home">
+ <header class="header" id="home">
   <div class="container nav-shell">
     <a href="#home" class="logo">
       <div class="logo-icon">
@@ -29,45 +29,44 @@
     </a>
 
     <nav class="navbar" id="navbar">
-      <a href="home.html"> Home</a>
+      <a href="home.html">Home</a>
       <a href="find-furbabies.html">Find Furbabies</a>
       <a href="surrender.html">Surrender</a>
       <a href="contact.html" class="active">Contact Us</a>
     </nav>
 
     <div class="nav-actions">
-      <div class="notification-wrap">
-        <button class="notification-btn" id="notificationBtn" aria-label="Notifications">
-          <i class="fa-regular fa-bell"></i>
-          <span class="notification-dot"></span>
-        </button>
+      <div class="user-actions-wrap">
+        <div class="notification-wrap">
+          <button class="notification-btn" id="notificationBtn" aria-label="Notifications">
+            <i class="fa-regular fa-bell"></i>
+            <span class="notification-dot"></span>
+          </button>
 
-        <div class="notification-popup" id="notificationPopup">
-          <div class="notification-popup-head">
-            <h4>Notifications</h4>
+          <div class="notification-popup" id="notificationPopup">
+            <div class="notification-popup-head">
+              <h4>Notifications</h4>
+            </div>
+            <ul class="notification-list">
+              <li>New animals were recently added for adoption.</li>
+              <li>Please complete forms carefully before submission.</li>
+              <li>Shelter announcements will appear here.</li>
+            </ul>
           </div>
-          <ul class="notification-list">
-            <li>New animals were recently added for adoption.</li>
-            <li>Please complete forms carefully before submission.</li>
-            <li>Shelter announcements will appear here.</li>
-          </ul>
+        </div>
+
+        <a href="#" id="loginNavBtn" class="login-btn" aria-label="Login">
+          <i class="fa-regular fa-user"></i>
+        </a>
+
+        <div id="userLoggedInBox" class="hidden user-pill">
+          <span id="loggedUserName" class="user-pill-name"></span>
+
+          <button id="logoutBtn" type="button" class="logout-icon-btn user-pill-logout" aria-label="Logout">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </button>
         </div>
       </div>
-
-      <a href="#" class="chatbot-btn" aria-label="Chatbot">
-        <i class="fa-regular fa-comment-dots"></i>
-      </a>
-
-      <a href="#" id="loginNavBtn" class="login-btn" aria-label="Login">
-        <i class="fa-regular fa-user"></i>
-      </a>
-
-      <div id="userLoggedInBox" class="hidden">
-  <span id="loggedUserName"></span>
-  <button id="logoutBtn" type="button" class="logout-icon-btn" aria-label="Logout">
-    <i class="fa-solid fa-right-from-bracket"></i>
-  </button>
-</div>
 
       <button class="menu-toggle" id="menuToggle" aria-label="Toggle Navigation">
         <span></span>
@@ -85,8 +84,9 @@
         <span class="section-label">Contact Us</span>
         <h1>Get shelter help the easiest way.</h1>
         <p>
-          Use this page for office contact details, location, and quick answers.
-          For direct messaging, use our chatbot for faster assistance.
+         Use this page for office contact details, location, and quick answers.
+For direct concerns and further assistance, please contact us through the provided email address or phone number.
+
         </p>
 
         <div class="contact-info-hero-tags">
@@ -122,105 +122,105 @@
     </div>
 
     <!-- Right Side - Contact Options -->
-    <div class="contact-methods-card reveal">
-      <div class="contact-card-head">
-        <span class="section-label">Contact Options</span>
-        <h2>Choose how you want to reach us</h2>
-        <p>
-          Pick the option that best matches your concern for a faster and clearer response.
-        </p>
+  <div class="contact-methods-card reveal">
+  <div class="contact-card-head">
+    <span class="section-label">Contact Options</span>
+    <h2>Choose how you want to reach us</h2>
+    <p>
+      Pick the option that best matches your concern for a faster and clearer response.
+    </p>
+  </div>
+
+  <div class="contact-method-list">
+    <div class="contact-method-item">
+      <div class="contact-method-icon">
+        <i class="fa-solid fa-location-dot"></i>
       </div>
-
-      <div class="contact-method-list">
-        <div class="contact-method-item">
-          <div class="contact-method-icon">
-            <i class="fa-solid fa-phone"></i>
-          </div>
-          <div>
-            <strong>Call the Office</strong>
-            <p>(045) 322-0485</p>
-          </div>
-          <a href="tel:0453220485" class="mini-action-btn">Call</a>
-        </div>
-
-        <div class="contact-method-item">
-          <div class="contact-method-icon">
-            <i class="fa-solid fa-location-dot"></i>
-          </div>
-          <div>
-            <strong>Visit in Person</strong>
-            <p>City Hall Building, Pulung Maragul, Angeles City</p>
-          </div>
-          <a href="https://maps.google.com/?q=Angeles%20City%20Veterinary%20Office%20City%20Hall%20Building%20Aniceto%20Gueco%20Street%20Pulung%20Maragul%20Angeles%20City" target="_blank" rel="noopener noreferrer" class="mini-action-btn">Directions</a>
-        </div>
-
-        <div class="contact-method-item contact-method-chat">
-          <div class="contact-method-icon">
-            <i class="fa-regular fa-comment-dots"></i>
-          </div>
-          <div>
-            <strong>Message Through Chatbot</strong>
-            <p>For quick questions and basic guidance, use our chatbot.</p>
-          </div>
-          <button type="button" class="mini-action-btn" id="openChatFromContact">Open Chat</button>
-        </div>
+      <div>
+        <strong>Visit in Person</strong>
+        <p>City Hall Building, Pulung Maragul, Angeles City</p>
       </div>
+      <a href="https://maps.google.com/?q=Angeles%20City%20Veterinary%20Office%20City%20Hall%20Building%20Aniceto%20Gueco%20Street%20Pulung%20Maragul%20Angeles%20City" target="_blank" rel="noopener noreferrer" class="mini-action-btn">Directions</a>
     </div>
 
+    <div class="contact-method-item">
+      <div class="contact-method-icon">
+        <i class="fa-solid fa-phone"></i>
+      </div>
+      <div>
+        <strong>Call the Office</strong>
+        <p>(045) 322-0485</p>
+      </div>
+      <a href="tel:0453220485" class="mini-action-btn">Call</a>
+    </div>
+
+    <div class="contact-method-item">
+      <div class="contact-method-icon">
+        <i class="fa-regular fa-envelope"></i>
+      </div>
+      <div>
+        <strong>Send an Email</strong>
+        <p>Reach out to us for questions, follow-ups, and other concerns.</p>
+      </div>
+      <a href="mailto:your@email.com" class="mini-action-btn">Email</a>
+    </div>
   </div>
+</div>
+
+</div>
 </section>
 
 
   <!-- FAQ -->
-  <section class="contact-faq-section">
-    <div class="container">
-      <div class="section-heading center-heading reveal">
-        <span class="section-label">Frequently Asked Questions</span>
-        <br>
-        <h2>Quick answers before you contact us</h2>
-        <p>
-          These common questions may help you find what you need right away.
-        </p>
-      </div>
-
-      <div class="faq-list reveal">
-        <details class="faq-item">
-          <summary>Where is the City Veterinary Office located?</summary>
-          <div class="faq-answer">
-            The office is located at City Hall Building, Aniceto Gueco Street, Pulung Maragul, Angeles City, Pampanga.
-          </div>
-        </details>
-
-        <details class="faq-item">
-          <summary>What are the office hours?</summary>
-          <div class="faq-answer">
-            The office is generally open Monday to Friday, 8:00 AM to 5:00 PM.
-          </div>
-        </details>
-
-        <details class="faq-item">
-          <summary>Can I ask adoption questions through the chatbot?</summary>
-          <div class="faq-answer">
-            Yes. The chatbot can help with quick questions, guidance, and page navigation. For formal or detailed concerns, contacting the office directly is still better.
-          </div>
-        </details>
-
-        <details class="faq-item">
-          <summary>Can I submit surrender concerns here?</summary>
-          <div class="faq-answer">
-            For surrender-related concerns, please review the Surrender page first. You may then contact the office or use the chatbot for guidance before proceeding.
-          </div>
-        </details>
-
-        <details class="faq-item">
-          <summary>What if I cannot visit the office right away?</summary>
-          <div class="faq-answer">
-            You may use the chatbot first for general guidance, then call the office for more specific concerns that require confirmation.
-          </div>
-        </details>
-      </div>
+ <section class="contact-faq-section">
+  <div class="container">
+    <div class="section-heading center-heading reveal">
+      <span class="section-label">Frequently Asked Questions</span>
+      <br>
+      <h2>Quick answers before you contact us</h2>
+      <p>
+        These common questions may help you find what you need right away.
+      </p>
     </div>
-  </section>
+
+    <div class="faq-list reveal">
+      <details class="faq-item">
+        <summary>What is the process for adopting a pet through Animua?</summary>
+        <div class="faq-answer">
+          You can start by browsing the available pets on the Find Furbabies page, reviewing their profiles, and selecting a pet you are interested in. After that, you may complete and submit the adoption form for evaluation.
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>What responsibilities should an adopter be prepared for before taking home a pet?</summary>
+        <div class="faq-answer">
+          Adopters should be prepared to provide proper food, shelter, medical care, time, attention, and a safe environment. Pet adoption is a long-term responsibility that requires commitment and patience.
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>What should pet owners know before submitting an animal surrender request?</summary>
+        <div class="faq-answer">
+          Owners should understand that surrendering an animal means permanently giving up ownership to the shelter. Since the shelter may have limited space, owners are encouraged to first explore safe rehoming options with trusted relatives, friends, or other responsible individuals.
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>How does animal surrender differ from temporary pet boarding or care?</summary>
+        <div class="faq-answer">
+          Animal surrender is a permanent transfer of the pet to the shelter, while boarding or temporary care only involves short-term arrangements. The shelter’s surrender service is intended for cases where the owner can no longer keep the animal.
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>How can users contact the office for more information about adoption or surrender?</summary>
+        <div class="faq-answer">
+          Users may contact the office through the provided email address or contact number for questions, clarifications, and further assistance regarding adoption or surrender concerns.
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
 
   <!-- Footer -->
   <footer class="footer">
@@ -236,8 +236,9 @@
             <p>Connect. Learn. Adopt.</p>
           </div>
         </a>
-        <p>
-          Helping rescued animals find safe and loving homes.
+       <p>
+          A partnership project dedicated to rehoming rescued animals, promoting
+          responsible adoption, and creating safer futures for shelter pets.
         </p>
       </div>
 
