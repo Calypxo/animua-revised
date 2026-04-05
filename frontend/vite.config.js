@@ -7,26 +7,29 @@ export default defineConfig({
     outDir: 'dist',
     rollupOptions: {
       input: {
-        // ── Main Entry ────────────────────────────────────────
         main: resolve(__dirname, 'index.html'),
 
-        // ── Public Pages ──────────────────────────────────────
-        home: resolve(__dirname, 'pages/public/home.html'),
-        findFurbabies: resolve(__dirname, 'pages/public/find-furbabies.html'),
-        petCompatibility: resolve(__dirname, 'pages/public/petCompatibility.html'),
-        quizLanding: resolve(__dirname, 'pages/public/quizLanding.html'),
-        compatibilityResults: resolve(__dirname, 'pages/public/compatibilityResults.html'),
-        contact: resolve(__dirname, 'pages/public/contact.html'),
-        surrender: resolve(__dirname, 'pages/public/surrender.html'),
+        adminLogin: resolve(__dirname, 'pages/admin-login.html'),
+        dashboard: resolve(__dirname, 'pages/dashboard.html'),
+        adoptionApplications: resolve(__dirname, 'pages/adoptionApplications.html'),
+        animalProfile: resolve(__dirname, 'pages/animalProfile.html'),
+        animalProfiling: resolve(__dirname, 'pages/animalProfiling.html'),
+        animalRecords: resolve(__dirname, 'pages/animalRecords.html'),
+        intake: resolve(__dirname, 'pages/intakeList.html'),
+        inventory: resolve(__dirname, 'pages/inventory.html'),
+        petCompatibility: resolve(__dirname, 'pages/petCompatibility.html'),
+        reports: resolve(__dirname, 'pages/reports.html'),
+        settings: resolve(__dirname, 'pages/settings.html'),
+        surrenders: resolve(__dirname, 'pages/surrenders.html'),
+        userManagement: resolve(__dirname, 'pages/userManagement.html'),
       },
     },
   },
 
-  // public/ folder is copied to dist/ automatically — no plugin needed
   publicDir: 'public',
 
   server: {
     host: true,
-    port: 5173
+    port: 5175
   }
 });
