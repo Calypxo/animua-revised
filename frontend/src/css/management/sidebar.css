@@ -1,561 +1,222 @@
-/* ═══════════════════════════════════════════════════════════════
-   ANIMUA — Sidebar  |  sidebar.css
-   Static sidebar — no collapse. Clean, modern, transition-rich.
-   ═══════════════════════════════════════════════════════════════ */
+:root {
+  --sb-red-bg: #6F191C;      /* Deep Wine/Red Background */
+  --sb-red-hover: #8B1E21;   /* Lighter Red for Hover */
+  --sb-cream: #FDF2F2;       /* Cream Text */
+  --sb-white: #ffffff;
+  --sb-border: rgba(255, 255, 255, 0.1); /* Subtle white border */
+}
 
-/* ══════════════════════════════════════════════════════════════
-   SIDEBAR SHELL
-   ══════════════════════════════════════════════════════════════ */
+/* ── LAYOUT ── */
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
 .sidebar {
-  width: var(--sidebar-w);           /* 220px from admin-dashboard.css */
-  min-width: var(--sidebar-w);
+  width: 260px;
   height: 100vh;
-  background: var(--surface);
-  border-right: 1px solid var(--bdr);
+  background: var(--sb-red-bg); /* Full Red Background */
   display: flex;
   flex-direction: column;
-  flex-shrink: 0;
-  overflow: hidden;
-  z-index: 100;
-
-  /* Subtle entry animation when page loads */
-  animation: sidebarEntry 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  position: sticky;
+  top: 0;
+  transition: all 0.3s ease;
+  color: var(--sb-cream); /* Default text color to cream */
 }
 
-@keyframes sidebarEntry {
-  from {
-    opacity: 0;
-    transform: translateX(-16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-/* ══════════════════════════════════════════════════════════════
-   LOGO
-   ══════════════════════════════════════════════════════════════ */
+/* ── LOGO ── */
 .sidebar-logo {
-  height: 64px;
+  height: 70px;
   padding: 0 20px;
   display: flex;
   align-items: center;
-  border-bottom: 1px solid var(--bdr);
-  flex-shrink: 0;
+  gap: 12px;
+  border-bottom: 1px solid var(--sb-border);
 }
 
-.logo-mark {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  text-decoration: none;
-}
-
-.logo-icon {
-  width: 34px;
-  height: 34px;
+.logo-icon-box {
+  width: 36px; height: 36px;
+  background: var(--sb-white); /* White box to pop out of red bg */
   border-radius: 10px;
-  background: linear-gradient(135deg, var(--orange) 0%, var(--wine) 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  box-shadow: 0 3px 10px rgba(111,25,28,0.35);
-  transition: box-shadow 0.3s, transform 0.3s cubic-bezier(0.16,1,0.3,1);
-}
-.logo-mark:hover .logo-icon {
-  box-shadow: 0 5px 16px rgba(111,25,28,0.45);
-  transform: scale(1.05);
-}
-.logo-icon i {
-  color: var(--amber);
-  font-size: 0.95rem;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--sb-red-bg); /* Red icon inside white box */
 }
 
-.logo-text {
-  font-family: var(--font-h);
-  font-size: 1.15rem;
-  font-weight: 800;
-  color: var(--wine);
-  letter-spacing: 0.04em;
+.logo-text { 
+  color: var(--sb-white); 
+  font-weight: 800; 
+  font-size: 1.15rem; 
+  letter-spacing: 0.05em; 
 }
 
-/* ══════════════════════════════════════════════════════════════
-   NAVIGATION
-   ══════════════════════════════════════════════════════════════ */
+/* ── NAV & HIDE SCROLLBAR ── */
 .sidebar-nav {
   flex: 1;
   overflow-y: auto;
-  overflow-x: hidden;
-  padding: 12px 10px;
-  scrollbar-width: none;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  padding: 16px 12px;
+  scrollbar-width: none; 
 }
 .sidebar-nav::-webkit-scrollbar { display: none; }
 
-/* Section grouping */
-.nav-section {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  margin-bottom: 6px;
-}
-
-/* Section label */
 .nav-label {
-  font-size: 0.58rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--txt-g);
-  padding: 10px 10px 5px;
-  user-select: none;
+  font-size: 0.65rem; 
+  font-weight: 700; 
+  color: rgba(255, 255, 255, 0.5); /* Muted white for labels */
+  text-transform: uppercase; 
+  margin: 20px 10px 8px; 
+  letter-spacing: 0.1em;
 }
 
-/* ── Nav Item ── */
 .nav-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 12px;
-  border-radius: 9px;
-  color: var(--txt-m);
+  display: flex; 
+  align-items: center; 
+  gap: 12px; 
+  padding: 10px 12px;
+  border-radius: 8px; 
+  color: var(--sb-cream); /* Cream text */
   text-decoration: none;
-  font-size: 0.835rem;
-  font-weight: 500;
-  position: relative;
-  overflow: hidden;
-  cursor: pointer;
-
-  /* Smooth all colour + background transitions */
-  transition:
-    background 200ms cubic-bezier(0.16,1,0.3,1),
-    color 200ms,
-    transform 150ms cubic-bezier(0.16,1,0.3,1),
-    box-shadow 200ms;
+  font-size: 0.9rem; 
+  font-weight: 500; 
+  transition: 0.2s;
+  margin-bottom: 2px;
 }
 
-/* Icon wrapper */
-.nav-icon {
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.95rem;
-  flex-shrink: 0;
-  background: transparent;
-  transition:
-    background 200ms cubic-bezier(0.16,1,0.3,1),
-    color 200ms,
-    transform 200ms cubic-bezier(0.16,1,0.3,1);
+.nav-item i { 
+  font-size: 1.2rem; 
+  color: rgba(255, 255, 255, 0.7); /* Slightly transparent icons */
 }
 
-.nav-text {
-  flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* ── Hover ── */
+/* ── HOVER (Lighter Red) ── */
 .nav-item:hover {
-  background: #faf3ee;
-  color: var(--orange);
-  transform: translateX(2px);
-}
-.nav-item:hover .nav-icon {
-  background: rgba(209,96,30,0.1);
-  color: var(--orange);
-  transform: scale(1.1);
+  background: var(--sb-red-hover); 
+  color: var(--sb-white);
 }
 
-/* ── Active ── */
+.nav-item:hover i {
+  color: var(--sb-white);
+}
+
+/* ── ACTIVE (Cream Background with Red Text) ── */
 .nav-item.active {
-  background: linear-gradient(
-    135deg,
-    rgba(151,10,18,0.09) 0%,
-    rgba(209,96,30,0.05) 100%
-  );
-  color: var(--crimson);
+  background: var(--sb-cream);
+  color: var(--sb-red-bg);
   font-weight: 700;
-  transform: translateX(0);  /* no shift when active */
-}
-.nav-item.active .nav-icon {
-  background: rgba(151,10,18,0.1);
-  color: var(--crimson);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* Active left bar */
-.nav-item.active::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 7px;
-  bottom: 7px;
-  width: 3px;
-  border-radius: 0 3px 3px 0;
-  background: linear-gradient(180deg, var(--crimson), var(--orange));
-  box-shadow: 0 0 8px rgba(151,10,18,0.4);
+.nav-item.active i {
+  color: var(--sb-red-bg);
 }
 
-/* Badge */
-.nav-badge {
-  margin-left: auto;
-  min-width: 19px;
-  height: 19px;
-  border-radius: 10px;
-  background: var(--crimson);
-  color: #fff;
-  font-size: 0.58rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 5px;
-  flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(151,10,18,0.3);
-  transition: transform 200ms cubic-bezier(0.16,1,0.3,1);
-}
-.nav-item:hover .nav-badge {
-  transform: scale(1.1);
+/* ── FOOTER ── */
+.sidebar-footer { 
+  padding: 16px; 
+  border-top: 1px solid var(--sb-border); 
 }
 
-/* ── Ripple effect on click ── */
-.nav-ripple {
-  position: absolute;
+.user-card { 
+  display: flex; 
+  align-items: center; 
+  gap: 12px; 
+  margin-bottom: 12px; 
+}
+
+.avatar-circle {
+  width: 36px; height: 36px;
+  background: var(--sb-white);
+  color: var(--sb-red-bg); 
   border-radius: 50%;
-  background: rgba(209,96,30,0.15);
-  transform: scale(0);
-  animation: rippleAnim 500ms linear forwards;
-  pointer-events: none;
-}
-@keyframes rippleAnim {
-  to {
-    transform: scale(2.5);
-    opacity: 0;
-  }
-}
-
-/* ── Staggered load animation for nav items ── */
-.nav-item:nth-child(1)  { animation: navItemIn 0.35s 0.08s cubic-bezier(0.16,1,0.3,1) both; }
-.nav-item:nth-child(2)  { animation: navItemIn 0.35s 0.12s cubic-bezier(0.16,1,0.3,1) both; }
-.nav-item:nth-child(3)  { animation: navItemIn 0.35s 0.16s cubic-bezier(0.16,1,0.3,1) both; }
-.nav-item:nth-child(4)  { animation: navItemIn 0.35s 0.20s cubic-bezier(0.16,1,0.3,1) both; }
-.nav-item:nth-child(5)  { animation: navItemIn 0.35s 0.24s cubic-bezier(0.16,1,0.3,1) both; }
-.nav-item:nth-child(6)  { animation: navItemIn 0.35s 0.28s cubic-bezier(0.16,1,0.3,1) both; }
-.nav-item:nth-child(7)  { animation: navItemIn 0.35s 0.32s cubic-bezier(0.16,1,0.3,1) both; }
-.nav-item:nth-child(8)  { animation: navItemIn 0.35s 0.36s cubic-bezier(0.16,1,0.3,1) both; }
-.nav-item:nth-child(9)  { animation: navItemIn 0.35s 0.40s cubic-bezier(0.16,1,0.3,1) both; }
-.nav-item:nth-child(10) { animation: navItemIn 0.35s 0.44s cubic-bezier(0.16,1,0.3,1) both; }
-
-@keyframes navItemIn {
-  from {
-    opacity: 0;
-    transform: translateX(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-/* ══════════════════════════════════════════════════════════════
-   FOOTER — user card + logout
-   ══════════════════════════════════════════════════════════════ */
-.sidebar-footer {
-  padding: 12px 10px 16px;
-  border-top: 1px solid var(--bdr);
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-/* User card */
-.sidebar-user {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  padding: 9px 10px;
-  border-radius: 10px;
-  background: var(--surface-2);
-  border: 1px solid var(--bdr);
-  cursor: pointer;
-  transition:
-    background 200ms,
-    box-shadow 200ms cubic-bezier(0.16,1,0.3,1),
-    border-color 200ms;
-}
-.sidebar-user:hover {
-  background: #faf3ee;
-  border-color: rgba(209,96,30,0.2);
-  box-shadow: 0 3px 12px rgba(111,25,28,0.08);
-}
-
-.s-avatar {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--orange), var(--wine));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.62rem;
+  display: flex; align-items: center; justify-content: center; 
   font-weight: 700;
-  color: #fff;
-  flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(111,25,28,0.3);
-  transition: transform 200ms cubic-bezier(0.16,1,0.3,1);
-}
-.sidebar-user:hover .s-avatar {
-  transform: scale(1.08);
 }
 
-.s-info { flex: 1; min-width: 0; }
-.s-name {
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: var(--txt-h);
-  line-height: 1.15;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.s-role {
-  font-size: 0.63rem;
-  color: var(--txt-m);
-  white-space: nowrap;
-}
+.u-name { font-size: 0.85rem; font-weight: 700; color: var(--sb-white); }
+.u-role { font-size: 0.7rem; color: rgba(255, 255, 255, 0.6); }
 
-.s-caret {
-  color: var(--txt-g);
-  font-size: 0.7rem;
-  flex-shrink: 0;
-  transition: color 200ms;
-}
-.sidebar-user:hover .s-caret { color: var(--txt-m); }
-
-/* Logout button */
-.btn-logout-sm {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  width: 100%;
-  padding: 8px 10px;
-  border-radius: 9px;
-  background: transparent;
-  border: 1px solid var(--bdr);
-  color: var(--txt-m);
-  font-family: var(--font-b);
-  font-size: 0.8rem;
-  font-weight: 600;
+.logout-btn {
+  width: 100%; 
+  padding: 10px; 
+  border-radius: 8px; 
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: transparent; 
+  color: var(--sb-white); 
+  font-weight: 600; 
   cursor: pointer;
-  transition:
-    background 200ms cubic-bezier(0.16,1,0.3,1),
-    color 200ms,
-    border-color 200ms,
-    box-shadow 200ms;
-}
-.btn-logout-sm:hover {
-  background: #fce9e9;
-  border-color: rgba(151,10,18,0.22);
-  color: var(--crimson);
-  box-shadow: 0 2px 8px rgba(151,10,18,0.1);
-}
-.btn-logout-sm i {
-  font-size: 0.9rem;
-  transition: transform 200ms cubic-bezier(0.16,1,0.3,1);
-}
-.btn-logout-sm:hover i {
-  transform: translateX(-2px);
-}
-/* ══════════════════════════════════════════════════════════════
-   SIDEBAR — MODERN COLLAPSIBLE
-   Replace the old collapsible block at the bottom of
-   admin-dashboard.css with this entire block
-   ══════════════════════════════════════════════════════════════ */
-
-/* ── Smooth transition ── */
-.sidebar {
-  transition:
-    width 280ms cubic-bezier(0.16, 1, 0.3, 1),
-    min-width 280ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: 0.3s;
 }
 
-/* ── nav-text fade ── */
-.nav-text {
-  opacity: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  transition: opacity 180ms ease;
-  flex: 1;
+.logout-btn:hover { 
+  background: #ffffff; 
+  color: #ef4444; 
 }
 
-/* ══════════════════════════════════════════════════════════════
-   COLLAPSED STATE
-   ══════════════════════════════════════════════════════════════ */
-.sidebar.collapsed {
-  width: 68px;
-  min-width: 68px;
-  overflow: visible;
+/* ── RESPONSIVE MOBILE TOGGLE ── */
+@media (max-width: 768px) {
+  .mobile-nav-toggle {
+    background: var(--sb-red-bg); /* Matching red for hamburger */
+    box-shadow: 0 4px 15px rgba(111, 25, 28, 0.3);
+  }
 }
 
-.sidebar.collapsed .sidebar-nav {
-  overflow: visible;
-  padding: 16px 0;
+/* ── RESPONSIVE MOBILE LOGIC ── */
+@media (max-width: 768px) {
+  /* 1. Itago ang sidebar sa labas ng screen */
+  .sidebar {
+    position: fixed;
+    left: -260px; /* Nakatago sa kaliwa */
+    top: 0;
+    z-index: 9999;
+    box-shadow: 10px 0 30px rgba(0,0,0,0.3);
+    transition: left 0.3s ease-in-out;
+  }
+
+  /* 2. Kapag active (mobile-show), ilabas ang sidebar */
+  .sidebar.mobile-show {
+    left: 0;
+  }
+
+  /* 3. Siguraduhing lilitaw ang Hamburger Button */
+  .mobile-nav-toggle {
+    display: flex !important;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    width: 45px;
+    height: 45px;
+    background: var(--sb-red-bg);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    z-index: 10000;
+    cursor: pointer;
+  }
+
+  /* 4. Dark Overlay kapag naka-open ang menu */
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+    z-index: 9998;
+  }
+
+  .sidebar-overlay.active {
+    display: block;
+  }
+
+  /* 5. Adjust main content padding para hindi matabunan ng button */
+  #main-content {
+    padding-top: 80px !important;
+  }
 }
 
-/* ── Hide all text ── */
-.sidebar.collapsed .nav-text,
-.sidebar.collapsed .nav-label,
-.sidebar.collapsed .nav-badge,
-.sidebar.collapsed .logo-text,
-.sidebar.collapsed .s-name,
-.sidebar.collapsed .s-role,
-.sidebar.collapsed .s-caret,
-.sidebar.collapsed .s-user-info {
-  display: none;
-}
-
-/* ── Logo: center the icon ── */
-.sidebar.collapsed .sidebar-logo {
-  padding: 20px 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.sidebar.collapsed .logo-mark {
-  justify-content: center;
-  width: 100%;
-}
-
-/* ── Nav items: perfectly centered ── */
-.sidebar.collapsed .nav-item {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 10px 0;
-  margin: 2px 8px;
-  gap: 0;
-  width: calc(100% - 16px);
-}
-.sidebar.collapsed .nav-item i {
-  font-size: 1.2rem;
-  width: auto;
-  text-align: center;
-  margin: 0;
-}
-
-/* Keep active indicator */
-.sidebar.collapsed .nav-item.active::before {
-  top: 6px;
-  bottom: 6px;
-}
-
-/* ── Footer: center avatar ── */
-.sidebar.collapsed .sidebar-footer {
-  padding: 12px 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.sidebar.collapsed .sidebar-user {
-  justify-content: center;
-  padding: 8px 0;
-  gap: 0;
-  width: 100%;
-  display: flex;
-  align-items: center;
-}
-.sidebar.collapsed .s-avatar {
-  margin: 0 auto;
-}
-.sidebar.collapsed .btn-logout-sm {
-  justify-content: center;
-  padding: 8px 0;
-  gap: 0;
-  width: calc(100% - 16px);
-  margin: 4px 8px 0;
-}
-
-/* ── Tooltips ── */
-.sidebar.collapsed .nav-item {
-  position: relative;
-}
-.sidebar.collapsed .nav-item::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  left: calc(100% + 14px);
-  top: 50%;
-  transform: translateY(-50%) scale(0.95);
-  background: var(--txt-h);
-  color: #fff;
-  font-size: 0.74rem;
-  font-weight: 600;
-  padding: 6px 12px;
-  border-radius: 8px;
-  white-space: nowrap;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 150ms ease, transform 150ms ease;
-  z-index: 9999;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-/* Tooltip arrow */
-.sidebar.collapsed .nav-item::before {
-  content: '';
-  position: absolute;
-  left: calc(100% + 8px);
-  top: 50%;
-  transform: translateY(-50%);
-  border: 5px solid transparent;
-  border-right-color: var(--txt-h);
-  opacity: 0;
-  transition: opacity 150ms ease;
-  z-index: 9999;
-  pointer-events: none;
-}
-.sidebar.collapsed .nav-item:hover::after,
-.sidebar.collapsed .nav-item:hover::before {
-  opacity: 1;
-  transform: translateY(-50%) scale(1);
-}
-
-/* ── Toggle button ── */
-.sidebar-toggle {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  border: 1.5px solid var(--bdr);
-  background: var(--surface);
-  color: var(--txt-m);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 1rem;
-  flex-shrink: 0;
-  transition:
-    background var(--dur),
-    color var(--dur),
-    border-color var(--dur),
-    box-shadow var(--dur);
-}
-.sidebar-toggle:hover {
-  background: linear-gradient(135deg, rgba(151,10,18,0.06), rgba(209,96,30,0.04));
-  border-color: rgba(151,10,18,0.2);
-  color: var(--crimson);
-  box-shadow: var(--sh-xs);
-}
-.sidebar-toggle i {
-  transition: transform 280ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-.sidebar-toggle.is-collapsed i {
-  transform: rotate(180deg);
+/* Itago ang button sa Desktop */
+@media (min-width: 769px) {
+  .mobile-nav-toggle, .sidebar-overlay {
+    display: none;
+  }
 }

@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ANIMUA — Inventory Management</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/css/adminDashboard.css" />
+  <link rel="stylesheet" href="/src/css/sidebar.css" />
+  <link rel="stylesheet" href="/src/css/inventory.css" />
+</head>
+<body class="loading">
+<div class="shell">
+  <div id="sidebar-container"></div>
+  <div class="stage">
+
+    <header class="topbar">
+      <div class="topbar-left">
+        <button id="sidebarToggle" class="icon-btn"><i class="bi bi-list"></i></button>
+        <nav class="d-flex align-items-center">
+          <span class="breadcrumb-link">Logistics</span>
+          <i class="bi bi-chevron-right breadcrumb-sep"></i>
+          <span class="breadcrumb-current">Inventory Management</span>
+        </nav>
+      </div>
+      <div class="topbar-right">
+        <button class="icon-btn notif-btn"><i class="bi bi-bell-fill"></i><span class="notif-dot"></span></button>
+        <div class="user-chip">
+          <div class="user-avatar" id="topbar-initials">AS</div>
+          <div class="user-meta"><span id="display-name">Admin</span><small id="display-role">Administrator</small></div>
+          <i class="bi bi-chevron-down caret"></i>
+        </div>
+      </div>
+    </header>
+
+    <div class="page-body">
+
+      <div class="page-header mb-4">
+        <div>
+          <h1 class="page-title">Inventory Management</h1>
+          <p class="page-sub">Real-time stock tracking with Random Forest movement classification and automated restock alerts.</p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap align-items-center">
+          <button class="btn-primary-clay" id="btnStockIn"><i class="bi bi-plus-lg"></i> Stock In</button>
+          <button class="btn-outline-add"  id="btnAddItem"><i class="bi bi-box-seam"></i> Add Item</button>
+        </div>
+      </div>
+
+      <!-- RF Banner -->
+      <div class="rf-banner mb-4">
+        <div class="rf-banner-icon"><i class="bi bi-diagram-3-fill"></i></div>
+        <div>
+          <strong>Random Forest Classification Active (Mock)</strong>
+          <p>Each item is classified as <strong>Fast-Moving</strong> or <strong>Slow-Moving</strong> using Monthly Turnover Ratio, Recency, Stockout Frequency, and Lead Time. Restock alerts are triggered automatically based on predicted days until stockout. Real RF model integration is pending.</p>
+        </div>
+        <div class="rf-banner-stats">
+          <div class="rf-mini-stat"><span id="rfFastCount">18</span><small>Fast Moving</small></div>
+          <div class="rf-mini-stat rf-mini-alert"><span id="rfReviewCount">17</span><small>Need Review</small></div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="inv-stats mb-4">
+        <div class="inv-stat-card"><div class="inv-stat-icon icon-clay"><i class="bi bi-boxes"></i></div><div><div class="inv-stat-val" id="statTotal">81</div><div class="inv-stat-lbl">Total Items</div></div></div>
+        <div class="inv-stat-card"><div class="inv-stat-icon icon-rose"><i class="bi bi-exclamation-triangle-fill"></i></div><div><div class="inv-stat-val" id="statCritical">0</div><div class="inv-stat-lbl">Critical Stock</div></div></div>
+        <div class="inv-stat-card"><div class="inv-stat-icon icon-amber"><i class="bi bi-arrow-down-circle-fill"></i></div><div><div class="inv-stat-val" id="statLow">0</div><div class="inv-stat-lbl">Low Stock</div></div></div>
+        <div class="inv-stat-card"><div class="inv-stat-icon icon-teal"><i class="bi bi-cpu"></i></div><div><div class="inv-stat-val" id="statFast">18</div><div class="inv-stat-lbl">Fast-Moving</div></div></div>
+        <div class="inv-stat-card"><div class="inv-stat-icon icon-green"><i class="bi bi-check-circle-fill"></i></div><div><div class="inv-stat-val" id="statOk">81</div><div class="inv-stat-lbl">Adequate Stock</div></div></div>
+        <div class="inv-stat-card"><div class="inv-stat-icon icon-blue"><i class="bi bi-clock-history"></i></div><div><div class="inv-stat-val" id="statAvgDays">58d</div><div class="inv-stat-lbl">Avg Days Until Stockout</div></div></div>
+      </div>
+
+      <!-- Alerts -->
+      <div id="alertsBar" class="mb-4">
+        <div class="alert-row alert-low">
+          <i class="bi bi-cpu"></i>
+          <div><strong>RF Alert:</strong> 17 fast-moving items flagged for review — including Alcohol (39d), Disposable Syringes (41–43d), and Anti-Rabies Vaccine (Rabisin). Restock within lead time window.</div>
+          <span class="alert-action" id="alertViewFast">View fast items →</span>
+        </div>
+        <div class="alert-row alert-info">
+          <i class="bi bi-info-circle-fill"></i>
+          <div>All 81 items currently above critical threshold. Stock levels are healthy — RF monitoring active.</div>
+        </div>
+      </div>
+
+      <!-- Layout -->
+      <div class="inv-layout" id="invLayout">
+        <div class="panel inv-table-panel">
+          <div class="panel-head flex-column gap-3">
+
+            <!-- Category tabs -->
+            <div class="inv-tabs" id="categoryTabs">
+              <button class="inv-tab active" data-tab="all">All</button>
+              <button class="inv-tab" data-tab="Antibiotic">Antibiotic</button>
+              <button class="inv-tab" data-tab="Antiparasitic">Antiparasitic</button>
+              <button class="inv-tab" data-tab="Anesthetic">Anesthetic</button>
+              <button class="inv-tab" data-tab="Antifungal">Antifungal</button>
+              <button class="inv-tab" data-tab="Consumable">Consumable</button>
+              <button class="inv-tab" data-tab="Diagnostic">Diagnostic</button>
+              <button class="inv-tab" data-tab="Disinfectant">Disinfectant</button>
+              <button class="inv-tab" data-tab="Equipment">Equipment</button>
+              <button class="inv-tab" data-tab="Feed">Feed</button>
+              <button class="inv-tab" data-tab="Hormonal Medicine">Hormonal</button>
+              <button class="inv-tab" data-tab="Pain Relief">Pain Relief</button>
+              <button class="inv-tab" data-tab="Respiratory Medicine">Respiratory</button>
+              <button class="inv-tab" data-tab="Sedative">Sedative</button>
+              <button class="inv-tab" data-tab="Shelter Supply">Shelter Supply</button>
+              <button class="inv-tab" data-tab="Supplement">Supplement</button>
+              <button class="inv-tab" data-tab="Surgical Supply">Surgical</button>
+              <button class="inv-tab" data-tab="Topical Medicine">Topical</button>
+              <button class="inv-tab" data-tab="Vaccine">Vaccine</button>
+            </div>
+
+            <div class="d-flex gap-2 flex-wrap align-items-center justify-content-between w-100">
+              <div class="d-flex gap-2 flex-wrap">
+                <div class="search-pill-sm">
+                  <i class="bi bi-search"></i>
+                  <input type="text" id="searchInventory" placeholder="Search item, ID, category…" autocomplete="off" />
+                </div>
+                <select class="filter-select" id="filterMovement">
+                  <option value="">All movement</option>
+                  <option value="Fast">Fast Moving</option>
+                  <option value="Slow">Slow Moving</option>
+                </select>
+                <select class="filter-select" id="filterRisk">
+                  <option value="">All risk</option>
+                  <option value="Review">Needs Review</option>
+                  <option value="OK">OK</option>
+                </select>
+              </div>
+              <div class="d-flex gap-2">
+                <button class="view-btn active" id="btnTableView" title="Table view"><i class="bi bi-table"></i></button>
+                <button class="view-btn" id="btnCardView"  title="Card view"><i class="bi bi-grid-3x3-gap-fill"></i></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- TABLE VIEW -->
+          <div id="tableView">
+            <div class="table-responsive">
+              <table class="shelter-table">
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Category</th>
+                    <th>Unit</th>
+                    <th>Current Stock</th>
+                    <th>Avg Monthly Use</th>
+                    <th>Days Until Stockout</th>
+                    <th>RF Movement</th>
+                    <th>Reorder Risk</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="inventoryTableBody">
+                  <tr><td colspan="9" class="text-center py-5"><div class="um-spinner"></div></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- CARD VIEW -->
+          <div id="cardView" style="display:none">
+            <div class="inv-card-grid" id="inventoryCardGrid"></div>
+          </div>
+
+          <div class="um-pagination" id="paginationBar"></div>
+        </div>
+
+        <!-- Detail Drawer -->
+        <div class="inv-drawer" id="invDrawer">
+          <div class="inv-drawer-inner" id="invDrawerInner"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- STOCK IN MODAL -->
+<div class="um-modal-backdrop" id="stockInModalBackdrop">
+  <div class="um-modal inv-modal" role="dialog" aria-modal="true">
+    <div class="um-modal-header">
+      <div><h2 id="stockInTitle">Stock In</h2><p class="modal-subtitle">Record incoming stock for an item.</p></div>
+      <button class="modal-close-btn" id="stockInClose"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="um-modal-body">
+      <form id="stockInForm" novalidate>
+        <input type="hidden" id="fStockItemId" />
+        <div class="form-grid">
+          <div class="form-group form-full">
+            <label class="form-lbl" for="fStockItemSelect">Item <span class="req">*</span></label>
+            <select class="form-inp" id="fStockItemSelect"></select>
+            <span class="form-err" id="errStockItem"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-lbl" for="fStockQty">Quantity to Add <span class="req">*</span></label>
+            <input type="number" class="form-inp" id="fStockQty" min="1" placeholder="e.g. 10" />
+            <span class="form-err" id="errStockQty"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-lbl" for="fStockDate">Date Received</label>
+            <input type="date" class="form-inp" id="fStockDate" />
+          </div>
+          <div class="form-group form-full">
+            <label class="form-lbl" for="fStockSupplier">Supplier / Source</label>
+            <input type="text" class="form-inp" id="fStockSupplier" placeholder="e.g. BVMO Supply, Donation" />
+          </div>
+          <div class="form-group form-full">
+            <label class="form-lbl" for="fStockNotes">Notes</label>
+            <textarea class="form-inp form-textarea" id="fStockNotes" rows="2" placeholder="Batch number, expiry date, condition…"></textarea>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="um-modal-footer">
+      <button class="btn-ghost-clay" id="stockInCancel">Cancel</button>
+      <button class="btn-primary-clay" id="stockInSave"><i class="bi bi-plus-lg"></i> Confirm Stock In</button>
+    </div>
+  </div>
+</div>
+
+<!-- STOCK OUT / USE MODAL -->
+<div class="um-modal-backdrop" id="stockOutModalBackdrop">
+  <div class="um-modal inv-modal" role="dialog" aria-modal="true">
+    <div class="um-modal-header">
+      <div><h2>Record Usage</h2><p class="modal-subtitle" id="stockOutSubtitle">Deduct stock used on an animal.</p></div>
+      <button class="modal-close-btn" id="stockOutClose"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="um-modal-body">
+      <form id="stockOutForm" novalidate>
+        <input type="hidden" id="fOutItemId" />
+        <div class="form-grid">
+          <div class="form-group form-full">
+            <label class="form-lbl">Item</label>
+            <div class="disabled-inp" id="fOutItemName"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-lbl" for="fOutQty">Quantity Used <span class="req">*</span></label>
+            <input type="number" class="form-inp" id="fOutQty" min="1" placeholder="e.g. 2" />
+            <span class="form-err" id="errOutQty"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-lbl" for="fOutDate">Date Used</label>
+            <input type="date" class="form-inp" id="fOutDate" />
+          </div>
+          <div class="form-group form-full">
+            <label class="form-lbl" for="fOutAnimal">Animal (optional)</label>
+            <input type="text" class="form-inp" id="fOutAnimal" placeholder="e.g. ANIM-2025-001 / Bantay" />
+          </div>
+          <div class="form-group form-full">
+            <label class="form-lbl" for="fOutProcedure">Procedure / Purpose</label>
+            <select class="form-inp" id="fOutProcedure">
+              <option value="">Select…</option>
+              <option>Vaccination</option>
+              <option>Deworming</option>
+              <option>Treatment</option>
+              <option>Surgery / Spay / Neuter</option>
+              <option>Checkup</option>
+              <option>Feeding</option>
+              <option>Cleaning / Disinfection</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-group form-full">
+            <label class="form-lbl" for="fOutNotes">Notes</label>
+            <textarea class="form-inp form-textarea" id="fOutNotes" rows="2" placeholder="Additional notes…"></textarea>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="um-modal-footer">
+      <button class="btn-ghost-clay" id="stockOutCancel">Cancel</button>
+      <button class="btn-deduct-clay" id="stockOutSave"><i class="bi bi-dash-lg"></i> Confirm Usage</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD / EDIT ITEM MODAL -->
+<div class="um-modal-backdrop" id="itemModalBackdrop">
+  <div class="um-modal inv-modal" role="dialog" aria-modal="true">
+    <div class="um-modal-header">
+      <h2 id="itemModalTitle">Add New Item</h2>
+      <button class="modal-close-btn" id="itemModalClose"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="um-modal-body">
+      <form id="itemForm" novalidate>
+        <input type="hidden" id="fItemId" />
+        <div class="form-grid">
+          <div class="form-group form-full">
+            <label class="form-lbl" for="fItemName">Item Name <span class="req">*</span></label>
+            <input type="text" class="form-inp" id="fItemName" />
+            <span class="form-err" id="errItemName"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-lbl" for="fItemCategory">Category <span class="req">*</span></label>
+            <select class="form-inp" id="fItemCategory">
+              <option value="">Select…</option>
+              <option>Antibiotic</option><option>Antiparasitic</option><option>Antifungal</option>
+              <option>Anesthetic</option><option>Supplement</option><option>Vaccine</option>
+              <option>Consumable</option><option>Surgical Supply</option><option>Equipment</option>
+              <option>Disinfectant</option><option>Topical Medicine</option><option>Hormonal Medicine</option>
+              <option>Respiratory Medicine</option><option>Pain Relief</option><option>Sedative</option>
+              <option>Diagnostic</option><option>Feed</option><option>Shelter Supply</option><option>Other</option>
+            </select>
+            <span class="form-err" id="errItemCategory"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-lbl" for="fItemUnit">Unit</label>
+            <input type="text" class="form-inp" id="fItemUnit" placeholder="e.g. btls, boxes, pcs" />
+          </div>
+          <div class="form-group">
+            <label class="form-lbl" for="fItemCurrentStock">Current Stock <span class="req">*</span></label>
+            <input type="number" class="form-inp" id="fItemCurrentStock" min="0" />
+            <span class="form-err" id="errItemStock"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-lbl" for="fItemAvgUsage">Avg Monthly Usage</label>
+            <input type="number" class="form-inp" id="fItemAvgUsage" min="0" />
+          </div>
+          <div class="form-group">
+            <label class="form-lbl" for="fItemLeadTime">Lead Time (Days)</label>
+            <input type="number" class="form-inp" id="fItemLeadTime" min="0" />
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="um-modal-footer">
+      <button class="btn-ghost-clay" id="itemModalCancel">Cancel</button>
+      <button class="btn-primary-clay" id="itemModalSave"><i class="bi bi-floppy-fill"></i> Save Item</button>
+    </div>
+  </div>
+</div>
+
+<div class="um-toast" id="umToast"><i class="bi" id="toastIcon"></i><span id="toastMsg"></span></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script type="module" src="/src/management/inventory.js"></script>
+</body>
+</html>

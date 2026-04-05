@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ANIMUA — User Management</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/css/adminDashboard.css" />
+  <link rel="stylesheet" href="/src/css/sidebar.css" />
+  <link rel="stylesheet" href="/src/css/userManagement.css" />
+</head>
+<body class="loading">
+<div class="shell">
+  <div id="sidebar-container"></div>
+  <div class="stage">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button id="sidebarToggle" class="icon-btn" type="button"><i class="bi bi-list"></i></button>
+        <nav class="d-flex align-items-center">
+          <span class="breadcrumb-link">Main</span>
+          <i class="bi bi-chevron-right breadcrumb-sep"></i>
+          <span class="breadcrumb-current">User Management</span>
+        </nav>
+      </div>
+      <div class="topbar-right">
+        <button class="icon-btn notif-btn" type="button"><i class="bi bi-bell-fill"></i><span class="notif-dot"></span></button>
+        <div class="user-chip">
+          <div class="user-avatar" id="topbar-initials">AS</div>
+          <div class="user-meta"><span id="display-name">Super Admin</span><small id="display-role">Administrator</small></div>
+          <i class="bi bi-chevron-down caret"></i>
+        </div>
+      </div>
+    </header>
+
+    <div class="page-body">
+
+      <!-- Page header -->
+      <div class="page-header mb-4">
+        <div>
+          <h1 class="page-title">User Management</h1>
+          <p class="page-sub">Manage all system accounts — Admins, Staff, and registered Public users.</p>
+        </div>
+        <button class="btn-primary-clay" id="btnAddUser" type="button">
+          <i class="bi bi-person-plus-fill"></i> Add Staff / Admin
+        </button>
+      </div>
+
+      <!-- Stats strip — 6 cards -->
+      <div class="um-stats mb-4">
+        <div class="um-stat-card">
+          <div class="um-stat-icon icon-clay"><i class="bi bi-people-fill"></i></div>
+          <div><div class="um-stat-val" id="statTotal">—</div><div class="um-stat-lbl">Total Users</div></div>
+        </div>
+        <div class="um-stat-card">
+          <div class="um-stat-icon icon-green"><i class="bi bi-person-check-fill"></i></div>
+          <div><div class="um-stat-val" id="statActive">—</div><div class="um-stat-lbl">Active</div></div>
+        </div>
+        <div class="um-stat-card">
+          <div class="um-stat-icon icon-stone"><i class="bi bi-person-dash-fill"></i></div>
+          <div><div class="um-stat-val" id="statInactive">—</div><div class="um-stat-lbl">Inactive</div></div>
+        </div>
+        <div class="um-stat-card">
+          <div class="um-stat-icon icon-blue"><i class="bi bi-shield-lock-fill"></i></div>
+          <div><div class="um-stat-val" id="statAdmins">—</div><div class="um-stat-lbl">Administrators</div></div>
+        </div>
+        <div class="um-stat-card">
+          <div class="um-stat-icon icon-amber"><i class="bi bi-person-badge-fill"></i></div>
+          <div><div class="um-stat-val" id="statStaff">—</div><div class="um-stat-lbl">Staff</div></div>
+        </div>
+        <div class="um-stat-card">
+          <div class="um-stat-icon icon-rose"><i class="bi bi-person-heart-fill"></i></div>
+          <div><div class="um-stat-val" id="statPublic">—</div><div class="um-stat-lbl">Public Users</div></div>
+        </div>
+      </div>
+
+      <!-- Table panel -->
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <!-- Tabs -->
+            <div class="um-tabs">
+              <button class="um-tab active" data-tab="all">All Users</button>
+              <button class="um-tab" data-tab="staff">Admin &amp; Staff</button>
+              <button class="um-tab" data-tab="public">Public Users</button>
+            </div>
+          </div>
+          <div class="um-filters">
+            <div class="search-pill-sm">
+              <i class="bi bi-search"></i>
+              <input type="text" id="searchUsers" placeholder="Search name, email…" autocomplete="off" />
+            </div>
+            <select class="filter-select" id="filterRole">
+              <option value="">All roles</option>
+              <option value="Admin">Admin</option>
+              <option value="Staff">Staff</option>
+              <option value="Public">Public</option>
+            </select>
+            <select class="filter-select" id="filterStatus">
+              <option value="">All status</option>
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="shelter-table" id="userTable">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Permissions / Info</th>
+                <th>Last Login</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="userTableBody">
+              <tr><td colspan="7" class="text-center py-5 text-muted">Loading users…</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="um-pagination" id="paginationBar"></div>
+      </div>
+
+    </div><!-- /page-body -->
+  </div><!-- /stage -->
+</div><!-- /shell -->
+
+<!-- ADD / EDIT MODAL (Admin/Staff only) -->
+<div class="um-modal-backdrop" id="userModalBackdrop">
+  <div class="um-modal" id="userModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="um-modal-header">
+      <h2 id="modalTitle">Add User</h2>
+      <button class="modal-close-btn" id="modalCloseBtn" type="button"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="um-modal-body">
+      <form id="userForm" novalidate>
+        <input type="hidden" id="formUserId" />
+        <div class="avatar-preview-row mb-4">
+          <div class="avatar-preview-circle" id="avatarPreview">?</div>
+          <p class="form-hint">Initials auto-generated from name.</p>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-lbl" for="fFirstName">First Name <span class="req">*</span></label>
+            <input type="text" class="form-inp" id="fFirstName" placeholder="Juan" required />
+            <span class="form-err" id="errFirstName"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-lbl" for="fLastName">Last Name <span class="req">*</span></label>
+            <input type="text" class="form-inp" id="fLastName" placeholder="Dela Cruz" required />
+            <span class="form-err" id="errLastName"></span>
+          </div>
+          <div class="form-group form-full">
+            <label class="form-lbl" for="fEmail">Email Address <span class="req">*</span></label>
+            <input type="email" class="form-inp" id="fEmail" placeholder="juan@animua.org" required />
+            <span class="form-err" id="errEmail"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-lbl" for="fRole">Role <span class="req">*</span></label>
+            <select class="form-inp" id="fRole" required>
+              <option value="">Select role…</option>
+              <option value="Admin">Administrator</option>
+              <option value="Staff">Staff</option>
+            </select>
+            <span class="form-err" id="errRole"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-lbl" for="fStatus">Status <span class="req">*</span></label>
+            <select class="form-inp" id="fStatus">
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+          <div class="form-group" id="passwordGroup">
+            <label class="form-lbl" for="fPassword">Password <span class="req">*</span></label>
+            <div class="input-eye-wrap">
+              <input type="password" class="form-inp" id="fPassword" placeholder="Min. 8 characters" />
+              <button type="button" class="eye-btn" id="togglePassword"><i class="bi bi-eye"></i></button>
+            </div>
+            <span class="form-err" id="errPassword"></span>
+          </div>
+          <div class="form-group" id="confirmPasswordGroup">
+            <label class="form-lbl" for="fConfirmPassword">Confirm Password <span class="req">*</span></label>
+            <div class="input-eye-wrap">
+              <input type="password" class="form-inp" id="fConfirmPassword" placeholder="Repeat password" />
+              <button type="button" class="eye-btn" id="toggleConfirm"><i class="bi bi-eye"></i></button>
+            </div>
+            <span class="form-err" id="errConfirmPassword"></span>
+          </div>
+        </div>
+        <div class="permissions-section" id="permissionsSection">
+          <div class="perm-section-title">
+            <i class="bi bi-key-fill"></i> Module Permissions
+            <span class="perm-hint">Auto-filled by role — customise as needed.</span>
+          </div>
+          <div class="perm-grid" id="permGrid"></div>
+        </div>
+      </form>
+    </div>
+    <div class="um-modal-footer">
+      <button type="button" class="btn-ghost-clay" id="modalCancelBtn">Cancel</button>
+      <button type="button" class="btn-primary-clay" id="modalSaveBtn">
+        <i class="bi bi-floppy-fill"></i> Save User
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW USER MODAL -->
+<div class="um-modal-backdrop" id="viewModalBackdrop">
+  <div class="um-modal um-modal-sm" role="dialog" aria-modal="true">
+    <div class="um-modal-header">
+      <h2>User Details</h2>
+      <button class="modal-close-btn" id="viewModalCloseBtn"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="um-modal-body" id="viewModalBody"></div>
+    <div class="um-modal-footer">
+      <button type="button" class="btn-ghost-clay" id="viewModalClose2">Close</button>
+      <button type="button" class="btn-primary-clay" id="viewModalEditBtn" style="display:none">
+        <i class="bi bi-pencil-fill"></i> Edit
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- TOGGLE STATUS MODAL -->
+<div class="um-modal-backdrop" id="deactivateModalBackdrop">
+  <div class="um-modal um-modal-xs" role="dialog" aria-modal="true">
+    <div class="um-modal-header">
+      <h2 id="deactivateTitle">Deactivate User</h2>
+      <button class="modal-close-btn" id="deactivateCloseBtn"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="um-modal-body">
+      <div class="confirm-body">
+        <div class="confirm-icon-wrap deactivate" id="confirmIconWrap"><i class="bi bi-person-x-fill"></i></div>
+        <p id="deactivateMsg"></p>
+      </div>
+    </div>
+    <div class="um-modal-footer">
+      <button type="button" class="btn-ghost-clay" id="deactivateCancelBtn">Cancel</button>
+      <button type="button" class="btn-danger" id="deactivateConfirmBtn">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="um-toast" id="umToast"><i class="bi" id="toastIcon"></i><span id="toastMsg"></span></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script type="module" src="/src/management/userManagement.js"></script>
+</body>
+</html>

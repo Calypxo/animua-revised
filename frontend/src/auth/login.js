@@ -122,7 +122,7 @@ export async function handleLogin(event) {
     });
 
     if (userRole === "Admin" || userRole === "Staff") {
-      window.location.replace("/pages/management/dashboard.html");
+      window.location.replace("/pages/dashboard.html");
     } else {
       window.location.replace("/pages/public/home.html");
     }

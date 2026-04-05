@@ -1,4 +1,4 @@
-import "../css/management/admin-dashboard.css";
+import "../css/management/adminDashboard.css";
 import "../css/management/sidebar.css";
 
 import "../components/global/welcome.js";

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ANIMUA — Admin Access</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+</head>
+<body>
+
+<div class="page">
+
+  <!-- ── LEFT VISUAL ── -->
+  <div class="left">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="brand">
+      <div class="brand-mark">A</div>
+      <span class="brand-name">Animua</span>
+    </div>
+
+    <div class="left-hero">
+      <div class="tagline">Management Portal</div>
+      <h1>Hello,<br>Welcome<br><em>back.</em></h1>
+      <p>Authorized staff access only. Sign in to manage the Animua platform, content, and user accounts.</p>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat">
+        <span class="stat-value">Admin</span>
+        <span class="stat-label">Access Level</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">Secure</span>
+        <span class="stat-label">Connection</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">24/7</span>
+        <span class="stat-label">Uptime</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── RIGHT FORM ── -->
+  <div class="right">
+    <div class="form-card">
+
+      <div class="form-header">
+        <div class="eyebrow">Admin Sign In</div>
+        <h2>Access Panel</h2>
+        <p>Enter your credentials to continue to the dashboard.</p>
+      </div>
+
+      <form id="login-form" novalidate>
+
+        <!-- Email -->
+        <div class="field">
+          <label for="login-email">Email Address</label>
+          <div class="input-wrap">
+            <input
+              type="email"
+              id="login-email"
+              placeholder="admin@animua.com"
+              autocomplete="email"
+            />
+            <span class="input-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/>
+              </svg>
+            </span>
+          </div>
+          <div class="field-error" id="err-email"></div>
+        </div>
+
+        <!-- Password -->
+        <div class="field">
+          <label for="login-password">Password</label>
+          <div class="input-wrap">
+            <input
+              type="password"
+              id="login-password"
+              placeholder="••••••••"
+              autocomplete="current-password"
+            />
+            <span class="input-icon toggle-pw" id="togglePassword" title="Show/hide password">
+              <svg id="eye-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+            </span>
+          </div>
+          <div class="field-error" id="err-password"></div>
+        </div>
+
+        <!-- Options -->
+        <div class="options-row">
+          <a href="#" class="forgot-link">Forgot password?</a>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="btn-submit" id="loginBtn">
+          <span class="spinner" id="loginSpinner"></span>
+          <span id="loginBtnText">Sign In</span>
+        </button>
+
+      </form>
+
+
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script type="module" src="/src/management/admin-login.js"></script>
+
+
+
+</body>
+</html>

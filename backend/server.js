@@ -6,7 +6,9 @@ const cors = require("cors");
 const app = express();
 
 const authRoutes = require("./src/routes/authRoutes");
-const petRoutes = require("./src/routes/petRoutes");
+const userRoutes = require("./src/routes/userRoutes");
+const intakeRoutes = require("./src/routes/intakeRoutes");
+const animalRoutes = require("./src/routes/animalRoutes");
 const dashboardRoutes = require("./src/routes/dashboardRoutes");
 
 const publicRoutes = require("./src/routes/publicRoutes");
@@ -22,9 +24,13 @@ app.use(cors({
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://localhost:5174",
-    "http://127.0.0.1:5174"
+    "http://127.0.0.1:5174",
+    "http://localhost:5175",
+    "http://127.0.0.1:5175",
+    "http://localhost:5176",
+    "http://127.0.0.1:5176"
   ],
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
 }));
@@ -33,7 +39,9 @@ app.use(express.json());
 
 // ─── ROUTES ───────────────────────────────────────────────────────────────────
 app.use("/api/auth", authRoutes);
-app.use("/api/pets", petRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/intake", intakeRoutes);
+app.use("/api/animals", animalRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 
 app.use("/api/public", publicRoutes);
@@ -71,7 +79,7 @@ app.get("/api/public-user",
 );
 
 // ─── START ────────────────────────────────────────────────────────────────────
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`ANIMUA Server active on port ${PORT}`);
 });

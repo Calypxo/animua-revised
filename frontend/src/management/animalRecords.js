@@ -1,4 +1,4 @@
-import "../css/management/admin-dashboard.css";
+import "../css/management/adminDashboard.css";
 import "../css/management/sidebar.css";
 import "../css/management/animalRecords.css";
 

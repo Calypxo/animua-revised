@@ -26,128 +26,61 @@ const petNameField = document.getElementById("petNameField");
 const adoptionForm = document.getElementById("adoptionForm");
 const formMessage = document.getElementById("formMessage");
 
+
+console.log("find-furbabies.js loaded");
+console.log("API_BASE_URL:", API_BASE_URL);
+console.log("petsGrid:", petsGrid);
+console.log("resultsCount:", resultsCount);
+console.log("emptyState:", emptyState);
+
 let currentFilter = "all";
 let currentPetForAdoption = null;
 
 function mapPetFromBackend(pet) {
+  const rawSpecies = (pet.species || "").toLowerCase();
   const type =
-  pet.species === "Canine" ? "dog" :
-  pet.species === "Feline" ? "cat" :
+  rawSpecies === "dog" || rawSpecies === "canine" ? "dog" :
+  rawSpecies === "cat" || rawSpecies === "feline" ? "cat" :
   "other";
 
   return {
     id: pet.id,
     name: pet.name || "Unnamed Pet",
     type,
-    age: pet.age ? `${pet.age} year${Number(pet.age) > 1 ? "s" : ""}` : "Unknown age",
+    age: pet.ageEstimate || "Unknown age",
     sex: pet.sex || "Unknown",
     size: pet.size || "Unknown",
     status: pet.status || "Ready for Adoption",
     traits: [],
-    description: pet.distinctFeatures || "This rescued pet is looking for a loving home.",
+    description: pet.initialCondition || "This rescued pet is looking for a loving home.",
     match: "Best for adopters ready to provide a safe, caring, and responsible home.",
     image:
-      pet.photoUrl ||
-      (type === "dog"
-        ? "https://loremflickr.com/500/360/dog?lock=1001"
-        : "https://loremflickr.com/500/360/cat?lock=1002"),
+    pet.photoURL ||
+    (type === "dog"
+      ? "https://loremflickr.com/500/360/dog?lock=1001"
+      : type === "cat"
+      ? "https://loremflickr.com/500/360/cat?lock=1002"
+      : "https://loremflickr.com/500/360/animal?lock=1003"),
   };
 }
 
-const dogNames = [
-  "Buddy", "Max", "Bruno", "Coco", "Rocky", "Milo", "Bingo", "Charlie", "Toby", "Simba",
-  "Lucky", "Oreo", "Brownie", "Hunter", "Choco", "Sky", "Prince", "Pogi", "Bantay", "Yuki"
-];
-
-const catNames = [
-  "Luna", "Mochi", "Nori", "Miso", "Peaches", "Mimi", "Clover", "Ash", "Willow", "Maple",
-  "Tofu", "Sunny", "Panda", "Suki", "Snow", "Nina", "Olive", "Tiger", "Bibi", "Cali"
-];
-
-const dogPersonalities = [
-  ["Friendly", "Playful", "Loyal"],
-  ["Sweet", "Gentle", "Cuddly"],
-  ["Active", "Curious", "Smart"],
-  ["Calm", "Loving", "Quiet"],
-  ["Energetic", "Happy", "Social"],
-  ["Brave", "Affectionate", "Alert"],
-  ["Cheerful", "People-Oriented", "Playful"],
-  ["Gentle", "Easygoing", "Patient"],
-  ["Lively", "Silly", "Warm"],
-  ["Smart", "Trainable", "Loving"]
-];
-
-const catPersonalities = [
-  ["Calm", "Sweet", "Gentle"],
-  ["Curious", "Quiet", "Independent"],
-  ["Affectionate", "Soft", "Friendly"],
-  ["Playful", "Cute", "Alert"],
-  ["Relaxed", "Loving", "Shy"],
-  ["Gentle", "Indoor", "Quiet"],
-  ["Snuggly", "Soft", "Warm"],
-  ["Curious", "Smart", "Sweet"],
-  ["Calm", "Observant", "Gentle"],
-  ["Playful", "Friendly", "Light-Hearted"]
-];
-
-const dogDescriptions = [
-  "A lovable companion who enjoys attention, warm company, and daily walks.",
-  "Friendly and easy to bond with, perfect for adopters looking for a sweet dog.",
-  "A playful dog who would thrive in a caring and active home environment.",
-  "Calm and gentle, ideal for families or individuals wanting a loyal companion.",
-  "An affectionate rescue who is ready for a fresh start and a forever home."
-];
-
-const catDescriptions = [
-  "A gentle cat who enjoys calm spaces, soft naps, and kind human company.",
-  "Quiet and affectionate, best for adopters looking for a peaceful indoor companion.",
-  "A sweet rescue cat with a soft personality and a warm heart.",
-  "Curious but gentle, this cat would do well in a loving and patient home.",
-  "Calm and easygoing, perfect for adopters who want a relaxed feline friend."
-];
-
-function createDog(index) {
-  return {
-    id: `dog-${index + 1}`,
-    name: dogNames[index],
-    type: "dog",
-    age: `${(index % 5) + 1} year${(index % 5) + 1 > 1 ? "s" : ""}`,
-    sex: index % 2 === 0 ? "Male" : "Female",
-    size: ["Small", "Medium", "Large"][index % 3],
-    status: "Ready for Adoption",
-    traits: dogPersonalities[index % dogPersonalities.length],
-    description: dogDescriptions[index % dogDescriptions.length],
-    match: "Best for adopters looking for a loving dog with a friendly and adaptable personality.",
-    image: `https://loremflickr.com/500/360/dog?lock=${index + 1}`
-  };
-}
-
-function createCat(index) {
-  return {
-    id: `cat-${index + 1}`,
-    name: catNames[index],
-    type: "cat",
-    age: `${(index % 4) + 1} year${(index % 4) + 1 > 1 ? "s" : ""}`,
-    sex: index % 2 === 0 ? "Female" : "Male",
-    size: ["Small", "Medium"][index % 2],
-    status: "Ready for Adoption",
-    traits: catPersonalities[index % catPersonalities.length],
-    description: catDescriptions[index % catDescriptions.length],
-    match: "Best for adopters who want a gentle cat and a calm, nurturing home setup.",
-    image: `https://loremflickr.com/500/360/cat?lock=${index + 31}`
-  };
-}
 
 async function loadPublicPets() {
   try {
+    console.log("Loading public pets...");
     const res = await fetch(`${API_BASE_URL}/public/pets`);
+    console.log("Response status:", res.status);
 
     if (!res.ok) {
       throw new Error("Failed to load public pets");
     }
 
     const data = await res.json();
-    pets = data.map(mapPetFromBackend);
+    console.log("API data:", data);
+
+    pets = (data.pets || []).map(mapPetFromBackend);
+    console.log("Mapped pets:", pets);
+
     applyFilters();
   } catch (error) {
     console.error("Public pets load error:", error);
@@ -348,9 +281,16 @@ if (adoptionForm) {
   adoptionForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
+    if (!currentPetForAdoption?.id) {
+      formMessage.textContent = "No pet selected for adoption.";
+      formMessage.style.color = "red";
+      return;
+    }
+
     try {
       const formData = {
-        pet_name: petNameField.value,
+        pet_id: currentPetForAdoption?.id,
+        pet_name: currentPetForAdoption?.name,
         full_name: document.getElementById("fullName").value,
         age: document.getElementById("age").value,
         birthdate: document.getElementById("birthdate").value,
@@ -389,7 +329,6 @@ if (adoptionForm) {
       formMessage.style.color = "green";
 
       adoptionForm.reset();
-
     } catch (error) {
       console.error("Adoption submit error:", error);
       formMessage.textContent = "Failed to submit. Please try again.";
@@ -398,4 +337,4 @@ if (adoptionForm) {
   });
 }
 
-loadPublicPets();;
+loadPublicPets();

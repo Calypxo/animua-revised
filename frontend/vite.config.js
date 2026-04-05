@@ -10,20 +10,14 @@ export default defineConfig({
         // ── Main Entry ────────────────────────────────────────
         main: resolve(__dirname, 'index.html'),
 
-        // ── Management Pages ──────────────────────────────────
-        adminLogin:       resolve(__dirname, 'pages/management/admin-login.html'),
-        dashboard:        resolve(__dirname, 'pages/management/dashboard.html'),
-        animalRecords:    resolve(__dirname, 'pages/management/animalRecords.html'),
-        adoptions:        resolve(__dirname, 'pages/management/adoptionRequests.html'),
-        surrenders:       resolve(__dirname, 'pages/management/surrenders.html'),
-        inventory:        resolve(__dirname, 'pages/management/inventory.html'),
-        reports:          resolve(__dirname, 'pages/management/reports.html'),
-        petCompatibility: resolve(__dirname, 'pages/management/petCompatibility.html'),
-        team:             resolve(__dirname, 'pages/management/team.html'),
-        settings:         resolve(__dirname, 'pages/management/settings.html'),
-
         // ── Public Pages ──────────────────────────────────────
         home: resolve(__dirname, 'pages/public/home.html'),
+        findFurbabies: resolve(__dirname, 'pages/public/find-furbabies.html'),
+        petCompatibility: resolve(__dirname, 'pages/public/petCompatibility.html'),
+        quizLanding: resolve(__dirname, 'pages/public/quizLanding.html'),
+        compatibilityResults: resolve(__dirname, 'pages/public/compatibilityResults.html'),
+        contact: resolve(__dirname, 'pages/public/contact.html'),
+        surrender: resolve(__dirname, 'pages/public/surrender.html'),
       },
     },
   },

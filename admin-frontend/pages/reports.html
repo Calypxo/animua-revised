@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ANIMUA — Reports</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/css/adminDashboard.css" />
+  <link rel="stylesheet" href="/src/css/sidebar.css" />
+  <link rel="stylesheet" href="/src/css/reports.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+</head>
+<body class="loading">
+<div class="shell">
+  <div id="sidebar-container"></div>
+  <div class="stage">
+
+    <header class="topbar">
+      <div class="topbar-left">
+        <button id="sidebarToggle" class="icon-btn"><i class="bi bi-list"></i></button>
+        <nav class="d-flex align-items-center">
+          <span class="breadcrumb-link">Logistics</span>
+          <i class="bi bi-chevron-right breadcrumb-sep"></i>
+          <span class="breadcrumb-current">Reports</span>
+        </nav>
+      </div>
+      <div class="topbar-right">
+        <button class="icon-btn notif-btn"><i class="bi bi-bell-fill"></i><span class="notif-dot"></span></button>
+        <div class="user-chip">
+          <div class="user-avatar" id="topbar-initials">AS</div>
+          <div class="user-meta"><span id="display-name">Admin</span><small id="display-role">Administrator</small></div>
+          <i class="bi bi-chevron-down caret"></i>
+        </div>
+      </div>
+    </header>
+
+    <div class="page-body">
+
+      <!-- Page header -->
+      <div class="page-header mb-4">
+        <div>
+          <h1 class="page-title">Reports &amp; Analytics</h1>
+          <p class="page-sub">Descriptive analysis and summary reports for shelter operations. Export as PDF or CSV.</p>
+        </div>
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+          <select class="filter-select" id="reportPeriod">
+            <option value="2025-q1">2025 — Q1 (Jan–Mar)</option>
+            <option value="2024-annual">2024 — Full Year</option>
+            <option value="2025-jan">January 2025</option>
+            <option value="2025-feb">February 2025</option>
+            <option value="2025-mar">March 2025</option>
+          </select>
+          <button class="btn-export" id="btnExportPDF">
+            <i class="bi bi-file-earmark-pdf-fill"></i> Export PDF
+          </button>
+          <button class="btn-export btn-export-csv" id="btnExportCSV">
+            <i class="bi bi-filetype-csv"></i> Export CSV
+          </button>
+        </div>
+      </div>
+
+      <!-- Report type tabs -->
+      <div class="report-tabs mb-4">
+        <button class="report-tab active" data-tab="overview">
+          <i class="bi bi-grid-1x2-fill"></i> Overview
+        </button>
+        <button class="report-tab" data-tab="animal">
+          <i class="bi bi-heart-pulse-fill"></i> Animal Report
+        </button>
+        <button class="report-tab" data-tab="intake">
+          <i class="bi bi-box-arrow-in-down"></i> Intake Report
+        </button>
+        <button class="report-tab" data-tab="surrender">
+          <i class="bi bi-file-earmark-text-fill"></i> Surrender Report
+        </button>
+        <button class="report-tab" data-tab="medical">
+          <i class="bi bi-clipboard2-pulse-fill"></i> Medical Report
+        </button>
+        <button class="report-tab" data-tab="adoption">
+          <i class="bi bi-balloon-heart-fill"></i> Adoption Report
+        </button>
+      </div>
+
+      <!-- ═══════════════════════════════════
+           TAB: OVERVIEW
+      ═══════════════════════════════════ -->
+      <div class="report-content active" id="tab-overview">
+
+        <!-- Insight banner -->
+        <div class="insight-banner mb-4">
+          <div class="insight-icon"><i class="bi bi-lightbulb-fill"></i></div>
+          <div>
+            <strong>Descriptive Analysis — Q1 2025</strong>
+            <p>The shelter admitted <strong>100 animals</strong> in Q1 2025, a <strong>+18%</strong> increase vs Q4 2024. Adoption rate improved to <strong>68%</strong> of cleared animals. Average length of stay decreased to <strong>24 days</strong>. Critical surrender cases rose by <strong>+3</strong>, requiring priority intake scheduling.</p>
+          </div>
+        </div>
+
+        <!-- KPI row -->
+        <div class="kpi-row mb-4">
+          <div class="rpt-kpi"><div class="rpt-kpi-val">100</div><div class="rpt-kpi-lbl">Total Animals</div><div class="rpt-kpi-delta up">+18% vs Q4</div></div>
+          <div class="rpt-kpi"><div class="rpt-kpi-val">68%</div><div class="rpt-kpi-lbl">Adoption Rate</div><div class="rpt-kpi-delta up">+5pp vs Q4</div></div>
+          <div class="rpt-kpi"><div class="rpt-kpi-val">24d</div><div class="rpt-kpi-lbl">Avg. Length of Stay</div><div class="rpt-kpi-delta down">−3d vs Q4</div></div>
+          <div class="rpt-kpi"><div class="rpt-kpi-val">85%</div><div class="rpt-kpi-lbl">Quarantine Clearance Rate</div><div class="rpt-kpi-delta up">+2pp vs Q4</div></div>
+          <div class="rpt-kpi"><div class="rpt-kpi-val">22%</div><div class="rpt-kpi-lbl">Surrender Rejection Rate</div><div class="rpt-kpi-delta down">−4pp vs Q4</div></div>
+        </div>
+
+        <!-- Charts row -->
+        <div class="row g-4 mb-4">
+          <div class="col-xl-8">
+            <div class="rpt-card">
+              <div class="rpt-card-head">
+                <div><h3>Monthly Intake vs Adoptions</h3><p>Q1 2025 — Jan through Mar</p></div>
+              </div>
+              <div style="position:relative;height:260px">
+                <canvas id="chartOverviewTrend"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-4">
+            <div class="rpt-card h-100">
+              <div class="rpt-card-head">
+                <div><h3>Animal Lifecycle Status</h3><p>Current distribution</p></div>
+              </div>
+              <div style="position:relative;height:200px">
+                <canvas id="chartStatusDonut"></canvas>
+              </div>
+              <div id="statusDonutLegend" class="donut-legend mt-3"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+          <div class="col-xl-4">
+            <div class="rpt-card h-100">
+              <div class="rpt-card-head"><div><h3>Intake by Source</h3><p>Q1 2025</p></div></div>
+              <div style="position:relative;height:200px">
+                <canvas id="chartSourceDonut"></canvas>
+              </div>
+              <div id="sourceDonutLegend" class="donut-legend mt-3"></div>
+            </div>
+          </div>
+          <div class="col-xl-4">
+            <div class="rpt-card h-100">
+              <div class="rpt-card-head"><div><h3>Species Distribution</h3><p>Current shelter population</p></div></div>
+              <div style="position:relative;height:200px">
+                <canvas id="chartSpeciesPie"></canvas>
+              </div>
+              <div id="speciesLegend" class="donut-legend mt-3"></div>
+            </div>
+          </div>
+          <div class="col-xl-4">
+            <div class="rpt-card h-100">
+              <div class="rpt-card-head"><div><h3>Surrender Urgency</h3><p>NLP classification results</p></div></div>
+              <div style="position:relative;height:200px">
+                <canvas id="chartUrgencyBar"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Summary table -->
+        <div class="rpt-card">
+          <div class="rpt-card-head">
+            <div><h3>Module Summary</h3><p>Key figures by operational area</p></div>
+          </div>
+          <table class="rpt-table">
+            <thead>
+              <tr><th>Module</th><th>Total Records</th><th>This Period</th><th>Change vs Prior</th><th>Key Insight</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><span class="module-chip chip-intake">Intake</span></td><td>100</td><td>38</td><td><span class="delta-up">+18%</span></td><td>Peak in March due to summer stray season</td></tr>
+              <tr><td><span class="module-chip chip-surrender">Surrender</span></td><td>15</td><td>15</td><td><span class="delta-up">+2</span></td><td>Medical and abandonment risk cases dominant</td></tr>
+              <tr><td><span class="module-chip chip-medical">Medical</span></td><td>47</td><td>47</td><td>—</td><td>85% cleared from quarantine on schedule</td></tr>
+              <tr><td><span class="module-chip chip-adoption">Adoption</span></td><td>20</td><td>8</td><td><span class="delta-up">+5pp rate</span></td><td>AI quiz match apps show 12% higher finalize rate</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════
+           TAB: ANIMAL REPORT
+      ═══════════════════════════════════ -->
+      <div class="report-content" id="tab-animal">
+        <div class="insight-banner mb-4">
+          <div class="insight-icon"><i class="bi bi-lightbulb-fill"></i></div>
+          <div>
+            <strong>Animal Population Analysis</strong>
+            <p>Current shelter holds <strong>100 animals</strong> (50 Dogs, 50 Cats). <strong>50%</strong> are in the Profiling stage, indicating high recent intake. <strong>20 animals</strong> are cleared and ready for adoption — all have completed behavioral assessment. Average compatibility score for ready animals is <strong>73%</strong>.</p>
+          </div>
+        </div>
+        <div class="kpi-row mb-4">
+          <div class="rpt-kpi"><div class="rpt-kpi-val">100</div><div class="rpt-kpi-lbl">Total Animals</div></div>
+          <div class="rpt-kpi"><div class="rpt-kpi-val">50</div><div class="rpt-kpi-lbl">In Profiling</div><div class="rpt-kpi-delta neutral">50% of total</div></div>
+          <div class="rpt-kpi"><div class="rpt-kpi-val">30</div><div class="rpt-kpi-lbl">In Quarantine</div><div class="rpt-kpi-delta neutral">30% of total</div></div>
+          <div class="rpt-kpi"><div class="rpt-kpi-val">20</div><div class="rpt-kpi-lbl">Ready for Adoption</div><div class="rpt-kpi-delta up">All assessed</div></div>
+          <div class="rpt-kpi"><div class="rpt-kpi-val">73%</div><div class="rpt-kpi-lbl">Avg Compat Score</div><div class="rpt-kpi-delta up">Ready animals</div></div>
+        </div>
+        <div class="row g-4 mb-4">
+          <div class="col-xl-6">
+            <div class="rpt-card h-100">
+              <div class="rpt-card-head"><div><h3>Lifecycle Stage Breakdown</h3><p>All 100 animals</p></div></div>
+              <div style="position:relative;height:240px"><canvas id="chartAnimalStage"></canvas></div>
+            </div>
+          </div>
+          <div class="col-xl-6">
+            <div class="rpt-card h-100">
+              <div class="rpt-card-head"><div><h3>Length of Stay Distribution</h3><p>Days in shelter</p></div></div>
+              <div style="position:relative;height:240px"><canvas id="chartStay"></canvas></div>
+            </div>
+          </div>
+        </div>
+        <div class="row g-4 mb-4">
+          <div class="col-xl-6">
+            <div class="rpt-card">
+              <div class="rpt-card-head"><div><h3>Sex Distribution</h3><p>By species</p></div></div>
+              <div style="position:relative;height:220px"><canvas id="chartSexBar"></canvas></div>
+            </div>
+          </div>
+          <div class="col-xl-6">
+            <div class="rpt-card">
+              <div class="rpt-card-head"><div><h3>Behavioral Trait Averages</h3><p>All assessed animals (ready pool)</p></div></div>
+              <div style="position:relative;height:220px"><canvas id="chartTraitRadar"></canvas></div>
+            </div>
+          </div>
+        </div>
+        <div class="rpt-card">
+          <div class="rpt-card-head"><div><h3>Detailed Animal Breakdown</h3><p>Current population by status</p></div></div>
+          <table class="rpt-table" id="animalDetailTable">
+            <thead><tr><th>Status</th><th>Dogs</th><th>Cats</th><th>Total</th><th>% of Population</th><th>Avg Days in Shelter</th></tr></thead>
+            <tbody>
+              <tr><td><span class="status-pill pill-profiling">Profiling</span></td><td>25</td><td>25</td><td>50</td><td>50%</td><td>18d</td></tr>
+              <tr><td><span class="status-pill pill-quarantine">Quarantine</span></td><td>15</td><td>15</td><td>30</td><td>30%</td><td>28d</td></tr>
+              <tr><td><span class="status-pill pill-ready">Ready</span></td><td>10</td><td>10</td><td>20</td><td>20%</td><td>42d</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════
+           TAB: INTAKE REPORT
+      ═══════════════════════════════════ -->
+      <div class="report-content" id="tab-intake">
+        <div class="insight-banner mb-4">
+          <div class="insight-icon"><i class="bi bi-lightbulb-fill"></i></div>
+          <div>
+            <strong>Intake Analysis — Q1 2025</strong>
+            <p>Total of <strong>38 new intakes</strong> recorded this quarter. <strong>Rescue</strong> accounts for the highest volume (34%). Intake approvals average <strong>1.2 days</strong> from submission to decision. <strong>3 intakes were rejected</strong> due to incomplete documentation. Peak intake day was <strong>Saturday</strong> (29% of weekly volume).</p>
+          </div>
+        </div>
+        <div class="kpi-row mb-4">
+          <div class="rpt-kpi"><div class="rpt-kpi-val">38</div><div class="rpt-kpi-lbl">Total Intakes (Q1)</div><div class="rpt-kpi-delta up">+18% vs Q4</div></div>
+          <div class="rpt-kpi"><div class="rpt-kpi-val">34%</div><div class="rpt-kpi-lbl">Rescue Source</div></div>
+          <div class="rpt-kpi"><div class="rpt-kpi-val">33%</div><div class="rpt-kpi-lbl">Barangay Impound</div></div>
+          <div class="rpt-kpi"><div class="rpt-kpi-val">33%</div><div class="rpt-kpi-lbl">Approved Surrender</div></div>
+          <div class="rpt-kpi"><div class="rpt-kpi-val">1.2d</div><div class="rpt-kpi-lbl">Avg Approval Time</div><div class="rpt-kpi-delta up">−0.4d vs Q4</div></div>
+        </div>
+        <div class="row g-4 mb-4">
+          <div class="col-xl-8">
+            <div class="rpt-card">
+              <div class="rpt-card-head"><div><h3>Weekly Intake Trend</h3><p>Q1 2025 — Week by week</p></div></div>
+              <div style="position:relative;height:240px"><canvas id="chartIntakeWeekly"></canvas></div>
+            </div>
+          </div>
+          <div class="col-xl-4">
+            <div class="rpt-card h-100">
+              <div class="rpt-card-head"><div><h3>Intake by Day of Week</h3><p>Q1 2025</p></div></div>
+              <div style="position:relative;height:200px"><canvas id="chartIntakeDay"></canvas></div>
+            </div>
+          </div>
+        </div>
+        <div class="rpt-card">
+          <div class="rpt-card-head"><div><h3>Intake by Source &amp; Condition</h3></div></div>
+          <table class="rpt-table">
+            <thead><tr><th>Source</th><th>Count</th><th>% Share</th><th>Avg Condition</th><th>Critical Cases</th><th>Approval Rate</th></tr></thead>
+            <tbody>
+              <tr><td><span class="source-chip chip-rescue">Rescue</span></td><td>13</td><td>34%</td><td>Poor–Fair</td><td>3</td><td>92%</td></tr>
+              <tr><td><span class="source-chip chip-barangay">Barangay Impound</span></td><td>13</td><td>34%</td><td>Fair</td><td>1</td><td>88%</td></tr>
+              <tr><td><span class="source-chip chip-surrender">Approved Surrender</span></td><td>12</td><td>32%</td><td>Good–Fair</td><td>0</td><td>100%</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════
+           TAB: SURRENDER REPORT
+      ═══════════════════════════════════ -->
+      <div class="report-content" id="tab-surrender">
+        <div class="insight-banner mb-4">
+          <div class="insight-icon"><i class="bi bi-lightbulb-fill"></i></div>
+          <div>
+            <strong>Surrender Request Analysis — Q1 2025</strong>
+            <p><strong>15 surrender requests</strong> received this quarter. NLP classification shows <strong>Medical</strong> (27%) and <strong>Abandonment Risk</strong> (20%) as the top categories. <strong>4 requests were Critical urgency</strong> — all were processed within 24 hours. The shelter maintains a <strong>78% approval rate</strong> for surrender requests. Requests from <strong>Balibago</strong> and <strong>Anunas</strong> barangays are most frequent.</p>
+          </div>
+        </div>
+        <div class="kpi-row mb-4">
+          <div class="rpt-kpi"><div class="rpt-kpi-val">15</div><div class="rpt-kpi-lbl">Total Requests</div></div>
+          <div class="rpt-kpi"><div class="rpt-kpi-val">4</div><div class="rpt-kpi-lbl">Critical Urgency</div><div class="rpt-kpi-delta neutral">All resolved &lt;24h</div></div>
+          <div class="rpt-kpi"><div class="rpt-kpi-val">78%</div><div class="rpt-kpi-lbl">Approval Rate</div><div class="rpt-kpi-delta up">+4pp vs Q4</div></div>
+          <div class="rpt-kpi"><div class="rpt-kpi-val">1.8d</div><div class="rpt-kpi-lbl">Avg Review Time</div><div class="rpt-kpi-delta up">−0.6d vs Q4</div></div>
+          <div class="rpt-kpi"><div class="rpt-kpi-val">87%</div><div class="rpt-kpi-lbl">NLP Confidence Avg</div><div class="rpt-kpi-delta neutral">Mock value</div></div>
+        </div>
+        <div class="row g-4 mb-4">
+          <div class="col-xl-6">
+            <div class="rpt-card">
+              <div class="rpt-card-head"><div><h3>Surrender Reasons by Category</h3><p>NLP classification results</p></div></div>
+              <div style="position:relative;height:240px"><canvas id="chartSurrenderCat"></canvas></div>
+            </div>
+          </div>
+          <div class="col-xl-6">
+            <div class="rpt-card">
+              <div class="rpt-card-head"><div><h3>Urgency Level Distribution</h3><p>NLP urgency scoring</p></div></div>
+              <div style="position:relative;height:240px"><canvas id="chartSurrenderUrgency"></canvas></div>
+            </div>
+          </div>
+        </div>
+        <div class="rpt-card">
+          <div class="rpt-card-head"><div><h3>Surrender Requests by Barangay</h3><p>Top 8 barangays</p></div></div>
+          <div style="position:relative;height:240px"><canvas id="chartSurrenderBarangay"></canvas></div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════
+           TAB: MEDICAL REPORT
+      ═══════════════════════════════════ -->
+      <div class="report-content" id="tab-medical">
+        <div class="insight-banner mb-4">
+          <div class="insight-icon"><i class="bi bi-lightbulb-fill"></i></div>
+          <div>
+            <strong>Medical &amp; Quarantine Analysis — Q1 2025</strong>
+            <p><strong>47 medical records</strong> created this quarter. Vaccination coverage reached <strong>92%</strong> of eligible animals. Average quarantine duration was <strong>14 days</strong>. <strong>3 animals</strong> required emergency treatment. Deworming was the most common procedure (38%). Quarantine clearance rate improved to <strong>85%</strong>, up from 81% in Q4 2024.</p>
+          </div>
+        </div>
+        <div class="kpi-row mb-4">
+          <div class="rpt-kpi"><div class="rpt-kpi-val">47</div><div class="rpt-kpi-lbl">Medical Records</div></div>
+          <div class="rpt-kpi"><div class="rpt-kpi-val">92%</div><div class="rpt-kpi-lbl">Vaccination Coverage</div><div class="rpt-kpi-delta up">+3pp vs Q4</div></div>
+          <div class="rpt-kpi"><div class="rpt-kpi-val">14d</div><div class="rpt-kpi-lbl">Avg Quarantine Days</div><div class="rpt-kpi-delta up">−2d vs Q4</div></div>
+          <div class="rpt-kpi"><div class="rpt-kpi-val">85%</div><div class="rpt-kpi-lbl">Clearance Rate</div><div class="rpt-kpi-delta up">+4pp vs Q4</div></div>
+          <div class="rpt-kpi"><div class="rpt-kpi-val">3</div><div class="rpt-kpi-lbl">Emergency Cases</div></div>
+        </div>
+        <div class="row g-4 mb-4">
+          <div class="col-xl-7">
+            <div class="rpt-card">
+              <div class="rpt-card-head"><div><h3>Medical Record Types</h3><p>Q1 2025</p></div></div>
+              <div style="position:relative;height:240px"><canvas id="chartMedTypes"></canvas></div>
+            </div>
+          </div>
+          <div class="col-xl-5">
+            <div class="rpt-card h-100">
+              <div class="rpt-card-head"><div><h3>Quarantine Clearance</h3><p>Current status</p></div></div>
+              <div style="position:relative;height:200px"><canvas id="chartClearance"></canvas></div>
+              <div id="clearanceLegend" class="donut-legend mt-3"></div>
+            </div>
+          </div>
+        </div>
+        <div class="rpt-card">
+          <div class="rpt-card-head"><div><h3>Vaccination Schedule Compliance</h3><p>By vaccine type — Q1 2025</p></div></div>
+          <table class="rpt-table">
+            <thead><tr><th>Vaccine</th><th>Administered</th><th>Due</th><th>Overdue</th><th>Compliance Rate</th></tr></thead>
+            <tbody>
+              <tr><td>Anti-Rabies</td><td>28</td><td>4</td><td>2</td><td><div class="compliance-bar"><div class="compliance-fill" style="width:82%"></div><span>82%</span></div></td></tr>
+              <tr><td>5-in-1 (Dogs)</td><td>22</td><td>6</td><td>1</td><td><div class="compliance-bar"><div class="compliance-fill" style="width:76%"></div><span>76%</span></div></td></tr>
+              <tr><td>FVRCP (Cats)</td><td>18</td><td>5</td><td>3</td><td><div class="compliance-bar"><div class="compliance-fill" style="width:69%"></div><span>69%</span></div></td></tr>
+              <tr><td>Deworming</td><td>35</td><td>2</td><td>0</td><td><div class="compliance-bar"><div class="compliance-fill" style="width:95%"></div><span>95%</span></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════
+           TAB: ADOPTION REPORT
+      ═══════════════════════════════════ -->
+      <div class="report-content" id="tab-adoption">
+        <div class="insight-banner mb-4">
+          <div class="insight-icon"><i class="bi bi-lightbulb-fill"></i></div>
+          <div>
+            <strong>Adoption Analysis — Q1 2025</strong>
+            <p><strong>20 applications</strong> received: 12 Direct Browse and 8 AI Quiz Match. Quiz Match applications show a <strong>12% higher finalization rate</strong> (87% vs 75%). Average compatibility score for finalized adoptions was <strong>81%</strong>. The most common adopter barangays are <strong>Balibago, Anunas, and Pampang</strong>. Dogs had a <strong>15% faster</strong> adoption processing time than cats.</p>
+          </div>
+        </div>
+        <div class="kpi-row mb-4">
+          <div class="rpt-kpi"><div class="rpt-kpi-val">20</div><div class="rpt-kpi-lbl">Applications</div></div>
+          <div class="rpt-kpi"><div class="rpt-kpi-val">8</div><div class="rpt-kpi-lbl">Finalized</div><div class="rpt-kpi-delta up">68% rate</div></div>
+          <div class="rpt-kpi"><div class="rpt-kpi-val">81%</div><div class="rpt-kpi-lbl">Avg Compat Score</div><div class="rpt-kpi-delta up">Finalized apps</div></div>
+          <div class="rpt-kpi"><div class="rpt-kpi-val">+12%</div><div class="rpt-kpi-lbl">Quiz vs Browse Rate</div><div class="rpt-kpi-delta up">AI advantage</div></div>
+          <div class="rpt-kpi"><div class="rpt-kpi-val">6.4d</div><div class="rpt-kpi-lbl">Avg Processing Time</div></div>
+        </div>
+        <div class="row g-4 mb-4">
+          <div class="col-xl-6">
+            <div class="rpt-card">
+              <div class="rpt-card-head"><div><h3>Application Type Comparison</h3><p>Direct Browse vs AI Quiz Match</p></div></div>
+              <div style="position:relative;height:240px"><canvas id="chartAppTypeCompare"></canvas></div>
+            </div>
+          </div>
+          <div class="col-xl-6">
+            <div class="rpt-card">
+              <div class="rpt-card-head"><div><h3>Compatibility Score Distribution</h3><p>Finalized adoptions (Quiz Match only)</p></div></div>
+              <div style="position:relative;height:240px"><canvas id="chartCompatDist"></canvas></div>
+            </div>
+          </div>
+        </div>
+        <div class="row g-4 mb-4">
+          <div class="col-xl-5">
+            <div class="rpt-card h-100">
+              <div class="rpt-card-head"><div><h3>Adoptions by Species</h3></div></div>
+              <div style="position:relative;height:200px"><canvas id="chartAdoptionSpecies"></canvas></div>
+              <div id="adoptionSpeciesLegend" class="donut-legend mt-3"></div>
+            </div>
+          </div>
+          <div class="col-xl-7">
+            <div class="rpt-card">
+              <div class="rpt-card-head"><div><h3>Adoption Pipeline Funnel</h3><p>Application → Approval → Finalization</p></div></div>
+              <div style="position:relative;height:200px"><canvas id="chartFunnel"></canvas></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /page-body -->
+  </div><!-- /stage -->
+</div><!-- /shell -->
+
+<!-- Toast -->
+<div class="um-toast" id="umToast"><i class="bi" id="toastIcon"></i><span id="toastMsg"></span></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script type="module" src="/src/management/reports.js"></script>
+</body>
+</html>

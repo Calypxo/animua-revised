@@ -2,168 +2,140 @@ import { clearUserSession, getUserName, getUserRole } from "../../utils/storage.
 
 export function loadSidebar() {
   const container = document.getElementById("sidebar-container");
-
-  if (!container) {
-    console.warn("[sidebarLoader.js] #sidebar-container not found.");
-    return;
-  }
+  if (!container) return;
 
   const name = getUserName() || "Admin User";
   const role = getUserRole() || "Administrator";
-  const initials = name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .substring(0, 2)
-    .toUpperCase();
+  const initials = name.split(" ").map(n => n[0]).join("").toUpperCase();
 
   container.innerHTML = `
+    <button class="mobile-nav-toggle" id="mobile-nav-toggle"><i class="bi bi-list"></i></button>
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-logo">
-        <a href="/pages/management/dashboard.html" class="logo-mark">
-          <div class="logo-icon"><i class="bi bi-heart-fill"></i></div>
-          <span class="logo-text">ANIMUA</span>
-        </a>
+        <div class="logo-icon-box"><i class="bi bi-heart-fill logo-icon"></i></div>
+        <span class="logo-text">ANIMUA</span>
       </div>
 
       <nav class="sidebar-nav">
-        <div class="nav-label">Main</div>
+        <div class="nav-section">
+          <div class="nav-label">Main</div>
+          <a href="/pages/management/dashboard.html" class="nav-item"><i class="bi bi-grid-1x2"></i><span class="nav-text">Dashboard</span></a>
+          <a href="/pages/management/userManagement.html" class="nav-item"><i class="bi bi-people"></i><span class="nav-text">User Management</span></a>
+        </div>
 
-        <a href="/pages/management/dashboard.html" class="nav-item" data-tooltip="Dashboard">
-          <i class="bi bi-grid-1x2-fill"></i>
-          <span class="nav-text">Dashboard</span>
-        </a>
+        <div class="nav-section">
+          <div class="nav-label">Animal Management</div>
+          <a href="/pages/management/intakeList.html" class="nav-item"><i class="bi bi-box-arrow-in-right"></i><span class="nav-text">Animal Intake</span></a>
+          <a href="/pages/management/animalProfiling.html" class="nav-item"><i class="bi bi-card-list"></i><span class="nav-text">Animal Profiling</span></a>
+        </div>
 
-        <a href="/pages/management/animalRecords.html" class="nav-item" data-tooltip="Animal Records">
-          <i class="bi bi-collection-fill"></i>
-          <span class="nav-text">Animal Records</span>
-          <span class="nav-badge">12</span>
-        </a>
+        <div class="nav-section">
+          <div class="nav-label">Adoption & Matching</div>
+          <a href="/pages/management/surrenders.html" class="nav-item"><i class="bi bi-file-earmark-text"></i><span class="nav-text">Surrender Requests</span></a>
+          <a href="/pages/management/petCompatibility.html" class="nav-item"><i class="bi bi-cpu"></i><span class="nav-text">Pet Matching (AI)</span></a>
+          <a href="/pages/management/adoptionApplications.html" class="nav-item"><i class="bi bi-person-check"></i><span class="nav-text">Adoption Apps</span></a>
+          <a href="/pages/management/followUps.html" class="nav-item"><i class="bi bi-chat-heart"></i><span class="nav-text">Post-Adoption</span></a>
+        </div>
 
-        <a href="/pages/management/surrenders.html" class="nav-item" data-tooltip="Surrenders">
-          <i class="bi bi-house-door-fill"></i>
-          <span class="nav-text">Surrenders</span>
-        </a>
-
-        <a href="/pages/management/adoptionRequests.html" class="nav-item" data-tooltip="Adoption Requests">
-          <i class="bi bi-heart-arrow"></i>
-          <span class="nav-text">Adoptions</span>
-          <span class="nav-badge">5</span>
-        </a>
-
-        <div class="nav-label" style="margin-top:8px;">Operations</div>
-
-        <a href="/pages/management/inventory.html" class="nav-item" data-tooltip="Inventory">
-          <i class="bi bi-box-seam-fill"></i>
-          <span class="nav-text">Inventory</span>
-        </a>
-
-        <a href="/pages/management/reports.html" class="nav-item" data-tooltip="Reports">
-          <i class="bi bi-bar-chart-fill"></i>
-          <span class="nav-text">Reports</span>
-        </a>
-
-        <a href="/pages/management/petCompatibility.html" class="nav-item" data-tooltip="Matching AI">
-          <i class="bi bi-cpu-fill"></i>
-          <span class="nav-text">Matching AI</span>
-        </a>
-
-        <div class="nav-label" style="margin-top:8px;">System</div>
-
-        <a href="/pages/management/team.html" class="nav-item" data-tooltip="Team">
-          <i class="bi bi-people-fill"></i>
-          <span class="nav-text">Team</span>
-        </a>
-
-        <a href="/pages/management/schedule.html" class="nav-item" data-tooltip="Schedule">
-          <i class="bi bi-calendar3"></i>
-          <span class="nav-text">Schedule</span>
-        </a>
-
-        <a href="/pages/management/settings.html" class="nav-item" data-tooltip="Settings">
-          <i class="bi bi-gear-fill"></i>
-          <span class="nav-text">Settings</span>
-        </a>
-
-        <a href="/pages/management/help.html" class="nav-item" data-tooltip="Help">
-          <i class="bi bi-question-circle-fill"></i>
-          <span class="nav-text">Help</span>
-        </a>
+        <div class="nav-section">
+          <div class="nav-label">Logistics</div>
+          <a href="/pages/management/inventory.html" class="nav-item"><i class="bi bi-box-seam"></i><span class="nav-text">Inventory</span></a>
+          <a href="/pages/management/reports.html" class="nav-item"><i class="bi bi-bar-chart"></i><span class="nav-text">Reports</span></a>
+          <a href="/pages/management/settings.html" class="nav-item"><i class="bi bi-gear"></i><span class="nav-text">Settings</span></a>
+        </div>
       </nav>
 
       <div class="sidebar-footer">
-        <div class="sidebar-user">
-          <div class="s-avatar" id="sidebar-initials">${initials}</div>
-          <div class="s-user-info" style="flex:1; min-width:0;">
-            <div class="s-name" id="sidebar-name">${name}</div>
-            <div class="s-role" id="sidebar-role">${role}</div>
+        <div class="user-card">
+          <div class="avatar-circle">${initials}</div>
+          <div class="u-meta">
+            <div class="u-name">${name}</div>
+            <div class="u-role">${role}</div>
           </div>
-          <i class="bi bi-chevron-expand s-caret"></i>
         </div>
-
-        <button class="btn-logout-sm" id="sidebar-logout" type="button">
-          <i class="bi bi-box-arrow-left"></i>
-          <span class="nav-text">Sign Out</span>
-        </button>
+        <button id="sidebar-logout" class="logout-btn"><i class="bi bi-box-arrow-left"></i> <span>Sign Out</span></button>
       </div>
     </aside>
   `;
 
   setActiveNav();
-  setupSidebarToggle();
+  setupResponsiveLogic();
   setupLogout();
+  setupNavigation(); // The SPA-Lite Logic
+}
+
+function setupNavigation() {
+  const navLinks = document.querySelectorAll(".nav-item");
+  const mainContent = document.getElementById("main-content");
+  const pageTitle = document.getElementById("page-title");
+
+  navLinks.forEach(link => {
+    link.addEventListener("click", async (e) => {
+      const targetUrl = link.getAttribute("href");
+      if (!targetUrl || targetUrl.startsWith('#')) return;
+
+      e.preventDefault();
+      
+      // Smoothly update URL
+      window.history.pushState({}, "", targetUrl);
+
+      try {
+        const response = await fetch(targetUrl);
+        const html = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, "text/html");
+        
+        // SWAP CONTENT ONLY
+        const newContent = doc.getElementById("main-content").innerHTML;
+        mainContent.innerHTML = newContent;
+        
+        // Update Title if exists in the new page
+        if (doc.querySelector('h1')) {
+           pageTitle.innerText = doc.querySelector('h1').innerText;
+        }
+
+        // Re-run Page Specific Logic
+        // Halimbawa: if(targetUrl.includes('intake')) initIntakeModule();
+
+      } catch (err) {
+        console.warn("Routing failed, doing full reload.");
+        window.location.href = targetUrl;
+      }
+    });
+  });
+}
+
+function setupResponsiveLogic() {
+  const toggle = document.getElementById('mobile-nav-toggle');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+
+  if (toggle) toggle.onclick = () => {
+    sidebar.classList.toggle('mobile-show');
+    overlay.classList.toggle('active');
+  };
+  if (overlay) overlay.onclick = () => {
+    sidebar.classList.remove('mobile-show');
+    overlay.classList.remove('active');
+  };
 }
 
 function setActiveNav() {
   const currentPath = window.location.pathname;
-
   document.querySelectorAll(".nav-item").forEach((link) => {
     const href = link.getAttribute("href");
-    if (currentPath.endsWith(href)) {
-      link.classList.add("active");
-    }
-  });
-}
-
-function setupSidebarToggle() {
-  const toggleBtn = document.getElementById("sidebarToggle");
-  const sidebar = document.getElementById("sidebar");
-
-  if (!toggleBtn || !sidebar) return;
-
-  const isCollapsed = localStorage.getItem("sidebar_collapsed") === "true";
-
-  if (isCollapsed) {
-    sidebar.classList.add("collapsed");
-    toggleBtn.classList.add("is-collapsed");
-  }
-
-  toggleBtn.addEventListener("click", () => {
-    const collapsed = sidebar.classList.toggle("collapsed");
-    toggleBtn.classList.toggle("is-collapsed", collapsed);
-    localStorage.setItem("sidebar_collapsed", String(collapsed));
+    if (href && currentPath.includes(href)) link.classList.add("active");
   });
 }
 
 function setupLogout() {
   const logoutBtn = document.getElementById("sidebar-logout");
-
-  if (!logoutBtn) return;
-
-  logoutBtn.addEventListener("click", async (e) => {
-    e.preventDefault();
-
-    if (typeof Swal !== "undefined") {
-      await Swal.fire({
-        icon: "info",
-        title: "Logged Out",
-        text: "Your session has been securely terminated.",
-        timer: 1500,
-        showConfirmButton: false,
-      });
-    }
-
+  if (logoutBtn) logoutBtn.onclick = () => {
     clearUserSession();
     window.location.href = "/pages/management/admin-login.html";
-  });
+  };
 }
+
+window.addEventListener("popstate", () => window.location.reload());

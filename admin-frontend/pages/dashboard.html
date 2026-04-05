@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ANIMUA — Dashboard</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/src/css/adminDashboard.css" />
+</head>
+<body class="loading">
+
+<div class="shell">
+  <!-- Sidebar injected here -->
+  <div id="sidebar-container"></div>
+
+  <!-- Main stage -->
+  <div class="stage">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button id="sidebarToggle" class="icon-btn" type="button" aria-label="Toggle sidebar">
+          <i class="bi bi-list"></i>
+        </button>
+        <div class="search-pill">
+          <i class="bi bi-search"></i>
+          <input type="text" id="globalSearch" placeholder="Search animals, records, staff…" autocomplete="off" />
+          <div id="searchDropdown" class="search-dropdown d-none"></div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="icon-btn" type="button" title="Messages">
+          <i class="bi bi-envelope"></i>
+          <span class="badge-count" id="msgCount" style="display:none"></span>
+        </button>
+        <button class="icon-btn notif-btn" type="button" title="Notifications" id="notifToggle">
+          <i class="bi bi-bell-fill"></i>
+          <span class="notif-dot" id="notifDot"></span>
+        </button>
+        <div class="user-chip">
+          <div class="user-avatar" id="topbar-initials">AS</div>
+          <div class="user-meta">
+            <span id="display-name">Super Admin</span>
+            <small id="display-role">Administrator</small>
+          </div>
+          <i class="bi bi-chevron-down caret"></i>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page body -->
+    <div class="page-body">
+
+      <!-- Hero -->
+      <section class="hero mb-4">
+        <div class="hero-text">
+          <p class="hero-eyebrow">Dashboard Overview</p>
+          <h1>Hello, <em id="welcomeName">Admin</em></h1>
+          <p class="hero-sub">Monitor shelter activity, track intake progress, and keep adoption readiness in check — all in one place.</p>
+          <div class="d-flex align-items-center gap-3 flex-wrap mt-2">
+            <span class="hero-date" id="live-date"></span>
+            <span class="hero-weather" id="shelter-status">
+              <span class="status-dot status-green"></span> Shelter operating normally
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <!-- KPI Strip -->
+      <section class="kpi-strip mb-4">
+
+        <article class="kpi-card kpi-primary" id="kpi-total">
+          <div class="kpi-head">
+            <div class="kpi-icon"><i class="bi bi-heart-pulse-fill"></i></div>
+            <span class="kpi-pill">Live</span>
+          </div>
+          <h2 id="totalPetsCount" class="kpi-counter" data-target="0">0</h2>
+          <p>Total Animals</p>
+          <div class="kpi-trend"><i class="bi bi-arrow-up-short"></i><span id="totalTrend">—</span></div>
+        </article>
+
+        <article class="kpi-card" id="kpi-intake">
+          <div class="kpi-head">
+            <div class="kpi-icon kpi-amber"><i class="bi bi-box-arrow-in-down"></i></div>
+            <span class="kpi-pill">Queue</span>
+          </div>
+          <h2 id="intakeCount" class="kpi-counter" data-target="0">0</h2>
+          <p>In Intake</p>
+          <div class="kpi-trend kpi-trend-amber"><i class="bi bi-clock-history"></i><span id="intakeTrend">—</span></div>
+        </article>
+
+        <article class="kpi-card" id="kpi-quarantine">
+          <div class="kpi-head">
+            <div class="kpi-icon kpi-blue"><i class="bi bi-shield-plus"></i></div>
+            <span class="kpi-pill">Care</span>
+          </div>
+          <h2 id="quarantineCount" class="kpi-counter" data-target="0">0</h2>
+          <p>Quarantine</p>
+          <div class="kpi-trend kpi-trend-blue"><i class="bi bi-clipboard2-pulse"></i><span id="quarantineTrend">—</span></div>
+        </article>
+
+        <article class="kpi-card" id="kpi-ready">
+          <div class="kpi-head">
+            <div class="kpi-icon kpi-green"><i class="bi bi-house-heart-fill"></i></div>
+            <span class="kpi-pill">Ready</span>
+          </div>
+          <h2 id="readyCount" class="kpi-counter" data-target="0">0</h2>
+          <p>Ready for Adoption</p>
+          <div class="kpi-trend kpi-trend-green"><i class="bi bi-arrow-up-short"></i><span id="readyTrend">—</span></div>
+        </article>
+
+        <article class="kpi-card" id="kpi-adopted">
+          <div class="kpi-head">
+            <div class="kpi-icon kpi-rose"><i class="bi bi-balloon-heart-fill"></i></div>
+            <span class="kpi-pill">This Month</span>
+          </div>
+          <h2 id="adoptedCount" class="kpi-counter" data-target="0">0</h2>
+          <p>Adopted</p>
+          <div class="kpi-trend kpi-trend-rose"><i class="bi bi-arrow-up-short"></i><span id="adoptedTrend">—</span></div>
+        </article>
+
+      </section>
+
+      <!-- Main grid -->
+      <div class="row g-4 mb-4">
+
+        <!-- Intake vs Adoptions chart -->
+        <div class="col-xl-8 col-lg-7">
+          <div class="panel h-100">
+            <div class="panel-head">
+              <div>
+                <h3>Intake vs Adoptions</h3>
+                <p>Monthly comparison — current year</p>
+              </div>
+              <div class="d-flex gap-2 align-items-center">
+                <div class="chart-legend">
+                  <span class="legend-dot" style="background:var(--clay)"></span><span>Intake</span>
+                  <span class="legend-dot ms-2" style="background:var(--green)"></span><span>Adoptions</span>
+                </div>
+                <button class="dot-btn" type="button"><i class="bi bi-three-dots"></i></button>
+              </div>
+            </div>
+            <div style="position:relative;height:280px;">
+              <canvas id="intakeAdoptionChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Species donut -->
+        <div class="col-xl-4 col-lg-5">
+          <div class="panel h-100">
+            <div class="panel-head">
+              <div>
+                <h3>Species Breakdown</h3>
+                <p>Current shelter population</p>
+              </div>
+            </div>
+            <div style="position:relative;height:200px;margin-bottom:12px;">
+              <canvas id="speciesChart"></canvas>
+            </div>
+            <div id="speciesLegend" class="species-legend-grid"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Second row -->
+      <div class="row g-4 mb-4">
+
+        <!-- Recent activities table -->
+        <div class="col-xl-8">
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <h3>Recent Activity</h3>
+                <p>Latest shelter events and updates</p>
+              </div>
+              <div class="d-flex gap-2">
+                <select class="filter-select" id="activityFilter">
+                  <option value="all">All types</option>
+                  <option value="intake">Intake</option>
+                  <option value="adoption">Adoption</option>
+                  <option value="medical">Medical</option>
+                  <option value="transfer">Transfer</option>
+                </select>
+                <a href="/pages/management/animalRecords.html" class="text-btn">View all →</a>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="shelter-table" id="activityTable">
+                <thead>
+                  <tr>
+                    <th>Animal</th>
+                    <th>Type</th>
+                    <th>Event</th>
+                    <th>Staff</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="activityTableBody">
+                  <tr><td colspan="6" class="text-center py-4 text-muted">Loading activity…</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right column: alerts + quick actions -->
+        <div class="col-xl-4">
+          <div class="d-flex flex-column gap-4">
+
+            <!-- Alerts -->
+            <div class="panel">
+              <div class="panel-head">
+                <div>
+                  <h3>Alerts</h3>
+                  <p>Requires attention</p>
+                </div>
+                <span class="alert-badge" id="alertCount">0</span>
+              </div>
+              <div class="alert-stack" id="alertStack">
+                <div class="alert-row alert-amber">
+                  <div class="alert-ico"><i class="bi bi-exclamation-triangle-fill"></i></div>
+                  <div>
+                    <strong>Pending applications</strong>
+                    <p>Review newly submitted adoption requests.</p>
+                  </div>
+                </div>
+                <div class="alert-row alert-blue">
+                  <div class="alert-ico"><i class="bi bi-clipboard2-pulse"></i></div>
+                  <div>
+                    <strong>Medical monitoring</strong>
+                    <p>Track quarantine and treatment records daily.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Compatibility Queue -->
+            <div class="panel">
+              <div class="panel-head">
+                <div>
+                  <h3>Compatibility Queue</h3>
+                  <p>Pending AI matches</p>
+                </div>
+                <a href="/pages/management/adoptionRequests.html" class="text-btn">See all →</a>
+              </div>
+              <div class="compat-list" id="compatList">
+                <div class="compat-item">
+                  <div class="compat-avatar compat-dog"><i class="bi bi-emoji-smile"></i></div>
+                  <div class="compat-info">
+                    <strong>Buddy</strong>
+                    <span>Matched with Santos family</span>
+                  </div>
+                  <div class="compat-score score-high">94%</div>
+                </div>
+                <div class="compat-item">
+                  <div class="compat-avatar compat-cat"><i class="bi bi-emoji-smile"></i></div>
+                  <div class="compat-info">
+                    <strong>Mochi</strong>
+                    <span>Matched with Dela Cruz family</span>
+                  </div>
+                  <div class="compat-score score-mid">77%</div>
+                </div>
+                <div class="compat-item">
+                  <div class="compat-avatar compat-dog"><i class="bi bi-emoji-smile"></i></div>
+                  <div class="compat-info">
+                    <strong>Rex</strong>
+                    <span>Awaiting applicant profile</span>
+                  </div>
+                  <div class="compat-score score-pending">—</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Third row -->
+      <div class="row g-4 mb-4">
+
+        <!-- Length of stay chart -->
+        <div class="col-xl-4 col-lg-5">
+          <div class="panel h-100">
+            <div class="panel-head">
+              <div>
+                <h3>Length of Stay</h3>
+                <p>Days in shelter distribution</p>
+              </div>
+            </div>
+            <div style="position:relative;height:220px;">
+              <canvas id="stayChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick actions -->
+        <div class="col-xl-4 col-lg-7">
+          <div class="panel h-100">
+            <div class="panel-head">
+              <div>
+                <h3>Quick Actions</h3>
+                <p>Shortcuts for common tasks</p>
+              </div>
+            </div>
+            <div class="action-grid">
+              <a href="/pages/management/animalRecords.html" class="action-tile">
+                <div class="action-tile-icon tile-clay"><i class="bi bi-plus-square-fill"></i></div>
+                <span>Add Animal</span>
+              </a>
+              <a href="/pages/management/adoptionRequests.html" class="action-tile">
+                <div class="action-tile-icon tile-rose"><i class="bi bi-heart-fill"></i></div>
+                <span>Adoptions</span>
+              </a>
+              <a href="/pages/management/reports.html" class="action-tile">
+                <div class="action-tile-icon tile-blue"><i class="bi bi-bar-chart-line-fill"></i></div>
+                <span>Reports</span>
+              </a>
+              <a href="/pages/management/medical.html" class="action-tile">
+                <div class="action-tile-icon tile-green"><i class="bi bi-clipboard2-heart-fill"></i></div>
+                <span>Medical</span>
+              </a>
+              <a href="/pages/management/staff.html" class="action-tile">
+                <div class="action-tile-icon tile-amber"><i class="bi bi-people-fill"></i></div>
+                <span>Staff</span>
+              </a>
+              <a href="/pages/management/foster.html" class="action-tile">
+                <div class="action-tile-icon tile-teal"><i class="bi bi-house-door-fill"></i></div>
+                <span>Foster</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Today's schedule -->
+        <div class="col-xl-4">
+          <div class="panel h-100">
+            <div class="panel-head">
+              <div>
+                <h3>Today's Schedule</h3>
+                <p>Priority queue</p>
+              </div>
+              <button class="dot-btn"><i class="bi bi-three-dots"></i></button>
+            </div>
+            <div class="sched-stack" id="schedStack">
+              <div class="sched-item sched-active">
+                <span class="sched-time">09:00</span>
+                <div>
+                  <strong>Intake review</strong>
+                  <p>Morning shelter check-in</p>
+                </div>
+                <span class="sched-tag tag-now">Now</span>
+              </div>
+              <div class="sched-item">
+                <span class="sched-time">11:00</span>
+                <div>
+                  <strong>Medical status review</strong>
+                  <p>Quarantine and treatment updates</p>
+                </div>
+              </div>
+              <div class="sched-item">
+                <span class="sched-time">13:30</span>
+                <div>
+                  <strong>Compatibility assessments</strong>
+                  <p>AI match review for 3 pending pairs</p>
+                </div>
+              </div>
+              <div class="sched-item">
+                <span class="sched-time">14:00</span>
+                <div>
+                  <strong>Adoption shortlist</strong>
+                  <p>Finalize ready-for-adoption candidates</p>
+                </div>
+              </div>
+              <div class="sched-item">
+                <span class="sched-time">16:00</span>
+                <div>
+                  <strong>Foster family visit</strong>
+                  <p>Orientation for 2 new foster applicants</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Recent animals table -->
+      <div class="row g-4 mb-2">
+        <div class="col-12">
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <h3>Recent Animals</h3>
+                <p>Latest entries from the shelter system</p>
+              </div>
+              <div class="d-flex gap-2 align-items-center">
+                <input type="text" class="filter-select" id="animalSearch" placeholder="Search animals…" style="width:180px" />
+                <a href="/pages/management/animalRecords.html" class="text-btn">View all →</a>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="shelter-table" id="recentAnimalsTable">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Species</th>
+                    <th>Breed</th>
+                    <th>Age</th>
+                    <th>Status</th>
+                    <th>Days in Shelter</th>
+                    <th>Compatibility</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="recentAnimalsBody">
+                  <tr><td colspan="9" class="text-center py-4 text-muted">Loading animals…</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /page-body -->
+  </div><!-- /stage -->
+</div><!-- /shell -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script type="module" src="/src/management/dashboard.js"></script>
+</body>
+</html>
