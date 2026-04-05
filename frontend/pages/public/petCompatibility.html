@@ -3,512 +3,882 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ANIMUA | Pet Compatibility Quiz</title>
+  <title>ANIMUA — Pet Compatibility Quiz</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-  />
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
-    rel="stylesheet"
-  />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;700&display=swap"
-    rel="stylesheet"
-  />
+    :root {
+      --clay:      #6f191c;
+      --clay-2:    #9b2d30;
+      --clay-soft: #fdf0f0;
+      --clay-muted:rgba(111,25,28,0.1);
+      --amber:     #f0a500;
+      --teal:      #0d7377;
+      --teal-soft: #e6f7f7;
+      --green:     #1a7a40;
+      --green-soft:#e8f7ee;
+      --ink:       #0f0d0d;
+      --stone:     #7a7070;
+      --stone-2:   #b0a8a8;
+      --cream:     #fdfaf7;
+      --cream-2:   #f5f0ea;
+      --white:     #ffffff;
+      --serif:     'Fraunces', Georgia, serif;
+      --sans:      'Plus Jakarta Sans', sans-serif;
+      --ease:      cubic-bezier(0.16, 1, 0.3, 1);
+      --radius:    20px;
+    }
 
-  <link rel="stylesheet" href="/src/css/public/petCompatibility.css" />
+    body {
+      font-family: var(--sans);
+      background: var(--cream);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    /* ── BG ─────────────────────────────────────────── */
+    .bg-canvas { position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
+    .bg-blob { position:absolute; border-radius:50%; filter:blur(80px); opacity:0.25; }
+    .blob-1 { width:500px;height:500px;background:radial-gradient(circle,#f9d0d0,transparent);top:-80px;right:-80px;animation:drift 14s ease-in-out infinite alternate; }
+    .blob-2 { width:400px;height:400px;background:radial-gradient(circle,#d0f0ee,transparent);bottom:-60px;left:-60px;animation:drift 10s ease-in-out infinite alternate-reverse; }
+    @keyframes drift { from{transform:translate(0,0)}to{transform:translate(20px,15px)} }
+
+    /* ── Layout ─────────────────────────────────────── */
+    .quiz-shell {
+      position:relative; z-index:1;
+      min-height:100vh; display:flex; flex-direction:column;
+    }
+
+    /* ── Header ─────────────────────────────────────── */
+    .quiz-header {
+      padding:18px 32px;
+      background:rgba(253,250,247,0.9); backdrop-filter:blur(12px);
+      border-bottom:1px solid rgba(0,0,0,0.07);
+      display:flex; align-items:center; gap:20px; flex-wrap:wrap;
+      position:sticky; top:0; z-index:100;
+    }
+    .header-brand {
+      display:flex;align-items:center;gap:8px;font-family:var(--serif);
+      font-size:1rem;font-weight:700;color:var(--ink);text-decoration:none;
+    }
+    .header-brand-dot {
+      width:28px;height:28px;background:var(--clay);border-radius:8px;
+      display:flex;align-items:center;justify-content:center;font-size:0.8rem;
+    }
+
+    /* Progress bar */
+    .header-progress { flex:1; min-width:200px; }
+    .progress-label {
+      display:flex;justify-content:space-between;
+      font-size:0.75rem;font-weight:600;color:var(--stone);margin-bottom:6px;
+    }
+    .progress-track {
+      height:6px;background:rgba(0,0,0,0.08);border-radius:999px;overflow:hidden;
+    }
+    .progress-fill {
+      height:100%;background:linear-gradient(90deg,var(--clay),#e05a5d);
+      border-radius:999px;transition:width 400ms var(--ease);
+    }
+
+    .header-meta {
+      font-size:0.8rem;font-weight:700;color:var(--stone);
+      display:flex;align-items:center;gap:6px;
+    }
+    .phase-badge {
+      background:var(--clay-soft);color:var(--clay);
+      border:1px solid rgba(111,25,28,0.15);
+      border-radius:999px;padding:3px 12px;font-size:0.72rem;font-weight:700;
+    }
+
+    /* ── Main area ───────────────────────────────────── */
+    .quiz-main {
+      flex:1;display:flex;align-items:flex-start;
+      justify-content:center;padding:40px 24px 60px;gap:28px;
+    }
+
+    /* ── Question area ───────────────────────────────── */
+    .question-area { flex:1;max-width:700px; }
+
+    /* Phase intro */
+    .phase-intro {
+      background:var(--white);border:1px solid rgba(0,0,0,0.07);
+      border-radius:var(--radius);padding:24px 28px;margin-bottom:24px;
+      display:flex;align-items:center;gap:16px;
+    }
+    .phase-intro-icon {
+      width:48px;height:48px;border-radius:14px;
+      display:flex;align-items:center;justify-content:center;font-size:1.3rem;
+      flex-shrink:0;
+    }
+    .phase-intro-kicker { font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--stone);margin-bottom:3px; }
+    .phase-intro-title  { font-family:var(--serif);font-size:1.1rem;font-weight:700;color:var(--ink);margin-bottom:2px; }
+    .phase-intro-desc   { font-size:0.82rem;color:var(--stone);line-height:1.5; }
+
+    /* Question card */
+    .question-card {
+      background:var(--white);border:1px solid rgba(0,0,0,0.08);
+      border-radius:var(--radius);padding:28px 28px 24px;
+      margin-bottom:14px;transition:box-shadow 250ms var(--ease);
+      position:relative;
+    }
+    .question-card.answered { border-color:rgba(111,25,28,0.2); }
+    .question-card.answered::after {
+      content:'\F26B'; font-family:'Bootstrap-icons';
+      position:absolute;top:16px;right:16px;font-size:1rem;color:var(--clay);
+    }
+
+    .q-num {
+      font-family:var(--serif);font-size:0.75rem;font-weight:700;
+      color:var(--stone-2);text-transform:uppercase;letter-spacing:0.08em;
+      margin-bottom:8px;
+    }
+    .q-text {
+      font-size:1rem;font-weight:700;color:var(--ink);
+      line-height:1.4;margin-bottom:6px;
+    }
+    .q-hint {
+      font-size:0.82rem;color:var(--stone);margin-bottom:18px;line-height:1.5;
+    }
+
+    /* Option buttons (5-scale) */
+    .option-group {
+      display:flex;gap:8px;flex-wrap:wrap;
+    }
+    .option-btn {
+      flex:1;min-width:80px;
+      padding:10px 8px;
+      border:1.5px solid rgba(0,0,0,0.1);
+      border-radius:12px;
+      background:var(--cream);
+      cursor:pointer;
+      display:flex;flex-direction:column;align-items:center;gap:4px;
+      font-family:var(--sans);
+      transition:all 220ms var(--ease);
+      position:relative;
+    }
+    .option-btn:hover {
+      border-color:var(--clay);
+      background:var(--clay-soft);
+      transform:translateY(-2px);
+    }
+    .option-btn.selected {
+      border-color:var(--clay);
+      background:var(--clay);
+      color:#fff;
+    }
+    .option-num {
+      font-family:var(--serif);font-size:1.4rem;font-weight:900;
+      color:var(--stone-2);line-height:1;
+    }
+    .option-btn.selected .option-num { color:rgba(255,255,255,0.7); }
+    .option-label {
+      font-size:0.72rem;font-weight:600;color:var(--stone);
+      text-align:center;line-height:1.3;
+    }
+    .option-btn.selected .option-label { color:rgba(255,255,255,0.9); }
+
+    /* Filter section — select tiles */
+    .filter-section {
+      background:var(--white);border:1px solid rgba(0,0,0,0.08);
+      border-radius:var(--radius);padding:28px;margin-bottom:14px;
+    }
+    .filter-section .q-num    { margin-bottom:4px; }
+    .filter-section .q-text   { margin-bottom:4px; }
+    .filter-section .q-hint   { margin-bottom:14px; }
+
+    .select-tiles { display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px; }
+    .select-tile {
+      padding:12px 10px;border:1.5px solid rgba(0,0,0,0.1);
+      border-radius:12px;background:var(--cream);
+      cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;
+      font-family:var(--sans);transition:all 220ms var(--ease);text-align:center;
+    }
+    .select-tile:hover { border-color:var(--clay);background:var(--clay-soft); }
+    .select-tile.selected { border-color:var(--clay);background:var(--clay);color:#fff; }
+    .select-tile-icon  { font-size:1.4rem; }
+    .select-tile-label { font-size:0.78rem;font-weight:600;color:var(--stone);line-height:1.3; }
+    .select-tile.selected .select-tile-label { color:rgba(255,255,255,0.9); }
+
+    /* Toggle tiles (yes/no) */
+    .toggle-group { display:flex;gap:8px; }
+    .toggle-tile {
+      flex:1;padding:14px 12px;border:1.5px solid rgba(0,0,0,0.1);
+      border-radius:12px;background:var(--cream);cursor:pointer;
+      display:flex;align-items:center;justify-content:center;gap:8px;
+      font-family:var(--sans);font-size:0.88rem;font-weight:600;color:var(--stone);
+      transition:all 220ms var(--ease);
+    }
+    .toggle-tile:hover { border-color:var(--clay);background:var(--clay-soft);color:var(--clay); }
+    .toggle-tile.selected-yes { border-color:var(--green);background:var(--green);color:#fff; }
+    .toggle-tile.selected-no  { border-color:var(--clay);background:var(--clay);color:#fff; }
+
+    /* Navigation */
+    .quiz-nav {
+      display:flex;justify-content:space-between;align-items:center;
+      margin-top:8px;gap:12px;
+    }
+    .btn-prev {
+      display:inline-flex;align-items:center;gap:7px;
+      padding:11px 20px;border:1.5px solid rgba(0,0,0,0.12);
+      border-radius:12px;background:var(--white);color:var(--stone);
+      font:600 0.88rem var(--sans);cursor:pointer;transition:all 250ms var(--ease);
+    }
+    .btn-prev:hover { border-color:var(--clay);color:var(--clay); }
+    .btn-prev:disabled { opacity:0.35;cursor:not-allowed; }
+
+    .btn-next {
+      display:inline-flex;align-items:center;gap:8px;
+      padding:12px 28px;background:var(--clay);color:#fff;
+      border:none;border-radius:12px;font:700 0.95rem var(--sans);
+      cursor:pointer;transition:all 250ms var(--ease);
+      box-shadow:0 4px 14px rgba(111,25,28,0.3);
+    }
+    .btn-next:hover { background:var(--clay-2);transform:translateY(-1px);box-shadow:0 6px 20px rgba(111,25,28,0.35); }
+    .btn-next:disabled { opacity:0.4;cursor:not-allowed;box-shadow:none;transform:none; }
+
+    .btn-submit {
+      display:inline-flex;align-items:center;gap:8px;
+      padding:14px 32px;background:var(--clay);color:#fff;
+      border:none;border-radius:14px;font:700 1rem var(--sans);
+      cursor:pointer;transition:all 250ms var(--ease);
+      box-shadow:0 4px 20px rgba(111,25,28,0.35);
+    }
+    .btn-submit:hover { background:var(--clay-2);transform:translateY(-2px); }
+
+    /* ── Sidebar ─────────────────────────────────────── */
+    .quiz-sidebar { width:260px;flex-shrink:0; }
+    .sidebar-sticky { position:sticky;top:100px;display:flex;flex-direction:column;gap:14px; }
+
+    .progress-card {
+      background:var(--white);border:1px solid rgba(0,0,0,0.08);
+      border-radius:var(--radius);padding:20px;
+    }
+    .progress-card-title { font-family:var(--serif);font-size:0.95rem;font-weight:700;margin-bottom:14px; }
+    .phase-steps { display:flex;flex-direction:column;gap:10px; }
+    .phase-step {
+      display:flex;align-items:center;gap:10px;
+      padding:8px 10px;border-radius:10px;
+      font-size:0.82rem;font-weight:600;color:var(--stone);
+      transition:all 200ms;cursor:default;
+    }
+    .phase-step.active { background:var(--clay-soft);color:var(--clay); }
+    .phase-step.done   { color:var(--green); }
+    .phase-step-dot {
+      width:22px;height:22px;border-radius:50%;
+      border:2px solid rgba(0,0,0,0.12);
+      display:flex;align-items:center;justify-content:center;
+      font-size:0.7rem;flex-shrink:0;
+    }
+    .phase-step.active .phase-step-dot { border-color:var(--clay);background:var(--clay);color:#fff; }
+    .phase-step.done   .phase-step-dot { border-color:var(--green);background:var(--green);color:#fff; }
+
+    .answers-card {
+      background:var(--white);border:1px solid rgba(0,0,0,0.08);
+      border-radius:var(--radius);padding:20px;max-height:280px;overflow-y:auto;
+    }
+    .answers-card-title { font-family:var(--serif);font-size:0.9rem;font-weight:700;margin-bottom:12px; }
+    .answer-chip-list   { display:flex;flex-direction:column;gap:5px; }
+    .answer-chip {
+      display:flex;justify-content:space-between;align-items:center;
+      padding:5px 10px;background:var(--cream-2);border-radius:8px;
+      font-size:0.75rem;
+    }
+    .answer-chip-key   { color:var(--stone);font-weight:600; }
+    .answer-chip-val   { color:var(--clay);font-weight:700;font-family:var(--serif); }
+
+    .tip-card {
+      background:var(--clay);border-radius:var(--radius);padding:18px;color:#fff;
+    }
+    .tip-card-label { font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;opacity:0.7;margin-bottom:6px; }
+    .tip-card-text  { font-size:0.85rem;line-height:1.6;opacity:0.9; }
+
+    /* ── Completion screen ───────────────────────────── */
+    #completionScreen {
+      display:none;
+      flex:1;align-items:center;justify-content:center;padding:40px 24px;
+    }
+    .complete-card {
+      background:var(--white);border:1px solid rgba(0,0,0,0.08);
+      border-radius:24px;padding:48px 40px;text-align:center;max-width:500px;
+      box-shadow:0 16px 48px rgba(0,0,0,0.08);
+    }
+    .complete-icon {
+      font-size:3rem;margin-bottom:20px;display:block;
+      animation:pop 0.5s var(--ease) both;
+    }
+    @keyframes pop { from{transform:scale(0.5);opacity:0}to{transform:scale(1);opacity:1} }
+    .complete-title { font-family:var(--serif);font-size:2rem;font-weight:900;margin-bottom:12px; }
+    .complete-title em { color:var(--clay);font-style:italic; }
+    .complete-sub   { color:var(--stone);font-size:0.95rem;line-height:1.6;margin-bottom:28px; }
+    .complete-scores {
+      display:flex;justify-content:center;gap:16px;margin-bottom:28px;flex-wrap:wrap;
+    }
+    .score-pill {
+      background:var(--clay-soft);border:1px solid rgba(111,25,28,0.12);
+      border-radius:10px;padding:8px 16px;font-size:0.82rem;font-weight:700;color:var(--clay);
+    }
+
+    /* ── Animations ─────────────────────────────────── */
+    @keyframes slideIn {
+      from{opacity:0;transform:translateX(20px)}
+      to{opacity:1;transform:translateX(0)}
+    }
+    @keyframes slideOut {
+      from{opacity:1;transform:translateX(0)}
+      to{opacity:0;transform:translateX(-20px)}
+    }
+    .slide-in  { animation:slideIn 320ms var(--ease) both; }
+    .slide-out { animation:slideOut 200ms var(--ease) both; }
+
+    /* ── Responsive ─────────────────────────────────── */
+    @media(max-width:900px) {
+      .quiz-sidebar { display:none; }
+      .quiz-main    { padding:24px 16px 48px; }
+    }
+    @media(max-width:600px) {
+      .option-group { gap:6px; }
+      .option-btn   { min-width:60px;padding:8px 4px; }
+      .option-num   { font-size:1.1rem; }
+    }
+  </style>
 </head>
 <body>
-  <main class="quiz-shell">
-    <div class="bg-blob blob-1"></div>
-    <div class="bg-blob blob-2"></div>
-    <div class="bg-blob blob-3"></div>
+<div class="bg-canvas">
+  <div class="bg-blob blob-1"></div>
+  <div class="bg-blob blob-2"></div>
+</div>
 
-    <div class="quiz-layout">
-      <!-- LEFT / MAIN -->
-      <section class="quiz-main">
-        <div class="quiz-hero">
-          <span class="quiz-badge">
-            <i class="bi bi-stars"></i>
-            Personalized Pet Matching
-          </span>
+<div class="quiz-shell">
 
-          <h1>Let’s find the right pet match.</h1>
-          <p>
-            Answer the quiz based on the adopter’s real lifestyle, environment,
-            and care capacity. ANIMUA will compare the answers with each pet’s
-            compatibility profile to recommend the strongest matches.
-          </p>
+  <!-- Header -->
+  <header class="quiz-header">
+    <a href="/pages/public/quizLanding.html" class="header-brand">
+      <div class="header-brand-dot">🐾</div>
+      <span>ANIMUA</span>
+    </a>
+    <div class="header-progress">
+      <div class="progress-label">
+        <span id="progressLabel">Step 1 of 24</span>
+        <span id="progressPercent">0%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill" style="width:0%"></div>
+      </div>
+    </div>
+    <div class="header-meta">
+      <span class="phase-badge" id="phaseBadge">Filters</span>
+    </div>
+  </header>
 
-          <div class="hero-tags">
-            <span><i class="bi bi-ui-checks-grid"></i> 19 Questions</span>
-            <span><i class="bi bi-funnel"></i> Smart Filters</span>
-            <span><i class="bi bi-heart-pulse"></i> Match Results</span>
+  <!-- Quiz Main -->
+  <div class="quiz-main" id="quizMain">
+
+    <!-- Question area -->
+    <div class="question-area" id="questionArea">
+      <!-- Populated by JS -->
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="quiz-sidebar">
+      <div class="sidebar-sticky">
+        <div class="progress-card">
+          <div class="progress-card-title">Your progress</div>
+          <div class="phase-steps" id="phaseSteps">
+            <div class="phase-step active" data-phase="0">
+              <div class="phase-step-dot"><i class="bi bi-funnel-fill" style="font-size:0.6rem"></i></div>
+              <span>Basic Filters</span>
+            </div>
+            <div class="phase-step" data-phase="1">
+              <div class="phase-step-dot"><i class="bi bi-lightning-charge-fill" style="font-size:0.6rem"></i></div>
+              <span>Lifestyle</span>
+            </div>
+            <div class="phase-step" data-phase="2">
+              <div class="phase-step-dot"><i class="bi bi-people-fill" style="font-size:0.6rem"></i></div>
+              <span>Social</span>
+            </div>
+            <div class="phase-step" data-phase="3">
+              <div class="phase-step-dot"><i class="bi bi-house-heart-fill" style="font-size:0.6rem"></i></div>
+              <span>Home & Care</span>
+            </div>
+            <div class="phase-step" data-phase="4">
+              <div class="phase-step-dot"><i class="bi bi-heart-fill" style="font-size:0.6rem"></i></div>
+              <span>Affection</span>
+            </div>
           </div>
         </div>
 
-        <form id="pet-compatibility-form" class="quiz-form">
-          <!-- FILTERS -->
-          <section class="section-card reveal-card" data-section="filters">
-            <div class="section-header">
-              <div>
-                <span class="section-kicker">Step 1</span>
-                <h2>Choose basic filters</h2>
-                <p>
-                  Narrow down the pet pool first before matching begins.
-                </p>
-              </div>
-              <div class="section-icon icon-wine">
-                <i class="bi bi-funnel-fill"></i>
-              </div>
-            </div>
-
-            <div class="filter-grid">
-              <div class="input-tile">
-                <label for="preferred-species" class="question-label">Preferred Species</label>
-                <select id="preferred-species" name="preferredSpecies" class="form-select">
-                  <option value="Any">Any</option>
-                  <option value="Dog">Dog</option>
-                  <option value="Cat">Cat</option>
-                </select>
-              </div>
-
-              <div class="input-tile">
-                <label for="preferred-sex" class="question-label">Preferred Sex</label>
-                <select id="preferred-sex" name="preferredSex" class="form-select">
-                  <option value="Any">Any</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                </select>
-              </div>
-
-              <div class="input-tile">
-                <label for="needAllergyFriendly" class="question-label">Need Allergy-Friendly Pet?</label>
-                <select id="needAllergyFriendly" name="needAllergyFriendly" class="form-select">
-                  <option value="no">No Preference</option>
-                  <option value="yes">Yes</option>
-                </select>
-              </div>
-
-              <div class="input-tile">
-                <label for="acceptAggressive" class="question-label">Accept Aggressive Behaviour?</label>
-                <select id="acceptAggressive" name="acceptAggressive" class="form-select">
-                  <option value="yes">Yes</option>
-                  <option value="no">No</option>
-                </select>
-              </div>
-
-              <div class="input-tile">
-                <label for="acceptSpecialNeeds" class="question-label">Accept Special-Needs Pet?</label>
-                <select id="acceptSpecialNeeds" name="acceptSpecialNeeds" class="form-select">
-                  <option value="yes">Yes</option>
-                  <option value="no">No</option>
-                </select>
-              </div>
-            </div>
-          </section>
-
-          <!-- LIFESTYLE -->
-          <section class="section-card reveal-card delay-1" data-section="lifestyle">
-            <div class="section-header">
-              <div>
-                <span class="section-kicker">Step 2</span>
-                <h2>Lifestyle & activity</h2>
-                <p>These questions reflect routine, attention, and daily energy.</p>
-              </div>
-              <div class="section-icon icon-blue">
-                <i class="bi bi-lightning-charge-fill"></i>
-              </div>
-            </div>
-
-            <div class="question-grid">
-              <div class="question-card">
-                <label class="question-label">1. Daily Activity Level</label>
-                <div class="question-help">How active are you daily?</div>
-
-                <div class="scale-group" data-name="energyLevel">
-                  <input type="radio" id="energyLevel-1" name="energyLevel" value="1" required>
-                  <label for="energyLevel-1" class="scale-option">
-                    <span class="scale-number">1</span>
-                    <span class="scale-text">Very Low</span>
-                  </label>
-
-                  <input type="radio" id="energyLevel-2" name="energyLevel" value="2">
-                  <label for="energyLevel-2" class="scale-option">
-                    <span class="scale-number">2</span>
-                    <span class="scale-text">Low</span>
-                  </label>
-
-                  <input type="radio" id="energyLevel-3" name="energyLevel" value="3">
-                  <label for="energyLevel-3" class="scale-option">
-                    <span class="scale-number">3</span>
-                    <span class="scale-text">Moderate</span>
-                  </label>
-
-                  <input type="radio" id="energyLevel-4" name="energyLevel" value="4">
-                  <label for="energyLevel-4" class="scale-option">
-                    <span class="scale-number">4</span>
-                    <span class="scale-text">Active</span>
-                  </label>
-
-                  <input type="radio" id="energyLevel-5" name="energyLevel" value="5">
-                  <label for="energyLevel-5" class="scale-option">
-                    <span class="scale-number">5</span>
-                    <span class="scale-text">Very Active</span>
-                  </label>
-                </div>
-              </div>
-
-              <div class="question-card">
-                <label for="exerciseNeeds" class="question-label">2. Exercise Commitment</label>
-                <div class="question-help">How often can you exercise a pet?</div>
-                <select id="exerciseNeeds" name="exerciseNeeds" class="form-select" required>
-                  <option value="">Select</option>
-                  <option value="1">1 - Very Rarely</option>
-                  <option value="2">2 - Rarely</option>
-                  <option value="3">3 - Sometimes</option>
-                  <option value="4">4 - Often</option>
-                  <option value="5">5 - Very Often</option>
-                </select>
-              </div>
-
-              <div class="question-card">
-                <label for="independenceLevel" class="question-label">3. Independence Preference</label>
-                <div class="question-help">Do you prefer a pet that is independent?</div>
-                <select id="independenceLevel" name="independenceLevel" class="form-select" required>
-                  <option value="">Select</option>
-                  <option value="1">1 - Very Dependent</option>
-                  <option value="2">2 - Slightly Dependent</option>
-                  <option value="3">3 - Balanced</option>
-                  <option value="4">4 - Independent</option>
-                  <option value="5">5 - Very Independent</option>
-                </select>
-              </div>
-
-              <div class="question-card">
-                <label for="attentionNeeds" class="question-label">4. Daily Attention</label>
-                <div class="question-help">How much attention can you give daily?</div>
-                <select id="attentionNeeds" name="attentionNeeds" class="form-select" required>
-                  <option value="">Select</option>
-                  <option value="1">1 - Very Little</option>
-                  <option value="2">2 - Little</option>
-                  <option value="3">3 - Moderate</option>
-                  <option value="4">4 - High</option>
-                  <option value="5">5 - Very High</option>
-                </select>
-              </div>
-
-              <div class="question-card">
-                <label for="playfulness" class="question-label">5. Playfulness Preference</label>
-                <div class="question-help">How much do you enjoy playing with pets?</div>
-                <select id="playfulness" name="playfulness" class="form-select" required>
-                  <option value="">Select</option>
-                  <option value="1">1 - Very Little</option>
-                  <option value="2">2 - Little</option>
-                  <option value="3">3 - Moderate</option>
-                  <option value="4">4 - A Lot</option>
-                  <option value="5">5 - Very Much</option>
-                </select>
-              </div>
-
-              <div class="question-card">
-                <label for="adaptability" class="question-label">6. Routine Stability</label>
-                <div class="question-help">How often does your routine change?</div>
-                <select id="adaptability" name="adaptability" class="form-select" required>
-                  <option value="">Select</option>
-                  <option value="1">1 - Very Stable</option>
-                  <option value="2">2 - Slightly Changing</option>
-                  <option value="3">3 - Moderate Changes</option>
-                  <option value="4">4 - Often Changing</option>
-                  <option value="5">5 - Very Unpredictable</option>
-                </select>
-              </div>
-            </div>
-          </section>
-
-          <!-- SOCIAL -->
-          <section class="section-card reveal-card delay-2" data-section="social">
-            <div class="section-header">
-              <div>
-                <span class="section-kicker">Step 3</span>
-                <h2>Social environment</h2>
-                <p>These questions measure how social the home setup is.</p>
-              </div>
-              <div class="section-icon icon-gold">
-                <i class="bi bi-people-fill"></i>
-              </div>
-            </div>
-
-            <div class="question-grid">
-              <div class="question-card">
-                <label for="friendlinessToHumans" class="question-label">7. Household Social Activity</label>
-                <div class="question-help">How social is your household?</div>
-                <select id="friendlinessToHumans" name="friendlinessToHumans" class="form-select" required>
-                  <option value="">Select</option>
-                  <option value="1">1 - Very Quiet</option>
-                  <option value="2">2 - Slightly Social</option>
-                  <option value="3">3 - Moderately Social</option>
-                  <option value="4">4 - Social</option>
-                  <option value="5">5 - Very Social</option>
-                </select>
-              </div>
-
-              <div class="question-card">
-                <label for="goodWithKids" class="question-label">8. Child Interaction</label>
-                <div class="question-help">How often will the pet interact with children?</div>
-                <select id="goodWithKids" name="goodWithKids" class="form-select" required>
-                  <option value="">Select</option>
-                  <option value="1">1 - Never</option>
-                  <option value="2">2 - Rarely</option>
-                  <option value="3">3 - Sometimes</option>
-                  <option value="4">4 - Often</option>
-                  <option value="5">5 - Very Often</option>
-                </select>
-              </div>
-
-              <div class="question-card">
-                <label for="goodWithOtherPets" class="question-label">9. Other Pet Interaction</label>
-                <div class="question-help">How often will the pet interact with other pets?</div>
-                <select id="goodWithOtherPets" name="goodWithOtherPets" class="form-select" required>
-                  <option value="">Select</option>
-                  <option value="1">1 - Never</option>
-                  <option value="2">2 - Rarely</option>
-                  <option value="3">3 - Sometimes</option>
-                  <option value="4">4 - Often</option>
-                  <option value="5">5 - Very Often</option>
-                </select>
-              </div>
-
-              <div class="question-card">
-                <label for="strangerTolerance" class="question-label">10. Stranger Interaction</label>
-                <div class="question-help">How comfortable are you with pets meeting strangers?</div>
-                <select id="strangerTolerance" name="strangerTolerance" class="form-select" required>
-                  <option value="">Select</option>
-                  <option value="1">1 - Not Comfortable</option>
-                  <option value="2">2 - Slightly Comfortable</option>
-                  <option value="3">3 - Neutral</option>
-                  <option value="4">4 - Comfortable</option>
-                  <option value="5">5 - Very Comfortable</option>
-                </select>
-              </div>
-            </div>
-          </section>
-
-          <!-- CARE -->
-          <section class="section-card reveal-card delay-3" data-section="care">
-            <div class="section-header">
-              <div>
-                <span class="section-kicker">Step 4</span>
-                <h2>Home, care & maintenance</h2>
-                <p>These measure space, grooming, readiness, and maintenance tolerance.</p>
-              </div>
-              <div class="section-icon icon-blue-soft">
-                <i class="bi bi-house-heart-fill"></i>
-              </div>
-            </div>
-
-            <div class="question-grid">
-              <div class="question-card">
-                <label for="noiseLevel" class="question-label">11. Noise Tolerance</label>
-                <div class="question-help">How tolerant are you of pet noise?</div>
-                <select id="noiseLevel" name="noiseLevel" class="form-select" required>
-                  <option value="">Select</option>
-                  <option value="1">1 - Very Low Tolerance</option>
-                  <option value="2">2 - Low Tolerance</option>
-                  <option value="3">3 - Moderate</option>
-                  <option value="4">4 - Tolerant</option>
-                  <option value="5">5 - Very Tolerant</option>
-                </select>
-              </div>
-
-              <div class="question-card">
-                <label for="spaceNeeds" class="question-label">12. Space Availability</label>
-                <div class="question-help">How much living space do you have?</div>
-                <select id="spaceNeeds" name="spaceNeeds" class="form-select" required>
-                  <option value="">Select</option>
-                  <option value="1">1 - Very Small Space</option>
-                  <option value="2">2 - Small Space</option>
-                  <option value="3">3 - Moderate Space</option>
-                  <option value="4">4 - Large Space</option>
-                  <option value="5">5 - Very Large Space</option>
-                </select>
-              </div>
-
-              <div class="question-card">
-                <label for="climateTolerance" class="question-label">13. Climate Readiness</label>
-                <div class="question-help">Can you care for a pet in warm weather?</div>
-                <select id="climateTolerance" name="climateTolerance" class="form-select" required>
-                  <option value="">Select</option>
-                  <option value="1">1 - Not Ready</option>
-                  <option value="2">2 - Slightly Ready</option>
-                  <option value="3">3 - Moderately Ready</option>
-                  <option value="4">4 - Ready</option>
-                  <option value="5">5 - Fully Ready</option>
-                </select>
-              </div>
-
-              <div class="question-card">
-                <label for="groomingNeeds" class="question-label">14. Grooming Commitment</label>
-                <div class="question-help">How willing are you to groom a pet regularly?</div>
-                <select id="groomingNeeds" name="groomingNeeds" class="form-select" required>
-                  <option value="">Select</option>
-                  <option value="1">1 - Not Willing</option>
-                  <option value="2">2 - Slightly Willing</option>
-                  <option value="3">3 - Moderately Willing</option>
-                  <option value="4">4 - Willing</option>
-                  <option value="5">5 - Very Willing</option>
-                </select>
-              </div>
-
-              <div class="question-card">
-                <label for="sheddingLevel" class="question-label">15. Shedding Tolerance</label>
-                <div class="question-help">How comfortable are you with shedding fur?</div>
-                <select id="sheddingLevel" name="sheddingLevel" class="form-select" required>
-                  <option value="">Select</option>
-                  <option value="1">1 - Not Comfortable</option>
-                  <option value="2">2 - Slightly Comfortable</option>
-                  <option value="3">3 - Neutral</option>
-                  <option value="4">4 - Comfortable</option>
-                  <option value="5">5 - Very Comfortable</option>
-                </select>
-              </div>
-
-              <div class="question-card">
-                <label for="trainingDifficulty" class="question-label">16. Training Commitment</label>
-                <div class="question-help">How willing are you to train a pet?</div>
-                <select id="trainingDifficulty" name="trainingDifficulty" class="form-select" required>
-                  <option value="">Select</option>
-                  <option value="1">1 - Not Willing</option>
-                  <option value="2">2 - Slightly Willing</option>
-                  <option value="3">3 - Moderately Willing</option>
-                  <option value="4">4 - Willing</option>
-                  <option value="5">5 - Very Willing</option>
-                </select>
-              </div>
-
-              <div class="question-card">
-                <label for="healthRiskLevel" class="question-label">17. Vet Cost Preparedness</label>
-                <div class="question-help">How prepared are you for vet costs?</div>
-                <select id="healthRiskLevel" name="healthRiskLevel" class="form-select" required>
-                  <option value="">Select</option>
-                  <option value="1">1 - Not Prepared</option>
-                  <option value="2">2 - Slightly Prepared</option>
-                  <option value="3">3 - Moderately Prepared</option>
-                  <option value="4">4 - Prepared</option>
-                  <option value="5">5 - Fully Prepared</option>
-                </select>
-              </div>
-            </div>
-          </section>
-
-          <!-- AFFECTION -->
-          <section class="section-card reveal-card delay-4" data-section="affection">
-            <div class="section-header">
-              <div>
-                <span class="section-kicker">Step 5</span>
-                <h2>Affection & attachment</h2>
-                <p>These questions reflect closeness and attachment preference.</p>
-              </div>
-              <div class="section-icon icon-rose">
-                <i class="bi bi-heart-fill"></i>
-              </div>
-            </div>
-
-            <div class="question-grid">
-              <div class="question-card">
-                <label for="affectionLevel" class="question-label">18. Affection Preference</label>
-                <div class="question-help">How affectionate do you want your pet to be?</div>
-                <select id="affectionLevel" name="affectionLevel" class="form-select" required>
-                  <option value="">Select</option>
-                  <option value="1">1 - Very Independent</option>
-                  <option value="2">2 - Slightly Affectionate</option>
-                  <option value="3">3 - Balanced</option>
-                  <option value="4">4 - Affectionate</option>
-                  <option value="5">5 - Very Affectionate</option>
-                </select>
-              </div>
-
-              <div class="question-card">
-                <label for="separationAnxiety" class="question-label">19. Clinginess Preference</label>
-                <div class="question-help">How comfortable are you with a clingy pet?</div>
-                <select id="separationAnxiety" name="separationAnxiety" class="form-select" required>
-                  <option value="">Select</option>
-                  <option value="1">1 - Not Comfortable</option>
-                  <option value="2">2 - Slightly Comfortable</option>
-                  <option value="3">3 - Neutral</option>
-                  <option value="4">4 - Comfortable</option>
-                  <option value="5">5 - Very Comfortable</option>
-                </select>
-              </div>
-            </div>
-          </section>
-
-          <div class="quiz-actions">
-            <a href="/pages/public/quizLanding.html" class="btn-back-outline">
-              <i class="bi bi-arrow-left"></i>
-              Back
-            </a>
-
-            <button type="submit" class="btn-find-match">
-              <i class="bi bi-stars"></i>
-              Find Matches
-            </button>
-          </div>
-        </form>
-      </section>
-
-      <!-- RIGHT / STICKY -->
-      <aside class="quiz-side">
-        <div class="progress-card">
-          <span class="mini-kicker">Quiz Progress</span>
-          <h3>Complete the steps</h3>
-          <p>
-            Progress updates automatically as answers are filled in.
-          </p>
-
-          <div class="progress-bar-wrap">
-            <div class="progress-bar-fill" id="quizProgressFill"></div>
-          </div>
-          <div class="progress-text" id="quizProgressText">0% completed</div>
-
-          <div class="step-list">
-            <div class="step-item" data-step="filters">
-              <span class="step-dot"></span>
-              <span>Basic filters</span>
-            </div>
-            <div class="step-item" data-step="lifestyle">
-              <span class="step-dot"></span>
-              <span>Lifestyle & activity</span>
-            </div>
-            <div class="step-item" data-step="social">
-              <span class="step-dot"></span>
-              <span>Social environment</span>
-            </div>
-            <div class="step-item" data-step="care">
-              <span class="step-dot"></span>
-              <span>Home, care & maintenance</span>
-            </div>
-            <div class="step-item" data-step="affection">
-              <span class="step-dot"></span>
-              <span>Affection & attachment</span>
-            </div>
+        <div class="answers-card">
+          <div class="answers-card-title">Your answers so far</div>
+          <div class="answer-chip-list" id="answerChips">
+            <div style="font-size:0.78rem;color:var(--stone-2);text-align:center;padding:8px">No answers yet</div>
           </div>
         </div>
 
         <div class="tip-card">
-          <span class="mini-kicker">Helpful Tip</span>
-          <h3>Answer honestly</h3>
-          <p>
-            Better answers lead to better matches. Use the adopter’s actual routine,
-            environment, and capacity for care.
-          </p>
+          <div class="tip-card-label" id="tipLabel">💡 Tip</div>
+          <div class="tip-card-text" id="tipText">Answer based on your real lifestyle, not what you think you should say.</div>
         </div>
-      </aside>
-    </div>
-  </main>
+      </div>
+    </aside>
 
-  <script type="module" src="/src/public/js/petCompatibility.js"></script>
+  </div>
+
+  <!-- Completion screen -->
+  <div id="completionScreen" style="display:none; flex:1; align-items:center; justify-content:center; padding:40px 24px;">
+    <div class="complete-card">
+      <span class="complete-icon">🎉</span>
+      <h2 class="complete-title">All done! Finding your <em>best matches…</em></h2>
+      <p class="complete-sub">We're comparing your lifestyle answers with every available pet's compatibility profile. Your top matches are being calculated now.</p>
+      <div class="complete-scores" id="completeSummary"></div>
+      <button class="btn-submit" id="viewResultsBtn">
+        <i class="bi bi-stars"></i>
+        View My Matches
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script type="module">
+import { API_BASE_URL } from "../../utils/api.js";
+
+/* ══════════════════════════════════════════════════════
+   QUIZ DEFINITION
+   Phase 0: Filters (5 questions — select tiles)
+   Phases 1-4: Lifestyle / Social / Home / Affection (19 questions — 1-5 scale)
+══════════════════════════════════════════════════════ */
+const PHASES = [
+  {
+    id: 0, key: "filters", label: "Basic Filters",
+    icon: "bi-funnel-fill", iconBg: "#fdf0f0", iconColor: "var(--clay)",
+    kicker: "Step 1 of 5", title: "Set your filters",
+    desc: "Narrow down the pet pool before matching begins.",
+    questions: [
+      {
+        key: "preferredSpecies", label: "Preferred Species", isFilter: true,
+        text: "What species are you interested in?",
+        hint: "Select any if you have no preference.",
+        type: "tiles",
+        options: [
+          { label:"Any", value:"Any", icon:"🐾" },
+          { label:"Dog", value:"Dog", icon:"🐶" },
+          { label:"Cat", value:"Cat", icon:"🐱" },
+        ]
+      },
+      {
+        key: "preferredSex", label: "Preferred Sex", isFilter: true,
+        text: "Do you have a sex preference?",
+        hint: "This filters the matching pool — choose Any if undecided.",
+        type: "tiles",
+        options: [
+          { label:"Any", value:"Any", icon:"🔀" },
+          { label:"Male", value:"Male", icon:"♂" },
+          { label:"Female", value:"Female", icon:"♀" },
+        ]
+      },
+      {
+        key: "needAllergyFriendly", label: "Allergy-Friendly", isFilter: true,
+        text: "Does anyone in your household have pet allergies?",
+        hint: "We'll prioritize hypoallergenic or low-shedding animals.",
+        type: "toggle",
+        options: [
+          { label:"No, no allergies", value:"no", icon:"bi-x-circle" },
+          { label:"Yes, need allergy-friendly", value:"yes", icon:"bi-shield-check" },
+        ]
+      },
+      {
+        key: "acceptAggressive", label: "Behavioral Challenges", isFilter: true,
+        text: "Can you handle a pet with behavioral challenges?",
+        hint: "This includes pets that may require extra patience or training.",
+        type: "toggle",
+        options: [
+          { label:"No, I prefer easy-going", value:"no", icon:"bi-emoji-smile" },
+          { label:"Yes, I'm experienced", value:"yes", icon:"bi-award" },
+        ]
+      },
+      {
+        key: "acceptSpecialNeeds", label: "Special Needs", isFilter: true,
+        text: "Are you open to adopting a special-needs pet?",
+        hint: "Medical, physical, or behavioral care needs.",
+        type: "toggle",
+        options: [
+          { label:"Not at this time", value:"no", icon:"bi-x-circle" },
+          { label:"Yes, open to it", value:"yes", icon:"bi-heart-fill" },
+        ]
+      },
+    ]
+  },
+  {
+    id: 1, key: "lifestyle", label: "Lifestyle",
+    icon: "bi-lightning-charge-fill", iconBg: "#e6f7f7", iconColor: "var(--teal)",
+    kicker: "Step 2 of 5", title: "Lifestyle & activity",
+    desc: "These questions reflect your daily routine, energy, and attention.",
+    questions: [
+      { key:"energyLevel",       label:"Energy Level",       text:"How energetic do you want your pet to be?",            hint:"Think about your own daily activity level at home.", scale:["Very calm","Low energy","Moderate","Active","Very energetic"] },
+      { key:"exerciseNeeds",     label:"Exercise Capacity",  text:"How much daily exercise can you realistically provide?",hint:"Walks, playtime, outdoor runs — be honest about your routine.", scale:["Very little","A little","Moderate","A lot","Very high"] },
+      { key:"independenceLevel", label:"Independence",       text:"How independent should your pet be?",                  hint:"Some pets are fine alone for hours; others need constant company.", scale:["Needs constant companionship","Low independence","Balanced","Quite independent","Very independent"] },
+      { key:"attentionNeeds",    label:"Attention Capacity", text:"How much daily attention can you give your pet?",       hint:"Bonding time, supervision, interaction — not just feeding.", scale:["Very little","A little","Moderate","A lot","Very high"] },
+      { key:"playfulness",       label:"Playfulness",        text:"How playful do you want your pet to be?",              hint:"Do you want a couch companion or an active play partner?", scale:["Very calm","Slightly playful","Balanced","Playful","Very playful"] },
+      { key:"adaptability",      label:"Routine Stability",  text:"How often does your daily routine change?",            hint:"Frequent travel, irregular schedules, or moving affects pet wellbeing.", scale:["Very stable","Slightly changing","Moderate changes","Often changing","Very unpredictable"] },
+    ]
+  },
+  {
+    id: 2, key: "social", label: "Social Environment",
+    icon: "bi-people-fill", iconBg: "#fff8e6", iconColor: "var(--amber)",
+    kicker: "Step 3 of 5", title: "Social environment",
+    desc: "These questions measure how social and busy your home is.",
+    questions: [
+      { key:"friendlinessToHumans", label:"Household Sociability",  text:"How social is your household overall?",                     hint:"Think about guests, family gatherings, and daily human activity.", scale:["Very quiet","Slightly social","Moderately social","Social","Very social"] },
+      { key:"goodWithKids",         label:"Kids at Home",           text:"How often will your pet interact with children?",            hint:"Daily kids = high importance; no kids = set this to 1.", scale:["Never","Rarely","Sometimes","Often","Daily — it's a must"] },
+      { key:"goodWithOtherPets",    label:"Other Pets",             text:"Will your pet live with or interact with other pets?",       hint:"Multi-pet households need pets with high compatibility scores.", scale:["No other pets","Rare contact","Sometimes","Often","Yes, definitely"] },
+      { key:"strangerTolerance",    label:"Visitor Comfort",        text:"How comfortable should your pet be around visitors or strangers?", hint:"If guests visit often, a welcoming pet makes life easier.", scale:["Very cautious","Reserved","Balanced","Friendly","Very welcoming"] },
+    ]
+  },
+  {
+    id: 3, key: "care", label: "Home & Care",
+    icon: "bi-house-heart-fill", iconBg: "#e8f7ee", iconColor: "var(--green)",
+    kicker: "Step 4 of 5", title: "Home, care & maintenance",
+    desc: "These measure your space, grooming capacity, and care tolerance.",
+    questions: [
+      { key:"noiseLevel",        label:"Noise Tolerance",      text:"How much noise can you comfortably handle from a pet?",      hint:"Barking, meowing, vocalizing — think about your neighbors too.", scale:["Very little","Low","Moderate","High","Very high"] },
+      { key:"spaceNeeds",        label:"Living Space",         text:"How much living space can you provide?",                     hint:"Studio apartment vs. house with yard — both are valid.", scale:["Very small (studio)","Small","Average","Large","Very large with yard"] },
+      { key:"climateTolerance",  label:"Climate Readiness",    text:"Can you care for a pet in Angeles City's warm climate?",     hint:"Some breeds need more heat management and care in tropical climates.", scale:["Not ready","Slightly ready","Moderately ready","Ready","Fully prepared"] },
+      { key:"groomingNeeds",     label:"Grooming Commitment",  text:"How willing are you to groom your pet regularly?",           hint:"Brushing, bathing, trimming — some breeds need much more.", scale:["Not willing","Slightly willing","Moderate effort","Willing","Very willing"] },
+      { key:"sheddingLevel",     label:"Shedding Tolerance",   text:"How comfortable are you with pet fur around the house?",     hint:"High-shedding pets require regular vacuuming and lint-rolling.", scale:["Not at all","Slightly OK","Neutral","Comfortable","No problem at all"] },
+      { key:"trainingDifficulty",label:"Training Commitment",  text:"How much training difficulty can you handle?",               hint:"Think about your patience, experience, and time for training.", scale:["Very easy only","Low difficulty","Moderate","Can handle difficult","Very experienced trainer"] },
+      { key:"healthRiskLevel",   label:"Vet Budget",           text:"How prepared are you for veterinary costs?",                hint:"Unexpected vet bills are part of pet ownership — be realistic.", scale:["Not prepared","Slightly prepared","Somewhat prepared","Prepared","Fully prepared & insured"] },
+    ]
+  },
+  {
+    id: 4, key: "affection", label: "Affection",
+    icon: "bi-heart-fill", iconBg: "#fdf0f0", iconColor: "var(--clay)",
+    kicker: "Step 5 of 5", title: "Affection & attachment",
+    desc: "These questions reflect the closeness and bond you want.",
+    questions: [
+      { key:"affectionLevel",    label:"Affection Preference",  text:"How affectionate do you want your pet to be?",          hint:"Cuddly lap pet vs. independent companion — what fits you?", scale:["Very independent","Not very affectionate","Balanced","Affectionate","Very cuddly"] },
+      { key:"separationAnxiety", label:"Clinginess Tolerance",  text:"How comfortable are you with a clingy pet?",             hint:"Some pets get stressed when left alone — can you manage that?", scale:["Not comfortable","Slightly OK","Neutral","Comfortable","Completely fine with it"] },
+    ]
+  }
+];
+
+const PHASE_TIPS = [
+  "These filters narrow down the pet pool — so your quiz answers match the right animals.",
+  "Be honest about your actual daily routine, not your ideal version of it.",
+  "Consider your whole household — kids, roommates, and other pets all matter.",
+  "Think about your current home setup, not a future dream home.",
+  "The bond you want with your pet is just as important as practical needs.",
+];
+
+/* ══════════════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════════════ */
+let answers     = {};
+let currentPhase= 0;
+let totalAnswered= 0;
+const totalQ    = PHASES.reduce((s,p) => s+p.questions.length, 0);
+
+/* ══════════════════════════════════════════════════════
+   RENDER
+══════════════════════════════════════════════════════ */
+function renderPhase(phaseIdx) {
+  const phase = PHASES[phaseIdx];
+  const area  = document.getElementById("questionArea");
+
+  // Update sidebar tip
+  document.getElementById("tipText").textContent  = PHASE_TIPS[phaseIdx];
+  document.getElementById("phaseBadge").textContent= phase.label;
+
+  // Update phase steps in sidebar
+  document.querySelectorAll(".phase-step").forEach((el, i) => {
+    el.classList.remove("active","done");
+    if (i < phaseIdx)  el.classList.add("done");
+    if (i === phaseIdx) el.classList.add("active");
+    // update dot icon
+    const dot = el.querySelector(".phase-step-dot");
+    if (i < phaseIdx) dot.innerHTML = `<i class="bi bi-check2" style="font-size:0.7rem"></i>`;
+  });
+
+  let html = `
+    <div class="phase-intro slide-in">
+      <div class="phase-intro-icon" style="background:${phase.iconBg};color:${phase.iconColor}">
+        <i class="bi ${phase.icon}"></i>
+      </div>
+      <div>
+        <div class="phase-intro-kicker">${phase.kicker}</div>
+        <div class="phase-intro-title">${phase.title}</div>
+        <div class="phase-intro-desc">${phase.desc}</div>
+      </div>
+    </div>`;
+
+  phase.questions.forEach((q, qi) => {
+    const globalIdx = PHASES.slice(0, phaseIdx).reduce((s,p) => s+p.questions.length,0) + qi + 1;
+    const answered  = answers[q.key] !== undefined;
+
+    if (q.type === "tiles") {
+      html += `
+        <div class="filter-section slide-in ${answered?"answered":""}" data-key="${q.key}" style="animation-delay:${qi*40}ms">
+          <div class="q-num">Question ${globalIdx}</div>
+          <div class="q-text">${q.text}</div>
+          <div class="q-hint">${q.hint}</div>
+          <div class="select-tiles">
+            ${q.options.map(opt => `
+              <div class="select-tile ${answers[q.key]===opt.value?"selected":""}"
+                   data-key="${q.key}" data-value="${opt.value}">
+                <div class="select-tile-icon">${opt.icon}</div>
+                <div class="select-tile-label">${opt.label}</div>
+              </div>`).join("")}
+          </div>
+        </div>`;
+    } else if (q.type === "toggle") {
+      html += `
+        <div class="filter-section slide-in ${answered?"answered":""}" data-key="${q.key}" style="animation-delay:${qi*40}ms">
+          <div class="q-num">Question ${globalIdx}</div>
+          <div class="q-text">${q.text}</div>
+          <div class="q-hint">${q.hint}</div>
+          <div class="toggle-group">
+            ${q.options.map(opt => `
+              <div class="toggle-tile ${answers[q.key]===opt.value?(opt.value==="yes"?"selected-yes":"selected-no"):""}"
+                   data-key="${q.key}" data-value="${opt.value}">
+                <i class="bi ${opt.icon}"></i>${opt.label}
+              </div>`).join("")}
+          </div>
+        </div>`;
+    } else {
+      // 1-5 scale
+      html += `
+        <div class="question-card slide-in ${answered?"answered":""}" data-key="${q.key}" style="animation-delay:${qi*40}ms">
+          <div class="q-num">Question ${globalIdx}</div>
+          <div class="q-text">${q.text}</div>
+          <div class="q-hint">${q.hint}</div>
+          <div class="option-group">
+            ${q.scale.map((lbl, val) => `
+              <button class="option-btn ${answers[q.key]===(val+1)?"selected":""}"
+                      data-key="${q.key}" data-value="${val+1}" type="button">
+                <span class="option-num">${val+1}</span>
+                <span class="option-label">${lbl}</span>
+              </button>`).join("")}
+          </div>
+        </div>`;
+    }
+  });
+
+  // Navigation
+  const isLast = phaseIdx === PHASES.length - 1;
+  html += `
+    <div class="quiz-nav slide-in" style="animation-delay:${phase.questions.length*40+40}ms">
+      <button class="btn-prev" id="btnPrev" ${phaseIdx===0?"disabled":""}>
+        <i class="bi bi-arrow-left"></i> Previous
+      </button>
+      ${isLast
+        ? `<button class="btn-submit" id="btnSubmit" type="button">
+             <i class="bi bi-stars"></i> Find My Matches
+           </button>`
+        : `<button class="btn-next" id="btnNext" type="button">
+             Next <i class="bi bi-arrow-right"></i>
+           </button>`
+      }
+    </div>`;
+
+  area.innerHTML = html;
+
+  // Bind events
+  area.querySelectorAll(".option-btn, .select-tile, .toggle-tile").forEach(el => {
+    el.addEventListener("click", () => handleAnswer(el.dataset.key, el.dataset.value));
+  });
+
+  document.getElementById("btnPrev")?.addEventListener("click", () => {
+    if (currentPhase > 0) { currentPhase--; renderPhase(currentPhase); updateProgress(); }
+  });
+
+  document.getElementById("btnNext")?.addEventListener("click", () => {
+    if (currentPhase < PHASES.length - 1) {
+      currentPhase++;
+      renderPhase(currentPhase);
+      updateProgress();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  });
+
+  document.getElementById("btnSubmit")?.addEventListener("click", handleSubmit);
+
+  // Set defaults for filter questions if not yet answered
+  PHASES[phaseIdx].questions.forEach(q => {
+    if (q.type === "tiles" && answers[q.key] === undefined) {
+      handleAnswer(q.key, q.options[0].value, true);
+    }
+    if (q.type === "toggle" && answers[q.key] === undefined) {
+      handleAnswer(q.key, q.options[0].value, true);
+    }
+  });
+}
+
+function handleAnswer(key, value, silent = false) {
+  const wasAnswered = answers[key] !== undefined;
+  answers[key] = isNaN(value) ? value : Number(value);
+  if (!wasAnswered) totalAnswered++;
+
+  if (!silent) {
+    // Update the clicked element visually
+    const card = document.querySelector(`[data-key="${key}"]`)?.closest(".question-card, .filter-section");
+    if (card) card.classList.add("answered");
+
+    // Deselect siblings
+    document.querySelectorAll(`[data-key="${key}"]`).forEach(el => {
+      el.classList.remove("selected","selected-yes","selected-no");
+    });
+
+    // Select clicked
+    const clicked = document.querySelector(`[data-key="${key}"][data-value="${value}"]`);
+    if (clicked) {
+      if (clicked.classList.contains("toggle-tile")) {
+        clicked.classList.add(value==="yes"?"selected-yes":"selected-no");
+      } else {
+        clicked.classList.add("selected");
+      }
+    }
+  }
+
+  updateProgress();
+  updateAnswerChips();
+}
+
+function updateProgress() {
+  const pct = Math.round((Object.keys(answers).length / totalQ) * 100);
+  document.getElementById("progressFill").style.width  = pct + "%";
+  document.getElementById("progressPercent").textContent= pct + "%";
+
+  // Count answered in all phases
+  let done = 0, total = 0;
+  PHASES.forEach(p => { p.questions.forEach(() => total++); });
+  Object.keys(answers).forEach(() => done++);
+  document.getElementById("progressLabel").textContent = `${done} of ${total} answered`;
+}
+
+function updateAnswerChips() {
+  const container = document.getElementById("answerChips");
+  const entries   = Object.entries(answers);
+  if (!entries.length) {
+    container.innerHTML = `<div style="font-size:0.78rem;color:var(--stone-2);text-align:center;padding:8px">No answers yet</div>`;
+    return;
+  }
+  container.innerHTML = entries.slice(-8).reverse().map(([k,v]) => {
+    // Find label
+    let label = k;
+    PHASES.forEach(p => p.questions.forEach(q => { if (q.key===k) label = q.label; }));
+    return `<div class="answer-chip"><span class="answer-chip-key">${label}</span><span class="answer-chip-val">${v}</span></div>`;
+  }).join("");
+}
+
+async function handleSubmit() {
+  // Build quiz data structure matching existing petCompatibility.js format
+  const quizData = {
+    filters: {
+      preferredSpecies:    answers.preferredSpecies    || "Any",
+      preferredSex:        answers.preferredSex        || "Any",
+      needAllergyFriendly: answers.needAllergyFriendly || "no",
+      acceptAggressive:    answers.acceptAggressive    || "yes",
+      acceptSpecialNeeds:  answers.acceptSpecialNeeds  || "yes",
+    },
+    preferences: {
+      energyLevel:          answers.energyLevel         || 3,
+      exerciseNeeds:        answers.exerciseNeeds        || 3,
+      independenceLevel:    answers.independenceLevel    || 3,
+      attentionNeeds:       answers.attentionNeeds       || 3,
+      playfulness:          answers.playfulness          || 3,
+      friendlinessToHumans: answers.friendlinessToHumans || 3,
+      goodWithKids:         answers.goodWithKids         || 3,
+      goodWithOtherPets:    answers.goodWithOtherPets    || 3,
+      strangerTolerance:    answers.strangerTolerance    || 3,
+      noiseLevel:           answers.noiseLevel           || 3,
+      spaceNeeds:           answers.spaceNeeds           || 3,
+      adaptability:         answers.adaptability         || 3,
+      climateTolerance:     answers.climateTolerance     || 3,
+      groomingNeeds:        answers.groomingNeeds        || 3,
+      sheddingLevel:        answers.sheddingLevel        || 3,
+      trainingDifficulty:   answers.trainingDifficulty   || 3,
+      healthRiskLevel:      answers.healthRiskLevel      || 3,
+      affectionLevel:       answers.affectionLevel       || 3,
+      separationAnxiety:    answers.separationAnxiety    || 3,
+    }
+  };
+
+  // Show completion screen
+  document.getElementById("quizMain").style.display   = "none";
+  document.getElementById("completionScreen").style.display = "flex";
+
+  // Build summary chips
+  const summary = document.getElementById("completeSummary");
+  const highlights = [
+    { label:"Species", val: quizData.filters.preferredSpecies },
+    { label:"Energy",  val: quizData.preferences.energyLevel + "/5" },
+    { label:"Space",   val: quizData.preferences.spaceNeeds + "/5" },
+    { label:"Allergy-safe", val: quizData.filters.needAllergyFriendly==="yes"?"Yes":"No" },
+  ];
+  summary.innerHTML = highlights.map(h => `<div class="score-pill">${h.label}: <strong>${h.val}</strong></div>`).join("");
+
+  try {
+    const animals  = await fetchAnimals();
+    const filtered = applyFilters(animals, quizData.filters);
+    const matched  = scoreAnimals(filtered, quizData.preferences);
+
+    localStorage.setItem("animua_quiz_data",      JSON.stringify(quizData));
+    localStorage.setItem("animua_match_results",  JSON.stringify(matched));
+
+    document.getElementById("viewResultsBtn").onclick = () => {
+      window.location.href = "/pages/public/compatibilityResults.html";
+    };
+  } catch(err) {
+    console.error("Matching failed:", err);
+    document.getElementById("completionScreen").innerHTML = `
+      <div class="complete-card">
+        <span class="complete-icon">😕</span>
+        <h2 class="complete-title">Something went wrong</h2>
+        <p class="complete-sub">We couldn't fetch pet data right now. Please try again later.</p>
+        <button class="btn-submit" onclick="window.location.href='/pages/public/quizLanding.html'">Back to Quiz</button>
+      </div>`;
+  }
+}
+
+/* ── API ──────────────────────────────────────────── */
+async function fetchAnimals() {
+  const res  = await fetch(`${API_BASE_URL}/public/pets`);
+  if (!res.ok) throw new Error("Failed to fetch pets");
+  const data = await res.json();
+  const pets = Array.isArray(data) ? data : data.pets || data.animals || [];
+  return pets.map(p => ({ ...p, ...(p.compatibility||{}), ...(p.flags||{}) }));
+}
+
+function applyFilters(animals, f) {
+  return animals.filter(a => {
+    if (a.status !== "Ready for Adoption") return false;
+    if (f.preferredSpecies && f.preferredSpecies !== "Any" && a.species !== f.preferredSpecies) return false;
+    if (f.preferredSex && f.preferredSex !== "Any" && a.sex !== f.preferredSex) return false;
+    if (f.needAllergyFriendly === "yes" && !a.allergyFriendly) return false;
+    if (f.acceptAggressive === "no" && a.aggressive === true) return false;
+    if (f.acceptSpecialNeeds === "no" && a.specialNeeds === true) return false;
+    return true;
+  });
+}
+
+const SCORE_KEYS = ["energyLevel","exerciseNeeds","independenceLevel","attentionNeeds","playfulness","friendlinessToHumans","goodWithKids","goodWithOtherPets","strangerTolerance","noiseLevel","spaceNeeds","adaptability","climateTolerance","groomingNeeds","sheddingLevel","trainingDifficulty","healthRiskLevel","affectionLevel","separationAnxiety"];
+
+function scoreAnimals(animals, prefs) {
+  const uVec = SCORE_KEYS.map(k => Number(prefs[k]||0));
+  return animals.map(a => {
+    const pVec = SCORE_KEYS.map(k => Number(a[k]||0));
+    const dot  = uVec.reduce((s,v,i) => s+v*pVec[i], 0);
+    const magA = Math.sqrt(uVec.reduce((s,v) => s+v*v, 0));
+    const magB = Math.sqrt(pVec.reduce((s,v) => s+v*v, 0));
+    const sim  = (!magA||!magB) ? 0 : dot/(magA*magB);
+    return { ...a, matchScore: +sim.toFixed(4), matchPercent: +(sim*100).toFixed(2) };
+  }).sort((a,b) => b.matchScore - a.matchScore);
+}
+
+/* ── Init ─────────────────────────────────────────── */
+renderPhase(0);
+updateProgress();
+</script>
 </body>
 </html>
