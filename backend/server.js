@@ -13,9 +13,12 @@ const dashboardRoutes = require("./src/routes/dashboardRoutes");
 
 const publicRoutes = require("./src/routes/publicRoutes");
 const adoptionRoutes = require("./src/routes/adoptionRoutes");
+const predictiveRoutes = require("./src/routes/predictiveRoutes");
 
 const authenticateToken = require("./src/middleware/authMiddleware");
 const authorizeRole = require("./src/middleware/roleMiddleware");
+const { trainInventoryModel } = require("./src/services/predictiveService");
+
 
 // ─── CORS ─────────────────────────────────────────────────────────────────────
 app.use(cors({
@@ -46,6 +49,7 @@ app.use("/api/dashboard", dashboardRoutes);
 
 app.use("/api/public", publicRoutes);
 app.use("/api/adoptions", adoptionRoutes);
+app.use("/api/predictive", predictiveRoutes);
 
 app.get("/", (req, res) => {
   res.send("ANIMUA Backend is Live!");
@@ -82,4 +86,14 @@ app.get("/api/public-user",
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`ANIMUA Server active on port ${PORT}`);
+
+  trainInventoryModel()
+    .then((summary) => {
+      console.log("Predictive model trained on startup.");
+      console.log(summary);
+    })
+    .catch((error) => {
+      console.error("Startup training failed:", error.message);
+    });
 });
+

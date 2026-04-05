@@ -1,13 +1,8 @@
 // admin-frontend/src/management/inventory.js
 // ─────────────────────────────────────────────────────
-// MOCK PAGE — data is inline, no JSON import, no API call.
-// When backend is ready:
-//   1. Seed Firestore using seedInventory.js (from inventoryData.json)
-//   2. Replace MOCK_INVENTORY below with: await apiFetch("/inventory")
-//   3. Replace addStock / deductStock with API calls to
-//      POST /api/inventory/:id/stock-in
-//      POST /api/inventory/:id/use
-// ─────────────────────────────────────────────────────
+// Predictive inventory page
+// Data is loaded from backend predictive endpoints.
+// Local stock actions are currently handled in-page until full inventory API integration is completed.
 import "../css/adminDashboard.css";
 import "../css/sidebar.css";
 import "../css/inventory.css";
@@ -16,122 +11,12 @@ import { protectManagementPage } from "../auth/authGuard.js";
 import { renderTopbarUser }      from "../components/management/topbarUser.js";
 import { loadSidebar }           from "../components/management/sidebarLoader.js";
 import { getUserName }           from "../utils/storage.js";
+import { getPredictiveInventoryItems } from "../services/predictiveInventory.service.js";
+
 
 /* ══════════════════════════════════════════════════════
-   MOCK INVENTORY — 81 items from Inventory.xlsx
-   Fields reference:
-     id, name, unit, category
-     currentStock, averageInventory, avgMonthlyUsage
-     recencyDays, leadTimeDays, stockoutFrequency
-     monthlyTurnoverRatio, movementLabel, reorderRisk
-     daysUntilStockout (derived: currentStock/avgMonthlyUsage*30)
-     reorderPoint     (derived: avgMonthlyUsage/30 * leadTimeDays)
-══════════════════════════════════════════════════════ */
-const MOCK_INVENTORY = [
-  // ── ANESTHETIC (2) ─────────────────────────────────
-  { id:"ITM042", name:"Lidocaine 2%",                       unit:"btls",  category:"Anesthetic",         currentStock:11,  averageInventory:14,  avgMonthlyUsage:5,   recencyDays:14, leadTimeDays:9,  stockoutFrequency:0, monthlyTurnoverRatio:0.3571, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:66  },
-  { id:"ITM077", name:"Zoletil",                            unit:"btls",  category:"Anesthetic",         currentStock:25,  averageInventory:31,  avgMonthlyUsage:16,  recencyDays:8,  leadTimeDays:10, stockoutFrequency:0, monthlyTurnoverRatio:0.5161, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:47  },
-  // ── ANTIBIOTIC (15) ────────────────────────────────
-  { id:"ITM003", name:"Amoxicilin sc route-DYFAMOX LA",     unit:"btls",  category:"Antibiotic",         currentStock:34,  averageInventory:40,  avgMonthlyUsage:25,  recencyDays:3,  leadTimeDays:7,  stockoutFrequency:1, monthlyTurnoverRatio:0.6250, movementLabel:"Fast", reorderRisk:"Review", daysUntilStockout:41  },
-  { id:"ITM007", name:"Baytril 5%",                        unit:"btls",  category:"Antibiotic",         currentStock:36,  averageInventory:42,  avgMonthlyUsage:21,  recencyDays:5,  leadTimeDays:8,  stockoutFrequency:1, monthlyTurnoverRatio:0.5000, movementLabel:"Fast", reorderRisk:"Review", daysUntilStockout:51  },
-  { id:"ITM017", name:"Co-Amoxiclav Suspension",           unit:"btls",  category:"Antibiotic",         currentStock:38,  averageInventory:45,  avgMonthlyUsage:22,  recencyDays:5,  leadTimeDays:8,  stockoutFrequency:1, monthlyTurnoverRatio:0.4889, movementLabel:"Fast", reorderRisk:"Review", daysUntilStockout:52  },
-  { id:"ITM018", name:"Co-Amoxiclav",                      unit:"boxes", category:"Antibiotic",         currentStock:19,  averageInventory:24,  avgMonthlyUsage:12,  recencyDays:8,  leadTimeDays:7,  stockoutFrequency:0, monthlyTurnoverRatio:0.5000, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:48  },
-  { id:"ITM027", name:"Doxycycline 5%+Colistin+Bromhexine",unit:"btls",  category:"Antibiotic",         currentStock:27,  averageInventory:33,  avgMonthlyUsage:15,  recencyDays:8,  leadTimeDays:8,  stockoutFrequency:0, monthlyTurnoverRatio:0.4545, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:54  },
-  { id:"ITM028", name:"Doxycycline tablet",                unit:"btls",  category:"Antibiotic",         currentStock:18,  averageInventory:22,  avgMonthlyUsage:11,  recencyDays:10, leadTimeDays:7,  stockoutFrequency:0, monthlyTurnoverRatio:0.5000, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:49  },
-  { id:"ITM029", name:"Doxycycline Suspension",            unit:"btls",  category:"Antibiotic",         currentStock:21,  averageInventory:26,  avgMonthlyUsage:13,  recencyDays:8,  leadTimeDays:7,  stockoutFrequency:0, monthlyTurnoverRatio:0.5000, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:49  },
-  { id:"ITM033", name:"Enrocep tablet 100mg/50mg",         unit:"boxes", category:"Antibiotic",         currentStock:17,  averageInventory:22,  avgMonthlyUsage:10,  recencyDays:11, leadTimeDays:8,  stockoutFrequency:0, monthlyTurnoverRatio:0.4545, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:51  },
-  { id:"ITM034", name:"Gentin",                            unit:"btls",  category:"Antibiotic",         currentStock:13,  averageInventory:16,  avgMonthlyUsage:6,   recencyDays:13, leadTimeDays:8,  stockoutFrequency:0, monthlyTurnoverRatio:0.3750, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:65  },
-  { id:"ITM045", name:"Marbocyl 2%",                       unit:"btls",  category:"Antibiotic",         currentStock:8,   averageInventory:10,  avgMonthlyUsage:3,   recencyDays:19, leadTimeDays:8,  stockoutFrequency:0, monthlyTurnoverRatio:0.3000, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:80  },
-  { id:"ITM046", name:"Metronidazole 50mg",                unit:"btls",  category:"Antibiotic",         currentStock:27,  averageInventory:33,  avgMonthlyUsage:16,  recencyDays:7,  leadTimeDays:7,  stockoutFrequency:0, monthlyTurnoverRatio:0.4848, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:51  },
-  { id:"ITM052", name:"Oxytetracycline 20% OXYVET",        unit:"btls",  category:"Antibiotic",         currentStock:14,  averageInventory:18,  avgMonthlyUsage:7,   recencyDays:12, leadTimeDays:8,  stockoutFrequency:0, monthlyTurnoverRatio:0.3889, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:60  },
-  { id:"ITM059", name:"Papi scour (Co-Trimoxazole)",       unit:"btls",  category:"Antibiotic",         currentStock:12,  averageInventory:16,  avgMonthlyUsage:6,   recencyDays:12, leadTimeDays:8,  stockoutFrequency:0, monthlyTurnoverRatio:0.3750, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:60  },
-  { id:"ITM063", name:"Scourbust",                         unit:"btls",  category:"Antibiotic",         currentStock:33,  averageInventory:40,  avgMonthlyUsage:20,  recencyDays:6,  leadTimeDays:8,  stockoutFrequency:1, monthlyTurnoverRatio:0.5000, movementLabel:"Fast", reorderRisk:"Review", daysUntilStockout:50  },
-  { id:"ITM064", name:"Septotryl",                         unit:"btls",  category:"Antibiotic",         currentStock:8,   averageInventory:10,  avgMonthlyUsage:3,   recencyDays:19, leadTimeDays:8,  stockoutFrequency:0, monthlyTurnoverRatio:0.3000, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:80  },
-  // ── ANTIFUNGAL (1) ─────────────────────────────────
-  { id:"ITM035", name:"Itraconazole tablet 10x10 box",     unit:"boxes", category:"Antifungal",         currentStock:14,  averageInventory:18,  avgMonthlyUsage:7,   recencyDays:12, leadTimeDays:9,  stockoutFrequency:0, monthlyTurnoverRatio:0.3889, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:60  },
-  // ── ANTIPARASITIC (7) ──────────────────────────────
-  { id:"ITM038", name:"Ivomec",                            unit:"btls",  category:"Antiparasitic",      currentStock:12,  averageInventory:15,  avgMonthlyUsage:6,   recencyDays:12, leadTimeDays:8,  stockoutFrequency:0, monthlyTurnoverRatio:0.4000, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:60  },
-  { id:"ITM040", name:"Levamisole",                        unit:"pack",  category:"Antiparasitic",      currentStock:14,  averageInventory:18,  avgMonthlyUsage:7,   recencyDays:10, leadTimeDays:8,  stockoutFrequency:0, monthlyTurnoverRatio:0.3889, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:60  },
-  { id:"ITM048", name:"Microzole (Albendazole)",           unit:"btls",  category:"Antiparasitic",      currentStock:39,  averageInventory:48,  avgMonthlyUsage:24,  recencyDays:4,  leadTimeDays:8,  stockoutFrequency:1, monthlyTurnoverRatio:0.5000, movementLabel:"Fast", reorderRisk:"Review", daysUntilStockout:49  },
-  { id:"ITM066", name:"Simparica trio (10-20kg)",          unit:"boxes", category:"Antiparasitic",      currentStock:19,  averageInventory:24,  avgMonthlyUsage:11,  recencyDays:9,  leadTimeDays:9,  stockoutFrequency:0, monthlyTurnoverRatio:0.4583, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:52  },
-  { id:"ITM067", name:"Simparica trio (20-40kg)",          unit:"boxes", category:"Antiparasitic",      currentStock:20,  averageInventory:26,  avgMonthlyUsage:12,  recencyDays:9,  leadTimeDays:9,  stockoutFrequency:0, monthlyTurnoverRatio:0.4615, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:50  },
-  { id:"ITM073", name:"Vermifuge Oral Suspension",         unit:"btls",  category:"Antiparasitic",      currentStock:16,  averageInventory:21,  avgMonthlyUsage:9,   recencyDays:10, leadTimeDays:8,  stockoutFrequency:0, monthlyTurnoverRatio:0.4286, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:53  },
-  { id:"ITM074", name:"Vermifuge Tablets",                 unit:"btls",  category:"Antiparasitic",      currentStock:15,  averageInventory:20,  avgMonthlyUsage:8,   recencyDays:11, leadTimeDays:8,  stockoutFrequency:0, monthlyTurnoverRatio:0.4000, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:56  },
-  // ── CONSUMABLE (12) ────────────────────────────────
-  { id:"ITM001", name:"Absorbent pads",                    unit:"pack",  category:"Consumable",         currentStock:42,  averageInventory:48,  avgMonthlyUsage:18,  recencyDays:6,  leadTimeDays:5,  stockoutFrequency:1, monthlyTurnoverRatio:0.3750, movementLabel:"Slow", reorderRisk:"Review", daysUntilStockout:70  },
-  { id:"ITM020", name:"Cotton rolls",                      unit:"rolls", category:"Consumable",         currentStock:20,  averageInventory:24,  avgMonthlyUsage:9,   recencyDays:10, leadTimeDays:4,  stockoutFrequency:0, monthlyTurnoverRatio:0.3750, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:67  },
-  { id:"ITM021", name:"Disposable Gloves (Large)",         unit:"boxes", category:"Consumable",         currentStock:22,  averageInventory:27,  avgMonthlyUsage:14,  recencyDays:7,  leadTimeDays:5,  stockoutFrequency:1, monthlyTurnoverRatio:0.5185, movementLabel:"Fast", reorderRisk:"Review", daysUntilStockout:47  },
-  { id:"ITM022", name:"Disposable Gloves (Medium)",        unit:"boxes", category:"Consumable",         currentStock:25,  averageInventory:29,  avgMonthlyUsage:16,  recencyDays:5,  leadTimeDays:5,  stockoutFrequency:1, monthlyTurnoverRatio:0.5517, movementLabel:"Fast", reorderRisk:"Review", daysUntilStockout:47  },
-  { id:"ITM023", name:"Disposable Needle G21",             unit:"boxes", category:"Consumable",         currentStock:32,  averageInventory:38,  avgMonthlyUsage:22,  recencyDays:4,  leadTimeDays:5,  stockoutFrequency:1, monthlyTurnoverRatio:0.5789, movementLabel:"Fast", reorderRisk:"Review", daysUntilStockout:44  },
-  { id:"ITM024", name:"Disposable Needle G23",             unit:"boxes", category:"Consumable",         currentStock:29,  averageInventory:34,  avgMonthlyUsage:19,  recencyDays:5,  leadTimeDays:5,  stockoutFrequency:1, monthlyTurnoverRatio:0.5588, movementLabel:"Fast", reorderRisk:"Review", daysUntilStockout:46  },
-  { id:"ITM025", name:"Disposable Syringe 1cc",            unit:"boxes", category:"Consumable",         currentStock:34,  averageInventory:40,  avgMonthlyUsage:24,  recencyDays:4,  leadTimeDays:5,  stockoutFrequency:1, monthlyTurnoverRatio:0.6000, movementLabel:"Fast", reorderRisk:"Review", daysUntilStockout:43  },
-  { id:"ITM026", name:"Disposable Syringe 3cc",            unit:"boxes", category:"Consumable",         currentStock:36,  averageInventory:42,  avgMonthlyUsage:26,  recencyDays:3,  leadTimeDays:5,  stockoutFrequency:1, monthlyTurnoverRatio:0.6190, movementLabel:"Fast", reorderRisk:"Review", daysUntilStockout:42  },
-  { id:"ITM037", name:"IV Line",                           unit:"pcs",   category:"Consumable",         currentStock:24,  averageInventory:29,  avgMonthlyUsage:15,  recencyDays:6,  leadTimeDays:5,  stockoutFrequency:0, monthlyTurnoverRatio:0.5172, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:48  },
-  { id:"ITM041", name:"Leukoplast 4 inches",               unit:"pack",  category:"Consumable",         currentStock:9,   averageInventory:11,  avgMonthlyUsage:4,   recencyDays:17, leadTimeDays:5,  stockoutFrequency:0, monthlyTurnoverRatio:0.3636, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:68  },
-  { id:"ITM047", name:"Micropore 1 inch",                  unit:"boxes", category:"Consumable",         currentStock:14,  averageInventory:18,  avgMonthlyUsage:7,   recencyDays:11, leadTimeDays:5,  stockoutFrequency:0, monthlyTurnoverRatio:0.3889, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:60  },
-  { id:"ITM069", name:"Sterile Gauze",                     unit:"boxes", category:"Consumable",         currentStock:18,  averageInventory:23,  avgMonthlyUsage:9,   recencyDays:10, leadTimeDays:5,  stockoutFrequency:0, monthlyTurnoverRatio:0.3913, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:60  },
-  // ── DIAGNOSTIC (1) ─────────────────────────────────
-  { id:"ITM013", name:"Canine Distemper test kit",         unit:"boxes", category:"Diagnostic",         currentStock:6,   averageInventory:8,   avgMonthlyUsage:3,   recencyDays:20, leadTimeDays:12, stockoutFrequency:0, monthlyTurnoverRatio:0.3750, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:60  },
-  // ── DISINFECTANT (1) ───────────────────────────────
-  { id:"ITM002", name:"Alcohol",                           unit:"gal",   category:"Disinfectant",       currentStock:26,  averageInventory:30,  avgMonthlyUsage:20,  recencyDays:4,  leadTimeDays:4,  stockoutFrequency:1, monthlyTurnoverRatio:0.6667, movementLabel:"Fast", reorderRisk:"Review", daysUntilStockout:39  },
-  // ── EQUIPMENT (7) ──────────────────────────────────
-  { id:"ITM006", name:"Artificial Insemination Gun",       unit:"pc",    category:"Equipment",          currentStock:3,   averageInventory:4,   avgMonthlyUsage:1,   recencyDays:40, leadTimeDays:20, stockoutFrequency:0, monthlyTurnoverRatio:0.2500, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:90  },
-  { id:"ITM015", name:"Cautery",                           unit:"pcs",   category:"Equipment",          currentStock:2,   averageInventory:3,   avgMonthlyUsage:1,   recencyDays:45, leadTimeDays:18, stockoutFrequency:0, monthlyTurnoverRatio:0.3333, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:60  },
-  { id:"ITM043", name:"Liquid Nitrogen Tank (Field tank)", unit:"pc",    category:"Equipment",          currentStock:2,   averageInventory:2,   avgMonthlyUsage:1,   recencyDays:60, leadTimeDays:25, stockoutFrequency:0, monthlyTurnoverRatio:0.5000, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:60  },
-  { id:"ITM050", name:"Needle Holder with scissors",       unit:"pcs",   category:"Equipment",          currentStock:3,   averageInventory:4,   avgMonthlyUsage:1,   recencyDays:50, leadTimeDays:18, stockoutFrequency:0, monthlyTurnoverRatio:0.2500, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:90  },
-  { id:"ITM062", name:"Scissors (Blunt-Blunt)",            unit:"pcs",   category:"Equipment",          currentStock:2,   averageInventory:3,   avgMonthlyUsage:1,   recencyDays:55, leadTimeDays:18, stockoutFrequency:0, monthlyTurnoverRatio:0.3333, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:60  },
-  { id:"ITM065", name:"Shaver",                            unit:"pcs",   category:"Equipment",          currentStock:2,   averageInventory:3,   avgMonthlyUsage:1,   recencyDays:48, leadTimeDays:16, stockoutFrequency:0, monthlyTurnoverRatio:0.3333, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:60  },
-  { id:"ITM076", name:"Weighing Scale",                    unit:"pc",    category:"Equipment",          currentStock:2,   averageInventory:2,   avgMonthlyUsage:1,   recencyDays:70, leadTimeDays:20, stockoutFrequency:0, monthlyTurnoverRatio:0.5000, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:60  },
-  // ── FEED (3) ───────────────────────────────────────
-  { id:"ITM078", name:"Cat Food",                          unit:"bag",   category:"Feed",               currentStock:28,  averageInventory:36,  avgMonthlyUsage:22,  recencyDays:4,  leadTimeDays:6,  stockoutFrequency:0, monthlyTurnoverRatio:0.6111, movementLabel:"Fast", reorderRisk:"OK",     daysUntilStockout:38  },
-  { id:"ITM079", name:"Dog Food 20 kgs.",                  unit:"bag",   category:"Feed",               currentStock:34,  averageInventory:42,  avgMonthlyUsage:27,  recencyDays:3,  leadTimeDays:6,  stockoutFrequency:0, monthlyTurnoverRatio:0.6429, movementLabel:"Fast", reorderRisk:"OK",     daysUntilStockout:38  },
-  { id:"ITM081", name:"Rice",                              unit:"sack",  category:"Feed",               currentStock:18,  averageInventory:23,  avgMonthlyUsage:11,  recencyDays:8,  leadTimeDays:5,  stockoutFrequency:0, monthlyTurnoverRatio:0.4783, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:49  },
-  // ── HORMONAL MEDICINE (2) ──────────────────────────
-  { id:"ITM044", name:"Lutalyse",                          unit:"btls",  category:"Hormonal Medicine",  currentStock:10,  averageInventory:13,  avgMonthlyUsage:5,   recencyDays:16, leadTimeDays:10, stockoutFrequency:0, monthlyTurnoverRatio:0.3846, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:60  },
-  { id:"ITM053", name:"Oxytocin 50ml",                     unit:"btls",  category:"Hormonal Medicine",  currentStock:8,   averageInventory:10,  avgMonthlyUsage:3,   recencyDays:18, leadTimeDays:9,  stockoutFrequency:0, monthlyTurnoverRatio:0.3000, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:80  },
-  // ── PAIN RELIEF (2) ────────────────────────────────
-  { id:"ITM068", name:"Spasmovet",                         unit:"btls",  category:"Pain Relief",        currentStock:11,  averageInventory:15,  avgMonthlyUsage:5,   recencyDays:14, leadTimeDays:8,  stockoutFrequency:0, monthlyTurnoverRatio:0.3333, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:66  },
-  { id:"ITM070", name:"Tolfenamic",                        unit:"btls",  category:"Pain Relief",        currentStock:12,  averageInventory:16,  avgMonthlyUsage:6,   recencyDays:12, leadTimeDays:8,  stockoutFrequency:0, monthlyTurnoverRatio:0.3750, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:60  },
-  // ── RESPIRATORY MEDICINE (1) ───────────────────────
-  { id:"ITM011", name:"Bromhexine Suspension",             unit:"btls",  category:"Respiratory Medicine",currentStock:29, averageInventory:34,  avgMonthlyUsage:16,  recencyDays:8,  leadTimeDays:7,  stockoutFrequency:0, monthlyTurnoverRatio:0.4706, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:54  },
-  // ── SEDATIVE (1) ───────────────────────────────────
-  { id:"ITM012", name:"Calmivet",                          unit:"btls",  category:"Sedative",           currentStock:8,   averageInventory:12,  avgMonthlyUsage:4,   recencyDays:15, leadTimeDays:10, stockoutFrequency:0, monthlyTurnoverRatio:0.3333, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:60  },
-  // ── SHELTER SUPPLY (1) ─────────────────────────────
-  { id:"ITM080", name:"Plastic Matting for dogs 1x3 ft",  unit:"pc",    category:"Shelter Supply",     currentStock:8,   averageInventory:10,  avgMonthlyUsage:3,   recencyDays:20, leadTimeDays:9,  stockoutFrequency:0, monthlyTurnoverRatio:0.3000, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:80  },
-  // ── SUPPLEMENT (14) ────────────────────────────────
-  { id:"ITM008", name:"B-Complex (Hepavita)",              unit:"btls",  category:"Supplement",         currentStock:31,  averageInventory:35,  avgMonthlyUsage:17,  recencyDays:7,  leadTimeDays:6,  stockoutFrequency:0, monthlyTurnoverRatio:0.4857, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:55  },
-  { id:"ITM016", name:"CBG Calcionate",                    unit:"btls",  category:"Supplement",         currentStock:9,   averageInventory:11,  avgMonthlyUsage:4,   recencyDays:16, leadTimeDays:9,  stockoutFrequency:0, monthlyTurnoverRatio:0.3636, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:68  },
-  { id:"ITM019", name:"Coforta",                           unit:"btls",  category:"Supplement",         currentStock:28,  averageInventory:34,  avgMonthlyUsage:18,  recencyDays:9,  leadTimeDays:7,  stockoutFrequency:0, monthlyTurnoverRatio:0.5294, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:47  },
-  { id:"ITM030", name:"Electrolytes+Multivitamins+Bcomplex",unit:"btls", category:"Supplement",         currentStock:12,  averageInventory:16,  avgMonthlyUsage:6,   recencyDays:14, leadTimeDays:6,  stockoutFrequency:0, monthlyTurnoverRatio:0.3750, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:60  },
-  { id:"ITM031", name:"Electrolytes with Vitamin C",       unit:"pack",  category:"Supplement",         currentStock:10,  averageInventory:12,  avgMonthlyUsage:5,   recencyDays:16, leadTimeDays:6,  stockoutFrequency:0, monthlyTurnoverRatio:0.4167, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:60  },
-  { id:"ITM032", name:"Ener G Probiotic Powder (5g x14)",  unit:"boxes", category:"Supplement",         currentStock:11,  averageInventory:14,  avgMonthlyUsage:5,   recencyDays:13, leadTimeDays:7,  stockoutFrequency:0, monthlyTurnoverRatio:0.3571, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:66  },
-  { id:"ITM036", name:"Iron",                              unit:"btls",  category:"Supplement",         currentStock:15,  averageInventory:19,  avgMonthlyUsage:8,   recencyDays:11, leadTimeDays:7,  stockoutFrequency:0, monthlyTurnoverRatio:0.4211, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:56  },
-  { id:"ITM049", name:"Multivets oral liquid paste 200g",  unit:"pack",  category:"Supplement",         currentStock:13,  averageInventory:17,  avgMonthlyUsage:6,   recencyDays:12, leadTimeDays:7,  stockoutFrequency:0, monthlyTurnoverRatio:0.3529, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:65  },
-  { id:"ITM054", name:"Papi Bion Plus (Bcomplex with Iron)",unit:"btls", category:"Supplement",         currentStock:11,  averageInventory:14,  avgMonthlyUsage:5,   recencyDays:14, leadTimeDays:7,  stockoutFrequency:0, monthlyTurnoverRatio:0.3571, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:66  },
-  { id:"ITM055", name:"Papi Livwell",                      unit:"btls",  category:"Supplement",         currentStock:10,  averageInventory:13,  avgMonthlyUsage:4,   recencyDays:16, leadTimeDays:7,  stockoutFrequency:0, monthlyTurnoverRatio:0.3077, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:75  },
-  { id:"ITM056", name:"Papi MVP (Multivitamins)",          unit:"btls",  category:"Supplement",         currentStock:20,  averageInventory:25,  avgMonthlyUsage:12,  recencyDays:9,  leadTimeDays:7,  stockoutFrequency:0, monthlyTurnoverRatio:0.4800, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:50  },
-  { id:"ITM061", name:"Renacure",                          unit:"btls",  category:"Supplement",         currentStock:9,   averageInventory:12,  avgMonthlyUsage:4,   recencyDays:16, leadTimeDays:7,  stockoutFrequency:0, monthlyTurnoverRatio:0.3333, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:68  },
-  { id:"ITM072", name:"Vitamin ADE injectable",            unit:"btls",  category:"Supplement",         currentStock:26,  averageInventory:32,  avgMonthlyUsage:17,  recencyDays:8,  leadTimeDays:7,  stockoutFrequency:0, monthlyTurnoverRatio:0.5313, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:46  },
-  { id:"ITM075", name:"Water Soluble Vitamin A, D3, E",    unit:"pack",  category:"Supplement",         currentStock:9,   averageInventory:12,  avgMonthlyUsage:4,   recencyDays:17, leadTimeDays:7,  stockoutFrequency:0, monthlyTurnoverRatio:0.3333, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:68  },
-  // ── SURGICAL SUPPLY (4) ────────────────────────────
-  { id:"ITM009", name:"Blade size #10",                    unit:"boxes", category:"Surgical Supply",    currentStock:18,  averageInventory:22,  avgMonthlyUsage:8,   recencyDays:11, leadTimeDays:6,  stockoutFrequency:0, monthlyTurnoverRatio:0.3636, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:68  },
-  { id:"ITM010", name:"Blade size #22",                    unit:"boxes", category:"Surgical Supply",    currentStock:16,  averageInventory:20,  avgMonthlyUsage:7,   recencyDays:13, leadTimeDays:6,  stockoutFrequency:0, monthlyTurnoverRatio:0.3500, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:69  },
-  { id:"ITM057", name:"Polyglactin 2",                     unit:"boxes", category:"Surgical Supply",    currentStock:13,  averageInventory:17,  avgMonthlyUsage:6,   recencyDays:13, leadTimeDays:9,  stockoutFrequency:0, monthlyTurnoverRatio:0.3529, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:65  },
-  { id:"ITM058", name:"Polyglactin 3",                     unit:"boxes", category:"Surgical Supply",    currentStock:12,  averageInventory:16,  avgMonthlyUsage:6,   recencyDays:14, leadTimeDays:9,  stockoutFrequency:0, monthlyTurnoverRatio:0.3750, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:60  },
-  // ── TOPICAL MEDICINE (2) ───────────────────────────
-  { id:"ITM014", name:"Canizep ointment",                  unit:"btls",  category:"Topical Medicine",   currentStock:14,  averageInventory:18,  avgMonthlyUsage:6,   recencyDays:12, leadTimeDays:8,  stockoutFrequency:0, monthlyTurnoverRatio:0.3333, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:70  },
-  { id:"ITM051", name:"Otiderm",                           unit:"btls",  category:"Topical Medicine",   currentStock:10,  averageInventory:13,  avgMonthlyUsage:4,   recencyDays:15, leadTimeDays:8,  stockoutFrequency:0, monthlyTurnoverRatio:0.3077, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:75  },
-  // ── VACCINE (5) ────────────────────────────────────
-  { id:"ITM004", name:"Anti-Rabies vaccine (Rabisin)",     unit:"btls",  category:"Vaccine",            currentStock:520, averageInventory:700, avgMonthlyUsage:180, recencyDays:2,  leadTimeDays:14, stockoutFrequency:2, monthlyTurnoverRatio:0.2571, movementLabel:"Fast", reorderRisk:"Review", daysUntilStockout:87  },
-  { id:"ITM005", name:"Anti Tetanus",                      unit:"boxes", category:"Vaccine",            currentStock:12,  averageInventory:15,  avgMonthlyUsage:5,   recencyDays:18, leadTimeDays:12, stockoutFrequency:0, monthlyTurnoverRatio:0.3333, movementLabel:"Slow", reorderRisk:"OK",     daysUntilStockout:72  },
-  { id:"ITM039", name:"Kennel Cough (Vial)",               unit:"btls",  category:"Vaccine",            currentStock:23,  averageInventory:30,  avgMonthlyUsage:14,  recencyDays:7,  leadTimeDays:13, stockoutFrequency:1, monthlyTurnoverRatio:0.4667, movementLabel:"Fast", reorderRisk:"Review", daysUntilStockout:49  },
-  { id:"ITM060", name:"Purified Vero Cell Rabies Vaccine", unit:"btls",  category:"Vaccine",            currentStock:41,  averageInventory:52,  avgMonthlyUsage:27,  recencyDays:3,  leadTimeDays:14, stockoutFrequency:1, monthlyTurnoverRatio:0.5192, movementLabel:"Fast", reorderRisk:"Review", daysUntilStockout:46  },
-  { id:"ITM071", name:"Vanguard 5CVL (Vial)",              unit:"btls",  category:"Vaccine",            currentStock:24,  averageInventory:30,  avgMonthlyUsage:15,  recencyDays:7,  leadTimeDays:13, stockoutFrequency:1, monthlyTurnoverRatio:0.5000, movementLabel:"Fast", reorderRisk:"Review", daysUntilStockout:48  },
-];
-
-/* ══════════════════════════════════════════════════════
-   RF MOCK CLASSIFIER
-   When real RF model is ready: POST /api/inventory/classify
+   Local recalculation helper
+  Used for in-page stock changes until full inventory mutation API integration is completed.
 ══════════════════════════════════════════════════════ */
 function rfClassify(item) {
   const dailyUsage       = item.avgMonthlyUsage / 30;
@@ -160,19 +45,60 @@ function rfClassify(item) {
   };
 }
 
-/* ══════════════════════════════════════════════════════
-   LIVE STORE — deep clone + RF applied
-══════════════════════════════════════════════════════ */
-let store = MOCK_INVENTORY.map(item => ({
-  ...item,
-  ...rfClassify(item),
-  transactions: [],
-}));
+function mapPredictiveItem(item, index = 0) {
+  const currentStock = Number(
+    item.currentStock ??
+    item.quantity ??
+    item.stock ??
+    item.onHand ??
+    0
+  );
 
-/* ══════════════════════════════════════════════════════
-   STATE
-══════════════════════════════════════════════════════ */
-let filtered      = [...store];
+  const daysUntilStockout = Math.round(Number(item.daysToStockout ?? 999));
+
+  const avgMonthlyUsage =
+    item.avgMonthlyUsage != null
+      ? Number(item.avgMonthlyUsage)
+      : daysUntilStockout > 0 && daysUntilStockout < 999
+      ? Math.max(1, Math.round((currentStock / daysUntilStockout) * 30))
+      : 1;
+  const leadTimeDays = Number(item.leadTimeDays ?? item.leadTime ?? 7);
+  const movementRaw = String(item.predictedMovement ?? item.movementLabel ?? "Slow").toLowerCase();
+  const movement = movementRaw.includes("fast") ? "Fast" : "Slow";
+  const reorderRisk = Number(item.stockoutRiskPercent ?? 0) >= 50 ? "Review" : "OK";
+
+  const reorderPoint = Math.ceil((avgMonthlyUsage / 30) * leadTimeDays);
+
+  const stockStatus =
+    currentStock <= reorderPoint * 0.5 ? "Critical" :
+    currentStock <= reorderPoint ? "Low" : "OK";
+
+  return {
+    id: item.id || item.itemId || `PRED-${String(index + 1).padStart(3, "0")}`,
+    name: item.itemDescription || item.name || "Unnamed Item",
+    unit: item.unit || "pcs",
+    category: item.category || "Uncategorized",
+    currentStock,
+    averageInventory: Number(item.averageInventory ?? currentStock),
+    avgMonthlyUsage,
+    recencyDays: Number(item.recencyDays ?? 0),
+    leadTimeDays,
+    stockoutFrequency: Number(item.stockoutFrequency ?? 0),
+    monthlyTurnoverRatio: Number(item.monthlyTurnoverRatio ?? 0),
+    movementLabel: movement,
+    movement,
+    reorderRisk,
+    daysUntilStockout,
+    daysToRestock: Math.max(0, daysUntilStockout - leadTimeDays),
+    reorderPoint,
+    stockStatus,
+    transactions: [],
+  };
+}
+
+
+let store = [];
+let filtered = [];
 let currentPage   = 1;
 const PAGE_SIZE   = 12;
 let activeTab     = "all";
@@ -432,7 +358,7 @@ function renderDrawer(item) {
       </div>
 
       <div class="drawer-section">
-        <div class="drawer-section-title"><i class="bi bi-diagram-3-fill"></i> Random Forest Prediction (Mock)</div>
+        <div class="drawer-section-title"><i class="bi bi-diagram-3-fill"></i> Random Forest Prediction</div>
         <div class="rf-pred-card">
           <div class="rf-pred-header">
             <span class="rf-chip"><i class="bi bi-cpu-fill"></i> RF Classified</span>
@@ -441,10 +367,25 @@ function renderDrawer(item) {
             </span>
           </div>
           <div class="rf-pred-metrics">
-            <div class="rf-metric"><div class="rf-metric-val">${item.daysUntilStockout>=999?"—":item.daysUntilStockout+"d"}</div><div class="rf-metric-lbl">Est. Days Until Stockout</div></div>
-            <div class="rf-metric"><div class="rf-metric-val">${item.daysToRestock<=0?"Now":item.daysToRestock+"d"}</div><div class="rf-metric-lbl">Restock Action In</div></div>
-            <div class="rf-metric"><div class="rf-metric-val">${(item.monthlyTurnoverRatio*100).toFixed(0)}%</div><div class="rf-metric-lbl">Monthly Turnover Rate</div></div>
-            <div class="rf-metric"><div class="rf-metric-val">${item.stockoutFrequency}×</div><div class="rf-metric-lbl">Stockout Frequency</div></div>
+            <div class="rf-metric">
+              <div class="rf-metric-val">${item.daysUntilStockout >= 999 ? "—" : item.daysUntilStockout + "d"}</div>
+              <div class="rf-metric-lbl">Days Until Stockout</div>
+            </div>
+
+            <div class="rf-metric">
+              <div class="rf-metric-val">${item.reorderRisk}</div>
+              <div class="rf-metric-lbl">Reorder Risk</div>
+            </div>
+
+            <div class="rf-metric">
+              <div class="rf-metric-val">${item.currentStock} ${item.unit}</div>
+              <div class="rf-metric-lbl">Current Stock</div>
+            </div>
+
+            <div class="rf-metric">
+              <div class="rf-metric-val">${item.movement}</div>
+              <div class="rf-metric-lbl">Predicted Movement</div>
+            </div>
           </div>
           ${item.daysUntilStockout<999?`
           <div class="stockout-meter" style="margin-top:12px">
@@ -485,6 +426,27 @@ function renderDrawer(item) {
   document.getElementById("drawerStockInBtn")?.addEventListener("click",()=>openStockIn(item.id));
   document.getElementById("drawerUseBtn")?.addEventListener("click",    ()=>openStockOut(item.id));
   document.getElementById("drawerEditBtn")?.addEventListener("click",   ()=>openItemModal(item.id));
+}
+
+async function loadPredictiveInventory() {
+  try {
+    const data = await getPredictiveInventoryItems();
+
+    const rawItems = Array.isArray(data.items) ? data.items : [];
+    if (!rawItems.length) {
+      throw new Error("No predictive inventory items returned.");
+    }
+
+    store = rawItems.map(mapPredictiveItem);
+    filtered = [...store];
+    return true;
+  } catch (error) {
+    console.error("[loadPredictiveInventory]", error.message);
+    showToast("error", error.message || "Failed to load predictive inventory.");
+    store = [];
+    filtered = [];
+    return false;
+  }
 }
 
 /* ── Real-time deduction (called by medical records page) ── */
@@ -665,7 +627,10 @@ function bindSidebarToggle(){
 async function init(){
   try{
     await protectManagementPage();
-    loadSidebar(); renderTopbarUser(); bindSidebarToggle();
+    loadSidebar();
+    renderTopbarUser();
+    bindSidebarToggle();
+    await loadPredictiveInventory();
     buildCategoryTabs();
     renderStats();
     renderAlerts();
