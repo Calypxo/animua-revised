@@ -823,11 +823,10 @@ body.auth-open {
   color: #7f2018 !important;
   box-shadow: 0 16px 35px rgba(151, 10, 18, 0.14) !important;
 }
-
 #userLoggedInBox {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 #userLoggedInBox.hidden {
@@ -836,13 +835,16 @@ body.auth-open {
 
 #loggedUserName {
   font-weight: 700;
+  font-size: 17px;
   color: #7f2018;
   font-family: 'Inter', sans-serif;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .logout-icon-btn {
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   border: none;
   border-radius: 50%;
   background: linear-gradient(135deg, #970A12, #d1601e);
@@ -851,15 +853,78 @@ body.auth-open {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 10px 24px rgba(151, 10, 18, 0.22);
+  box-shadow: none;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  flex-shrink: 0;
 }
 
 .logout-icon-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 14px 28px rgba(151, 10, 18, 0.28);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(151, 10, 18, 0.18);
 }
 
 .logout-icon-btn i {
-  font-size: 15px;
+  font-size: 16px;
+}
+
+.user-actions-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px 8px 16px;
+  background: #fffaf7;
+  border: 1px solid #f0e4de;
+  border-radius: 999px;
+  min-height: 58px;
+}
+
+.user-pill-name {
+  font-size: 17px;
+  font-weight: 700;
+  color: #8f2418;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.notification-btn {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 1px solid #f0e4de;
+  background: #fffaf7;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: none;
+  flex-shrink: 0;
+}
+
+.notification-btn i {
+  font-size: 18px;
+  color: #972919;
+}
+
+.user-pill-logout {
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--crimson), var(--orange));
+  color: var(--white);
+  cursor: pointer;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+
+.user-pill-logout i {
+  font-size: 16px;
 }

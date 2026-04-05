@@ -36,38 +36,37 @@
     </nav>
 
     <div class="nav-actions">
-      <div class="notification-wrap">
-        <button class="notification-btn" id="notificationBtn" aria-label="Notifications">
-          <i class="fa-regular fa-bell"></i>
-          <span class="notification-dot"></span>
-        </button>
+      <div class="user-actions-wrap">
+        <div class="notification-wrap">
+          <button class="notification-btn" id="notificationBtn" aria-label="Notifications">
+            <i class="fa-regular fa-bell"></i>
+            <span class="notification-dot"></span>
+          </button>
 
-        <div class="notification-popup" id="notificationPopup">
-          <div class="notification-popup-head">
-            <h4>Notifications</h4>
+          <div class="notification-popup" id="notificationPopup">
+            <div class="notification-popup-head">
+              <h4>Notifications</h4>
+            </div>
+            <ul class="notification-list">
+              <li>New animals were recently added for adoption.</li>
+              <li>Please complete forms carefully before submission.</li>
+              <li>Shelter announcements will appear here.</li>
+            </ul>
           </div>
-          <ul class="notification-list">
-            <li>New animals were recently added for adoption.</li>
-            <li>Please complete forms carefully before submission.</li>
-            <li>Shelter announcements will appear here.</li>
-          </ul>
+        </div>
+
+        <a href="#" id="loginNavBtn" class="login-btn" aria-label="Login">
+          <i class="fa-regular fa-user"></i>
+        </a>
+
+        <div id="userLoggedInBox" class="hidden user-pill">
+          <span id="loggedUserName" class="user-pill-name"></span>
+
+          <button id="logoutBtn" type="button" class="logout-icon-btn user-pill-logout" aria-label="Logout">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </button>
         </div>
       </div>
-
-      <a href="#" class="chatbot-btn" aria-label="Chatbot">
-        <i class="fa-regular fa-comment-dots"></i>
-      </a>
-
-      <a href="#" id="loginNavBtn" class="login-btn" aria-label="Login">
-        <i class="fa-regular fa-user"></i>
-      </a>
-
-      <div id="userLoggedInBox" class="hidden">
-  <span id="loggedUserName"></span>
-  <button id="logoutBtn" type="button" class="logout-icon-btn" aria-label="Logout">
-    <i class="fa-solid fa-right-from-bracket"></i>
-  </button>
-</div>
 
       <button class="menu-toggle" id="menuToggle" aria-label="Toggle Navigation">
         <span></span>
