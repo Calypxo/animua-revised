@@ -40,34 +40,58 @@
       <div class="page-header mb-4">
         <div>
           <h1 class="page-title">Inventory Management</h1>
-          <p class="page-sub">Real-time stock tracking with Random Forest movement classification and automated restock alerts.</p>
+          <p class="page-sub">Real-time stock tracking, movement monitoring, and automated restock alerts.</p>
         </div>
         <div class="d-flex gap-2 flex-wrap align-items-center">
           <button class="btn-primary-clay" id="btnStockIn"><i class="bi bi-plus-lg"></i> Stock In</button>
-          <button class="btn-outline-add"  id="btnAddItem"><i class="bi bi-box-seam"></i> Add Item</button>
+          <button class="btn-outline-add" id="btnAddItem"><i class="bi bi-box-seam"></i> Add Item</button>
         </div>
       </div>
 
       <!-- Stats -->
       <div class="inv-stats mb-4">
-        <div class="inv-stat-card"><div class="inv-stat-icon icon-clay"><i class="bi bi-boxes"></i></div><div><div class="inv-stat-val" id="statTotal">81</div><div class="inv-stat-lbl">Total Items</div></div></div>
-        <div class="inv-stat-card"><div class="inv-stat-icon icon-rose"><i class="bi bi-exclamation-triangle-fill"></i></div><div><div class="inv-stat-val" id="statCritical">0</div><div class="inv-stat-lbl">Critical Stock</div></div></div>
-        <div class="inv-stat-card"><div class="inv-stat-icon icon-amber"><i class="bi bi-arrow-down-circle-fill"></i></div><div><div class="inv-stat-val" id="statLow">0</div><div class="inv-stat-lbl">Low Stock</div></div></div>
-        <div class="inv-stat-card"><div class="inv-stat-icon icon-teal"><i class="bi bi-cpu"></i></div><div><div class="inv-stat-val" id="statFast">18</div><div class="inv-stat-lbl">Fast-Moving</div></div></div>
-        <div class="inv-stat-card"><div class="inv-stat-icon icon-green"><i class="bi bi-check-circle-fill"></i></div><div><div class="inv-stat-val" id="statOk">81</div><div class="inv-stat-lbl">Adequate Stock</div></div></div>
-        <div class="inv-stat-card"><div class="inv-stat-icon icon-blue"><i class="bi bi-clock-history"></i></div><div><div class="inv-stat-val" id="statAvgDays">58d</div><div class="inv-stat-lbl">Avg Days Until Stockout</div></div></div>
+        <div class="inv-stat-card">
+          <div class="inv-stat-icon icon-clay"><i class="bi bi-boxes"></i></div>
+          <div>
+            <div class="inv-stat-val" id="statTotal">81</div>
+            <div class="inv-stat-lbl">Total Items</div>
+          </div>
+        </div>
+
+        <div class="inv-stat-card">
+          <div class="inv-stat-icon icon-rose"><i class="bi bi-exclamation-triangle-fill"></i></div>
+          <div>
+            <div class="inv-stat-val" id="statCritical">0</div>
+            <div class="inv-stat-lbl">Critical Stock</div>
+          </div>
+        </div>
+
+        <div class="inv-stat-card">
+          <div class="inv-stat-icon icon-amber"><i class="bi bi-arrow-down-circle-fill"></i></div>
+          <div>
+            <div class="inv-stat-val" id="statLow">0</div>
+            <div class="inv-stat-lbl">Low Stock</div>
+          </div>
+        </div>
+
+        <div class="inv-stat-card">
+          <div class="inv-stat-icon icon-teal"><i class="bi bi-cpu"></i></div>
+          <div>
+            <div class="inv-stat-val" id="statFast">18</div>
+            <div class="inv-stat-lbl">Fast-Moving</div>
+          </div>
+        </div>
       </div>
 
       <!-- Alerts -->
       <div id="alertsBar" class="mb-4">
         <div class="alert-row alert-low">
-          <i class="bi bi-cpu"></i>
-          <div><strong>RF Alert:</strong> 17 fast-moving items flagged for review — including Alcohol (39d), Disposable Syringes (41–43d), and Anti-Rabies Vaccine (Rabisin). Restock within lead time window.</div>
-          <span class="alert-action" id="alertViewFast">View fast items →</span>
-        </div>
-        <div class="alert-row alert-info">
-          <i class="bi bi-info-circle-fill"></i>
-          <div>All 81 items currently above critical threshold. Stock levels are healthy — RF monitoring active.</div>
+          <i class="bi bi-exclamation-triangle-fill"></i>
+          <div>
+            <strong>1 item at CRITICAL stock level</strong><br />
+            — Immediate restocking required: Baytril 5%
+          </div>
+          <span class="alert-action" id="alertViewFast">View all →</span>
         </div>
       </div>
 
@@ -81,21 +105,10 @@
               <button class="inv-tab active" data-tab="all">All</button>
               <button class="inv-tab" data-tab="Antibiotic">Antibiotic</button>
               <button class="inv-tab" data-tab="Antiparasitic">Antiparasitic</button>
-              <button class="inv-tab" data-tab="Anesthetic">Anesthetic</button>
-              <button class="inv-tab" data-tab="Antifungal">Antifungal</button>
               <button class="inv-tab" data-tab="Consumable">Consumable</button>
-              <button class="inv-tab" data-tab="Diagnostic">Diagnostic</button>
               <button class="inv-tab" data-tab="Disinfectant">Disinfectant</button>
               <button class="inv-tab" data-tab="Equipment">Equipment</button>
-              <button class="inv-tab" data-tab="Feed">Feed</button>
-              <button class="inv-tab" data-tab="Hormonal Medicine">Hormonal</button>
-              <button class="inv-tab" data-tab="Pain Relief">Pain Relief</button>
-              <button class="inv-tab" data-tab="Respiratory Medicine">Respiratory</button>
-              <button class="inv-tab" data-tab="Sedative">Sedative</button>
-              <button class="inv-tab" data-tab="Shelter Supply">Shelter Supply</button>
               <button class="inv-tab" data-tab="Supplement">Supplement</button>
-              <button class="inv-tab" data-tab="Surgical Supply">Surgical</button>
-              <button class="inv-tab" data-tab="Topical Medicine">Topical</button>
               <button class="inv-tab" data-tab="Vaccine">Vaccine</button>
             </div>
 
@@ -118,7 +131,7 @@
               </div>
               <div class="d-flex gap-2">
                 <button class="view-btn active" id="btnTableView" title="Table view"><i class="bi bi-table"></i></button>
-                <button class="view-btn" id="btnCardView"  title="Card view"><i class="bi bi-grid-3x3-gap-fill"></i></button>
+                <button class="view-btn" id="btnCardView" title="Card view"><i class="bi bi-grid-3x3-gap-fill"></i></button>
               </div>
             </div>
           </div>
@@ -131,17 +144,15 @@
                   <tr>
                     <th>Item</th>
                     <th>Category</th>
-                    <th>Unit</th>
                     <th>Current Stock</th>
-                    <th>Avg Monthly Use</th>
                     <th>Days Until Stockout</th>
-                    <th>RF Movement</th>
+                    <th>Movement</th>
                     <th>Reorder Risk</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody id="inventoryTableBody">
-                  <tr><td colspan="9" class="text-center py-5"><div class="um-spinner"></div></td></tr>
+                  <tr><td colspan="7" class="text-center py-5"><div class="um-spinner"></div></td></tr>
                 </tbody>
               </table>
             </div>
