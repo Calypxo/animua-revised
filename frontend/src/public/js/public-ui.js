@@ -83,22 +83,30 @@ function showRegisterView() {
 }
 
 function setupPasswordToggles() {
-  const toggleButtons = document.querySelectorAll(".toggle-password");
+  if (document.body.dataset.passwordToggleBound === "true") return;
+  document.body.dataset.passwordToggleBound = "true";
 
-  toggleButtons.forEach((toggle) => {
-    toggle.addEventListener("click", () => {
-      const targetId = toggle.getAttribute("data-target");
-      const input = document.getElementById(targetId);
-      const icon = toggle.querySelector("i");
+  document.addEventListener("click", (event) => {
+    const toggle = event.target.closest(".toggle-password");
+    if (!toggle) return;
 
-      if (!input || !icon) return;
+    event.preventDefault();
 
-      const isHidden = input.type === "password";
-      input.type = isHidden ? "text" : "password";
+    const targetId = toggle.getAttribute("data-target");
+    const input = document.getElementById(targetId);
+    const icon = toggle.querySelector("i");
 
-      icon.classList.remove("fa-eye", "fa-eye-slash");
-      icon.classList.add(isHidden ? "fa-eye" : "fa-eye-slash");
-    });
+    if (!input || !icon) return;
+
+    if (input.type === "password") {
+      input.type = "text";
+      icon.classList.remove("fa-eye-slash");
+      icon.classList.add("fa-eye");
+    } else {
+      input.type = "password";
+      icon.classList.remove("fa-eye");
+      icon.classList.add("fa-eye-slash");
+    }
   });
 }
 

@@ -1,5 +1,12 @@
 import Swal from "sweetalert2";
+import { auth, db } from "../utils/firebase.js";
 import { API_BASE_URL } from "../utils/api.js";
+import {
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+  updateProfile
+} from "firebase/auth";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 
 export async function handleRegistration(event) {
   event.preventDefault();
@@ -129,6 +136,26 @@ export async function handleRegistration(event) {
       return;
     }
 
+    // FIREBASE AUTH REGISTER
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    // SAVE DISPLAY NAME
+    await updateProfile(user, {
+      displayName: fullName
+    });
+
+    // SEND VERIFICATION EMAIL
+ await sendEmailVerification(user, {
+  url: `${window.location.origin}/pages/verify-success.html`,
+  handleCodeInApp: false
+});
+
+    // SAVE TEMP LOGIN INFO FOR AUTO LOGIN AFTER VERIFICATION
+   localStorage.setItem("pending_verify_email", email);
+   localStorage.setItem("pending_verify_password", password);
+  localStorage.setItem("pending_verify_name", fullName);
+
     if (fullNameInput) fullNameInput.value = "";
     if (emailInput) emailInput.value = "";
     if (passwordInput) passwordInput.value = "";
@@ -138,21 +165,23 @@ export async function handleRegistration(event) {
     await Swal.fire({
       icon: "success",
       title: "Registration Successful",
-      text: "Your account has been created successfully.",
-      timer: 2200,
+      text: "Your account has been created successfully. Please check your email and verify your account.",
+      timer: 3200,
       showConfirmButton: false,
       timerProgressBar: true,
       customClass: {
         popup: "animua-popup"
       }
     });
+
+    window.location.href = "/pages/verify-success.html";
   } catch (error) {
     console.error("[Register Error]", error);
     closeModal(authModal);
     Swal.fire({
       icon: "error",
       title: "Connection Error",
-      text: "Cannot connect to the backend. Please check your internet or server status.",
+      text: error.message || "Cannot connect to the backend. Please check your internet or server status.",
       customClass: {
         popup: "animua-popup",
         confirmButton: "animua-confirm"
