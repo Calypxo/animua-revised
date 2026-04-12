@@ -1,8 +1,4 @@
 // admin-frontend/src/management/inventory.js
-// ─────────────────────────────────────────────────────
-// Predictive inventory page
-// Data is loaded from backend predictive endpoints.
-// Local stock actions are currently handled in-page until full inventory API integration is completed.
 
 import "../css/adminDashboard.css";
 import "../css/sidebar.css";
@@ -12,36 +8,56 @@ import { protectManagementPage } from "../auth/authGuard.js";
 import { renderTopbarUser } from "../components/management/topbarUser.js";
 import { loadSidebar } from "../components/management/sidebarLoader.js";
 import { getUserName } from "../utils/storage.js";
-import { getPredictiveInventoryItems } from "../services/predictiveInventory.service.js";
+
+import {
+  getInventoryItems,
+  getInventoryItemById,
+  updateInventoryItem,
+  createInventoryItem,
+  addInventoryTransaction,
+  getItemTransactions
+} from "../services/inventoryFirestore.service.js";
 
 /* ══════════════════════════════════════════════════════
    Local recalculation helper
-   Used for in-page stock changes until full inventory mutation API integration is completed.
 ══════════════════════════════════════════════════════ */
 function rfClassify(item) {
-  const dailyUsage = item.avgMonthlyUsage / 30;
-  const reorderPoint = Math.ceil(dailyUsage * item.leadTimeDays);
+  const dailyUsage = Number(item.avgMonthlyUsage || 0) / 30;
+
+  const reorderPoint = Math.max(
+    1,
+    Math.ceil(dailyUsage * Number(item.leadTimeDays || 0))
+  );
+
+  const criticalPoint = Math.max(1, Math.floor(reorderPoint * 0.5));
+
   const daysUntilStockout =
-    item.avgMonthlyUsage > 0
-      ? Math.round((item.currentStock / item.avgMonthlyUsage) * 30)
+    Number(item.avgMonthlyUsage || 0) > 0
+      ? Math.round(
+          (Number(item.currentStock || 0) / Number(item.avgMonthlyUsage || 0)) * 30
+        )
       : 999;
 
-  const daysToRestock = Math.max(0, daysUntilStockout - item.leadTimeDays);
+  const daysToRestock = Math.max(
+    0,
+    daysUntilStockout - Number(item.leadTimeDays || 0)
+  );
 
-  // RF decision (mirrors dataset labels)
   const isFast =
-    (item.monthlyTurnoverRatio >= 0.5 && item.recencyDays <= 7) ||
-    item.stockoutFrequency > 0;
+    (Number(item.monthlyTurnoverRatio || 0) >= 0.5 &&
+      Number(item.recencyDays || 0) <= 7) ||
+    Number(item.stockoutFrequency || 0) > 0;
 
   const stockStatus =
-    item.currentStock <= reorderPoint * 0.5
+    Number(item.currentStock || 0) <= criticalPoint
       ? "Critical"
-      : item.currentStock <= reorderPoint
+      : Number(item.currentStock || 0) <= reorderPoint
       ? "Low"
       : "OK";
 
   const reorderRisk =
-    item.currentStock < item.avgMonthlyUsage || item.stockoutFrequency > 0
+    Number(item.currentStock || 0) < Number(item.avgMonthlyUsage || 0) ||
+    Number(item.stockoutFrequency || 0) > 0
       ? "Review"
       : "OK";
 
@@ -55,6 +71,46 @@ function rfClassify(item) {
   };
 }
 
+function formatUnit(count, unit) {
+  const qty = Number(count || 0);
+  const cleanUnit = String(unit || "").trim().toLowerCase();
+
+  if (!cleanUnit) return "";
+
+  const irregular = {
+    boxes: "box",
+    box: "box",
+    bottles: "bottle",
+    bottle: "bottle",
+    packs: "pack",
+    pack: "pack",
+    pieces: "piece",
+    piece: "piece",
+    pcs: "pc",
+    pc: "pc",
+    tablets: "tablet",
+    tablet: "tablet",
+    capsules: "capsule",
+    capsule: "capsule",
+    vials: "vial",
+    vial: "vial",
+    gallons: "gallon",
+    gallon: "gallon",
+  };
+
+  const singular = irregular[cleanUnit] || cleanUnit.replace(/s$/, "");
+  const plural =
+    singular === "box"
+      ? "boxes"
+      : singular === "pc"
+      ? "pcs"
+      : singular.endsWith("s")
+      ? singular
+      : `${singular}s`;
+
+  return qty === 1 ? singular : plural;
+}
+
 function mapPredictiveItem(item, index = 0) {
   const currentStock = Number(
     item.currentStock ??
@@ -64,7 +120,14 @@ function mapPredictiveItem(item, index = 0) {
       0
   );
 
-  const daysUntilStockout = Math.round(Number(item.daysToStockout ?? 999));
+  const daysUntilStockout =
+    item.daysUntilStockout != null
+      ? Math.round(Number(item.daysUntilStockout))
+      : item.daysToStockout != null
+      ? Math.round(Number(item.daysToStockout))
+      : Number(item.avgMonthlyUsage || 0) > 0
+      ? Math.round((currentStock / Number(item.avgMonthlyUsage || 1)) * 30)
+      : 999;
 
   const avgMonthlyUsage =
     item.avgMonthlyUsage != null
@@ -74,17 +137,22 @@ function mapPredictiveItem(item, index = 0) {
       : 1;
 
   const leadTimeDays = Number(item.leadTimeDays ?? item.leadTime ?? 7);
-  const movementRaw = String(
-    item.predictedMovement ?? item.movementLabel ?? "Slow"
-  ).toLowerCase();
-  const movement = movementRaw.includes("fast") ? "Fast" : "Slow";
-  const reorderRisk =
-    Number(item.stockoutRiskPercent ?? 0) >= 50 ? "Review" : "OK";
 
-  const reorderPoint = Math.ceil((avgMonthlyUsage / 30) * leadTimeDays);
+  const movementRaw = String(
+    item.predictedMovement ?? item.movementLabel ?? item.movement ?? "Slow"
+  ).toLowerCase();
+
+  const movement = movementRaw.includes("fast") ? "Fast" : "Slow";
+
+  const reorderPoint = Math.max(
+    1,
+    Math.ceil((avgMonthlyUsage / 30) * leadTimeDays)
+  );
+
+  const criticalPoint = Math.max(1, Math.floor(reorderPoint * 0.5));
 
   const stockStatus =
-    currentStock <= reorderPoint * 0.5
+    currentStock <= criticalPoint
       ? "Critical"
       : currentStock <= reorderPoint
       ? "Low"
@@ -104,12 +172,12 @@ function mapPredictiveItem(item, index = 0) {
     monthlyTurnoverRatio: Number(item.monthlyTurnoverRatio ?? 0),
     movementLabel: movement,
     movement,
-    reorderRisk,
+    reorderRisk: item.reorderRisk || "OK",
     daysUntilStockout,
     daysToRestock: Math.max(0, daysUntilStockout - leadTimeDays),
     reorderPoint,
     stockStatus,
-    transactions: [],
+    transactions: Array.isArray(item.transactions) ? item.transactions : [],
   };
 }
 
@@ -120,6 +188,10 @@ const PAGE_SIZE = 12;
 let activeTab = "all";
 let activeItemId = null;
 let viewMode = "table";
+let editingItemId = null;
+let activeStockStatus = "";
+let stockInMode = "single";
+let stockOutMode = "single";
 
 /* ══════════════════════════════════════════════════════
    CATEGORY COLORS
@@ -157,7 +229,7 @@ const today = () => new Date().toISOString().split("T")[0];
 
 const fmtDate = (d) => {
   if (!d) return "—";
-  return new Date(d + "T00:00:00").toLocaleDateString("en-PH", {
+  return new Date(`${d}T00:00:00`).toLocaleDateString("en-PH", {
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -203,19 +275,26 @@ function renderAlerts() {
           <strong>${critical.length} item${critical.length > 1 ? "s" : ""} at CRITICAL stock level</strong>
           — Immediate restocking required: ${names}
         </div>
-        <span class="alert-action" data-filter-risk="Review">View all →</span>
+        <span class="alert-action" data-stock-status="Critical">View all →</span>
       </div>
     `;
-  } else {
-    html = "";
   }
 
   bar.innerHTML = html;
 
-  bar.querySelectorAll("[data-filter-risk]").forEach((el) => {
+  bar.querySelectorAll("[data-stock-status]").forEach((el) => {
     el.addEventListener("click", () => {
+      activeStockStatus = el.dataset.stockStatus || "Critical";
+
       const riskFilter = document.getElementById("filterRisk");
-      if (riskFilter) riskFilter.value = "Review";
+      if (riskFilter) riskFilter.value = "";
+
+      const movementFilter = document.getElementById("filterMovement");
+      if (movementFilter) movementFilter.value = "";
+
+      const searchInput = document.getElementById("searchInventory");
+      if (searchInput) searchInput.value = "";
+
       applyFilters();
     });
   });
@@ -226,20 +305,27 @@ function applyFilters() {
   const q = (document.getElementById("searchInventory")?.value || "")
     .toLowerCase()
     .trim();
+
   const movement = document.getElementById("filterMovement")?.value || "";
   const risk = document.getElementById("filterRisk")?.value || "";
+  const stockStatus =
+    activeStockStatus ||
+    document.getElementById("filterStockStatus")?.value ||
+    "";
 
   filtered = store.filter((item) => {
     if (activeTab !== "all" && item.category !== activeTab) return false;
     if (movement && item.movement !== movement) return false;
     if (risk && item.reorderRisk !== risk) return false;
+    if (stockStatus && item.stockStatus !== stockStatus) return false;
     if (
       q &&
       !item.name.toLowerCase().includes(q) &&
       !item.id.toLowerCase().includes(q) &&
       !item.category.toLowerCase().includes(q)
-    )
+    ) {
       return false;
+    }
     return true;
   });
 
@@ -256,16 +342,16 @@ function applyFilters() {
 
 /* ── Stock helpers ──────────────────────────────────── */
 function stockBar(item) {
-  const pct = Math.min(
-    100,
-    Math.round((item.currentStock / item.averageInventory) * 100)
-  );
+  const base = Number(item.averageInventory || 0) || 1;
+  const pct = Math.min(100, Math.round((Number(item.currentStock || 0) / base) * 100));
+
   const fillCls =
     item.stockStatus === "Critical"
       ? "fill-crit"
       : item.stockStatus === "Low"
       ? "fill-low"
       : "fill-ok";
+
   const valCls =
     item.stockStatus === "Critical"
       ? "days-crit"
@@ -277,7 +363,7 @@ function stockBar(item) {
     <div class="stock-cell">
       <span class="stock-val ${valCls}">
         ${item.currentStock}
-        <span style="font-size:0.7rem;font-weight:500;color:var(--stone)">${item.unit}</span>
+        <span style="font-size:0.7rem;font-weight:500;color:var(--stone)">${formatUnit(item.currentStock, item.unit)}</span>
       </span>
       <div class="stock-bar-wrap">
         <div class="stock-bar">
@@ -290,14 +376,15 @@ function stockBar(item) {
 }
 
 function daysBadge(item) {
-  if (item.daysUntilStockout >= 999)
-    return `<span class="days-cell days-ok">—</span>`;
+  if (item.daysUntilStockout >= 999) return `<span class="days-cell days-ok">—</span>`;
+
   const cls =
     item.daysUntilStockout <= 14
       ? "days-crit"
       : item.daysUntilStockout <= 30
       ? "days-warn"
       : "days-ok";
+
   return `<span class="days-cell ${cls}">${item.daysUntilStockout}d</span>`;
 }
 
@@ -391,10 +478,9 @@ function renderCards() {
           ? "card-low"
           : "";
 
-      const pct = Math.min(
-        100,
-        Math.round((item.currentStock / item.averageInventory) * 100)
-      );
+      const base = Number(item.averageInventory || 0) || 1;
+      const pct = Math.min(100, Math.round((Number(item.currentStock || 0) / base) * 100));
+
       const fc =
         item.stockStatus === "Critical"
           ? "fill-crit"
@@ -412,7 +498,7 @@ function renderCards() {
           ${catBadge(item.category)}
         </div>
         <div class="inv-card-stock">${item.currentStock}</div>
-        <div class="inv-card-unit">${item.unit} in stock</div>
+        <div class="inv-card-unit">${formatUnit(item.currentStock, item.unit)} in stock</div>
         <div style="margin:8px 0 4px">
           <div class="stock-bar" style="height:5px">
             <div class="stock-bar-fill ${fc}" style="width:${pct}%"></div>
@@ -464,9 +550,7 @@ function renderPagination() {
   const end = Math.min(currentPage * PAGE_SIZE, total);
 
   let h = `<span class="page-info">Showing ${total ? start : 0}–${end} of ${total}</span>`;
-  h += `<button class="page-btn" id="pagePrev" ${
-    currentPage === 1 ? "disabled" : ""
-  }><i class="bi bi-chevron-left"></i></button>`;
+  h += `<button class="page-btn" id="pagePrev" ${currentPage === 1 ? "disabled" : ""}><i class="bi bi-chevron-left"></i></button>`;
 
   for (let i = 1; i <= Math.min(pages, 8); i++) {
     h += `<button class="page-btn ${i === currentPage ? "active" : ""}" data-page="${i}">${i}</button>`;
@@ -476,9 +560,7 @@ function renderPagination() {
     h += `<span style="color:var(--stone);font-size:0.82rem;padding:0 4px">…${pages}</span>`;
   }
 
-  h += `<button class="page-btn" id="pageNext" ${
-    currentPage === pages ? "disabled" : ""
-  }><i class="bi bi-chevron-right"></i></button>`;
+  h += `<button class="page-btn" id="pageNext" ${currentPage === pages ? "disabled" : ""}><i class="bi bi-chevron-right"></i></button>`;
 
   bar.innerHTML = h;
 
@@ -500,7 +582,7 @@ function renderPagination() {
 
   bar.querySelectorAll("[data-page]").forEach((b) =>
     b.addEventListener("click", () => {
-      currentPage = parseInt(b.dataset.page);
+      currentPage = parseInt(b.dataset.page, 10);
       renderView();
       renderPagination();
     })
@@ -514,30 +596,33 @@ function openDrawer(id) {
 
   activeItemId = id;
 
-  document
-    .querySelectorAll("tr[data-id]")
-    .forEach((r) => r.classList.toggle("row-active", r.dataset.id === id));
-  document
-    .querySelectorAll(".inv-card")
-    .forEach((c) => c.classList.toggle("card-active", c.dataset.id === id));
+  document.querySelectorAll("tr[data-id]").forEach((r) => {
+    r.classList.toggle("row-active", r.dataset.id === id);
+  });
 
-  document.getElementById("invLayout")?.classList.add("drawer-open");
+  document.querySelectorAll(".inv-card").forEach((c) => {
+    c.classList.toggle("card-active", c.dataset.id === id);
+  });
+
   renderDrawer(item);
+  openModal("viewItemModalBackdrop");
 }
 
 function closeDrawer() {
   activeItemId = null;
-  document.getElementById("invLayout")?.classList.remove("drawer-open");
-  document
-    .querySelectorAll("tr[data-id]")
-    .forEach((r) => r.classList.remove("row-active"));
-  document
-    .querySelectorAll(".inv-card")
-    .forEach((c) => c.classList.remove("card-active"));
+  closeModal("viewItemModalBackdrop");
+
+  document.querySelectorAll("tr[data-id]").forEach((r) => {
+    r.classList.remove("row-active");
+  });
+
+  document.querySelectorAll(".inv-card").forEach((c) => {
+    c.classList.remove("card-active");
+  });
 }
 
 function renderDrawer(item) {
-  const inner = document.getElementById("invDrawerInner");
+  const inner = document.getElementById("viewItemModalInner");
   if (!inner) return;
 
   const txns = item.transactions.slice().reverse().slice(0, 8);
@@ -546,13 +631,12 @@ function renderDrawer(item) {
     <div class="drawer-header">
       <div>
         <h3>${item.name.trim()}</h3>
-        <p>${item.id} · ${item.category} · ${item.unit}</p>
+        <p>${item.id} · ${item.category} · ${formatUnit(item.currentStock, item.unit)}</p>
       </div>
       <button class="drawer-close-btn" id="drawerCloseX"><i class="bi bi-x-lg"></i></button>
     </div>
 
     <div class="drawer-body">
-
       <div class="drawer-section">
         <div class="drawer-section-title"><i class="bi bi-boxes"></i> Stock Status</div>
         <div class="drawer-info-grid">
@@ -565,7 +649,7 @@ function renderDrawer(item) {
                 ? "var(--amber)"
                 : "var(--ink)"
             }">
-              ${item.currentStock} <span style="font-size:0.8rem;font-weight:500;color:var(--stone)">${item.unit}</span>
+              ${item.currentStock} <span style="font-size:0.8rem;font-weight:500;color:var(--stone)">${formatUnit(item.currentStock, item.unit)}</span>
             </div>
           </div>
 
@@ -576,11 +660,7 @@ function renderDrawer(item) {
                 item.stockStatus === "Critical" || item.stockStatus === "Low"
                   ? "risk-review"
                   : "risk-ok"
-              }" style="${
-    item.stockStatus === "Low"
-      ? "background:var(--amber-soft);color:var(--amber)"
-      : ""
-  }">
+              }" style="${item.stockStatus === "Low" ? "background:var(--amber-soft);color:var(--amber)" : ""}">
                 ${
                   item.stockStatus === "Critical"
                     ? "⚠ Critical"
@@ -594,13 +674,14 @@ function renderDrawer(item) {
 
           <div class="drawer-info-item">
             <div class="drawer-info-lbl">Avg Monthly Usage</div>
-            <div class="drawer-info-val">${item.avgMonthlyUsage} ${item.unit}/mo</div>
+           <div class="drawer-info-val">${item.avgMonthlyUsage} ${formatUnit(item.avgMonthlyUsage, item.unit)}/mo</div>
           </div>
 
           <div class="drawer-info-item">
             <div class="drawer-info-lbl">Reorder Point</div>
-            <div class="drawer-info-val">${item.reorderPoint} ${item.unit}</div>
+            <div class="drawer-info-val">${item.reorderPoint} ${formatUnit(item.reorderPoint, item.unit)}</div>
           </div>
+        </div>
       </div>
 
       <div class="drawer-section">
@@ -616,9 +697,7 @@ function renderDrawer(item) {
 
           <div class="rf-pred-metrics">
             <div class="rf-metric">
-              <div class="rf-metric-val">${
-                item.daysUntilStockout >= 999 ? "—" : item.daysUntilStockout + "d"
-              }</div>
+              <div class="rf-metric-val">${item.daysUntilStockout >= 999 ? "—" : `${item.daysUntilStockout}d`}</div>
               <div class="rf-metric-lbl">Days Until Stockout</div>
             </div>
 
@@ -635,7 +714,7 @@ function renderDrawer(item) {
                 ? `⚠ Restock recommended${
                     item.daysToRestock <= 0
                       ? " now"
-                      : " within " + item.daysToRestock + " days"
+                      : ` within ${item.daysToRestock} days`
                   } — allow ${item.leadTimeDays}d lead time`
                 : "✓ Stock is adequate. No action needed yet."
             }</span>
@@ -655,17 +734,9 @@ function renderDrawer(item) {
               <i class="bi ${t.type === "in" ? "bi-plus-lg" : "bi-dash-lg"}"></i>
             </div>
             <div class="txn-body">
-              <div class="txn-type">${t.type === "in" ? "Stock In" : "Used — " + t.procedure}</div>
-              <div class="txn-meta">${fmtDate(t.date)}${
-                    t.animal ? " · " + t.animal : ""
-                  }${t.supplier ? " · " + t.supplier : ""}${
-                    t.staff ? " · by " + t.staff : ""
-                  }</div>
-              ${
-                t.notes
-                  ? `<div class="txn-meta" style="font-style:italic">${t.notes}</div>`
-                  : ""
-              }
+              <div class="txn-type">${t.type === "in" ? "Stock In" : "Used — " + (t.procedure || "General Use")}</div>
+              <div class="txn-meta">${fmtDate(t.date)}${t.animal ? " · " + t.animal : ""}${t.supplier ? " · " + t.supplier : ""}${t.staff ? " · by " + t.staff : ""}</div>
+              ${t.notes ? `<div class="txn-meta" style="font-style:italic">${t.notes}</div>` : ""}
             </div>
             <span class="txn-qty ${t.type === "in" ? "qty-in" : "qty-out"}">${t.type === "in" ? "+" : "-"}${t.qty}</span>
           </div>
@@ -675,7 +746,6 @@ function renderDrawer(item) {
             : `<p style="font-size:0.84rem;color:var(--stone);text-align:center;padding:16px 0">No transactions recorded yet.</p>`
         }
       </div>
-
     </div>
 
     <div class="drawer-footer">
@@ -688,132 +758,448 @@ function renderDrawer(item) {
 
   document.getElementById("drawerCloseX")?.addEventListener("click", closeDrawer);
   document.getElementById("drawerCloseBtn")?.addEventListener("click", closeDrawer);
-  document
-    .getElementById("drawerStockInBtn")
-    ?.addEventListener("click", () => openStockIn(item.id));
-  document
-    .getElementById("drawerUseBtn")
-    ?.addEventListener("click", () => openStockOut(item.id));
-  document
-    .getElementById("drawerEditBtn")
-    ?.addEventListener("click", () => openItemModal(item.id));
+  document.getElementById("drawerStockInBtn")?.addEventListener("click", () => {
+  closeDrawer();
+  setTimeout(() => openStockIn(item.id), 180);
+});
+
+document.getElementById("drawerUseBtn")?.addEventListener("click", () => {
+  closeDrawer();
+  setTimeout(() => openStockOut(item.id), 180);
+});
+  document.getElementById("drawerEditBtn")?.addEventListener("click", () => openItemModal(item.id));
 }
 
-async function loadPredictiveInventory() {
+async function loadInventory() {
   try {
-    const data = await getPredictiveInventoryItems();
-    const rawItems = Array.isArray(data.items) ? data.items : [];
+    const items = await getInventoryItems();
 
-    if (!rawItems.length) {
-      throw new Error("No predictive inventory items returned.");
+    if (!items.length) {
+      throw new Error("No inventory items found.");
     }
 
-    store = rawItems.map(mapPredictiveItem);
+    store = await Promise.all(
+      items.map(async (item, index) => {
+        const mapped = mapPredictiveItem(item, index);
+        const txns = await getItemTransactions(mapped.id);
+        mapped.transactions = txns;
+        return mapped;
+      })
+    );
+
     filtered = [...store];
-    return true;
+    renderStats();
+    renderAlerts();
+    buildCategoryTabs();
+    applyFilters();
   } catch (error) {
-    console.error("[loadPredictiveInventory]", error.message);
-    showToast("error", error.message || "Failed to load predictive inventory.");
+    console.error("[loadInventory]", error);
+    showToast("error", error.message || "Failed to load inventory.");
     store = [];
     filtered = [];
-    return false;
+    renderView();
+    renderPagination();
   }
 }
 
-/* ── Real-time deduction ────────────────────────────── */
-function deductStock(itemId, qty, opts = {}) {
-  const item = store.find((i) => i.id === itemId);
-  if (!item) return null;
-  if (item.currentStock < qty) return { error: "Insufficient stock" };
-
-  item.currentStock -= qty;
-
-  item.transactions.push({
-    type: "out",
-    qty,
-    date: opts.date || today(),
-    animal: opts.animal || "",
-    procedure: opts.procedure || "General Use",
-    notes: opts.notes || "",
-    staff: getUserName()?.split(" ")[0] || "Staff",
-  });
-
-  // update predictive fields
-  item.recencyDays = 0;
-  item.stockoutFrequency = item.currentStock <= 0
-    ? (Number(item.stockoutFrequency) || 0) + 1
-    : Number(item.stockoutFrequency) || 0;
-
-  item.monthlyTurnoverRatio =
-    item.averageInventory > 0
-      ? Number(((Number(item.avgMonthlyUsage) || 0) / Number(item.averageInventory)).toFixed(2))
-      : 0;
-
-  Object.assign(item, rfClassify(item));
-  return item;
-}
-
-function addStock(itemId, qty, opts = {}) {
-  const item = store.find((i) => i.id === itemId);
-  if (!item) return null;
-
-  item.currentStock += qty;
-  item.transactions.push({
-    type: "in",
-    qty,
-    date: opts.date || today(),
-    supplier: opts.supplier || "",
-    notes: opts.notes || "",
-    staff: getUserName()?.split(" ")[0] || "Staff",
-  });
-
-  Object.assign(item, rfClassify(item));
-  return item;
-}
-
-window.addEventListener("animua:stockDeduct", (e) => {
+/* ── Firestore stock deduction event ────────────────── */
+window.addEventListener("animua:stockDeduct", async (e) => {
   const { itemId, qty, animal, procedure, notes } = e.detail;
-  const result = deductStock(itemId, qty, { animal, procedure, notes });
 
-  if (result?.error) {
-    console.warn("[stockDeduct]", result.error);
-  } else {
-    renderStats();
-    renderAlerts();
-    renderView();
-    if (activeItemId === itemId) renderDrawer(store.find((i) => i.id === itemId));
+  try {
+    const item = await getInventoryItemById(itemId);
+
+    if (Number(item.currentStock || 0) < qty) {
+      console.warn("[stockDeduct] Insufficient stock");
+      return;
+    }
+
+    const newStock = Number(item.currentStock || 0) - qty;
+
+    const updatedLocal = {
+      ...item,
+      currentStock: newStock,
+      recencyDays: 0,
+      stockoutFrequency:
+        newStock <= 0
+          ? (Number(item.stockoutFrequency) || 0) + 1
+          : Number(item.stockoutFrequency) || 0,
+    };
+
+    updatedLocal.monthlyTurnoverRatio =
+      Number(updatedLocal.averageInventory || 0) > 0
+        ? Number(
+            (
+              Number(updatedLocal.avgMonthlyUsage || 0) /
+              Number(updatedLocal.averageInventory || 0)
+            ).toFixed(2)
+          )
+        : 0;
+
+    Object.assign(updatedLocal, rfClassify(updatedLocal));
+
+    await updateInventoryItem(itemId, {
+      currentStock: updatedLocal.currentStock,
+      recencyDays: updatedLocal.recencyDays,
+      stockoutFrequency: updatedLocal.stockoutFrequency,
+      monthlyTurnoverRatio: updatedLocal.monthlyTurnoverRatio,
+      movementLabel: updatedLocal.movement,
+      movement: updatedLocal.movement,
+      reorderRisk: updatedLocal.reorderRisk,
+      reorderPoint: updatedLocal.reorderPoint,
+      daysUntilStockout: updatedLocal.daysUntilStockout,
+      daysToRestock: updatedLocal.daysToRestock,
+      stockStatus: updatedLocal.stockStatus,
+    });
+
+    await addInventoryTransaction(itemId, {
+      type: "out",
+      qty,
+      date: today(),
+      animal: animal || "",
+      procedure: procedure || "General Use",
+      notes: notes || "",
+      staff: getUserName()?.split(" ")[0] || "Staff",
+    });
+
+    await loadInventory();
+  } catch (error) {
+    console.error("[stockDeduct]", error);
   }
 });
 
+/* ── Batch helpers ──────────────────────────────────── */
+function addStockInBatchRow(prefill = {}) {
+  const wrap = document.getElementById("stockInBatchRows");
+  if (!wrap) return;
+
+  const row = document.createElement("div");
+  row.className = "batch-row";
+  row.style.display = "grid";
+  row.style.gridTemplateColumns = "2fr 1fr 2fr auto";
+  row.style.gap = "10px";
+  row.style.marginBottom = "10px";
+
+  row.innerHTML = `
+    <select class="form-inp batch-stock-item">
+      <option value="">Select item</option>
+      ${store
+        .map(
+          (i) =>
+            `<option value="${i.id}" ${prefill.itemId === i.id ? "selected" : ""}>
+              ${i.name.trim()} (${i.id}) — ${i.currentStock} ${formatUnit(i.currentStock, i.unit)}
+            </option>`
+        )
+        .join("")}
+    </select>
+
+    <input type="number" min="1" class="form-inp batch-stock-qty" placeholder="Qty" value="${prefill.qty || ""}" />
+    <input type="text" class="form-inp batch-stock-note" placeholder="Note (optional)" value="${prefill.note || ""}" />
+
+    <button type="button" class="btn-ghost-clay batch-remove-btn">
+      <i class="bi bi-trash"></i>
+    </button>
+  `;
+
+  row.querySelector(".batch-remove-btn")?.addEventListener("click", () => {
+    row.remove();
+  });
+
+  wrap.appendChild(row);
+}
+
+function addStockOutBatchRow(prefill = {}) {
+  const wrap = document.getElementById("stockOutBatchRows");
+  if (!wrap) return;
+
+  const row = document.createElement("div");
+  row.className = "batch-row batch-usage-row";
+
+  row.innerHTML = `
+    <div class="batch-usage-grid">
+      <select class="form-inp batch-out-item">
+        <option value="">Select item</option>
+        ${store
+          .map(
+            (i) =>
+              `<option value="${i.id}" ${prefill.itemId === i.id ? "selected" : ""}>
+                ${i.name.trim()} (${i.id}) — ${i.currentStock} ${formatUnit(i.currentStock, i.unit)}
+              </option>`
+          )
+          .join("")}
+      </select>
+
+      <input
+        type="number"
+        min="1"
+        class="form-inp batch-out-qty"
+        placeholder="Qty"
+        value="${prefill.qty || ""}"
+      />
+
+      <button type="button" class="btn-ghost-clay batch-remove-btn" title="Remove row">
+        <i class="bi bi-trash"></i>
+      </button>
+
+      <input
+        type="text"
+        class="form-inp batch-out-animal"
+        placeholder="Animal (optional)"
+        value="${prefill.animal || ""}"
+      />
+
+      <select class="form-inp batch-out-procedure">
+        <option value="">Select procedure…</option>
+        <option ${prefill.procedure === "Vaccination" ? "selected" : ""}>Vaccination</option>
+        <option ${prefill.procedure === "Deworming" ? "selected" : ""}>Deworming</option>
+        <option ${prefill.procedure === "Treatment" ? "selected" : ""}>Treatment</option>
+        <option ${prefill.procedure === "Surgery / Spay / Neuter" ? "selected" : ""}>Surgery / Spay / Neuter</option>
+        <option ${prefill.procedure === "Checkup" ? "selected" : ""}>Checkup</option>
+        <option ${prefill.procedure === "Feeding" ? "selected" : ""}>Feeding</option>
+        <option ${prefill.procedure === "Cleaning / Disinfection" ? "selected" : ""}>Cleaning / Disinfection</option>
+        <option ${prefill.procedure === "Other" ? "selected" : ""}>Other</option>
+      </select>
+    </div>
+  `;
+
+  row.querySelector(".batch-remove-btn")?.addEventListener("click", () => {
+    row.remove();
+  });
+
+  wrap.appendChild(row);
+}
+
+function openBatchStockIn() {
+  stockInMode = "batch";
+
+  document.getElementById("stockInTitle").textContent = "Batch Stock In";
+  document.getElementById("fStockDate").value = today();
+  document.getElementById("fStockSupplier").value = "";
+  document.getElementById("fStockNotes").value = "";
+  document.getElementById("errStockItem").textContent = "";
+  document.getElementById("errStockQty").textContent = "";
+  const batchErr = document.getElementById("errStockBatch");
+  if (batchErr) batchErr.textContent = "";
+
+  const singleWrap = document.getElementById("stockInSingleFields");
+  const batchWrap = document.getElementById("stockInBatchWrap");
+  if (singleWrap) singleWrap.style.display = "none";
+  if (batchWrap) batchWrap.style.display = "";
+
+  const wrap = document.getElementById("stockInBatchRows");
+  if (wrap) {
+    wrap.innerHTML = "";
+    addStockInBatchRow();
+  }
+
+  openModal("stockInModalBackdrop");
+}
+
+function openBatchStockOut() {
+  stockOutMode = "batch";
+
+  document.getElementById("stockOutSubtitle").textContent = "Record usage for multiple items";
+  document.getElementById("errOutQty").textContent = "";
+  document.getElementById("fOutDate").value = today();
+  document.getElementById("fOutNotes").value = "";
+
+  const singleWrap = document.getElementById("stockOutSingleFields");
+  const batchWrap = document.getElementById("stockOutBatchWrap");
+  if (singleWrap) singleWrap.style.display = "none";
+  if (batchWrap) batchWrap.style.display = "";
+
+  const wrap = document.getElementById("stockOutBatchRows");
+  if (wrap) {
+    wrap.innerHTML = "";
+    addStockOutBatchRow();
+  }
+
+  openModal("stockOutModalBackdrop");
+}
+
+async function saveBatchStockIn() {
+  const rows = [...document.querySelectorAll("#stockInBatchRows .batch-row")];
+  const batchDate = document.getElementById("fStockDate").value || today();
+  const supplier = document.getElementById("fStockSupplier").value.trim();
+  const notes = document.getElementById("fStockNotes").value.trim();
+  const batchId = `BIN-${Date.now()}`;
+
+  if (!rows.length) {
+    showToast("warning", "Add at least one item.");
+    return;
+  }
+
+  try {
+    for (const row of rows) {
+      const id = row.querySelector(".batch-stock-item")?.value;
+      const qty = parseInt(row.querySelector(".batch-stock-qty")?.value, 10);
+      const rowNote = row.querySelector(".batch-stock-note")?.value.trim() || "";
+
+      if (!id || !qty || qty < 1) {
+        throw new Error("Please complete all batch stock in rows.");
+      }
+
+      const item = await getInventoryItemById(id);
+      const newStock = Number(item.currentStock || 0) + qty;
+
+      const updatedLocal = {
+        ...item,
+        currentStock: newStock,
+      };
+
+      Object.assign(updatedLocal, rfClassify(updatedLocal));
+
+      await updateInventoryItem(id, {
+        currentStock: updatedLocal.currentStock,
+        movementLabel: updatedLocal.movement,
+        movement: updatedLocal.movement,
+        reorderRisk: updatedLocal.reorderRisk,
+        reorderPoint: updatedLocal.reorderPoint,
+        daysUntilStockout: updatedLocal.daysUntilStockout,
+        daysToRestock: updatedLocal.daysToRestock,
+        stockStatus: updatedLocal.stockStatus,
+      });
+
+      await addInventoryTransaction(id, {
+        type: "in",
+        qty,
+        date: batchDate,
+        supplier,
+        notes: rowNote || notes,
+        batchId,
+        staff: getUserName()?.split(" ")[0] || "Staff",
+      });
+    }
+
+    closeModal("stockInModalBackdrop");
+    await loadInventory();
+    showToast("success", "Batch stock in saved successfully.");
+  } catch (error) {
+    console.error("[saveBatchStockIn]", error);
+    const batchErr = document.getElementById("errStockBatch");
+    if (batchErr) batchErr.textContent = error.message || "Failed to save batch stock in.";
+    showToast("error", error.message || "Failed to save batch stock in.");
+  }
+}
+
+async function saveBatchStockOut() {
+  const rows = [...document.querySelectorAll("#stockOutBatchRows .batch-row")];
+  const batchDate = document.getElementById("fOutDate").value || today();
+  const notes = document.getElementById("fOutNotes").value.trim();
+  const batchId = `BOUT-${Date.now()}`;
+
+  if (!rows.length) {
+    showToast("warning", "Add at least one item.");
+    return;
+  }
+
+  try {
+    for (const row of rows) {
+      const id = row.querySelector(".batch-out-item")?.value;
+      const qty = parseInt(row.querySelector(".batch-out-qty")?.value, 10);
+      const animal = row.querySelector(".batch-out-animal")?.value.trim() || "";
+      const procedure = row.querySelector(".batch-out-procedure")?.value.trim() || "General Use";
+
+      if (!id || !qty || qty < 1) {
+        throw new Error("Please complete all batch usage rows.");
+      }
+
+      const item = await getInventoryItemById(id);
+
+      if (qty > Number(item.currentStock || 0)) {
+        throw new Error(`${item.name.trim()} only has ${item.currentStock} ${formatUnit(item.currentStock, item.unit)} available.`);
+      }
+
+      const newStock = Number(item.currentStock || 0) - qty;
+
+      const updatedLocal = {
+        ...item,
+        currentStock: newStock,
+        recencyDays: 0,
+        stockoutFrequency:
+          newStock <= 0
+            ? (Number(item.stockoutFrequency) || 0) + 1
+            : Number(item.stockoutFrequency) || 0,
+      };
+
+      updatedLocal.monthlyTurnoverRatio =
+        Number(updatedLocal.averageInventory || 0) > 0
+          ? Number(
+              (
+                Number(updatedLocal.avgMonthlyUsage || 0) /
+                Number(updatedLocal.averageInventory || 0)
+              ).toFixed(2)
+            )
+          : 0;
+
+      Object.assign(updatedLocal, rfClassify(updatedLocal));
+
+      await updateInventoryItem(id, {
+        currentStock: updatedLocal.currentStock,
+        recencyDays: updatedLocal.recencyDays,
+        stockoutFrequency: updatedLocal.stockoutFrequency,
+        monthlyTurnoverRatio: updatedLocal.monthlyTurnoverRatio,
+        movementLabel: updatedLocal.movement,
+        movement: updatedLocal.movement,
+        reorderRisk: updatedLocal.reorderRisk,
+        reorderPoint: updatedLocal.reorderPoint,
+        daysUntilStockout: updatedLocal.daysUntilStockout,
+        daysToRestock: updatedLocal.daysToRestock,
+        stockStatus: updatedLocal.stockStatus,
+      });
+
+      await addInventoryTransaction(id, {
+        type: "out",
+        qty,
+        date: batchDate,
+        animal,
+        procedure,
+        notes,
+        batchId,
+        staff: getUserName()?.split(" ")[0] || "Staff",
+      });
+    }
+
+    closeModal("stockOutModalBackdrop");
+    await loadInventory();
+    showToast("success", "Batch record usage saved successfully.");
+  } catch (error) {
+    console.error("[saveBatchStockOut]", error);
+    document.getElementById("errOutQty").textContent =
+      error.message || "Failed to record batch usage.";
+  }
+}
+
 /* ── Stock In Modal ─────────────────────────────────── */
 function openStockIn(prefillId = null) {
-  const select = document.getElementById("fStockItemSelect");
-  select.innerHTML = store
-    .map(
-      (i) =>
-        `<option value="${i.id}">${i.name.trim()} (${i.id}) — ${i.currentStock} ${i.unit}</option>`
-    )
-    .join("");
+  stockInMode = "single";
 
-  if (prefillId) select.value = prefillId;
+  const singleWrap = document.getElementById("stockInSingleFields");
+  const batchWrap = document.getElementById("stockInBatchWrap");
+  if (singleWrap) singleWrap.style.display = "";
+  if (batchWrap) batchWrap.style.display = "none";
 
-  document.getElementById("fStockDate").value = "";
+  const item = prefillId ? store.find((i) => i.id === prefillId) : null;
+  if (!item) return;
+
+  document.getElementById("fStockItemSelect").value = item.id;
+  document.getElementById("fStockItemName").textContent =
+    `${item.name.trim()} — ${item.currentStock} ${formatUnit(item.currentStock, item.unit)} available`;
+
+  document.getElementById("fStockDate").value = today();
   document.getElementById("fStockQty").value = "";
   document.getElementById("fStockSupplier").value = "";
   document.getElementById("fStockNotes").value = "";
   document.getElementById("errStockItem").textContent = "";
   document.getElementById("errStockQty").textContent = "";
-  document.getElementById("stockInTitle").textContent = prefillId
-    ? `Stock In — ${store.find((i) => i.id === prefillId)?.name.trim()}`
-    : "Stock In";
-  document.getElementById("fStockDate").value = today();
+  document.getElementById("stockInTitle").textContent = `Stock In — ${item.name.trim()}`;
 
   openModal("stockInModalBackdrop");
 }
 
-function saveStockIn() {
+async function saveStockIn() {
   const id = document.getElementById("fStockItemSelect").value;
-  const qty = parseInt(document.getElementById("fStockQty").value);
+  const qty = parseInt(document.getElementById("fStockQty").value, 10);
 
   if (!id) {
     document.getElementById("errStockItem").textContent = "Please select an item.";
@@ -825,85 +1211,161 @@ function saveStockIn() {
     return;
   }
 
-  const result = addStock(id, qty, {
-    date: document.getElementById("fStockDate").value,
-    supplier: document.getElementById("fStockSupplier").value.trim(),
-    notes: document.getElementById("fStockNotes").value.trim(),
-  });
+  try {
+    const item = await getInventoryItemById(id);
+    const newStock = Number(item.currentStock || 0) + qty;
 
-  closeModal("stockInModalBackdrop");
-  renderStats();
-  renderAlerts();
-  renderView();
-  if (activeItemId === id) renderDrawer(result);
-  showToast("success", `+${qty} ${result.unit} added to ${result.name.trim()}.`);
+    const updatedLocal = {
+      ...item,
+      currentStock: newStock,
+    };
+
+    Object.assign(updatedLocal, rfClassify(updatedLocal));
+
+    await updateInventoryItem(id, {
+      currentStock: updatedLocal.currentStock,
+      movementLabel: updatedLocal.movement,
+      movement: updatedLocal.movement,
+      reorderRisk: updatedLocal.reorderRisk,
+      reorderPoint: updatedLocal.reorderPoint,
+      daysUntilStockout: updatedLocal.daysUntilStockout,
+      daysToRestock: updatedLocal.daysToRestock,
+      stockStatus: updatedLocal.stockStatus,
+    });
+
+    await addInventoryTransaction(id, {
+      type: "in",
+      qty,
+      date: document.getElementById("fStockDate").value,
+      supplier: document.getElementById("fStockSupplier").value.trim(),
+      notes: document.getElementById("fStockNotes").value.trim(),
+      staff: getUserName()?.split(" ")[0] || "Staff",
+    });
+
+    closeModal("stockInModalBackdrop");
+    await loadInventory();
+    showToast("success", `+${qty} ${formatUnit(qty, item.unit)} added to ${item.name.trim()}.`);
+  } catch (error) {
+    console.error("[saveStockIn]", error);
+    showToast("error", error.message || "Failed to save stock in.");
+  }
 }
 
 /* ── Stock Out Modal ────────────────────────────────── */
 function openStockOut(id) {
+  stockOutMode = "single";
+
+  const singleWrap = document.getElementById("stockOutSingleFields");
+  const batchWrap = document.getElementById("stockOutBatchWrap");
+  if (singleWrap) singleWrap.style.display = "";
+  if (batchWrap) batchWrap.style.display = "none";
+
   const item = store.find((i) => i.id === id);
   if (!item) return;
 
   document.getElementById("fOutItemId").value = id;
-  document.getElementById("fOutItemName").textContent = `${item.name.trim()} — ${item.currentStock} ${item.unit} available`;
+  document.getElementById("fOutItemName").textContent = `${item.name.trim()} — ${item.currentStock} ${formatUnit(item.currentStock, item.unit)} available`;
   document.getElementById("fOutQty").value = "";
   document.getElementById("fOutDate").value = today();
   document.getElementById("fOutAnimal").value = "";
   document.getElementById("fOutProcedure").value = "";
   document.getElementById("fOutNotes").value = "";
   document.getElementById("errOutQty").textContent = "";
-  document.getElementById("stockOutSubtitle").textContent = `Deduct from: ${item.name.trim()} (${item.currentStock} ${item.unit} available)`;
+  document.getElementById("stockOutSubtitle").textContent = `Deduct from: ${item.name.trim()} — ${item.currentStock} ${formatUnit(item.currentStock, item.unit)} available`;
 
   openModal("stockOutModalBackdrop");
 }
 
-function saveStockOut() {
+async function saveStockOut() {
   const id = document.getElementById("fOutItemId").value;
-  const qty = parseInt(document.getElementById("fOutQty").value);
-  const item = store.find((i) => i.id === id);
+  const qty = parseInt(document.getElementById("fOutQty").value, 10);
 
   if (!qty || qty < 1) {
     document.getElementById("errOutQty").textContent = "Enter a valid quantity.";
     return;
   }
 
-  if (qty > item.currentStock) {
-    document.getElementById("errOutQty").textContent = `Only ${item.currentStock} ${item.unit} available.`;
-    return;
-  }
+  try {
+    const item = await getInventoryItemById(id);
 
-  const result = deductStock(id, qty, {
-    date: document.getElementById("fOutDate").value,
-    animal: document.getElementById("fOutAnimal").value.trim(),
-    procedure: document.getElementById("fOutProcedure").value,
-    notes: document.getElementById("fOutNotes").value.trim(),
-  });
+    if (qty > Number(item.currentStock || 0)) {
+      document.getElementById("errOutQty").textContent =
+        `Only ${item.currentStock} ${formatUnit(item.currentStock, item.unit)} available`;
+      return;
+    }
 
-  closeModal("stockOutModalBackdrop");
-  renderStats();
-  renderAlerts();
-  renderView();
+    const newStock = Number(item.currentStock || 0) - qty;
 
-  if (activeItemId === id) renderDrawer(result);
+    const updatedLocal = {
+      ...item,
+      currentStock: newStock,
+      recencyDays: 0,
+      stockoutFrequency:
+        newStock <= 0
+          ? (Number(item.stockoutFrequency) || 0) + 1
+          : Number(item.stockoutFrequency) || 0,
+    };
 
-  if (result.stockStatus === "Critical") {
-    showToast(
-      "error",
-      `⚠ ${result.name.trim()} is now at CRITICAL stock level (${result.currentStock} ${result.unit}).`
-    );
-  } else if (result.stockStatus === "Low") {
-    showToast(
-      "warning",
-      `↓ ${result.name.trim()} stock is LOW (${result.currentStock} ${result.unit}).`
-    );
-  } else {
-    showToast("success", `−${qty} ${result.unit} deducted from ${result.name.trim()}.`);
+    updatedLocal.monthlyTurnoverRatio =
+      Number(updatedLocal.averageInventory || 0) > 0
+        ? Number(
+            (
+              Number(updatedLocal.avgMonthlyUsage || 0) /
+              Number(updatedLocal.averageInventory || 0)
+            ).toFixed(2)
+          )
+        : 0;
+
+    Object.assign(updatedLocal, rfClassify(updatedLocal));
+
+    await updateInventoryItem(id, {
+      currentStock: updatedLocal.currentStock,
+      recencyDays: updatedLocal.recencyDays,
+      stockoutFrequency: updatedLocal.stockoutFrequency,
+      monthlyTurnoverRatio: updatedLocal.monthlyTurnoverRatio,
+      movementLabel: updatedLocal.movement,
+      movement: updatedLocal.movement,
+      reorderRisk: updatedLocal.reorderRisk,
+      reorderPoint: updatedLocal.reorderPoint,
+      daysUntilStockout: updatedLocal.daysUntilStockout,
+      daysToRestock: updatedLocal.daysToRestock,
+      stockStatus: updatedLocal.stockStatus,
+    });
+
+    await addInventoryTransaction(id, {
+      type: "out",
+      qty,
+      date: document.getElementById("fOutDate").value,
+      animal: document.getElementById("fOutAnimal").value.trim(),
+      procedure: document.getElementById("fOutProcedure").value || "General Use",
+      notes: document.getElementById("fOutNotes").value.trim(),
+      staff: getUserName()?.split(" ")[0] || "Staff",
+    });
+
+    closeModal("stockOutModalBackdrop");
+    await loadInventory();
+
+    if (updatedLocal.stockStatus === "Critical") {
+      showToast(
+        "error",
+        `⚠ ${item.name.trim()} is now at CRITICAL stock level (${updatedLocal.currentStock} ${item.unit}).`
+      );
+    } else if (updatedLocal.stockStatus === "Low") {
+      showToast(
+        "warning",
+        `↓ ${item.name.trim()} stock is LOW (${updatedLocal.currentStock} ${item.unit}).`
+      );
+    } else {
+      showToast("success", `−${qty} ${item.unit} deducted from ${item.name.trim()}.`);
+    }
+  } catch (error) {
+    console.error("[saveStockOut]", error);
+    document.getElementById("errOutQty").textContent =
+      error.message || "Failed to record usage.";
   }
 }
 
 /* ── Add/Edit Item Modal ────────────────────────────── */
-let editingItemId = null;
-
 function openItemModal(id = null) {
   editingItemId = id;
   const item = id ? store.find((i) => i.id === id) : null;
@@ -917,199 +1379,183 @@ function openItemModal(id = null) {
   document.getElementById("fItemAvgUsage").value = item?.avgMonthlyUsage || "";
   document.getElementById("fItemLeadTime").value = item?.leadTimeDays || "";
 
-  ["errItemName", "errItemCategory", "errItemStock"].forEach((id) => {
-    document.getElementById(id).textContent = "";
+  ["errItemName", "errItemCategory", "errItemStock"].forEach((errId) => {
+    const el = document.getElementById(errId);
+    if (el) el.textContent = "";
   });
 
   openModal("itemModalBackdrop");
 }
 
-function saveItem() {
+async function saveItem() {
+  const itemIdInput = document.getElementById("fItemId");
   const name = document.getElementById("fItemName").value.trim();
   const cat = document.getElementById("fItemCategory").value;
-  const stock = parseInt(document.getElementById("fItemCurrentStock").value);
+  const unit = document.getElementById("fItemUnit").value.trim() || "pcs";
+  const stock = parseInt(document.getElementById("fItemCurrentStock").value, 10) || 0;
+  const avgUsage = parseInt(document.getElementById("fItemAvgUsage").value, 10) || 1;
+  const leadTime = parseInt(document.getElementById("fItemLeadTime").value, 10) || 7;
+
+  let hasError = false;
+
+  document.getElementById("errItemName").textContent = "";
+  document.getElementById("errItemCategory").textContent = "";
+  document.getElementById("errItemStock").textContent = "";
 
   if (!name) {
-    document.getElementById("errItemName").textContent = "Name is required.";
-    return;
+    document.getElementById("errItemName").textContent = "Item name is required.";
+    hasError = true;
   }
 
   if (!cat) {
-    document.getElementById("errItemCategory").textContent = "Category is required.";
-    return;
+    document.getElementById("errItemCategory").textContent = "Please select a category.";
+    hasError = true;
   }
 
-  if (isNaN(stock) || stock < 0) {
-    document.getElementById("errItemStock").textContent = "Valid stock required.";
-    return;
+  if (stock < 0) {
+    document.getElementById("errItemStock").textContent = "Stock cannot be negative.";
+    hasError = true;
   }
 
-  if (editingItemId) {
-    const item = store.find((i) => i.id === editingItemId);
-    if (item) {
-      item.name = name;
-      item.category = cat;
-      item.unit = document.getElementById("fItemUnit").value.trim() || item.unit;
-      item.currentStock = stock;
-      item.avgMonthlyUsage =
-        parseInt(document.getElementById("fItemAvgUsage").value) || item.avgMonthlyUsage;
-      item.leadTimeDays =
-        parseInt(document.getElementById("fItemLeadTime").value) || item.leadTimeDays;
+  if (hasError) return;
 
-      Object.assign(item, rfClassify(item));
+  try {
+    let finalId = itemIdInput.value.trim();
+
+    if (!editingItemId) {
+      finalId = finalId || `ITM${String(store.length + 1).padStart(3, "0")}X`;
+      itemIdInput.value = finalId;
     }
-    showToast("success", "Item updated.");
-  } else {
-    const newId = `ITM${String(store.length + 1).padStart(3, "0")}X`;
-    const newItem = {
-      id: newId,
+
+    const baseItem = {
+      id: finalId,
       name,
       category: cat,
-      unit: document.getElementById("fItemUnit").value.trim() || "pcs",
+      unit,
       currentStock: stock,
       averageInventory: stock,
-      avgMonthlyUsage: parseInt(document.getElementById("fItemAvgUsage").value) || 1,
-      leadTimeDays: parseInt(document.getElementById("fItemLeadTime").value) || 7,
-      stockoutFrequency: 0,
-      monthlyTurnoverRatio: 0,
+      avgMonthlyUsage: avgUsage,
       recencyDays: 0,
+      leadTimeDays: leadTime,
+      stockoutFrequency: 0,
+      monthlyTurnoverRatio: stock > 0 ? Number((avgUsage / stock).toFixed(2)) : 0,
       transactions: [],
     };
 
-    Object.assign(newItem, rfClassify(newItem));
-    store.push(newItem);
-    buildCategoryTabs();
-    showToast("success", "New item added.");
-  }
+    const computed = rfClassify(baseItem);
+    const finalItem = {
+      ...baseItem,
+      ...computed,
+      movementLabel: computed.movement,
+      movement: computed.movement,
+    };
 
-  closeModal("itemModalBackdrop");
-  renderStats();
-  renderAlerts();
-  applyFilters();
+    if (editingItemId) {
+      await updateInventoryItem(finalId, finalItem);
+      showToast("success", "Item updated.");
+    } else {
+      await createInventoryItem(finalItem);
+      showToast("success", "New item added.");
+    }
+
+    closeModal("itemModalBackdrop");
+    await loadInventory();
+  } catch (error) {
+    console.error("[saveItem]", error);
+    showToast("error", error.message || "Failed to save item.");
+  }
 }
 
 /* ── Category tabs ──────────────────────────────────── */
 function buildCategoryTabs() {
-  const allowedTabs = [
-    "all",
-    "Antibiotic",
-    "Antiparasitic",
-    "Consumable",
-    "Disinfectant",
-    "Equipment",
-    "Supplement",
-    "Vaccine"
-  ];
-
-  const labels = {
-    all: "All",
-    Antibiotic: "Antibiotic",
-    Antiparasitic: "Antiparasitic",
-    Consumable: "Consumable",
-    Disinfectant: "Disinfectant",
-    Equipment: "Equipment",
-    Supplement: "Supplement",
-    Vaccine: "Vaccine"
-  };
-
   const container = document.getElementById("categoryTabs");
   if (!container) return;
 
-  container.innerHTML = allowedTabs
+  const categories = [
+    "all",
+    ...new Set(
+      store
+        .map((i) => (i.category || "").trim())
+        .filter(Boolean)
+    ),
+  ];
+
+  container.innerHTML = categories
     .map(
       (c) =>
-        `<button class="inv-tab ${c === activeTab ? "active" : ""}" data-tab="${c}">${labels[c] || c}</button>`
+        `<button class="inv-tab ${c === activeTab ? "active" : ""}" data-tab="${c}">
+          ${c === "all" ? "All" : c}
+        </button>`
     )
     .join("");
 
   container.querySelectorAll(".inv-tab").forEach((btn) => {
     btn.addEventListener("click", () => {
-      container.querySelectorAll(".inv-tab").forEach((t) =>
-        t.classList.remove("active")
-      );
+      container.querySelectorAll(".inv-tab").forEach((t) => t.classList.remove("active"));
       btn.classList.add("active");
       activeTab = btn.dataset.tab;
-
-      if (activeTab === "all") {
-        const movementFilter = document.getElementById("filterMovement");
-        const riskFilter = document.getElementById("filterRisk");
-        const searchInput = document.getElementById("searchInventory");
-
-        if (movementFilter) movementFilter.value = "";
-        if (riskFilter) riskFilter.value = "";
-        if (searchInput) searchInput.value = "";
-      }
-
+      activeStockStatus = "";
       applyFilters();
     });
   });
 }
-/* ── Modals / Toast / Sidebar ───────────────────────── */
+
+/* ── Modals / Toast ─────────────────────────────────── */
 const openModal = (id) => document.getElementById(id)?.classList.add("open");
 const closeModal = (id) => document.getElementById(id)?.classList.remove("open");
 const closeAllModals = () =>
-  ["stockInModalBackdrop", "stockOutModalBackdrop", "itemModalBackdrop"].forEach(
-    closeModal
-  );
+  ["stockInModalBackdrop", "stockOutModalBackdrop", "itemModalBackdrop"].forEach(closeModal);
 
 let toastT;
+
 function showToast(type, msg) {
   const t = document.getElementById("umToast");
   const i = document.getElementById("toastIcon");
   const m = document.getElementById("toastMsg");
-  if (!t) return;
+  if (!t || !i || !m) return;
 
   const icons = {
     success: "bi-check-circle-fill",
-    error: "bi-x-circle-fill",
-    info: "bi-info-circle-fill",
     warning: "bi-exclamation-triangle-fill",
+    error: "bi-x-circle-fill",
   };
 
-  t.className = `um-toast toast-${type}`;
-  i.className = `bi ${icons[type] || "bi-info-circle-fill"}`;
+  t.className = `um-toast show ${type}`;
+  i.className = `bi ${icons[type] || icons.success}`;
   m.textContent = msg;
 
-  t.classList.add("show");
   clearTimeout(toastT);
-  toastT = setTimeout(() => t.classList.remove("show"), 4000);
-}
-
-function bindSidebarToggle() {
-  document.getElementById("sidebarToggle")?.addEventListener("click", () => {
-    const sb = document.getElementById("sidebar");
-    const ct = document.getElementById("sidebar-container");
-
-    if (window.innerWidth <= 768) {
-      document.getElementById("mobile-nav-toggle")?.click();
-      return;
-    }
-
-    const c = sb?.classList.toggle("collapsed");
-    if (ct) {
-      ct.style.width = c ? "64px" : "";
-      ct.style.minWidth = c ? "64px" : "";
-    }
-  });
+  toastT = setTimeout(() => t.classList.remove("show"), 2400);
 }
 
 /* ── Init ───────────────────────────────────────────── */
 async function init() {
   try {
-    await protectManagementPage();
-    loadSidebar();
+    protectManagementPage();
     renderTopbarUser();
-    bindSidebarToggle();
+    await loadSidebar();
 
-    await loadPredictiveInventory();
-    buildCategoryTabs();
-    renderStats();
-    renderAlerts();
-    applyFilters();
+    await loadInventory();
 
-    document.getElementById("searchInventory")?.addEventListener("input", applyFilters);
-    document.getElementById("filterMovement")?.addEventListener("change", applyFilters);
-    document.getElementById("filterRisk")?.addEventListener("change", applyFilters);
+    document.getElementById("searchInventory")?.addEventListener("input", () => {
+      activeStockStatus = "";
+      applyFilters();
+    });
+
+    document.getElementById("filterMovement")?.addEventListener("change", () => {
+      activeStockStatus = "";
+      applyFilters();
+    });
+
+    document.getElementById("filterRisk")?.addEventListener("change", () => {
+      activeStockStatus = "";
+      applyFilters();
+    });
+
+    document.getElementById("filterStockStatus")?.addEventListener("change", () => {
+      activeStockStatus = "";
+      applyFilters();
+    });
 
     document.getElementById("btnTableView")?.addEventListener("click", () => {
       viewMode = "table";
@@ -1129,16 +1575,37 @@ async function init() {
       renderView();
     });
 
-    document.getElementById("btnStockIn")?.addEventListener("click", () => openStockIn());
+    document.getElementById("btnStockIn")?.addEventListener("click", () => openBatchStockIn());
+    document.getElementById("btnRecordUsage")?.addEventListener("click", () => openBatchStockOut());
     document.getElementById("btnAddItem")?.addEventListener("click", () => openItemModal());
+
+    document.getElementById("addStockInBatchRow")?.addEventListener("click", () => {
+      addStockInBatchRow();
+    });
+
+    document.getElementById("addStockOutBatchRow")?.addEventListener("click", () => {
+      addStockOutBatchRow();
+    });
 
     document.getElementById("stockInClose")?.addEventListener("click", () => closeModal("stockInModalBackdrop"));
     document.getElementById("stockInCancel")?.addEventListener("click", () => closeModal("stockInModalBackdrop"));
-    document.getElementById("stockInSave")?.addEventListener("click", saveStockIn);
+    document.getElementById("stockInSave")?.addEventListener("click", () => {
+      if (stockInMode === "batch") {
+        saveBatchStockIn();
+      } else {
+        saveStockIn();
+      }
+    });
 
     document.getElementById("stockOutClose")?.addEventListener("click", () => closeModal("stockOutModalBackdrop"));
     document.getElementById("stockOutCancel")?.addEventListener("click", () => closeModal("stockOutModalBackdrop"));
-    document.getElementById("stockOutSave")?.addEventListener("click", saveStockOut);
+    document.getElementById("stockOutSave")?.addEventListener("click", () => {
+      if (stockOutMode === "batch") {
+        saveBatchStockOut();
+      } else {
+        saveStockOut();
+      }
+    });
 
     document.getElementById("itemModalClose")?.addEventListener("click", () => closeModal("itemModalBackdrop"));
     document.getElementById("itemModalCancel")?.addEventListener("click", () => closeModal("itemModalBackdrop"));

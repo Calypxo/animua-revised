@@ -44,6 +44,7 @@
         </div>
         <div class="d-flex gap-2 flex-wrap align-items-center">
           <button class="btn-primary-clay" id="btnStockIn"><i class="bi bi-plus-lg"></i> Stock In</button>
+          <button class="btn-outline-add" id="btnRecordUsage"><i class="bi bi-dash-lg"></i> Record Usage</button>
           <button class="btn-outline-add" id="btnAddItem"><i class="bi bi-box-seam"></i> Add Item</button>
         </div>
       </div>
@@ -128,6 +129,12 @@
                   <option value="Review">Needs Review</option>
                   <option value="OK">OK</option>
                 </select>
+                <select class="filter-select" id="filterStockStatus">
+                  <option value="">All status</option>
+                  <option value="Critical">Critical</option>
+                  <option value="Low">Low</option>
+                  <option value="OK">OK</option>
+                </select>
               </div>
               <div class="d-flex gap-2">
                 <button class="view-btn active" id="btnTableView" title="Table view"><i class="bi bi-table"></i></button>
@@ -166,7 +173,7 @@
           <div class="um-pagination" id="paginationBar"></div>
         </div>
 
-        <!-- Detail Drawer -->
+        <!-- Old Drawer (can stay hidden / unused) -->
         <div class="inv-drawer" id="invDrawer">
           <div class="inv-drawer-inner" id="invDrawerInner"></div>
         </div>
@@ -180,42 +187,108 @@
 <div class="um-modal-backdrop" id="stockInModalBackdrop">
   <div class="um-modal inv-modal" role="dialog" aria-modal="true">
     <div class="um-modal-header">
-      <div><h2 id="stockInTitle">Stock In</h2><p class="modal-subtitle">Record incoming stock for an item.</p></div>
+      <div>
+        <h2 id="stockInTitle">Stock In</h2>
+        <p class="modal-subtitle">Record incoming stock for an item.</p>
+      </div>
       <button class="modal-close-btn" id="stockInClose"><i class="bi bi-x-lg"></i></button>
     </div>
+
     <div class="um-modal-body">
       <form id="stockInForm" novalidate>
         <input type="hidden" id="fStockItemId" />
-        <div class="form-grid">
-          <div class="form-group form-full">
-            <label class="form-lbl" for="fStockItemSelect">Item <span class="req">*</span></label>
-            <select class="form-inp" id="fStockItemSelect"></select>
-            <span class="form-err" id="errStockItem"></span>
+
+        <!-- SINGLE ITEM STOCK IN -->
+        <div id="stockInSingleFields">
+  <div class="form-grid">
+    <input type="hidden" id="fStockItemSelect" />
+    <div class="form-group form-full">
+      <label class="form-lbl">Item <span class="req">*</span></label>
+      <div class="disabled-inp" id="fStockItemName"></div>
+      <span class="form-err" id="errStockItem"></span>
+    </div>
+            <div class="form-group">
+              <label class="form-lbl" for="fStockQty">Quantity to Add <span class="req">*</span></label>
+              <input type="number" class="form-inp" id="fStockQty" min="1" placeholder="e.g. 10" />
+              <span class="form-err" id="errStockQty"></span>
+            </div>
+            <div class="form-group">
+              <label class="form-lbl" for="fStockDate">Date Received</label>
+              <input type="date" class="form-inp" id="fStockDate" />
+            </div>
+            <div class="form-group form-full">
+              <label class="form-lbl" for="fStockSupplier">Supplier / Source</label>
+              <input type="text" class="form-inp" id="fStockSupplier" placeholder="e.g. BVMO Supply, Donation" />
+            </div>
+            <div class="form-group form-full">
+              <label class="form-lbl" for="fStockNotes">Notes</label>
+              <textarea class="form-inp form-textarea" id="fStockNotes" rows="2" placeholder="Batch number, expiry date, condition…"></textarea>
+            </div>
           </div>
-          <div class="form-group">
-            <label class="form-lbl" for="fStockQty">Quantity to Add <span class="req">*</span></label>
-            <input type="number" class="form-inp" id="fStockQty" min="1" placeholder="e.g. 10" />
-            <span class="form-err" id="errStockQty"></span>
-          </div>
-          <div class="form-group">
-            <label class="form-lbl" for="fStockDate">Date Received</label>
-            <input type="date" class="form-inp" id="fStockDate" />
-          </div>
-          <div class="form-group form-full">
-            <label class="form-lbl" for="fStockSupplier">Supplier / Source</label>
-            <input type="text" class="form-inp" id="fStockSupplier" placeholder="e.g. BVMO Supply, Donation" />
-          </div>
-          <div class="form-group form-full">
-            <label class="form-lbl" for="fStockNotes">Notes</label>
-            <textarea class="form-inp form-textarea" id="fStockNotes" rows="2" placeholder="Batch number, expiry date, condition…"></textarea>
+        </div>
+
+        <!-- BATCH STOCK IN -->
+        <div id="stockInBatchWrap" style="display:none">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-lbl" for="fStockDate">Date Received</label>
+              <input type="date" class="form-inp" id="fStockDateBatchMirror" disabled style="display:none" />
+              <input type="date" class="form-inp" id="fStockDateBatch" style="display:none" />
+              <input type="date" class="form-inp" id="fStockDateClone" style="display:none" />
+              <input type="date" class="form-inp" id="fStockDateHiddenMirror" style="display:none" />
+              <input type="date" class="form-inp" id="fStockDateHidden" style="display:none" />
+              <input type="date" class="form-inp" id="fStockDateShadow" style="display:none" />
+              <input type="date" class="form-inp" id="fStockDateGhost" style="display:none" />
+              <input type="date" class="form-inp" id="fStockDatePhantom" style="display:none" />
+              <input type="date" class="form-inp" id="fStockDateEcho" style="display:none" />
+              <input type="date" class="form-inp" id="fStockDateReplay" style="display:none" />
+              <input type="date" class="form-inp" id="fStockDateRef" style="display:none" />
+              <input type="date" class="form-inp" id="fStockDateTemp" style="display:none" />
+              <input type="date" class="form-inp" id="fStockDate" />
+            </div>
+            <div class="form-group">
+              <label class="form-lbl" for="fStockSupplier">Supplier / Source</label>
+              <input type="text" class="form-inp" id="fStockSupplierBatchMirror" disabled style="display:none" />
+              <input type="text" class="form-inp" id="fStockSupplierBatch" style="display:none" />
+              <input type="text" class="form-inp" id="fStockSupplier" placeholder="e.g. BVMO Supply, Donation" />
+            </div>
+            <div class="form-group form-full">
+              <label class="form-lbl" for="fStockNotes">General Notes</label>
+              <textarea class="form-inp form-textarea" id="fStockNotesBatchMirror" rows="2" disabled style="display:none"></textarea>
+              <textarea class="form-inp form-textarea" id="fStockNotesBatch" rows="2" style="display:none"></textarea>
+              <textarea class="form-inp form-textarea" id="fStockNotes" rows="2" placeholder="Batch number, expiry date, condition…"></textarea>
+            </div>
+
+            <div class="form-group form-full">
+              <label class="form-lbl">Items to Stock In <span class="req">*</span></label>
+              <div id="stockInBatchRows"></div>
+            </div>
+
+            <div class="form-group form-full">
+              <button type="button" class="btn-outline-add" id="addStockInBatchRow">
+                <i class="bi bi-plus-circle"></i> Add Another Item
+              </button>
+            </div>
+
+            <div class="form-group form-full">
+              <span class="form-err" id="errStockBatch"></span>
+            </div>
           </div>
         </div>
       </form>
     </div>
+
     <div class="um-modal-footer">
       <button class="btn-ghost-clay" id="stockInCancel">Cancel</button>
       <button class="btn-primary-clay" id="stockInSave"><i class="bi bi-plus-lg"></i> Confirm Stock In</button>
     </div>
+  </div>
+</div>
+
+<!-- VIEW ITEM POPUP MODAL -->
+<div class="um-modal-backdrop" id="viewItemModalBackdrop">
+  <div class="um-modal inv-modal view-item-modal" role="dialog" aria-modal="true">
+    <div id="viewItemModalInner"></div>
   </div>
 </div>
 
@@ -229,41 +302,72 @@
     <div class="um-modal-body">
       <form id="stockOutForm" novalidate>
         <input type="hidden" id="fOutItemId" />
-        <div class="form-grid">
-          <div class="form-group form-full">
-            <label class="form-lbl">Item</label>
-            <div class="disabled-inp" id="fOutItemName"></div>
+
+        <!-- SINGLE ITEM USAGE -->
+        <div id="stockOutSingleFields">
+          <div class="form-grid">
+            <div class="form-group form-full">
+              <label class="form-lbl">Item</label>
+              <div class="disabled-inp" id="fOutItemName"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-lbl" for="fOutQty">Quantity Used <span class="req">*</span></label>
+              <input type="number" class="form-inp" id="fOutQty" min="1" placeholder="e.g. 2" />
+              <span class="form-err" id="errOutQty"></span>
+            </div>
+            <div class="form-group">
+              <label class="form-lbl" for="fOutDate">Date Used</label>
+              <input type="date" class="form-inp" id="fOutDate" />
+            </div>
+            <div class="form-group form-full">
+              <label class="form-lbl" for="fOutAnimal">Animal (optional)</label>
+              <input type="text" class="form-inp" id="fOutAnimal" placeholder="e.g. ANIM-2025-001 / Bantay" />
+            </div>
+            <div class="form-group form-full">
+              <label class="form-lbl" for="fOutProcedure">Procedure / Purpose</label>
+              <select class="form-inp" id="fOutProcedure">
+                <option value="">Select…</option>
+                <option>Vaccination</option>
+                <option>Deworming</option>
+                <option>Treatment</option>
+                <option>Surgery / Spay / Neuter</option>
+                <option>Checkup</option>
+                <option>Feeding</option>
+                <option>Cleaning / Disinfection</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="form-group form-full">
+              <label class="form-lbl" for="fOutNotes">Notes</label>
+              <textarea class="form-inp form-textarea" id="fOutNotes" rows="2" placeholder="Additional notes…"></textarea>
+            </div>
           </div>
-          <div class="form-group">
-            <label class="form-lbl" for="fOutQty">Quantity Used <span class="req">*</span></label>
-            <input type="number" class="form-inp" id="fOutQty" min="1" placeholder="e.g. 2" />
-            <span class="form-err" id="errOutQty"></span>
-          </div>
-          <div class="form-group">
-            <label class="form-lbl" for="fOutDate">Date Used</label>
-            <input type="date" class="form-inp" id="fOutDate" />
-          </div>
-          <div class="form-group form-full">
-            <label class="form-lbl" for="fOutAnimal">Animal (optional)</label>
-            <input type="text" class="form-inp" id="fOutAnimal" placeholder="e.g. ANIM-2025-001 / Bantay" />
-          </div>
-          <div class="form-group form-full">
-            <label class="form-lbl" for="fOutProcedure">Procedure / Purpose</label>
-            <select class="form-inp" id="fOutProcedure">
-              <option value="">Select…</option>
-              <option>Vaccination</option>
-              <option>Deworming</option>
-              <option>Treatment</option>
-              <option>Surgery / Spay / Neuter</option>
-              <option>Checkup</option>
-              <option>Feeding</option>
-              <option>Cleaning / Disinfection</option>
-              <option>Other</option>
-            </select>
-          </div>
-          <div class="form-group form-full">
-            <label class="form-lbl" for="fOutNotes">Notes</label>
-            <textarea class="form-inp form-textarea" id="fOutNotes" rows="2" placeholder="Additional notes…"></textarea>
+        </div>
+
+        <!-- BATCH USAGE -->
+        <div id="stockOutBatchWrap" style="display:none">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-lbl" for="fOutDate">Date Used</label>
+              <input type="date" class="form-inp" id="fOutDate" />
+            </div>
+
+            <div class="form-group form-full">
+              <label class="form-lbl" for="fOutNotes">General Notes</label>
+              <textarea class="form-inp form-textarea" id="fOutNotes" rows="2" placeholder="Additional notes…"></textarea>
+            </div>
+
+            <div class="form-group form-full">
+              <label class="form-lbl">Items to Record Usage <span class="req">*</span></label>
+              <div id="stockOutBatchRows"></div>
+              <span class="form-err" id="errOutQty"></span>
+            </div>
+
+            <div class="form-group form-full">
+              <button type="button" class="btn-outline-add" id="addStockOutBatchRow">
+                <i class="bi bi-plus-circle"></i> Add Another Item
+              </button>
+            </div>
           </div>
         </div>
       </form>
