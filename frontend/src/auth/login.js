@@ -1,5 +1,8 @@
 import Swal from "sweetalert2";
+import { auth, db } from "../utils/firebase.js";
 import { API_BASE_URL } from "../utils/api.js";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { doc, updateDoc } from "firebase/firestore";
 
 export async function handleLogin(event) {
   event.preventDefault();
@@ -97,6 +100,38 @@ export async function handleLogin(event) {
       return;
     }
 
+    // FIREBASE AUTH LOGIN
+    const firebaseCredential = await signInWithEmailAndPassword(auth, email, password);
+    const firebaseUser = firebaseCredential.user;
+
+    // REFRESH USER DATA TO GET LATEST EMAIL VERIFICATION STATUS
+    await firebaseUser.reload();
+
+    if (!firebaseUser.emailVerified) {
+      await signOut(auth);
+
+      closeModal(authModal);
+      await Swal.fire({
+        icon: "warning",
+        title: "Email Not Verified",
+        text: "Please verify your email first before logging in.",
+        customClass: {
+          popup: "animua-popup",
+          confirmButton: "animua-confirm"
+        },
+        buttonsStyling: false
+      });
+
+      window.location.replace("/pages/verify-success.html");
+      return;
+    }
+
+    // UPDATE FIRESTORE USER STATUS
+    await updateDoc(doc(db, "users", firebaseUser.email.toLowerCase()), {
+      emailVerified: true,
+      status: "Active"
+    });
+
     const userRole = data.role || "Public";
     const userFullName = data.fullName || "User";
 
@@ -105,7 +140,7 @@ export async function handleLogin(event) {
     localStorage.setItem("user_name", userFullName);
     localStorage.setItem("user_email", email);
     localStorage.setItem("is_logged_in", "true");
-    localStorage.setItem("show_welcome_toast", "true");
+   
 
     closeModal(authModal);
 
@@ -132,7 +167,7 @@ export async function handleLogin(event) {
     Swal.fire({
       icon: "error",
       title: "Connection Error",
-      text: "Cannot connect to the backend. Please check your internet or server status.",
+      text: error.message || "Cannot connect to the backend. Please check your internet or server status.",
       customClass: {
         popup: "animua-popup",
         confirmButton: "animua-confirm"

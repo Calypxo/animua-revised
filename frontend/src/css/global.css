@@ -928,3 +928,63 @@ body.auth-open {
 .user-pill-logout i {
   font-size: 16px;
 }
+
+
+.auth-field {
+  position: relative;
+}
+
+.auth-field input {
+  padding-right: 40px; /* space for eye icon */
+}
+
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  z-index: 10;
+}
+
+.toggle-password i {
+  pointer-events: none;
+}
+.auth-field {
+  position: relative !important;
+}
+
+.auth-field input {
+  width: 100% !important;
+  padding-right: 52px !important;
+}
+
+.auth-field > span:not(.toggle-password) {
+  pointer-events: none !important;
+}
+
+.toggle-password {
+  position: absolute !important;
+  right: 16px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  z-index: 999 !important;
+  width: 24px !important;
+  height: 24px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  background: transparent !important;
+}
+
+.toggle-password i {
+  pointer-events: none !important;
+  font-size: 16px !important;
+}
+
+#login-password,
+#reg-password {
+  padding-right: 52px !important;
+}

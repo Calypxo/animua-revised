@@ -133,17 +133,20 @@ function setupPasswordToggles() {
   toggles.forEach((toggle) => {
     toggle.addEventListener("click", () => {
       const targetId = toggle.getAttribute("data-target");
-      const input = document.getElementById(targetId);
+      const input = document.querySelector(`#${targetId}`);
       const icon = toggle.querySelector("i");
+      console.log(input);
 
       if (!input || !icon) return;
 
       if (input.type === "password") {
         input.type = "text";
-        icon.className = "fa-regular fa-eye";
+        icon.classList.remove("fa-eye-slash");
+        icon.classList.add("fa-eye");
       } else {
         input.type = "password";
-        icon.className = "fa-regular fa-eye-slash";
+        icon.classList.remove("fa-eye");
+        icon.classList.add("fa-eye-slash");
       }
     });
   });

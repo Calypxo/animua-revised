@@ -12,6 +12,7 @@
     "vite": "^8.0.1"
   },
   "dependencies": {
+    "firebase": "^12.12.0",
     "sweetalert2": "^11.26.24"
   }
 }

@@ -112,7 +112,7 @@ function getInventoryItems() {
       predictedMovement,
       stockoutRiskPercent: metrics.stockoutRiskPercent,
       daysToStockout: metrics.daysToStockout,
-      isAlert: predictedMovement === "Fast" && metrics.daysToStockout <= 10
+      isAlert: predictedMovement === "Fast" && metrics.daysToStockout <= 14
     };
   });
 

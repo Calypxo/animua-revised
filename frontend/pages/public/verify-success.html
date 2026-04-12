@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Email Verification - ANIMUA</title>
+  <style>
+    :root {
+      --primary: #970A12;
+      --primary-dark: #7f0810;
+      --accent: #D1601E;
+      --accent-soft: #FECD6E;
+      --bg: #fffaf7;
+      --card: #ffffff;
+      --text: #2b1d1d;
+      --muted: #6f5c5c;
+      --border: #f0d9d1;
+      --shadow: 0 18px 45px rgba(151, 10, 18, 0.12);
+      --success: #2e7d32;
+      --warning: #b26a00;
+      --radius-lg: 24px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(254, 205, 110, 0.28), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(209, 96, 30, 0.14), transparent 24%),
+        linear-gradient(135deg, #fffaf7 0%, #fffdfb 100%);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .verification-shell {
+      width: 100%;
+      max-width: 980px;
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      background: var(--card);
+      border-radius: 30px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(151, 10, 18, 0.08);
+    }
+
+    .brand-panel {
+      position: relative;
+      padding: 48px 40px;
+      background:
+        linear-gradient(160deg, rgba(151, 10, 18, 0.98), rgba(111, 25, 28, 0.96));
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 620px;
+    }
+
+    .brand-panel::before,
+    .brand-panel::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(254, 205, 110, 0.12);
+      pointer-events: none;
+    }
+
+    .brand-panel::before {
+      width: 220px;
+      height: 220px;
+      top: -60px;
+      right: -60px;
+    }
+
+    .brand-panel::after {
+      width: 160px;
+      height: 160px;
+      bottom: 40px;
+      left: -50px;
+    }
+
+    .brand-top,
+    .brand-bottom {
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 22px;
+      backdrop-filter: blur(4px);
+    }
+
+    .paw-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent-soft);
+      box-shadow: 18px 0 0 var(--accent-soft), 9px -10px 0 var(--accent-soft), 9px 10px 0 var(--accent-soft);
+      margin-right: 20px;
+      position: relative;
+    }
+
+    .brand-title {
+      font-size: clamp(2rem, 3vw, 3.1rem);
+      line-height: 1.08;
+      margin: 0 0 16px;
+      font-weight: 800;
+    }
+
+    .brand-text {
+      margin: 0;
+      font-size: 1rem;
+      line-height: 1.8;
+      color: rgba(255, 255, 255, 0.84);
+      max-width: 420px;
+    }
+
+    .brand-points {
+      display: grid;
+      gap: 14px;
+      margin-top: 28px;
+    }
+
+    .brand-point {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      color: rgba(255, 255, 255, 0.92);
+      font-size: 0.96rem;
+      line-height: 1.6;
+    }
+
+    .brand-point span {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(254, 205, 110, 0.18);
+      color: var(--accent-soft);
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .brand-footer {
+      margin-top: 32px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 0.92rem;
+      line-height: 1.7;
+    }
+
+    .content-panel {
+      padding: 42px 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(180deg, #ffffff 0%, #fffdfb 100%);
+    }
+
+    .card {
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+    }
+
+    .status-icon-wrap {
+      width: 92px;
+      height: 92px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(254, 205, 110, 0.7), rgba(209, 96, 30, 0.18)),
+        #fff5ef;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(209, 96, 30, 0.18);
+      box-shadow: inset 0 2px 10px rgba(255, 255, 255, 0.7);
+    }
+
+    .status-icon {
+      font-size: 34px;
+      line-height: 1;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(254, 205, 110, 0.22);
+      padding: 8px 12px;
+      border-radius: 999px;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 2rem;
+      line-height: 1.15;
+      color: var(--primary);
+    }
+
+    p {
+      margin: 0;
+    }
+
+    #statusText {
+      color: var(--text);
+      font-size: 1rem;
+      line-height: 1.75;
+      margin-bottom: 10px;
+    }
+
+    .subtext {
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.7;
+      margin-top: 4px;
+      min-height: 46px;
+    }
+
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--border), transparent);
+      margin: 24px 0 18px;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 6px;
+    }
+
+    button {
+      appearance: none;
+      border: none;
+      width: 100%;
+      border-radius: 14px;
+      padding: 14px 18px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    #continueBtn,
+    #resendBtn {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      box-shadow: 0 12px 24px rgba(151, 10, 18, 0.16);
+    }
+
+    #continueBtn:hover,
+    #resendBtn:hover {
+      opacity: 0.97;
+    }
+
+    #refreshBtn {
+      background: #fff4de;
+      color: #8f5600;
+      border: 1px solid #f0d6a6;
+    }
+
+    .tips-box {
+      margin-top: 18px;
+      text-align: left;
+      background: #fff9f1;
+      border: 1px solid #f2dfb9;
+      border-radius: 16px;
+      padding: 16px 16px 14px;
+    }
+
+    .tips-title {
+      margin: 0 0 10px;
+      color: #9a5b00;
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .tips-list {
+      margin: 0;
+      padding-left: 18px;
+      color: #7b6447;
+      font-size: 0.9rem;
+      line-height: 1.7;
+    }
+
+    .tips-list li + li {
+      margin-top: 4px;
+    }
+
+    @media (max-width: 860px) {
+      .verification-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .brand-panel {
+        min-height: auto;
+        padding: 34px 28px;
+      }
+
+      .content-panel {
+        padding: 34px 24px;
+      }
+
+      .brand-title {
+        font-size: 2.2rem;
+      }
+    }
+
+    @media (max-width: 520px) {
+      body {
+        padding: 14px;
+      }
+
+      .verification-shell {
+        border-radius: 22px;
+      }
+
+      .brand-panel,
+      .content-panel {
+        padding-left: 20px;
+        padding-right: 20px;
+      }
+
+      h1 {
+        font-size: 1.7rem;
+      }
+
+      .status-icon-wrap {
+        width: 82px;
+        height: 82px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="verification-shell">
+    <section class="brand-panel">
+      <div class="brand-top">
+        <div class="brand-badge">
+          <span class="paw-dot"></span>
+          ANIMUA Verification
+        </div>
+
+        <h2 class="brand-title">Safe access for every adopter, surrenderer, and shelter user.</h2>
+        <p class="brand-text">
+          ANIMUA helps connect people with shelter services in a safer and more organized way.
+          Email verification confirms that your account is real before you continue using the system.
+        </p>
+
+        <div class="brand-points">
+          <div class="brand-point">
+            <span>✓</span>
+            <div>Helps reduce fake registrations and invalid email accounts.</div>
+          </div>
+          <div class="brand-point">
+            <span>✓</span>
+            <div>Supports a more secure and trusted adoption and shelter workflow.</div>
+          </div>
+          <div class="brand-point">
+            <span>✓</span>
+            <div>Keeps your ANIMUA account ready for proper login and role-based access.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="brand-bottom">
+        <div class="brand-footer">
+          Animal Shelter Information System with a clean, secure, and user-friendly verification experience.
+        </div>
+      </div>
+    </section>
+
+    <section class="content-panel">
+      <div class="card">
+        <div class="status-icon-wrap">
+          <div class="status-icon" id="statusIcon">📩</div>
+        </div>
+
+        <div class="eyebrow" id="statusBadge">Account Status</div>
+        <h1>Email Verification</h1>
+        <p id="statusText">Checking your verification status...</p>
+
+        <div class="divider"></div>
+
+        <div class="btn-group">
+          <button id="continueBtn" style="display:none;">Continue</button>
+          <button id="refreshBtn" style="display:none;">Refresh Verification Status</button>
+          <button id="resendBtn" style="display:none;">Resend Verification Email</button>
+        </div>
+
+        <p class="subtext" id="helperText"></p>
+
+        <div class="tips-box">
+          <p class="tips-title">Quick help</p>
+          <ul class="tips-list">
+            <li>Check your inbox and spam folder for the verification email.</li>
+            <li>Click the verification link first before pressing refresh.</li>
+            <li>If the link expires, request a new verification email.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script type="module">
+    import { auth, db } from "../src/utils/firebase.js";
+    import { onAuthStateChanged, sendEmailVerification } from "firebase/auth";
+    import { doc, updateDoc } from "firebase/firestore";
+    import { API_BASE_URL } from "../src/utils/api.js";
+
+    const statusText = document.getElementById("statusText");
+    const continueBtn = document.getElementById("continueBtn");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const resendBtn = document.getElementById("resendBtn");
+    const helperText = document.getElementById("helperText");
+    const statusIcon = document.getElementById("statusIcon");
+    const statusBadge = document.getElementById("statusBadge");
+
+    function getRedirectPage() {
+      const role = (localStorage.getItem("user_role") || "").toLowerCase();
+
+      if (role === "admin" || role === "staff") {
+        return "/pages/dashboard.html";
+      }
+
+      return "/pages/public/home.html";
+    }
+
+    function resetButtons() {
+      continueBtn.style.display = "none";
+      refreshBtn.style.display = "none";
+      resendBtn.style.display = "none";
+      continueBtn.onclick = null;
+      refreshBtn.onclick = null;
+      resendBtn.onclick = null;
+    }
+
+    function setVisualState(type) {
+      if (type === "success") {
+        statusIcon.textContent = "✅";
+        statusBadge.textContent = "Verified";
+      } else if (type === "warning") {
+        statusIcon.textContent = "⏳";
+        statusBadge.textContent = "Pending Verification";
+      } else if (type === "error") {
+        statusIcon.textContent = "⚠️";
+        statusBadge.textContent = "Verification Problem";
+      } else {
+        statusIcon.textContent = "📩";
+        statusBadge.textContent = "Account Status";
+      }
+    }
+
+    function showContinueButton(text, handler) {
+      continueBtn.style.display = "inline-block";
+      continueBtn.textContent = text;
+      continueBtn.onclick = handler;
+    }
+
+    function showRefreshButton(handler) {
+      refreshBtn.style.display = "inline-block";
+      refreshBtn.onclick = handler;
+    }
+
+    function showResendButton(handler) {
+      resendBtn.style.display = "inline-block";
+      resendBtn.onclick = handler;
+    }
+
+    async function autoLoginBackend(email, password) {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Backend auto-login failed.");
+      }
+
+      const userRole = data.role || "Public";
+      const userFullName = data.fullName || localStorage.getItem("pending_verify_name") || "User";
+
+      localStorage.setItem("animua_token", data.token || "");
+      localStorage.setItem("user_role", userRole);
+      localStorage.setItem("user_name", userFullName);
+      localStorage.setItem("user_email", email);
+      localStorage.setItem("is_logged_in", "true");
+
+      localStorage.removeItem("pending_verify_email");
+      localStorage.removeItem("pending_verify_password");
+      localStorage.removeItem("pending_verify_name");
+
+      return { userRole };
+    }
+
+    async function handleVerifiedUser(user) {
+      resetButtons();
+      setVisualState("success");
+
+      try {
+        await updateDoc(doc(db, "users", user.email.toLowerCase()), {
+          emailVerified: true,
+          status: "Active"
+        });
+      } catch (firestoreError) {
+        console.error("[Firestore Update Error]", firestoreError);
+      }
+
+      const savedEmail = localStorage.getItem("pending_verify_email");
+      const savedPassword = localStorage.getItem("pending_verify_password");
+
+      if (savedEmail && savedPassword) {
+        statusText.textContent = "Your email has been verified successfully.";
+        helperText.textContent = "Your ANIMUA account is now active. Signing you in automatically...";
+
+        try {
+          await autoLoginBackend(savedEmail, savedPassword);
+
+          setTimeout(() => {
+            window.location.href = getRedirectPage();
+          }, 1200);
+
+          showContinueButton("Continue to ANIMUA", () => {
+            window.location.href = getRedirectPage();
+          });
+
+          return;
+        } catch (loginError) {
+          console.error("[Auto Login Error]", loginError);
+          setVisualState("warning");
+          statusText.textContent = "Your email is verified, but automatic login failed.";
+          helperText.textContent = "Please continue to the login page and sign in manually.";
+
+          showContinueButton("Go to Login", () => {
+            window.location.href = "/pages/index.html";
+          });
+
+          return;
+        }
+      }
+
+      statusText.textContent = "Your email has been verified successfully.";
+      helperText.textContent = "You may now continue to login and access your account.";
+
+      showContinueButton("Go to Login", () => {
+        window.location.href = "/pages/index.html";
+      });
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      resetButtons();
+      setVisualState("default");
+
+      try {
+        if (!user) {
+          setVisualState("error");
+          statusText.textContent = "No logged-in account was found.";
+          helperText.textContent = "Please log in first, then open your verification email again if needed.";
+
+          showContinueButton("Go to Login", () => {
+            window.location.href = "/pages/index.html";
+          });
+          return;
+        }
+
+        await user.reload();
+
+        if (user.emailVerified) {
+          await handleVerifiedUser(user);
+          return;
+        }
+
+        setVisualState("warning");
+        statusText.textContent = "Your email is not verified yet.";
+        helperText.textContent = "Open the verification email you received, click the link, then return here and refresh your status.";
+
+        showRefreshButton(async () => {
+          try {
+            resetButtons();
+            setVisualState("default");
+            statusText.textContent = "Checking your verification status again...";
+            helperText.textContent = "Please wait a moment.";
+
+            await user.reload();
+
+            if (auth.currentUser && auth.currentUser.emailVerified) {
+              await handleVerifiedUser(auth.currentUser);
+            } else {
+              setVisualState("warning");
+              statusText.textContent = "Your email is still not verified.";
+              helperText.textContent = "Please make sure you clicked the verification link from your email.";
+              showRefreshButton(arguments.callee);
+              showResendButton(async () => {
+                try {
+                  await sendEmailVerification(user, {
+                    url: `${window.location.origin}/pages/verify-success.html`,
+                    handleCodeInApp: false
+                  });
+
+                  setVisualState("default");
+                  statusText.textContent = "A new verification email has been sent.";
+                  helperText.textContent = "Please check your inbox or spam folder, open the link, then return here and refresh again.";
+                  showRefreshButton(arguments.callee);
+                  showResendButton(async () => {});
+                } catch (resendError) {
+                  console.error("[Resend Verification Error]", resendError);
+                  setVisualState("error");
+                  statusText.textContent = "Failed to resend verification email.";
+                  helperText.textContent = resendError.message || "Please try again later.";
+                  showContinueButton("Go to Login", () => {
+                    window.location.href = "/pages/index.html";
+                  });
+                }
+              });
+            }
+          } catch (reloadError) {
+            console.error("[Reload Error]", reloadError);
+            setVisualState("error");
+            statusText.textContent = "Something went wrong while checking your account.";
+            helperText.textContent = "Please try again or log in once more.";
+
+            showContinueButton("Go to Login", () => {
+              window.location.href = "/pages/index.html";
+            });
+          }
+        });
+
+        showResendButton(async () => {
+          try {
+            await sendEmailVerification(user, {
+              url: `${window.location.origin}/pages/verify-success.html`,
+              handleCodeInApp: false
+            });
+
+            setVisualState("default");
+            statusText.textContent = "A new verification email has been sent.";
+            helperText.textContent = "Please check your inbox or spam folder, then click the link and refresh this page.";
+          } catch (resendError) {
+            console.error("[Resend Verification Error]", resendError);
+            setVisualState("error");
+            statusText.textContent = "Failed to resend verification email.";
+            helperText.textContent = resendError.message || "Please try again later.";
+          }
+        });
+      } catch (error) {
+        console.error("[Verification Page Error]", error);
+        setVisualState("error");
+        statusText.textContent = "Something went wrong while checking your verification status.";
+        helperText.textContent = "Please try logging in again.";
+
+        showContinueButton("Go to Login", () => {
+          window.location.href = "/pages/index.html";
+        });
+      }
+    });
+  </script>
+</body>
+</html>
