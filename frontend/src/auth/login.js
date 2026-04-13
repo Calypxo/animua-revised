@@ -159,7 +159,14 @@ export async function handleLogin(event) {
     if (userRole === "Admin" || userRole === "Staff") {
       window.location.replace("/pages/dashboard.html");
     } else {
-      window.location.replace("/pages/public/home.html");
+      const pendingPetId = localStorage.getItem("animua_selected_pet_id");
+      const pendingAction = localStorage.getItem("animua_selected_pet_action");
+
+      if (pendingPetId && pendingAction === "adopt") {
+        window.location.replace("/pages/public/find-furbabies.html");
+      } else {
+        window.location.replace("/pages/public/home.html");
+      }
     }
   } catch (error) {
     console.error("[Login Error]", error);

@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ANIMUA — Post Adoption Monitoring</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="/src/css/adminDashboard.css" />
+  <link rel="stylesheet" href="/src/css/sidebar.css" />
+  <link rel="stylesheet" href="/src/css/postAdoption.css" />
+</head>
+<body class="loading">
+  <div class="shell">
+    <div id="sidebar-container"></div>
+
+    <div class="stage">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button id="sidebarToggle" class="icon-btn"><i class="bi bi-list"></i></button>
+          <nav class="d-flex align-items-center">
+            <span class="breadcrumb-link">Adoption Management</span>
+            <i class="bi bi-chevron-right breadcrumb-sep"></i>
+            <span class="breadcrumb-current">Post Adoption Monitoring</span>
+          </nav>
+        </div>
+
+        <div class="topbar-right">
+          <button class="icon-btn notif-btn">
+            <i class="bi bi-bell-fill"></i>
+            <span class="notif-dot"></span>
+          </button>
+
+          <div class="user-chip">
+            <div class="user-avatar" id="topbar-initials">AS</div>
+            <div class="user-meta">
+              <span id="display-name">Admin</span>
+              <small id="display-role">Administrator</small>
+            </div>
+            <i class="bi bi-chevron-down caret"></i>
+          </div>
+        </div>
+      </header>
+
+      <div class="page-body">
+        <div class="page-header mb-4">
+          <div>
+            <h1 class="page-title">Post Adoption Monitoring</h1>
+            <p class="page-sub">
+              Track adopted pets, schedule surprise visits, record follow-up findings, and monitor each pet’s condition after adoption.
+            </p>
+          </div>
+
+          <div class="d-flex gap-2 flex-wrap align-items-center">
+            <button class="btn-primary-clay" id="btnScheduleVisit">
+              <i class="bi bi-calendar-plus"></i> Schedule Visit
+            </button>
+            <button class="btn-outline-add" id="btnLogVisit">
+              <i class="bi bi-clipboard2-pulse"></i> Log Visit
+            </button>
+            <button class="btn-outline-add" id="btnExportSummary">
+              <i class="bi bi-download"></i> Export Summary
+            </button>
+          </div>
+        </div>
+
+        <!-- Monitoring Banner -->
+        <div class="pa-banner mb-4">
+          <div class="pa-banner-icon">
+            <i class="bi bi-heart-pulse-fill"></i>
+          </div>
+
+          <div class="pa-banner-copy">
+            <strong>Post-Adoption Welfare Monitoring</strong>
+            <p>
+              Surprise visits and scheduled check-ins help ensure adopted animals remain safe, healthy, and well cared for in their new homes.
+            </p>
+          </div>
+
+          <div class="pa-banner-stats">
+            <div class="pa-mini-stat">
+              <span id="miniOverdue">0</span>
+              <small>Overdue</small>
+            </div>
+            <div class="pa-mini-stat">
+              <span id="miniUpcoming">0</span>
+              <small>Upcoming</small>
+            </div>
+            <div class="pa-mini-stat alert">
+              <span id="miniAttention">0</span>
+              <small>Needs Attention</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="pa-stats mb-4">
+          <div class="pa-stat-card">
+            <div class="pa-stat-icon icon-clay">
+              <i class="bi bi-house-heart-fill"></i>
+            </div>
+            <div>
+              <div class="pa-stat-val" id="statTotalCases">0</div>
+              <div class="pa-stat-lbl">Total Post-Adoption Cases</div>
+            </div>
+          </div>
+
+          <div class="pa-stat-card">
+            <div class="pa-stat-icon icon-blue">
+              <i class="bi bi-calendar-check-fill"></i>
+            </div>
+            <div>
+              <div class="pa-stat-val" id="statUpcomingVisits">0</div>
+              <div class="pa-stat-lbl">Upcoming Visits</div>
+            </div>
+          </div>
+
+          <div class="pa-stat-card">
+            <div class="pa-stat-icon icon-rose">
+              <i class="bi bi-exclamation-diamond-fill"></i>
+            </div>
+            <div>
+              <div class="pa-stat-val" id="statNeedsAttention">0</div>
+              <div class="pa-stat-lbl">Needs Attention</div>
+            </div>
+          </div>
+
+          <div class="pa-stat-card">
+            <div class="pa-stat-icon icon-green">
+              <i class="bi bi-shield-check"></i>
+            </div>
+            <div>
+              <div class="pa-stat-val" id="statHealthyCases">0</div>
+              <div class="pa-stat-lbl">Healthy / Stable Cases</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alerts -->
+        <div id="alertsBar" class="mb-4"></div>
+
+        <!-- Main Layout -->
+        <div class="pa-layout" id="paLayout">
+          <div class="panel pa-table-panel">
+            <div class="panel-head flex-column gap-3">
+              <!-- Status Tabs -->
+              <div class="pa-tabs" id="statusTabs">
+                <button class="pa-tab active" data-tab="all">All</button>
+                <button class="pa-tab" data-tab="Upcoming">Upcoming</button>
+                <button class="pa-tab" data-tab="Visited">Visited</button>
+                <button class="pa-tab" data-tab="Needs Attention">Needs Attention</button>
+                <button class="pa-tab" data-tab="Closed">Closed</button>
+              </div>
+
+              <div class="d-flex gap-2 flex-wrap align-items-center justify-content-between w-100">
+                <div class="d-flex gap-2 flex-wrap">
+                  <div class="search-pill-sm">
+                    <i class="bi bi-search"></i>
+                    <input
+                      type="text"
+                      id="searchCases"
+                      placeholder="Search pet, adopter, adoption ID, staff..."
+                      autocomplete="off"
+                    />
+                  </div>
+
+                  <select class="filter-select" id="filterSpecies">
+                    <option value="">All species</option>
+                    <option value="Dog">Dog</option>
+                    <option value="Cat">Cat</option>
+                  </select>
+
+                  <select class="filter-select" id="filterCondition">
+                    <option value="">All condition</option>
+                    <option value="Excellent">Excellent</option>
+                    <option value="Good">Good</option>
+                    <option value="Fair">Fair</option>
+                    <option value="Needs Attention">Needs Attention</option>
+                  </select>
+
+                  <select class="filter-select" id="filterVisitState">
+                    <option value="">All visit state</option>
+                    <option value="Overdue">Overdue</option>
+                    <option value="Today">Today</option>
+                    <option value="Upcoming">Upcoming</option>
+                    <option value="No Visit Scheduled">No Visit Scheduled</option>
+                  </select>
+                </div>
+
+                <div class="d-flex gap-2">
+                  <button class="view-btn active" id="btnTableView" title="Table view">
+                    <i class="bi bi-table"></i>
+                  </button>
+                  <button class="view-btn" id="btnCardView" title="Card view">
+                    <i class="bi bi-grid-3x3-gap-fill"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- TABLE VIEW -->
+            <div id="tableView">
+              <div class="table-responsive">
+                <table class="shelter-table">
+                  <thead>
+                    <tr>
+                      <th>Pet / Adoption</th>
+                      <th>Adopter</th>
+                      <th>Status</th>
+                      <th>Condition</th>
+                      <th>Next Visit</th>
+                      <th>Assigned Staff</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="casesTableBody">
+                    <tr>
+                      <td colspan="7" class="text-center py-5">
+                        <div class="um-spinner"></div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- CARD VIEW -->
+            <div id="cardView" style="display:none">
+              <div class="pa-card-grid" id="casesCardGrid"></div>
+            </div>
+
+            <div class="um-pagination" id="paginationBar"></div>
+          </div>
+
+          <div class="pa-drawer" id="paDrawer">
+            <div class="pa-drawer-inner" id="paDrawerInner"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW DETAILS MODAL -->
+  <div class="um-modal-backdrop" id="viewCaseModalBackdrop">
+    <div class="um-modal pa-modal view-case-modal" role="dialog" aria-modal="true">
+      <div id="viewCaseModalInner"></div>
+    </div>
+  </div>
+
+  <!-- SCHEDULE VISIT MODAL -->
+  <div class="um-modal-backdrop" id="scheduleVisitModalBackdrop">
+    <div class="um-modal pa-modal" role="dialog" aria-modal="true">
+      <div class="um-modal-header">
+        <div>
+          <h2 id="scheduleVisitTitle">Schedule Follow-Up Visit</h2>
+          <p class="modal-subtitle">Assign a visit date and monitoring purpose for an adopted pet.</p>
+        </div>
+        <button class="modal-close-btn" id="scheduleVisitClose">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="um-modal-body">
+        <form id="scheduleVisitForm" novalidate>
+          <input type="hidden" id="fScheduleCaseId" />
+
+          <div class="form-grid">
+            <div class="form-group form-full">
+              <label class="form-lbl">Selected Case</label>
+              <div class="disabled-inp" id="fScheduleCaseLabel">No case selected</div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-lbl" for="fScheduleDate">Visit Date <span class="req">*</span></label>
+              <input type="date" class="form-inp" id="fScheduleDate" />
+              <span class="form-err" id="errScheduleDate"></span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-lbl" for="fScheduleStaff">Assigned Staff <span class="req">*</span></label>
+              <input type="text" class="form-inp" id="fScheduleStaff" placeholder="e.g. Staff Maria Santos" />
+              <span class="form-err" id="errScheduleStaff"></span>
+            </div>
+
+            <div class="form-group form-full">
+              <label class="form-lbl" for="fSchedulePurpose">Visit Purpose</label>
+              <select class="form-inp" id="fSchedulePurpose">
+                <option value="">Select…</option>
+                <option>Routine Welfare Check</option>
+                <option>Surprise Home Visit</option>
+                <option>Condition Reassessment</option>
+                <option>Complaint Verification</option>
+                <option>Final Follow-Up Visit</option>
+              </select>
+            </div>
+
+            <div class="form-group form-full">
+              <label class="form-lbl" for="fScheduleNotes">Notes</label>
+              <textarea
+                class="form-inp form-textarea"
+                id="fScheduleNotes"
+                rows="3"
+                placeholder="Add reminders, risks to observe, or special instructions..."
+              ></textarea>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="um-modal-footer">
+        <button class="btn-ghost-clay" id="scheduleVisitCancel">Cancel</button>
+        <button class="btn-primary-clay" id="scheduleVisitSave">
+          <i class="bi bi-calendar-plus"></i> Save Schedule
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOG VISIT MODAL -->
+  <div class="um-modal-backdrop" id="logVisitModalBackdrop">
+    <div class="um-modal pa-modal" role="dialog" aria-modal="true">
+      <div class="um-modal-header">
+        <div>
+          <h2 id="logVisitTitle">Log Post-Adoption Visit</h2>
+          <p class="modal-subtitle">Record the results of an animal welfare visit and update the case condition.</p>
+        </div>
+        <button class="modal-close-btn" id="logVisitClose">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="um-modal-body">
+        <form id="logVisitForm" novalidate>
+          <input type="hidden" id="fVisitCaseId" />
+
+          <div class="form-grid">
+            <div class="form-group form-full">
+              <label class="form-lbl">Selected Case</label>
+              <div class="disabled-inp" id="fVisitCaseLabel">No case selected</div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-lbl" for="fVisitDate">Visit Date <span class="req">*</span></label>
+              <input type="date" class="form-inp" id="fVisitDate" />
+              <span class="form-err" id="errVisitDate"></span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-lbl" for="fVisitOutcomeStatus">Case Status <span class="req">*</span></label>
+              <select class="form-inp" id="fVisitOutcomeStatus">
+                <option value="">Select…</option>
+                <option>Visited</option>
+                <option>Upcoming</option>
+                <option>Needs Attention</option>
+                <option>Closed</option>
+              </select>
+              <span class="form-err" id="errVisitOutcomeStatus"></span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-lbl" for="fVisitCondition">Pet Condition <span class="req">*</span></label>
+              <select class="form-inp" id="fVisitCondition">
+                <option value="">Select…</option>
+                <option>Excellent</option>
+                <option>Good</option>
+                <option>Fair</option>
+                <option>Needs Attention</option>
+              </select>
+              <span class="form-err" id="errVisitCondition"></span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-lbl" for="fVisitCleanliness">Home / Space Condition</label>
+              <select class="form-inp" id="fVisitCleanliness">
+                <option value="">Select…</option>
+                <option>Clean and Safe</option>
+                <option>Acceptable</option>
+                <option>Needs Improvement</option>
+                <option>Unsafe</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-lbl" for="fVisitWeight">Observed Weight</label>
+              <input type="text" class="form-inp" id="fVisitWeight" placeholder="e.g. 12.4 kg" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-lbl" for="fVisitBehavior">Behavior</label>
+              <select class="form-inp" id="fVisitBehavior">
+                <option value="">Select…</option>
+                <option>Friendly</option>
+                <option>Calm</option>
+                <option>Active</option>
+                <option>Anxious</option>
+                <option>Weak / Lethargic</option>
+                <option>Aggressive</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-lbl" for="fVisitNextDate">Next Visit Date</label>
+              <input type="date" class="form-inp" id="fVisitNextDate" />
+            </div>
+
+            <div class="form-group form-full">
+              <label class="form-lbl" for="fVisitFindings">Findings <span class="req">*</span></label>
+              <textarea
+                class="form-inp form-textarea"
+                id="fVisitFindings"
+                rows="3"
+                placeholder="Describe the pet’s appearance, environment, condition, and observed care..."
+              ></textarea>
+              <span class="form-err" id="errVisitFindings"></span>
+            </div>
+
+            <div class="form-group form-full">
+              <label class="form-lbl" for="fVisitRecommendation">Recommendations / Required Action</label>
+              <textarea
+                class="form-inp form-textarea"
+                id="fVisitRecommendation"
+                rows="3"
+                placeholder="Add follow-up instructions, warnings, health advice, or recheck requirements..."
+              ></textarea>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="um-modal-footer">
+        <button class="btn-ghost-clay" id="logVisitCancel">Cancel</button>
+        <button class="btn-primary-clay" id="logVisitSave">
+          <i class="bi bi-check2-circle"></i> Save Visit Log
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="um-toast" id="umToast">
+    <i class="bi" id="toastIcon"></i>
+    <span id="toastMsg"></span>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script type="module" src="/src/management/postAdoption.js"></script>
+</body>
+</html>

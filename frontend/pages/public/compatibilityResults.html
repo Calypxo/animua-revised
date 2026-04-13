@@ -589,19 +589,37 @@ function render() {
       </a>
     </div>`;
 
-  /* Attach navigation handlers — preserves existing logic */
-  shell.querySelectorAll(".adopt-btn, .view-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const petId = btn.dataset.petId;
-      if (petId) localStorage.setItem("animua_selected_pet_id", petId);
 
-      if (btn.classList.contains("adopt-btn")) {
-        const token = localStorage.getItem("animua_token");
-        if (!token) { window.location.href = "/index.html"; return; }
-      }
-    });
-    /* href already set on <a> so navigation happens naturally */
+/* Attach navigation handlers */
+shell.querySelectorAll(".adopt-btn").forEach(btn => {
+  btn.addEventListener("click", (e) => {
+    const petId = btn.dataset.petId;
+
+    if (petId) {
+      localStorage.setItem("animua_selected_pet_id", petId);
+      localStorage.setItem("animua_selected_pet_action", "adopt");
+    }
+
+    const token = localStorage.getItem("animua_token");
+    if (!token) {
+      e.preventDefault();
+      localStorage.setItem("animua_open_auth_modal", "true");
+      window.location.href = "/pages/public/find-furbabies.html";
+      return;
+    }
   });
+});
+
+shell.querySelectorAll(".view-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const petId = btn.dataset.petId;
+
+    if (petId) {
+      localStorage.setItem("animua_selected_pet_id", petId);
+      localStorage.setItem("animua_selected_pet_action", "view");
+    }
+  });
+});
 
   setTimeout(() => {
   document.querySelectorAll(".ring-fill").forEach((el) => {

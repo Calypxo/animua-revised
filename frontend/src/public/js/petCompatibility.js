@@ -326,7 +326,6 @@ function updateAnswerChips() {
 }
 
 async function handleSubmit() {
-  // Build quiz data structure matching existing petCompatibility.js format
   const quizData = {
     filters: {
       preferredSpecies:    answers.preferredSpecies    || "Any",
@@ -336,63 +335,74 @@ async function handleSubmit() {
       acceptSpecialNeeds:  answers.acceptSpecialNeeds  || "yes",
     },
     preferences: {
-      energyLevel:          answers.energyLevel         || 3,
+      energyLevel:          answers.energyLevel          || 3,
       exerciseNeeds:        answers.exerciseNeeds        || 3,
-      independenceLevel:    answers.independenceLevel    || 3,
-      attentionNeeds:       answers.attentionNeeds       || 3,
-      playfulness:          answers.playfulness          || 3,
+      independenceLevel:    answers.independenceLevel   || 3,
+      attentionNeeds:       answers.attentionNeeds      || 3,
+      playfulness:          answers.playfulness         || 3,
       friendlinessToHumans: answers.friendlinessToHumans || 3,
-      goodWithKids:         answers.goodWithKids         || 3,
-      goodWithOtherPets:    answers.goodWithOtherPets    || 3,
-      strangerTolerance:    answers.strangerTolerance    || 3,
-      noiseLevel:           answers.noiseLevel           || 3,
-      spaceNeeds:           answers.spaceNeeds           || 3,
-      adaptability:         answers.adaptability         || 3,
-      climateTolerance:     answers.climateTolerance     || 3,
-      groomingNeeds:        answers.groomingNeeds        || 3,
-      sheddingLevel:        answers.sheddingLevel        || 3,
-      trainingDifficulty:   answers.trainingDifficulty   || 3,
-      healthRiskLevel:      answers.healthRiskLevel      || 3,
-      affectionLevel:       answers.affectionLevel       || 3,
-      separationAnxiety:    answers.separationAnxiety    || 3,
+      goodWithKids:         answers.goodWithKids        || 3,
+      goodWithOtherPets:    answers.goodWithOtherPets   || 3,
+      strangerTolerance:    answers.strangerTolerance   || 3,
+      noiseLevel:           answers.noiseLevel          || 3,
+      spaceNeeds:           answers.spaceNeeds          || 3,
+      adaptability:         answers.adaptability        || 3,
+      climateTolerance:     answers.climateTolerance    || 3,
+      groomingNeeds:        answers.groomingNeeds       || 3,
+      sheddingLevel:        answers.sheddingLevel       || 3,
+      trainingDifficulty:   answers.trainingDifficulty  || 3,
+      healthRiskLevel:      answers.healthRiskLevel     || 3,
+      affectionLevel:       answers.affectionLevel      || 3,
+      separationAnxiety:    answers.separationAnxiety   || 3,
     }
   };
 
-  // Show completion screen
-  document.getElementById("quizMain").style.display   = "none";
+  document.getElementById("quizMain").style.display = "none";
   document.getElementById("completionScreen").style.display = "flex";
 
-  // Build summary chips
   const summary = document.getElementById("completeSummary");
   const highlights = [
-    { label:"Species", val: quizData.filters.preferredSpecies },
-    { label:"Energy",  val: quizData.preferences.energyLevel + "/5" },
-    { label:"Space",   val: quizData.preferences.spaceNeeds + "/5" },
-    { label:"Allergy-safe", val: quizData.filters.needAllergyFriendly==="yes"?"Yes":"No" },
+    { label: "Species", val: quizData.filters.preferredSpecies },
+    { label: "Energy", val: quizData.preferences.energyLevel + "/5" },
+    { label: "Space", val: quizData.preferences.spaceNeeds + "/5" },
+    { label: "Allergy-safe", val: quizData.filters.needAllergyFriendly === "yes" ? "Yes" : "No" },
   ];
-  summary.innerHTML = highlights.map(h => `<div class="score-pill">${h.label}: <strong>${h.val}</strong></div>`).join("");
-
-  console.log("Quiz data:", quizData);
+  summary.innerHTML = highlights
+    .map(h => `<div class="score-pill">${h.label}: <strong>${h.val}</strong></div>`)
+    .join("");
 
   try {
-    const animals  = await fetchAnimals();
-    const filtered = applyFilters(animals, quizData.filters);
-    const matched  = scoreAnimals(filtered, quizData.preferences);
+    const response = await fetch(`${API_BASE_URL}/match`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(quizData)
+    });
 
-    localStorage.setItem("animua_quiz_data",      JSON.stringify(quizData));
-    localStorage.setItem("animua_match_results",  JSON.stringify(matched));
+    if (!response.ok) {
+      throw new Error("Failed to fetch compatibility matches.");
+    }
+
+    const result = await response.json();
+    const matched = result.matches || [];
+
+    localStorage.setItem("animua_quiz_data", JSON.stringify(quizData));
+    localStorage.setItem("animua_match_results", JSON.stringify(matched));
 
     document.getElementById("viewResultsBtn").onclick = () => {
       window.location.href = "/pages/public/compatibilityResults.html";
     };
-  } catch(err) {
+  } catch (err) {
     console.error("Matching failed:", err);
     document.getElementById("completionScreen").innerHTML = `
       <div class="complete-card">
         <span class="complete-icon">😕</span>
         <h2 class="complete-title">Something went wrong</h2>
-        <p class="complete-sub">We couldn't fetch pet data right now. Please try again later.</p>
-        <button class="btn-submit" onclick="window.location.href='/pages/public/quizLanding.html'">Back to Quiz</button>
+        <p class="complete-sub">We couldn't fetch pet matches right now. Please try again later.</p>
+        <button class="btn-submit" onclick="window.location.href='/pages/public/quizLanding.html'">
+          Back to Quiz
+        </button>
       </div>`;
   }
 }

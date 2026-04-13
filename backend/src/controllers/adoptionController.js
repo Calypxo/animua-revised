@@ -8,6 +8,7 @@ exports.createAdoption = async (req, res) => {
     const {
       pet_id,
       pet_name,
+      compatibility,
       full_name,
       age,
       birthdate,
@@ -52,6 +53,15 @@ exports.createAdoption = async (req, res) => {
 
       pet_id,
       pet_name,
+      compatibility: compatibility
+        ? {
+            source: "quiz", // optional but recommended
+            matchPercent: compatibility.matchPercent ?? null,
+            preferences: compatibility.preferences ?? {},
+            filters: compatibility.filters ?? {},
+            matchedAt: compatibility.matchedAt ?? null
+          }
+        : null,
 
       applicant: {
         full_name: full_name || "",
@@ -121,6 +131,7 @@ exports.getAllAdoptions = async (req, res) => {
           species: "Unknown",
           breed: "Unknown",
           status: "",
+          compatibilityVector: [],
         };
 
         if (data.pet_id) {
@@ -136,6 +147,7 @@ exports.getAllAdoptions = async (req, res) => {
                 species: animalData.species || "Unknown",
                 breed: animalData.breed || "Unknown",
                 status: animalData.status || "",
+                compatibilityVector: animalData.compatibilityVector || [],
               };
             }
           } catch (animalErr) {
@@ -152,6 +164,7 @@ exports.getAllAdoptions = async (req, res) => {
           applicant: data.applicant || {},
           other_information: data.other_information || {},
           declaration: data.declaration || {},
+          compatibility: data.compatibility || null,
           status: data.status || "Pending",
           rejectedReason: data.rejectedReason || "",
           approvedAt: data.approvedAt || null,
@@ -212,6 +225,7 @@ exports.getAdoptionById = async (req, res) => {
       applicant: data.applicant || {},
       other_information: data.other_information || {},
       declaration: data.declaration || {},
+      compatibility: data.compatibility || null,
       status: data.status || "Pending",
       rejectedReason: data.rejectedReason || "",
       approvedAt: data.approvedAt || null,

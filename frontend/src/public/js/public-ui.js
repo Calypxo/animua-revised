@@ -289,4 +289,11 @@ document.addEventListener("DOMContentLoaded", () => {
   if (window.location.pathname.includes("login.html") && authModal) {
     authModal.classList.remove("hidden");
   }
+const shouldOpenAuthModal = localStorage.getItem("animua_open_auth_modal") === "true";
+  if (shouldOpenAuthModal) {
+    showLoginView();
+    openAuthModal();
+    localStorage.removeItem("animua_open_auth_modal");
+  }
+  
 });

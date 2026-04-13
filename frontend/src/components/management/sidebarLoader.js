@@ -34,16 +34,16 @@ export function loadSidebar() {
         <div class="nav-section">
           <div class="nav-label">Adoption & Matching</div>
           <a href="/pages/management/surrenders.html" class="nav-item"><i class="bi bi-file-earmark-text"></i><span class="nav-text">Surrender Requests</span></a>
-          <a href="/pages/management/petCompatibility.html" class="nav-item"><i class="bi bi-cpu"></i><span class="nav-text">Pet Matching (AI)</span></a>
           <a href="/pages/management/adoptionApplications.html" class="nav-item"><i class="bi bi-person-check"></i><span class="nav-text">Adoption Apps</span></a>
-          <a href="/pages/management/followUps.html" class="nav-item"><i class="bi bi-chat-heart"></i><span class="nav-text">Post-Adoption</span></a>
+          <a href="/pages/management/auditTrail.html" class="nav-item"><i class="bi bi-chat-heart"></i><span class="nav-text">Audit Trail</span></a>
         </div>
 
         <div class="nav-section">
           <div class="nav-label">Logistics</div>
           <a href="/pages/management/inventory.html" class="nav-item"><i class="bi bi-box-seam"></i><span class="nav-text">Inventory</span></a>
           <a href="/pages/management/reports.html" class="nav-item"><i class="bi bi-bar-chart"></i><span class="nav-text">Reports</span></a>
-          <a href="/pages/management/settings.html" class="nav-item"><i class="bi bi-gear"></i><span class="nav-text">Settings</span></a>
+          <a href="/pages/management/auditTrail.html" class="nav-item"><i class="bi bi-gear"></i><span class="nav-text">Settings</span></a>
+          <a href="/pages/management/archivedRecords.html" class="nav-item"><i class="bi bi-archive"></i><span class="nav-text">Archived Records</span></a>
         </div>
       </nav>
 

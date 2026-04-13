@@ -26,12 +26,14 @@ const petNameField = document.getElementById("petNameField");
 const adoptionForm = document.getElementById("adoptionForm");
 const formMessage = document.getElementById("formMessage");
 
-
-console.log("find-furbabies.js loaded");
 console.log("API_BASE_URL:", API_BASE_URL);
 console.log("petsGrid:", petsGrid);
 console.log("resultsCount:", resultsCount);
 console.log("emptyState:", emptyState);
+
+console.log("adoptModal:", adoptModal);
+console.log("selectedPetName:", selectedPetName);
+console.log("petNameField:", petNameField);
 
 let currentFilter = "all";
 let currentPetForAdoption = null;
@@ -78,10 +80,11 @@ async function loadPublicPets() {
     const data = await res.json();
     console.log("API data:", data);
 
-    pets = (data.pets || []).map(mapPetFromBackend);
-    console.log("Mapped pets:", pets);
+    const rawPets = Array.isArray(data) ? data : (data.pets || []);
+    pets = rawPets.map(mapPetFromBackend);
 
     applyFilters();
+    openSelectedPetFromResults();
   } catch (error) {
     console.error("Public pets load error:", error);
     resultsCount.textContent = "0 pets found";
@@ -113,7 +116,9 @@ function renderPets(list) {
     card.innerHTML = `
       <div class="pet-card-image">
         <img src="${pet.image}" alt="${pet.name}">
-        <span class="pet-badge">${pet.type === "dog" ? "Dog" : "Cat"}</span>
+        <span class="pet-badge">
+          ${pet.type === "dog" ? "Dog" : pet.type === "cat" ? "Cat" : "Pet"}
+        </span>
       </div>
       <div class="pet-card-body">
         <div class="pet-card-top">
@@ -201,7 +206,10 @@ function openProfileModal(pet) {
   currentPetForAdoption = pet;
   profileImage.src = pet.image;
   profileImage.alt = pet.name;
-  profileType.textContent = pet.type === "dog" ? "Dog" : "Cat";
+ profileType.textContent =
+  pet.type === "dog" ? "Dog" :
+  pet.type === "cat" ? "Cat" :
+  "Pet";
   profileName.textContent = pet.name;
   profileDescription.textContent = pet.description;
   profileAge.textContent = pet.age;
@@ -210,7 +218,11 @@ function openProfileModal(pet) {
   profileStatus.textContent = pet.status;
   profileMatch.textContent = pet.match;
 
-  profileTraits.innerHTML = pet.traits
+  const traitList = pet.traits && pet.traits.length
+  ? pet.traits
+  : ["Gentle", "Rescue", "Needs a loving home"];
+
+  profileTraits.innerHTML = traitList
     .map((trait) => `<span class="trait-chip">${trait}</span>`)
     .join("");
 
@@ -218,26 +230,65 @@ function openProfileModal(pet) {
   document.body.classList.add("menu-open");
 }
 
-function openAdoptModal(pet) {
-  if (!adoptModal) {
+function openSelectedPetFromResults() {
+  const selectedPetId = localStorage.getItem("animua_selected_pet_id");
+  const selectedAction = localStorage.getItem("animua_selected_pet_action");
+  const token = localStorage.getItem("animua_token");
+
+  if (!selectedPetId || !pets.length) return;
+
+  const selectedPet = pets.find((pet) => String(pet.id) === String(selectedPetId));
+  if (!selectedPet) return;
+
+  if (selectedAction === "view") {
+    openProfileModal(selectedPet);
+    localStorage.removeItem("animua_selected_pet_id");
+    localStorage.removeItem("animua_selected_pet_action");
     return;
   }
 
+  if (selectedAction === "adopt") {
+    if (!token) return;
+
+    showAdoptModalForPet(selectedPet);
+    localStorage.removeItem("animua_selected_pet_id");
+    localStorage.removeItem("animua_selected_pet_action");
+  }
+}
+
+function showAdoptModalForPet(pet) {
+  if (!adoptModal) return;
+
   currentPetForAdoption = pet;
-  selectedPetName.textContent = `${pet.name} (${pet.type === "dog" ? "Dog" : "Cat"})`;
+  selectedPetName.textContent = `${pet.name} (${pet.type === "dog" ? "Dog" : pet.type === "cat" ? "Cat" : "Pet"})`;
   petNameField.value = pet.name;
   formMessage.textContent = "";
+
   adoptModal.classList.add("show");
   document.body.classList.add("menu-open");
 }
 
-if (profileAdoptBtn) {
-  profileAdoptBtn.addEventListener("click", () => {
-    if (currentPetForAdoption && profileModal) {
-      profileModal.classList.remove("show");
-      openAdoptModal(currentPetForAdoption);
+function openAdoptModal(pet) {
+  if (!adoptModal) return;
+
+  const token = localStorage.getItem("animua_token");
+
+  currentPetForAdoption = pet;
+  localStorage.setItem("animua_selected_pet_id", pet.id);
+  localStorage.setItem("animua_selected_pet_action", "adopt");
+
+  if (!token) {
+    localStorage.setItem("animua_open_auth_modal", "true");
+
+    const authModal = document.getElementById("authModal");
+    if (authModal) {
+      authModal.classList.remove("hidden");
+      document.body.classList.add("modal-open");
     }
-  });
+    return;
+  }
+
+  showAdoptModalForPet(pet);
 }
 
 document.querySelectorAll("[data-close]").forEach((button) => {
@@ -288,9 +339,29 @@ if (adoptionForm) {
     }
 
     try {
+      const quizData = JSON.parse(localStorage.getItem("animua_quiz_data") || "{}");
+      const matchResults = JSON.parse(localStorage.getItem("animua_match_results") || "[]");
+      const selectedPetId = currentPetForAdoption?.id;
+
+      const selectedMatch = matchResults.find(
+        (pet) => String(pet.id || pet.petId) === String(selectedPetId)
+      );
+
+      const compatibilityData = selectedMatch
+        ? {
+            source: "quiz",
+            matchPercent: selectedMatch.matchPercent || null,
+            preferences: quizData.preferences || {},
+            filters: quizData.filters || {},
+            matchedAt: new Date().toISOString()
+          }
+        : null;
+
       const formData = {
         pet_id: currentPetForAdoption?.id,
         pet_name: currentPetForAdoption?.name,
+        compatibility: compatibilityData,
+
         full_name: document.getElementById("fullName").value,
         age: document.getElementById("age").value,
         birthdate: document.getElementById("birthdate").value,
@@ -329,10 +400,27 @@ if (adoptionForm) {
       formMessage.style.color = "green";
 
       adoptionForm.reset();
+      currentPetForAdoption = null;
+      selectedPetName.textContent = "";
+      petNameField.value = "";
+
+      setTimeout(() => {
+        adoptModal.classList.remove("show");
+        document.body.classList.remove("menu-open");
+      }, 1200);
     } catch (error) {
       console.error("Adoption submit error:", error);
       formMessage.textContent = "Failed to submit. Please try again.";
       formMessage.style.color = "red";
+    }
+  });
+}
+
+if (profileAdoptBtn) {
+  profileAdoptBtn.addEventListener("click", () => {
+    if (currentPetForAdoption && profileModal) {
+      profileModal.classList.remove("show");
+      openAdoptModal(currentPetForAdoption);
     }
   });
 }

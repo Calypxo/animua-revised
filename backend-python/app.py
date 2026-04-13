@@ -1,0 +1,106 @@
+from math import sqrt
+from typing import Any, Dict, List, Optional
+
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+app = FastAPI(title="Animua Python Matcher")
+
+SCORE_KEYS = [
+    "energyLevel",
+    "exerciseNeeds",
+    "independenceLevel",
+    "attentionNeeds",
+    "playfulness",
+    "friendlinessToHumans",
+    "goodWithKids",
+    "goodWithOtherPets",
+    "strangerTolerance",
+    "noiseLevel",
+]
+
+class MatchRequest(BaseModel):
+    preferences: Dict[str, Any]
+    animals: List[Dict[str, Any]]
+    top_k: Optional[int] = 5
+
+def safe_num(value: Any, default: float = 3.0) -> float:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
+
+def build_vector(data: Dict[str, Any], keys: List[str]) -> List[float]:
+    return [safe_num(data.get(key), 3.0) for key in keys]
+
+def dot_product(a: List[float], b: List[float]) -> float:
+    return sum(x * y for x, y in zip(a, b))
+
+def magnitude(vec: List[float]) -> float:
+    return sqrt(sum(v * v for v in vec))
+
+def cosine_similarity(a: List[float], b: List[float]) -> float:
+    mag_a = magnitude(a)
+    mag_b = magnitude(b)
+
+    if mag_a == 0 or mag_b == 0:
+        return 0.0
+
+    return dot_product(a, b) / (mag_a * mag_b)
+
+def score_pet(user_vector: List[float], pet_vector: List[float]) -> Dict[str, float]:
+    cosine = cosine_similarity(user_vector, pet_vector)
+
+    diff = 0.0
+    for u, p in zip(user_vector, pet_vector):
+        diff += abs(u - p)
+
+    max_diff = len(user_vector) * 4.0
+    penalty = diff / max_diff
+    final_score = cosine * (1 - penalty)
+
+    return {
+        "matchScore": round(final_score, 4),
+        "matchPercent": round(final_score * 100, 2),
+    }
+
+@app.get("/health")
+def health():
+    return {"ok": True}
+
+@app.post("/score")
+def score_matches(payload: MatchRequest):
+    user_vector = build_vector(payload.preferences, SCORE_KEYS)
+    results = []
+
+    for animal in payload.animals:
+        assessment = animal.get("behavioralAssessment", {}) or {}
+
+        pet_vector = build_vector(assessment, SCORE_KEYS)
+        score = score_pet(user_vector, pet_vector)
+
+        results.append({
+            "id": animal.get("id"),
+            "petId": animal.get("petId"),
+            "name": animal.get("name"),
+            "species": animal.get("species"),
+            "breed": animal.get("breed"),
+            "sex": animal.get("sex"),
+            "size": animal.get("size"),
+            "status": animal.get("status"),
+            "photoURL": animal.get("photoURL"),
+            "photoUrl": animal.get("photoUrl") or animal.get("photoURL"),
+            "ageEstimate": animal.get("ageEstimate"),
+            "age": animal.get("age") or animal.get("ageEstimate"),
+            "allergyFriendly": animal.get("allergyFriendly"),
+            "specialNeeds": assessment.get("specialNeeds", animal.get("specialNeeds")),
+            "aggressive": assessment.get("aggressive", animal.get("aggressive")),
+            **assessment,
+            **score,
+        })
+
+    results.sort(key=lambda x: x["matchScore"], reverse=True)
+
+    return {
+        "matches": results[: payload.top_k]
+    }

@@ -34,12 +34,18 @@ const QUIZ_DIMENSIONS = [
 const AVATAR_COLORS = ["#6f191c","#2558a8","#186534","#b86a00","#0d6e6e","#9b2c4e","#3d2b8a","#1a6b5a"];
 
 function mapAdoptionFromBackend(a) {
+  const compatibility = a.compatibility || null;
+  const preferences = compatibility?.preferences || null;
+  const filters = compatibility?.filters || null;
+  const matchPercent = compatibility?.matchPercent ?? null;
+
   return {
     id: a.id,
     applicationId: a.applicationId || a.id,
     pet_id: a.pet_id,
     pet_name: a.pet_name,
-    type: "Direct Browse",
+
+    type: compatibility ? "Quiz Match" : "Direct Browse",
     status: a.status || "Pending",
     submitted: a.submittedAt?.seconds
       ? new Date(a.submittedAt.seconds * 1000).toISOString().split("T")[0]
@@ -51,14 +57,15 @@ function mapAdoptionFromBackend(a) {
       species: a.animal?.species || "Unknown",
       breed: a.animal?.breed || "Unknown",
       status: a.animal?.status || "",
+      vector: a.animal?.compatibilityVector || [],
     },
 
     adopter: {
       name: a.applicant?.full_name || "Unknown",
-      email: "N/A",
+      email: a.applicant?.email || "N/A",
       contact: a.applicant?.contact_number || "",
       address: a.applicant?.address || "",
-      idType: "N/A",
+      idType: a.applicant?.idType || "N/A",
       occupation: a.applicant?.occupation || "",
       color: AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)],
       initials: (a.applicant?.full_name || "U")
@@ -69,11 +76,12 @@ function mapAdoptionFromBackend(a) {
         .toUpperCase(),
     },
 
-
     reqDone: 0,
-    compatScore: null,
-    adopterAnswers: null,
-    quizTopMatches: null,
+    compatScore: matchPercent ? Math.round(Number(matchPercent)) : null,
+    adopterAnswers: preferences,
+    quizFilters: filters,
+    quizTopMatches: compatibility?.quizTopMatches || null,
+
     rejectedReason: a.rejectedReason || "",
     adoptionDate: a.adoptionDate || "",
     processedBy: a.processedBy || "",
