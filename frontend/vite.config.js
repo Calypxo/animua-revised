@@ -8,7 +8,6 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
-        verifyEmailAction: resolve(__dirname, 'pages/public/verify-email-action.html'),
         petCompatibility: resolve(__dirname, 'pages/management/petCompatibility.html'),
       },
     },
