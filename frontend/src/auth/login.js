@@ -108,13 +108,17 @@ export async function handleLogin(event) {
     await firebaseUser.reload();
 
     if (!firebaseUser.emailVerified) {
+      // SAVE FOR LOGIN AFTER MANUAL EMAIL VERIFICATION
+      localStorage.setItem("pending_verify_email", email);
+      localStorage.setItem("pending_verify_password", password);
+
       await signOut(auth);
 
       closeModal(authModal);
       await Swal.fire({
-        icon: "warning",
+        icon: "info",
         title: "Email Not Verified",
-        text: "Please verify your email first before logging in.",
+        text: "Your email is not verified yet. Please check your ANIMUA verification email and click the verification button before logging in.",
         customClass: {
           popup: "animua-popup",
           confirmButton: "animua-confirm"
@@ -122,7 +126,6 @@ export async function handleLogin(event) {
         buttonsStyling: false
       });
 
-      window.location.replace("/pages/verify-success.html");
       return;
     }
 
@@ -140,7 +143,6 @@ export async function handleLogin(event) {
     localStorage.setItem("user_name", userFullName);
     localStorage.setItem("user_email", email);
     localStorage.setItem("is_logged_in", "true");
-   
 
     closeModal(authModal);
 

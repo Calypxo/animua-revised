@@ -443,261 +443,151 @@
   </div>
 
   <script type="module">
-    import { auth, db } from "../src/utils/firebase.js";
-    import { onAuthStateChanged, sendEmailVerification } from "firebase/auth";
-    import { doc, updateDoc } from "firebase/firestore";
-    import { API_BASE_URL } from "../src/utils/api.js";
+  import { auth, db } from "../src/utils/firebase.js";
+  import { onAuthStateChanged } from "firebase/auth";
+  import { doc, updateDoc } from "firebase/firestore";
+  import { API_BASE_URL } from "../src/utils/api.js";
 
-    const statusText = document.getElementById("statusText");
-    const continueBtn = document.getElementById("continueBtn");
-    const refreshBtn = document.getElementById("refreshBtn");
-    const resendBtn = document.getElementById("resendBtn");
-    const helperText = document.getElementById("helperText");
-    const statusIcon = document.getElementById("statusIcon");
-    const statusBadge = document.getElementById("statusBadge");
+  const statusText = document.getElementById("statusText");
+  const continueBtn = document.getElementById("continueBtn");
+  const refreshBtn = document.getElementById("refreshBtn");
+  const resendBtn = document.getElementById("resendBtn");
+  const helperText = document.getElementById("helperText");
+  const statusIcon = document.getElementById("statusIcon");
+  const statusBadge = document.getElementById("statusBadge");
 
-    function getRedirectPage() {
-      const role = (localStorage.getItem("user_role") || "").toLowerCase();
-
-      if (role === "admin" || role === "staff") {
-        return "/pages/dashboard.html";
-      }
-
-      return "/pages/public/home.html";
+  function getRedirectPage() {
+    const role = (localStorage.getItem("user_role") || "").toLowerCase();
+    if (role === "admin" || role === "staff") {
+      return "/pages/dashboard.html";
     }
+    return "/pages/public/home.html";
+  }
 
-    function resetButtons() {
-      continueBtn.style.display = "none";
-      refreshBtn.style.display = "none";
-      resendBtn.style.display = "none";
-      continueBtn.onclick = null;
-      refreshBtn.onclick = null;
-      resendBtn.onclick = null;
+  function resetButtons() {
+    continueBtn.style.display = "none";
+    refreshBtn.style.display = "none";
+    resendBtn.style.display = "none";
+  }
+
+  function setVisualState(type) {
+    if (type === "success") {
+      statusIcon.textContent = "✅";
+      statusBadge.textContent = "Verified";
+    } else if (type === "warning") {
+      statusIcon.textContent = "⏳";
+      statusBadge.textContent = "Pending Verification";
+    } else if (type === "error") {
+      statusIcon.textContent = "⚠️";
+      statusBadge.textContent = "Verification Problem";
+    } else {
+      statusIcon.textContent = "📩";
+      statusBadge.textContent = "Account Status";
     }
+  }
 
-    function setVisualState(type) {
-      if (type === "success") {
-        statusIcon.textContent = "✅";
-        statusBadge.textContent = "Verified";
-      } else if (type === "warning") {
-        statusIcon.textContent = "⏳";
-        statusBadge.textContent = "Pending Verification";
-      } else if (type === "error") {
-        statusIcon.textContent = "⚠️";
-        statusBadge.textContent = "Verification Problem";
-      } else {
-        statusIcon.textContent = "📩";
-        statusBadge.textContent = "Account Status";
-      }
-    }
+  function showContinueButton(text, handler) {
+    continueBtn.style.display = "inline-block";
+    continueBtn.textContent = text;
+    continueBtn.onclick = handler;
+  }
 
-    function showContinueButton(text, handler) {
-      continueBtn.style.display = "inline-block";
-      continueBtn.textContent = text;
-      continueBtn.onclick = handler;
-    }
+  function showRefreshButton(handler) {
+    refreshBtn.style.display = "inline-block";
+    refreshBtn.onclick = handler;
+  }
 
-    function showRefreshButton(handler) {
-      refreshBtn.style.display = "inline-block";
-      refreshBtn.onclick = handler;
-    }
+  async function autoLoginBackend(email, password) {
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
 
-    function showResendButton(handler) {
-      resendBtn.style.display = "inline-block";
-      resendBtn.onclick = handler;
-    }
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
 
-    async function autoLoginBackend(email, password) {
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ email, password })
+    localStorage.setItem("animua_token", data.token || "");
+    localStorage.setItem("user_role", data.role || "Public");
+    localStorage.setItem("user_name", data.fullName || "User");
+    localStorage.setItem("user_email", email);
+    localStorage.setItem("is_logged_in", "true");
+
+    localStorage.removeItem("pending_verify_email");
+    localStorage.removeItem("pending_verify_password");
+    localStorage.removeItem("pending_verify_name");
+  }
+
+  async function handleVerifiedUser(user) {
+    resetButtons();
+    setVisualState("success");
+
+    try {
+      await updateDoc(doc(db, "users", user.email.toLowerCase()), {
+        emailVerified: true,
+        status: "Active"
       });
+    } catch (e) {}
 
-      const data = await response.json();
+    const savedEmail = localStorage.getItem("pending_verify_email");
+    const savedPassword = localStorage.getItem("pending_verify_password");
 
-      if (!response.ok) {
-        throw new Error(data.message || "Backend auto-login failed.");
-      }
-
-      const userRole = data.role || "Public";
-      const userFullName = data.fullName || localStorage.getItem("pending_verify_name") || "User";
-
-      localStorage.setItem("animua_token", data.token || "");
-      localStorage.setItem("user_role", userRole);
-      localStorage.setItem("user_name", userFullName);
-      localStorage.setItem("user_email", email);
-      localStorage.setItem("is_logged_in", "true");
-
-      localStorage.removeItem("pending_verify_email");
-      localStorage.removeItem("pending_verify_password");
-      localStorage.removeItem("pending_verify_name");
-
-      return { userRole };
-    }
-
-    async function handleVerifiedUser(user) {
-      resetButtons();
-      setVisualState("success");
+    if (savedEmail && savedPassword) {
+      statusText.textContent = "Your email has been verified successfully.";
+      helperText.textContent = "Signing you in automatically...";
 
       try {
-        await updateDoc(doc(db, "users", user.email.toLowerCase()), {
-          emailVerified: true,
-          status: "Active"
+        await autoLoginBackend(savedEmail, savedPassword);
+        setTimeout(() => {
+          window.location.href = getRedirectPage();
+        }, 1200);
+
+        showContinueButton("Continue to ANIMUA", () => {
+          window.location.href = getRedirectPage();
         });
-      } catch (firestoreError) {
-        console.error("[Firestore Update Error]", firestoreError);
+        return;
+      } catch {
+        statusText.textContent = "Verified, but auto-login failed.";
+        helperText.textContent = "Please login manually.";
       }
+    }
 
-      const savedEmail = localStorage.getItem("pending_verify_email");
-      const savedPassword = localStorage.getItem("pending_verify_password");
+    showContinueButton("Go to Login", () => {
+      window.location.href = "/pages/index.html";
+    });
+  }
 
-      if (savedEmail && savedPassword) {
-        statusText.textContent = "Your email has been verified successfully.";
-        helperText.textContent = "Your ANIMUA account is now active. Signing you in automatically...";
+  onAuthStateChanged(auth, async (user) => {
+    resetButtons();
 
-        try {
-          await autoLoginBackend(savedEmail, savedPassword);
-
-          setTimeout(() => {
-            window.location.href = getRedirectPage();
-          }, 1200);
-
-          showContinueButton("Continue to ANIMUA", () => {
-            window.location.href = getRedirectPage();
-          });
-
-          return;
-        } catch (loginError) {
-          console.error("[Auto Login Error]", loginError);
-          setVisualState("warning");
-          statusText.textContent = "Your email is verified, but automatic login failed.";
-          helperText.textContent = "Please continue to the login page and sign in manually.";
-
-          showContinueButton("Go to Login", () => {
-            window.location.href = "/pages/index.html";
-          });
-
-          return;
-        }
-      }
-
-      statusText.textContent = "Your email has been verified successfully.";
-      helperText.textContent = "You may now continue to login and access your account.";
-
+    if (!user) {
+      setVisualState("error");
+      statusText.textContent = "No logged-in account.";
+      helperText.textContent = "Please log in first.";
       showContinueButton("Go to Login", () => {
         window.location.href = "/pages/index.html";
       });
+      return;
     }
 
-    onAuthStateChanged(auth, async (user) => {
-      resetButtons();
-      setVisualState("default");
+    await user.reload();
 
-      try {
-        if (!user) {
-          setVisualState("error");
-          statusText.textContent = "No logged-in account was found.";
-          helperText.textContent = "Please log in first, then open your verification email again if needed.";
+    if (user.emailVerified) {
+      await handleVerifiedUser(user);
+      return;
+    }
 
-          showContinueButton("Go to Login", () => {
-            window.location.href = "/pages/index.html";
-          });
-          return;
-        }
+    setVisualState("warning");
+    statusText.textContent = "Your email is not verified yet.";
+    helperText.textContent = "Click the verification link from your email, then refresh.";
 
-        await user.reload();
-
-        if (user.emailVerified) {
-          await handleVerifiedUser(user);
-          return;
-        }
-
-        setVisualState("warning");
-        statusText.textContent = "Your email is not verified yet.";
-        helperText.textContent = "Open the verification email you received, click the link, then return here and refresh your status.";
-
-        showRefreshButton(async () => {
-          try {
-            resetButtons();
-            setVisualState("default");
-            statusText.textContent = "Checking your verification status again...";
-            helperText.textContent = "Please wait a moment.";
-
-            await user.reload();
-
-            if (auth.currentUser && auth.currentUser.emailVerified) {
-              await handleVerifiedUser(auth.currentUser);
-            } else {
-              setVisualState("warning");
-              statusText.textContent = "Your email is still not verified.";
-              helperText.textContent = "Please make sure you clicked the verification link from your email.";
-              showRefreshButton(arguments.callee);
-              showResendButton(async () => {
-                try {
-                  await sendEmailVerification(user, {
-                    url: `${window.location.origin}/pages/verify-success.html`,
-                    handleCodeInApp: false
-                  });
-
-                  setVisualState("default");
-                  statusText.textContent = "A new verification email has been sent.";
-                  helperText.textContent = "Please check your inbox or spam folder, open the link, then return here and refresh again.";
-                  showRefreshButton(arguments.callee);
-                  showResendButton(async () => {});
-                } catch (resendError) {
-                  console.error("[Resend Verification Error]", resendError);
-                  setVisualState("error");
-                  statusText.textContent = "Failed to resend verification email.";
-                  helperText.textContent = resendError.message || "Please try again later.";
-                  showContinueButton("Go to Login", () => {
-                    window.location.href = "/pages/index.html";
-                  });
-                }
-              });
-            }
-          } catch (reloadError) {
-            console.error("[Reload Error]", reloadError);
-            setVisualState("error");
-            statusText.textContent = "Something went wrong while checking your account.";
-            helperText.textContent = "Please try again or log in once more.";
-
-            showContinueButton("Go to Login", () => {
-              window.location.href = "/pages/index.html";
-            });
-          }
-        });
-
-        showResendButton(async () => {
-          try {
-            await sendEmailVerification(user, {
-              url: `${window.location.origin}/pages/verify-success.html`,
-              handleCodeInApp: false
-            });
-
-            setVisualState("default");
-            statusText.textContent = "A new verification email has been sent.";
-            helperText.textContent = "Please check your inbox or spam folder, then click the link and refresh this page.";
-          } catch (resendError) {
-            console.error("[Resend Verification Error]", resendError);
-            setVisualState("error");
-            statusText.textContent = "Failed to resend verification email.";
-            helperText.textContent = resendError.message || "Please try again later.";
-          }
-        });
-      } catch (error) {
-        console.error("[Verification Page Error]", error);
-        setVisualState("error");
-        statusText.textContent = "Something went wrong while checking your verification status.";
-        helperText.textContent = "Please try logging in again.";
-
-        showContinueButton("Go to Login", () => {
-          window.location.href = "/pages/index.html";
-        });
+    showRefreshButton(async () => {
+      await user.reload();
+      if (auth.currentUser.emailVerified) {
+        await handleVerifiedUser(auth.currentUser);
       }
     });
-  </script>
+  });
+</script>
 </body>
 </html>

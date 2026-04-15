@@ -1,12 +1,5 @@
 import Swal from "sweetalert2";
-import { auth, db } from "../utils/firebase.js";
 import { API_BASE_URL } from "../utils/api.js";
-import {
-  createUserWithEmailAndPassword,
-  sendEmailVerification,
-  updateProfile
-} from "firebase/auth";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 
 export async function handleRegistration(event) {
   event.preventDefault();
@@ -123,10 +116,19 @@ export async function handleRegistration(event) {
 
     if (!response.ok) {
       closeModal(authModal);
+
+      let title = "Registration Failed";
+      let text = data.message || "An error occurred during registration.";
+
+      if (response.status === 409) {
+        title = "Email Already Registered";
+        text = "This email is already registered. Please log in instead, or verify your email if you have not completed verification yet.";
+      }
+
       Swal.fire({
         icon: "error",
-        title: "Registration Failed",
-        text: data.message || "An error occurred during registration.",
+        title,
+        text,
         customClass: {
           popup: "animua-popup",
           confirmButton: "animua-confirm"
@@ -136,25 +138,10 @@ export async function handleRegistration(event) {
       return;
     }
 
-    // FIREBASE AUTH REGISTER
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-
-    // SAVE DISPLAY NAME
-    await updateProfile(user, {
-      displayName: fullName
-    });
-
-    // SEND VERIFICATION EMAIL
- await sendEmailVerification(user, {
-  url: `${window.location.origin}/pages/verify-success.html`,
-  handleCodeInApp: false
-});
-
-    // SAVE TEMP LOGIN INFO FOR AUTO LOGIN AFTER VERIFICATION
-   localStorage.setItem("pending_verify_email", email);
-   localStorage.setItem("pending_verify_password", password);
-  localStorage.setItem("pending_verify_name", fullName);
+    // SAVE TEMP INFO IF YOU STILL WANT TO USE IT LATER
+    localStorage.setItem("pending_verify_email", email);
+    localStorage.setItem("pending_verify_password", password);
+    localStorage.setItem("pending_verify_name", fullName);
 
     if (fullNameInput) fullNameInput.value = "";
     if (emailInput) emailInput.value = "";
@@ -165,8 +152,8 @@ export async function handleRegistration(event) {
     await Swal.fire({
       icon: "success",
       title: "Registration Successful",
-      text: "Your account has been created successfully. Please check your email and verify your account.",
-      timer: 3200,
+      text: data.message || "Your account has been created. Please check your email and click the verification button to activate your ANIMUA account.",
+      timer: 3500,
       showConfirmButton: false,
       timerProgressBar: true,
       customClass: {
@@ -174,9 +161,10 @@ export async function handleRegistration(event) {
       }
     });
 
-    window.location.href = "/pages/verify-success.html";
+    window.location.href = "/pages/index.html";
   } catch (error) {
     console.error("[Register Error]", error);
+
     closeModal(authModal);
     Swal.fire({
       icon: "error",
