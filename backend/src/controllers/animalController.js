@@ -343,7 +343,7 @@ exports.addMedicalRecord = async (req, res) => {
       updates.weight = weight;
     }
 
-    if (clearance === "Cleared" && doc.data().status === "Profiling") {
+    if (clearance !== "Cleared" && doc.data().status === "Profiling") {
       updates.status = "Quarantine";
     }
 

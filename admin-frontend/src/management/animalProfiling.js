@@ -75,7 +75,10 @@ function compatBar(assessment) {
 async function loadAnimals() {
   try {
     const data = await getAllAnimals();
+    console.log("GET ALL ANIMALS RESPONSE:", data);
     animals = data.animals || [];
+    console.log("ANIMALS ARRAY:", animals);
+
     renderStats();
     applyFilters();
   } catch (err) {
@@ -108,8 +111,26 @@ function applyFilters() {
   const species = document.getElementById("filterSpecies")?.value || "";
   const sex = document.getElementById("filterSex")?.value || "";
 
+  console.log("ACTIVE TAB:", activeTab);
+  console.log(
+    "ALL STATUSES:",
+    animals.map(a => ({
+      id: a.id,
+      name: a.name,
+      status: a.status
+    }))
+  );
+
   filtered = animals.filter(a => {
-    if (activeTab !== "all" && a.status !== activeTab) return false;
+    if (activeTab !== "all") {
+    if (activeTab === "Quarantine") {
+      if (a.status !== "Quarantine" && a.status !== "Quarantine & Medical Monitoring") {
+        return false;
+      }
+    } else if (a.status !== activeTab) {
+      return false;
+    }
+  }
     if (species && a.species !== species) return false;
     if (sex && a.sex !== sex) return false;
 
@@ -124,6 +145,8 @@ function applyFilters() {
 
     return true;
   });
+
+  console.log("FILTERED:", filtered);
 
   currentPage = 1;
   renderTable();
