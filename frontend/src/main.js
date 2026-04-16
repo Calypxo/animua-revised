@@ -5,12 +5,12 @@ import { handleLogin }        from "./auth/login.js";
 // SECURITY TOGGLE — mirrors IS_INSECURE_MODE in the backend
 // false = SECURE (Phase 4)
 // true  = INSECURE (Phase 3)
-// render: https://animua.onrender.com 
+// render: https://animua-backend.onrender.com 
 // local:   http://localhost:5000
 // =============================================================================
 const IS_FRONTEND_INSECURE = false;
 
-const API_URL = "https://animua.onrender.com";
+const API_URL = "https://animua-backend.onrender.com";
 
 // ─── GLOBAL HELPERS ───────────────────────────────────────────────────────────
 window.toggleView = function () {
