@@ -20,31 +20,46 @@ const authenticateToken = require("./src/middleware/authMiddleware");
 const authorizeRole = require("./src/middleware/roleMiddleware");
 const { trainInventoryModel } = require("./src/services/predictiveService");
 
+const allowedOrigins = [
+  // 🌐 Production
+  "https://animua-angelescity.web.app",
+  "https://animua-admin.web.app",
 
-// ─── CORS ─────────────────────────────────────────────────────────────────────
-app.use(cors({
-  origin: [
-    "https://animua-angelescity.web.app",
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://localhost:5174",
-    "http://127.0.0.1:5174",
-    "http://localhost:5175",
-    "http://127.0.0.1:5175",
-    "http://localhost:5176",
-    "http://127.0.0.1:5176",
-    "http://localhost:5177",
-    "http://127.0.0.1:5177",
-    "http://localhost:5179",
-    "http://127.0.0.1:5179"
-  ],
+  // 🧪 Local development
+  "http://localhost:5175",
+  "http://127.0.0.1:5175",
+];
 
+const corsOptions = {
+  origin: function (origin, callback) {
+    // ✅ Allow tools like Postman / server-to-server requests
+    if (!origin) return callback(null, true);
 
-  
+    // ✅ Allow localhost / 127.0.0.1 on ANY port
+    if (
+      origin.startsWith("http://localhost:") ||
+      origin.startsWith("http://127.0.0.1:")
+    ) {
+      return callback(null, true);
+    }
+
+    // ✅ Allow deployed frontends
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    // ❌ Block everything else
+    return callback(new Error("Not allowed by CORS"));
+  },
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
-}));
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
+
+// ✅ Use the SAME CORS options for preflight
+app.options("*", cors(corsOptions));
 
 app.use(express.json());
 
@@ -72,20 +87,22 @@ app.get("/api/protected", authenticateToken, (req, res) => {
   });
 });
 
-// Role-gated routes
-app.get("/api/admin-only",
+app.get(
+  "/api/admin-only",
   authenticateToken,
   authorizeRole("Admin"),
   (req, res) => res.json({ message: "Welcome, Admin!" })
 );
 
-app.get("/api/staff-only",
+app.get(
+  "/api/staff-only",
   authenticateToken,
   authorizeRole("Admin", "Staff"),
   (req, res) => res.json({ message: "Welcome, Staff or Admin!" })
 );
 
-app.get("/api/public-user",
+app.get(
+  "/api/public-user",
   authenticateToken,
   authorizeRole("Public", "Admin", "Staff"),
   (req, res) => res.json({ message: "Welcome, logged-in user!" })

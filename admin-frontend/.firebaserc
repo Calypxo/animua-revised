@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "animua-angelescity"
+  },
+  "targets": {
+    "animua-angelescity": {
+      "hosting": {
+        "admin": [
+          "animua-admin"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
