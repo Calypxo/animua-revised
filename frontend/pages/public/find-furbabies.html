@@ -206,59 +206,80 @@
 </footer>
 
   <!-- Pet Profile Modal -->
-  <div class="modal-overlay" id="profileModal">
-    <div class="modal-panel pet-profile-panel">
-      <button class="modal-close" data-close="profileModal">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
+  <!-- Pet Profile Modal -->
+<div class="modal-overlay" id="profileModal">
+  <div class="modal-panel pet-profile-panel redesigned-profile-modal">
+    <button class="modal-close profile-close-btn" data-close="profileModal">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
 
-      <div class="pet-profile-grid">
-        <div class="pet-profile-image-wrap">
-          <img src="" alt="" id="profileImage">
+    <div class="profile-hero">
+      <div class="profile-hero-image-wrap">
+        <img src="" alt="" id="profileImage" class="profile-hero-image">
+        <span class="profile-type-badge" id="profileType">Dog</span>
+      </div>
+
+      <div class="profile-hero-content">
+        <div class="profile-title-wrap">
+          <h2 id="profileName">Buddy</h2>
+          <span class="profile-status-pill" id="profileStatus">Ready for Adoption</span>
         </div>
 
-        <div class="pet-profile-content">
-          <span class="profile-type" id="profileType">Dog</span>
-          <h2 id="profileName">Buddy</h2>
-          <p class="profile-description" id="profileDescription"></p>
+        <p class="profile-short-description" id="profileDescription">
+          This rescued pet is looking for a loving home.
+        </p>
 
-          <div class="profile-info-grid">
-            <div class="profile-info-card">
-              <small>Age</small>
-              <strong id="profileAge"></strong>
-            </div>
-            <div class="profile-info-card">
-              <small>Sex</small>
-              <strong id="profileSex"></strong>
-            </div>
-            <div class="profile-info-card">
-              <small>Size</small>
-              <strong id="profileSize"></strong>
-            </div>
-            <div class="profile-info-card">
-              <small>Status</small>
-              <strong id="profileStatus"></strong>
-            </div>
+        <div class="profile-meta-grid">
+          <div class="profile-meta-card">
+            <span class="meta-label">Age</span>
+            <strong id="profileAge">Unknown</strong>
           </div>
 
-          <div class="profile-section">
-            <h4>Personality</h4>
-            <div class="profile-traits" id="profileTraits"></div>
+          <div class="profile-meta-card">
+            <span class="meta-label">Sex</span>
+            <strong id="profileSex">Unknown</strong>
           </div>
 
-          <div class="profile-section">
+          <div class="profile-meta-card">
+            <span class="meta-label">Size</span>
+            <strong id="profileSize">Unknown</strong>
+          </div>
+        </div>
+
+        <div class="profile-highlight-box">
+          <div class="profile-highlight-head">
+            <i class="fa-solid fa-heart"></i>
             <h4>Best Match</h4>
-            <p id="profileMatch"></p>
           </div>
-
-          <div class="profile-actions">
-            <button class="btn primary-btn" id="profileAdoptBtn">Adopt Now</button>
-            <button class="btn secondary-btn" data-close="profileModal">Close</button>
-          </div>
+          <p id="profileMatch">
+            Best for adopters ready to provide a safe, caring, and responsible home.
+          </p>
         </div>
       </div>
     </div>
+
+    <div class="profile-body-sections">
+      <div class="profile-section-card">
+        <div class="profile-section-head">
+          <i class="fa-solid fa-paw"></i>
+          <h4>Personality Traits</h4>
+        </div>
+        <div class="profile-traits modern-traits" id="profileTraits"></div>
+      </div>
+    </div>
+
+    <div class="profile-actions redesigned-profile-actions">
+      <button class="btn primary-btn" id="profileAdoptBtn">
+        <i class="fa-solid fa-heart-circle-check"></i>
+        Adopt This Pet
+      </button>
+      <button class="btn secondary-btn" data-close="profileModal">
+        <i class="fa-solid fa-xmark"></i>
+        Close
+      </button>
+    </div>
   </div>
+</div>
 
   <!-- Adopt Form Modal -->
   <div class="modal-overlay" id="adoptModal">

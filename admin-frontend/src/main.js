@@ -5,7 +5,7 @@ import { handleLogin }        from "./auth/login.js";
 // SECURITY TOGGLE — mirrors IS_INSECURE_MODE in the backend
 // false = SECURE (Phase 4)
 // true  = INSECURE (Phase 3)
-// render: https://animua-backend.onrender.com "https://animua-backend.onrender.com/api"
+// render: https://animua-backend.onrender.com 
 // local:   http://localhost:5000
 // =============================================================================
 const IS_FRONTEND_INSECURE = false;
