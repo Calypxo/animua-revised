@@ -90,7 +90,7 @@
         </p>
 
         <div class="finder-actions">
-          <a href="/pages/public/quizLanding.html">Take the Compatibility Quiz</a>
+          <a href="/pages/public/quizLanding.html" class="btn primary-btn">Take the Compatibility Quiz</a>
           <a href="#browse-pets" class="btn secondary-btn">Browse All Pets</a>
         </div>
 
@@ -208,21 +208,23 @@
   <!-- Pet Profile Modal -->
   <!-- Pet Profile Modal -->
 <div class="modal-overlay" id="profileModal">
-  <div class="modal-panel pet-profile-panel redesigned-profile-modal">
+  <div class="redesigned-profile-modal">
     <button class="modal-close profile-close-btn" data-close="profileModal">
       <i class="fa-solid fa-xmark"></i>
     </button>
 
     <div class="profile-hero">
       <div class="profile-hero-image-wrap">
-        <img src="" alt="" id="profileImage" class="profile-hero-image">
-        <span class="profile-type-badge" id="profileType">Dog</span>
+         <img src="" alt="" id="profileImage" class="profile-hero-image">
+         <span class="profile-type-badge" id="profileType">Dog</span>
+         <span class="profile-status-pill" id="profileStatus">Ready for Adoption</span>
+
       </div>
 
       <div class="profile-hero-content">
         <div class="profile-title-wrap">
           <h2 id="profileName">Buddy</h2>
-          <span class="profile-status-pill" id="profileStatus">Ready for Adoption</span>
+          
         </div>
 
         <p class="profile-short-description" id="profileDescription">
@@ -502,9 +504,10 @@
   </div>
 </div>
 
-
   <script type="module" src="../../src/public/js/public-ui.js"></script>
   <script type="module" src="../../src/public/js/find-furbabies.js"></script>
 <script type="module" src="../../src/auth/authModal.js"></script>
+
+
 </body>
 </html>

@@ -429,17 +429,6 @@ function syncWelcomeName() {
   if (el) el.textContent = name.split(" ")[0] || name;
 }
 
-/* ── Sidebar toggle ────────────────────────────────── */
-function bindSidebarToggle() {
-  const btn = document.getElementById("sidebarToggle");
-  if (!btn) return;
-  btn.addEventListener("click", () => {
-    const sidebar = document.getElementById("sidebar");
-    const mobileToggle = document.getElementById("mobile-nav-toggle");
-    if (window.innerWidth <= 768 && mobileToggle) { mobileToggle.click(); return; }
-    if (sidebar) sidebar.classList.toggle("collapsed");
-  });
-}
 
 /* ── Global search ─────────────────────────────────── */
 function bindSearch() {
@@ -535,9 +524,8 @@ function populateKPIs(stats) {
 async function initDashboard() {
   try {
     await protectManagementPage();
-    loadSidebar();
-    renderTopbarUser();
-    bindSidebarToggle();
+    renderTopbarUser(); // ← topbar first so #sidebarToggle exists
+    loadSidebar();  
     setLiveDate();
     syncWelcomeName();
     bindSearch();

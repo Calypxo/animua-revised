@@ -593,25 +593,13 @@ function bindButtons() {
   });
 }
 
-function bindSidebarToggle() {
-  const toggleBtn = getEl("sidebarToggle");
-  if (!toggleBtn) return;
-
-  toggleBtn.addEventListener("click", () => {
-    const mobileToggle = document.getElementById("mobile-nav-toggle");
-    const sidebar = document.getElementById("sidebar");
-
-    if (sidebar) sidebar.classList.toggle("open");
-    if (mobileToggle) mobileToggle.classList.toggle("active");
-  });
-}
 
 async function initArchivedRecordsPage() {
   try {
     await protectManagementPage();
-    loadSidebar();
     renderTopbarUser();
-    bindSidebarToggle();
+    loadSidebar();
+
 
     seedRecords();
     state.records = getRecords();

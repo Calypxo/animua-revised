@@ -140,6 +140,14 @@ function renderPets(list) {
 
     petsGrid.appendChild(card);
 
+    // add this block
+    const img = card.querySelector('.pet-card-image img');
+    img.addEventListener('load', function() {
+      this.style.objectPosition = this.naturalHeight > this.naturalWidth
+        ? 'center top'
+        : 'center 30%';
+    });
+
     setTimeout(() => {
       card.classList.add("show");
     }, index * 20);
@@ -205,6 +213,7 @@ function openProfileModal(pet) {
 
   currentPetForAdoption = pet;
   profileImage.src = pet.image;
+  profileImage.style.objectPosition = 'center 30%';
   profileImage.alt = pet.name;
  profileType.textContent =
   pet.type === "dog" ? "Dog" :

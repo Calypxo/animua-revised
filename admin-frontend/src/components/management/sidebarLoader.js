@@ -14,14 +14,8 @@ export function loadSidebar() {
     .slice(0, 2);
 
   container.innerHTML = `
-    <!-- Mobile hamburger (hidden on desktop via CSS) -->
-    <button class="mobile-nav-toggle" id="mobile-nav-toggle" aria-label="Open menu">
-      <i class="bi bi-list"></i>
-    </button>
-
-    <!-- Dim overlay for mobile -->
+    
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
-
     <aside class="sidebar" id="sidebar">
 
       <!-- Logo -->
@@ -125,7 +119,6 @@ export function loadSidebar() {
 
   setActiveNav();
   setupResponsiveLogic();
-  setupCollapseToggle();
   setupLogout();
 }
 
@@ -144,57 +137,47 @@ function setActiveNav() {
 
 /* ── Mobile overlay open/close ──────────────────────── */
 function setupResponsiveLogic() {
-  const toggle  = document.getElementById("mobile-nav-toggle");
+  const toggle  = document.getElementById("sidebarToggle");
   const sidebar = document.getElementById("sidebar");
   const overlay = document.getElementById("sidebar-overlay");
+  const container = document.getElementById("sidebar-container");
 
-  if (!toggle || !sidebar || !overlay) return;
+  if (!toggle || !sidebar) return;
 
-  toggle.onclick = () => {
-    const open = sidebar.classList.toggle("mobile-show");
-    overlay.classList.toggle("active", open);
-    toggle.setAttribute("aria-expanded", open);
-  };
+  toggle.addEventListener("click", () => {
+    if (window.innerWidth <= 768) {
+      // ── MOBILE: slide in/out ──
+      const open = sidebar.classList.toggle("mobile-show");
+      overlay?.classList.toggle("active", open);
+      toggle.setAttribute("aria-expanded", String(open));
+    } else {
+      // ── DESKTOP: collapse/expand ──
+      const collapsed = sidebar.classList.toggle("collapsed");
+      if (container) {
+        container.style.width    = collapsed ? "64px" : "";
+        container.style.minWidth = collapsed ? "64px" : "";
+      }
+    }
+  });
 
-  overlay.onclick = () => {
+  // Close sidebar when tapping overlay on mobile
+  overlay?.addEventListener("click", () => {
     sidebar.classList.remove("mobile-show");
     overlay.classList.remove("active");
     toggle.setAttribute("aria-expanded", "false");
-  };
+  });
 
-  // Close on Escape
+  // Close on Escape key (mobile)
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && sidebar.classList.contains("mobile-show")) {
       sidebar.classList.remove("mobile-show");
-      overlay.classList.remove("active");
+      overlay?.classList.remove("active");
     }
   });
 }
 
-/* ── Desktop collapse toggle (via sidebarToggle btn) ── */
 function setupCollapseToggle() {
-  // The topbar's #sidebarToggle button triggers collapse on desktop
-  const toggleBtn = document.getElementById("sidebarToggle");
-  const sidebar   = document.getElementById("sidebar");
-  const container = document.getElementById("sidebar-container");
-
-  if (!toggleBtn || !sidebar || !container) return;
-
-  // Only wire collapse on desktop (>768px)
-  toggleBtn.addEventListener("click", () => {
-    if (window.innerWidth <= 768) return; // mobile handled by setupResponsiveLogic
-
-    const collapsed = sidebar.classList.toggle("collapsed");
-
-    // Sync container width so .stage re-flows correctly
-    if (collapsed) {
-      container.style.width    = "64px";
-      container.style.minWidth = "64px";
-    } else {
-      container.style.width    = "";
-      container.style.minWidth = "";
-    }
-  });
+  // ← DELETE everything inside here, logic moved to setupResponsiveLogic
 }
 
 /* ── Logout ─────────────────────────────────────────── */
