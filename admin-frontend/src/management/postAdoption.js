@@ -1584,25 +1584,12 @@ function bindModals() {
   });
 }
 
-function bindSidebarToggle() {
-  const toggleBtn = document.getElementById("sidebarToggle");
-  if (!toggleBtn) return;
-
-  toggleBtn.addEventListener("click", () => {
-    const mobileToggle = document.getElementById("mobile-nav-toggle");
-    const sidebar = document.getElementById("sidebar");
-
-    if (sidebar) sidebar.classList.toggle("open");
-    if (mobileToggle) mobileToggle.classList.toggle("active");
-  });
-}
 
 async function initPage() {
   try {
     await protectManagementPage();
-    loadSidebar();
     renderTopbarUser();
-    bindSidebarToggle();
+    loadSidebar();
 
     seedCases();
     bindFilters();

@@ -490,15 +490,6 @@ function bindEye(btnId, inputId) {
   });
 }
 
-/* ── Sidebar Toggle ──────────────────────────────────── */
-function bindSidebarToggle() {
-  document.getElementById("sidebarToggle")?.addEventListener("click",()=>{
-    const sb=document.getElementById("sidebar"), ct=document.getElementById("sidebar-container");
-    if(window.innerWidth<=768){document.getElementById("mobile-nav-toggle")?.click();return;}
-    const c=sb?.classList.toggle("collapsed");
-    if(ct){ct.style.width=c?"64px":"";ct.style.minWidth=c?"64px":"";}
-  });
-}
 
 /* ── Role badge CSS for Public (add to page) ─────────── */
 function injectPublicRoleStyle() {
@@ -517,7 +508,10 @@ async function init() {
       return;
     }
     injectPublicRoleStyle();
-    loadSidebar(); renderTopbarUser(); bindSidebarToggle(); bindTabs();
+    renderTopbarUser();
+    loadSidebar(); 
+
+    bindTabs();
 
     await loadUsers();
 

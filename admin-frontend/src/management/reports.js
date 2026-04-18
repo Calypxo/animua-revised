@@ -510,16 +510,6 @@ function showToast(type, msg) {
   t.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),4000);
 }
 
-/* ══════════════════════════════════════════════════════
-   SIDEBAR
-══════════════════════════════════════════════════════ */
-function bindSidebarToggle() {
-  document.getElementById("sidebarToggle")?.addEventListener("click", () => {
-    const sb=document.getElementById("sidebar"),ct=document.getElementById("sidebar-container");
-    if(window.innerWidth<=768){document.getElementById("mobile-nav-toggle")?.click();return;}
-    const c=sb?.classList.toggle("collapsed"); if(ct){ct.style.width=c?"64px":"";ct.style.minWidth=c?"64px":"";}
-  });
-}
 
 /* ══════════════════════════════════════════════════════
    INIT
@@ -527,7 +517,9 @@ function bindSidebarToggle() {
 async function init() {
   try {
     await protectManagementPage();
-    loadSidebar(); renderTopbarUser(); bindSidebarToggle();
+    renderTopbarUser();
+    loadSidebar(); 
+
     bindTabs();
     bindExport();
     // Build overview charts (first active tab) after paint
