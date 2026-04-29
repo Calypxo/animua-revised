@@ -276,8 +276,61 @@ if (registerForm) {
   registerForm.addEventListener("submit", handleRegistration);
 }
 
+const commonPasswords = [
+  "123456",
+  "12345678",
+  "password",
+  "password123",
+  "qwerty",
+  "admin",
+  "111111",
+  "abc123"
+];
+
+function setupPasswordStrengthMeter() {
+  const regPasswordInput = document.getElementById("reg-password");
+  const strengthText = document.getElementById("password-strength-text");
+
+  if (!regPasswordInput || !strengthText) return;
+
+  regPasswordInput.addEventListener("input", () => {
+    const password = regPasswordInput.value;
+
+    if (!password) {
+      strengthText.textContent = "";
+      return;
+    }
+
+    if (commonPasswords.includes(password.toLowerCase())) {
+      strengthText.textContent = "Very weak password";
+      strengthText.style.color = "red";
+      return;
+    }
+
+    let score = 0;
+
+    if (password.length >= 8) score++;
+    if (/[A-Z]/.test(password)) score++;
+    if (/[a-z]/.test(password)) score++;
+    if (/\d/.test(password)) score++;
+    if (/[@$!%*?&]/.test(password)) score++;
+
+    if (score <= 2) {
+      strengthText.textContent = "Weak password";
+      strengthText.style.color = "red";
+    } else if (score <= 4) {
+      strengthText.textContent = "Medium password";
+      strengthText.style.color = "orange";
+    } else {
+      strengthText.textContent = "Strong password";
+      strengthText.style.color = "green";
+    }
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   setupPasswordToggles();
+  setupPasswordStrengthMeter();
   setupRevealAnimations();
   updateAuthUI();
   showWelcomeToastIfNeeded();
