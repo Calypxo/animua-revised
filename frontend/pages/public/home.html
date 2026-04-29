@@ -59,14 +59,48 @@
           <i class="fa-regular fa-user"></i>
         </a>
 
-        <div id="userLoggedInBox" class="hidden user-pill">
-          <span id="loggedUserName" class="user-pill-name"></span>
+       <div id="userLoggedInBox" class="hidden user-pill user-menu">
+  <button type="button" class="user-menu-btn" id="userMenuBtn">
+  <span class="user-avatar-mini">
+    <i class="fa-regular fa-user"></i>
+  </span>
 
-          <button id="logoutBtn" type="button" class="logout-icon-btn user-pill-logout" aria-label="Logout">
-            <i class="fa-solid fa-right-from-bracket"></i>
-          </button>
-        </div>
-      </div>
+  <span id="loggedUserName" class="user-pill-name"></span>
+
+  <span class="user-menu-chevron">
+    <i class="fa-solid fa-chevron-down"></i>
+  </span>
+</button>
+
+  <div class="user-dropdown hidden" id="userDropdown">
+  <div class="user-dropdown-head">
+    <div class="user-dropdown-avatar">
+      <i class="fa-regular fa-user"></i>
+    </div>
+
+    <div>
+      <strong id="dropdownUserName">Account</strong>
+      <small>Manage your Animua profile</small>
+    </div>
+  </div>
+
+  <button type="button" id="changeUsernameBtn">
+    <i class="fa-solid fa-pen"></i>
+    <span>Change Username</span>
+  </button>
+
+  <button type="button" id="changePasswordBtn">
+    <i class="fa-solid fa-lock"></i>
+    <span>Change Password</span>
+  </button>
+
+  <div class="user-dropdown-divider"></div>
+
+  <button type="button" id="logoutBtn" class="logout-option">
+    <i class="fa-solid fa-right-from-bracket"></i>
+    <span>Logout</span>
+  </button>
+</div>
 
       <button class="menu-toggle" id="menuToggle" aria-label="Toggle Navigation">
         <span></span>

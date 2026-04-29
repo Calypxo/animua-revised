@@ -1,6 +1,7 @@
 import Swal from "sweetalert2";
 import { handleLogin } from "../../auth/login.js";
 import { handleRegistration } from "../../auth/register.js";
+import { API_BASE_URL } from "../../utils/api.js";
 
 const menuToggle = document.getElementById("menuToggle");
 const navbar = document.getElementById("navbar");
@@ -111,6 +112,7 @@ function setupPasswordToggles() {
 }
 
 function updateAuthUI() {
+  const dropdownUserName = document.getElementById("dropdownUserName");
   const loginNavBtn = document.getElementById("loginNavBtn");
   const userLoggedInBox = document.getElementById("userLoggedInBox");
   const loggedUserName = document.getElementById("loggedUserName");
@@ -123,6 +125,7 @@ function updateAuthUI() {
     if (loginNavBtn) loginNavBtn.classList.add("hidden");
     if (userLoggedInBox) userLoggedInBox.classList.remove("hidden");
     if (loggedUserName) loggedUserName.textContent = userName;
+if (dropdownUserName) dropdownUserName.textContent = userName;
   } else {
     if (loginNavBtn) loginNavBtn.classList.remove("hidden");
     if (userLoggedInBox) userLoggedInBox.classList.add("hidden");
@@ -327,10 +330,31 @@ function setupPasswordStrengthMeter() {
     }
   });
 }
+function setupUserDropdown() {
+  const userMenuBtn = document.getElementById("userMenuBtn");
+  const userDropdown = document.getElementById("userDropdown");
+
+  if (!userMenuBtn || !userDropdown) return;
+
+  userMenuBtn.addEventListener("click", (event) => {
+    event.stopPropagation();
+    userDropdown.classList.toggle("hidden");
+  });
+
+  userDropdown.addEventListener("click", (event) => {
+    event.stopPropagation();
+  });
+
+  document.addEventListener("click", () => {
+    userDropdown.classList.add("hidden");
+  });
+}
 
 document.addEventListener("DOMContentLoaded", () => {
+  setupAccountActions();
   setupPasswordToggles();
   setupPasswordStrengthMeter();
+  setupUserDropdown();
   setupRevealAnimations();
   updateAuthUI();
   showWelcomeToastIfNeeded();
@@ -350,3 +374,139 @@ const shouldOpenAuthModal = localStorage.getItem("animua_open_auth_modal") === "
   }
   
 });
+
+function setupAccountActions() {
+  const changeUsernameBtn = document.getElementById("changeUsernameBtn");
+  const changePasswordBtn = document.getElementById("changePasswordBtn");
+
+  if (changeUsernameBtn && !changeUsernameBtn.dataset.bound) {
+    changeUsernameBtn.dataset.bound = "true";
+
+    changeUsernameBtn.addEventListener("click", async () => {
+      const currentName = localStorage.getItem("user_name") || "";
+
+      const result = await Swal.fire({
+        title: "Change Username",
+        input: "text",
+        inputValue: currentName,
+        inputPlaceholder: "Enter new username",
+        showCancelButton: true,
+        confirmButtonText: "Update",
+        cancelButtonText: "Cancel",
+        customClass: {
+          popup: "animua-popup",
+          confirmButton: "animua-confirm",
+          cancelButton: "animua-cancel"
+        },
+        buttonsStyling: false,
+        preConfirm: (value) => {
+          if (!value || value.trim().length < 2) {
+            Swal.showValidationMessage("Username must be at least 2 characters.");
+            return false;
+          }
+          return value.trim();
+        }
+      });
+
+      if (!result.isConfirmed) return;
+
+      await updateUsername(result.value);
+    });
+  }
+
+  if (changePasswordBtn && !changePasswordBtn.dataset.bound) {
+    changePasswordBtn.dataset.bound = "true";
+
+    changePasswordBtn.addEventListener("click", async () => {
+      const result = await Swal.fire({
+        title: "Change Password",
+        html: `
+          <input id="oldPassword" type="password" class="swal2-input" placeholder="Current password">
+          <input id="newPassword" type="password" class="swal2-input" placeholder="New password">
+        `,
+        showCancelButton: true,
+        confirmButtonText: "Update Password",
+        cancelButtonText: "Cancel",
+        customClass: {
+          popup: "animua-popup",
+          confirmButton: "animua-confirm",
+          cancelButton: "animua-cancel"
+        },
+        buttonsStyling: false,
+        preConfirm: () => {
+          const oldPassword = document.getElementById("oldPassword").value;
+          const newPassword = document.getElementById("newPassword").value;
+
+          if (!oldPassword || !newPassword) {
+            Swal.showValidationMessage("Please fill in both password fields.");
+            return false;
+          }
+
+          if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(newPassword)) {
+            Swal.showValidationMessage("New password must include uppercase, lowercase, number, and special character.");
+            return false;
+          }
+
+          return { oldPassword, newPassword };
+        }
+      });
+
+      if (!result.isConfirmed) return;
+
+      await updatePassword(result.value.oldPassword, result.value.newPassword);
+    });
+  }
+}
+
+async function updateUsername(newName) {
+  const token = localStorage.getItem("animua_token");
+
+  const response = await fetch(`${API_BASE_URL}/auth/update-username`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ fullName: newName })
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    Swal.fire("Error", data.message || "Failed to update username.", "error");
+    return;
+  }
+
+  localStorage.setItem("user_name", data.fullName || newName);
+
+  const loggedUserName = document.getElementById("loggedUserName");
+  const dropdownUserName = document.getElementById("dropdownUserName");
+
+  if (loggedUserName) loggedUserName.textContent = data.fullName || newName;
+  if (dropdownUserName) dropdownUserName.textContent = data.fullName || newName;
+
+  Swal.fire("Updated", "Your username has been updated.", "success");
+}
+
+async function updatePassword(oldPassword, newPassword) {
+  const token = localStorage.getItem("animua_token");
+
+  const response = await fetch(`${API_BASE_URL}/auth/change-password`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ oldPassword, newPassword })
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    Swal.fire("Error", data.message || "Failed to update password.", "error");
+    return;
+  }
+
+  Swal.fire("Updated", "Your password has been changed.", "success");
+}
+

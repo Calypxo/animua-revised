@@ -988,3 +988,260 @@ body.auth-open {
 #reg-password {
   padding-right: 52px !important;
 }
+
+.user-menu {
+  position: relative;
+}
+
+.user-menu-btn {
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: inherit;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.user-dropdown {
+  position: absolute;
+  top: 115%;
+  right: 0;
+  width: 230px;
+  background: #fff;
+  border-radius: 18px;
+  padding: 10px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.16);
+  z-index: 9999;
+}
+
+.user-dropdown {
+  position: absolute;
+  top: 120%;
+  right: 0;
+  width: 280px;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(150, 60, 45, 0.12);
+  border-radius: 26px;
+  padding: 14px;
+  box-shadow: 0 22px 55px rgba(80, 35, 25, 0.18);
+  z-index: 9999;
+  animation: dropdownPop 0.2s ease;
+}
+
+@keyframes dropdownPop {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.user-dropdown button {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 15px 16px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-weight: 800;
+  font-size: 15px;
+  color: #3f302c;
+  cursor: pointer;
+  text-align: left;
+  transition: 0.2s ease;
+}
+
+.user-dropdown button i {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  color: #9d261f;
+}
+
+.user-dropdown button:hover {
+  background: linear-gradient(135deg, #fff1ec, #fff8f5);
+  transform: translateX(4px);
+  color: #92221c;
+}
+
+.user-dropdown-divider {
+  height: 1px;
+  background: #f0ded8;
+  margin: 8px 4px;
+}
+
+.logout-option {
+  margin-top: 6px;
+  background: linear-gradient(135deg, #9d261f, #c2642e) !important;
+  color: white !important;
+}
+
+.logout-option i {
+  color: white !important;
+}
+
+.logout-option:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 10px 25px rgba(157, 38, 31, 0.28);
+}
+
+.user-pill {
+  position: relative;
+  background: linear-gradient(135deg, #fffaf7, #fff3ee);
+  border: 1px solid rgba(137, 35, 28, 0.12);
+  border-radius: 999px;
+  box-shadow: 0 10px 24px rgba(100, 35, 20, 0.08);
+}
+
+.user-menu-btn {
+  border: none;
+  background: transparent;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #86251f;
+  font-weight: 900;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.user-avatar-mini {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #98251f, #c6632d);
+  color: white;
+}
+
+.user-dropdown {
+  position: absolute;
+  right: 0;
+  top: 118%;
+  width: 310px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(137, 35, 28, 0.12);
+  border-radius: 28px;
+  padding: 14px;
+  box-shadow: 0 24px 60px rgba(63, 28, 20, 0.18);
+  z-index: 9999;
+}
+
+.user-dropdown-head {
+  padding: 14px 16px 12px;
+}
+
+.user-dropdown-head strong {
+  display: block;
+  color: #86251f;
+  font-size: 18px;
+}
+
+.user-dropdown-head small {
+  color: #84736e;
+  font-weight: 600;
+}
+
+.user-dropdown button {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 14px 14px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-weight: 800;
+  color: #3f302c;
+  cursor: pointer;
+  text-align: left;
+}
+
+.user-dropdown button:hover {
+  background: #fff0ea;
+}
+
+.user-dropdown button i {
+  width: 38px;
+  height: 38px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: #fff1ec;
+  color: #9d261f;
+}
+
+.user-dropdown-divider {
+  height: 1px;
+  background: #f0ded8;
+  margin: 8px 4px;
+}
+
+.logout-option {
+  background: linear-gradient(135deg, #9d261f, #c2642e) !important;
+  color: white !important;
+}
+
+.logout-option i {
+  background: rgba(255,255,255,0.18) !important;
+  color: white !important;
+}
+
+.account-modal-form {
+  text-align: left;
+  margin-top: 10px;
+}
+
+.account-modal-subtitle {
+  color: #76635d;
+  font-size: 14px;
+  margin-bottom: 18px;
+  text-align: center;
+}
+
+.account-modal-field {
+  margin-bottom: 14px;
+}
+
+.account-modal-field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+  color: #7f251f;
+  margin-bottom: 7px;
+}
+
+.account-modal-field input {
+  width: 100%;
+  border: 1px solid #ead9d3;
+  border-radius: 16px;
+  padding: 14px 15px;
+  font-size: 15px;
+  outline: none;
+  background: #fffaf7;
+}
+
+.account-modal-field input:focus {
+  border-color: #9d261f;
+  box-shadow: 0 0 0 4px rgba(157, 38, 31, 0.1);
+}
+
+.account-password-hint {
+  display: block;
+  color: #8b7770;
+  font-size: 12px;
+  line-height: 1.4;
+}
