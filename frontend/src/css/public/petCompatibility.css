@@ -644,3 +644,170 @@ body {
   .phase-intro  { padding: 16px 18px; }
   .question-card, .filter-section { padding: 20px 18px; }
 }
+
+/* =========================
+   ANIMUA PET COMPATIBILITY THEME
+========================= */
+:root {
+  --animua-red: #D94A4A;
+  --animua-red-dark: #A83232;
+  --animua-red-soft: #FFE3E3;
+  --animua-red-light: #FFF6F6;
+  --animua-cream: #FFF8F0;
+  --animua-white: #FFFFFF;
+  --animua-text: #2B2B2B;
+  --animua-muted: #777777;
+
+  --crimson: var(--animua-red);
+  --crimson-dark: var(--animua-red-dark);
+  --crimson-soft: var(--animua-red-soft);
+  --crimson-mid: rgba(217, 74, 74, 0.1);
+  --dark: var(--animua-text);
+  --gray: var(--animua-muted);
+  --gray-2: #9B8585;
+  --white: var(--animua-white);
+  --cream: var(--animua-cream);
+  --cream-2: var(--animua-red-light);
+  --border: rgba(217, 74, 74, 0.13);
+  --border-hover: rgba(217, 74, 74, 0.28);
+  --shadow-sm: 0 14px 34px rgba(168, 50, 50, 0.09);
+  --shadow-md: 0 20px 46px rgba(168, 50, 50, 0.12);
+  --shadow-lg: 0 28px 70px rgba(168, 50, 50, 0.14);
+  --radius-sm: 22px;
+  --radius-md: 28px;
+  --radius-lg: 34px;
+}
+
+body {
+  background:
+    radial-gradient(circle at 8% 10%, rgba(255, 227, 227, 0.84), transparent 30%),
+    radial-gradient(circle at 92% 22%, rgba(255, 248, 240, 0.92), transparent 32%),
+    linear-gradient(180deg, var(--animua-red-light), var(--animua-cream) 58%, #fff);
+}
+
+.quiz-header {
+  background: rgba(255, 255, 255, 0.9);
+  border-bottom-color: rgba(217, 74, 74, 0.13);
+}
+
+.header-brand-dot,
+.progress-fill,
+.phase-badge,
+.btn-next,
+.btn-submit,
+.option-btn.selected,
+.select-tile.selected,
+.toggle-tile.selected-no,
+.tip-card {
+  background: linear-gradient(135deg, var(--animua-red), var(--animua-red-dark));
+}
+
+.phase-intro,
+.question-card,
+.filter-section,
+.progress-card,
+.answers-card,
+.complete-card {
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(217, 74, 74, 0.13);
+  box-shadow: var(--shadow-sm);
+}
+
+.phase-intro {
+  border-left-color: var(--animua-red);
+}
+
+.phase-intro-icon,
+.feature-icon {
+  border-radius: 50%;
+}
+
+.phase-intro-title,
+.q-text,
+.progress-card-title,
+.answers-card-title,
+.complete-title {
+  color: var(--animua-text);
+  letter-spacing: 0;
+}
+
+.phase-intro-kicker,
+.q-num,
+#progressPercent,
+.answer-chip-val,
+.complete-title em {
+  color: var(--animua-red-dark);
+}
+
+.phase-intro-desc,
+.q-hint,
+.option-label,
+.select-tile-label,
+.answer-chip-key,
+.complete-sub {
+  color: var(--animua-muted);
+}
+
+.option-btn,
+.select-tile,
+.toggle-tile,
+.answer-chip,
+.score-pill {
+  background: var(--animua-red-light);
+  border-color: rgba(217, 74, 74, 0.13);
+  border-radius: 24px;
+}
+
+.option-btn:hover,
+.select-tile:hover,
+.toggle-tile:hover,
+.answer-chip:hover {
+  background: var(--animua-red-soft);
+  border-color: rgba(217, 74, 74, 0.24);
+}
+
+.option-num,
+.select-tile:hover .select-tile-label,
+.option-btn:hover .option-num {
+  color: var(--animua-red-dark);
+}
+
+.question-card.answered,
+.filter-section.answered {
+  border-left: 5px solid var(--animua-red);
+}
+
+.phase-step.active {
+  background: var(--animua-red-soft);
+  color: var(--animua-red-dark);
+}
+
+.phase-step.active .phase-step-dot {
+  background: var(--animua-red);
+  border-color: var(--animua-red);
+}
+
+.btn-prev {
+  background: var(--animua-white);
+  border-color: rgba(217, 74, 74, 0.16);
+  border-radius: 999px;
+}
+
+.btn-next,
+.btn-submit {
+  border-radius: 999px;
+  box-shadow: 0 14px 28px rgba(217, 74, 74, 0.24);
+}
+
+.complete-card {
+  border-radius: 42px;
+}
+
+@media (max-width: 600px) {
+  .question-card,
+  .filter-section,
+  .phase-intro,
+  .complete-card {
+    border-radius: 28px;
+  }
+}
