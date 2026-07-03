@@ -10,106 +10,116 @@
   <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="stylesheet" href="../../src/css/public/home.css">
-<link rel="stylesheet" href="../../src/css/global.css">
+  <link rel="stylesheet" href="../../src/css/global.css">
 </head>
 <body>
 
   <!-- Header -->
- <header class="header" id="home">
-  <div class="container nav-shell">
-    <a href="#home" class="logo">
-      <div class="logo-icon">
-        <i class="fa-solid fa-heart"></i>
-        <i class="fa-solid fa-paw paw-mini"></i>
+  <header class="header" id="home">
+    <div class="top-mini-bar">
+      <div class="container top-mini-inner">
+        <span>Angeles City Veterinary Office &bull; Animal Shelter Public Portal</span>
       </div>
-      <div class="logo-text">
-        <h2>Animua</h2>
-        <p>Connect. Learn. Adopt.</p>
-      </div>
-    </a>
+    </div>
 
-    <nav class="navbar" id="navbar">
-      <a href="home.html" class="active">Home</a>
-      <a href="find-furbabies.html">Find Furbabies</a>
-      <a href="surrender.html">Surrender</a>
-      <a href="contact.html">Contact Us</a>
-    </nav>
-
-    <div class="nav-actions">
-      <div class="user-actions-wrap">
-        <div class="notification-wrap">
-          <button class="notification-btn" id="notificationBtn" aria-label="Notifications">
-            <i class="fa-regular fa-bell"></i>
-            <span class="notification-dot"></span>
-          </button>
-
-          <div class="notification-popup" id="notificationPopup">
-            <div class="notification-popup-head">
-              <h4>Notifications</h4>
-            </div>
-            <ul class="notification-list">
-              <li>New animals were recently added for adoption.</li>
-              <li>Please complete forms carefully before submission.</li>
-              <li>Shelter announcements will appear here.</li>
-            </ul>
+    <div class="main-nav-wrap">
+      <div class="container nav-shell">
+        <a href="#home" class="logo">
+          <div class="logo-icon">
+            <i class="fa-solid fa-heart"></i>
+            <i class="fa-solid fa-paw paw-mini"></i>
           </div>
-        </div>
-
-        <a href="#" id="loginNavBtn" class="login-btn" aria-label="Login">
-          <i class="fa-regular fa-user"></i>
+          <div class="logo-text">
+            <h2>Animua</h2>
+            <p>Connect. Learn. Adopt.</p>
+          </div>
         </a>
 
-       <div id="userLoggedInBox" class="hidden user-pill user-menu">
-  <button type="button" class="user-menu-btn" id="userMenuBtn">
-  <span class="user-avatar-mini">
-    <i class="fa-regular fa-user"></i>
-  </span>
+        <nav class="navbar" id="navbar">
+          <a href="home.html" class="active">Home</a>
+          <a href="find-furbabies.html">Find Furbabies</a>
+          <a href="surrender.html">Surrender</a>
+          <a href="contact.html">Contact Us</a>
+        </nav>
 
-  <span id="loggedUserName" class="user-pill-name"></span>
+        <div class="nav-actions">
+          <div class="user-actions-wrap">
+            <div class="notification-wrap">
+              <button class="notification-btn" id="notificationBtn" aria-label="Notifications">
+                <i class="fa-regular fa-bell"></i>
+                <span class="notification-dot"></span>
+              </button>
 
-  <span class="user-menu-chevron">
-    <i class="fa-solid fa-chevron-down"></i>
-  </span>
-</button>
+              <div class="notification-popup" id="notificationPopup">
+                <div class="notification-popup-head">
+                  <h4>Notifications</h4>
+                </div>
+                <ul class="notification-list">
+                  <li>New animals were recently added for adoption.</li>
+                  <li>Please complete forms carefully before submission.</li>
+                  <li>Shelter announcements will appear here.</li>
+                </ul>
+              </div>
+            </div>
 
-  <div class="user-dropdown hidden" id="userDropdown">
-  <div class="user-dropdown-head">
-    <div class="user-dropdown-avatar">
-      <i class="fa-regular fa-user"></i>
+            <a href="#" id="loginNavBtn" class="login-btn" aria-label="Login">
+              <i class="fa-regular fa-user"></i>
+            </a>
+
+            <div id="userLoggedInBox" class="hidden user-pill user-menu">
+              <button type="button" class="user-menu-btn" id="userMenuBtn">
+                <span class="user-avatar-mini">
+                  <i class="fa-regular fa-user"></i>
+                </span>
+
+                <span id="loggedUserName" class="user-pill-name"></span>
+
+                <span class="user-menu-chevron">
+                  <i class="fa-solid fa-chevron-down"></i>
+                </span>
+              </button>
+
+              <div class="user-dropdown hidden" id="userDropdown">
+                <div class="user-dropdown-head">
+                  <div class="user-dropdown-avatar">
+                    <i class="fa-regular fa-user"></i>
+                  </div>
+
+                  <div>
+                    <strong id="dropdownUserName">Account</strong>
+                    <small>Manage your Animua profile</small>
+                  </div>
+                </div>
+
+                <button type="button" id="changeUsernameBtn">
+                  <i class="fa-solid fa-pen"></i>
+                  <span>Change Username</span>
+                </button>
+
+                <button type="button" id="changePasswordBtn">
+                  <i class="fa-solid fa-lock"></i>
+                  <span>Change Password</span>
+                </button>
+
+                <div class="user-dropdown-divider"></div>
+
+                <button type="button" id="logoutBtn" class="logout-option">
+                  <i class="fa-solid fa-right-from-bracket"></i>
+                  <span>Logout</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <button class="menu-toggle" id="menuToggle" aria-label="Toggle Navigation">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        </div>
+      </div>
     </div>
-
-    <div>
-      <strong id="dropdownUserName">Account</strong>
-      <small>Manage your Animua profile</small>
-    </div>
-  </div>
-
-  <button type="button" id="changeUsernameBtn">
-    <i class="fa-solid fa-pen"></i>
-    <span>Change Username</span>
-  </button>
-
-  <button type="button" id="changePasswordBtn">
-    <i class="fa-solid fa-lock"></i>
-    <span>Change Password</span>
-  </button>
-
-  <div class="user-dropdown-divider"></div>
-
-  <button type="button" id="logoutBtn" class="logout-option">
-    <i class="fa-solid fa-right-from-bracket"></i>
-    <span>Logout</span>
-  </button>
-</div>
-
-      <button class="menu-toggle" id="menuToggle" aria-label="Toggle Navigation">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-    </div>
-  </div>
-</header>
+  </header>
 
   <!-- Hero -->
   <section class="hero" id="home">
@@ -119,14 +129,14 @@
         <span class="hero-badge-icon">
   <i class="fa-solid fa-paw"></i>
 </span>
-        <span class="hero-badge-text">Animua Adoption Journey</span>
+        <span class="hero-badge-text">Angeles City Animal Welfare Portal</span>
       </div>
 
-      <h1>Your New Best Friend is Just a Click Away.</h1>
+      <h1>Adopt, Report, and Support Animal Welfare in Angeles City</h1>
 
       <p>
-        Bridging the gap between rescued animals and loving homes through smart,
-        digital adoption tracking.
+        ANIMUA helps connect rescued animals with responsible adopters through
+        digital records, adoption tracking, and compatibility matching.
       </p>
 
       <div class="hero-actions">
@@ -141,20 +151,52 @@
     <div class="hero-right reveal">
       <div class="hero-right-bg"></div>
 
-      <div class="hero-pattern hero-pattern-1">
-        <i class="fa-solid fa-paw"></i>
-      </div>
-      <div class="hero-pattern hero-pattern-2">
-        <i class="fa-solid fa-paw"></i>
-      </div>
-      <div class="hero-pattern hero-pattern-3">
-        <i class="fa-solid fa-paw"></i>
+      <div class="hero-visual-note">
+        <strong>Public Shelter Services</strong>
+        <span>Adoption, matching, reporting, and surrender requests in one system.</span>
       </div>
 
-     <img src="../../src/assets/images/style1.png" alt="Dog with stylish look" class="hero-main-img">
+      <img src="../../src/assets/images/style1.png" alt="Dog with stylish look" class="hero-main-img">
     </div>
   </div>
 </section>
+
+  <!-- Services -->
+  <section class="services-section" aria-label="Animua public services">
+    <div class="container">
+      <div class="section-heading reveal">
+        <span class="section-label">Public Services</span>
+        <h2>Choose the service you need</h2>
+        <p>Access the core shelter workflows for adoption, matching, reporting, and intake support.</p>
+      </div>
+
+      <div class="service-grid">
+        <a href="find-furbabies.html" class="service-card reveal">
+          <span class="service-icon"><i class="fa-solid fa-paw"></i></span>
+          <h3>Find Furbabies</h3>
+          <p>View adoptable shelter animals and review their basic profiles.</p>
+        </a>
+
+        <a href="/pages/public/quizLanding.html" class="service-card reveal">
+          <span class="service-icon"><i class="fa-solid fa-clipboard-check"></i></span>
+          <h3>Compatibility Quiz</h3>
+          <p>Answer a short guide to find animals that fit your home and routine.</p>
+        </a>
+
+        <a href="contact.html" class="service-card reveal">
+          <span class="service-icon"><i class="fa-solid fa-location-dot"></i></span>
+          <h3>Report Stray</h3>
+          <p>Reach the veterinary office for stray animal concerns or urgent reports.</p>
+        </a>
+
+        <a href="surrender.html" class="service-card reveal">
+          <span class="service-icon"><i class="fa-solid fa-file-signature"></i></span>
+          <h3>Surrender Request</h3>
+          <p>Read the requirements before submitting an animal surrender request.</p>
+        </a>
+      </div>
+    </div>
+  </section>
 
   <!-- About -->
   <section class="about-section" id="about">
@@ -215,6 +257,7 @@
     <img src="../../src/assets/images/6.jpg" alt="Another pet">
   </div>
 </div>
+      </div>
     </div>
   </section>
 
