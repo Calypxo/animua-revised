@@ -72,36 +72,69 @@ export async function handleRegistration(event) {
     });
     return;
   }
+if (!password) {
+  closeModal(authModal);
+  Swal.fire({
+    icon: "warning",
+    title: "Missing Password",
+    text: "Please enter your password.",
+    customClass: {
+      popup: "animua-popup",
+      confirmButton: "animua-confirm"
+    },
+    buttonsStyling: false
+  });
+  return;
+}
 
-  if (!password) {
-    closeModal(authModal);
-    Swal.fire({
-      icon: "warning",
-      title: "Missing Password",
-      text: "Please enter your password.",
-      customClass: {
-        popup: "animua-popup",
-        confirmButton: "animua-confirm"
-      },
-      buttonsStyling: false
-    });
-    return;
-  }
+if (password.length < 6) {
+  closeModal(authModal);
+  Swal.fire({
+    icon: "warning",
+    title: "Invalid Password",
+    text: "Password must be at least 6 characters.",
+    customClass: {
+      popup: "animua-popup",
+      confirmButton: "animua-confirm"
+    },
+    buttonsStyling: false
+  });
+  return;
+}
 
-  if (password.length < 6) {
-    closeModal(authModal);
-    Swal.fire({
-      icon: "warning",
-      title: "Invalid Password",
-      text: "Password must be at least 6 characters.",
-      customClass: {
-        popup: "animua-popup",
-        confirmButton: "animua-confirm"
-      },
-      buttonsStyling: false
-    });
-    return;
+const passwordError = document.getElementById("reg-password-error");
+
+// clear previous error
+if (passwordError) passwordError.textContent = "";
+
+const commonPasswords = [
+  "123456",
+  "12345678",
+  "password",
+  "password123",
+  "qwerty",
+  "admin",
+  "111111",
+  "abc123"
+];
+
+if (commonPasswords.includes(password.toLowerCase())) {
+  if (passwordError) {
+    passwordError.textContent =
+      "This password is too common. Please choose a stronger password.";
   }
+  return;
+}
+
+const isStrong = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(password);
+
+if (!isStrong) {
+  if (passwordError) {
+    passwordError.textContent =
+      "Password must be at least 8 characters and include uppercase, lowercase, number, and special character.";
+  }
+  return;
+}
 
   try {
     const response = await fetch(`${API_BASE_URL}/auth/register`, {
@@ -186,4 +219,8 @@ function closeModal(authModal) {
 
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function isStrongPassword(password) {
+  return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/.test(password);
 }

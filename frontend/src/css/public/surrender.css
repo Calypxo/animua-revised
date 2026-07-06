@@ -303,3 +303,148 @@
 }
 
 /* CONTACT PAGE */
+
+/* =========================
+   ANIMUA SURRENDER THEME
+========================= */
+.surrender-page-hero {
+  padding: 62px 0 34px;
+}
+
+.surrender-page-hero-grid {
+  background:
+    radial-gradient(circle at 8% 10%, rgba(255, 227, 227, 0.85), transparent 30%),
+    linear-gradient(135deg, var(--animua-white), var(--animua-cream));
+  border: 1px solid rgba(217, 74, 74, 0.13);
+  border-radius: 48px;
+  padding: 38px;
+  box-shadow: var(--shadow-soft);
+}
+
+.surrender-page-text h1,
+.surrender-notice-box h2,
+.document-form-section h3 {
+  color: var(--animua-text);
+  letter-spacing: 0;
+}
+
+.surrender-page-text p,
+.notice-item span,
+.waiver-box p,
+.approval-box small {
+  color: var(--animua-muted);
+}
+
+.surrender-page-image img {
+  border-radius: 42px;
+  border: 8px solid var(--animua-white);
+  box-shadow: 0 22px 48px rgba(168, 50, 50, 0.16);
+}
+
+.surrender-notice-box,
+.surrender-form-wrap {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(217, 74, 74, 0.13);
+  border-radius: 42px;
+  box-shadow: var(--shadow-soft);
+}
+
+.surrender-notice-grid {
+  gap: 18px;
+}
+
+.notice-item {
+  background: var(--animua-red-light);
+  border: 1px solid rgba(217, 74, 74, 0.11);
+  border-radius: 28px;
+  box-shadow: none;
+}
+
+.notice-item i {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 42px;
+  border-radius: 50%;
+  background: var(--animua-white);
+  color: var(--animua-red-dark);
+  box-shadow: 0 10px 22px rgba(168, 50, 50, 0.09);
+}
+
+.section-heading.center-heading {
+  background: var(--animua-red-light);
+  border: 1px solid rgba(217, 74, 74, 0.11);
+  border-radius: 32px;
+  padding: 26px;
+  margin-bottom: 22px;
+}
+
+.document-form-section {
+  background: linear-gradient(180deg, var(--animua-white), var(--animua-red-light));
+  border: 1px solid rgba(217, 74, 74, 0.11);
+  border-radius: 30px;
+  padding: 24px;
+}
+
+.surrender-form select,
+.surrender-form input,
+.surrender-form textarea,
+.approval-box input {
+  background: var(--animua-white);
+  border-color: rgba(217, 74, 74, 0.16);
+  border-radius: 20px;
+}
+
+.surrender-form select:focus,
+.surrender-form input:focus,
+.surrender-form textarea:focus {
+  border-color: rgba(217, 74, 74, 0.42);
+  box-shadow: 0 0 0 4px rgba(217, 74, 74, 0.1);
+}
+
+.form-group label,
+.approval-box label,
+.check-option {
+  color: #6B4D4D;
+}
+
+.check-option {
+  background: var(--animua-white);
+  border: 1px solid rgba(217, 74, 74, 0.13);
+  border-radius: 999px;
+  padding: 10px 14px;
+}
+
+.check-option input {
+  accent-color: var(--animua-red);
+}
+
+.waiver-box {
+  background: var(--animua-cream);
+  border-color: rgba(217, 74, 74, 0.14);
+  border-radius: 26px;
+}
+
+.approval-box {
+  background: var(--animua-red-light);
+  border: 1px solid rgba(217, 74, 74, 0.11);
+  border-radius: 24px;
+  padding: 18px;
+}
+
+@media (max-width: 900px) {
+  .surrender-page-hero-grid {
+    padding: 24px;
+    border-radius: 34px;
+  }
+
+  .surrender-form-wrap {
+    padding: 22px;
+    border-radius: 34px;
+  }
+
+  .document-form-section {
+    padding: 18px;
+  }
+}
