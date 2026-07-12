@@ -15,40 +15,42 @@ const publicRoutes = require("./src/routes/publicRoutes");
 const adoptionRoutes = require("./src/routes/adoptionRoutes");
 const predictiveRoutes = require("./src/routes/predictiveRoutes");
 const matchRoutes = require("./src/routes/matchRoutes");
+const surrenderRoutes = require("./src/routes/surrenderRoutes");
 
 const authenticateToken = require("./src/middleware/authMiddleware");
 const authorizeRole = require("./src/middleware/roleMiddleware");
 const { trainInventoryModel } = require("./src/services/predictiveService");
 
-
 // ─── CORS ─────────────────────────────────────────────────────────────────────
-app.use(cors({
+const corsOptions = {
   origin: [
     "https://animua-angelescity.web.app",
+    "https://animua-admin.web.app",
+
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+
     "http://localhost:5174",
     "http://127.0.0.1:5174",
+
     "http://localhost:5175",
     "http://127.0.0.1:5175",
+
     "http://localhost:5176",
     "http://127.0.0.1:5176",
+
     "http://localhost:5177",
     "http://127.0.0.1:5177",
+
     "http://localhost:5179",
     "http://127.0.0.1:5179"
   ],
-
-
-  
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true,
+  credentials: true
 };
 
 app.use(cors(corsOptions));
-
-// ✅ Use the SAME CORS options for preflight
 app.options(/.*/, cors(corsOptions));
 
 app.use(express.json());
@@ -63,6 +65,7 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/public", publicRoutes);
 app.use("/api/adoptions", adoptionRoutes);
 app.use("/api/predictive", predictiveRoutes);
+app.use("/api/surrenders", surrenderRoutes);
 app.use("/api", matchRoutes);
 
 app.get("/", (req, res) => {
@@ -100,6 +103,7 @@ app.get(
 
 // ─── START ────────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`ANIMUA Server active on port ${PORT}`);
 

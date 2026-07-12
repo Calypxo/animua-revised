@@ -10,7 +10,7 @@ import { handleLogin }        from "./auth/login.js";
 // =============================================================================
 const IS_FRONTEND_INSECURE = false;
 
-const API_URL = "https://animua-backend.onrender.com";
+const API_URL = "http://localhost:5000";
 
 // ─── GLOBAL HELPERS ───────────────────────────────────────────────────────────
 window.toggleView = function () {

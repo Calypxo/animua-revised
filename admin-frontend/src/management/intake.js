@@ -36,6 +36,7 @@ let activeTab      = "all";
 let editingId      = null;
 let confirmAction  = null;   // "approve" | "reject" | "convert"
 let confirmTargetId = null;
+let approvedSurrenderContext = null;
 
 /* ══════════════════════════════════════════════════════
    HELPERS
@@ -358,6 +359,75 @@ function openAddModal() {
   openModal("intakeModalBackdrop");
 }
 
+function openApprovedSurrenderIntakeModal() {
+  const saved = sessionStorage.getItem("approved_surrender_for_intake");
+
+  if (!saved) return;
+
+  const surrender = JSON.parse(saved);
+  approvedSurrenderContext = surrender;
+
+  editingId = null;
+
+  document.getElementById("intakeModalTitle").textContent = "New Intake from Approved Surrender";
+  document.getElementById("intakeModalSubtitle").textContent =
+    "Review and complete the intake details before submitting.";
+
+  document.getElementById("intakeForm").reset();
+  document.getElementById("fIntakeId").value = "";
+  document.getElementById("fIntakeDate").value = today();
+
+  document.getElementById("fAnimalName").value = surrender.petName || "";
+  document.getElementById("fSpecies").value = surrender.species || "";
+  document.getElementById("fBreed").value = surrender.breed || "";
+  document.getElementById("fSex").value = surrender.sex || "";
+  document.getElementById("fAgeEstimate").value = surrender.age || "";
+  document.getElementById("fColor").value = surrender.colorMarkings || "";
+  document.getElementById("fCondition").value = "Fair";
+
+  document.getElementById("fIntakeNotes").value =
+    surrender.surrenderReason
+      ? `From approved surrender request ${surrender.surrenderId}. Reason: ${surrender.surrenderReason}`
+      : `From approved surrender request ${surrender.surrenderId}.`;
+
+  // This creates the surrender reference fields
+  setSource("Approved Surrender");
+
+  // Fill the surrender reference fields after they exist
+  setTimeout(() => {
+    const surrenderRefInput = document.getElementById("fSurrenderRef");
+    const ownerNameInput = document.getElementById("fOwnerName");
+    const ownerContactInput = document.getElementById("fOwnerContact");
+    const approvedDateInput = document.getElementById("fSurrenderApprovedDate");
+
+    if (surrenderRefInput) {
+      surrenderRefInput.value = surrender.surrenderId || "";
+    }
+
+    if (ownerNameInput) {
+      ownerNameInput.value = surrender.ownerName || "";
+    }
+
+    if (ownerContactInput) {
+      ownerContactInput.value = surrender.ownerContact || "";
+    }
+
+    if (approvedDateInput) {
+      approvedDateInput.value = surrender.approvedDate || today();
+    }
+
+    console.log("Approved surrender prefill:", {
+      surrenderId: surrender.surrenderId,
+      ownerName: surrender.ownerName,
+      ownerContact: surrender.ownerContact,
+      approvedDate: surrender.approvedDate,
+    });
+  }, 150);
+
+  clearFormErrors();
+  openModal("intakeModalBackdrop");
+}
+
 function openEditModal(id) {
   const r = intakeRecords.find(x => x.id === id);
   if (!r) return;
@@ -487,8 +557,30 @@ function validateForm() {
   return valid;
 }
 
+async function updateSurrenderStatusFromIntake(surrenderId, payload) {
+  const token = localStorage.getItem("animua_token");
+
+  const response = await fetch(`http://localhost:5000/api/surrenders/${surrenderId}/status`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to update surrender request status.");
+  }
+
+  return data.request;
+}
+
 async function saveIntake(asDraft = false) {
   if (!asDraft && !validateForm()) return;
+
   if (asDraft && !document.getElementById("fSource").value) {
     setErr("errSource", "Please select a source before saving.");
     return;
@@ -497,12 +589,46 @@ async function saveIntake(asDraft = false) {
   const payload = collectFormData(asDraft);
 
   try {
+    let createdOrUpdatedData = null;
+
     if (editingId) {
-      await updateIntake(editingId, payload);
+      createdOrUpdatedData = await updateIntake(editingId, payload);
       showToast("success", "Intake record updated.");
     } else {
-      await createIntake(payload);
+      createdOrUpdatedData = await createIntake(payload);
       showToast("success", asDraft ? "Draft saved." : "Intake submitted for review.");
+    }
+
+    const savedRecord =
+      createdOrUpdatedData?.record ||
+      createdOrUpdatedData?.intake ||
+      createdOrUpdatedData?.data ||
+      createdOrUpdatedData;
+
+    const savedIntakeId =
+      savedRecord?.id ||
+      savedRecord?.intakeId ||
+      payload.id ||
+      payload.intakeId ||
+      null;
+
+    const isFromApprovedSurrender =
+      !asDraft &&
+      !editingId &&
+      payload.source === "Approved Surrender" &&
+      payload.surrenderRefId;
+
+    if (isFromApprovedSurrender) {
+      await updateSurrenderStatusFromIntake(payload.surrenderRefId, {
+        status: "Converted",
+        intakeId: savedIntakeId,
+        dropoffDate: payload.intakeDate,
+      });
+
+      sessionStorage.removeItem("approved_surrender_for_intake");
+      approvedSurrenderContext = null;
+
+      showToast("success", "Intake created and surrender request marked as converted.");
     }
 
     closeModal("intakeModalBackdrop");
@@ -794,6 +920,12 @@ async function init() {
 
     // Initial render
 await loadIntakeRecords();
+
+const params = new URLSearchParams(window.location.search);
+
+if (params.get("source") === "surrender") {
+  openApprovedSurrenderIntakeModal();
+}
 
     // Tabs
     document.querySelectorAll(".intake-tab").forEach(btn => {
