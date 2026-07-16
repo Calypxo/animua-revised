@@ -5,17 +5,23 @@ function updateAuthPanel() {
   const authSideTag = document.getElementById("authSideTag");
   const authTitle = document.getElementById("authModalTitle");
   const authText = document.getElementById("authSideText");
+  const authSideAction = document.getElementById("authSideAction");
+  const authModal = document.getElementById("authModal");
 
-  if (!authSideTag || !authTitle || !authText) return;
+  if (!authTitle || !authText) return;
 
   if (isLoginVisible) {
-    authSideTag.textContent = "Welcome Back";
-    authTitle.innerHTML = "Hello,<br>Welcome back to Animua!";
-    authText.textContent = "Log in to continue exploring rescued animals and shelter services.";
+    if (authModal) authModal.classList.remove("register-mode");
+    if (authSideTag) authSideTag.textContent = "Welcome Back";
+    authTitle.textContent = "Welcome back to Animua";
+    authText.innerHTML = 'Continue helping rescued animals find <span class="auth-gold">safer homes</span>.';
+    if (authSideAction) authSideAction.textContent = "Sign up";
   } else {
-    authSideTag.textContent = "New Here?";
-    authTitle.innerHTML = "Create your<br>Animua account";
-    authText.textContent = "Sign up to start your journey with Animua and access shelter features easily.";
+    if (authModal) authModal.classList.add("register-mode");
+    if (authSideTag) authSideTag.textContent = "New Here?";
+    authTitle.textContent = "Join the Animua community";
+    authText.innerHTML = 'Help rescued animals take their next step toward <span class="auth-gold">safer homes</span>.';
+    if (authSideAction) authSideAction.textContent = "Sign in";
   }
 }
 
@@ -25,10 +31,62 @@ function toggleAuthView() {
 
   if (!loginSection || !registerSection) return;
 
-  loginSection.classList.toggle("hidden");
-  registerSection.classList.toggle("hidden");
+  const authModal = document.getElementById("authModal");
+  if (authModal && authModal.classList.contains("auth-switching")) return;
+
+  const loginVisible = !loginSection.classList.contains("hidden");
+  const currentSection = loginVisible ? loginSection : registerSection;
+  const nextSection = loginVisible ? registerSection : loginSection;
+
+  if (authModal) {
+    authModal.classList.remove("slide-to-register", "slide-to-login");
+    authModal.classList.add(loginVisible ? "slide-to-register" : "slide-to-login");
+    authModal.classList.add("auth-switching");
+    window.setTimeout(() => {
+      authModal.classList.remove("auth-switching", "slide-to-register", "slide-to-login");
+    }, 480);
+  }
+
+  nextSection.classList.add("hidden");
+  nextSection.classList.remove("auth-view-exit", "auth-view-enter");
+  currentSection.classList.remove("auth-view-exit", "auth-view-enter");
+  currentSection.classList.add("auth-view-exit");
+  window.setTimeout(() => {
+    currentSection.classList.add("hidden");
+    currentSection.classList.remove("auth-view-exit");
+    nextSection.classList.remove("hidden");
+    nextSection.classList.add("auth-view-enter");
+  }, 120);
+
+  window.setTimeout(() => {
+    nextSection.classList.remove("auth-view-enter");
+  }, 260);
+
   clearAuthErrors();
-  updateAuthPanel();
+  if (authModal) {
+    if (loginVisible) {
+      authModal.classList.add("register-mode");
+    } else {
+      authModal.classList.remove("register-mode");
+    }
+  }
+
+  const authSideTag = document.getElementById("authSideTag");
+  const authTitle = document.getElementById("authModalTitle");
+  const authText = document.getElementById("authSideText");
+  const authSideAction = document.getElementById("authSideAction");
+
+  if (loginVisible) {
+    if (authSideTag) authSideTag.textContent = "New Here?";
+    if (authTitle) authTitle.textContent = "Join the Animua community";
+    if (authText) authText.innerHTML = 'Help rescued animals take their next step toward <span class="auth-gold">safer homes</span>.';
+    if (authSideAction) authSideAction.textContent = "Sign in";
+  } else {
+    if (authSideTag) authSideTag.textContent = "Welcome Back";
+    if (authTitle) authTitle.textContent = "Welcome back to Animua";
+    if (authText) authText.innerHTML = 'Continue helping rescued animals find <span class="auth-gold">safer homes</span>.';
+    if (authSideAction) authSideAction.textContent = "Sign up";
+  }
 }
 
 function openAuthModal() {

@@ -46,7 +46,7 @@ html { scroll-behavior: smooth; }
 
 body {
   font-family: var(--sans);
-  background: var(--cream);
+  background: var(--animua-warm-cream);
   color: var(--dark);
   min-height: 100vh;
 }
@@ -552,4 +552,157 @@ body {
   .btn-adopt         { width: 100%; justify-content: center; }
   .hero-badges       { gap: 8px; }
   .hero-badge        { padding: 10px 14px; }
+}
+
+/* =========================
+   ANIMUA COMPATIBILITY RESULTS THEME
+========================= */
+:root {
+  --animua-red: #D94A4A;
+  --animua-red-dark: #A83232;
+  --animua-red-soft: #FFE3E3;
+  --animua-red-light: #FFF6F6;
+  --animua-cream: #FFF8F0;
+  --animua-white: #FFFFFF;
+  --animua-text: #2B2B2B;
+  --animua-muted: #777777;
+
+  --crimson: var(--animua-red);
+  --crimson-dark: var(--animua-red-dark);
+  --crimson-soft: var(--animua-red-soft);
+  --crimson-glow: rgba(217, 74, 74, 0.13);
+  --dark: var(--animua-text);
+  --dark-2: #4C3838;
+  --gray: var(--animua-muted);
+  --gray-2: #9B8585;
+  --white: var(--animua-white);
+  --cream: var(--animua-cream);
+  --cream-2: var(--animua-red-light);
+  --border: rgba(217, 74, 74, 0.13);
+  --shadow-sm: 0 14px 34px rgba(168, 50, 50, 0.09);
+  --shadow-md: 0 20px 46px rgba(168, 50, 50, 0.12);
+  --shadow-lg: 0 30px 70px rgba(168, 50, 50, 0.15);
+  --radius-sm: 22px;
+  --radius-md: 28px;
+  --radius-lg: 34px;
+  --radius-xl: 46px;
+}
+
+body {
+  background: var(--animua-warm-cream);
+}
+
+.topnav {
+  background: rgba(255, 255, 255, 0.9);
+  border-bottom-color: rgba(217, 74, 74, 0.13);
+}
+
+.nav-brand-dot,
+.nav-retake:hover,
+.results-hero,
+.btn-adopt {
+  background: linear-gradient(135deg, var(--animua-red), var(--animua-red-dark));
+}
+
+.nav-back,
+.nav-retake,
+.btn-retake,
+.btn-profile {
+  border-color: rgba(217, 74, 74, 0.16);
+}
+
+.nav-back:hover,
+.nav-retake,
+.btn-retake,
+.btn-profile:hover {
+  background: var(--animua-red-soft);
+  color: var(--animua-red-dark);
+}
+
+.results-hero {
+  border-radius: 48px;
+  box-shadow: 0 24px 60px rgba(168, 50, 50, 0.2);
+}
+
+.hero-title,
+.pet-name,
+.ring-pct,
+.no-results h2 {
+  letter-spacing: 0;
+}
+
+.result-card,
+.no-results {
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(217, 74, 74, 0.13);
+  border-radius: 36px;
+  box-shadow: var(--shadow-sm);
+}
+
+.result-card:hover,
+.result-card.rank-1:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+.result-card.rank-1 {
+  border-color: rgba(217, 74, 74, 0.28);
+  box-shadow: 0 22px 54px rgba(168, 50, 50, 0.14);
+}
+
+.rank-stripe.s-1 {
+  background: linear-gradient(180deg, var(--animua-red), var(--animua-red-dark));
+}
+
+.pet-image {
+  border-radius: 30px;
+  border-color: rgba(217, 74, 74, 0.12);
+}
+
+.best-match-badge {
+  background: var(--animua-red-soft);
+  color: var(--animua-red-dark);
+  border-color: rgba(217, 74, 74, 0.16);
+}
+
+.chip-species,
+.chip-sex,
+.chip-size,
+.chip-special,
+.chip-allergy,
+.pet-summary {
+  background: var(--animua-red-light);
+  color: #6B4D4D;
+}
+
+.pet-summary {
+  border-left-color: var(--animua-red);
+  border-radius: 24px;
+}
+
+.btn-profile,
+.btn-adopt,
+.btn-retake {
+  border-radius: 999px;
+}
+
+.btn-adopt {
+  box-shadow: 0 14px 28px rgba(217, 74, 74, 0.24);
+}
+
+.ring-track,
+.trait-track {
+  stroke: rgba(217, 74, 74, 0.14);
+  background: rgba(217, 74, 74, 0.12);
+}
+
+.results-footer {
+  border-top-color: rgba(217, 74, 74, 0.12);
+}
+
+@media (max-width: 700px) {
+  .results-hero,
+  .result-card,
+  .no-results {
+    border-radius: 32px;
+  }
 }

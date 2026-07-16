@@ -1,6 +1,55 @@
 const { db } = require("../config/firebase");
 
 const ANIMAL_COL = "animals";
+const EVENT_COL = "events";
+
+const getEventDateValue = (event = {}) => {
+  const value =
+    event.date ||
+    event.eventDate ||
+    event.startDate ||
+    event.startsAt ||
+    event.startAt ||
+    "";
+
+  if (value?.toDate) return value.toDate().getTime();
+  if (value?._seconds) return value._seconds * 1000;
+  if (typeof value === "number") return value;
+
+  const parsed = Date.parse(value);
+  return Number.isNaN(parsed) ? 0 : parsed;
+};
+
+const serializeEventDate = (value) => {
+  if (!value) return "";
+  if (value?.toDate) return value.toDate().toISOString();
+  if (value?._seconds) return new Date(value._seconds * 1000).toISOString();
+  return value;
+};
+
+const isPublishedEvent = (event = {}) => {
+  const status = String(event.status || event.state || event.publishStatus || "").toLowerCase();
+  const archived =
+    event.archived === true ||
+    event.isArchived === true ||
+    status.includes("archive");
+  const unpublished =
+    event.published === false ||
+    event.isPublished === false ||
+    status.includes("draft") ||
+    status.includes("unpublish") ||
+    status.includes("private");
+  const published =
+    event.published === true ||
+    event.isPublished === true ||
+    event.isPublic === true ||
+    status.includes("publish") ||
+    status.includes("upcoming") ||
+    status.includes("active") ||
+    status.includes("live");
+
+  return published && !unpublished && !archived;
+};
 
 /**
  * GET /api/public/pets
@@ -126,6 +175,55 @@ exports.getPublicPetById = async (req, res) => {
     console.error("[getPublicPetById]", error.message);
     res.status(500).json({
       message: "Failed to fetch pet details.",
+    });
+  }
+};
+
+/**
+ * GET /api/public/events
+ * Public-facing list of published upcoming events
+ */
+exports.getPublicEvents = async (req, res) => {
+  try {
+    const snapshot = await db.collection(EVENT_COL).get();
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+
+    const events = snapshot.docs
+      .map((doc) => {
+        const data = doc.data();
+
+        return {
+          id: doc.id,
+          title: data.title || data.name || "Shelter Event",
+          date: serializeEventDate(data.date || data.eventDate || data.startDate || data.startsAt || data.startAt),
+          time: data.time || data.eventTime || data.startTime || "",
+          location: data.location || data.venue || data.address || "",
+          description: data.summary || data.shortDescription || data.description || "",
+          image: data.image || data.imageUrl || data.imageURL || data.photoURL || data.coverImage || "",
+          url: data.url || data.href || data.link || "",
+          status: data.status || data.state || data.publishStatus || "",
+          published: data.published,
+          isPublished: data.isPublished,
+          isPublic: data.isPublic,
+          archived: data.archived,
+          isArchived: data.isArchived,
+        };
+      })
+      .filter((event) => {
+        const dateValue = getEventDateValue(event);
+        return isPublishedEvent(event) && dateValue && dateValue >= now.getTime();
+      })
+      .sort((a, b) => getEventDateValue(a) - getEventDateValue(b));
+
+    res.status(200).json({
+      events,
+      total: events.length,
+    });
+  } catch (error) {
+    console.error("[getPublicEvents]", error.message);
+    res.status(500).json({
+      message: "Failed to fetch public events.",
     });
   }
 };

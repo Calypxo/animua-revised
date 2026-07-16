@@ -20,6 +20,10 @@ const authenticateToken = require("./src/middleware/authMiddleware");
 const authorizeRole = require("./src/middleware/roleMiddleware");
 const { trainInventoryModel } = require("./src/services/predictiveService");
 
+// ❌ DO NOT USE THIS because your routes are inside ./src/routes/authRoutes
+// const authRoutes = require("./routes/authRoutes");
+// app.use("/api/auth", authRoutes);
+
 const allowedOrigins = [
   // 🌐 Production
   "https://animua-angelescity.web.app",

@@ -5,13 +5,17 @@ export async function handleRegistration(event) {
   event.preventDefault();
 
   const fullNameInput = document.getElementById("reg-name");
+  const phoneInput = document.getElementById("reg-phone");
   const emailInput = document.getElementById("reg-email");
   const passwordInput = document.getElementById("reg-password");
+  const confirmPasswordInput = document.getElementById("reg-confirm-password");
   const authModal = document.getElementById("authModal");
 
   const fullName = fullNameInput?.value.trim();
+  const phone = phoneInput?.value.trim();
   const email = emailInput?.value.trim().toLowerCase();
   const password = passwordInput?.value;
+  const confirmPassword = confirmPasswordInput?.value;
 
   if (!fullName) {
     closeModal(authModal);
@@ -34,6 +38,36 @@ export async function handleRegistration(event) {
       icon: "warning",
       title: "Invalid Name",
       text: "Full name must be at least 2 characters.",
+      customClass: {
+        popup: "animua-popup",
+        confirmButton: "animua-confirm"
+      },
+      buttonsStyling: false
+    });
+    return;
+  }
+
+  if (!phone) {
+    closeModal(authModal);
+    Swal.fire({
+      icon: "warning",
+      title: "Missing Mobile Number",
+      text: "Please enter your mobile number.",
+      customClass: {
+        popup: "animua-popup",
+        confirmButton: "animua-confirm"
+      },
+      buttonsStyling: false
+    });
+    return;
+  }
+
+  if (!/^[0-9+\-\s()]{10,20}$/.test(phone)) {
+    closeModal(authModal);
+    Swal.fire({
+      icon: "warning",
+      title: "Invalid Mobile Number",
+      text: "Please enter a valid mobile number.",
       customClass: {
         popup: "animua-popup",
         confirmButton: "animua-confirm"
@@ -73,35 +107,77 @@ export async function handleRegistration(event) {
     return;
   }
 
-  if (!password) {
-    closeModal(authModal);
-    Swal.fire({
-      icon: "warning",
-      title: "Missing Password",
-      text: "Please enter your password.",
-      customClass: {
-        popup: "animua-popup",
-        confirmButton: "animua-confirm"
-      },
-      buttonsStyling: false
-    });
-    return;
-  }
+if (!password) {
+  closeModal(authModal);
+  Swal.fire({
+    icon: "warning",
+    title: "Missing Password",
+    text: "Please enter your password.",
+    customClass: {
+      popup: "animua-popup",
+      confirmButton: "animua-confirm"
+    },
+    buttonsStyling: false
+  });
+  return;
+}
 
-  if (password.length < 6) {
-    closeModal(authModal);
-    Swal.fire({
-      icon: "warning",
-      title: "Invalid Password",
-      text: "Password must be at least 6 characters.",
-      customClass: {
-        popup: "animua-popup",
-        confirmButton: "animua-confirm"
-      },
-      buttonsStyling: false
-    });
-    return;
+if (password !== confirmPassword) {
+  const confirmPasswordError = document.getElementById("reg-confirm-password-error");
+  if (confirmPasswordError) {
+    confirmPasswordError.textContent = "Passwords do not match.";
   }
+  return;
+}
+
+if (password.length < 6) {
+  closeModal(authModal);
+  Swal.fire({
+    icon: "warning",
+    title: "Invalid Password",
+    text: "Password must be at least 6 characters.",
+    customClass: {
+      popup: "animua-popup",
+      confirmButton: "animua-confirm"
+    },
+    buttonsStyling: false
+  });
+  return;
+}
+
+const passwordError = document.getElementById("reg-password-error");
+
+// clear previous error
+if (passwordError) passwordError.textContent = "";
+
+const commonPasswords = [
+  "123456",
+  "12345678",
+  "password",
+  "password123",
+  "qwerty",
+  "admin",
+  "111111",
+  "abc123"
+];
+
+if (commonPasswords.includes(password.toLowerCase())) {
+  if (passwordError) {
+    passwordError.textContent =
+      "This password is too common. Please choose a stronger password.";
+  }
+  return;
+}
+
+const isStrong = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(password);
+
+if (!isStrong) {
+  if (passwordError) {
+    passwordError.textContent =
+      "Password must be at least 8 characters and include uppercase, lowercase, number, and special character.";
+  }
+  return;
+}
 
   try {
     const response = await fetch(`${API_BASE_URL}/auth/register`, {
@@ -109,7 +185,7 @@ export async function handleRegistration(event) {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ fullName, email, password })
+      body: JSON.stringify({ fullName, phone, email, password })
     });
 
     const data = await response.json();
@@ -142,10 +218,13 @@ export async function handleRegistration(event) {
     localStorage.setItem("pending_verify_email", email);
     localStorage.setItem("pending_verify_password", password);
     localStorage.setItem("pending_verify_name", fullName);
+    localStorage.setItem("pending_verify_phone", phone);
 
     if (fullNameInput) fullNameInput.value = "";
+    if (phoneInput) phoneInput.value = "";
     if (emailInput) emailInput.value = "";
     if (passwordInput) passwordInput.value = "";
+    if (confirmPasswordInput) confirmPasswordInput.value = "";
 
     closeModal(authModal);
 
@@ -186,4 +265,8 @@ function closeModal(authModal) {
 
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function isStrongPassword(password) {
+  return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/.test(password);
 }

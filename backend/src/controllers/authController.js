@@ -76,6 +76,7 @@ async function sendVerificationEmail({ email, fullName, verificationLink }) {
 exports.register = async (req, res) => {
   try {
     const fullName = req.body.fullName?.trim();
+    const phone = req.body.phone?.trim() || "";
     const email = req.body.email?.trim().toLowerCase();
     const password = req.body.password;
 
@@ -116,6 +117,7 @@ exports.register = async (req, res) => {
     // SAVE USER IN FIRESTORE AS PENDING VERIFICATION
     await db.collection("users").doc(email).set({
       fullName,
+      phone,
       email,
       password: storedPassword,
       role: "Public",
@@ -205,6 +207,112 @@ exports.login = async (req, res) => {
     });
   } catch (error) {
     console.error("[Login Error]", error.message);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+// ─── UPDATE USERNAME ──────────────────────────────────────────────────────────
+exports.updateUsername = async (req, res) => {
+  try {
+    const email = req.user?.email;
+    const fullName = req.body.fullName?.trim();
+
+    if (!email) {
+      return res.status(401).json({ message: "Unauthorized." });
+    }
+
+    if (!fullName || fullName.length < 2) {
+      return res.status(400).json({ message: "Username must be at least 2 characters." });
+    }
+
+    const userRef = db.collection("users").doc(email);
+    const userDoc = await userRef.get();
+
+    if (!userDoc.exists) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    const userData = userDoc.data();
+
+    await userRef.update({
+      fullName,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    if (userData.firebaseUid) {
+      await admin.auth().updateUser(userData.firebaseUid, {
+        displayName: fullName
+      });
+    }
+
+    return res.status(200).json({
+      message: "Username updated successfully.",
+      fullName
+    });
+  } catch (error) {
+    console.error("[Update Username Error]", error.message);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+
+// ─── CHANGE PASSWORD ──────────────────────────────────────────────────────────
+exports.changePassword = async (req, res) => {
+  try {
+    const email = req.user?.email;
+    const { oldPassword, newPassword } = req.body;
+
+    if (!email) {
+      return res.status(401).json({ message: "Unauthorized." });
+    }
+
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({ message: "Current and new password are required." });
+    }
+
+    if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(newPassword)) {
+      return res.status(400).json({
+        message: "New password must be at least 8 characters and include uppercase, lowercase, number, and special character."
+      });
+    }
+
+    const userRef = db.collection("users").doc(email);
+    const userDoc = await userRef.get();
+
+    if (!userDoc.exists) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    const userData = userDoc.data();
+
+    const isMatch = IS_INSECURE_MODE
+      ? oldPassword === userData.password
+      : await bcrypt.compare(oldPassword, userData.password);
+
+    if (!isMatch) {
+      return res.status(401).json({ message: "Current password is incorrect." });
+    }
+
+    const newStoredPassword = IS_INSECURE_MODE
+      ? newPassword
+      : await bcrypt.hash(newPassword, 12);
+
+    await userRef.update({
+      password: newStoredPassword,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    if (userData.firebaseUid) {
+      await admin.auth().updateUser(userData.firebaseUid, {
+        password: newPassword
+      });
+    }
+
+    return res.status(200).json({
+      message: "Password changed successfully."
+    });
+  } catch (error) {
+    console.error("[Change Password Error]", error.message);
     return res.status(500).json({ message: "Internal server error." });
   }
 };
