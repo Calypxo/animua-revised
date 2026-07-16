@@ -5,8 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ANIMUA — Your Best Matches</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="../../src/css/public/compatibilityResults.css" />
+<link rel="stylesheet" href="../../src/css/public/public-design-system.css" />
   
 </head>
 <body>
@@ -18,7 +21,7 @@
 
 <nav class="topnav">
   <a href="/pages/public/home.html" class="nav-brand">
-    <div class="nav-brand-dot">🐾</div>
+    <img src="../../src/assets/images/animua-logo-transparent.png" alt="ANIMUA" class="public-brand-logo">
     <span>ANIMUA</span>
   </a>
   <a href="/pages/public/petCompatibility.html" class="nav-back">
@@ -31,7 +34,7 @@
 
 <main class="results-shell" id="resultsShell">
   <div class="loading-state">
-    <div class="loading-icon">🐾</div>
+    <div class="loading-icon"></div>
     <p style="color:var(--stone);font-size:0.9rem">Loading your matches…</p>
   </div>
 </main>
@@ -136,7 +139,7 @@ function buildCard(pet, rank, prefs) {
   }).join("");
 
   const chips = [
-    pet.species ? `<span class="info-chip chip-species">🐾 ${pet.species}</span>` : "",
+    pet.species ? `<span class="info-chip chip-species">${pet.species}</span>` : "",
     pet.sex     ? `<span class="info-chip chip-sex">${pet.sex==="Male"?"♂":"♀"} ${pet.sex}</span>` : "",
     pet.size    ? `<span class="info-chip chip-size">📐 ${pet.size}</span>` : "",
     pet.allergyFriendly === true  ? `<span class="info-chip chip-allergy">✓ Allergy-Friendly</span>` : "",
@@ -228,7 +231,7 @@ function buildCard(pet, rank, prefs) {
             <a href="/pages/public/find-furbabies.html"
                class="btn-adopt adopt-btn"
                data-pet-id="${petId}">
-              <i class="bi bi-heart-fill"></i> Apply to Adopt
+              Apply to Adopt
             </a>
           </div>
 
@@ -275,7 +278,7 @@ function render() {
     <section class="results-hero">
       <div class="hero-text">
         <div class="hero-eyebrow">Compatibility Results</div>
-        <h1 class="hero-title">Your <em>best matches</em> are here! 🎉</h1>
+        <h1 class="hero-title">Your <em>best matches</em> are here.</h1>
         <p class="hero-sub">Based on your quiz answers, these rescue animals best match your lifestyle, home, and care capacity — ranked by compatibility score.</p>
       </div>
       <div class="hero-badges">

@@ -1,0 +1,892 @@
+/* Shared ANIMUA public design system.
+   Loaded last on public pages to normalize older page-specific styles without changing behavior. */
+
+:root {
+  --animua-red: #8E2A20;
+  --animua-red-dark: #721B14;
+  --animua-gold: #F1C045;
+  --animua-warm-white: #F7F2E8;
+  --animua-warm-cream: #F7F2E8;
+  --animua-cream: #F7F2E8;
+  --animua-white: #FFFFFF;
+  --animua-charcoal: #20303A;
+  --animua-muted: #5F5854;
+  --animua-brown: #6B4F3F;
+  --animua-line: rgba(107, 79, 63, 0.16);
+  --animua-shadow: 0 14px 32px rgba(75, 43, 33, 0.10);
+  --animua-shadow-soft: 0 8px 22px rgba(75, 43, 33, 0.08);
+  --animua-font: "Inter", Arial, sans-serif;
+  --animua-radius: 8px;
+  --animua-radius-sm: 6px;
+  --animua-section-space: clamp(48px, 5.5vw, 76px);
+  --animua-container: 1280px;
+  --animua-page-pad: clamp(24px, 5vw, 84px);
+  --animua-button-height: 46px;
+  --animua-heading-hero: clamp(42px, 5.2vw, 68px);
+  --animua-heading-section: clamp(30px, 3.3vw, 48px);
+  --animua-heading-card: clamp(20px, 1.6vw, 26px);
+  --animua-body-size: clamp(14px, 1vw, 16px);
+  --animua-transition: 180ms ease;
+
+  --crimson: var(--animua-red);
+  --crimson-dark: var(--animua-red-dark);
+  --crimson-soft: rgba(142, 42, 32, 0.10);
+  --dark: var(--animua-charcoal);
+  --gray: var(--animua-muted);
+  --stone: var(--animua-muted);
+  --stone-2: rgba(95, 88, 84, 0.72);
+  --white: var(--animua-white);
+  --cream: var(--animua-warm-white);
+  --cream-2: #EFE8DC;
+  --border: var(--animua-line);
+  --border-soft: var(--animua-line);
+  --shadow: var(--animua-shadow);
+  --shadow-soft: var(--animua-shadow-soft);
+  --radius: var(--animua-radius);
+  --radius-sm: var(--animua-radius);
+  --radius-md: var(--animua-radius);
+  --radius-lg: var(--animua-radius);
+  --radius-xl: var(--animua-radius);
+  --radius-pill: 999px;
+  --sans: var(--animua-font);
+  --serif: var(--animua-font);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body,
+button,
+input,
+select,
+textarea {
+  font-family: var(--animua-font) !important;
+}
+
+body {
+  min-width: 320px;
+  background: var(--animua-warm-white) !important;
+  color: var(--animua-charcoal);
+  overflow-x: hidden;
+}
+
+.container,
+body.home-page .featured-furbabies-layout,
+body.home-page .how-animua-works-layout,
+body.home-page > .footer .footer-grid,
+body.home-page > .footer .footer-bottom-inner,
+.features,
+.notice-section,
+.final-cta,
+.how-inner,
+.quiz-main,
+.results-shell {
+  width: min(100%, var(--animua-container)) !important;
+  max-width: var(--animua-container) !important;
+  margin-inline: auto !important;
+  padding-inline: var(--animua-page-pad) !important;
+}
+
+h1,
+h2,
+h3,
+h4,
+.hero-left h1,
+.featured-furbabies-head h2,
+.about-animua-copy h2,
+.how-animua-works-head h2,
+.finder-left h1,
+.contact-info-hero h1,
+.surrender-page-text h1,
+.hero-title,
+.features-title,
+.how-title,
+.final-title,
+.phase-intro-title,
+.q-text,
+.complete-title,
+.pet-name,
+.profile-title-wrap h2 {
+  font-family: var(--animua-font) !important;
+  letter-spacing: 0 !important;
+}
+
+.hero-left h1,
+.finder-left h1,
+.contact-info-hero h1,
+.surrender-page-text h1,
+.hero-title,
+.results-hero .hero-title {
+  color: var(--animua-charcoal) !important;
+  font-size: var(--animua-heading-hero) !important;
+  font-weight: 900 !important;
+  line-height: 0.96 !important;
+}
+
+.section-heading h2,
+.featured-furbabies-head h2,
+.about-animua-copy h2,
+.how-animua-works-head h2,
+.browser-toolbar-left h2,
+.contact-card-head h2,
+.surrender-form-wrap .section-heading h2,
+.surrender-notice-box h2,
+.features-title,
+.how-title,
+.final-title,
+.complete-title,
+.no-results h2 {
+  color: var(--animua-charcoal) !important;
+  font-size: var(--animua-heading-section) !important;
+  font-weight: 900 !important;
+  line-height: 1.02 !important;
+  text-transform: none !important;
+}
+
+p,
+li,
+.hero-left p,
+.featured-furbabies-head p,
+.about-animua-copy p,
+.how-animua-works-head p,
+.how-animua-step p,
+.finder-left p,
+.contact-card-head p,
+.contact-info-hero p,
+.surrender-page-text p,
+.feature-desc,
+.notice-list li,
+.final-sub,
+.hero-sub,
+.phase-intro-desc,
+.q-hint,
+.complete-sub {
+  color: var(--animua-muted);
+  font-size: var(--animua-body-size);
+  line-height: 1.55;
+}
+
+.section-label,
+.tagline,
+.finder-kicker,
+.hero-eyebrow,
+.hero-text .hero-eyebrow,
+.phase-intro-kicker,
+.q-num,
+.adoption-section-label {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin: 0 0 12px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--animua-red) !important;
+  font-family: var(--animua-font) !important;
+  font-size: 0.74rem !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.12em !important;
+  line-height: 1 !important;
+  text-transform: uppercase !important;
+  box-shadow: none !important;
+}
+
+.section-label::before,
+.tagline::before,
+.finder-kicker::before,
+.hero-eyebrow::before,
+.hero-text .hero-eyebrow::before,
+.phase-intro-kicker::before,
+.q-num::before {
+  content: "" !important;
+  width: 34px !important;
+  height: 2px !important;
+  flex: 0 0 34px !important;
+  border-radius: 999px !important;
+  background: var(--animua-red) !important;
+  opacity: 1 !important;
+}
+
+.section-label::after,
+.tagline::after,
+.finder-kicker::after,
+.hero-eyebrow::after,
+.hero-text .hero-eyebrow::after {
+  content: "" !important;
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 50% !important;
+  background: var(--animua-gold) !important;
+}
+
+.btn,
+.primary-btn,
+.secondary-btn,
+.auth-submit-btn,
+.auth-side-action,
+.how-animua-primary,
+.btn-start,
+.btn-submit,
+.btn-next,
+.btn-prev,
+.btn-profile,
+.btn-adopt,
+.btn-retake,
+.mini-action-btn,
+.form-actions button,
+.form-actions a,
+.redesigned-profile-actions .btn,
+.finder-actions .btn,
+.pet-actions .btn {
+  min-height: var(--animua-button-height) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 9px !important;
+  padding: 0 22px !important;
+  border-radius: var(--animua-radius) !important;
+  font-family: var(--animua-font) !important;
+  font-size: 0.92rem !important;
+  font-weight: 850 !important;
+  line-height: 1 !important;
+  text-decoration: none !important;
+  cursor: pointer;
+  transition: background var(--animua-transition), color var(--animua-transition), border-color var(--animua-transition), transform var(--animua-transition), box-shadow var(--animua-transition) !important;
+}
+
+.primary-btn,
+.auth-submit-btn,
+.auth-side-action,
+.how-animua-primary,
+.btn-start,
+.btn-submit,
+.btn-next,
+.btn-adopt,
+.mini-action-btn,
+.form-actions .primary-btn {
+  border: 1px solid var(--animua-red) !important;
+  background: var(--animua-red) !important;
+  color: var(--animua-white) !important;
+  box-shadow: var(--animua-shadow-soft) !important;
+}
+
+.primary-btn:hover,
+.auth-submit-btn:hover,
+.auth-side-action:hover,
+.how-animua-primary:hover,
+.btn-start:hover,
+.btn-submit:hover,
+.btn-next:hover,
+.btn-adopt:hover,
+.mini-action-btn:hover,
+.form-actions .primary-btn:hover {
+  border-color: var(--animua-red-dark) !important;
+  background: var(--animua-red-dark) !important;
+  color: var(--animua-white) !important;
+  transform: translateY(-1px) !important;
+}
+
+.secondary-btn,
+.btn-prev,
+.btn-profile,
+.btn-learn,
+.nav-back,
+.nav-retake,
+.form-actions .secondary-btn {
+  border: 1px solid rgba(142, 42, 32, 0.32) !important;
+  background: rgba(255, 255, 255, 0.48) !important;
+  color: var(--animua-red) !important;
+  box-shadow: none !important;
+}
+
+.secondary-btn:hover,
+.btn-prev:hover,
+.btn-profile:hover,
+.btn-learn:hover,
+.nav-back:hover,
+.nav-retake:hover,
+.form-actions .secondary-btn:hover {
+  border-color: var(--animua-red) !important;
+  background: rgba(142, 42, 32, 0.08) !important;
+  color: var(--animua-red-dark) !important;
+  transform: translateY(-1px) !important;
+}
+
+.how-animua-secondary,
+.footer-links a,
+.auth-muted-link,
+.auth-switch-btn,
+.services-heading-link,
+.featured-furbabies-all {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: auto;
+  padding: 0 0 4px !important;
+  border: 0 !important;
+  border-bottom: 2px solid rgba(241, 192, 69, 0.82) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--animua-red) !important;
+  box-shadow: none !important;
+  font-family: var(--animua-font) !important;
+  font-size: 0.9rem !important;
+  font-weight: 850 !important;
+  line-height: 1.2 !important;
+  text-decoration: none !important;
+}
+
+.how-animua-secondary i,
+.btn-learn i,
+.nav-back i,
+.nav-retake i {
+  font-size: 0.95em !important;
+  transform: none !important;
+}
+
+.home-highlights-section,
+.featured-furbabies-section,
+.about-animua-section,
+.how-animua-works-section,
+.pet-browser-section,
+.contact-info-hero,
+.contact-ux-section,
+.contact-faq-section,
+.surrender-page-hero,
+.surrender-notice-section,
+.surrender-form-section,
+.features,
+.notice-section,
+.final-cta {
+  padding-block: var(--animua-section-space) !important;
+}
+
+body.home-page .about-animua-section {
+  padding-block: 0 !important;
+}
+
+body.home-page .how-animua-works-section {
+  background: var(--animua-warm-white) !important;
+}
+
+body.home-page .how-animua-works-head {
+  max-width: 700px !important;
+  margin-bottom: clamp(24px, 3vw, 40px) !important;
+}
+
+body.home-page .how-animua-process {
+  gap: clamp(18px, 3vw, 48px) !important;
+}
+
+body.home-page .how-animua-step h3 {
+  color: var(--animua-red) !important;
+  font-family: var(--animua-font) !important;
+  font-size: var(--animua-heading-card) !important;
+  font-weight: 900 !important;
+  line-height: 1.05 !important;
+}
+
+body.home-page .how-animua-number {
+  background: var(--animua-red) !important;
+  border-color: var(--animua-warm-white) !important;
+  box-shadow: var(--animua-shadow-soft) !important;
+}
+
+body.home-page .how-animua-visual {
+  background: rgba(255, 255, 255, 0.64) !important;
+  color: var(--animua-red) !important;
+  box-shadow: inset 0 0 0 1px var(--animua-line) !important;
+}
+
+body.home-page .how-animua-visual i {
+  color: var(--animua-red) !important;
+}
+
+.furbaby-card,
+.featured-furbaby-card,
+.feature-card,
+.notice-card,
+.contact-map-card,
+.contact-methods-card,
+.faq-item,
+.surrender-notice-box,
+.surrender-form-wrap,
+.question-card,
+.filter-section,
+.progress-card,
+.answers-card,
+.complete-card,
+.result-card-inner,
+.profile-section-card,
+.profile-meta-card,
+.profile-highlight-box,
+.modal-panel,
+.redesigned-profile-modal {
+  border: 1px solid var(--animua-line) !important;
+  border-radius: var(--animua-radius) !important;
+  background: var(--animua-white) !important;
+  box-shadow: var(--animua-shadow-soft) !important;
+}
+
+img,
+.featured-furbaby-image,
+.showcase-main,
+.showcase-small-card,
+.profile-hero-image-wrap,
+.pet-media,
+.map-frame-wrap,
+.surrender-page-image,
+.about-shelter-card,
+.contact-map-card iframe {
+  border-radius: var(--animua-radius) !important;
+}
+
+.bg-canvas,
+.bg-blob,
+.pet-float,
+.paw-trail,
+.showcase-floating,
+.auth-side-mark i,
+.auth-brand-mark,
+.complete-icon:empty,
+.loading-icon:empty,
+.hero::before,
+.hero::after,
+.services-section::before,
+.services-section::after,
+.auth-modal-left::before,
+.auth-modal-left::after {
+  display: none !important;
+}
+
+.topnav,
+.quiz-header,
+.header {
+  background: var(--animua-warm-white) !important;
+  border-bottom: 1px solid rgba(107, 79, 63, 0.08) !important;
+  box-shadow: none !important;
+}
+
+.navbar a,
+.topnav a,
+.quiz-header a,
+.footer-links a {
+  font-family: var(--animua-font) !important;
+  font-weight: 800 !important;
+}
+
+.nav-brand-icon,
+.nav-brand-dot,
+.header-brand-dot {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: var(--animua-radius) !important;
+  background: var(--animua-red) !important;
+  color: var(--animua-white) !important;
+  box-shadow: none !important;
+}
+
+.nav-brand-name,
+.header-brand span,
+.navbar-brand-name,
+.footer-brand-name {
+  font-family: var(--animua-font) !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.08em !important;
+}
+
+.navbar-logo-img,
+.footer-logo-img,
+.public-brand-logo {
+  width: 46px !important;
+  height: 46px !important;
+  flex: 0 0 46px !important;
+  object-fit: contain !important;
+}
+
+.footer-logo-img,
+.public-brand-logo {
+  width: 42px !important;
+  height: 42px !important;
+  flex-basis: 42px !important;
+}
+
+.navbar-brand-copy,
+.footer-brand-copy {
+  display: grid !important;
+  gap: 3px !important;
+}
+
+.navbar-brand-name,
+.footer-brand-name {
+  color: var(--animua-charcoal) !important;
+  font-size: 1rem !important;
+  line-height: 1 !important;
+}
+
+.navbar-brand-tagline,
+.footer-brand-tagline {
+  max-width: 220px !important;
+  color: var(--animua-muted) !important;
+  font-size: 0.66rem !important;
+  font-weight: 850 !important;
+  letter-spacing: 0.06em !important;
+  line-height: 1.2 !important;
+  text-transform: uppercase !important;
+}
+
+.footer-brand-name {
+  color: var(--animua-white) !important;
+}
+
+.footer-brand-tagline {
+  color: rgba(255, 255, 255, 0.72) !important;
+}
+
+.nav-brand,
+.header-brand {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 11px !important;
+}
+
+.footer,
+body.home-page > .footer {
+  background: var(--animua-red) !important;
+  color: var(--animua-white) !important;
+}
+
+.footer-links h4,
+body.home-page > .footer .footer-links h4 {
+  color: var(--animua-gold) !important;
+  font-family: var(--animua-font) !important;
+  font-size: 0.78rem !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+}
+
+.footer-brand p,
+.footer-contact p,
+.footer-bottom,
+.footer-bottom p,
+body.home-page > .footer .footer-brand p,
+body.home-page > .footer .footer-contact p,
+body.home-page > .footer .footer-bottom p {
+  color: rgba(255, 255, 255, 0.76) !important;
+}
+
+.footer-links a,
+body.home-page > .footer .footer-links a {
+  color: rgba(255, 255, 255, 0.82) !important;
+  border-bottom-color: rgba(241, 192, 69, 0.7) !important;
+}
+
+.footer-links a:hover,
+body.home-page > .footer .footer-links a:hover {
+  color: var(--animua-white) !important;
+}
+
+.features-title span,
+.final-title em,
+.hero-title em,
+.complete-title em {
+  color: var(--animua-red) !important;
+  font-style: normal !important;
+}
+
+.stats-strip,
+.feature-card::before,
+.how-section::before,
+.btn-start::after {
+  background: none !important;
+}
+
+.how-section {
+  width: 100% !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  background: var(--animua-red) !important;
+  box-shadow: none !important;
+}
+
+.how-title,
+.step-title,
+.step-desc {
+  color: var(--animua-white) !important;
+}
+
+.step-circle,
+.phase-intro-icon,
+.feature-icon,
+.notice-icon,
+.contact-method-icon {
+  border-radius: var(--animua-radius) !important;
+  background: rgba(142, 22, 22, 0.10) !important;
+  color: var(--animua-red) !important;
+  box-shadow: none !important;
+}
+
+.how-section .step-circle {
+  border-color: rgba(255, 255, 255, 0.34) !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: var(--animua-white) !important;
+}
+
+.option-btn,
+.select-tile,
+.toggle-tile,
+.filter-tab,
+.answer-chip,
+.score-pill,
+.info-chip,
+.profile-type-badge,
+.profile-status-pill,
+.featured-furbaby-details > span {
+  border-radius: var(--animua-radius-sm) !important;
+}
+
+.option-btn:hover,
+.select-tile:hover,
+.toggle-tile:hover,
+.feature-card:hover,
+.question-card:hover,
+.filter-section:hover {
+  transform: none !important;
+  box-shadow: var(--animua-shadow-soft) !important;
+}
+
+.option-btn.selected,
+.select-tile.selected,
+.toggle-tile.selected-no,
+.phase-badge,
+.progress-fill {
+  background: var(--animua-red) !important;
+  color: var(--animua-white) !important;
+}
+
+@media (max-width: 900px) {
+  :root {
+    --animua-page-pad: 22px;
+    --animua-section-space: 44px;
+    --animua-heading-hero: clamp(34px, 9vw, 48px);
+    --animua-heading-section: clamp(28px, 7vw, 38px);
+  }
+
+  .container,
+  body.home-page .featured-furbabies-layout,
+  body.home-page .how-animua-works-layout,
+  body.home-page > .footer .footer-grid,
+  body.home-page > .footer .footer-bottom-inner,
+  .features,
+  .notice-section,
+  .final-cta,
+  .how-inner,
+  .quiz-main,
+  .results-shell {
+    padding-inline: var(--animua-page-pad) !important;
+  }
+
+  .btn,
+  .primary-btn,
+  .secondary-btn,
+  .auth-submit-btn,
+  .how-animua-primary,
+  .btn-start,
+  .btn-submit,
+  .btn-next,
+  .btn-prev,
+  .btn-profile,
+  .btn-adopt,
+  .btn-retake,
+  .mini-action-btn {
+    max-width: 100%;
+    white-space: normal !important;
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --animua-button-height: 44px;
+    --animua-page-pad: 20px;
+  }
+
+  .finder-actions,
+  .cta-group,
+  .form-actions,
+  .card-actions,
+  .redesigned-profile-actions,
+  .how-animua-actions {
+    align-items: stretch !important;
+  }
+
+  .finder-actions .btn,
+  .cta-group .btn-start,
+  .cta-group .btn-learn,
+  .form-actions .btn,
+  .card-actions a,
+  .redesigned-profile-actions .btn,
+  .how-animua-primary,
+  .how-animua-secondary {
+    width: 100% !important;
+  }
+}
+
+/* Final uniform public action buttons */
+:root {
+  --animua-btn-height: 46px;
+  --animua-btn-radius: 999px;
+  --animua-btn-pad-x: 22px;
+  --animua-btn-font-size: 0.92rem;
+  --animua-btn-font-weight: 850;
+}
+
+.btn,
+.primary-btn,
+.secondary-btn,
+.hero-link-btn,
+.how-animua-primary,
+.how-animua-secondary,
+.auth-submit-btn,
+.auth-side-action,
+.btn-start,
+.btn-learn,
+.btn-submit,
+.btn-next,
+.btn-prev,
+.btn-profile,
+.btn-adopt,
+.btn-retake,
+.mini-action-btn,
+.form-actions .btn,
+.finder-actions .btn,
+.redesigned-profile-actions .btn,
+.pet-actions .btn {
+  min-height: var(--animua-btn-height) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 9px !important;
+  padding: 0 var(--animua-btn-pad-x) !important;
+  border-radius: var(--animua-btn-radius) !important;
+  font-family: var(--animua-font) !important;
+  font-size: var(--animua-btn-font-size) !important;
+  font-weight: var(--animua-btn-font-weight) !important;
+  line-height: 1 !important;
+  text-decoration: none !important;
+  white-space: nowrap;
+  box-shadow: none !important;
+  cursor: pointer;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease !important;
+}
+
+.primary-btn,
+.auth-submit-btn,
+.auth-side-action,
+.how-animua-primary,
+.btn-start,
+.btn-submit,
+.btn-next,
+.btn-adopt,
+.mini-action-btn {
+  border: 1px solid var(--animua-red) !important;
+  background: var(--animua-red) !important;
+  color: var(--animua-white) !important;
+}
+
+.primary-btn:hover,
+.auth-submit-btn:hover,
+.auth-side-action:hover,
+.how-animua-primary:hover,
+.btn-start:hover,
+.btn-submit:hover,
+.btn-next:hover,
+.btn-adopt:hover,
+.mini-action-btn:hover,
+.primary-btn:focus-visible,
+.auth-submit-btn:focus-visible,
+.auth-side-action:focus-visible,
+.how-animua-primary:focus-visible,
+.btn-start:focus-visible,
+.btn-submit:focus-visible,
+.btn-next:focus-visible,
+.btn-adopt:focus-visible,
+.mini-action-btn:focus-visible {
+  border-color: var(--animua-red-dark) !important;
+  background: var(--animua-red-dark) !important;
+  color: var(--animua-white) !important;
+  transform: translateY(-1px) !important;
+}
+
+.secondary-btn,
+.hero-link-btn,
+.how-animua-secondary,
+.btn-learn,
+.btn-prev,
+.btn-profile,
+.btn-retake {
+  border: 1px solid rgba(142, 42, 32, 0.72) !important;
+  background: rgba(142, 42, 32, 0.08) !important;
+  color: var(--animua-red) !important;
+}
+
+.secondary-btn:hover,
+.hero-link-btn:hover,
+.how-animua-secondary:hover,
+.btn-learn:hover,
+.btn-prev:hover,
+.btn-profile:hover,
+.btn-retake:hover,
+.secondary-btn:focus-visible,
+.hero-link-btn:focus-visible,
+.how-animua-secondary:focus-visible,
+.btn-learn:focus-visible,
+.btn-prev:focus-visible,
+.btn-profile:focus-visible,
+.btn-retake:focus-visible {
+  border-color: var(--animua-red-dark) !important;
+  background: rgba(142, 42, 32, 0.08) !important;
+  color: var(--animua-red-dark) !important;
+  transform: translateY(-1px) !important;
+}
+
+.btn:disabled,
+.btn-next:disabled,
+.btn-prev:disabled,
+.btn-submit:disabled,
+.auth-submit-btn:disabled {
+  opacity: 0.48 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
+@media (max-width: 640px) {
+  .btn,
+  .primary-btn,
+  .secondary-btn,
+  .hero-link-btn,
+  .how-animua-primary,
+  .how-animua-secondary,
+  .auth-submit-btn,
+  .auth-side-action,
+  .btn-start,
+  .btn-learn,
+  .btn-submit,
+  .btn-next,
+  .btn-prev,
+  .btn-profile,
+  .btn-adopt,
+  .btn-retake,
+  .mini-action-btn {
+    min-height: 44px !important;
+    white-space: normal;
+  }
+}

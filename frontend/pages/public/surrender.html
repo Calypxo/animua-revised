@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="stylesheet" href="../../src/css/public/surrender.css">
 <link rel="stylesheet" href="../../src/css/global.css">
+<link rel="stylesheet" href="../../src/css/public/public-design-system.css">
 </head>
 <body>
 
@@ -18,14 +19,11 @@
 <header class="header" id="home">
   <div class="container nav-shell">
     <a href="#home" class="logo">
-      <div class="logo-icon">
-        <i class="fa-solid fa-heart"></i>
-        <i class="fa-solid fa-paw paw-mini"></i>
-      </div>
-      <div class="logo-text">
-        <h2>Animua</h2>
-        <p>Connect. Learn. Adopt.</p>
-      </div>
+      <img src="../../src/assets/images/animua-logo-transparent.png" alt="ANIMUA" class="navbar-logo-img">
+      <span class="navbar-brand-copy">
+        <span class="navbar-brand-name">ANIMUA</span>
+        <span class="navbar-brand-tagline">Connect. Learn. Adopt.</span>
+      </span>
     </a>
 
     <nav class="navbar" id="navbar">
@@ -118,7 +116,7 @@
             <span>Submitting this form does not guarantee automatic acceptance.</span>
           </div>
           <div class="notice-item">
-            <i class="fa-solid fa-paw"></i>
+            <i class="fa-solid fa-file-circle-check"></i>
             <span>Please provide honest and complete animal information.</span>
           </div>
         </div>
@@ -348,14 +346,11 @@
     <div class="container footer-grid">
       <div class="footer-brand">
         <a href="home.html" class="logo footer-logo">
-          <div class="logo-icon">
-            <i class="fa-solid fa-heart"></i>
-            <i class="fa-solid fa-paw paw-mini"></i>
-          </div>
-          <div class="logo-text">
-            <h2>Animua</h2>
-            <p>Connect. Learn. Adopt.</p>
-          </div>
+          <img src="../../src/assets/images/animua-logo-transparent.png" alt="ANIMUA" class="footer-logo-img">
+          <span class="footer-brand-copy">
+            <span class="footer-brand-name">ANIMUA</span>
+            <span class="footer-brand-tagline">Connect. Learn. Adopt.</span>
+          </span>
         </a>
         <p>
           A partnership project dedicated to rehoming rescued animals, promoting
@@ -377,7 +372,8 @@
     </div>
   </footer>
 
-  <!-- AUTH MODAL -->
+  
+<!-- AUTH MODAL -->
 <div class="auth-modal-overlay hidden" id="authModal">
   <div class="auth-modal-card auth-modal-small" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
 
@@ -386,25 +382,38 @@
     </button>
 
     <div class="auth-modal-left auth-modal-left-simple">
-      <div class="auth-brand-badge">ANIMUA</div>
-      <span class="auth-side-tag" id="authSideTag">Welcome Back</span>
-      <h1 id="authModalTitle">Hello,<br>Welcome back to Animua!</h1>
+      <div class="auth-side-mark" aria-hidden="true">
+        <span>Animua</span>
+      </div>
+      <h1 id="authModalTitle">Welcome back.</h1>
       <p id="authSideText">
-        Log in to continue exploring rescued animals and shelter services.
+        Continue managing matches, applications, and rescued animals through Animua.
       </p>
+      <button type="button" class="auth-side-action" id="authSideAction" onclick="toggleAuthView()">Create account</button>
     </div>
 
     <div class="auth-modal-right">
+      <div class="auth-form-brand">
+        <span>Animua</span>
+      </div>
+
       <div id="login-section">
-        <h2 class="auth-title">Login</h2>
+        <h2 class="auth-title">Welcome Back</h2>
+        <div class="auth-switch-text auth-switch-inline">
+          Sign in to continue supporting rescued animals through Animua.
+        </div>
 
         <form id="login-form" novalidate>
+          <label class="auth-field-label" for="login-email">Email</label>
           <div class="auth-field">
             <input type="email" id="login-email" placeholder="Email" required>
             <span><i class="fa-regular fa-envelope"></i></span>
           </div>
           <small class="auth-error" id="login-email-error"></small>
 
+          <div class="auth-row-label">
+            <label class="auth-field-label" for="login-password">Password</label>
+          </div>
           <div class="auth-field">
             <input type="password" id="login-password" placeholder="Password" required minlength="6">
             <span class="toggle-password" data-target="login-password">
@@ -414,48 +423,91 @@
           <small class="auth-error" id="login-password-error"></small>
 
           <div class="auth-extra-row">
+            <label class="auth-check">
+              <input type="checkbox">
+              <span>Remember this device</span>
+            </label>
             <a href="#" class="auth-muted-link">Forgot password?</a>
           </div>
 
-          <button type="submit" class="auth-submit-btn">Login</button>
+          <button type="submit" class="auth-submit-btn">Log In</button>
         </form>
 
-        <div class="auth-switch-text">
-          Don’t have an account?
-          <button type="button" class="auth-switch-btn" onclick="toggleAuthView()">Register here</button>
+        <div class="auth-bottom-switch">
+          <span>Don't have an account?</span>
+          <button type="button" class="auth-switch-btn" onclick="toggleAuthView()">Create account</button>
         </div>
       </div>
 
       <div id="register-section" class="hidden">
         <h2 class="auth-title">Create Account</h2>
+        <div class="auth-switch-text auth-switch-inline">
+          Use your email to create your Animua account.
+        </div>
 
         <form id="register-form" novalidate>
-          <div class="auth-field">
-            <input type="text" id="reg-name" placeholder="Full Name" required minlength="2">
-            <span><i class="fa-regular fa-user"></i></span>
-          </div>
-          <small class="auth-error" id="reg-name-error"></small>
+          <div class="auth-form-grid">
+            <div>
+              <label class="auth-field-label" for="reg-name">Full Name</label>
+              <div class="auth-field">
+                <input type="text" id="reg-name" placeholder="Full Name" required minlength="2">
+                <span><i class="fa-regular fa-user"></i></span>
+              </div>
+              <small class="auth-error" id="reg-name-error"></small>
+            </div>
 
-          <div class="auth-field">
-            <input type="email" id="reg-email" placeholder="Email Address" required>
-            <span><i class="fa-regular fa-envelope"></i></span>
-          </div>
-          <small class="auth-error" id="reg-email-error"></small>
+            <div>
+              <label class="auth-field-label" for="reg-phone">Mobile Number</label>
+              <div class="auth-field">
+                <input type="tel" id="reg-phone" placeholder="Mobile Number" required>
+                <span><i class="fa-solid fa-phone"></i></span>
+              </div>
+              <small class="auth-error" id="reg-phone-error"></small>
+            </div>
 
-          <div class="auth-field">
-            <input type="password" id="reg-password" placeholder="Create Password" required minlength="6">
-            <span class="toggle-password" data-target="reg-password">
-              <i class="fa-regular fa-eye-slash"></i>
-            </span>
-          </div>
-          <small class="auth-error" id="reg-password-error"></small>
+            <div class="auth-grid-span">
+              <label class="auth-field-label" for="reg-email">Email Address</label>
+              <div class="auth-field">
+                <input type="email" id="reg-email" placeholder="Email Address" required>
+                <span><i class="fa-regular fa-envelope"></i></span>
+              </div>
+              <small class="auth-error" id="reg-email-error"></small>
+            </div>
 
-          <button type="submit" class="auth-submit-btn">Sign Up</button>
+            <div>
+              <label class="auth-field-label" for="reg-password">Password</label>
+              <div class="auth-field">
+                <input type="password" id="reg-password" placeholder="Create Password" required minlength="8">
+                <span class="toggle-password" data-target="reg-password">
+                  <i class="fa-regular fa-eye-slash"></i>
+                </span>
+              </div>
+              <small class="auth-error" id="reg-password-error"></small>
+            </div>
+
+            <div>
+              <label class="auth-field-label" for="reg-confirm-password">Confirm Password</label>
+              <div class="auth-field">
+                <input type="password" id="reg-confirm-password" placeholder="Confirm Password" required minlength="8">
+                <span class="toggle-password" data-target="reg-confirm-password">
+                  <i class="fa-regular fa-eye-slash"></i>
+                </span>
+              </div>
+              <small class="auth-error" id="reg-confirm-password-error"></small>
+            </div>
+          </div>
+
+          <label class="auth-check auth-terms-check">
+            <input type="checkbox">
+            <span>I agree to the terms and privacy policy.</span>
+          </label>
+
+          <button type="submit" class="auth-submit-btn">Create Account</button>
         </form>
 
-        <div class="auth-switch-text">
-          Already a member?
-          <button type="button" class="auth-switch-btn" onclick="toggleAuthView()">Login here</button>
+        <div class="auth-bottom-switch">
+          <span>Already have an account?</span>
+          <button type="button" class="auth-switch-btn" onclick="toggleAuthView()">Log In</button>
         </div>
       </div>
     </div>

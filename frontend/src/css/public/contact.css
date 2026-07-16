@@ -378,8 +378,7 @@
 }
 
 .contact-faq-section {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(255, 227, 227, 0.24));
+  background: transparent;
   border-radius: 46px;
 }
 

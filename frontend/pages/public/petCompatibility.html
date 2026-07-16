@@ -5,8 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ANIMUA — Pet Compatibility Quiz</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="../../src/css/public/petCompatibility.css" />
+<link rel="stylesheet" href="../../src/css/public/public-design-system.css" />
   
 </head>
 <body>
@@ -20,7 +23,7 @@
   <!-- Header -->
   <header class="quiz-header">
     <a href="/pages/public/quizLanding.html" class="header-brand">
-      <div class="header-brand-dot">🐾</div>
+      <img src="../../src/assets/images/animua-logo-transparent.png" alt="ANIMUA" class="public-brand-logo">
       <span>ANIMUA</span>
     </a>
     <div class="header-progress">
@@ -64,11 +67,11 @@
               <span>Social</span>
             </div>
             <div class="phase-step" data-phase="3">
-              <div class="phase-step-dot"><i class="bi bi-house-heart-fill" style="font-size:0.6rem"></i></div>
+              <div class="phase-step-dot"><i class="bi bi-house-fill" style="font-size:0.6rem"></i></div>
               <span>Home & Care</span>
             </div>
             <div class="phase-step" data-phase="4">
-              <div class="phase-step-dot"><i class="bi bi-heart-fill" style="font-size:0.6rem"></i></div>
+              <div class="phase-step-dot"><i class="bi bi-check-circle-fill" style="font-size:0.6rem"></i></div>
               <span>Affection</span>
             </div>
           </div>
@@ -82,7 +85,7 @@
         </div>
 
         <div class="tip-card">
-          <div class="tip-card-label" id="tipLabel">💡 Tip</div>
+          <div class="tip-card-label" id="tipLabel">Tip</div>
           <div class="tip-card-text" id="tipText">Answer based on your real lifestyle, not what you think you should say.</div>
         </div>
       </div>
@@ -93,7 +96,7 @@
   <!-- Completion screen -->
   <div id="completionScreen" style="display:none; flex:1; align-items:center; justify-content:center; padding:40px 24px;">
     <div class="complete-card">
-      <span class="complete-icon">🎉</span>
+      <span class="complete-icon"></span>
       <h2 class="complete-title">All done! Finding your <em>best matches…</em></h2>
       <p class="complete-sub">We're comparing your lifestyle answers with every available pet's compatibility profile. Your top matches are being calculated now.</p>
       <div class="complete-scores" id="completeSummary"></div>

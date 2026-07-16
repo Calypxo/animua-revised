@@ -24,6 +24,7 @@ exports.getAllUsers = async (req, res) => {
         fullName:    safe.fullName    || "",
         firstName:   safe.firstName   || "",
         lastName:    safe.lastName    || "",
+        phone:       safe.phone       || "",
         role:        safe.role        || "Public",
         status:      safe.status      || "Active",
         permissions: safe.permissions || [],

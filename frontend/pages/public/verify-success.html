@@ -4,23 +4,26 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Email Verification - ANIMUA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #970A12;
-      --primary-dark: #7f0810;
-      --accent: #D1601E;
-      --accent-soft: #FECD6E;
-      --bg: #fffaf7;
+      --primary: #8E1616;
+      --primary-dark: #711212;
+      --accent: #F1C045;
+      --accent-soft: #F1C045;
+      --bg: #F7F2E8;
       --card: #ffffff;
-      --text: #2b1d1d;
-      --muted: #6f5c5c;
-      --border: #f0d9d1;
-      --shadow: 0 18px 45px rgba(151, 10, 18, 0.12);
+      --text: #20303A;
+      --muted: #5F5854;
+      --border: rgba(107, 79, 63, 0.16);
+      --shadow: 0 14px 32px rgba(75, 43, 33, 0.10);
       --success: #2e7d32;
       --warning: #b26a00;
-      --radius-lg: 24px;
-      --radius-md: 14px;
-      --radius-sm: 10px;
+      --radius-lg: 8px;
+      --radius-md: 8px;
+      --radius-sm: 6px;
     }
 
     * {
@@ -30,11 +33,8 @@
     body {
       margin: 0;
       min-height: 100vh;
-      font-family: "Segoe UI", Arial, sans-serif;
-      background:
-        radial-gradient(circle at top left, rgba(254, 205, 110, 0.28), transparent 28%),
-        radial-gradient(circle at bottom right, rgba(209, 96, 30, 0.14), transparent 24%),
-        linear-gradient(135deg, #fffaf7 0%, #fffdfb 100%);
+      font-family: "Inter", Arial, sans-serif;
+      background: var(--bg);
       color: var(--text);
       display: flex;
       align-items: center;
@@ -48,7 +48,7 @@
       display: grid;
       grid-template-columns: 1.05fr 0.95fr;
       background: var(--card);
-      border-radius: 30px;
+      border-radius: var(--radius-lg);
       overflow: hidden;
       box-shadow: var(--shadow);
       border: 1px solid rgba(151, 10, 18, 0.08);
@@ -57,8 +57,7 @@
     .brand-panel {
       position: relative;
       padding: 48px 40px;
-      background:
-        linear-gradient(160deg, rgba(151, 10, 18, 0.98), rgba(111, 25, 28, 0.96));
+      background: var(--primary);
       color: white;
       display: flex;
       flex-direction: column;
@@ -67,27 +66,7 @@
     }
 
     .brand-panel::before,
-    .brand-panel::after {
-      content: "";
-      position: absolute;
-      border-radius: 50%;
-      background: rgba(254, 205, 110, 0.12);
-      pointer-events: none;
-    }
-
-    .brand-panel::before {
-      width: 220px;
-      height: 220px;
-      top: -60px;
-      right: -60px;
-    }
-
-    .brand-panel::after {
-      width: 160px;
-      height: 160px;
-      bottom: 40px;
-      left: -50px;
-    }
+    .brand-panel::after { content: none; }
 
     .brand-top,
     .brand-bottom {
@@ -100,9 +79,9 @@
       align-items: center;
       gap: 10px;
       padding: 10px 16px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.12);
-      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 0;
+      background: transparent;
+      border: 0;
       font-size: 13px;
       font-weight: 700;
       letter-spacing: 0.08em;
@@ -111,15 +90,7 @@
       backdrop-filter: blur(4px);
     }
 
-    .paw-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--accent-soft);
-      box-shadow: 18px 0 0 var(--accent-soft), 9px -10px 0 var(--accent-soft), 9px 10px 0 var(--accent-soft);
-      margin-right: 20px;
-      position: relative;
-    }
+    .paw-dot { display: none; }
 
     .brand-title {
       font-size: clamp(2rem, 3vw, 3.1rem);
@@ -179,7 +150,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(180deg, #ffffff 0%, #fffdfb 100%);
+      background: #ffffff;
     }
 
     .card {
@@ -192,10 +163,8 @@
       width: 92px;
       height: 92px;
       margin: 0 auto 20px;
-      border-radius: 50%;
-      background:
-        radial-gradient(circle at 30% 30%, rgba(254, 205, 110, 0.7), rgba(209, 96, 30, 0.18)),
-        #fff5ef;
+      border-radius: var(--radius-lg);
+      background: rgba(142, 22, 22, 0.08);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -209,15 +178,15 @@
     }
 
     .eyebrow {
-      display: inline-block;
+      display: inline-flex;
       font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: var(--accent);
-      background: rgba(254, 205, 110, 0.22);
-      padding: 8px 12px;
-      border-radius: 999px;
+      color: var(--primary);
+      background: transparent;
+      padding: 0;
+      border-radius: 0;
       margin-bottom: 14px;
     }
 
@@ -265,8 +234,9 @@
       appearance: none;
       border: none;
       width: 100%;
-      border-radius: 14px;
-      padding: 14px 18px;
+      border-radius: var(--radius-lg);
+      min-height: 46px;
+      padding: 0 22px;
       font-size: 15px;
       font-weight: 700;
       cursor: pointer;
@@ -283,7 +253,7 @@
 
     #continueBtn,
     #resendBtn {
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      background: var(--primary);
       color: white;
       box-shadow: 0 12px 24px rgba(151, 10, 18, 0.16);
     }
@@ -294,23 +264,23 @@
     }
 
     #refreshBtn {
-      background: #fff4de;
-      color: #8f5600;
-      border: 1px solid #f0d6a6;
+      background: rgba(255, 255, 255, 0.48);
+      color: var(--primary);
+      border: 1px solid rgba(142, 22, 22, 0.32);
     }
 
     .tips-box {
       margin-top: 18px;
       text-align: left;
-      background: #fff9f1;
-      border: 1px solid #f2dfb9;
-      border-radius: 16px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
       padding: 16px 16px 14px;
     }
 
     .tips-title {
       margin: 0 0 10px;
-      color: #9a5b00;
+      color: var(--primary);
       font-size: 0.95rem;
       font-weight: 700;
     }

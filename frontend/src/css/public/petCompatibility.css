@@ -38,7 +38,7 @@ html { scroll-behavior: smooth; }
 
 body {
   font-family: var(--sans);
-  background: var(--cream);
+  background: var(--animua-warm-cream);
   color: var(--dark);
   min-height: 100vh;
 }
@@ -679,10 +679,7 @@ body {
 }
 
 body {
-  background:
-    radial-gradient(circle at 8% 10%, rgba(255, 227, 227, 0.84), transparent 30%),
-    radial-gradient(circle at 92% 22%, rgba(255, 248, 240, 0.92), transparent 32%),
-    linear-gradient(180deg, var(--animua-red-light), var(--animua-cream) 58%, #fff);
+  background: var(--animua-warm-cream);
 }
 
 .quiz-header {

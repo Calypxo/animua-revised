@@ -76,6 +76,7 @@ async function sendVerificationEmail({ email, fullName, verificationLink }) {
 exports.register = async (req, res) => {
   try {
     const fullName = req.body.fullName?.trim();
+    const phone = req.body.phone?.trim() || "";
     const email = req.body.email?.trim().toLowerCase();
     const password = req.body.password;
 
@@ -116,6 +117,7 @@ exports.register = async (req, res) => {
     // SAVE USER IN FIRESTORE AS PENDING VERIFICATION
     await db.collection("users").doc(email).set({
       fullName,
+      phone,
       email,
       password: storedPassword,
       role: "Public",

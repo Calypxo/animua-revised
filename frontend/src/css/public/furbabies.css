@@ -2,7 +2,7 @@
    FIND FURBABIES PAGE
 ========================= */
 .furbabies-page {
-  background: var(--cream);
+  background: var(--animua-warm-cream);
 }
 
 .furbabies-hero {
@@ -1510,9 +1510,7 @@
    ANIMUA FIND FURBABIES THEME
 ========================= */
 .furbabies-page {
-  background:
-    radial-gradient(circle at 14% 10%, rgba(255, 227, 227, 0.8), transparent 30%),
-    linear-gradient(180deg, var(--animua-red-light), var(--animua-cream) 52%, #fff);
+  background: var(--animua-warm-cream);
 }
 
 .finder-shell {
