@@ -6,7 +6,13 @@ import "../css/animalProfiling.css";
 import { protectManagementPage } from "../auth/authGuard.js";
 import { renderTopbarUser } from "../components/management/topbarUser.js";
 import { loadSidebar } from "../components/management/sidebarLoader.js";
-import { getUserName } from "../utils/storage.js";
+import {
+  getUserName,
+} from "../utils/storage.js";
+
+import {
+  hasPermission,
+} from "../auth/permissions.js";
 
 import {
   getAnimalById,
@@ -45,6 +51,7 @@ const TRAIT_COLORS = [
 
 let animal = null;
 let editingMedId = null;
+let currentRole = "";
 
 const speciesEmoji = s => ({ Dog: "🐶", Cat: "🐱", Rabbit: "🐰", Bird: "🐦" }[s] || "🐾");
 
@@ -171,20 +178,71 @@ function renderHero() {
     <span class="profile-tag" style="background:var(--cream-2);color:var(--stone)">${animal.color || "Unknown color"}</span>`;
 
   const btn = document.getElementById("btnStatusChange");
-  if (animal.status === "Profiling" || animal.status === "Quarantine") {
+
+  btn.style.display = "none";
+  btn.onclick = null;
+
+  if (
+    animal.status === "Profiling" &&
+    can("send_to_quarantine")
+  ) {
     btn.style.display = "";
-    btn.innerHTML = `<i class="bi bi-house-heart-fill"></i> Mark Ready`;
-    btn.onclick = () => markStatusChange("Ready");
-  } else if (animal.status === "Ready") {
+
+    btn.innerHTML = `
+      <i class="bi bi-shield-plus"></i>
+      Send to Quarantine
+    `;
+
+    btn.onclick = sendToQuarantine;
+  } else if (
+    animal.status === "Quarantine" &&
+    can("mark_ready")
+  ) {
+    const clearanceStatus = getLatestClearanceStatus();
+
+    const requirementsComplete =
+      clearanceStatus === "Cleared" &&
+      Boolean(animal.behavioralAssessment);
+
+    if (requirementsComplete) {
+      btn.style.display = "";
+
+      btn.innerHTML = `
+        <i class="bi bi-house-heart-fill"></i>
+        Mark Ready
+      `;
+
+      btn.onclick = markReadyForAdoption;
+    }
+  } else if (
+    animal.status === "Ready" &&
+    can("process_adoption")
+  ) {
     btn.style.display = "";
-    btn.innerHTML = `<i class="bi bi-house-heart-fill"></i> Process Adoption`;
-    btn.onclick = () => window.location.href = `/pages/adoptionApplications.html?animalId=${animal.id}`;
-  } else {
-    btn.style.display = "none";
+
+    btn.innerHTML = `
+      <i class="bi bi-person-check-fill"></i>
+      Process Adoption
+    `;
+
+    btn.onclick = () => {
+      window.location.href =
+        `/pages/adoptionApplications.html?animalId=${encodeURIComponent(
+          animal.id
+        )}`;
+    };
   }
 }
 
 async function uploadAnimalPhoto() {
+  if (!can("upload_photo")) {
+    showToast(
+      "error",
+      "You do not have permission to upload or change the animal photo."
+    );
+    return;
+  }
+
   const input = document.getElementById("photoInput");
   const file = input?.files?.[0];
 
@@ -218,6 +276,7 @@ async function uploadAnimalPhoto() {
     animal.photoURL = data.photoURL || "";
 
     const ph = document.getElementById("profilePhoto");
+
     ph.innerHTML = animal.photoURL
       ? `<img src="${animal.photoURL}" alt="${animal.name}" />`
       : `<span>${(animal.name || "A")[0]}</span>`;
@@ -227,25 +286,11 @@ async function uploadAnimalPhoto() {
     showToast("success", "Photo updated successfully.");
   } catch (err) {
     console.error("[uploadAnimalPhoto]", err);
-    showToast("error", err.message || "Failed to upload image.");
-  }
-}
 
-
-async function markStatusChange(newStatus) {
-  try {
-    await updateAnimal(animal.id, { status: newStatus });
-    await refreshAnimal();
-    renderHero();
-    renderOverviewTab();
-    renderMedicalTab();
-    renderBehavioralTab();
-    renderAdoptionTab();
-    renderHistoryTab();
-    showToast("success", `${animal.name} marked as ${newStatus}.`);
-  } catch (err) {
-    console.error("[markStatusChange]", err);
-    showToast("error", err.message || "Failed to update status.");
+    showToast(
+      "error",
+      err.message || "Failed to upload image."
+    );
   }
 }
 
@@ -282,12 +327,40 @@ function renderOverviewTab() {
 }
 
 function renderMedicalTab() {
+
+  const addMedicalButton =
+  document.getElementById("btnAddMedical");
+
+if (addMedicalButton) {
+  addMedicalButton.style.display =
+    animal.status === "Quarantine" &&
+    can("add_medical")
+      ? ""
+      : "none";
+}
+
   const list = document.getElementById("medicalRecordsList");
   const recs = animal.medicalRecords || [];
 
-  if (!recs.length) {
-    list.innerHTML = `<div class="behavioral-empty"><i class="bi bi-clipboard2-x"></i><p>No medical records yet. Add the first record.</p></div>`;
-  } else {
+  if (animal.status === "Profiling") {
+  list.innerHTML = `
+    <div class="behavioral-empty">
+      <i class="bi bi-shield-plus"></i>
+      <p>This animal has not entered quarantine yet.</p>
+      <p style="font-size:0.82rem;color:var(--stone-2)">
+        Complete the basic profile and select
+        “Send to Quarantine” before adding medical records.
+      </p>
+    </div>
+  `;
+} else if (!recs.length) {
+  list.innerHTML = `
+    <div class="behavioral-empty">
+      <i class="bi bi-clipboard2-x"></i>
+      <p>No medical records yet. Add the first record.</p>
+    </div>
+  `;
+} else {
     list.innerHTML = recs.slice().reverse().map(r => {
       const tc = medTypeCfg[r.type] || medTypeCfg.Checkup;
       const cc = clearanceCfg[r.clearance] || clearanceCfg.Pending;
@@ -301,9 +374,19 @@ function renderMedicalTab() {
             <div class="d-flex align-items-center gap-3">
               <span class="med-card-date">${formatDate(r.date)}</span>
               <span class="med-card-vet"><i class="bi bi-person-fill me-1"></i>${r.vet || "—"}</span>
-              <button class="tbl-action-btn" data-med-edit="${r.id}" title="Edit">
-                <i class="bi bi-pencil"></i>
-              </button>
+              ${
+              animal.status === "Quarantine" && can("edit_medical")
+                ? `
+                  <button
+                    class="tbl-action-btn"
+                    data-med-edit="${r.id}"
+                    title="Edit"
+                  >
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                `
+                : ""
+            }
             </div>
           </div>
           <div class="med-card-body">
@@ -320,9 +403,14 @@ function renderMedicalTab() {
     });
   }
 
-  const lastClearance = recs.filter(r => r.clearance).sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-  const clearStatus = lastClearance?.clearance || "Pending";
-  const cc = clearanceCfg[clearStatus] || clearanceCfg.Pending;
+  const clearStatus = getLatestClearanceStatus();
+
+  const cc =
+    clearanceCfg[clearStatus] ||
+    clearanceCfg.Pending;
+
+  const latestMedicalRecord =
+    getLatestMedicalRecord();
 
   document.getElementById("quarantineCard").innerHTML = `
     <div class="qs-title"><i class="bi bi-shield-plus"></i> Quarantine Summary</div>
@@ -331,7 +419,16 @@ function renderMedicalTab() {
         <div class="qs-val"><span class="clearance-badge ${cc.cls}">${cc.label}</span></div>
       </div>
       <div class="qs-item"><div class="qs-lbl">Total Records</div><div class="qs-val">${recs.length}</div></div>
-      <div class="qs-item"><div class="qs-lbl">Last Visit</div><div class="qs-val">${lastClearance ? formatDate(lastClearance.date) : "—"}</div></div>
+      <div class="qs-item">
+  <div class="qs-lbl">Last Visit</div>
+  <div class="qs-val">
+    ${
+      latestMedicalRecord
+        ? formatDate(latestMedicalRecord.date)
+        : "—"
+    }
+  </div>
+</div>
     </div>`;
 }
 
@@ -434,19 +531,55 @@ function renderAdoptionTab() {
       </div>
     </div>
     <div class="mt-3">
-      <a href="/pages/adoptionApplications.html?animalId=${animal.id}" class="btn-primary-clay">
-        <i class="bi bi-person-check-fill"></i> View Adoption Applications
-      </a>
+      ${
+  can("process_adoption")
+    ? `
+      <div class="mt-3">
+        <a
+          href="/pages/adoptionApplications.html?animalId=${encodeURIComponent(
+            animal.id
+          )}"
+          class="btn-primary-clay"
+        >
+          <i class="bi bi-person-check-fill"></i>
+          View Adoption Applications
+        </a>
+      </div>
+    `
+    : ""
+}
     </div>`;
   return;
 }
 
   const missingItems = [];
-  if (!animal.behavioralAssessment) missingItems.push("Behavioral assessment not yet completed");
-  const lastMed = (animal.medicalRecords || []).sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-  if (!lastMed || lastMed.clearance !== "Cleared") missingItems.push("Medical / quarantine not yet cleared");
 
-  btn.style.display = missingItems.length === 0 ? "" : "none";
+  if (animal.status === "Profiling") {
+    missingItems.unshift(
+      "Animal must first be sent to quarantine"
+    );
+  }
+
+  if (!animal.behavioralAssessment) {
+    missingItems.push(
+      "Behavioral assessment not yet completed"
+    );
+  }
+
+  const clearanceStatus = getLatestClearanceStatus();
+
+  if (clearanceStatus !== "Cleared") {
+    missingItems.push(
+      "Medical / quarantine not yet cleared"
+    );
+  }
+
+  const canMarkReady =
+  animal.status === "Quarantine" &&
+  missingItems.length === 0 &&
+  can("mark_ready");
+
+btn.style.display = canMarkReady ? "" : "none";
 
   el.innerHTML = `
     <div class="adoption-status-card">
@@ -459,8 +592,8 @@ function renderAdoptionTab() {
           </div>
         </div>
         <div class="qs-item"><div class="qs-lbl">Medical Clearance</div>
-          <div class="qs-val" style="color:${lastMed?.clearance === "Cleared" ? "var(--green)" : "var(--amber)"}">
-            ${lastMed?.clearance === "Cleared" ? "✓ Cleared" : "⚠ Not cleared"}
+          <div class="qs-val" style="color:${clearanceStatus === "Cleared"? "var(--green)" : "var(--amber)"}">
+            ${clearanceStatus === "Cleared" ? "✓ Cleared" : "⚠ Not cleared"}
           </div>
         </div>
       </div>
@@ -503,7 +636,71 @@ function renderHistoryTab() {
     </div>`;
 }
 
+async function sendToQuarantine() {
+  if (!can("send_to_quarantine")) {
+  showToast(
+    "error",
+    "You do not have permission to send animals to quarantine."
+  );
+  return;
+}
+
+  if (animal.status !== "Profiling") {
+    showToast(
+      "warning",
+      "Only animals currently in profiling can be sent to quarantine."
+    );
+    return;
+  }
+
+  if (
+    !animal.species ||
+    !animal.sex ||
+    !animal.cageNumber ||
+    !animal.housingType
+  ) {
+    showToast(
+      "warning",
+      "Complete the animal profile before sending to quarantine."
+    );
+    return;
+  }
+
+  try {
+    await updateAnimal(animal.id, {
+      status: "Quarantine",
+      profilingStatus: "Completed",
+      quarantineStatus: "Active",
+      quarantineClearance: "Pending",
+      quarantineStartedAt: new Date().toISOString(),
+    });
+
+    await refreshAnimal();
+    renderAllTabs();
+
+    showToast(
+      "success",
+      `${animal.name} has been sent to quarantine.`
+    );
+  } catch (error) {
+    console.error("[sendToQuarantine]", error);
+
+    showToast(
+      "error",
+      error.message || "Failed to send animal to quarantine."
+    );
+  }
+}
+
 function openBehavioralModal() {
+  if (!can("edit_behavioral")) {
+  showToast(
+    "error",
+    "Only veterinarians or administrators can evaluate behavior."
+  );
+  return;
+}
+
   const ba = animal.behavioralAssessment || {};
   document.getElementById("behavioralNotes").value = animal.behavioralNotes || "";
   document.getElementById("behavioralAssessor").value = animal.behavioralAssessor || getUserName()?.split(" ")[0] || "";
@@ -537,6 +734,14 @@ function openBehavioralModal() {
 }
 
 async function saveBehavioralAssessment() {
+  if (!can("edit_behavioral")) {
+  showToast(
+    "error",
+    "You do not have permission to save behavioral assessments."
+  );
+  return;
+}
+
   const traits = {};
   TRAITS.forEach(t => {
     traits[t.key] = parseInt(document.getElementById(`slider-${t.key}`)?.value || 3);
@@ -550,9 +755,7 @@ async function saveBehavioralAssessment() {
     await refreshAnimal();
 
     closeModal("behavioralModalBackdrop");
-    renderBehavioralTab();
-    renderHistoryTab();
-    renderAdoptionTab();
+    renderAllTabs();
     showToast("success", "Behavioral assessment saved.");
   } catch (err) {
     console.error("[saveBehavioralAssessment]", err);
@@ -561,118 +764,443 @@ async function saveBehavioralAssessment() {
 }
 
 function openMedicalModal(medId = null) {
+  const requiredPermission =
+  medId
+    ? "edit_medical"
+    : "add_medical";
+
+if (!can(requiredPermission)) {
+  showToast(
+    "error",
+    "Only veterinarians or administrators can manage medical records."
+  );
+  return;
+}
+
+  if (animal.status !== "Quarantine") {
+    showToast(
+      "warning",
+      "Send the animal to quarantine before adding medical records."
+    );
+    return;
+  }
+
   editingMedId = medId;
-  document.getElementById("medicalModalTitle").textContent = medId ? "Edit Medical Record" : "Add Medical Record";
+
+  document.getElementById("medicalModalTitle").textContent =
+    medId ? "Edit Medical Record" : "Add Medical Record";
+
   document.getElementById("medicalForm").reset();
-  document.getElementById("fMedDate").value = new Date().toISOString().split("T")[0];
+
+  document.getElementById("fMedDate").value =
+    new Date().toISOString().split("T")[0];
+
+  const typeSelect = document.getElementById("fMedType");
+  const clearanceField = document.getElementById("fMedClearance")?.parentElement;
+
+  const updateClearanceVisibility = () => {
+    const selectedType = typeSelect?.value;
+    if (clearanceField) {
+      clearanceField.style.display =
+        selectedType === "Quarantine Clearance" ? "" : "none";
+    }
+  };
+
+  typeSelect?.addEventListener("change", updateClearanceVisibility);
 
   if (medId) {
-    const rec = (animal.medicalRecords || []).find(r => r.id === medId);
-    if (rec) {
-      document.getElementById("fMedType").value = rec.type;
-      document.getElementById("fMedDate").value = rec.date;
-      document.getElementById("fMedVet").value = rec.vet || "";
-      document.getElementById("fMedDiagnosis").value = rec.diagnosis || "";
-      document.getElementById("fMedTreatment").value = rec.treatment || "";
-      document.getElementById("fMedNotes").value = rec.notes || "";
-      document.getElementById("fMedClearance").value = rec.clearance || "Pending";
-      document.getElementById("fMedWeight").value = rec.weight || "";
+    const record = (animal.medicalRecords || []).find(
+      (item) => item.id === medId
+    );
+
+    if (record) {
+      document.getElementById("fMedType").value =
+        record.type || "";
+
+      document.getElementById("fMedDate").value =
+        record.date || "";
+
+      document.getElementById("fMedVet").value =
+        record.vet || "";
+
+      document.getElementById("fMedDiagnosis").value =
+        record.diagnosis || "";
+
+      document.getElementById("fMedTreatment").value =
+        record.treatment || "";
+
+      document.getElementById("fMedNotes").value =
+        record.notes || "";
+
+      document.getElementById("fMedClearance").value =
+        record.clearance || "Pending";
+
+      document.getElementById("fMedWeight").value =
+        record.weight || "";
     }
   }
 
+  updateClearanceVisibility();
   openModal("medicalModalBackdrop");
 }
 
 async function saveMedicalRecord() {
-  const type = document.getElementById("fMedType").value;
-  const date = document.getElementById("fMedDate").value;
+  const requiredPermission = editingMedId
+    ? "edit_medical"
+    : "add_medical";
+
+  if (!can(requiredPermission)) {
+    showToast(
+      "error",
+      "Only veterinarians or administrators can save medical records."
+    );
+    return;
+  }
+
+  if (animal.status !== "Quarantine") {
+    showToast(
+      "warning",
+      "Medical records can only be saved while the animal is in quarantine."
+    );
+    return;
+  }
+
+  const type =
+    document.getElementById("fMedType").value;
+
+  const date =
+    document.getElementById("fMedDate").value;
 
   if (!type) {
-    showToast("error", "Please select a record type.");
+    showToast(
+      "error",
+      "Please select a record type."
+    );
     return;
   }
 
   if (!date) {
-    showToast("error", "Please select a date.");
+    showToast(
+      "error",
+      "Please select a date."
+    );
     return;
   }
+
+  const selectedClearance =
+    document.getElementById("fMedClearance").value ||
+    "Pending";
+
+  const clearance =
+    type === "Quarantine Clearance"
+      ? selectedClearance
+      : "Pending";
 
   const payload = {
     type,
     date,
-    vet: document.getElementById("fMedVet").value.trim(),
-    diagnosis: document.getElementById("fMedDiagnosis").value.trim(),
-    treatment: document.getElementById("fMedTreatment").value.trim(),
-    notes: document.getElementById("fMedNotes").value.trim(),
-    clearance: document.getElementById("fMedClearance").value || "Pending",
-    weight: parseFloat(document.getElementById("fMedWeight").value) || null,
+
+    vet:
+      document
+        .getElementById("fMedVet")
+        .value
+        .trim(),
+
+    diagnosis:
+      document
+        .getElementById("fMedDiagnosis")
+        .value
+        .trim(),
+
+    treatment:
+      document
+        .getElementById("fMedTreatment")
+        .value
+        .trim(),
+
+    notes:
+      document
+        .getElementById("fMedNotes")
+        .value
+        .trim(),
+
+    clearance,
+
+    weight:
+      parseFloat(
+        document.getElementById("fMedWeight").value
+      ) || null,
   };
 
   try {
     if (editingMedId) {
-      await updateMedicalRecordApi(animal.id, editingMedId, payload);
-      showToast("success", "Medical record updated.");
+      await updateMedicalRecordApi(
+        animal.id,
+        editingMedId,
+        payload
+      );
+
+      showToast(
+        "success",
+        "Medical record updated."
+      );
     } else {
-      await addMedicalRecordApi(animal.id, payload);
-      showToast("success", "Medical record added.");
+      await addMedicalRecordApi(
+        animal.id,
+        payload
+      );
+
+      showToast(
+        "success",
+        "Medical record added."
+      );
     }
 
     await refreshAnimal();
+
     closeModal("medicalModalBackdrop");
-    renderMedicalTab();
-    renderAdoptionTab();
-    renderHistoryTab();
+    renderAllTabs();
   } catch (err) {
     console.error("[saveMedicalRecord]", err);
-    showToast("error", err.message || "Failed to save medical record.");
+
+    showToast(
+      "error",
+      err.message || "Failed to save medical record."
+    );
   }
 }
 
+function getLatestMedicalRecord() {
+  const records = [...(animal.medicalRecords || [])];
+
+  if (records.length === 0) {
+    return null;
+  }
+
+  records.sort((a, b) => {
+    const dateA = parseDateValue(a.date)?.getTime() || 0;
+    const dateB = parseDateValue(b.date)?.getTime() || 0;
+
+    return dateB - dateA;
+  });
+
+  return records[0];
+}
+
+function getLatestClearanceStatus() {
+  const clearanceRecords = [
+    ...(animal.medicalRecords || []),
+  ].filter(
+    (record) =>
+      record.type === "Quarantine Clearance" &&
+      record.clearance
+  );
+
+  if (clearanceRecords.length === 0) {
+    return "Pending";
+  }
+
+  clearanceRecords.sort((a, b) => {
+    const dateA =
+      parseDateValue(a.date)?.getTime() || 0;
+
+    const dateB =
+      parseDateValue(b.date)?.getTime() || 0;
+
+    return dateB - dateA;
+  });
+
+  return clearanceRecords[0].clearance || "Pending";
+}
+
+async function markReadyForAdoption() {
+  if (!can("mark_ready")) {
+  showToast(
+    "error",
+    "You do not have permission to mark animals as ready."
+  );
+  return;
+}
+
+  const clearanceStatus = getLatestClearanceStatus();
+
+  if (animal.status !== "Quarantine") {
+    showToast(
+      "error",
+      "Only animals currently in quarantine can be marked ready."
+    );
+
+    return;
+  }
+
+  if (clearanceStatus !== "Cleared") {
+    showToast(
+      "warning",
+      "The veterinarian must clear the animal from quarantine first."
+    );
+
+    return;
+  }
+
+  if (!animal.behavioralAssessment) {
+    showToast(
+      "warning",
+      "Complete the behavioral assessment before marking the animal ready."
+    );
+
+    return;
+  }
+
+  try {
+    await updateAnimal(animal.id, {
+      status: "Ready",
+      quarantineStatus: "Completed",
+      quarantineClearance: "Cleared",
+      quarantineClearedAt: new Date().toISOString(),
+      readyForAdoptionAt: new Date().toISOString(),
+    });
+
+    await refreshAnimal();
+    renderAllTabs();
+
+    showToast(
+      "success",
+      `${animal.name} is now ready for adoption.`
+    );
+  } catch (error) {
+    console.error("[markReadyForAdoption]", error);
+
+    showToast(
+      "error",
+      error.message || "Failed to mark animal as ready."
+    );
+  }
+}
+
+function renderAllTabs() {
+  renderHero();
+  renderOverviewTab();
+  renderMedicalTab();
+  renderBehavioralTab();
+  renderAdoptionTab();
+  renderHistoryTab();
+  applyRolePermissions();
+}
+
 function openEditModal() {
-  document.getElementById("eName").value = animal.name || "";
-  document.getElementById("eSpecies").value = animal.species || "Dog";
-  document.getElementById("eBreed").value = animal.breed || "";
-  document.getElementById("eSex").value = animal.sex || "Unknown";
-  document.getElementById("eAge").value = animal.ageEstimate || "";
-  document.getElementById("eColor").value = animal.color || "";
-  document.getElementById("eWeight").value = animal.weight || "";
-  document.getElementById("eStatus").value = animal.status || "Profiling";
-  document.getElementById("eNotes").value = animal.notes || "";
-  document.getElementById("eCageNumber").value = animal.cageNumber || "";
-  document.getElementById("eHousingType").value = animal.housingType || "Unassigned";
+  if (!can("edit_basic")) {
+    showToast(
+      "error",
+      "You do not have permission to edit the basic animal profile."
+    );
+    return;
+  }
+
+  document.getElementById("eName").value =
+    animal.name || "";
+
+  document.getElementById("eSpecies").value =
+    animal.species || "Dog";
+
+  document.getElementById("eBreed").value =
+    animal.breed || "";
+
+  document.getElementById("eSex").value =
+    animal.sex || "Unknown";
+
+  document.getElementById("eAge").value =
+    animal.ageEstimate || "";
+
+  document.getElementById("eColor").value =
+    animal.color || "";
+
+  document.getElementById("eWeight").value =
+    animal.weight || "";
+
+  document.getElementById("eNotes").value =
+    animal.notes || "";
+
+  document.getElementById("eCageNumber").value =
+    animal.cageNumber || "";
+
+  document.getElementById("eHousingType").value =
+    animal.housingType || "Unassigned";
+
   openModal("editModalBackdrop");
 }
 
 async function saveEditProfile() {
+  if (!can("edit_basic")) {
+    showToast(
+      "error",
+      "You do not have permission to update the basic animal profile."
+    );
+    return;
+  }
+
   const payload = {
-    name: document.getElementById("eName").value.trim() || animal.name,
-    species: document.getElementById("eSpecies").value,
-    breed: document.getElementById("eBreed").value.trim(),
-    sex: document.getElementById("eSex").value,
-    ageEstimate: document.getElementById("eAge").value.trim(),
-    color: document.getElementById("eColor").value.trim(),
-    weight: parseFloat(document.getElementById("eWeight").value) || animal.weight || null,
-    status: document.getElementById("eStatus").value,
-    notes: document.getElementById("eNotes").value.trim(),
-    cageNumber: document.getElementById("eCageNumber").value.trim(),
-    housingType: document.getElementById("eHousingType").value,
+    name:
+      document.getElementById("eName").value.trim() ||
+      animal.name,
+
+    species:
+      document.getElementById("eSpecies").value,
+
+    breed:
+      document.getElementById("eBreed").value.trim(),
+
+    sex:
+      document.getElementById("eSex").value,
+
+    ageEstimate:
+      document.getElementById("eAge").value.trim(),
+
+    color:
+      document.getElementById("eColor").value.trim(),
+
+    weight:
+      parseFloat(
+        document.getElementById("eWeight").value
+      ) ||
+      animal.weight ||
+      null,
+
+    notes:
+      document.getElementById("eNotes").value.trim(),
+
+    cageNumber:
+      document.getElementById("eCageNumber").value.trim(),
+
+    housingType:
+      document.getElementById("eHousingType").value,
   };
 
   try {
-    await updateAnimal(animal.id, payload);
+    await updateAnimal(
+      animal.id,
+      payload
+    );
+
     await refreshAnimal();
 
     closeModal("editModalBackdrop");
-    renderHero();
-    renderOverviewTab();
-    renderMedicalTab();
-    renderBehavioralTab();
-    renderAdoptionTab();
-    renderHistoryTab();
-    showToast("success", "Profile updated successfully.");
+    renderAllTabs();
+
+    showToast(
+      "success",
+      "Profile updated successfully."
+    );
   } catch (err) {
-    console.error("[saveEditProfile]", err);
-    showToast("error", err.message || "Failed to update profile.");
+    console.error(
+      "[saveEditProfile]",
+      err
+    );
+
+    showToast(
+      "error",
+      err.message ||
+        "Failed to update profile."
+    );
   }
 }
 
@@ -720,20 +1248,72 @@ function showToast(type, msg) {
   toastT = setTimeout(() => t.classList.remove("show"), 3500);
 }
 
+function can(action) {
+  return hasPermission(
+    currentRole,
+    "animals",
+    action
+  );
+}
+
+function applyRolePermissions() {
+  const editProfileButton =
+    document.getElementById("btnEditProfile");
+
+  const behavioralButton =
+    document.getElementById("btnEditBehavioral");
+
+  const addMedicalButton =
+    document.getElementById("btnAddMedical");
+
+  const archiveButton =
+    document.getElementById("ddArchive");
+
+  const photoUploadButton =
+    document.querySelector(".photo-upload-btn");
+
+  if (editProfileButton) {
+    editProfileButton.style.display =
+      can("edit_basic") ? "" : "none";
+  }
+
+  if (behavioralButton) {
+    behavioralButton.style.display =
+      can("edit_behavioral") ? "" : "none";
+  }
+
+  if (addMedicalButton) {
+    const canShowMedical =
+      animal.status === "Quarantine" &&
+      can("add_medical");
+
+    addMedicalButton.style.display =
+      canShowMedical ? "" : "none";
+  }
+
+  if (archiveButton) {
+    archiveButton.style.display =
+      can("archive") ? "" : "none";
+  }
+
+  if (photoUploadButton) {
+    photoUploadButton.style.display =
+      can("upload_photo") ? "" : "none";
+  }
+}
+
 
 async function init() {
   try {
-    await protectManagementPage();
+    const session = await protectManagementPage();
+
+    currentRole = session.role;
+
     renderTopbarUser();
     loadSidebar();
     await loadAnimal();
 
-    renderHero();
-    renderOverviewTab();
-    renderMedicalTab();
-    renderBehavioralTab();
-    renderAdoptionTab();
-    renderHistoryTab();
+    renderAllTabs();
 
     bindTabs();
 
@@ -748,23 +1328,41 @@ async function init() {
     document.getElementById("behavioralModalSave")?.addEventListener("click", saveBehavioralAssessment);
 
     document.getElementById("btnAddMedical")?.addEventListener("click", () => openMedicalModal());
+    document.getElementById("btnMarkReady")?.addEventListener("click", markReadyForAdoption);
     document.getElementById("medicalModalClose")?.addEventListener("click", () => closeModal("medicalModalBackdrop"));
     document.getElementById("medicalModalCancel")?.addEventListener("click", () => closeModal("medicalModalBackdrop"));
     document.getElementById("medicalModalSave")?.addEventListener("click", saveMedicalRecord);
 
-    document.getElementById("ddArchive")?.addEventListener("click", async () => {
-      try {
-        await archiveAnimalApi(animal.id);
-        await refreshAnimal();
-        renderHero();
-        renderHistoryTab();
-        renderAdoptionTab();
-        showToast("info", `${animal.name} has been archived.`);
-      } catch (err) {
-        console.error("[archiveAnimal]", err);
-        showToast("error", err.message || "Failed to archive animal.");
-      }
-    });
+    document
+  .getElementById("ddArchive")
+  ?.addEventListener("click", async () => {
+    if (!can("archive")) {
+      showToast(
+        "error",
+        "Only administrators can archive animal records."
+      );
+      return;
+    }
+
+    try {
+      await archiveAnimalApi(animal.id);
+      await refreshAnimal();
+
+      renderAllTabs();
+
+      showToast(
+        "info",
+        `${animal.name} has been archived.`
+      );
+    } catch (err) {
+      console.error("[archiveAnimal]", err);
+
+      showToast(
+        "error",
+        err.message || "Failed to archive animal."
+      );
+    }
+  });
 
     const uploadBtn = document.querySelector(".photo-upload-btn");
 
@@ -774,20 +1372,44 @@ async function init() {
       uploadBtn.style.right = "-5px";
     }
 
-      document.getElementById("photoInput")?.addEventListener("change", async (e) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
+    document
+  .getElementById("photoInput")
+  ?.addEventListener("change", async (event) => {
+    if (!can("upload_photo")) {
+      event.target.value = "";
 
-        // preview
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          const ph = document.getElementById("profilePhoto");
-          ph.innerHTML = `<img src="${ev.target.result}" alt="${animal.name}" />`;
-        };
-        reader.readAsDataURL(file);
+      showToast(
+        "error",
+        "You do not have permission to upload or change the animal photo."
+      );
 
-        await uploadAnimalPhoto();
-      });
+      return;
+    }
+
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = (readerEvent) => {
+      const photoElement =
+        document.getElementById("profilePhoto");
+
+      photoElement.innerHTML = `
+        <img
+          src="${readerEvent.target.result}"
+          alt="${animal.name}"
+        />
+      `;
+    };
+
+    reader.readAsDataURL(file);
+
+    await uploadAnimalPhoto();
+  });
 
     ["editModalBackdrop", "behavioralModalBackdrop", "medicalModalBackdrop"].forEach(id => {
       document.getElementById(id)?.addEventListener("click", e => {

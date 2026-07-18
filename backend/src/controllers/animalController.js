@@ -76,13 +76,18 @@ exports.updateAnimal = async (req, res) => {
       "weight",
       "status",
       "notes",
-      "photoURL"
+      "photoURL",
+      "cageNumber",
+      "housingType"
     ];
 
     const updates = {};
     allowed.forEach((k) => {
       if (req.body[k] !== undefined) updates[k] = req.body[k];
     });
+
+    console.log("[updateAnimal] Incoming req.body:", req.body);
+    console.log("[updateAnimal] Updates object:", updates);
 
     updates.updatedAt = admin.firestore.FieldValue.serverTimestamp();
     updates.updatedBy = req.user?.email || "";
