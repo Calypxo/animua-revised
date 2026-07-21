@@ -3,8 +3,16 @@ const { db, admin } = require("../config/firebase");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
+const https = require("https");
+const path = require("path");
 
 const IS_INSECURE_MODE = false;
+const RECAPTCHA_SECRET_KEY =
+  process.env.RECAPTCHA_SECRET_KEY ||
+  process.env.GOOGLE_RECAPTCHA_SECRET_KEY ||
+  "";
+const CURRENT_POLICY_VERSION = "1.0";
+const EMAIL_HERO_IMAGE_PATH = path.join(__dirname, "../assets/cityvet-services-email.jpg");
 
 // EMAIL TRANSPORTER
 const transporter = nodemailer.createTransport({
@@ -15,61 +23,187 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-async function sendVerificationEmail({ email, fullName, verificationLink }) {
+function escapeHtml(value = "") {
+  return String(value).replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "\"": "&quot;",
+    "'": "&#39;"
+  }[character]));
+}
+
+function formatOtpForEmail(otp = "") {
+  return String(otp)
+    .split("")
+    .map((digit) => `<span style="display:inline-block;padding:0 7px;">${escapeHtml(digit)}</span>`)
+    .join("");
+}
+
+function getEmailHeroImageSrc() {
+  const configuredUrl = process.env.EMAIL_HERO_IMAGE_URL?.trim();
+  if (configuredUrl) return configuredUrl;
+
+  const appBaseUrl = process.env.APP_BASE_URL?.trim().replace(/\/+$/, "");
+  if (appBaseUrl) return `${appBaseUrl}/images/cityvet-services-email.jpg`;
+
+  return "cid:cityvet-services-email";
+}
+
+async function sendEmailVerificationOtp({ email, fullName, otp }) {
+  const safeFullName = escapeHtml(fullName || "ANIMUA user");
+  const formattedOtp = formatOtpForEmail(otp);
+  const heroImageSrc = escapeHtml(getEmailHeroImageSrc());
+
   const mailOptions = {
     from: `"ANIMUA" <${process.env.EMAIL_USER}>`,
     to: email,
-    subject: "Verify Your ANIMUA Account",
+    subject: "Your ANIMUA verification code",
     html: `
-      <div style="margin:0;padding:0;background:#fffaf7;font-family:Segoe UI,Arial,sans-serif;">
-        <div style="max-width:680px;margin:30px auto;background:#ffffff;border-radius:22px;overflow:hidden;box-shadow:0 18px 45px rgba(151,10,18,0.12);border:1px solid rgba(151,10,18,0.08);">
-          
-          <div style="background:linear-gradient(160deg, rgba(151,10,18,0.98), rgba(111,25,28,0.96));padding:42px 36px;color:#ffffff;">
-            <div style="display:inline-block;padding:10px 16px;border-radius:999px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.14);font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">
-              ANIMUA Verification
-            </div>
-
-            <h1 style="margin:22px 0 12px;font-size:32px;line-height:1.15;">
-              Verify your email address
-            </h1>
-
-            <p style="margin:0;font-size:15px;line-height:1.8;color:rgba(255,255,255,0.86);max-width:480px;">
-              Hi ${fullName || "User"}, welcome to ANIMUA. Please verify your email address to activate your account and continue using the system.
-            </p>
-          </div>
-
-          <div style="padding:36px 32px 34px;color:#2b1d1d;">
-            <p style="margin:0 0 16px;font-size:15px;line-height:1.8;color:#6f5c5c;">
-              This verification helps confirm that your email is valid and owned by you. It also helps reduce fake registrations and keeps ANIMUA more secure for adopters, surrenderers, staff, and administrators.
-            </p>
-
-            <div style="margin:28px 0;text-align:center;">
-              <a href="${verificationLink}" style="display:inline-block;background:linear-gradient(135deg,#970A12,#7f0810);color:#ffffff;text-decoration:none;padding:15px 26px;border-radius:14px;font-weight:700;font-size:15px;">
-                Verify My Email
-              </a>
-            </div>
-
-            <p style="margin:0 0 12px;font-size:14px;line-height:1.7;color:#6f5c5c;">
-              If the button does not work, copy and paste this link into your browser:
-            </p>
-
-            <p style="margin:0 0 18px;word-break:break-word;font-size:13px;line-height:1.8;color:#970A12;">
-              ${verificationLink}
-            </p>
-
-            <div style="margin-top:22px;padding:16px 18px;border-radius:14px;background:#fff9f1;border:1px solid #f2dfb9;">
-              <p style="margin:0 0 8px;font-size:14px;font-weight:700;color:#9a5b00;">Quick reminder</p>
-              <p style="margin:0;font-size:13px;line-height:1.7;color:#7b6447;">
-                If you did not create an ANIMUA account, you may safely ignore this email.
-              </p>
-            </div>
-          </div>
-        </div>
+      <div style="display:none;max-height:0;overflow:hidden;color:#f8f3ef;font-size:1px;line-height:1px;">
+        Use this six-digit code to verify your ANIMUA email address.
       </div>
-    `
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0;padding:0;background:#f8f3ef;font-family:Segoe UI,Arial,sans-serif;color:#2d3338;">
+        <tr>
+          <td align="center" style="padding:28px 12px;">
+            <table role="presentation" width="640" cellspacing="0" cellpadding="0" border="0" style="width:640px;max-width:100%;background:#ffffff;border:1px solid #eadbd5;border-radius:14px;overflow:hidden;box-shadow:0 14px 34px rgba(93,31,25,0.10);">
+              <tr>
+                <td align="center" style="padding:26px 28px 18px;background:#ffffff;">
+                  <div style="font-size:35px;line-height:1;font-weight:900;letter-spacing:0.03em;color:#6f2119;">ANIMUA</div>
+                  <div style="margin-top:6px;font-size:12px;font-weight:700;color:#b8792b;">Compassion. Connection. Care.</div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <img src="${heroImageSrc}" width="640" alt="Angeles City Veterinary Office services" style="display:block;width:100%;max-width:640px;height:auto;border:0;line-height:100%;">
+                </td>
+              </tr>
+              <tr>
+                <td align="center" style="padding:30px 34px 18px;background:#ffffff;">
+                  <h1 style="margin:0;color:#6f2119;font-size:30px;line-height:1.2;font-weight:900;">Verify your email</h1>
+                  <div style="width:112px;margin:14px auto 22px;border-top:2px solid #d9a544;"></div>
+                  <p style="margin:0 0 10px;color:#2d3338;font-size:16px;line-height:1.6;font-weight:800;">Hello, ${safeFullName}!</p>
+                  <p style="margin:0;color:#4f575d;font-size:15px;line-height:1.65;">Thank you for creating an ANIMUA account. Use the verification code below to confirm your email address.</p>
+                </td>
+              </tr>
+              <tr>
+                <td align="center" style="padding:10px 34px 16px;background:#ffffff;">
+                  <div style="max-width:420px;margin:0 auto;padding:18px 14px;border:1.5px solid #8e2f25;border-radius:12px;background:#fffdfb;color:#6f2119;font-size:34px;line-height:1.25;font-weight:900;letter-spacing:0.18em;text-align:center;">
+                    ${formattedOtp}
+                  </div>
+                  <p style="margin:16px 0 0;color:#6b625e;font-size:14px;line-height:1.5;">Valid for 10 minutes</p>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:8px 34px 0;background:#ffffff;">
+                  <div style="border-top:1px solid #eadbd5;"></div>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:18px 34px 18px;background:#ffffff;">
+                  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                      <td width="52" valign="top" style="padding-right:14px;">
+                        <div style="width:42px;height:42px;border-radius:50%;background:#f5e7e2;color:#6f2119;text-align:center;line-height:42px;font-size:22px;font-weight:900;">!</div>
+                      </td>
+                      <td valign="top">
+                        <p style="margin:0 0 5px;color:#6f2119;font-size:15px;line-height:1.4;font-weight:900;">For your security</p>
+                        <p style="margin:0;color:#40474c;font-size:14px;line-height:1.55;">Never share this code with anyone. ANIMUA staff will never ask for your verification code.</p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:0 34px;background:#ffffff;">
+                  <div style="border-top:1px solid #eadbd5;"></div>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:18px 34px 28px;background:#ffffff;">
+                  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                      <td width="52" valign="top" style="padding-right:14px;">
+                        <div style="width:42px;height:42px;border-radius:50%;background:#fff4df;color:#8e2f25;text-align:center;line-height:42px;font-size:20px;font-weight:900;">?</div>
+                      </td>
+                      <td valign="top">
+                        <p style="margin:0 0 5px;color:#6f2119;font-size:15px;line-height:1.4;font-weight:900;">Need help?</p>
+                        <p style="margin:0;color:#40474c;font-size:14px;line-height:1.55;">Contact the Angeles City Veterinary Office for questions or assistance.</p>
+                      </td>
+                    </tr>
+                  </table>
+                  <p style="margin:22px 0 0;color:#687077;font-size:13px;line-height:1.55;text-align:center;">If you did not create an ANIMUA account, you may safely ignore this email.</p>
+                </td>
+              </tr>
+              <tr>
+                <td align="center" style="padding:18px 24px 22px;background:#f8f3ef;color:#6f2119;">
+                  <p style="margin:0 0 8px;font-size:13px;line-height:1.4;font-weight:900;">&copy; 2026 ANIMUA</p>
+                  <p style="margin:0;color:#6b625e;font-size:12px;line-height:1.5;">This is an automated message. Please do not reply directly to this email.</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    `,
+    attachments: [
+      {
+        filename: "cityvet-services-email.jpg",
+        path: EMAIL_HERO_IMAGE_PATH,
+        cid: "cityvet-services-email"
+      }
+    ]
   };
 
   await transporter.sendMail(mailOptions);
+}
+
+function verifyRecaptchaToken(token, remoteIp) {
+  return new Promise((resolve, reject) => {
+    if (!RECAPTCHA_SECRET_KEY) {
+      reject(new Error("reCAPTCHA secret key is not configured."));
+      return;
+    }
+
+    const body = new URLSearchParams({
+      secret: RECAPTCHA_SECRET_KEY,
+      response: token
+    });
+
+    if (remoteIp) {
+      body.append("remoteip", remoteIp);
+    }
+
+    const request = https.request(
+      "https://www.google.com/recaptcha/api/siteverify",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Content-Length": Buffer.byteLength(body.toString())
+        }
+      },
+      (response) => {
+        let data = "";
+
+        response.on("data", (chunk) => {
+          data += chunk;
+        });
+
+        response.on("end", () => {
+          try {
+            resolve(JSON.parse(data));
+          } catch (error) {
+            reject(error);
+          }
+        });
+      }
+    );
+
+    request.on("error", reject);
+    request.write(body.toString());
+    request.end();
+  });
 }
 
 // ─── REGISTER ─────────────────────────────────────────────────────────────────
@@ -79,9 +213,44 @@ exports.register = async (req, res) => {
     const phone = req.body.phone?.trim() || "";
     const email = req.body.email?.trim().toLowerCase();
     const password = req.body.password;
+    const captchaToken = req.body.captchaToken;
+    const firebaseUid = req.body.firebaseUid;
+    const firebaseIdToken = req.body.firebaseIdToken;
+    const termsAccepted = req.body.termsAccepted === true;
+    const policyVersion = req.body.policyVersion;
 
     if (!fullName || !email || !password) {
       return res.status(400).json({ message: "All fields are required." });
+    }
+
+    if (!firebaseUid || !firebaseIdToken) {
+      return res.status(400).json({ message: "Firebase account verification is required." });
+    }
+
+    if (!termsAccepted || policyVersion !== CURRENT_POLICY_VERSION) {
+      return res.status(400).json({
+        message: "You must accept the Terms of Use and Privacy Notice to create an account."
+      });
+    }
+
+    if (!captchaToken) {
+      return res.status(400).json({ message: "Please complete the reCAPTCHA check." });
+    }
+
+    if (!RECAPTCHA_SECRET_KEY) {
+      return res.status(503).json({ message: "Captcha verification is not configured." });
+    }
+
+    const captchaResult = await verifyRecaptchaToken(captchaToken, req.ip);
+
+    if (!captchaResult.success) {
+      console.warn("[Register Captcha Failed]", captchaResult["error-codes"] || []);
+      return res.status(403).json({ message: "Captcha verification failed. Please try again." });
+    }
+
+    const decodedToken = await admin.auth().verifyIdToken(firebaseIdToken);
+    if (decodedToken.uid !== firebaseUid || decodedToken.email?.toLowerCase() !== email) {
+      return res.status(401).json({ message: "Firebase account verification failed." });
     }
 
     const userDoc = await db.collection("users").doc(email).get();
@@ -97,52 +266,26 @@ exports.register = async (req, res) => {
       storedPassword = await bcrypt.hash(password, salt);
     }
 
-    // CREATE FIREBASE AUTH USER FIRST
-    let firebaseUser;
-    try {
-      firebaseUser = await admin.auth().getUserByEmail(email);
-    } catch (err) {
-      if (err.code === "auth/user-not-found") {
-        firebaseUser = await admin.auth().createUser({
-          email,
-          password,
-          displayName: fullName,
-          emailVerified: false
-        });
-      } else {
-        throw err;
-      }
-    }
-
-    // SAVE USER IN FIRESTORE AS PENDING VERIFICATION
     await db.collection("users").doc(email).set({
       fullName,
       phone,
       email,
       password: storedPassword,
       role: "Public",
-      status: "Pending Verification",
+      status: "Active",
       emailVerified: false,
+      phoneVerified: false,
+      termsAccepted: true,
+      termsAcceptedAt: admin.firestore.FieldValue.serverTimestamp(),
+      policyVersion: CURRENT_POLICY_VERSION,
       permissions: [],
-      firebaseUid: firebaseUser.uid,
+      firebaseUid,
       createdAt: admin.firestore.FieldValue.serverTimestamp()
     });
 
-    // GENERATE CUSTOM EMAIL VERIFICATION LINK
-    const verificationLink = await admin.auth().generateEmailVerificationLink(email, {
-      url: `${process.env.APP_BASE_URL}/pages/public/verify-email-action.html`,
-      handleCodeInApp: false
-    });
-
-    // SEND CUSTOM ANIMUA EMAIL
-    await sendVerificationEmail({
-      email,
-      fullName,
-      verificationLink
-    });
-
     return res.status(201).json({
-      message: "Registration successful. A verification email has been sent."
+      requiresEmailVerification: true,
+      message: "Registration successful. Please verify your email before logging in."
     });
   } catch (error) {
     console.error("[Register Error]", error.message);
@@ -151,13 +294,186 @@ exports.register = async (req, res) => {
 };
 
 // ─── LOGIN ────────────────────────────────────────────────────────────────────
+exports.requestEmailVerificationOtp = async (req, res) => {
+  try {
+    const firebaseIdToken = req.body.firebaseIdToken;
+
+    if (!firebaseIdToken) {
+      return res.status(400).json({ message: "Firebase verification token is required." });
+    }
+
+    const decodedToken = await admin.auth().verifyIdToken(firebaseIdToken);
+    const firebaseUser = await admin.auth().getUser(decodedToken.uid);
+    const email = firebaseUser.email?.toLowerCase();
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required." });
+    }
+
+    if (firebaseUser.emailVerified) {
+      return res.status(409).json({ message: "Email is already verified." });
+    }
+
+    const userDoc = await db.collection("users").doc(email).get();
+    if (!userDoc.exists) {
+      return res.status(404).json({ message: "User profile not found." });
+    }
+
+    const existingOtpDoc = await db.collection("emailVerificationOtps").doc(email).get();
+    if (existingOtpDoc.exists) {
+      const existing = existingOtpDoc.data();
+      const createdAt = existing.createdAt?.toDate ? existing.createdAt.toDate() : null;
+
+      if (createdAt && Date.now() - createdAt.getTime() < 60 * 1000) {
+        return res.status(429).json({ message: "Please wait before requesting another email OTP." });
+      }
+    }
+
+    const otp = String(Math.floor(100000 + Math.random() * 900000));
+    const otpHash = await bcrypt.hash(otp, 10);
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+    const userData = userDoc.data();
+
+    await db.collection("emailVerificationOtps").doc(email).set({
+      email,
+      firebaseUid: firebaseUser.uid,
+      otpHash,
+      attempts: 0,
+      expiresAt,
+      createdAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    await sendEmailVerificationOtp({
+      email,
+      fullName: userData.fullName,
+      otp
+    });
+
+    return res.status(200).json({ message: "We sent a six-digit OTP to your email." });
+  } catch (error) {
+    console.error("[Request Email Verification OTP Error]", error.message);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+exports.confirmEmailVerificationOtp = async (req, res) => {
+  try {
+    const firebaseIdToken = req.body.firebaseIdToken;
+    const otp = String(req.body.otp || "").trim();
+
+    if (!firebaseIdToken || !otp) {
+      return res.status(400).json({ message: "Firebase token and OTP are required." });
+    }
+
+    if (!/^\d{6}$/.test(otp)) {
+      return res.status(400).json({ message: "Please enter the six-digit email OTP." });
+    }
+
+    const decodedToken = await admin.auth().verifyIdToken(firebaseIdToken);
+    const firebaseUser = await admin.auth().getUser(decodedToken.uid);
+    const email = firebaseUser.email?.toLowerCase();
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required." });
+    }
+
+    const otpRef = db.collection("emailVerificationOtps").doc(email);
+    const otpDoc = await otpRef.get();
+
+    if (!otpDoc.exists) {
+      return res.status(404).json({ message: "No email OTP request found. Please request a new code." });
+    }
+
+    const otpData = otpDoc.data();
+    const expiresAt = otpData.expiresAt?.toDate ? otpData.expiresAt.toDate() : new Date(otpData.expiresAt);
+
+    if (!expiresAt || expiresAt.getTime() < Date.now()) {
+      await otpRef.delete();
+      return res.status(410).json({ message: "Email OTP expired. Please request a new code." });
+    }
+
+    if ((otpData.attempts || 0) >= 5) {
+      await otpRef.delete();
+      return res.status(429).json({ message: "Too many email OTP attempts. Please request a new code." });
+    }
+
+    const isOtpMatch = await bcrypt.compare(otp, otpData.otpHash);
+    if (!isOtpMatch) {
+      await otpRef.update({
+        attempts: admin.firestore.FieldValue.increment(1),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+      return res.status(401).json({ message: "Incorrect email OTP. Please try again." });
+    }
+
+    await admin.auth().updateUser(firebaseUser.uid, {
+      emailVerified: true
+    });
+
+    const userRef = db.collection("users").doc(email);
+    const userDoc = await userRef.get();
+
+    if (!userDoc.exists) {
+      return res.status(404).json({ message: "User profile not found." });
+    }
+
+    const userData = userDoc.data();
+
+    await userRef.update({
+      emailVerified: true,
+      status: "Active",
+      lastLogin: admin.firestore.FieldValue.serverTimestamp(),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    await otpRef.delete();
+
+    const token = jwt.sign(
+      {
+        email: userData.email,
+        fullName: userData.fullName,
+        role: userData.role
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "8h", algorithm: "HS256" }
+    );
+
+    return res.status(200).json({
+      message: "Email verified successfully.",
+      token,
+      role: userData.role,
+      fullName: userData.fullName,
+      email: userData.email,
+      emailVerified: true,
+      phoneVerified: Boolean(userData.phoneVerified)
+    });
+  } catch (error) {
+    console.error("[Confirm Email Verification OTP Error]", error.message);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
 exports.login = async (req, res) => {
   try {
     const email = req.body.email?.trim().toLowerCase();
     const password = req.body.password;
+    const captchaToken = req.body.captchaToken;
 
     if (!email || !password) {
       return res.status(400).json({ message: "Email and password are required." });
+    }
+
+    if (captchaToken) {
+      if (!RECAPTCHA_SECRET_KEY) {
+        return res.status(503).json({ message: "Captcha verification is not configured." });
+      }
+
+      const captchaResult = await verifyRecaptchaToken(captchaToken, req.ip);
+
+      if (!captchaResult.success) {
+        console.warn("[Login Captcha Failed]", captchaResult["error-codes"] || []);
+        return res.status(403).json({ message: "Captcha verification failed. Please try again." });
+      }
     }
 
     const userDoc = await db.collection("users").doc(email).get();
@@ -184,6 +500,27 @@ exports.login = async (req, res) => {
       return res.status(401).json({ message: "Invalid email or password." });
     }
 
+    if (!userData.emailVerified && !userData.phoneVerified) {
+      const firebaseUser = userData.firebaseUid
+        ? await admin.auth().getUser(userData.firebaseUid)
+        : await admin.auth().getUserByEmail(email);
+
+      if (!firebaseUser.emailVerified && !firebaseUser.phoneNumber) {
+        return res.status(403).json({
+          message: "Please verify your email or phone number before logging in."
+        });
+      }
+
+      await db.collection("users").doc(email).update({
+        emailVerified: Boolean(firebaseUser.emailVerified),
+        phone: firebaseUser.phoneNumber || userData.phone || "",
+        phoneVerified: Boolean(firebaseUser.phoneNumber),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+      userData.emailVerified = Boolean(firebaseUser.emailVerified);
+      userData.phoneVerified = Boolean(firebaseUser.phoneNumber);
+    }
+
     const token = jwt.sign(
       {
         email: userData.email,
@@ -203,7 +540,9 @@ exports.login = async (req, res) => {
       token,
       role: userData.role,
       fullName: userData.fullName,
-      email: userData.email
+      email: userData.email,
+      emailVerified: Boolean(userData.emailVerified),
+      phoneVerified: Boolean(userData.phoneVerified)
     });
   } catch (error) {
     console.error("[Login Error]", error.message);
@@ -212,6 +551,81 @@ exports.login = async (req, res) => {
 };
 
 // ─── UPDATE USERNAME ──────────────────────────────────────────────────────────
+exports.confirmPhoneVerification = async (req, res) => {
+  try {
+    const firebaseIdToken = req.body.firebaseIdToken;
+
+    if (!firebaseIdToken) {
+      return res.status(400).json({ message: "Firebase verification token is required." });
+    }
+
+    const decodedToken = await admin.auth().verifyIdToken(firebaseIdToken);
+    const firebaseUser = await admin.auth().getUser(decodedToken.uid);
+    const email = firebaseUser.email?.toLowerCase();
+
+    if (!email || !firebaseUser.phoneNumber) {
+      return res.status(400).json({ message: "Phone number is not verified yet." });
+    }
+
+    const userRef = db.collection("users").doc(email);
+    const userDoc = await userRef.get();
+
+    if (!userDoc.exists) {
+      return res.status(404).json({ message: "User profile not found." });
+    }
+
+    await userRef.update({
+      phone: firebaseUser.phoneNumber,
+      phoneVerified: true,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    return res.status(200).json({
+      message: "Phone number verified successfully."
+    });
+  } catch (error) {
+    console.error("[Confirm Phone Verification Error]", error.message);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+exports.discardUnverifiedRegistration = async (req, res) => {
+  try {
+    const firebaseIdToken = req.body.firebaseIdToken;
+
+    if (!firebaseIdToken) {
+      return res.status(400).json({ message: "Firebase verification token is required." });
+    }
+
+    const decodedToken = await admin.auth().verifyIdToken(firebaseIdToken);
+    const email = decodedToken.email?.toLowerCase();
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required." });
+    }
+
+    const firebaseUser = await admin.auth().getUser(decodedToken.uid);
+    const userRef = db.collection("users").doc(email);
+    const userDoc = await userRef.get();
+
+    if (firebaseUser.emailVerified || firebaseUser.phoneNumber) {
+      return res.status(409).json({ message: "Verified accounts cannot be discarded." });
+    }
+
+    if (userDoc.exists) {
+      const userData = userDoc.data();
+      if (!userData.emailVerified && !userData.phoneVerified) {
+        await userRef.delete();
+      }
+    }
+
+    return res.status(200).json({ message: "Unverified registration discarded." });
+  } catch (error) {
+    console.error("[Discard Unverified Registration Error]", error.message);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
 exports.updateUsername = async (req, res) => {
   try {
     const email = req.user?.email;

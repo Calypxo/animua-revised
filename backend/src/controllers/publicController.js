@@ -189,7 +189,7 @@ exports.getPublicEvents = async (req, res) => {
     const now = new Date();
     now.setHours(0, 0, 0, 0);
 
-    const events = snapshot.docs
+    const publishedEvents = snapshot.docs
       .map((doc) => {
         const data = doc.data();
 
@@ -212,9 +212,18 @@ exports.getPublicEvents = async (req, res) => {
       })
       .filter((event) => {
         const dateValue = getEventDateValue(event);
-        return isPublishedEvent(event) && dateValue && dateValue >= now.getTime();
-      })
+        return isPublishedEvent(event) && Boolean(dateValue);
+      });
+
+    const upcomingEvents = publishedEvents
+      .filter((event) => getEventDateValue(event) >= now.getTime())
       .sort((a, b) => getEventDateValue(a) - getEventDateValue(b));
+
+    const recentEvents = publishedEvents
+      .filter((event) => getEventDateValue(event) < now.getTime())
+      .sort((a, b) => getEventDateValue(b) - getEventDateValue(a));
+
+    const events = (upcomingEvents.length ? upcomingEvents : recentEvents).slice(0, 4);
 
     res.status(200).json({
       events,

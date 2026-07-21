@@ -44,7 +44,11 @@ document.addEventListener("DOMContentLoaded", () => {
             title:            "Logged Out",
             text:             "Your session has been securely terminated.",
             timer:            1500,
-            showConfirmButton: false
+            showConfirmButton: false,
+            customClass: {
+                popup: "animua-popup"
+            },
+            buttonsStyling: false
         });
         window.location.href = "/";
     });

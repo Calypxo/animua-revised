@@ -7218,7 +7218,7 @@ body.home-page .home-highlights-track {
   width: min(100%, 1280px);
   max-width: 1280px;
   display: grid;
-  grid-template-columns: repeat(5, minmax(110px, 1fr));
+  grid-template-columns: repeat(4, minmax(110px, 1fr));
   gap: clamp(18px, 4vw, 58px);
   align-items: start;
   margin: 0 auto;
@@ -7281,10 +7281,6 @@ body.home-page .home-highlight-story:nth-child(3) img {
 
 body.home-page .home-highlight-story:nth-child(4) img {
   object-position: 50% 45%;
-}
-
-body.home-page .home-highlight-story:nth-child(5) img {
-  object-position: 50% 52%;
 }
 
 body.home-page .home-highlight-story:hover .highlight-cover,
@@ -7508,6 +7504,17 @@ body.home-page .home-highlight-story:focus-visible {
   box-shadow: 0 14px 28px rgba(75, 43, 33, 0.14);
   outline: none;
   transform: translateY(-1px);
+}
+
+.story-pet-card-static {
+  cursor: default;
+}
+
+.story-pet-card-static:hover,
+.story-pet-card-static:focus-visible {
+  border-color: rgba(142, 22, 22, 0.12);
+  box-shadow: none;
+  transform: none;
 }
 
 .story-pet-card img {
@@ -9173,8 +9180,8 @@ body.home-page .how-animua-step:nth-child(even) > div {
 body.home-page .how-animua-visual {
   order: -1;
   position: relative;
-  width: 86px;
-  height: 86px;
+  width: 104px;
+  height: 104px;
   display: grid;
   place-items: center;
   margin: 0 0 12px;
@@ -9334,8 +9341,8 @@ body.home-page .how-animua-secondary:focus-visible i {
   }
 
   body.home-page .how-animua-visual {
-    width: 78px;
-    height: 78px;
+    width: 94px;
+    height: 94px;
   }
 
   body.home-page .how-animua-actions,
@@ -9346,5 +9353,68 @@ body.home-page .how-animua-secondary:focus-visible i {
 
   body.home-page .how-animua-secondary {
     min-width: 0;
+  }
+}
+
+/* Final login pill treatment for the transparent homepage navbar. */
+body.home-page .login-btn {
+  width: auto !important;
+  min-width: 104px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 9px !important;
+  padding: 0 18px !important;
+  border: 1px solid rgba(255, 255, 255, 0.48) !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.16) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18) !important;
+  text-decoration: none !important;
+  text-shadow: none !important;
+  backdrop-filter: blur(10px);
+}
+
+body.home-page .login-btn:hover,
+body.home-page .login-btn:focus-visible {
+  background: rgba(255, 255, 255, 0.26) !important;
+  border-color: rgba(255, 255, 255, 0.7) !important;
+  color: #FFFFFF !important;
+  opacity: 1 !important;
+  transform: translateY(-1px) !important;
+}
+
+body.home-page .login-btn span {
+  display: inline !important;
+}
+
+body.home-page .login-btn i {
+  font-size: 0.95rem !important;
+}
+
+body.home-page .header.scrolled .login-btn {
+  border-color: rgba(142, 42, 32, 0.22) !important;
+  background: rgba(142, 42, 32, 0.1) !important;
+  color: var(--animua-red-dark) !important;
+  box-shadow: none !important;
+}
+
+body.home-page .header.scrolled .login-btn:hover,
+body.home-page .header.scrolled .login-btn:focus-visible {
+  background: var(--animua-red-dark) !important;
+  border-color: var(--animua-red-dark) !important;
+  color: #FFFFFF !important;
+}
+
+@media (max-width: 520px) {
+  body.home-page .login-btn {
+    min-width: 92px !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    padding: 0 13px !important;
+    gap: 7px !important;
+    font-size: 0.86rem !important;
   }
 }

@@ -37,11 +37,14 @@ function clearFormErrors() {
   const errorIds = [
     "login-email-error",
     "login-password-error",
-    "reg-name-error",
-    "reg-phone-error",
+    "login-captcha-error",
+    "reg-first-name-error",
+    "reg-last-name-error",
     "reg-email-error",
     "reg-password-error",
-    "reg-confirm-password-error"
+    "reg-confirm-password-error",
+    "reg-captcha-error",
+    "email-verification-message"
   ];
 
   errorIds.forEach((id) => {
@@ -173,19 +176,24 @@ function updateAuthUI() {
     logoutBtn.dataset.bound = "true";
     logoutBtn.addEventListener("click", async () => {
       const result = await Swal.fire({
-  icon: "question",
-  title: "Logout",
-  text: "Are you sure you want to log out?",
-  showCancelButton: true,
-  confirmButtonText: "Yes",
-  cancelButtonText: "Cancel",
-  customClass: {
-    popup: "animua-popup",
-    confirmButton: "animua-confirm",
-    cancelButton: "animua-cancel"
-  },
-  buttonsStyling: false
-});
+        title: "Log out of ANIMUA?",
+        html: `
+          <p class="animua-logout-copy">You will need to sign in again to access your account and continue your activities.</p>
+        `,
+        iconHtml: '<span class="animua-logout-mark"><i class="fa-solid fa-right-from-bracket"></i></span>',
+        showCancelButton: true,
+        showCloseButton: true,
+        confirmButtonText: '<i class="fa-solid fa-right-from-bracket"></i><span>Log Out</span>',
+        cancelButtonText: "Cancel",
+        customClass: {
+          popup: "animua-popup animua-logout-popup",
+          icon: "animua-logout-icon",
+          closeButton: "animua-logout-close",
+          confirmButton: "animua-confirm",
+          cancelButton: "animua-cancel"
+        },
+        buttonsStyling: false
+      });
 
       if (!result.isConfirmed) return;
 
@@ -256,6 +264,7 @@ function setupHomeStories() {
   const upcomingEventMedia = document.getElementById("upcomingEventMedia");
   const upcomingEventImage = document.getElementById("upcomingEventImage");
   const upcomingEventTitle = document.getElementById("upcomingEventTitle");
+  const upcomingEventLabel = document.getElementById("upcomingEventLabel");
   const upcomingEventDate = document.getElementById("upcomingEventDate");
   const upcomingEventTime = document.getElementById("upcomingEventTime");
   const upcomingEventLocation = document.getElementById("upcomingEventLocation");
@@ -269,6 +278,8 @@ function setupHomeStories() {
   let newestPets = [];
   let eventsLoaded = false;
   let upcomingEvents = [];
+  let adoptedStoriesLoaded = false;
+  let adoptedStories = [];
 
   const highlightContent = {
     "new-furbabies": {
@@ -279,39 +290,26 @@ function setupHomeStories() {
         "Discover the newest animals currently available for adoption at the Angeles City Veterinary Office. View their profiles to learn about their age, temperament, health information, and care needs.",
       primary: { label: "View All Furbabies", href: "find-furbabies.html" }
     },
-    "adoption-guide": {
-      tag: "Adoption Guide",
-      title: "Your Adoption Journey",
-      image: "../../src/assets/images/about-cat-cages.jpeg",
-      intro:
-        "Adopting an animal is a long-term commitment. ANIMUA helps applicants understand the process and submit the information needed by the shelter for evaluation.",
-      primary: { label: "Browse Furbabies", href: "find-furbabies.html" },
-      secondary: { label: "Take Match Quiz", href: "/pages/public/quizLanding.html" }
-    },
-    matching: {
-      tag: "Compatibility",
-      title: "Find a More Compatible Match",
-      image: "../../src/assets/images/service-match-shelter.jpg",
-      intro:
-        "ANIMUA compares your preferences and living situation with the characteristics and care requirements of animals available for adoption.",
-      primary: { label: "Take the Match Quiz", href: "/pages/public/quizLanding.html" },
-      secondary: { label: "Browse All Furbabies", href: "find-furbabies.html" }
-    },
     events: {
       tag: "Events",
-      title: "Shelter and Community Events",
+      title: "Upcoming Events",
       image: "../../src/assets/images/about-free-vaccination.jpg",
       intro:
-        "Stay informed about activities organized or announced by the Angeles City Veterinary Office, including adoption campaigns, vaccination drives, and animal welfare initiatives."
+        "Stay informed about the nearest published shelter or community event from the Angeles City Veterinary Office."
     },
-    "surrender-guide": {
-      tag: "Surrender Guide",
-      title: "Before Submitting a Surrender Request",
-      image: "../../src/assets/images/service-surrender-form.jpg",
+    "success-stories": {
+      tag: "Success Stories",
+      title: "Adoption Success Stories",
+      image: "../../src/assets/images/about-shelter-house.png",
       intro:
-        "Surrendering an animal should be considered carefully. ANIMUA allows eligible pet owners to submit a request for shelter review, but submitting a request does not guarantee that the animal will immediately be accepted.",
-      primary: { label: "Start Surrender Request", href: "surrender.html" },
-      secondary: { label: "Contact the Shelter", href: "contact.html" }
+        "Read real adoption outcomes recorded in ANIMUA. No testimonial is shown unless it comes from project data."
+    },
+    "adoption-tips": {
+      tag: "Adoption Tips",
+      title: "Before Adoption Day",
+      image: "../../src/assets/images/how-submit-application.jpg",
+      intro:
+        "Review practical adoption reminders aligned with the shelter adoption process and responsible pet ownership."
     }
   };
 
@@ -338,7 +336,9 @@ function setupHomeStories() {
 
   const getPetDateValue = (pet = {}) => {
     const value = pet.createdAt || pet.updatedAt || pet.intakeDate || "";
+    if (value?.toDate) return value.toDate().getTime();
     if (value?._seconds) return value._seconds * 1000;
+    if (value?.seconds) return value.seconds * 1000;
     if (typeof value === "number") return value;
     const parsed = Date.parse(value);
     return Number.isNaN(parsed) ? 0 : parsed;
@@ -374,6 +374,9 @@ function setupHomeStories() {
 
   const getEventDateValue = (event = {}) => {
     const value = event.date || event.eventDate || event.startDate || event.startsAt || event.startAt || "";
+    if (value?.toDate) return value.toDate().getTime();
+    if (value?._seconds) return value._seconds * 1000;
+    if (value?.seconds) return value.seconds * 1000;
     const parsed = Date.parse(value);
     return Number.isNaN(parsed) ? 0 : parsed;
   };
@@ -414,10 +417,20 @@ function setupHomeStories() {
       .filter((event) => {
         if (!isPublishedEvent(event)) return false;
         const dateValue = getEventDateValue(event);
-        return dateValue && dateValue >= now.getTime();
+        return Boolean(dateValue) && dateValue >= now.getTime();
       })
       .sort((a, b) => getEventDateValue(a) - getEventDateValue(b))
       .slice(0, 4);
+  };
+
+  const isUpcomingEvent = (event = {}) => {
+    const dateValue = getEventDateValue(event);
+    if (!dateValue) return false;
+
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+
+    return dateValue >= now.getTime();
   };
 
   const getDemoUpcomingEvent = () => {
@@ -427,7 +440,7 @@ function setupHomeStories() {
 
     return {
       id: "demo-upcoming-event",
-      title: "Veterinary Services Brought Closer to Angeleños",
+      title: "Veterinary Services Brought Closer to Angelenos",
       date: date.toISOString(),
       time: "9:00 AM - 3:00 PM",
       location: "Savannah Phase 1, Savannah Phase 2, and Green Plain Phase 3",
@@ -451,8 +464,11 @@ function setupHomeStories() {
         const response = await fetch(`${API_BASE_URL}${endpoint}`);
         if (!response.ok) continue;
 
-        upcomingEvents = normalizeEvents(await response.json());
-        return upcomingEvents;
+        const events = normalizeEvents(await response.json());
+        if (events.length) {
+          upcomingEvents = events;
+          return upcomingEvents;
+        }
       } catch (error) {
         console.warn(`Homepage events load skipped for ${endpoint}:`, error);
       }
@@ -471,9 +487,43 @@ function setupHomeStories() {
       console.warn("Homepage Firestore events load skipped:", error);
     }
 
-    // Demo fallback for homepage design review while no published event exists yet.
     upcomingEvents = [getDemoUpcomingEvent()];
     return upcomingEvents;
+  };
+
+  const normalizeAdoptedStories = (data) => {
+    const rawPets = Array.isArray(data) ? data : data?.pets || data?.animals || [];
+    return rawPets
+      .filter((pet) => {
+        const status = String(pet.status || pet.adoptionStatus || "").toLowerCase();
+        return status.includes("adopted") || status.includes("finalized");
+      })
+      .sort((a, b) => {
+        const aDate = a.adoptionDate || a.approvedAt || a.updatedAt || a.createdAt || "";
+        const bDate = b.adoptionDate || b.approvedAt || b.updatedAt || b.createdAt || "";
+        return getPetDateValue({ updatedAt: bDate }) - getPetDateValue({ updatedAt: aDate });
+      })
+      .slice(0, 3);
+  };
+
+  const loadAdoptedStories = async () => {
+    if (adoptedStoriesLoaded) return adoptedStories;
+    adoptedStoriesLoaded = true;
+
+    try {
+      const snapshot = await getDocs(collection(db, "animals"));
+      adoptedStories = normalizeAdoptedStories(
+        snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data()
+        }))
+      );
+    } catch (error) {
+      console.warn("Homepage adopted stories load skipped:", error);
+      adoptedStories = [];
+    }
+
+    return adoptedStories;
   };
 
   const formatEventDate = (event = {}) => {
@@ -509,6 +559,18 @@ function setupHomeStories() {
   const getEventImage = (event = {}) =>
     event.image || event.imageUrl || event.imageURL || event.photoURL || event.coverImage || "";
 
+  const getPetImage = (pet = {}) =>
+    pet.photoURL || pet.image || pet.imageUrl || pet.imageURL || pet.photo || fallbackPetImage(pet);
+
+  const updateHighlightPreview = (key, image, alt) => {
+    const button = document.querySelector(`.home-highlight-story[data-highlight-key="${key}"]`);
+    const img = button?.querySelector(".highlight-cover img");
+    if (!button || !img || !image) return;
+
+    img.src = image;
+    img.alt = alt || img.alt || "";
+  };
+
   const setOptionalEventRow = (rowId, valueElement, value) => {
     const row = document.getElementById(rowId);
     if (!row || !valueElement) return;
@@ -529,15 +591,17 @@ function setupHomeStories() {
     const events = await loadUpcomingEvents();
     const event = events[0];
 
-    if (!event) {
-      upcomingEventSection.classList.add("hidden");
-      return;
-    }
-
     const image = getEventImage(event);
     const title = event.title || event.name || "Shelter Event";
     const description = getEventDescription(event);
+    const isUpcoming = isUpcomingEvent(event);
 
+    updateHighlightPreview("events", image, title);
+
+    if (upcomingEventLabel) {
+      upcomingEventLabel.textContent = isUpcoming ? "UPCOMING EVENT" : "EVENT HIGHLIGHT";
+    }
+    upcomingEventSection.setAttribute("aria-label", isUpcoming ? "Upcoming event" : "Event highlight");
     upcomingEventTitle.textContent = title;
     setOptionalEventRow("upcomingEventDateRow", upcomingEventDate, formatEventDate(event));
     setOptionalEventRow("upcomingEventTimeRow", upcomingEventTime, formatEventTime(event));
@@ -558,6 +622,7 @@ function setupHomeStories() {
     }
 
     if (upcomingEventAction) {
+      upcomingEventAction.textContent = "View Event";
       upcomingEventAction.addEventListener("click", openEventsModal);
     }
 
@@ -677,88 +742,104 @@ function setupHomeStories() {
     `;
   };
 
+  const renderSuccessStories = async () => {
+    storyModalContent.innerHTML = '<p class="story-loading">Loading success stories...</p>';
+    const stories = await loadAdoptedStories();
+
+    if (!stories.length) {
+      storyModalText.textContent =
+        "Approved adoption stories will appear here once recorded in ANIMUA.";
+      storyModalContent.innerHTML =
+        '<p class="story-empty-state">Stories coming soon.</p>';
+      return;
+    }
+
+    const featuredStory = stories[0];
+    const image = getPetImage(featuredStory);
+
+    if (storyModalImage) {
+      storyModalImage.src = image;
+      storyModalImage.alt = featuredStory.name || "Adopted furbaby";
+    }
+
+    storyModalTitle.textContent = `${featuredStory.name || "A furbaby"} found a home`;
+    storyModalText.textContent =
+      "This adoption outcome comes from ANIMUA animal records.";
+
+    storyModalContent.innerHTML = `
+      <div class="story-pet-list">
+        ${stories
+          .map((pet) => {
+            const adoptionDate = pet.adoptionDate || "";
+            return `
+              <article class="story-pet-card story-pet-card-static">
+                <img src="${escapeHtml(getPetImage(pet))}" alt="${escapeHtml(pet.name || "Adopted furbaby")}">
+                <span class="story-pet-info">
+                  <strong>${escapeHtml(pet.name || "Unnamed Furbaby")}</strong>
+                  <small>${escapeHtml(petTypeLabel(pet))}</small>
+                  <span>${escapeHtml([pet.ageEstimate || pet.age || "", pet.sex || ""].filter(Boolean).join(" - ") || "Adopted animal")}</span>
+                  <em>${escapeHtml(adoptionDate ? `Adopted ${adoptionDate}` : "Adopted")}</em>
+                </span>
+              </article>
+            `;
+          })
+          .join("")}
+      </div>
+    `;
+  };
+
   const renderStaticContent = (key) => {
-    if (key === "adoption-guide") {
+    if (key === "adoption-tips") {
       storyModalContent.innerHTML = `
         ${renderSteps([
           {
-            title: "Step 1 - Explore Available Animals",
-            text: "Browse verified animal profiles and review their basic information, behavior, health condition, and care needs."
+            title: "Prepare Your Home",
+            text: "Set up a clean sleeping area, food and water bowls, safe boundaries, and a quiet adjustment space before bringing the pet home."
           },
           {
-            title: "Step 2 - Check Your Compatibility",
-            text: "Take the compatibility quiz to discover animals that may be suitable for your lifestyle, home environment, experience, and preferences."
+            title: "Plan the First Week",
+            text: "Keep routines calm and consistent. Introduce family members slowly, observe appetite and behavior, and avoid overwhelming the animal."
           },
           {
-            title: "Step 3 - Submit an Adoption Application",
-            text: "Choose an animal and complete the required adoption application. Make sure all submitted information is accurate."
+            title: "Bring Adoption Requirements",
+            text: "Prepare accurate applicant information, contact details, valid signatures, and any documents requested in the adoption form."
           },
           {
-            title: "Step 4 - Shelter Evaluation",
-            text: "The Angeles City Veterinary Office will review the application. Submission does not automatically guarantee approval."
-          },
-          {
-            title: "Step 5 - Adoption and Follow-Up",
-            text: "Approved applicants will receive instructions from the shelter regarding the next steps and post-adoption monitoring."
+            title: "Commit to Responsible Care",
+            text: "Provide proper food, shelter, veterinary care, vaccination follow-ups, exercise, and lifelong humane treatment."
           }
         ])}
-        <p class="story-note"><strong>Important note:</strong> Applicants must meet the evaluation requirements of the Angeles City Veterinary Office. The shelter may approve or reject an application based on the animal's welfare and the applicant's ability to provide responsible long-term care.</p>
+        <p class="story-note"><strong>Important note:</strong> Adoption approval remains subject to shelter evaluation and the animal's welfare needs.</p>
       `;
-      return;
+    }
+  };
+
+  const initializeHighlightPreviews = async () => {
+    const pets = await loadNewestPets();
+    if (pets[0]) {
+      updateHighlightPreview(
+        "new-furbabies",
+        getPetImage(pets[0]),
+        `${pets[0].name || "Newest furbaby"} available for adoption`
+      );
     }
 
-    if (key === "matching") {
-      storyModalContent.innerHTML = `
-        ${renderSteps([
-          {
-            title: "1. Tell Us About Your Lifestyle",
-            text: "The quiz asks about factors such as your living environment, daily routine, activity level, pet experience, preferred animal characteristics, and ability to provide care."
-          },
-          {
-            title: "2. ANIMUA Compares Your Answers",
-            text: "Your responses are compared with animal information such as temperament, age, size, behavior, activity level, and care requirements."
-          },
-          {
-            title: "3. Review Your Recommended Matches",
-            text: "The system generates ranked recommendations and compatibility results to help you make a more informed decision."
-          }
-        ])}
-        <p class="story-note">A compatibility result is a recommendation, not an automatic adoption approval. Final adoption decisions are still reviewed by the Angeles City Veterinary Office.</p>
-      `;
-      return;
+    const events = await loadUpcomingEvents();
+    if (events[0]) {
+      updateHighlightPreview(
+        "events",
+        getEventImage(events[0]),
+        events[0].title || events[0].name || "Upcoming event"
+      );
     }
 
-    if (key === "surrender-guide") {
-      storyModalContent.innerHTML = `
-        <div class="story-section-list">
-          <section>
-            <h3>Eligibility</h3>
-            <p>Animal surrender requests are limited to bona fide residents of Angeles City. Users must provide accurate owner, animal, and location information.</p>
-          </section>
-          <section>
-            <h3>Information You Will Need</h3>
-            ${renderBulletList([
-              "Owner and contact information",
-              "Proof or confirmation of Angeles City residency, based on the existing form",
-              "Animal details",
-              "Health and vaccination information, when available",
-              "Behavior and care information",
-              "Reason for surrender",
-              "Supporting photos or documents required by the existing surrender form"
-            ])}
-          </section>
-          <section>
-            <h3>Review Process</h3>
-            ${renderBulletList([
-              "Complete and submit the surrender request.",
-              "Shelter staff review the information and reason for surrender.",
-              "The request may be approved, rejected, or returned for additional information.",
-              "Approved requests may proceed to intake based on shelter evaluation, capacity, urgency, and available resources."
-            ])}
-          </section>
-        </div>
-        <p class="story-note"><strong>Important notice:</strong> Do not leave or abandon an animal at the shelter without confirmation. Continue providing food, water, shelter, and necessary care while the request is being reviewed.</p>
-      `;
+    const stories = await loadAdoptedStories();
+    if (stories[0]) {
+      updateHighlightPreview(
+        "success-stories",
+        getPetImage(stories[0]),
+        `${stories[0].name || "Adopted furbaby"} adoption story`
+      );
     }
   };
 
@@ -774,13 +855,28 @@ function setupHomeStories() {
   };
 
   storyButtons.forEach((button) => {
-    button.setAttribute("aria-haspopup", "dialog");
+    if (button.dataset.highlightKey === "success-stories" || button.dataset.highlightKey === "adoption-tips") {
+      button.setAttribute("aria-haspopup", "dialog");
+    }
     button.setAttribute("aria-pressed", "false");
 
     button.addEventListener("click", async () => {
       const key = button.dataset.highlightKey;
       const config = highlightContent[key];
       if (!config) return;
+
+      if (key === "new-furbabies") {
+        window.location.href = "find-furbabies.html?sort=newest";
+        return;
+      }
+
+      if (key === "events") {
+        await loadUpcomingEvents();
+        if (upcomingEventSection && !upcomingEventSection.classList.contains("hidden")) {
+          upcomingEventSection.scrollIntoView({ behavior: "smooth", block: "start" });
+          return;
+        }
+      }
 
       lastFocusedHighlight = button;
       storyButtons.forEach((item) => {
@@ -807,6 +903,8 @@ function setupHomeStories() {
         await renderNewFurbabies();
       } else if (key === "events") {
         await renderEvents();
+      } else if (key === "success-stories") {
+        await renderSuccessStories();
       } else {
         renderStaticContent(key);
       }
@@ -818,6 +916,7 @@ function setupHomeStories() {
   }
 
   renderUpcomingEventSection();
+  initializeHighlightPreviews();
 
   storyModal.addEventListener("click", (event) => {
     if (event.target === storyModal) {
@@ -1421,7 +1520,16 @@ async function updateUsername(newName) {
   const data = await response.json();
 
   if (!response.ok) {
-    Swal.fire("Error", data.message || "Failed to update username.", "error");
+    Swal.fire({
+      icon: "error",
+      title: "Update Failed",
+      text: data.message || "Failed to update username.",
+      customClass: {
+        popup: "animua-popup",
+        confirmButton: "animua-confirm"
+      },
+      buttonsStyling: false
+    });
     return;
   }
 
@@ -1436,7 +1544,16 @@ async function updateUsername(newName) {
   const userAvatarMini = document.querySelector(".user-avatar-mini");
   if (userAvatarMini) userAvatarMini.textContent = getInitial(data.fullName || newName);
 
-  Swal.fire("Updated", "Your username has been updated.", "success");
+  Swal.fire({
+    icon: "success",
+    title: "Username Updated",
+    text: "Your username has been updated.",
+    customClass: {
+      popup: "animua-popup",
+      confirmButton: "animua-confirm"
+    },
+    buttonsStyling: false
+  });
 }
 
 async function updatePassword(oldPassword, newPassword) {
@@ -1454,9 +1571,234 @@ async function updatePassword(oldPassword, newPassword) {
   const data = await response.json();
 
   if (!response.ok) {
-    Swal.fire("Error", data.message || "Failed to update password.", "error");
+    Swal.fire({
+      icon: "error",
+      title: "Update Failed",
+      text: data.message || "Failed to update password.",
+      customClass: {
+        popup: "animua-popup",
+        confirmButton: "animua-confirm"
+      },
+      buttonsStyling: false
+    });
     return;
   }
 
-  Swal.fire("Updated", "Your password has been changed.", "success");
+  Swal.fire({
+    icon: "success",
+    title: "Password Updated",
+    text: "Your password has been changed.",
+    customClass: {
+      popup: "animua-popup",
+      confirmButton: "animua-confirm"
+    },
+    buttonsStyling: false
+  });
+}
+
+initChatbotWidget();
+
+function initChatbotWidget() {
+  if (document.getElementById("animuaChatbot")) return;
+
+  document.body.insertAdjacentHTML(
+    "beforeend",
+    `
+      <section class="animua-chatbot" id="animuaChatbot" aria-live="polite">
+        <button type="button" class="animua-chatbot-toggle" id="chatbotToggle" aria-label="Open ANIMUA chat assistant" aria-expanded="false">
+          <i class="fa-regular fa-comments"></i>
+        </button>
+
+        <div class="chatbot-panel hidden" id="chatbotPanel" role="dialog" aria-modal="false" aria-labelledby="chatbotTitle">
+          <div class="chatbot-head">
+            <div class="chatbot-brand-mark" aria-hidden="true">
+              <i class="fa-regular fa-comments"></i>
+            </div>
+            <div class="chatbot-head-copy">
+              <p>ANIMUA Assistant</p>
+              <h2 id="chatbotTitle">How can I help?</h2>
+            </div>
+            <button type="button" class="chatbot-close" id="chatbotClose" aria-label="Close chat assistant">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+
+          <div class="chatbot-messages" id="chatbotMessages">
+            <div class="chatbot-message bot">
+              <p>Welcome to ANIMUA!
+
+I'm your virtual shelter assistant. I can help you with pet adoption, compatibility matching, surrender requests, upcoming events, your account, and other ANIMUA services.
+
+Choose a topic below or type your question to get started.</p>
+            </div>
+          </div>
+
+          <div class="chatbot-quick-actions" id="chatbotQuickActions" aria-label="Chatbot quick topics">
+            <button type="button" data-chatbot-prompt="Find a Pet">🐾 Find a Pet</button>
+            <button type="button" data-chatbot-prompt="Adoption Guide">❤️ Adoption Guide</button>
+            <button type="button" data-chatbot-prompt="Compatibility Quiz">🧩 Compatibility Quiz</button>
+            <button type="button" data-chatbot-prompt="Surrender Request">📤 Surrender Request</button>
+            <button type="button" data-chatbot-prompt="Upcoming Events">📅 Upcoming Events</button>
+            <button type="button" data-chatbot-prompt="Account Help">👤 Account Help</button>
+          </div>
+
+          <form class="chatbot-form" id="chatbotForm">
+            <input type="text" id="chatbotInput" placeholder="Type your question..." autocomplete="off" maxlength="700" aria-label="Message ANIMUA Assistant">
+            <button type="submit" id="chatbotSend" aria-label="Send message">
+              <i class="fa-solid fa-paper-plane"></i>
+            </button>
+          </form>
+        </div>
+      </section>
+    `
+  );
+
+  const toggle = document.getElementById("chatbotToggle");
+  const widget = document.getElementById("animuaChatbot");
+  const panel = document.getElementById("chatbotPanel");
+  const close = document.getElementById("chatbotClose");
+  const form = document.getElementById("chatbotForm");
+  const input = document.getElementById("chatbotInput");
+  const messages = document.getElementById("chatbotMessages");
+  const sendButton = document.getElementById("chatbotSend");
+  const quickActions = document.getElementById("chatbotQuickActions");
+  const history = [];
+
+  renderChatbotQuickActions(quickActions);
+
+  const openChat = () => {
+    panel?.classList.remove("hidden");
+    widget?.classList.add("is-open");
+    toggle?.setAttribute("aria-expanded", "true");
+    window.setTimeout(() => input?.focus(), 80);
+  };
+
+  const closeChat = () => {
+    panel?.classList.add("hidden");
+    widget?.classList.remove("is-open");
+    toggle?.setAttribute("aria-expanded", "false");
+    toggle?.focus();
+  };
+
+  toggle?.addEventListener("click", () => {
+    if (panel?.classList.contains("hidden")) {
+      openChat();
+    } else {
+      closeChat();
+    }
+  });
+
+  close?.addEventListener("click", closeChat);
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && panel && !panel.classList.contains("hidden")) {
+      closeChat();
+    }
+  });
+
+  quickActions?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-chatbot-prompt]");
+    if (!button || !input || !form) return;
+
+    input.value = button.dataset.chatbotPrompt || button.textContent.trim();
+    input.focus();
+    form.requestSubmit();
+  });
+
+  form?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const message = input?.value.trim() || "";
+    if (!message) return;
+
+    appendChatMessage(messages, "user", message);
+    history.push({ role: "user", content: message });
+    input.value = "";
+    setChatbotLoading(sendButton, true);
+    const typing = appendChatMessage(messages, "bot", "Typing...");
+    typing?.classList.add("is-typing");
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/chatbot/message`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message,
+          history: history.slice(-8)
+        })
+      });
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(data.message || "Unable to reach ANIMUA Assistant.");
+      }
+
+      typing?.remove();
+      const reply = data.reply || "I could not answer that yet. Please try asking another way.";
+      appendChatMessage(messages, "bot", reply);
+      history.push({ role: "assistant", content: reply });
+    } catch (error) {
+      typing?.remove();
+      appendChatMessage(messages, "bot", error.message || "Chat is unavailable right now. Please try again later.");
+    } finally {
+      setChatbotLoading(sendButton, false);
+      trimChatHistory(history);
+      input?.focus();
+    }
+  });
+}
+
+function appendChatMessage(container, type, text) {
+  if (!container) return null;
+
+  const item = document.createElement("div");
+  item.className = `chatbot-message ${type}`;
+
+  const paragraph = document.createElement("p");
+  paragraph.textContent = text;
+  item.appendChild(paragraph);
+
+  container.appendChild(item);
+  container.scrollTop = container.scrollHeight;
+  return item;
+}
+
+function renderChatbotQuickActions(container) {
+  if (!container) return;
+
+  const actions = [
+    { prompt: "Find a Pet", icon: "fa-paw", label: "Find a Pet" },
+    { prompt: "Adoption Guide", icon: "fa-heart", label: "Adoption Guide" },
+    { prompt: "Compatibility Quiz", icon: "fa-puzzle-piece", label: "Compatibility Quiz" },
+    { prompt: "Surrender Request", icon: "fa-file-arrow-up", label: "Surrender Request" },
+    { prompt: "Upcoming Events", icon: "fa-calendar", label: "Upcoming Events", regular: true },
+    { prompt: "Account Help", icon: "fa-user", label: "Account Help" }
+  ];
+
+  container.innerHTML = "";
+
+  actions.forEach((action) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.dataset.chatbotPrompt = action.prompt;
+
+    const icon = document.createElement("i");
+    icon.className = `${action.regular ? "fa-regular" : "fa-solid"} ${action.icon}`;
+
+    const label = document.createElement("span");
+    label.textContent = action.label;
+
+    button.append(icon, label);
+    container.appendChild(button);
+  });
+}
+
+function setChatbotLoading(button, isLoading) {
+  if (!button) return;
+  button.disabled = isLoading;
+  button.innerHTML = isLoading
+    ? '<i class="fa-solid fa-spinner fa-spin"></i>'
+    : '<i class="fa-solid fa-paper-plane"></i>';
+}
+
+function trimChatHistory(history) {
+  while (history.length > 8) history.shift();
 }

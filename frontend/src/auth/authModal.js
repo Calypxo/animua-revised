@@ -153,16 +153,25 @@ function validateLoginForm() {
 function validateRegisterForm() {
   clearAuthErrors();
 
-  const fullName = document.getElementById("reg-name")?.value.trim() || "";
+  const firstName = document.getElementById("reg-first-name")?.value.trim() || "";
+  const lastName = document.getElementById("reg-last-name")?.value.trim() || "";
   const email = document.getElementById("reg-email")?.value.trim() || "";
   const password = document.getElementById("reg-password")?.value || "";
   let isValid = true;
 
-  if (!fullName) {
-    setError("reg-name-error", "Full name is required.");
+  if (!firstName) {
+    setError("reg-first-name-error", "First name is required.");
     isValid = false;
-  } else if (fullName.length < 2) {
-    setError("reg-name-error", "Please enter your full name.");
+  } else if (firstName.length < 2) {
+    setError("reg-first-name-error", "First name must be at least 2 characters.");
+    isValid = false;
+  }
+
+  if (!lastName) {
+    setError("reg-last-name-error", "Last name is required.");
+    isValid = false;
+  } else if (lastName.length < 2) {
+    setError("reg-last-name-error", "Last name must be at least 2 characters.");
     isValid = false;
   }
 

@@ -55,7 +55,7 @@
 
             <a href="#" id="loginNavBtn" class="login-btn" aria-label="Login">
               <i class="fa-solid fa-user"></i>
-              <span>Log in</span>
+              <span>Login</span>
             </a>
 
             <div id="userLoggedInBox" class="hidden user-pill user-menu">
@@ -156,28 +156,6 @@
       <button
         type="button"
         class="home-highlight-story"
-        data-highlight-key="adoption-guide"
-      >
-        <span class="highlight-cover">
-          <img src="../../src/assets/images/about-cat-cages.jpeg" alt="Shelter cat care area">
-        </span>
-        <span>Adoption Guide</span>
-      </button>
-
-      <button
-        type="button"
-        class="home-highlight-story"
-        data-highlight-key="matching"
-      >
-        <span class="highlight-cover">
-          <img src="../../src/assets/images/service-match-shelter.jpg" alt="Shelter matching preview">
-        </span>
-        <span>How Matching Works</span>
-      </button>
-
-      <button
-        type="button"
-        class="home-highlight-story"
         data-highlight-key="events"
       >
         <span class="highlight-cover">
@@ -189,12 +167,23 @@
       <button
         type="button"
         class="home-highlight-story"
-        data-highlight-key="surrender-guide"
+        data-highlight-key="success-stories"
       >
         <span class="highlight-cover">
-          <img src="../../src/assets/images/service-surrender-form.jpg" alt="Surrender request form">
+          <img src="../../src/assets/images/about-shelter-house.png" alt="Adopted animal story">
         </span>
-        <span>Surrender Guide</span>
+        <span>Success Stories</span>
+      </button>
+
+      <button
+        type="button"
+        class="home-highlight-story"
+        data-highlight-key="adoption-tips"
+      >
+        <span class="highlight-cover">
+          <img src="../../src/assets/images/how-submit-application.jpg" alt="Adoption preparation">
+        </span>
+        <span>Adoption Tips</span>
       </button>
     </div>
   </section>
@@ -247,7 +236,7 @@
       </figure>
 
       <div class="upcoming-event-copy">
-        <span class="section-label">UPCOMING EVENT</span>
+        <span class="section-label" id="upcomingEventLabel">UPCOMING EVENT</span>
         <h2 id="upcomingEventTitle"></h2>
         <dl class="upcoming-event-meta" aria-label="Event details">
           <div id="upcomingEventDateRow">
@@ -508,6 +497,11 @@
           </div>
           <small class="auth-error" id="login-password-error"></small>
 
+          <div class="auth-recaptcha-row login-captcha-row hidden" id="login-captcha-row">
+            <div id="login-recaptcha" class="auth-recaptcha"></div>
+          </div>
+          <small class="auth-error auth-captcha-error" id="login-captcha-error"></small>
+
           <div class="auth-extra-row">
             <label class="auth-check">
               <input type="checkbox">
@@ -534,21 +528,21 @@
         <form id="register-form" novalidate>
           <div class="auth-form-grid">
             <div>
-              <label class="auth-field-label" for="reg-name">Full Name</label>
+              <label class="auth-field-label" for="reg-first-name">First Name</label>
               <div class="auth-field">
-                <input type="text" id="reg-name" placeholder="Full Name" required minlength="2">
+                <input type="text" id="reg-first-name" placeholder="First Name" required minlength="2">
                 <span><i class="fa-regular fa-user"></i></span>
               </div>
-              <small class="auth-error" id="reg-name-error"></small>
+              <small class="auth-error" id="reg-first-name-error"></small>
             </div>
 
             <div>
-              <label class="auth-field-label" for="reg-phone">Mobile Number</label>
+              <label class="auth-field-label" for="reg-last-name">Last Name</label>
               <div class="auth-field">
-                <input type="tel" id="reg-phone" placeholder="Mobile Number" required>
-                <span><i class="fa-solid fa-phone"></i></span>
+                <input type="text" id="reg-last-name" placeholder="Last Name" required minlength="2">
+                <span><i class="fa-regular fa-user"></i></span>
               </div>
-              <small class="auth-error" id="reg-phone-error"></small>
+              <small class="auth-error" id="reg-last-name-error"></small>
             </div>
 
             <div class="auth-grid-span">
@@ -584,9 +578,15 @@
           </div>
 
           <label class="auth-check auth-terms-check">
-            <input type="checkbox">
-            <span>I agree to the terms and privacy policy.</span>
+            <input type="checkbox" id="reg-terms">
+            <span>I have read and agree to ANIMUA's <a href="#terms-privacy-notice" class="auth-policy-link" data-auth-consent-link="terms-privacy">Terms and Privacy Notice</a>.</span>
           </label>
+          <small class="auth-error" id="reg-terms-error"></small>
+
+          <div class="auth-recaptcha-row">
+            <div id="register-recaptcha" class="auth-recaptcha"></div>
+          </div>
+          <small class="auth-error auth-captcha-error" id="reg-captcha-error"></small>
 
           <button type="submit" class="auth-submit-btn">Create Account</button>
         </form>

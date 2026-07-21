@@ -55,6 +55,7 @@
 
         <a href="#" id="loginNavBtn" class="login-btn" aria-label="Login">
           <i class="fa-regular fa-user"></i>
+          <span>Login</span>
         </a>
 
         <div id="userLoggedInBox" class="hidden user-pill">
@@ -300,6 +301,11 @@ For direct concerns and further assistance, please contact us through the provid
           </div>
           <small class="auth-error" id="login-password-error"></small>
 
+          <div class="auth-recaptcha-row login-captcha-row hidden" id="login-captcha-row">
+            <div id="login-recaptcha" class="auth-recaptcha"></div>
+          </div>
+          <small class="auth-error auth-captcha-error" id="login-captcha-error"></small>
+
           <div class="auth-extra-row">
             <label class="auth-check">
               <input type="checkbox">
@@ -326,21 +332,21 @@ For direct concerns and further assistance, please contact us through the provid
         <form id="register-form" novalidate>
           <div class="auth-form-grid">
             <div>
-              <label class="auth-field-label" for="reg-name">Full Name</label>
+              <label class="auth-field-label" for="reg-first-name">First Name</label>
               <div class="auth-field">
-                <input type="text" id="reg-name" placeholder="Full Name" required minlength="2">
+                <input type="text" id="reg-first-name" placeholder="First Name" required minlength="2">
                 <span><i class="fa-regular fa-user"></i></span>
               </div>
-              <small class="auth-error" id="reg-name-error"></small>
+              <small class="auth-error" id="reg-first-name-error"></small>
             </div>
 
             <div>
-              <label class="auth-field-label" for="reg-phone">Mobile Number</label>
+              <label class="auth-field-label" for="reg-last-name">Last Name</label>
               <div class="auth-field">
-                <input type="tel" id="reg-phone" placeholder="Mobile Number" required>
-                <span><i class="fa-solid fa-phone"></i></span>
+                <input type="text" id="reg-last-name" placeholder="Last Name" required minlength="2">
+                <span><i class="fa-regular fa-user"></i></span>
               </div>
-              <small class="auth-error" id="reg-phone-error"></small>
+              <small class="auth-error" id="reg-last-name-error"></small>
             </div>
 
             <div class="auth-grid-span">
@@ -376,9 +382,15 @@ For direct concerns and further assistance, please contact us through the provid
           </div>
 
           <label class="auth-check auth-terms-check">
-            <input type="checkbox">
-            <span>I agree to the terms and privacy policy.</span>
+            <input type="checkbox" id="reg-terms">
+            <span>I have read and agree to ANIMUA's <a href="#terms-privacy-notice" class="auth-policy-link" data-auth-consent-link="terms-privacy">Terms and Privacy Notice</a>.</span>
           </label>
+          <small class="auth-error" id="reg-terms-error"></small>
+
+          <div class="auth-recaptcha-row">
+            <div id="register-recaptcha" class="auth-recaptcha"></div>
+          </div>
+          <small class="auth-error auth-captcha-error" id="reg-captcha-error"></small>
 
           <button type="submit" class="auth-submit-btn">Create Account</button>
         </form>
