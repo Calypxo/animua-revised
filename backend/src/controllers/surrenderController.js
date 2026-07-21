@@ -21,8 +21,9 @@ function isAdminOrStaff(user) {
 }
 
 function generateRequestId() {
+  const year = new Date().getFullYear();
   const timestamp = Date.now().toString().slice(-6);
-  return `SR-2026-${timestamp}`;
+  return `SR-${year}-${timestamp}`;
 }
 
 async function analyzeSurrenderReason(reason) {
@@ -159,11 +160,6 @@ async function createSurrenderRequest(req, res) {
 
 async function getAllSurrenderRequests(req, res) {
   try {
-    if (!isAdminOrStaff(req.user)) {
-      return res.status(403).json({
-        message: "Only Admin or Staff can view all surrender requests.",
-      });
-    }
 
     const snapshot = await db
       .collection(COLLECTION_NAME)
@@ -236,6 +232,26 @@ async function updateSurrenderStatus(req, res) {
       });
     }
 
+    const current = requestDoc.data();
+
+    if (current.status === "Converted") {
+      return res.status(400).json({
+        message: "Converted surrender requests can no longer be updated.",
+      });
+    }
+
+    if (current.status === "Rejected" && status !== "Rejected") {
+      return res.status(400).json({
+        message: "Rejected surrender requests cannot be changed back.",
+      });
+    }
+
+    if (status === "Converted" && current.status !== "Approved") {
+      return res.status(400).json({
+        message: "Only approved surrender requests can be converted.",
+      });
+    }
+
     const updateData = {
       status,
       updatedAt: new Date().toISOString(),
@@ -256,7 +272,9 @@ async function updateSurrenderStatus(req, res) {
     }
 
     if (status === "Converted") {
-      updateData.intakeId = intakeId || `INT-2026-${Date.now().toString().slice(-6)}`;
+      const year = new Date().getFullYear();
+      updateData.intakeId =
+        intakeId || `INT-${year}-${Date.now().toString().slice(-6)}`;
     }
 
     await requestRef.update(updateData);

@@ -31,6 +31,20 @@ router.put(
   ctrl.updateAnimal
 );
 
+// Send animal to quarantine
+router.patch(
+  "/:id/send-to-quarantine",
+  authorize("Admin", "Staff"),
+  ctrl.sendToQuarantine
+);
+
+// Mark animal ready for adoption
+router.patch(
+  "/:id/mark-ready",
+  authorize("Admin", "Staff"),
+  ctrl.markReadyForAdoption
+);
+
 // Behavioral assessment
 router.post(
   "/:id/behavioral",
@@ -52,13 +66,6 @@ router.put(
   ctrl.updateMedicalRecord
 );
 
-// Archive animal
-router.patch(
-  "/:id/archive",
-  authorize("Admin"),
-  ctrl.archiveAnimal
-);
-
 // Upload animal image
 router.patch(
   "/:id/photo",
@@ -72,6 +79,13 @@ router.delete(
   "/:id/photo",
   authorize("Admin", "Staff"),
   ctrl.deleteAnimalProfileImage
+);
+
+// Archive animal
+router.patch(
+  "/:id/archive",
+  authorize("Admin"),
+  ctrl.archiveAnimal
 );
 
 console.log("Animal routes loaded");

@@ -3,10 +3,11 @@ import "../css/adminDashboard.css";
 import "../css/sidebar.css";
 import "../css/intake.css";
 
-import { protectManagementPage }       from "../auth/authGuard.js";
+import { protectPageByModule }         from "../auth/authGuard.js";
+import { hasPermission }               from "../auth/permissions.js";
 import { renderTopbarUser }            from "../components/management/topbarUser.js";
 import { loadSidebar }                 from "../components/management/sidebarLoader.js";
-import { getUserRole, getUserName }    from "../utils/storage.js";
+import { getUserName }                 from "../utils/storage.js";
 import { BARANGAYS }                   from "../utils/barangays.js";
 
 
@@ -37,6 +38,7 @@ let editingId      = null;
 let confirmAction  = null;   // "approve" | "reject" | "convert"
 let confirmTargetId = null;
 let approvedSurrenderContext = null;
+let currentRole = "";
 
 /* ══════════════════════════════════════════════════════
    HELPERS
@@ -144,10 +146,21 @@ function renderTable() {
   }
 
   tbody.innerHTML = page.map(r => {
-    const canApprove = r.status === "Pending";
-    const canReject  = r.status === "Pending";
-    const canConvert = r.status === "Approved";
-    const canEdit    = r.status === "Pending" || r.status === "Draft";
+    const canApprove =
+    r.status === "Pending" &&
+    can("approve");
+
+  const canReject =
+    r.status === "Pending" &&
+    can("reject");
+
+  const canConvert =
+    r.status === "Approved" &&
+    can("convert");
+
+  const canEdit =
+    (r.status === "Pending" || r.status === "Draft") &&
+    can("edit");
 
     return `
     <tr style="cursor:pointer" data-id="${r.id}">
@@ -346,6 +359,14 @@ if (select) {
    OPEN ADD / EDIT MODAL
 ══════════════════════════════════════════════════════ */
 function openAddModal() {
+  if (!can("create")) {
+  showToast(
+    "error",
+    "You do not have permission to create intake records."
+  );
+  return;
+}
+
   editingId = null;
   document.getElementById("intakeModalTitle").textContent    = "New Intake Record";
   document.getElementById("intakeModalSubtitle").textContent = "Fill in all required fields and submit for review.";
@@ -429,6 +450,14 @@ function openApprovedSurrenderIntakeModal() {
 }
 
 function openEditModal(id) {
+  if (!can("edit")) {
+  showToast(
+    "error",
+    "You do not have permission to edit intake records."
+  );
+  return;
+}
+
   const r = intakeRecords.find(x => x.id === id);
   if (!r) return;
   editingId = id;
@@ -739,17 +768,24 @@ function openViewModal(id) {
   // Footer buttons based on status
   const footer = document.getElementById("viewModalFooter");
   let footerBtns = `<button type="button" class="btn-ghost-clay" id="viewClose2">Close</button>`;
-
-  if (r.status === "Pending") {
-    footerBtns += `
-      <button type="button" class="btn-reject"  id="vBtnReject">
-        <i class="bi bi-x-lg"></i> Reject
-      </button>
-      <button type="button" class="btn-approve" id="vBtnApprove">
-        <i class="bi bi-check-lg"></i> Approve
-      </button>`;
-  }
-  if (r.status === "Approved") {
+  if (r.status === "Pending" && (can("approve") || can("reject"))) {
+  footerBtns += `
+    ${
+      can("reject")
+        ? `<button type="button" class="btn-reject" id="vBtnReject">
+            <i class="bi bi-x-lg"></i> Reject
+          </button>`
+        : ""
+    }
+    ${
+      can("approve")
+        ? `<button type="button" class="btn-approve" id="vBtnApprove">
+            <i class="bi bi-check-lg"></i> Approve
+          </button>`
+        : ""
+    }`;
+}
+  if (r.status === "Approved" && can("convert")) {
     footerBtns += `
       <button type="button" class="btn-convert" id="vBtnConvert">
         <i class="bi bi-arrow-right-circle"></i> Convert to Animal Profile
@@ -827,6 +863,17 @@ function openConfirmModal(action, id) {
 }
 
 async function executeConfirmAction() {
+  if (
+  confirmAction &&
+  !can(confirmAction)
+) {
+  showToast(
+    "error",
+    "You do not have permission to perform this action."
+  );
+  return;
+}
+
   try {
     if (confirmAction === "approve") {
       await approveIntake(confirmTargetId);
@@ -889,6 +936,15 @@ function clearFormErrors() {
   document.querySelectorAll(".form-inp.invalid").forEach(e => e.classList.remove("invalid"));
 }
 
+
+function can(action) {
+  return hasPermission(
+    currentRole,
+    "intake",
+    action
+  );
+}
+
 /* ══════════════════════════════════════════════════════
    TOAST
 ══════════════════════════════════════════════════════ */
@@ -913,7 +969,8 @@ function showToast(type, msg) {
 ══════════════════════════════════════════════════════ */
 async function init() {
   try {
-    await protectManagementPage();
+    const session = await protectPageByModule("intake");
+    currentRole = session.role;
     renderTopbarUser();
     loadSidebar();
 
@@ -943,7 +1000,20 @@ if (params.get("source") === "surrender") {
     document.getElementById("filterSpecies")?.addEventListener("change",applyFilters);
 
     // Add new intake
-    document.getElementById("btnNewIntake")?.addEventListener("click", openAddModal);
+    const newIntakeButton =
+    document.getElementById("btnNewIntake");
+
+  if (newIntakeButton) {
+    newIntakeButton.style.display =
+      can("create") ? "" : "none";
+
+    if (can("create")) {
+      newIntakeButton.addEventListener(
+        "click",
+        openAddModal
+      );
+    }
+  }
 
     // Source selector (inside modal — needs to re-bind on each open)
     // Done via event delegation instead

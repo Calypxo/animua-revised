@@ -26,6 +26,12 @@ function setLoading(loading) {
   if (spin) spin.style.display = loading ? "inline-block" : "none";
   if (txt)  txt.textContent   = loading ? "Signing in…" : "Sign In";
 }
+
+const MANAGEMENT_ROLES = [
+  "Admin",
+  "Staff",
+  "Veterinarian",
+];
  
 const swalCfg = {
   customClass: { popup: "animua-swal-popup", confirmButton: "animua-swal-btn" },
@@ -78,10 +84,17 @@ async function handleAdminLogin(e) {
     const fullName = data.fullName || "User";
     const token    = data.token    || "";
  
-    if (role !== "Admin" && role !== "Staff") {
-      await Swal.fire({ icon:"warning", title:"Access Denied", text:"This portal is for Admin and Staff only.", confirmButtonText:"OK", ...swalCfg });
-      return;
-    }
+ if (!MANAGEMENT_ROLES.includes(role)) {
+  await Swal.fire({
+    icon: "warning",
+    title: "Access Denied",
+    text: "This account is not authorized to access the management portal.",
+    confirmButtonText: "OK",
+    ...swalCfg,
+  });
+
+  return;
+}
  
     localStorage.setItem("animua_token",       token);
     localStorage.setItem("user_role",          role);
@@ -134,8 +147,14 @@ async function handleAdminLogin(e) {
 (function init() {
   const token = localStorage.getItem("animua_token");
   const role  = localStorage.getItem("user_role");
-  if (token && (role === "Admin" || role === "Staff")) {
-    window.location.replace("/pages/dashboard.html");
+  if (
+    token &&
+    MANAGEMENT_ROLES.includes(role)
+  ) {
+    window.location.replace(
+      "/pages/dashboard.html"
+    );
+
     return;
   }
   document.getElementById("login-form")?.addEventListener("submit", handleAdminLogin);

@@ -3,7 +3,7 @@ import "../css/adminDashboard.css";
 import "../css/sidebar.css";
 import "../css/animalProfiling.css";
 
-import { protectManagementPage } from "../auth/authGuard.js";
+import { protectPageByModule } from "../auth/authGuard.js";
 import { renderTopbarUser } from "../components/management/topbarUser.js";
 import { loadSidebar } from "../components/management/sidebarLoader.js";
 import {
@@ -17,11 +17,20 @@ import {
 import {
   getAnimalById,
   updateAnimal,
+  sendAnimalToQuarantine,
+  markAnimalReady,
   saveBehavioralAssessment as saveBehavioralAssessmentApi,
   addMedicalRecord as addMedicalRecordApi,
   updateMedicalRecord as updateMedicalRecordApi,
   archiveAnimal as archiveAnimalApi
 } from "../services/animal.service.js";
+
+import {
+  getInventoryItems,
+  getInventoryItemById,
+  updateInventoryItem,
+  addInventoryTransaction,
+} from "../services/inventoryFirestore.service.js";
 
 const TRAITS = [
   { key: "energyLevel", label: "Energy Level", desc: "Overall energy of the animal" },
@@ -52,6 +61,7 @@ const TRAIT_COLORS = [
 let animal = null;
 let editingMedId = null;
 let currentRole = "";
+let medicalInventoryItems = [];
 
 const speciesEmoji = s => ({ Dog: "🐶", Cat: "🐱", Rabbit: "🐰", Bird: "🐦" }[s] || "🐾");
 
@@ -89,6 +99,34 @@ const dotColors = {
   "Cleared from quarantine": "#186534",
   "Marked ready": "#186534",
 };
+
+const MEDICAL_CATEGORIES = [
+  "Antibiotic",
+  "Antiparasitic",
+  "Antifungal",
+  "Anesthetic",
+  "Supplement",
+  "Vaccine",
+  "Surgical Supply",
+  "Topical Medicine",
+  "Hormonal Medicine",
+  "Respiratory Medicine",
+  "Pain Relief",
+  "Sedative",
+  "Diagnostic",
+];
+
+function isMedicalInventoryItem(item) {
+  return MEDICAL_CATEGORIES.includes(item.category);
+}
+
+async function loadMedicalInventoryItems() {
+  const items = await getInventoryItems();
+
+  medicalInventoryItems = items
+    .map(mapInventoryItem)
+    .filter(isMedicalInventoryItem);
+}
 
 function parseDateValue(d) {
   if (!d) return null;
@@ -369,7 +407,15 @@ if (addMedicalButton) {
           <div class="med-card-header">
             <div class="d-flex align-items-center gap-2 flex-wrap">
               <span class="med-type-badge ${tc.cls}"><i class="bi ${tc.icon}"></i>${r.type}</span>
-              <span class="clearance-badge ${cc.cls}">${cc.label}</span>
+              ${
+                r.type === "Quarantine Clearance"
+                  ? `
+                    <span class="clearance-badge ${cc.cls}">
+                      ${cc.label}
+                    </span>
+                  `
+                  : ""
+              }
             </div>
             <div class="d-flex align-items-center gap-3">
               <span class="med-card-date">${formatDate(r.date)}</span>
@@ -392,6 +438,11 @@ if (addMedicalButton) {
           <div class="med-card-body">
             ${r.diagnosis ? `<p><strong>Findings:</strong> ${r.diagnosis}</p>` : ""}
             ${r.treatment ? `<p><strong>Treatment:</strong> ${r.treatment}</p>` : ""}
+            ${
+              r.inventoryItemName
+                ? `<p><strong>Inventory Used:</strong> ${r.quantityUsed || 0} ${r.inventoryUnit || "pcs"} — ${r.inventoryItemName}</p>`
+                : ""
+            }
             ${r.weight ? `<p><strong>Weight:</strong> ${r.weight} kg</p>` : ""}
             ${r.notes ? `<p><strong>Notes:</strong> ${r.notes}</p>` : ""}
           </div>
@@ -667,13 +718,7 @@ async function sendToQuarantine() {
   }
 
   try {
-    await updateAnimal(animal.id, {
-      status: "Quarantine",
-      profilingStatus: "Completed",
-      quarantineStatus: "Active",
-      quarantineClearance: "Pending",
-      quarantineStartedAt: new Date().toISOString(),
-    });
+    await sendAnimalToQuarantine(animal.id);
 
     await refreshAnimal();
     renderAllTabs();
@@ -694,12 +739,23 @@ async function sendToQuarantine() {
 
 function openBehavioralModal() {
   if (!can("edit_behavioral")) {
-  showToast(
-    "error",
-    "Only veterinarians or administrators can evaluate behavior."
-  );
-  return;
-}
+    showToast(
+      "error",
+      "Only veterinarians or administrators can evaluate behavior."
+    );
+    return;
+  }
+
+  if (
+    animal.status === "Adopted" ||
+    animal.status === "Archived"
+  ) {
+    showToast(
+      "warning",
+      "Behavioral assessments cannot be edited for adopted or archived animals."
+    );
+    return;
+  }
 
   const ba = animal.behavioralAssessment || {};
   document.getElementById("behavioralNotes").value = animal.behavioralNotes || "";
@@ -738,6 +794,17 @@ async function saveBehavioralAssessment() {
   showToast(
     "error",
     "You do not have permission to save behavioral assessments."
+  );
+  return;
+}
+
+  if (
+  animal.status === "Adopted" ||
+  animal.status === "Archived"
+) {
+  showToast(
+    "warning",
+    "Behavioral assessments cannot be saved for adopted or archived animals."
   );
   return;
 }
@@ -792,21 +859,90 @@ if (!can(requiredPermission)) {
 
   document.getElementById("medicalForm").reset();
 
+  const inventorySelect =
+  document.getElementById("fMedInventoryItem");
+
+if (inventorySelect) {
+  inventorySelect.innerHTML = `
+    <option value="">No inventory item used</option>
+    ${medicalInventoryItems
+      .map(
+        (item) => `
+          <option value="${item.id}">
+            ${item.name.trim()} — ${item.currentStock} ${item.unit || "pcs"} available
+          </option>
+        `
+      )
+      .join("")}
+  `;
+}
+
+const quantityInput =
+  document.getElementById("fMedQuantityUsed");
+
+if (quantityInput) {
+  quantityInput.value = "";
+}
+
+const itemErr =
+  document.getElementById("errMedInventoryItem");
+
+if (itemErr) {
+  itemErr.textContent = "";
+}
+
+const qtyErr =
+  document.getElementById("errMedQuantityUsed");
+
+if (qtyErr) {
+  qtyErr.textContent = "";
+}
+
   document.getElementById("fMedDate").value =
     new Date().toISOString().split("T")[0];
 
   const typeSelect = document.getElementById("fMedType");
-  const clearanceField = document.getElementById("fMedClearance")?.parentElement;
+const clearanceField =
+  document.getElementById("medClearanceGroup") ||
+  document.getElementById("fMedClearance")?.parentElement;
 
-  const updateClearanceVisibility = () => {
-    const selectedType = typeSelect?.value;
-    if (clearanceField) {
-      clearanceField.style.display =
-        selectedType === "Quarantine Clearance" ? "" : "none";
-    }
-  };
+const clearanceOption =
+  typeSelect?.querySelector(
+    'option[value="Quarantine Clearance"]'
+  );
 
-  typeSelect?.addEventListener("change", updateClearanceVisibility);
+if (clearanceOption) {
+  clearanceOption.disabled =
+    !can("set_clearance");
+}
+
+const updateClearanceVisibility = () => {
+  const selectedType = typeSelect?.value;
+
+  if (!clearanceField) {
+    return;
+  }
+
+  const isClearanceRecord =
+    selectedType === "Quarantine Clearance";
+
+  clearanceField.style.display =
+    isClearanceRecord ? "" : "none";
+
+  const clearanceSelect =
+    document.getElementById("fMedClearance");
+
+  if (clearanceSelect) {
+    clearanceSelect.disabled =
+      isClearanceRecord &&
+      !can("set_clearance");
+  }
+};
+
+if (typeSelect) {
+  typeSelect.onchange =
+    updateClearanceVisibility;
+}
 
   if (medId) {
     const record = (animal.medicalRecords || []).find(
@@ -837,6 +973,22 @@ if (!can(requiredPermission)) {
 
       document.getElementById("fMedWeight").value =
         record.weight || "";
+
+      const medInventoryInput =
+      document.getElementById("fMedInventoryItem");
+
+    if (medInventoryInput) {
+      medInventoryInput.value =
+        record.inventoryItemId || "";
+    }
+
+    const medQuantityInput =
+      document.getElementById("fMedQuantityUsed");
+
+    if (medQuantityInput) {
+      medQuantityInput.value =
+        record.quantityUsed || "";
+    }
     }
   }
 
@@ -887,6 +1039,49 @@ async function saveMedicalRecord() {
     return;
   }
 
+  if (
+    type === "Quarantine Clearance" &&
+    !can("set_clearance")
+  ) {
+    showToast(
+      "error",
+      "You do not have permission to set quarantine clearance."
+    );
+
+    return;
+  }
+
+  const inventoryItemId =
+    document.getElementById(
+      "fMedInventoryItem"
+    )?.value || "";
+
+  const quantityUsed =
+    parseInt(
+      document.getElementById(
+        "fMedQuantityUsed"
+      )?.value,
+      10
+    ) || 0;
+
+  if (quantityUsed > 0 && !inventoryItemId) {
+    showToast(
+      "error",
+      "Please select the medicine or medical supply used."
+    );
+
+    return;
+  }
+
+  if (inventoryItemId && quantityUsed < 1) {
+    showToast(
+      "error",
+      "Please enter the quantity used."
+    );
+
+    return;
+  }
+
   const selectedClearance =
     document.getElementById("fMedClearance").value ||
     "Pending";
@@ -894,43 +1089,57 @@ async function saveMedicalRecord() {
   const clearance =
     type === "Quarantine Clearance"
       ? selectedClearance
-      : "Pending";
+      : null;
+
+  const inventoryItem =
+    medicalInventoryItems.find(
+      (item) => item.id === inventoryItemId
+    );
 
   const payload = {
-    type,
-    date,
+  type,
+  date,
 
-    vet:
-      document
-        .getElementById("fMedVet")
-        .value
-        .trim(),
+  vet:
+    document
+      .getElementById("fMedVet")
+      .value
+      .trim(),
 
-    diagnosis:
-      document
-        .getElementById("fMedDiagnosis")
-        .value
-        .trim(),
+  diagnosis:
+    document
+      .getElementById("fMedDiagnosis")
+      .value
+      .trim(),
 
-    treatment:
-      document
-        .getElementById("fMedTreatment")
-        .value
-        .trim(),
+  treatment:
+    document
+      .getElementById("fMedTreatment")
+      .value
+      .trim(),
 
-    notes:
-      document
-        .getElementById("fMedNotes")
-        .value
-        .trim(),
+  notes:
+    document
+      .getElementById("fMedNotes")
+      .value
+      .trim(),
 
-    clearance,
+  clearance,
 
-    weight:
-      parseFloat(
-        document.getElementById("fMedWeight").value
-      ) || null,
-  };
+  weight:
+    parseFloat(
+      document.getElementById("fMedWeight").value
+    ) || null,
+
+  inventoryItemId,
+  quantityUsed,
+
+  inventoryItemName:
+    inventoryItem?.name || "",
+
+  inventoryUnit:
+    inventoryItem?.unit || "",
+};
 
   try {
     if (editingMedId) {
@@ -945,15 +1154,36 @@ async function saveMedicalRecord() {
         "Medical record updated."
       );
     } else {
+      const deductionResult =
+        await deductMedicalInventory({
+          inventoryItemId,
+          quantityUsed,
+          date,
+          type,
+          treatment: payload.treatment,
+          notes: payload.notes,
+        });
+
       await addMedicalRecordApi(
         animal.id,
         payload
       );
 
-      showToast(
-        "success",
-        "Medical record added."
-      );
+      if (deductionResult) {
+        showToast(
+          "success",
+          `Medical record added and ${quantityUsed} ${
+            deductionResult.unit
+          } deducted from ${
+            deductionResult.itemName
+          }.`
+        );
+      } else {
+        showToast(
+          "success",
+          "Medical record added."
+        );
+      }
     }
 
     await refreshAnimal();
@@ -968,6 +1198,221 @@ async function saveMedicalRecord() {
       err.message || "Failed to save medical record."
     );
   }
+}
+
+function mapInventoryItem(item, index = 0) {
+  return {
+    docId: item.docId || "",
+    id:
+      item.id ||
+      item.itemId ||
+      item.docId ||
+      `INV-${String(index + 1).padStart(3, "0")}`,
+
+    name:
+      item.itemDescription ||
+      item.name ||
+      "Unnamed Item",
+
+    category:
+      item.category ||
+      "Uncategorized",
+
+    unit:
+      item.unit ||
+      "pcs",
+
+    currentStock:
+      Number(
+        item.currentStock ??
+        item.quantity ??
+        item.stock ??
+        item.onHand ??
+        0
+      ),
+
+    avgMonthlyUsage:
+      Number(item.avgMonthlyUsage || 0),
+
+    leadTimeDays:
+      Number(item.leadTimeDays || item.leadTime || 7),
+
+    stockoutFrequency:
+      Number(item.stockoutFrequency || 0),
+
+    monthlyTurnoverRatio:
+      Number(item.monthlyTurnoverRatio || 0),
+
+    averageInventory:
+      Number(item.averageInventory || item.currentStock || 0),
+  };
+}
+
+function rfClassify(item) {
+  const dailyUsage =
+    Number(item.avgMonthlyUsage || 0) / 30;
+
+  const reorderPoint = Math.max(
+    1,
+    Math.ceil(
+      dailyUsage *
+        Number(item.leadTimeDays || 0)
+    )
+  );
+
+  const criticalPoint = Math.max(
+    1,
+    Math.floor(reorderPoint * 0.5)
+  );
+
+  const daysUntilStockout =
+    Number(item.avgMonthlyUsage || 0) > 0
+      ? Math.round(
+          (Number(item.currentStock || 0) /
+            Number(item.avgMonthlyUsage || 0)) *
+            30
+        )
+      : 999;
+
+  const daysToRestock = Math.max(
+    0,
+    daysUntilStockout -
+      Number(item.leadTimeDays || 0)
+  );
+
+  const isFast =
+    (Number(item.monthlyTurnoverRatio || 0) >=
+      0.5 &&
+      Number(item.recencyDays || 0) <= 7) ||
+    Number(item.stockoutFrequency || 0) > 0;
+
+  const stockStatus =
+    Number(item.currentStock || 0) <=
+    criticalPoint
+      ? "Critical"
+      : Number(item.currentStock || 0) <=
+        reorderPoint
+      ? "Low"
+      : "OK";
+
+  const reorderRisk =
+    Number(item.currentStock || 0) <
+      Number(item.avgMonthlyUsage || 0) ||
+    Number(item.stockoutFrequency || 0) > 0
+      ? "Review"
+      : "OK";
+
+  return {
+    movement: isFast ? "Fast" : "Slow",
+    reorderPoint,
+    daysUntilStockout,
+    daysToRestock,
+    stockStatus,
+    reorderRisk,
+  };
+}
+
+async function deductMedicalInventory({
+  inventoryItemId,
+  quantityUsed,
+  date,
+  type,
+  treatment,
+  notes,
+}) {
+  if (!inventoryItemId || quantityUsed < 1) {
+    return;
+  }
+
+  const item =
+    await getInventoryItemById(inventoryItemId);
+
+  const currentStock =
+    Number(item.currentStock || 0);
+
+  if (quantityUsed > currentStock) {
+    throw new Error(
+      `${item.name} only has ${currentStock} ${
+        item.unit || "pcs"
+      } available.`
+    );
+  }
+
+  const newStock =
+    currentStock - quantityUsed;
+
+  const updatedLocal = {
+    ...item,
+    currentStock: newStock,
+    recencyDays: 0,
+    stockoutFrequency:
+      newStock <= 0
+        ? Number(item.stockoutFrequency || 0) + 1
+        : Number(item.stockoutFrequency || 0),
+  };
+
+  updatedLocal.monthlyTurnoverRatio =
+    Number(updatedLocal.averageInventory || 0) >
+    0
+      ? Number(
+          (
+            Number(
+              updatedLocal.avgMonthlyUsage || 0
+            ) /
+            Number(
+              updatedLocal.averageInventory || 0
+            )
+          ).toFixed(2)
+        )
+      : 0;
+
+  Object.assign(
+    updatedLocal,
+    rfClassify(updatedLocal)
+  );
+
+  await updateInventoryItem(inventoryItemId, {
+    currentStock: updatedLocal.currentStock,
+    recencyDays: updatedLocal.recencyDays,
+    stockoutFrequency:
+      updatedLocal.stockoutFrequency,
+    monthlyTurnoverRatio:
+      updatedLocal.monthlyTurnoverRatio,
+    movementLabel: updatedLocal.movement,
+    movement: updatedLocal.movement,
+    reorderRisk: updatedLocal.reorderRisk,
+    reorderPoint: updatedLocal.reorderPoint,
+    daysUntilStockout:
+      updatedLocal.daysUntilStockout,
+    daysToRestock:
+      updatedLocal.daysToRestock,
+    stockStatus: updatedLocal.stockStatus,
+  });
+
+  await addInventoryTransaction(
+    inventoryItemId,
+    {
+      type: "out",
+      qty: quantityUsed,
+      date,
+      animal: animal.name || animal.id,
+      procedure: type,
+      notes:
+        treatment ||
+        notes ||
+        "Medical quarantine usage",
+      staff:
+        getUserName()?.split(" ")[0] ||
+        "Veterinarian",
+    }
+  );
+
+  return {
+    itemName: item.name,
+    unit: item.unit || "pcs",
+    newStock,
+    stockStatus: updatedLocal.stockStatus,
+  };
 }
 
 function getLatestMedicalRecord() {
@@ -1052,13 +1497,7 @@ async function markReadyForAdoption() {
   }
 
   try {
-    await updateAnimal(animal.id, {
-      status: "Ready",
-      quarantineStatus: "Completed",
-      quarantineClearance: "Cleared",
-      quarantineClearedAt: new Date().toISOString(),
-      readyForAdoptionAt: new Date().toISOString(),
-    });
+    await markAnimalReady(animal.id);
 
     await refreshAnimal();
     renderAllTabs();
@@ -1139,41 +1578,41 @@ async function saveEditProfile() {
   }
 
   const payload = {
-    name:
-      document.getElementById("eName").value.trim() ||
-      animal.name,
+  name:
+    document.getElementById("eName").value.trim() ||
+    animal.name,
 
-    species:
-      document.getElementById("eSpecies").value,
+  species:
+    document.getElementById("eSpecies").value,
 
-    breed:
-      document.getElementById("eBreed").value.trim(),
+  breed:
+    document.getElementById("eBreed").value.trim(),
 
-    sex:
-      document.getElementById("eSex").value,
+  sex:
+    document.getElementById("eSex").value,
 
-    ageEstimate:
-      document.getElementById("eAge").value.trim(),
+  ageEstimate:
+    document.getElementById("eAge").value.trim(),
 
-    color:
-      document.getElementById("eColor").value.trim(),
+  color:
+    document.getElementById("eColor").value.trim(),
 
-    weight:
-      parseFloat(
-        document.getElementById("eWeight").value
-      ) ||
-      animal.weight ||
-      null,
+  weight:
+    parseFloat(
+      document.getElementById("eWeight").value
+    ) ||
+    animal.weight ||
+    null,
 
-    notes:
-      document.getElementById("eNotes").value.trim(),
+  notes:
+    document.getElementById("eNotes").value.trim(),
 
-    cageNumber:
-      document.getElementById("eCageNumber").value.trim(),
+  cageNumber:
+    document.getElementById("eCageNumber").value.trim(),
 
-    housingType:
-      document.getElementById("eHousingType").value,
-  };
+  housingType:
+    document.getElementById("eHousingType").value,
+};
 
   try {
     await updateAnimal(
@@ -1256,6 +1695,15 @@ function can(action) {
   );
 }
 
+function canEditBehavioralAssessment() {
+  const lockedStatuses = ["Adopted", "Archived"];
+
+  return (
+    can("edit_behavioral") &&
+    !lockedStatuses.includes(animal.status)
+  );
+}
+
 function applyRolePermissions() {
   const editProfileButton =
     document.getElementById("btnEditProfile");
@@ -1277,10 +1725,10 @@ function applyRolePermissions() {
       can("edit_basic") ? "" : "none";
   }
 
-  if (behavioralButton) {
-    behavioralButton.style.display =
-      can("edit_behavioral") ? "" : "none";
-  }
+if (behavioralButton) {
+  behavioralButton.style.display =
+    canEditBehavioralAssessment() ? "" : "none";
+}
 
   if (addMedicalButton) {
     const canShowMedical =
@@ -1305,13 +1753,13 @@ function applyRolePermissions() {
 
 async function init() {
   try {
-    const session = await protectManagementPage();
-
+    const session = await protectPageByModule("animals");
     currentRole = session.role;
 
     renderTopbarUser();
-    loadSidebar();
+    await loadSidebar();
     await loadAnimal();
+    await loadMedicalInventoryItems();
 
     renderAllTabs();
 

@@ -306,14 +306,34 @@
             <textarea class="form-inp form-textarea" id="fMedTreatment" rows="2"
               placeholder="Medications given, dosage, procedures done…"></textarea>
           </div>
+          <div class="form-group">
+          <label class="form-lbl" for="fMedInventoryItem">Medicine / Medical Supply Used</label>
+          <select class="form-inp" id="fMedInventoryItem">
+            <option value="">No inventory item used</option>
+          </select>
+          <span class="form-err" id="errMedInventoryItem"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-lbl" for="fMedQuantityUsed">Quantity Used</label>
+          <input
+            type="number"
+            class="form-inp"
+            id="fMedQuantityUsed"
+            min="0"
+            step="1"
+            placeholder="0"
+          />
+          <span class="form-err" id="errMedQuantityUsed"></span>
+        </div>
           <div class="form-group form-full">
             <label class="form-lbl" for="fMedNotes">Notes / Follow-up</label>
             <textarea class="form-inp form-textarea" id="fMedNotes" rows="2"
               placeholder="Next checkup date, restrictions, special care instructions…"></textarea>
           </div>
-          <div class="form-group">
-            <label class="form-lbl" for="fMedClearance">Quarantine Clearance</label>
-            <select class="form-inp" id="fMedClearance">
+          <div class="form-group" id="medClearanceGroup">
+              <label class="form-lbl" for="fMedClearance">Quarantine Clearance</label>
+              <select class="form-inp" id="fMedClearance">
               <option value="Pending">Pending</option>
               <option value="Cleared">Cleared</option>
               <option value="Hold">On Hold</option>

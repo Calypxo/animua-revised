@@ -30,7 +30,7 @@ export const ROLE_PERMISSIONS = {
       "process_adoption",
       "archive",
       "restore",
-      ],
+    ],
 
     intake: [
       "view",
@@ -48,12 +48,18 @@ export const ROLE_PERMISSIONS = {
       "convert",
     ],
 
+    quarantine: [
+      "view",
+    ],
+
     inventory: [
       "view",
       "create",
       "edit",
       "delete",
-      "consume",
+      "stock_in",
+      "consume_general",
+      "consume_medical",
     ],
 
     adoption: [
@@ -62,6 +68,10 @@ export const ROLE_PERMISSIONS = {
       "approve",
       "reject",
       "finalize",
+    ],
+
+    reports: [
+      "view",
     ],
 
     archive: [
@@ -84,6 +94,7 @@ export const ROLE_PERMISSIONS = {
       "edit_basic",
       "upload_photo",
       "send_to_quarantine",
+      "mark_ready",
       "process_adoption",
     ],
 
@@ -103,9 +114,16 @@ export const ROLE_PERMISSIONS = {
       "convert",
     ],
 
+    quarantine: [
+      "view",
+    ],
+
     inventory: [
       "view",
-      "consume",
+      "create",
+      "edit",
+      "stock_in",
+      "consume_general",
     ],
 
     adoption: [
@@ -114,6 +132,10 @@ export const ROLE_PERMISSIONS = {
       "approve",
       "reject",
       "finalize",
+    ],
+
+    reports: [
+      "view",
     ],
 
     archive: [
@@ -134,20 +156,16 @@ export const ROLE_PERMISSIONS = {
       "set_clearance",
     ],
 
-    intake: [
-      "view",
-    ],
-
-    surrender: [
+    quarantine: [
       "view",
     ],
 
     inventory: [
       "view",
-      "consume",
+      "consume_medical",
     ],
 
-    adoption: [
+    reports: [
       "view",
     ],
 
@@ -162,7 +180,9 @@ export function normalizeRole(role) {
     return "";
   }
 
-  const normalized = String(role).trim().toLowerCase();
+  const normalized = String(role)
+    .trim()
+    .toLowerCase();
 
   if (normalized === "admin") {
     return USER_ROLES.ADMIN;
@@ -193,15 +213,15 @@ export function hasPermission(
     return false;
   }
 
-  const permissions =
+  const rolePermissions =
     ROLE_PERMISSIONS[normalizedRole];
 
-  if (!permissions) {
+  if (!rolePermissions) {
     return false;
   }
 
   const modulePermissions =
-    permissions[moduleName];
+    rolePermissions[moduleName];
 
   if (!Array.isArray(modulePermissions)) {
     return false;

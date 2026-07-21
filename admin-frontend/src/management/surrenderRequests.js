@@ -3,7 +3,8 @@ import "../css/adminDashboard.css";
 import "../css/sidebar.css";
 import "../css/surrenderRequests.css";
 
-import { protectManagementPage } from "../auth/authGuard.js";
+import { protectPageByModule } from "../auth/authGuard.js";
+import { hasPermission } from "../auth/permissions.js";
 import { renderTopbarUser }      from "../components/management/topbarUser.js";
 import { loadSidebar }           from "../components/management/sidebarLoader.js";
 import { getUserName }           from "../utils/storage.js";
@@ -120,6 +121,7 @@ const PAGE_SIZE = 8;
 let activeTab   = "all";
 let activeId    = null;
 let confirmMode = null;
+let currentRole = "";
 
 /* ══════════════════════════════════════════════════════
    HELPERS
@@ -474,10 +476,22 @@ function renderDrawer(r) {
   // ── Footer buttons ────────────────────────────────────
   let footerBtns = `<button class="btn-ghost-clay" id="drawerCloseBtn"><i class="bi bi-x"></i> Close</button>`;
   if (r.status === "Pending") {
-    footerBtns += `
-      <button class="btn-danger-outline" id="drawerRejectBtn"><i class="bi bi-x-lg"></i> Reject</button>
-      <button class="btn-approve-confirm" id="drawerApproveBtn"><i class="bi bi-check-lg"></i> Approve</button>`;
-  }
+  footerBtns += `
+    ${
+      can("reject")
+        ? `<button class="btn-danger-outline" id="drawerRejectBtn">
+            <i class="bi bi-x-lg"></i> Reject
+          </button>`
+        : ""
+    }
+    ${
+      can("approve")
+        ? `<button class="btn-approve-confirm" id="drawerApproveBtn">
+            <i class="bi bi-check-lg"></i> Approve
+          </button>`
+        : ""
+    }`;
+}
     if (r.status === "Approved") {
     footerBtns += `
       <button class="btn-ghost-clay" disabled>
@@ -538,6 +552,13 @@ async function updateSurrenderStatusInBackend(id, payload) {
 ══════════════════════════════════════════════════════ */
 // Approve
 function openApproveModal(id) {
+  if (!can("approve")) {
+  showToast(
+    "error",
+    "You do not have permission to approve surrender requests."
+  );
+  return;
+}
   const r = allRequests.find(x => x.id === id)
   if (!r) return;
   confirmMode = { type:"approve", id };
@@ -547,6 +568,13 @@ function openApproveModal(id) {
   openModal("approveModalBackdrop");
 }
 async function executeApprove() {
+  if (!can("approve")) {
+  showToast(
+    "error",
+    "You do not have permission to approve surrender requests."
+  );
+  return;
+}
   const r = allRequests.find(x => x.id === confirmMode.id);
 
   if (!r) return;
@@ -596,6 +624,13 @@ async function executeApprove() {
 
 // Reject
 function openRejectModal(id) {
+  if (!can("reject")) {
+  showToast(
+    "error",
+    "You do not have permission to reject surrender requests."
+  );
+  return;
+}
   const r = allRequests.find(x=>x.id===id);
   if (!r) return;
   confirmMode = { type:"reject", id };
@@ -606,6 +641,13 @@ function openRejectModal(id) {
   openModal("rejectModalBackdrop");
 }
 async function executeReject() {
+  if (!can("reject")) {
+  showToast(
+    "error",
+    "You do not have permission to reject surrender requests."
+  );
+  return;
+}
   const reason = document.getElementById("rejectReason")?.value.trim();
 
   if (!reason) {
@@ -697,7 +739,8 @@ function showToast(type,msg) {
 ══════════════════════════════════════════════════════ */
 async function init() {
   try {
-    await protectManagementPage();
+    const session = await protectPageByModule("surrender");
+    currentRole = session.role;
     renderTopbarUser();
     loadSidebar(); 
 

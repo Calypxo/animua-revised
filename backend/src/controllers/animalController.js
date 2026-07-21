@@ -74,11 +74,10 @@ exports.updateAnimal = async (req, res) => {
       "ageEstimate",
       "color",
       "weight",
-      "status",
       "notes",
       "photoURL",
       "cageNumber",
-      "housingType"
+      "housingType",
     ];
 
     const updates = {};
@@ -92,15 +91,6 @@ exports.updateAnimal = async (req, res) => {
     updates.updatedAt = admin.firestore.FieldValue.serverTimestamp();
     updates.updatedBy = req.user?.email || "";
 
-    if (updates.status && updates.status !== before.status) {
-      updates.history = admin.firestore.FieldValue.arrayUnion({
-        date: new Date().toISOString().split("T")[0],
-        event: `Status changed to ${updates.status}`,
-        detail: `From ${before.status}`,
-        actor: req.user?.fullName || req.user?.email || "Staff",
-      });
-    }
-
     await db.collection(ANIMAL_COL).doc(id).update(updates);
 
     await writeAuditLog({
@@ -111,7 +101,11 @@ exports.updateAnimal = async (req, res) => {
       performedBy: req.user?.email,
       performedByName: req.user?.fullName,
       before: { status: before.status },
-      after: { status: updates.status || before.status },
+      after: {
+      updatedFields: Object.keys(updates).filter(
+        key => !["updatedAt", "updatedBy"].includes(key)
+      ),
+    },
     });
 
     res.status(200).json({ message: "Animal profile updated." });
@@ -306,7 +300,20 @@ exports.saveBehavioralAssessment = async (req, res) => {
 exports.addMedicalRecord = async (req, res) => {
   try {
     const { id } = req.params;
-    const { type, date, vet, diagnosis, treatment, notes, clearance, weight } = req.body;
+    const {
+      type,
+      date,
+      vet,
+      diagnosis,
+      treatment,
+      notes,
+      clearance,
+      weight,
+      inventoryItemId,
+      quantityUsed,
+      inventoryItemName,
+      inventoryUnit,
+    } = req.body;
 
     if (!type || !date) {
       return res.status(400).json({ message: "Type and date are required." });
@@ -326,8 +333,15 @@ exports.addMedicalRecord = async (req, res) => {
       diagnosis: diagnosis || "",
       treatment: treatment || "",
       notes: notes || "",
-      clearance: clearance || "Pending",
+      clearance:
+        type === "Quarantine Clearance"
+          ? clearance || "Pending"
+          : null,
       weight: weight || null,
+      inventoryItemId: inventoryItemId || "",
+      quantityUsed: Number(quantityUsed || 0),
+      inventoryItemName: inventoryItemName || "",
+      inventoryUnit: inventoryUnit || "",
     };
 
     const histEntry = {
@@ -348,10 +362,6 @@ exports.addMedicalRecord = async (req, res) => {
       updates.weight = weight;
     }
 
-    if (clearance !== "Cleared" && doc.data().status === "Profiling") {
-      updates.status = "Quarantine";
-    }
-
     await db.collection(ANIMAL_COL).doc(id).update(updates);
 
     res.status(201).json({ message: "Medical record added.", id: medId });
@@ -365,7 +375,20 @@ exports.addMedicalRecord = async (req, res) => {
 exports.updateMedicalRecord = async (req, res) => {
   try {
     const { id, medicalId } = req.params;
-    const { type, date, vet, diagnosis, treatment, notes, clearance, weight } = req.body;
+    const {
+      type,
+      date,
+      vet,
+      diagnosis,
+      treatment,
+      notes,
+      clearance,
+      weight,
+      inventoryItemId,
+      quantityUsed,
+      inventoryItemName,
+      inventoryUnit,
+    } = req.body;
 
     const doc = await db.collection(ANIMAL_COL).doc(id).get();
     if (!doc.exists) {
@@ -390,8 +413,21 @@ exports.updateMedicalRecord = async (req, res) => {
       diagnosis: diagnosis ?? existing.diagnosis,
       treatment: treatment ?? existing.treatment,
       notes: notes ?? existing.notes,
-      clearance: clearance ?? existing.clearance,
+      clearance:
+        (type ?? existing.type) === "Quarantine Clearance"
+          ? clearance ?? existing.clearance ?? "Pending"
+          : null,
       weight: weight ?? existing.weight,
+      inventoryItemId:
+        inventoryItemId ?? existing.inventoryItemId ?? "",
+      quantityUsed:
+        quantityUsed !== undefined
+          ? Number(quantityUsed || 0)
+          : Number(existing.quantityUsed || 0),
+      inventoryItemName:
+        inventoryItemName ?? existing.inventoryItemName ?? "",
+      inventoryUnit:
+        inventoryUnit ?? existing.inventoryUnit ?? "",
     };
 
     const histEntry = {
@@ -418,6 +454,169 @@ exports.updateMedicalRecord = async (req, res) => {
   } catch (err) {
     console.error("[updateMedicalRecord]", err.message);
     res.status(500).json({ message: "Failed to update medical record." });
+  }
+};
+
+exports.sendToQuarantine = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const animalRef = db.collection(ANIMAL_COL).doc(id);
+    const doc = await animalRef.get();
+
+    if (!doc.exists) {
+      return res.status(404).json({
+        message: "Animal not found.",
+      });
+    }
+
+    const animal = doc.data();
+
+    if (animal.status !== "Profiling") {
+      return res.status(400).json({
+        message: "Only animals in Profiling can be sent to quarantine.",
+      });
+    }
+
+    const today = new Date().toISOString().split("T")[0];
+
+    const historyEntry = {
+      date: today,
+      event: "Sent to quarantine",
+      detail: "Animal moved from profiling to quarantine/medical evaluation.",
+      actor: req.user?.fullName || req.user?.email || "Staff",
+    };
+
+    await animalRef.update({
+      status: "Quarantine",
+      currentStage: "quarantine",
+      profilingStatus: "Completed",
+      quarantineStatus: "Active",
+      quarantineClearance: "Pending",
+      quarantineStartedAt: today,
+      visibleToPublic: false,
+      history: admin.firestore.FieldValue.arrayUnion(historyEntry),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedBy: req.user?.email || "",
+    });
+
+    await writeAuditLog({
+      action: "animal.sent_to_quarantine",
+      module: "Animal Profiling",
+      targetId: id,
+      targetName: animal.name,
+      performedBy: req.user?.email,
+      performedByName: req.user?.fullName,
+      before: {
+        status: animal.status,
+      },
+      after: {
+        status: "Quarantine",
+        quarantineClearance: "Pending",
+      },
+    });
+
+    res.status(200).json({
+      message: "Animal sent to quarantine.",
+      status: "Quarantine",
+    });
+  } catch (err) {
+    console.error("[sendToQuarantine]", err.message);
+    res.status(500).json({
+      message: "Failed to send animal to quarantine.",
+    });
+  }
+};
+
+exports.markReadyForAdoption = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const animalRef = db.collection(ANIMAL_COL).doc(id);
+    const doc = await animalRef.get();
+
+    if (!doc.exists) {
+      return res.status(404).json({
+        message: "Animal not found.",
+      });
+    }
+
+    const animal = doc.data();
+
+    if (animal.status !== "Quarantine") {
+      return res.status(400).json({
+        message: "Only animals in Quarantine can be marked ready for adoption.",
+      });
+    }
+
+    const medicalRecords = animal.medicalRecords || [];
+
+    const hasVetClearance = medicalRecords.some((record) => {
+      return (
+        record.type === "Quarantine Clearance" &&
+        record.clearance === "Cleared"
+      );
+    });
+
+    if (!hasVetClearance) {
+      return res.status(400).json({
+        message: "Animal must have cleared quarantine clearance before being marked ready.",
+      });
+    }
+
+    if (!animal.behavioralAssessment) {
+      return res.status(400).json({
+        message: "Behavioral assessment is required before marking animal ready for adoption.",
+      });
+    }
+
+    const today = new Date().toISOString().split("T")[0];
+
+    const historyEntry = {
+      date: today,
+      event: "Marked ready for adoption",
+      detail: "Animal completed quarantine clearance and behavioral assessment.",
+      actor: req.user?.fullName || req.user?.email || "Staff",
+    };
+
+    await animalRef.update({
+      status: "Ready",
+      currentStage: "adoption",
+      quarantineStatus: "Completed",
+      quarantineClearance: "Cleared",
+      quarantineClearedAt: today,
+      readyForAdoptionAt: today,
+      visibleToPublic: true,
+      history: admin.firestore.FieldValue.arrayUnion(historyEntry),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedBy: req.user?.email || "",
+    });
+
+    await writeAuditLog({
+      action: "animal.marked_ready",
+      module: "Animal Profiling",
+      targetId: id,
+      targetName: animal.name,
+      performedBy: req.user?.email,
+      performedByName: req.user?.fullName,
+      before: {
+        status: animal.status,
+      },
+      after: {
+        status: "Ready",
+        visibleToPublic: true,
+      },
+    });
+
+    res.status(200).json({
+      message: "Animal marked ready for adoption.",
+      status: "Ready",
+    });
+  } catch (err) {
+    console.error("[markReadyForAdoption]", err.message);
+    res.status(500).json({
+      message: "Failed to mark animal ready for adoption.",
+    });
   }
 };
 
