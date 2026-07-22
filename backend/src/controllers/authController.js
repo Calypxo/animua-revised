@@ -500,26 +500,56 @@ exports.login = async (req, res) => {
       return res.status(401).json({ message: "Invalid email or password." });
     }
 
-    if (!userData.emailVerified && !userData.phoneVerified) {
-      const firebaseUser = userData.firebaseUid
+    const managementRoles = ["Admin", "Staff", "Veterinarian"];
+const isManagementUser = managementRoles.includes(userData.role);
+
+if (!userData.emailVerified && !userData.phoneVerified) {
+  if (isManagementUser) {
+    await db.collection("users").doc(email).update({
+      emailVerified: true,
+      phoneVerified: false,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    userData.emailVerified = true;
+    userData.phoneVerified = false;
+  } else {
+    let firebaseUser;
+
+    try {
+      firebaseUser = userData.firebaseUid
         ? await admin.auth().getUser(userData.firebaseUid)
         : await admin.auth().getUserByEmail(email);
-
-      if (!firebaseUser.emailVerified && !firebaseUser.phoneNumber) {
-        return res.status(403).json({
-          message: "Please verify your email or phone number before logging in."
+    } catch (firebaseError) {
+      if (firebaseError.code === "auth/user-not-found") {
+        return res.status(401).json({
+          message:
+            "This public account is incomplete. Please register again or contact the administrator."
         });
       }
 
-      await db.collection("users").doc(email).update({
-        emailVerified: Boolean(firebaseUser.emailVerified),
-        phone: firebaseUser.phoneNumber || userData.phone || "",
-        phoneVerified: Boolean(firebaseUser.phoneNumber),
-        updatedAt: admin.firestore.FieldValue.serverTimestamp()
-      });
-      userData.emailVerified = Boolean(firebaseUser.emailVerified);
-      userData.phoneVerified = Boolean(firebaseUser.phoneNumber);
+      throw firebaseError;
     }
+
+    if (!firebaseUser.emailVerified && !firebaseUser.phoneNumber) {
+      return res.status(403).json({
+        message: "Please verify your email or phone number before logging in."
+      });
+    }
+
+    await db.collection("users").doc(email).update({
+      firebaseUid: firebaseUser.uid,
+      emailVerified: Boolean(firebaseUser.emailVerified),
+      phone: firebaseUser.phoneNumber || userData.phone || "",
+      phoneVerified: Boolean(firebaseUser.phoneNumber),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    userData.firebaseUid = firebaseUser.uid;
+    userData.emailVerified = Boolean(firebaseUser.emailVerified);
+    userData.phoneVerified = Boolean(firebaseUser.phoneNumber);
+  }
+}
 
     const token = jwt.sign(
       {
