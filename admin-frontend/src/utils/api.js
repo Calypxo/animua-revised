@@ -1,7 +1,7 @@
 // admin-frontend/src/utils/api.js
 // render: "https://animua-backend.onrender.com/api"
 // local:   "http://localhost:5000/api"
-export const API_BASE_URL = "https://animua-backend.onrender.com/api";
+export const API_BASE_URL = "http://localhost:5000/api";
 
 /**
  * Authenticated fetch wrapper.
