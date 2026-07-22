@@ -15,59 +15,61 @@ const publicRoutes = require("./src/routes/publicRoutes");
 const adoptionRoutes = require("./src/routes/adoptionRoutes");
 const predictiveRoutes = require("./src/routes/predictiveRoutes");
 const matchRoutes = require("./src/routes/matchRoutes");
-<<<<<<< HEAD
 const chatbotRoutes = require("./src/routes/chatbotRoutes");
-=======
 const surrenderRoutes = require("./src/routes/surrenderRoutes");
->>>>>>> 8c76e329d3ff001d2178f9f031b2d9a7600f79a0
 
 const authenticateToken = require("./src/middleware/authMiddleware");
 const authorizeRole = require("./src/middleware/roleMiddleware");
 const { trainInventoryModel } = require("./src/services/predictiveService");
 
-<<<<<<< HEAD
-// ❌ DO NOT USE THIS because your routes are inside ./src/routes/authRoutes
-// const authRoutes = require("./routes/authRoutes");
-// app.use("/api/auth", authRoutes);
-=======
 // ─── CORS ─────────────────────────────────────────────────────────────────────
+const allowedOrigins = [
+  "https://animua-angelescity.web.app",
+  "https://animua-admin.web.app",
+
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+
+  "http://localhost:5174",
+  "http://127.0.0.1:5174",
+
+  "http://localhost:5175",
+  "http://127.0.0.1:5175",
+
+  "http://localhost:5176",
+  "http://127.0.0.1:5176",
+
+  "http://localhost:5177",
+  "http://127.0.0.1:5177",
+
+  "http://localhost:5179",
+  "http://127.0.0.1:5179",
+];
+
 const corsOptions = {
-  origin: [
-    "https://animua-angelescity.web.app",
-    "https://animua-admin.web.app",
+  origin: function (origin, callback) {
+    // Allow requests with no origin, like Postman, mobile apps, or server-to-server calls
+    if (!origin) {
+      return callback(null, true);
+    }
 
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
->>>>>>> 8c76e329d3ff001d2178f9f031b2d9a7600f79a0
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
 
-    "http://localhost:5174",
-    "http://127.0.0.1:5174",
-
-    "http://localhost:5175",
-    "http://127.0.0.1:5175",
-
-    "http://localhost:5176",
-    "http://127.0.0.1:5176",
-
-<<<<<<< HEAD
-    // ✅ Allow localhost / 127.0.0.1 on ANY port
+    // Allow localhost / 127.0.0.1 on any port during development
     if (
       origin.startsWith("http://localhost:") ||
       origin.startsWith("http://127.0.0.1:")
     ) {
       return callback(null, true);
     }
-=======
-    "http://localhost:5177",
-    "http://127.0.0.1:5177",
->>>>>>> 8c76e329d3ff001d2178f9f031b2d9a7600f79a0
 
-    "http://localhost:5179",
-    "http://127.0.0.1:5179"
-  ],
+    return callback(new Error("Not allowed by CORS"));
+  },
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
+  credentials: true,
 };
 
 app.use(cors(corsOptions));
@@ -85,11 +87,8 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/public", publicRoutes);
 app.use("/api/adoptions", adoptionRoutes);
 app.use("/api/predictive", predictiveRoutes);
-<<<<<<< HEAD
 app.use("/api/chatbot", chatbotRoutes);
-=======
 app.use("/api/surrenders", surrenderRoutes);
->>>>>>> 8c76e329d3ff001d2178f9f031b2d9a7600f79a0
 app.use("/api", matchRoutes);
 
 app.get("/", (req, res) => {
@@ -100,7 +99,7 @@ app.get("/", (req, res) => {
 app.get("/api/protected", authenticateToken, (req, res) => {
   res.json({
     message: "Access Granted!",
-    user: req.user
+    user: req.user,
   });
 });
 
