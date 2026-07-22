@@ -7,12 +7,52 @@ const AVATAR_COLORS = [
   "#9b2c4e","#3d2b8a","#1a6b5a","#7a3b00","#1a4e7a",
 ];
 
-// GET ALL USERS — optional ?role=Admin|Staff|Public
+const ROLE_PERMISSIONS = {
+  Admin: {
+    dashboard: ["view"],
+    users: ["view", "create", "edit", "delete"],
+    surrender: ["view", "approve", "reject", "convert"],
+    intake: ["view", "create", "edit", "approve", "reject", "convert"],
+    animals: ["view", "edit_basic", "upload_photo", "send_to_quarantine", "edit_behavioral", "add_medical", "edit_medical", "set_clearance", "mark_ready", "process_adoption", "archive", "restore"],
+    quarantine: ["view"],
+    inventory: ["view", "create", "edit", "delete", "consume"],
+    adoption: ["view", "review", "approve", "reject", "finalize"],
+    reports: ["view"],
+    archive: ["view", "restore"],
+    audit: ["view"]
+  },
+  Staff: {
+    dashboard: ["view"],
+    animals: ["view", "edit_basic", "upload_photo", "send_to_quarantine", "process_adoption"],
+    intake: ["view", "create", "edit", "approve", "reject", "convert"],
+    surrender: ["view", "approve", "reject", "convert"],
+    quarantine: ["view"],
+    inventory: ["view", "consume"],
+    adoption: ["view", "review", "approve", "reject", "finalize"],
+    reports: ["view"],
+    archive: ["view"]
+  },
+  Veterinarian: {
+    dashboard: ["view"],
+    animals: ["view", "edit_behavioral", "add_medical", "edit_medical", "set_clearance"],
+    quarantine: ["view"],
+    inventory: ["view", "consume"],
+    reports: ["view"],
+    archive: ["view"]
+  },
+  Public: {}
+};
+
+function getPermissionsForRole(role) {
+  return Object.keys(ROLE_PERMISSIONS[role] || {});
+}
+
+// GET ALL USERS — optional ?role=Admin|Staff|Public|Veterinarian
 exports.getAllUsers = async (req, res) => {
   try {
     const { role } = req.query;
     let query = db.collection("users");
-    if (role && ["Admin","Staff","Public"].includes(role)) {
+    if (role && ["Admin","Staff","Veterinarian","Public"].includes(role)) {
       query = query.where("role","==",role);
     }
     const snapshot = await query.get();
@@ -34,11 +74,12 @@ exports.getAllUsers = async (req, res) => {
       };
     });
     const summary = {
-      total:    users.length,
-      admins:   users.filter(u => u.role === "Admin").length,
-      staff:    users.filter(u => u.role === "Staff").length,
-      public:   users.filter(u => u.role === "Public").length,
-      active:   users.filter(u => u.status === "Active").length,
+      total: users.length,
+      admins: users.filter(u => u.role === "Admin").length,
+      staff: users.filter(u => u.role === "Staff").length,
+      veterinarians: users.filter(u => u.role === "Veterinarian").length,
+      public: users.filter(u => u.role === "Public").length,
+      active: users.filter(u => u.status === "Active").length,
       inactive: users.filter(u => u.status === "Inactive").length,
     };
     res.status(200).json({ users, summary });
@@ -69,22 +110,23 @@ exports.createUser = async (req, res) => {
     if (!firstName || !lastName || !email || !password || !role) {
       return res.status(400).json({ message: "Required fields missing." });
     }
-    if (!["Admin","Staff"].includes(role)) {
-      return res.status(400).json({ message: "Admin panel can only create Admin or Staff accounts. Public users self-register." });
+    if (!["Admin","Staff","Veterinarian"].includes(role)) {
+      return res.status(400).json({ message: "Admin panel can only create management accounts. Public users self-register." });
     }
     const emailLower = email.trim().toLowerCase();
     const existing = await db.collection("users").doc(emailLower).get();
     if (existing.exists) return res.status(409).json({ message: "Email is already in use." });
 
-    const salt     = await bcrypt.genSalt(12);
+    const salt = await bcrypt.genSalt(12);
     const hashedPw = await bcrypt.hash(password, salt);
     const fullName = `${firstName.trim()} ${lastName.trim()}`;
     const assigned = color || AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)];
+    const computedPermissions = getPermissionsForRole(role);
 
     await db.collection("users").doc(emailLower).set({
       firstName: firstName.trim(), lastName: lastName.trim(), fullName,
       email: emailLower, password: hashedPw, role,
-      status: status || "Active", permissions: permissions || [],
+      status: status || "Active", permissions: computedPermissions,
       color: assigned, lastLogin: null,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
       createdBy: req.user?.email || "system",
@@ -92,7 +134,7 @@ exports.createUser = async (req, res) => {
     await writeAuditLog({ action:"user.created", module:"User Management",
       targetId: emailLower, targetName: fullName,
       performedBy: req.user?.email, performedByName: req.user?.fullName,
-      after: { firstName, lastName, email: emailLower, role, status, permissions },
+      after: { firstName, lastName, email: emailLower, role, status, permissions: computedPermissions },
     });
     res.status(201).json({ message: "User created successfully.", id: emailLower });
   } catch (error) {
@@ -110,8 +152,23 @@ exports.updateUser = async (req, res) => {
     const userDoc = await db.collection("users").doc(id).get();
     if (!userDoc.exists) return res.status(404).json({ message: "User not found." });
 
-    const before   = userDoc.data();
+    const before = userDoc.data();
     const isPublic = before.role === "Public";
+    const targetRole = role || before.role;
+    const computedPermissions = getPermissionsForRole(targetRole);
+
+    if (before.role === "Admin" && (role === "Staff" || role === "Veterinarian" || role === "Public" || status === "Inactive")) {
+      const activeAdminSnapshot = await db.collection("users")
+        .where("role", "==", "Admin")
+        .where("status", "==", "Active")
+        .get();
+
+      const otherActiveAdmins = activeAdminSnapshot.docs.filter(doc => doc.id !== id);
+
+      if (otherActiveAdmins.length === 0) {
+        return res.status(400).json({ message: "Cannot remove the last active Admin." });
+      }
+    }
 
     if (isPublic && role && role !== "Public") {
       return res.status(400).json({ message: "Cannot promote a Public user to Admin or Staff." });
@@ -122,12 +179,12 @@ exports.updateUser = async (req, res) => {
 
     const updates = {};
     if (!isPublic) {
-      if (firstName   !== undefined) updates.firstName   = firstName.trim();
-      if (lastName    !== undefined) updates.lastName    = lastName.trim();
-      if (firstName && lastName)     updates.fullName    = `${firstName.trim()} ${lastName.trim()}`;
-      if (role        !== undefined) updates.role        = role;
-      if (permissions !== undefined) updates.permissions = permissions;
-      if (color       !== undefined) updates.color       = color;
+      if (firstName !== undefined) updates.firstName = firstName.trim();
+      if (lastName !== undefined) updates.lastName = lastName.trim();
+      if (firstName && lastName) updates.fullName = `${firstName.trim()} ${lastName.trim()}`;
+      if (role !== undefined) updates.role = role;
+      updates.permissions = computedPermissions;
+      if (color !== undefined) updates.color = color;
     }
     if (status !== undefined) updates.status = status;
     updates.updatedAt = admin.firestore.FieldValue.serverTimestamp();
@@ -158,6 +215,24 @@ exports.toggleUserStatus = async (req, res) => {
     }
     const current   = userDoc.data();
     const newStatus = current.status === "Active" ? "Inactive" : "Active";
+
+    if (id === req.user?.email || id === req.user?.id) {
+      return res.status(400).json({ message: "You cannot deactivate your own account." });
+    }
+
+    if (current.role === "Admin" && newStatus === "Inactive") {
+      const activeAdminSnapshot = await db.collection("users")
+        .where("role", "==", "Admin")
+        .where("status", "==", "Active")
+        .get();
+
+      const otherActiveAdmins = activeAdminSnapshot.docs.filter(doc => doc.id !== id);
+
+      if (otherActiveAdmins.length === 0) {
+        return res.status(400).json({ message: "Cannot remove the last active Admin." });
+      }
+    }
+
     await db.collection("users").doc(id).update({
       status: newStatus,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),

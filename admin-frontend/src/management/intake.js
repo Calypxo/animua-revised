@@ -3,10 +3,11 @@ import "../css/adminDashboard.css";
 import "../css/sidebar.css";
 import "../css/intake.css";
 
-import { protectManagementPage }       from "../auth/authGuard.js";
+import { protectPageByModule }         from "../auth/authGuard.js";
+import { hasPermission }               from "../auth/permissions.js";
 import { renderTopbarUser }            from "../components/management/topbarUser.js";
 import { loadSidebar }                 from "../components/management/sidebarLoader.js";
-import { getUserRole, getUserName }    from "../utils/storage.js";
+import { getUserName }                 from "../utils/storage.js";
 import { BARANGAYS }                   from "../utils/barangays.js";
 
 
@@ -36,6 +37,8 @@ let activeTab      = "all";
 let editingId      = null;
 let confirmAction  = null;   // "approve" | "reject" | "convert"
 let confirmTargetId = null;
+let approvedSurrenderContext = null;
+let currentRole = "";
 
 /* ══════════════════════════════════════════════════════
    HELPERS
@@ -143,10 +146,21 @@ function renderTable() {
   }
 
   tbody.innerHTML = page.map(r => {
-    const canApprove = r.status === "Pending";
-    const canReject  = r.status === "Pending";
-    const canConvert = r.status === "Approved";
-    const canEdit    = r.status === "Pending" || r.status === "Draft";
+    const canApprove =
+    r.status === "Pending" &&
+    can("approve");
+
+  const canReject =
+    r.status === "Pending" &&
+    can("reject");
+
+  const canConvert =
+    r.status === "Approved" &&
+    can("convert");
+
+  const canEdit =
+    (r.status === "Pending" || r.status === "Draft") &&
+    can("edit");
 
     return `
     <tr style="cursor:pointer" data-id="${r.id}">
@@ -345,6 +359,14 @@ if (select) {
    OPEN ADD / EDIT MODAL
 ══════════════════════════════════════════════════════ */
 function openAddModal() {
+  if (!can("create")) {
+  showToast(
+    "error",
+    "You do not have permission to create intake records."
+  );
+  return;
+}
+
   editingId = null;
   document.getElementById("intakeModalTitle").textContent    = "New Intake Record";
   document.getElementById("intakeModalSubtitle").textContent = "Fill in all required fields and submit for review.";
@@ -358,7 +380,84 @@ function openAddModal() {
   openModal("intakeModalBackdrop");
 }
 
+function openApprovedSurrenderIntakeModal() {
+  const saved = sessionStorage.getItem("approved_surrender_for_intake");
+
+  if (!saved) return;
+
+  const surrender = JSON.parse(saved);
+  approvedSurrenderContext = surrender;
+
+  editingId = null;
+
+  document.getElementById("intakeModalTitle").textContent = "New Intake from Approved Surrender";
+  document.getElementById("intakeModalSubtitle").textContent =
+    "Review and complete the intake details before submitting.";
+
+  document.getElementById("intakeForm").reset();
+  document.getElementById("fIntakeId").value = "";
+  document.getElementById("fIntakeDate").value = today();
+
+  document.getElementById("fAnimalName").value = surrender.petName || "";
+  document.getElementById("fSpecies").value = surrender.species || "";
+  document.getElementById("fBreed").value = surrender.breed || "";
+  document.getElementById("fSex").value = surrender.sex || "";
+  document.getElementById("fAgeEstimate").value = surrender.age || "";
+  document.getElementById("fColor").value = surrender.colorMarkings || "";
+  document.getElementById("fCondition").value = "Fair";
+
+  document.getElementById("fIntakeNotes").value =
+    surrender.surrenderReason
+      ? `From approved surrender request ${surrender.surrenderId}. Reason: ${surrender.surrenderReason}`
+      : `From approved surrender request ${surrender.surrenderId}.`;
+
+  // This creates the surrender reference fields
+  setSource("Approved Surrender");
+
+  // Fill the surrender reference fields after they exist
+  setTimeout(() => {
+    const surrenderRefInput = document.getElementById("fSurrenderRef");
+    const ownerNameInput = document.getElementById("fOwnerName");
+    const ownerContactInput = document.getElementById("fOwnerContact");
+    const approvedDateInput = document.getElementById("fSurrenderApprovedDate");
+
+    if (surrenderRefInput) {
+      surrenderRefInput.value = surrender.surrenderId || "";
+    }
+
+    if (ownerNameInput) {
+      ownerNameInput.value = surrender.ownerName || "";
+    }
+
+    if (ownerContactInput) {
+      ownerContactInput.value = surrender.ownerContact || "";
+    }
+
+    if (approvedDateInput) {
+      approvedDateInput.value = surrender.approvedDate || today();
+    }
+
+    console.log("Approved surrender prefill:", {
+      surrenderId: surrender.surrenderId,
+      ownerName: surrender.ownerName,
+      ownerContact: surrender.ownerContact,
+      approvedDate: surrender.approvedDate,
+    });
+  }, 150);
+
+  clearFormErrors();
+  openModal("intakeModalBackdrop");
+}
+
 function openEditModal(id) {
+  if (!can("edit")) {
+  showToast(
+    "error",
+    "You do not have permission to edit intake records."
+  );
+  return;
+}
+
   const r = intakeRecords.find(x => x.id === id);
   if (!r) return;
   editingId = id;
@@ -487,8 +586,30 @@ function validateForm() {
   return valid;
 }
 
+async function updateSurrenderStatusFromIntake(surrenderId, payload) {
+  const token = localStorage.getItem("animua_token");
+
+  const response = await fetch(`http://localhost:5000/api/surrenders/${surrenderId}/status`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to update surrender request status.");
+  }
+
+  return data.request;
+}
+
 async function saveIntake(asDraft = false) {
   if (!asDraft && !validateForm()) return;
+
   if (asDraft && !document.getElementById("fSource").value) {
     setErr("errSource", "Please select a source before saving.");
     return;
@@ -497,12 +618,46 @@ async function saveIntake(asDraft = false) {
   const payload = collectFormData(asDraft);
 
   try {
+    let createdOrUpdatedData = null;
+
     if (editingId) {
-      await updateIntake(editingId, payload);
+      createdOrUpdatedData = await updateIntake(editingId, payload);
       showToast("success", "Intake record updated.");
     } else {
-      await createIntake(payload);
+      createdOrUpdatedData = await createIntake(payload);
       showToast("success", asDraft ? "Draft saved." : "Intake submitted for review.");
+    }
+
+    const savedRecord =
+      createdOrUpdatedData?.record ||
+      createdOrUpdatedData?.intake ||
+      createdOrUpdatedData?.data ||
+      createdOrUpdatedData;
+
+    const savedIntakeId =
+      savedRecord?.id ||
+      savedRecord?.intakeId ||
+      payload.id ||
+      payload.intakeId ||
+      null;
+
+    const isFromApprovedSurrender =
+      !asDraft &&
+      !editingId &&
+      payload.source === "Approved Surrender" &&
+      payload.surrenderRefId;
+
+    if (isFromApprovedSurrender) {
+      await updateSurrenderStatusFromIntake(payload.surrenderRefId, {
+        status: "Converted",
+        intakeId: savedIntakeId,
+        dropoffDate: payload.intakeDate,
+      });
+
+      sessionStorage.removeItem("approved_surrender_for_intake");
+      approvedSurrenderContext = null;
+
+      showToast("success", "Intake created and surrender request marked as converted.");
     }
 
     closeModal("intakeModalBackdrop");
@@ -613,17 +768,24 @@ function openViewModal(id) {
   // Footer buttons based on status
   const footer = document.getElementById("viewModalFooter");
   let footerBtns = `<button type="button" class="btn-ghost-clay" id="viewClose2">Close</button>`;
-
-  if (r.status === "Pending") {
-    footerBtns += `
-      <button type="button" class="btn-reject"  id="vBtnReject">
-        <i class="bi bi-x-lg"></i> Reject
-      </button>
-      <button type="button" class="btn-approve" id="vBtnApprove">
-        <i class="bi bi-check-lg"></i> Approve
-      </button>`;
-  }
-  if (r.status === "Approved") {
+  if (r.status === "Pending" && (can("approve") || can("reject"))) {
+  footerBtns += `
+    ${
+      can("reject")
+        ? `<button type="button" class="btn-reject" id="vBtnReject">
+            <i class="bi bi-x-lg"></i> Reject
+          </button>`
+        : ""
+    }
+    ${
+      can("approve")
+        ? `<button type="button" class="btn-approve" id="vBtnApprove">
+            <i class="bi bi-check-lg"></i> Approve
+          </button>`
+        : ""
+    }`;
+}
+  if (r.status === "Approved" && can("convert")) {
     footerBtns += `
       <button type="button" class="btn-convert" id="vBtnConvert">
         <i class="bi bi-arrow-right-circle"></i> Convert to Animal Profile
@@ -701,6 +863,17 @@ function openConfirmModal(action, id) {
 }
 
 async function executeConfirmAction() {
+  if (
+  confirmAction &&
+  !can(confirmAction)
+) {
+  showToast(
+    "error",
+    "You do not have permission to perform this action."
+  );
+  return;
+}
+
   try {
     if (confirmAction === "approve") {
       await approveIntake(confirmTargetId);
@@ -763,6 +936,15 @@ function clearFormErrors() {
   document.querySelectorAll(".form-inp.invalid").forEach(e => e.classList.remove("invalid"));
 }
 
+
+function can(action) {
+  return hasPermission(
+    currentRole,
+    "intake",
+    action
+  );
+}
+
 /* ══════════════════════════════════════════════════════
    TOAST
 ══════════════════════════════════════════════════════ */
@@ -787,13 +969,20 @@ function showToast(type, msg) {
 ══════════════════════════════════════════════════════ */
 async function init() {
   try {
-    await protectManagementPage();
+    const session = await protectPageByModule("intake");
+    currentRole = session.role;
     renderTopbarUser();
     loadSidebar();
 
 
     // Initial render
 await loadIntakeRecords();
+
+const params = new URLSearchParams(window.location.search);
+
+if (params.get("source") === "surrender") {
+  openApprovedSurrenderIntakeModal();
+}
 
     // Tabs
     document.querySelectorAll(".intake-tab").forEach(btn => {
@@ -811,7 +1000,20 @@ await loadIntakeRecords();
     document.getElementById("filterSpecies")?.addEventListener("change",applyFilters);
 
     // Add new intake
-    document.getElementById("btnNewIntake")?.addEventListener("click", openAddModal);
+    const newIntakeButton =
+    document.getElementById("btnNewIntake");
+
+  if (newIntakeButton) {
+    newIntakeButton.style.display =
+      can("create") ? "" : "none";
+
+    if (can("create")) {
+      newIntakeButton.addEventListener(
+        "click",
+        openAddModal
+      );
+    }
+  }
 
     // Source selector (inside modal — needs to re-bind on each open)
     // Done via event delegation instead

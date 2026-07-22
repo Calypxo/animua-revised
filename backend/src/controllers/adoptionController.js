@@ -366,6 +366,14 @@ exports.finalizeAdoption = async (req, res) => {
       });
     }
 
+    const animalData = animalDoc.data();
+
+    if (animalData.status !== "Ready") {
+      return res.status(400).json({
+        message: "Only animals marked Ready can be finalized for adoption.",
+      });
+    }
+
     const finalAdoptionDate = adoptionDate || new Date().toISOString().split("T")[0];
     const finalProcessedBy = processedBy || req.user?.email || "Admin";
 
@@ -379,15 +387,24 @@ exports.finalizeAdoption = async (req, res) => {
     });
 
     batch.update(animalRef, {
-      status: "Adopted",
-      adoptionStatus: "Adopted",
-      adoptionDate: finalAdoptionDate,
-      adopterName: adoptionData.applicant?.full_name || "",
-      processedBy: finalProcessedBy,
-      adoptionApplicationId: id,
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-      updatedBy: req.user?.email || "Admin",
-    });
+    status: "Adopted",
+    currentStage: "adopted",
+    visibleToPublic: false,
+    adoptionStatus: "Adopted",
+    adoptionDate: finalAdoptionDate,
+    adopterName: adoptionData.applicant?.full_name || "",
+    adoptionStaff: finalProcessedBy,
+    processedBy: finalProcessedBy,
+    adoptionApplicationId: id,
+    history: admin.firestore.FieldValue.arrayUnion({
+      date: finalAdoptionDate,
+      event: "Adopted",
+      detail: `Adopted by ${adoptionData.applicant?.full_name || "Unknown adopter"}`,
+      actor: finalProcessedBy,
+    }),
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    updatedBy: req.user?.email || "Admin",
+  });
 
     await batch.commit();
 

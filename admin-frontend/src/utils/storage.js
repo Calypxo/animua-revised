@@ -6,6 +6,10 @@ export function getUserRole() {
   return localStorage.getItem("user_role");
 }
 
+export function getUserEmail() {
+  return localStorage.getItem("user_email");
+}
+
 export function getUserName() {
   return localStorage.getItem("user_name");
 }

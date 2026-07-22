@@ -18,6 +18,24 @@ export async function updateAnimal(id, payload) {
   });
 }
 
+export async function sendAnimalToQuarantine(id) {
+  return await apiFetch(
+    `/animals/${encodeURIComponent(id)}/send-to-quarantine`,
+    {
+      method: "PATCH",
+    }
+  );
+}
+
+export async function markAnimalReady(id) {
+  return await apiFetch(
+    `/animals/${encodeURIComponent(id)}/mark-ready`,
+    {
+      method: "PATCH",
+    }
+  );
+}
+
 export async function saveBehavioralAssessment(id, payload) {
   return await apiFetch(`/animals/${encodeURIComponent(id)}/behavioral`, {
     method: "POST",

@@ -1,34 +1,72 @@
 // backend/src/routes/animalRoutes.js
-const express   = require("express");
-const router    = express.Router();
-const ctrl      = require("../controllers/animalController");
-const auth      = require("../middleware/authMiddleware");
+
+const express = require("express");
+const router = express.Router();
+
+const ctrl = require("../controllers/animalController");
+const auth = require("../middleware/authMiddleware");
 const authorize = require("../middleware/roleMiddleware");
 const uploadAnimalImage = require("../middleware/uploadAnimalImage");
 
 router.use(auth);
 
-// GET  /api/animals              → list all animals
-router.get("/", authorize("Admin", "Staff"), ctrl.getAllAnimals);
+// View animal list
+router.get(
+  "/",
+  authorize("Admin", "Staff", "Veterinarian"),
+  ctrl.getAllAnimals
+);
 
-// GET  /api/animals/:id          → get single animal profile
-router.get("/:id", authorize("Admin", "Staff"), ctrl.getAnimalById);
+// View individual animal profile
+router.get(
+  "/:id",
+  authorize("Admin", "Staff", "Veterinarian"),
+  ctrl.getAnimalById
+);
 
-// PUT  /api/animals/:id          → update basic profile fields / status
-router.put("/:id", authorize("Admin", "Staff"), ctrl.updateAnimal);
+// Update basic profile information
+router.put(
+  "/:id",
+  authorize("Admin", "Staff"),
+  ctrl.updateAnimal
+);
 
-// POST /api/animals/:id/behavioral → save behavioral assessment
-router.post("/:id/behavioral", authorize("Admin", "Staff"), ctrl.saveBehavioralAssessment);
+// Send animal to quarantine
+router.patch(
+  "/:id/send-to-quarantine",
+  authorize("Admin", "Staff"),
+  ctrl.sendToQuarantine
+);
 
-// POST /api/animals/:id/medical   → add medical record
-router.post("/:id/medical", authorize("Admin", "Staff"), ctrl.addMedicalRecord);
+// Mark animal ready for adoption
+router.patch(
+  "/:id/mark-ready",
+  authorize("Admin", "Staff"),
+  ctrl.markReadyForAdoption
+);
 
-// PUT  /api/animals/:id/medical/:medicalId → update medical record
-router.put("/:id/medical/:medicalId", authorize("Admin", "Staff"), ctrl.updateMedicalRecord);
+// Behavioral assessment
+router.post(
+  "/:id/behavioral",
+  authorize("Admin", "Veterinarian"),
+  ctrl.saveBehavioralAssessment
+);
 
-// PATCH /api/animals/:id/archive → archive animal
-router.patch("/:id/archive", authorize("Admin"), ctrl.archiveAnimal);
+// Add medical record
+router.post(
+  "/:id/medical",
+  authorize("Admin", "Veterinarian"),
+  ctrl.addMedicalRecord
+);
 
+// Update medical record
+router.put(
+  "/:id/medical/:medicalId",
+  authorize("Admin", "Veterinarian"),
+  ctrl.updateMedicalRecord
+);
+
+// Upload animal image
 router.patch(
   "/:id/photo",
   authorize("Admin", "Staff"),
@@ -36,10 +74,18 @@ router.patch(
   ctrl.uploadAnimalProfileImage
 );
 
+// Delete animal image
 router.delete(
   "/:id/photo",
   authorize("Admin", "Staff"),
   ctrl.deleteAnimalProfileImage
+);
+
+// Archive animal
+router.patch(
+  "/:id/archive",
+  authorize("Admin"),
+  ctrl.archiveAnimal
 );
 
 console.log("Animal routes loaded");

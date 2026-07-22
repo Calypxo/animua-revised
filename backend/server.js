@@ -15,31 +15,41 @@ const publicRoutes = require("./src/routes/publicRoutes");
 const adoptionRoutes = require("./src/routes/adoptionRoutes");
 const predictiveRoutes = require("./src/routes/predictiveRoutes");
 const matchRoutes = require("./src/routes/matchRoutes");
+<<<<<<< HEAD
 const chatbotRoutes = require("./src/routes/chatbotRoutes");
+=======
+const surrenderRoutes = require("./src/routes/surrenderRoutes");
+>>>>>>> 8c76e329d3ff001d2178f9f031b2d9a7600f79a0
 
 const authenticateToken = require("./src/middleware/authMiddleware");
 const authorizeRole = require("./src/middleware/roleMiddleware");
 const { trainInventoryModel } = require("./src/services/predictiveService");
 
+<<<<<<< HEAD
 // ❌ DO NOT USE THIS because your routes are inside ./src/routes/authRoutes
 // const authRoutes = require("./routes/authRoutes");
 // app.use("/api/auth", authRoutes);
-
-const allowedOrigins = [
-  // 🌐 Production
-  "https://animua-angelescity.web.app",
-  "https://animua-admin.web.app",
-
-  // 🧪 Local development
-  "http://localhost:5175",
-  "http://127.0.0.1:5175",
-];
-
+=======
+// ─── CORS ─────────────────────────────────────────────────────────────────────
 const corsOptions = {
-  origin: function (origin, callback) {
-    // ✅ Allow tools like Postman / server-to-server requests
-    if (!origin) return callback(null, true);
+  origin: [
+    "https://animua-angelescity.web.app",
+    "https://animua-admin.web.app",
 
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+>>>>>>> 8c76e329d3ff001d2178f9f031b2d9a7600f79a0
+
+    "http://localhost:5174",
+    "http://127.0.0.1:5174",
+
+    "http://localhost:5175",
+    "http://127.0.0.1:5175",
+
+    "http://localhost:5176",
+    "http://127.0.0.1:5176",
+
+<<<<<<< HEAD
     // ✅ Allow localhost / 127.0.0.1 on ANY port
     if (
       origin.startsWith("http://localhost:") ||
@@ -47,23 +57,20 @@ const corsOptions = {
     ) {
       return callback(null, true);
     }
+=======
+    "http://localhost:5177",
+    "http://127.0.0.1:5177",
+>>>>>>> 8c76e329d3ff001d2178f9f031b2d9a7600f79a0
 
-    // ✅ Allow deployed frontends
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-
-    // ❌ Block everything else
-    return callback(new Error("Not allowed by CORS"));
-  },
+    "http://localhost:5179",
+    "http://127.0.0.1:5179"
+  ],
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true,
+  credentials: true
 };
 
 app.use(cors(corsOptions));
-
-// ✅ Use the SAME CORS options for preflight
 app.options(/.*/, cors(corsOptions));
 
 app.use(express.json());
@@ -78,7 +85,11 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/public", publicRoutes);
 app.use("/api/adoptions", adoptionRoutes);
 app.use("/api/predictive", predictiveRoutes);
+<<<<<<< HEAD
 app.use("/api/chatbot", chatbotRoutes);
+=======
+app.use("/api/surrenders", surrenderRoutes);
+>>>>>>> 8c76e329d3ff001d2178f9f031b2d9a7600f79a0
 app.use("/api", matchRoutes);
 
 app.get("/", (req, res) => {
@@ -116,6 +127,7 @@ app.get(
 
 // ─── START ────────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`ANIMUA Server active on port ${PORT}`);
 

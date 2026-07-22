@@ -1,0 +1,377 @@
+[
+  {
+    "id": "SR-2026-831879",
+    "status": "Pending",
+    "submittedAt": "2026-07-06",
+    "owner": {
+      "name": "Rhianne Magsino",
+      "contact": "093256412568",
+      "email": "rhiannemag@gmail.com",
+      "address": "Camachiles"
+    },
+    "pet": {
+      "name": "Riri",
+      "species": "Cat",
+      "breed": "Puspin",
+      "age": "3",
+      "sex": "Female",
+      "colorMarkings": "White",
+      "status": [
+        "Neutered"
+      ],
+      "vaccinationHistory": "Vaccinated"
+    },
+    "surrenderReason": "May sakit po ang aso ko at hindi ko afford ang gamot.",
+    "waiver": {
+      "name": "Rhianne Magsino",
+      "address": "Camachiles",
+      "day": "5",
+      "month": "July",
+      "ownerSignature": "Rhianne Magsino"
+    },
+    "nlp": {
+      "sentiment": "Urgent",
+      "category": "Medical",
+      "urgencyLabel": "High",
+      "urgencyScore": 80,
+      "confidence": 0.35,
+      "keywords": [
+        "afford",
+        "may sakit",
+        "gamot"
+      ],
+      "suggestedPriority": "High Priority",
+      "source": "TF-IDF + Logistic Regression"
+    },
+    "source": "Public Form"
+  },
+  {
+    "id": "SR-2026-585407",
+    "status": "Pending",
+    "submittedAt": "2026-07-07",
+    "owner": {
+      "name": "Adrian Pagurayan",
+      "contact": "0932651236",
+      "email": "pags@gmail.com",
+      "address": "123 Rizal Street",
+      "barangay": "Cuayan",
+      "city": "Angeles City",
+      "isAngelesResident": true
+    },
+    "pet": {
+      "name": "Jojo",
+      "species": "Cat",
+      "breed": "Puspin",
+      "age": "5",
+      "sex": "Female",
+      "colorMarkings": "Gray",
+      "status": [
+        "Intact"
+      ],
+      "vaccinationHistory": "N/A"
+    },
+    "surrenderReason": "Aalis na po kasi kami sa Pilipinas and hindi po namin kayang dalhin si Jojo doon. Mag-migrate po kami sa Paris, France kaso complicated daw po yung mga document kaya may kasaman alaga.",
+    "waiver": {
+      "name": "Adrian Pagurayan",
+      "address": "123 Rizal Street",
+      "day": "7",
+      "month": "July",
+      "ownerSignature": "Adrian Pagurayan"
+    },
+    "nlp": {
+      "sentiment": "Urgent",
+      "category": "Overcrowding",
+      "urgencyLabel": "High",
+      "urgencyScore": 80,
+      "confidence": 0.26,
+      "keywords": [],
+      "suggestedPriority": "High Priority",
+      "source": "TF-IDF + Logistic Regression"
+    },
+    "source": "Public Form"
+  },
+  {
+    "id": "SR-2026-648316",
+    "status": "Pending",
+    "submittedAt": "2026-07-07",
+    "owner": {
+      "name": "Adrian Pagurayan",
+      "contact": "0932651236",
+      "email": "pags@gmail.com",
+      "address": "123 Rizal Street",
+      "barangay": "Lourdes Sur Este",
+      "city": "Angeles City",
+      "isAngelesResident": true
+    },
+    "pet": {
+      "name": "Jojo",
+      "species": "Cat",
+      "breed": "Puspin",
+      "age": "5",
+      "sex": "Female",
+      "colorMarkings": "Gray",
+      "status": [
+        "Intact"
+      ],
+      "vaccinationHistory": "N/A"
+    },
+    "surrenderReason": "Aalis na po kasi kami sa Pilipinas and hindi po namin kayang dalhin si Jojo doon. Mag-migrate po kami sa Paris, France kaso complicated daw po yung mga document kaya may kasamang alaga.",
+    "waiver": {
+      "name": "Adrian Pagurayan",
+      "address": "123 Rizal Street",
+      "day": "7",
+      "month": "July",
+      "ownerSignature": "Adrian Pagurayan"
+    },
+    "nlp": {
+      "sentiment": "Neutral",
+      "category": "Relocation",
+      "urgencyLabel": "Low",
+      "urgencyScore": 25,
+      "confidence": 0.42,
+      "keywords": [
+        "aalis",
+        "alis",
+        "pilipinas",
+        "france",
+        "paris"
+      ],
+      "suggestedPriority": "Normal Priority",
+      "source": "TF-IDF + Logistic Regression"
+    },
+    "source": "Public Form"
+  },
+  {
+    "id": "SR-2026-734808",
+    "status": "Pending",
+    "submittedAt": "2026-07-07",
+    "owner": {
+      "name": "Adrian Pagurayan",
+      "contact": "0932651236",
+      "email": "pags@gmail.com",
+      "address": "123 Rizal Street",
+      "barangay": "Lourdes Sur Este",
+      "city": "Angeles City",
+      "isAngelesResident": true
+    },
+    "pet": {
+      "name": "Jojo",
+      "species": "Cat",
+      "breed": "Puspin",
+      "age": "5",
+      "sex": "Female",
+      "colorMarkings": "Gray",
+      "status": [
+        "Intact"
+      ],
+      "vaccinationHistory": "N/A"
+    },
+    "surrenderReason": "Aalis na po kasi kami sa Pilipinas and hindi po namin kayang dalhin si Jojo doon. Mag-migrate po kami sa Paris, France kaso complicated daw po yung mga document kaya may kasamang alaga.",
+    "waiver": {
+      "name": "Adrian Pagurayan",
+      "address": "123 Rizal Street",
+      "day": "7",
+      "month": "July",
+      "ownerSignature": "Adrian Pagurayan"
+    },
+    "nlp": {
+      "sentiment": "Neutral",
+      "category": "Relocation",
+      "urgencyLabel": "Low",
+      "urgencyScore": 25,
+      "confidence": 0.42,
+      "keywords": [
+        "aalis",
+        "alis",
+        "pilipinas",
+        "france",
+        "paris"
+      ],
+      "suggestedPriority": "Normal Priority",
+      "source": "TF-IDF + Logistic Regression"
+    },
+    "source": "Public Form"
+  },
+  {
+    "id": "SR-2026-904829",
+    "status": "Pending",
+    "submittedAt": "2026-07-07",
+    "owner": {
+      "name": "Juliana Louise Pangan",
+      "contact": "093256412568",
+      "email": "yanapangan25@gmail.com",
+      "address": "Blk 47 Lot 51 San Timoteo St. Fiesta Communities",
+      "barangay": "Tabun",
+      "city": "Angeles City",
+      "isAngelesResident": true
+    },
+    "pet": {
+      "name": "Eury",
+      "species": "Cat",
+      "breed": "Persian",
+      "age": "1",
+      "sex": "Female",
+      "colorMarkings": "White",
+      "status": [
+        "Intact"
+      ],
+      "vaccinationHistory": "Vaccinated"
+    },
+    "surrenderReason": "Aalis na po kasi kami sa Pilipinas and hindi po namin kayang dalhin si Jojo doon. Mag-migrate po kami sa Paris, France kaso complicated daw po yung mga document kaya may kasamang alaga.",
+    "waiver": {
+      "name": "Juliana Louise Pangan",
+      "address": "47-51 San Timoteo St.",
+      "day": "8",
+      "month": "July",
+      "ownerSignature": "Juliana Louise Pangan"
+    },
+    "nlp": {
+      "sentiment": "Neutral",
+      "category": "Relocation",
+      "urgencyLabel": "Low",
+      "urgencyScore": 25,
+      "confidence": 0.42,
+      "keywords": [
+        "aalis",
+        "alis",
+        "pilipinas",
+        "france",
+        "paris"
+      ],
+      "suggestedPriority": "Normal Priority",
+      "source": "TF-IDF + Logistic Regression"
+    },
+    "source": "Public Form"
+  },
+  {
+    "id": "SR-2026-108587",
+    "status": "Pending",
+    "submittedAt": "2026-07-12",
+    "owner": {
+      "name": "Adrian Pagurayan",
+      "contact": "0932651236",
+      "email": "pags@gmail.com",
+      "address": "123 Rizal Street",
+      "barangay": "Pandan",
+      "city": "Angeles City",
+      "isAngelesResident": true
+    },
+    "pet": {
+      "name": "Jojo",
+      "species": "Cat",
+      "breed": "Puspin",
+      "age": "5",
+      "sex": "Female",
+      "colorMarkings": "Gray",
+      "status": [
+        "Intact"
+      ],
+      "vaccinationHistory": "N/A"
+    },
+    "surrenderReason": "Naospital po ako at wala nang mag-aalaga sa aso ko habang nagpapagaling ako.",
+    "waiver": {
+      "name": "Adrian Pagurayan",
+      "address": "123 Rizal Street",
+      "day": "7",
+      "month": "July",
+      "ownerSignature": "Adrian Pagurayan"
+    },
+    "nlp": {
+      "sentiment": "Urgent",
+      "category": "Owner Incapacity",
+      "urgencyLabel": "High",
+      "urgencyScore": 80,
+      "confidence": 0.36,
+      "keywords": [
+        "naospital"
+      ],
+      "suggestedPriority": "High Priority",
+      "source": "TF-IDF + Logistic Regression"
+    },
+    "source": "Public Form"
+  },
+  {
+    "id": "SR-2026-558949",
+    "status": "Pending",
+    "submittedAt": "2026-07-12",
+    "owner": {
+      "name": "Juliana Louise Pangan",
+      "contact": "09270716391",
+      "email": "yanapangan1225@gmail.com",
+      "address": "47-51 San Timoteo St. Fiesta Communities",
+      "barangay": "Pandan",
+      "city": "Angeles City",
+      "isAngelesResident": true
+    },
+    "pet": {
+      "name": "Eury",
+      "species": "Cat",
+      "breed": "Persian",
+      "age": "1",
+      "sex": "Female",
+      "colorMarkings": "White",
+      "status": [
+        "Intact"
+      ],
+      "vaccinationHistory": "Vaccinated"
+    },
+    "surrenderReason": "ang takaw niya di ko na kaya bumili ng mga pagkain niya",
+    "waiver": {
+      "name": "",
+      "address": "",
+      "day": "",
+      "month": "",
+      "ownerSignature": ""
+    },
+    "nlp": {
+      "sentiment": "Negative",
+      "category": "Financial",
+      "urgencyLabel": "Medium",
+      "urgencyScore": 55,
+      "confidence": 0.28,
+      "keywords": [],
+      "suggestedPriority": "Medium Priority",
+      "source": "TF-IDF + Logistic Regression"
+    },
+    "source": "Public Form"
+  },
+  {
+    "id": "SR-2026-800669",
+    "status": "Pending",
+    "submittedAt": "2026-07-12",
+    "owner": {
+      "name": "Juliana Louise Pangan",
+      "contact": "09270716391",
+      "email": "yanapangan1225@gmail.com",
+      "address": "47-51 San Timoteo St. Fiesta Communities",
+      "barangay": "Tabun",
+      "city": "Angeles City",
+      "isAngelesResident": true
+    },
+    "pet": {
+      "name": "Polar",
+      "species": "Cat",
+      "breed": "Puspin",
+      "age": "4",
+      "sex": "Male",
+      "colorMarkings": "White",
+      "status": [
+        "Neutered"
+      ],
+      "vaccinationHistory": "Vaccinated"
+    },
+    "surrenderReason": "Masyado na pong wild and nangangalmot na po siya",
+    "waiver": null,
+    "nlp": {
+      "sentiment": "Negative",
+      "category": "Overcrowding",
+      "urgencyLabel": "Medium",
+      "urgencyScore": 55,
+      "confidence": 0.29,
+      "keywords": [],
+      "suggestedPriority": "Medium Priority",
+      "source": "TF-IDF + Logistic Regression"
+    },
+    "source": "Public Form"
+  }
+]

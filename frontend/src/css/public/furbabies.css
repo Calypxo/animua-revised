@@ -1486,6 +1486,30 @@
   border-radius: 999px;
   white-space: nowrap;
   border: none;
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+}
+.form-actions .primary-btn {
+  flex: 1;
+  background: linear-gradient(135deg, var(--crimson), var(--orange));
+  color: var(--white);
+  box-shadow: 0 14px 28px rgba(151,10,18,0.18);
+}
+.form-actions .primary-btn:hover {
+  transform: translateY(-3px);
+}
+.form-actions .secondary-btn {
+  background: var(--white);
+  color: var(--dark);
+  border: 1px solid rgba(0,0,0,0.08) !important;
+}
+.form-actions .secondary-btn:hover {
+  background: #fff2ec;
+  transform: translateY(-2px);
+}
+=======
+>>>>>>> 8c76e329d3ff001d2178f9f031b2d9a7600f79a0
 }
 .form-actions .primary-btn {
   flex: 1;
@@ -1687,3 +1711,7 @@
     border-radius: 34px;
   }
 }
+<<<<<<< HEAD
+=======
+>>>>>>> 606b1bdf2899e5df758b6f4b01e816169754fd59
+>>>>>>> 8c76e329d3ff001d2178f9f031b2d9a7600f79a0

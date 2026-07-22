@@ -24,13 +24,24 @@ router.post("/",                   authorize("Admin","Staff"), ctrl.createIntake
 // PUT  /api/intake/:id       → update (Pending / Draft only)
 router.put("/:id",                 authorize("Admin","Staff"), ctrl.updateIntake);
 
-// PATCH /api/intake/:id/approve  → approve (Admin only)
-router.patch("/:id/approve",       authorize("Admin"),         ctrl.approveIntake);
+// PATCH /api/intake/:id/approve → approve
+router.patch(
+  "/:id/approve",
+  authorize("Admin", "Staff"),
+  ctrl.approveIntake
+);
 
-// PATCH /api/intake/:id/reject   → reject with reason (Admin only)
-router.patch("/:id/reject",        authorize("Admin"),         ctrl.rejectIntake);
+router.patch(
+  "/:id/reject",
+  authorize("Admin", "Staff"),
+  ctrl.rejectIntake
+);
 
-// POST  /api/intake/:id/convert  → convert to Animal Profile (Admin only)
-router.post("/:id/convert",        authorize("Admin"),         ctrl.convertToProfile);
+// POST /api/intake/:id/convert → convert to Animal Profile
+router.post(
+  "/:id/convert",
+  authorize("Admin", "Staff"),
+  ctrl.convertToProfile
+);
 
 module.exports = router;

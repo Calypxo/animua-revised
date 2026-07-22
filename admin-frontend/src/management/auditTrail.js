@@ -2,7 +2,7 @@ import "../css/auditTrail.css";
 import "../css/adminDashboard.css";
 import "../css/sidebar.css";
 
-import { protectManagementPage } from "../auth/authGuard.js";
+import { protectPageByModule } from "../auth/authGuard.js";
 import { renderTopbarUser } from "../components/management/topbarUser.js";
 import { loadSidebar } from "../components/management/sidebarLoader.js";
 
@@ -535,7 +535,8 @@ function bindButtons() {
 
 async function initAuditTrailPage() {
   try {
-    await protectManagementPage();
+    await protectPageByModule("audit");
+
     renderTopbarUser();
     loadSidebar();
 

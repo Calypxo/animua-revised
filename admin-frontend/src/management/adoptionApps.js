@@ -3,7 +3,8 @@ import "../css/adminDashboard.css";
 import "../css/sidebar.css";
 import "../css/adoptionApps.css";
 
-import { protectManagementPage } from "../auth/authGuard.js";
+import { protectPageByModule } from "../auth/authGuard.js";
+import { hasPermission } from "../auth/permissions.js";
 import { renderTopbarUser }      from "../components/management/topbarUser.js";
 import { loadSidebar }           from "../components/management/sidebarLoader.js";
 import { getUserName }           from "../utils/storage.js";
@@ -148,6 +149,7 @@ const PAGE_SIZE  = 8;
 let activeTab    = "all";
 let activeAppId  = null;
 let confirmMode  = null; // "reject" | "finalize"
+let currentRole = "";
 
 /* ══════════════════════════════════════════════════════
    HELPERS
@@ -179,6 +181,14 @@ function compatPill(score, type) {
     return `<span class="compat-pill compat-none">No quiz score</span>`;
   const c = compatColor(score);
   return `<span class="compat-pill ${c.cls}"><i class="bi bi-cpu"></i>${score}%</span>`;
+}
+
+function can(action) {
+  return hasPermission(
+    currentRole,
+    "adoption",
+    action
+  );
 }
 
 
@@ -498,15 +508,40 @@ function renderDrawerContent(app) {
   // ── Footer action buttons ─────────────────────────────
   let footerBtns = `<button class="btn-ghost-clay" id="drawerCloseBtn"><i class="bi bi-x"></i> Close</button>`;
   if (app.status === "Pending") {
-    footerBtns += `
-      <button class="btn-danger-outline" id="drawerRejectBtn"><i class="bi bi-x-lg"></i> Reject</button>
-      <button class="btn-approve-app"    id="drawerApproveBtn"><i class="bi bi-check-lg"></i> Approve</button>`;
-  }
-  if (app.status === "Approved") {
-    footerBtns += `
-      <button class="btn-danger-outline" id="drawerRejectBtn"><i class="bi bi-x-lg"></i> Reject</button>
-      <button class="btn-finalize"       id="drawerFinalizeBtn"><i class="bi bi-balloon-heart-fill"></i> Finalize Adoption</button>`;
-  }
+  footerBtns += `
+    ${
+      can("reject")
+        ? `<button class="btn-danger-outline" id="drawerRejectBtn">
+            <i class="bi bi-x-lg"></i> Reject
+          </button>`
+        : ""
+    }
+    ${
+      can("approve")
+        ? `<button class="btn-approve-app" id="drawerApproveBtn">
+            <i class="bi bi-check-lg"></i> Approve
+          </button>`
+        : ""
+    }`;
+}
+
+if (app.status === "Approved") {
+  footerBtns += `
+    ${
+      can("reject")
+        ? `<button class="btn-danger-outline" id="drawerRejectBtn">
+            <i class="bi bi-x-lg"></i> Reject
+          </button>`
+        : ""
+    }
+    ${
+      can("finalize")
+        ? `<button class="btn-finalize" id="drawerFinalizeBtn">
+            <i class="bi bi-balloon-heart-fill"></i> Finalize Adoption
+          </button>`
+        : ""
+    }`;
+}
 
   // ── Assemble full drawer ──────────────────────────────
   inner.innerHTML = `
@@ -538,6 +573,14 @@ function renderDrawerContent(app) {
    ACTIONS
 ══════════════════════════════════════════════════════ */
 async function approveApp(id) {
+  if (!can("approve")) {
+    showToast(
+      "error",
+      "You do not have permission to approve adoption applications."
+    );
+    return;
+  }
+
   try {
     await approveAdoption(id);
     await loadAdoptions();
@@ -553,6 +596,13 @@ async function approveApp(id) {
 }
 
 function openRejectModal(id) {
+  if (!can("finalize")) {
+  showToast(
+    "error",
+    "You do not have permission to finalize adoptions."
+  );
+  return;
+}
   const app = adoptionApps.find(a => a.id === id);
   if (!app) return;
   confirmMode = { type:"reject", id };
@@ -564,6 +614,13 @@ function openRejectModal(id) {
 }
 
 async function executeReject() {
+  if (!can("reject")) {
+  showToast(
+    "error",
+    "You do not have permission to reject adoption applications."
+  );
+  return;
+}
   const reason = document.getElementById("rejectReason")?.value.trim();
   if (!reason) {
     document.getElementById("errRejectReason").textContent = "A reason is required.";
@@ -597,6 +654,13 @@ function openFinalizeModal(id) {
 }
 
 async function executeFinalize() {
+  if (!can("finalize")) {
+  showToast(
+    "error",
+    "You do not have permission to finalize adoptions."
+  );
+  return;
+}
   try {
     await finalizeAdoption(confirmMode.id, {
       adoptionDate: document.getElementById("fAdoptionDate").value,
@@ -639,7 +703,8 @@ function showToast(type, msg) {
 ══════════════════════════════════════════════════════ */
 async function init() {
   try {
-    await protectManagementPage();
+    const session = await protectPageByModule("adoption");
+    currentRole = session.role;
     renderTopbarUser(); // ← topbar first so #sidebarToggle exists
     loadSidebar();
     await loadAdoptions();

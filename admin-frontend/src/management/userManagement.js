@@ -3,40 +3,107 @@ import "../css/adminDashboard.css";
 import "../css/sidebar.css";
 import "../css/userManagement.css";
 
-import { protectManagementPage } from "../auth/authGuard.js";
-import { renderTopbarUser }      from "../components/management/topbarUser.js";
-import { loadSidebar }           from "../components/management/sidebarLoader.js";
-import { getUserRole }           from "../utils/storage.js";
-import { getAllUsers, createUser, updateUser, toggleUserStatus } from "../services/users.service.js";
+import {
+  protectPageByModule,
+} from "../auth/authGuard.js";
+
+import {
+  renderTopbarUser,
+} from "../components/management/topbarUser.js";
+
+import {
+  loadSidebar,
+} from "../components/management/sidebarLoader.js";
+
+import {
+  getUserEmail,
+} from "../utils/storage.js";
+
+import {
+  ROLE_PERMISSIONS,
+  normalizeRole,
+  hasPermission,
+} from "../auth/permissions.js";
+
+import {
+  getAllUsers,
+  createUser,
+  updateUser,
+  toggleUserStatus,
+} from "../services/users.service.js";
 
 /* ── Constants ───────────────────────────────────────── */
 const ALL_PERMISSIONS = [
-  { key:"dashboard",        label:"Dashboard"          },
-  { key:"user_management",  label:"User Management"    },
-  { key:"animal_surrender", label:"Animal Surrender"   },
-  { key:"intake",           label:"Intake Mgmt"        },
-  { key:"animal_profiling", label:"Animal Profiling"   },
-  { key:"quarantine",       label:"Quarantine/Medical" },
-  { key:"adoption",         label:"Adoption"           },
-  { key:"inventory",        label:"Inventory"          },
-  { key:"reports",          label:"Reports"            },
-  { key:"audit_trail",      label:"Audit Trail"        },
-  { key:"archive",          label:"Archive"            },
+  {
+    key: "dashboard",
+    label: "Dashboard",
+  },
+  {
+    key: "users",
+    label: "User Management",
+  },
+  {
+    key: "surrender",
+    label: "Animal Surrender",
+  },
+  {
+    key: "intake",
+    label: "Intake Management",
+  },
+  {
+    key: "animals",
+    label: "Animal Profiling",
+  },
+  {
+    key: "quarantine",
+    label: "Quarantine / Medical",
+  },
+  {
+    key: "adoption",
+    label: "Adoption",
+  },
+  {
+    key: "inventory",
+    label: "Inventory",
+  },
+  {
+    key: "reports",
+    label: "Reports",
+  },
+  {
+    key: "audit",
+    label: "Audit Trail",
+  },
+  {
+    key: "archive",
+    label: "Archive",
+  },
 ];
 
-const ADMIN_DEFAULT_PERMS = ALL_PERMISSIONS.map(p => p.key);
-const STAFF_DEFAULT_PERMS = ["dashboard","animal_surrender","intake","animal_profiling","quarantine","adoption","inventory","reports"];
-const AVATAR_COLORS = ["#6f191c","#2558a8","#186534","#b86a00","#0d6e6e","#9b2c4e","#3d2b8a","#1a6b5a","#7a3b00","#1a4e7a"];
+const AVATAR_COLORS = [
+  "#6f191c",
+  "#2558a8",
+  "#186534",
+  "#b86a00",
+  "#0d6e6e",
+  "#9b2c4e",
+  "#3d2b8a",
+  "#1a6b5a",
+  "#7a3b00",
+  "#1a4e7a",
+];
+
 const PAGE_SIZE = 8;
 
 /* ── State ───────────────────────────────────────────── */
 let allUsers      = [];
 let filteredUsers = [];
 let currentPage   = 1;
-let activeTab     = "all";   // "all" | "staff" | "public"
+let activeTab     = "all";   // "all" | "staff" (management) | "public"
 let editingId     = null;
 let togglingId    = null;
 let isLoading     = false;
+let currentRole = "";
 
 /* ── Helpers ─────────────────────────────────────────── */
 const initials  = u => `${(u.firstName||u.fullName||"?")[0]}${(u.lastName||"")[0]||""}`.toUpperCase();
@@ -61,6 +128,42 @@ function displayName(u) {
   return u.fullName || `${u.firstName||""} ${u.lastName||""}`.trim() || u.id;
 }
 
+function getDisplayRole(role) {
+  const normalizedManagementRole = normalizeRole(role);
+
+  if (normalizedManagementRole) {
+    return normalizedManagementRole;
+  }
+
+  if (
+    String(role).trim().toLowerCase() === "public"
+  ) {
+    return "Public";
+  }
+
+  return "";
+}
+
+function getPermissionsForRole(role) {
+  const normalizedRole = normalizeRole(role);
+
+  if (!normalizedRole) {
+    return [];
+  }
+
+  const permissions = ROLE_PERMISSIONS[normalizedRole];
+
+  if (!permissions) {
+    return [];
+  }
+
+  return Object.keys(permissions);
+}
+
+function can(action) {
+  return hasPermission(currentRole, "users", action);
+}
+
 /* ── Load & Stats ────────────────────────────────────── */
 async function loadUsers() {
   setLoading(true);
@@ -80,24 +183,45 @@ async function loadUsers() {
   }
 }
 
-function renderStats(s) {
-  if (!s) {
-    s = {
-      total:    allUsers.length,
-      active:   allUsers.filter(u=>u.status==="Active").length,
-      inactive: allUsers.filter(u=>u.status==="Inactive").length,
-      admins:   allUsers.filter(u=>u.role==="Admin").length,
-      staff:    allUsers.filter(u=>u.role==="Staff").length,
-      public:   allUsers.filter(u=>u.role==="Public").length,
-    };
-  }
-  const set = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
-  set("statTotal",    s.total);
-  set("statActive",   s.active);
-  set("statInactive", s.inactive);
-  set("statAdmins",   s.admins);
-  set("statStaff",    s.staff);
-  set("statPublic",   s.public);
+function renderStats(summary) {
+  const calculatedSummary = {
+    total: allUsers.length,
+    active: allUsers.filter(user => user.status === "Active").length,
+    inactive: allUsers.filter(user => user.status === "Inactive").length,
+    admins: allUsers.filter(user => {
+      return getDisplayRole(user.role) === "Admin";
+    }).length,
+    staff: allUsers.filter(user => {
+      return getDisplayRole(user.role) === "Staff";
+    }).length,
+    veterinarians: allUsers.filter(user => {
+      return getDisplayRole(user.role) === "Veterinarian";
+    }).length,
+    public: allUsers.filter(user => {
+      return getDisplayRole(user.role) === "Public";
+    }).length
+  };
+
+  const stats = {
+    ...calculatedSummary,
+    ...(summary || {})
+  };
+
+  const setStatValue = (elementId, value) => {
+    const element = document.getElementById(elementId);
+
+    if (element) {
+      element.textContent = value ?? 0;
+    }
+  };
+
+  setStatValue("statTotal", stats.total);
+  setStatValue("statActive", stats.active);
+  setStatValue("statInactive", stats.inactive);
+  setStatValue("statAdmins", stats.admins);
+  setStatValue("statStaff", stats.staff);
+  setStatValue("statVeterinarians", stats.veterinarians ?? stats.vets ?? 0);
+  setStatValue("statPublic", stats.public);
 }
 
 function setLoading(v) {
@@ -131,20 +255,62 @@ function bindTabs() {
 
 /* ── Filter ──────────────────────────────────────────── */
 function applyFilters() {
-  const q      = (document.getElementById("searchUsers")?.value || "").toLowerCase().trim();
-  const role   = document.getElementById("filterRole")?.value   || "";
+  const q = (document.getElementById("searchUsers")?.value || "").toLowerCase().trim();
+  const role = document.getElementById("filterRole")?.value || "";
   const status = document.getElementById("filterStatus")?.value || "";
 
-  filteredUsers = allUsers.filter(u => {
+  filteredUsers = allUsers.filter(user => {
+    const normalizedRole = getDisplayRole(user.role);
+
     // Tab filter
-    if (activeTab === "staff"  && u.role === "Public")  return false;
-    if (activeTab === "public" && u.role !== "Public")  return false;
+    if (
+      activeTab === "staff" &&
+      normalizedRole === "Public"
+    ) {
+      return false;
+    }
+
+    if (
+      activeTab === "public" &&
+      normalizedRole !== "Public"
+    ) {
+      return false;
+    }
+
     // Dropdown filters
-    if (role   && u.role   !== role)   return false;
-    if (status && u.status !== status) return false;
+    if (
+      role &&
+      normalizedRole !== role
+    ) {
+      return false;
+    }
+
+    if (
+      status &&
+      user.status !== status
+    ) {
+      return false;
+    }
+
     // Search
-    const name = `${u.firstName||""} ${u.lastName||""} ${u.fullName||""}`.toLowerCase();
-    if (q && !name.includes(q) && !u.email?.toLowerCase().includes(q)) return false;
+    const name = `
+      ${user.firstName || ""}
+      ${user.lastName || ""}
+      ${user.fullName || ""}
+    `.toLowerCase();
+
+    const email = String(
+      user.email || user.id || ""
+    ).toLowerCase();
+
+    if (
+      q &&
+      !name.includes(q) &&
+      !email.includes(q)
+    ) {
+      return false;
+    }
+
     return true;
   });
 
@@ -164,30 +330,73 @@ function renderTable() {
   if (!page.length) { setTableMsg("No users found."); return; }
 
   tbody.innerHTML = page.map(u => {
-    const ini      = initials(u);
-    const color    = u.color || rndColor();
-    const isPublic = u.role === "Public";
+    const normalizedRole = getDisplayRole(u.role);
+    const ini = initials(u);
+    const color = u.color || rndColor();
+    const isPublic = normalizedRole === "Public";
     const isActive = u.status === "Active";
-    const dname    = displayName(u);
+    const dname = displayName(u);
 
     // Role badge
     const roleCfg = {
-      Admin:  { cls:"role-admin", icon:"bi-shield-fill",       label:"Admin" },
-      Staff:  { cls:"role-staff", icon:"bi-person-badge-fill", label:"Staff" },
-      Public: { cls:"role-public",icon:"bi-person-fill",       label:"Public" },
+      Admin: {
+        cls: "role-admin",
+        icon: "bi-shield-fill",
+        label: "Admin"
+      },
+      Staff: {
+        cls: "role-staff",
+        icon: "bi-person-badge-fill",
+        label: "Staff"
+      },
+      Veterinarian: {
+        cls: "role-veterinarian",
+        icon: "bi-heart-pulse-fill",
+        label: "Veterinarian"
+      },
+      Public: {
+        cls: "role-public",
+        icon: "bi-person-fill",
+        label: "Public"
+      }
     };
-    const rc = roleCfg[u.role] || roleCfg.Public;
+    const rc = roleCfg[normalizedRole] || roleCfg.Public;
 
     // Permissions / info column
     let permCol;
     if (isPublic) {
       permCol = `<span class="public-info-tag"><i class="bi bi-globe me-1"></i>Public portal user</span>`;
     } else {
-      const perms = (u.permissions||[]).slice(0,3);
-      const extra = (u.permissions||[]).length - 3;
-      permCol = perms.map(k=>`<span class="perm-tag">${labelPerm(k)}</span>`).join("")
-        + (extra > 0 ? `<span class="perm-tag-more">+${extra}</span>` : "")
-        || `<span style="color:var(--stone-2);font-size:0.78rem">None assigned</span>`;
+      const assignedPermissions = getPermissionsForRole(normalizedRole);
+      const perms = assignedPermissions.slice(0, 3);
+      const extra = assignedPermissions.length - 3;
+
+      permCol = perms
+        .map(permission => {
+          return `
+            <span class="perm-tag">
+              ${labelPerm(permission)}
+            </span>
+          `;
+        })
+        .join("") + (
+          extra > 0
+            ? `<span class="perm-tag-more">+${extra}</span>`
+            : ""
+        );
+
+      if (!permCol) {
+        permCol = `
+          <span
+            style="
+              color: var(--stone-2);
+              font-size: 0.78rem;
+            "
+          >
+            None assigned
+          </span>
+        `;
+      }
     }
 
     // Actions — Public users: view + toggle only, no edit
@@ -263,40 +472,78 @@ function renderPagination() {
 }
 
 /* ── Permission Grid ─────────────────────────────────── */
-function renderPermGrid(selected=[]) {
+function renderPermGrid(selected = []) {
   const grid = document.getElementById("permGrid");
-  if (!grid) return;
-  grid.innerHTML = ALL_PERMISSIONS.map(p=>{
-    const on = selected.includes(p.key);
-    return `<div class="perm-item ${on?"checked":""}" data-perm="${p.key}">
-      <div class="perm-checkbox"><i class="bi bi-check"></i></div>
-      <span class="perm-name">${p.label}</span>
-    </div>`;
+
+  if (!grid) {
+    return;
+  }
+
+  grid.innerHTML = ALL_PERMISSIONS.map(permission => {
+    const isEnabled = selected.includes(permission.key);
+
+    return `
+      <div
+        class="perm-item ${isEnabled ? "checked" : ""} perm-readonly"
+        data-perm="${permission.key}"
+        aria-disabled="true"
+      >
+        <div class="perm-checkbox">
+          <i class="bi bi-check"></i>
+        </div>
+
+        <span class="perm-name">
+          ${permission.label}
+        </span>
+      </div>
+    `;
   }).join("");
-  grid.querySelectorAll(".perm-item").forEach(i=>i.addEventListener("click",()=>i.classList.toggle("checked")));
 }
-function getCheckedPerms() { return [...document.querySelectorAll(".perm-item.checked")].map(i=>i.dataset.perm); }
 
 /* ── Add Modal ───────────────────────────────────────── */
 function openAddModal() {
+  if (!can("create")) {
+  showToast("error", "You do not have permission to create users.");
+  return;
+}
   editingId = null;
-  document.getElementById("modalTitle").textContent = "Add Admin / Staff User";
+
+  document.getElementById("modalTitle").textContent =
+    "Add Management User";
+
   document.getElementById("userForm").reset();
   document.getElementById("formUserId").value = "";
   document.getElementById("avatarPreview").textContent = "?";
-  document.getElementById("avatarPreview").style.background = "var(--clay)";
-  document.getElementById("passwordGroup").style.display        = "";
+  document.getElementById("avatarPreview").style.background =
+    "var(--clay)";
+
+  document.getElementById("passwordGroup").style.display = "";
   document.getElementById("confirmPasswordGroup").style.display = "";
   document.getElementById("fEmail").disabled = false;
+
+  document.getElementById("fRole").value = "Staff";
+
   clearFormErrors();
-  renderPermGrid(STAFF_DEFAULT_PERMS);
+  renderPermGrid(getPermissionsForRole("Staff"));
   openModal("userModalBackdrop");
 }
 
 /* ── Edit Modal ──────────────────────────────────────── */
 function openEditModal(id) {
+  if (!can("edit")) {
+  showToast("error", "You do not have permission to edit users.");
+  return;
+}
+
   const u = allUsers.find(u=>u.id===id);
-  if (!u || u.role==="Public") return;
+  if (!u) return;
+
+  const normalizedRole = getDisplayRole(u.role);
+
+  if (!normalizedRole || normalizedRole === "Public") {
+    return;
+  }
+
   editingId = id;
   document.getElementById("modalTitle").textContent = "Edit User";
   document.getElementById("formUserId").value  = id;
@@ -304,29 +551,60 @@ function openEditModal(id) {
   document.getElementById("fLastName").value   = u.lastName  || u.fullName?.split(" ").slice(1).join(" ") || "";
   document.getElementById("fEmail").value      = u.email || u.id;
   document.getElementById("fEmail").disabled   = true; // email = doc ID, cannot change
-  document.getElementById("fRole").value       = u.role;
+  document.getElementById("fRole").value       = normalizedRole;
   document.getElementById("fStatus").value     = u.status || "Active";
   document.getElementById("passwordGroup").style.display        = "none";
   document.getElementById("confirmPasswordGroup").style.display = "none";
   updateAvatarPreview();
   clearFormErrors();
-  renderPermGrid(u.permissions || []);
+  renderPermGrid(getPermissionsForRole(normalizedRole));
   openModal("userModalBackdrop");
 }
 
 /* ── Save ────────────────────────────────────────────── */
 async function saveUser() {
+  const requiredPermission = editingId ? "edit" : "create";
+
+if (!can(requiredPermission)) {
+  showToast(
+    "error",
+    editingId
+      ? "You do not have permission to edit users."
+      : "You do not have permission to create users."
+  );
+  return;
+}
+
   if (!validateForm()) return;
   const btn = document.getElementById("modalSaveBtn");
   btn.disabled = true; btn.textContent = "Saving…";
 
   try {
-    const firstName   = document.getElementById("fFirstName").value.trim();
-    const lastName    = document.getElementById("fLastName").value.trim();
-    const email       = document.getElementById("fEmail").value.trim().toLowerCase();
-    const role        = document.getElementById("fRole").value;
-    const status      = document.getElementById("fStatus").value;
-    const permissions = getCheckedPerms();
+    const firstName = document
+      .getElementById("fFirstName")
+      .value
+      .trim();
+
+    const lastName = document
+      .getElementById("fLastName")
+      .value
+      .trim();
+
+    const email = document
+      .getElementById("fEmail")
+      .value
+      .trim()
+      .toLowerCase();
+
+      const selectedRole = document.getElementById("fRole").value;
+    const role = normalizeRole(selectedRole);
+    const status = document.getElementById("fStatus").value;
+
+    if (!role) {
+      throw new Error("A valid management role is required.");
+    }
+
+    const permissions = getPermissionsForRole(role);
 
     if (editingId) {
       await updateUser(editingId, { firstName, lastName, role, status, permissions });
@@ -348,13 +626,30 @@ async function saveUser() {
 
 /* ── View Modal ──────────────────────────────────────── */
 function openViewModal(id) {
-  const u = allUsers.find(u=>u.id===id);
-  if (!u) return;
-  const ini = initials(u), color = u.color||rndColor();
+  const u = allUsers.find(user => user.id === id);
+
+  if (!u) {
+    return;
+  }
+
+  const normalizedRole = getDisplayRole(u.role);
+  const ini = initials(u);
+  const color = u.color || rndColor();
   const dname = displayName(u);
-  const isPublic = u.role==="Public";
-  const roleLabel = {Admin:"Administrator",Staff:"Staff",Public:"Public User"}[u.role]||u.role;
-  const roleCls   = {Admin:"role-admin",Staff:"role-staff",Public:"role-public"}[u.role]||"role-public";
+  const isPublic = normalizedRole === "Public";
+  const assignedPermissions = isPublic ? [] : getPermissionsForRole(normalizedRole);
+  const roleLabel = {
+    Admin: "Administrator",
+    Staff: "Staff",
+    Veterinarian: "Veterinarian",
+    Public: "Public User"
+  }[normalizedRole] || normalizedRole;
+  const roleCls = {
+    Admin: "role-admin",
+    Staff: "role-staff",
+    Veterinarian: "role-veterinarian",
+    Public: "role-public"
+  }[normalizedRole] || "role-public";
 
   document.getElementById("viewModalBody").innerHTML = `
     <div class="view-user-card">
@@ -374,9 +669,15 @@ function openViewModal(id) {
     ${isPublic
       ? `<div class="view-perms-title"><i class="bi bi-info-circle me-1"></i> Public Portal User</div>
          <p style="font-size:0.84rem;color:var(--stone)">This user registered via the public portal. Password resets and permission management are handled on the public side.</p>`
-      : `<div class="view-perms-title"><i class="bi bi-key-fill me-1"></i> Permissions (${(u.permissions||[]).length})</div>
-         <div class="view-perms-list">${(u.permissions||[]).length
-           ? (u.permissions||[]).map(k=>`<span class="perm-tag">${labelPerm(k)}</span>`).join("")
+      : `<div class="view-perms-title"><i class="bi bi-key-fill me-1"></i> Permissions (${assignedPermissions.length})</div>
+         <div class="view-perms-list">${assignedPermissions.length
+           ? assignedPermissions.map(permission => {
+               return `
+                 <span class="perm-tag">
+                   ${labelPerm(permission)}
+                 </span>
+               `;
+             }).join("")
            : `<span style="color:var(--stone-2);font-size:0.82rem">No permissions assigned.</span>`}</div>`
     }`;
 
@@ -390,8 +691,21 @@ function openViewModal(id) {
 
 /* ── Toggle Status Modal ─────────────────────────────── */
 function openToggleModal(id) {
+  if (!can("delete")) {
+  showToast("error", "You do not have permission to activate or deactivate users.");
+  return;
+}
   const u = allUsers.find(u=>u.id===id);
   if (!u) return;
+
+  const currentUserEmail = String(getUserEmail() || "").trim().toLowerCase();
+  const targetEmail = String(u.email || u.id || "").trim().toLowerCase();
+
+  if (currentUserEmail && targetEmail === currentUserEmail) {
+    showToast("error", "You cannot deactivate your own account.");
+    return;
+  }
+
   togglingId = id;
   const isActive = u.status==="Active";
   const dname    = displayName(u);
@@ -409,6 +723,11 @@ function openToggleModal(id) {
 }
 
 async function confirmToggle() {
+  if (!can("delete")) {
+  showToast("error", "You do not have permission to activate or deactivate users.");
+  return;
+}
+
   const btn = document.getElementById("deactivateConfirmBtn");
   btn.disabled = true; btn.textContent = "Saving…";
   try {
@@ -429,11 +748,16 @@ function validateForm() {
   const ln = document.getElementById("fLastName").value.trim();
   const em = document.getElementById("fEmail").value.trim();
   const ro = document.getElementById("fRole").value;
+  const normalizedRole = normalizeRole(ro);
   if (!fn) { setErr("errFirstName","First name required."); setInvalid("fFirstName"); ok=false; }
   if (!ln) { setErr("errLastName","Last name required.");   setInvalid("fLastName");  ok=false; }
   if (!em) { setErr("errEmail","Email required.");          setInvalid("fEmail");     ok=false; }
   else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) { setErr("errEmail","Invalid email."); setInvalid("fEmail"); ok=false; }
-  if (!ro) { setErr("errRole","Please select a role.");     setInvalid("fRole");      ok=false; }
+  if (!normalizedRole) {
+    setErr("errRole","Please select a valid management role.");
+    setInvalid("fRole");
+    ok = false;
+  }
   if (!editingId) {
     const pw=document.getElementById("fPassword").value;
     const cp=document.getElementById("fConfirmPassword").value;
@@ -461,8 +785,15 @@ function updateAvatarPreview() {
 }
 
 function onRoleChange() {
-  const r=document.getElementById("fRole")?.value;
-  if (r) renderPermGrid(r==="Admin"?ADMIN_DEFAULT_PERMS:STAFF_DEFAULT_PERMS);
+  const role = document.getElementById("fRole")?.value;
+
+  if (!role) {
+    renderPermGrid([]);
+    return;
+  }
+
+  const permissions = getPermissionsForRole(role);
+  renderPermGrid(permissions);
 }
 
 /* ── Modal Helpers ───────────────────────────────────── */
@@ -492,30 +823,61 @@ function bindEye(btnId, inputId) {
 
 
 /* ── Role badge CSS for Public (add to page) ─────────── */
-function injectPublicRoleStyle() {
-  const s=document.createElement("style");
-  s.textContent=`.role-public{background:var(--rose-soft);color:var(--rose);}`;
-  document.head.appendChild(s);
+function injectRoleStyles() {
+  const style = document.createElement("style");
+
+  style.textContent = `
+    .role-public {
+      background: var(--rose-soft);
+      color: var(--rose);
+    }
+
+    .role-veterinarian {
+      background: #dff4f1;
+      color: #17695f;
+    }
+
+    .icon-teal {
+      background: #dff4f1;
+      color: #17695f;
+    }
+
+    .perm-item.perm-readonly {
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .perm-item.perm-readonly:not(.checked) {
+      opacity: 0.55;
+    }
+  `;
+
+  document.head.appendChild(style);
 }
 
 /* ── Init ────────────────────────────────────────────── */
 async function init() {
   try {
-    await protectManagementPage();
-    if (getUserRole()!=="Admin") {
-      showToast("error","Access denied — Administrators only.");
-      setTimeout(()=>{window.location.href="/pages/dashboard.html";},1800);
-      return;
-    }
-    injectPublicRoleStyle();
+    const session = await protectPageByModule("users");
+    currentRole = session.role;
+     injectRoleStyles();
     renderTopbarUser();
-    loadSidebar(); 
+    loadSidebar();
 
     bindTabs();
 
     await loadUsers();
 
-    document.getElementById("btnAddUser")?.addEventListener("click",openAddModal);
+
+    const addUserButton = document.getElementById("btnAddUser");
+
+if (addUserButton) {
+  addUserButton.style.display = can("create") ? "" : "none";
+
+  if (can("create")) {
+    addUserButton.addEventListener("click", openAddModal);
+  }
+}
     document.getElementById("searchUsers")?.addEventListener("input",applyFilters);
     document.getElementById("filterRole")?.addEventListener("change",applyFilters);
     document.getElementById("filterStatus")?.addEventListener("change",applyFilters);

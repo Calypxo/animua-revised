@@ -42,10 +42,10 @@
       <div class="page-header mb-4">
         <div>
           <h1 class="page-title">User Management</h1>
-          <p class="page-sub">Manage all system accounts — Admins, Staff, and registered Public users.</p>
+         <p class="page-sub">Manage all system accounts — Administrators, Staff, Veterinarians, and registered Public users.</p>
         </div>
         <button class="btn-primary-clay" id="btnAddUser" type="button">
-          <i class="bi bi-person-plus-fill"></i> Add Staff / Admin
+          <i class="bi bi-person-plus-fill"></i> Add Management User
         </button>
       </div>
 
@@ -72,6 +72,15 @@
           <div><div class="um-stat-val" id="statStaff">—</div><div class="um-stat-lbl">Staff</div></div>
         </div>
         <div class="um-stat-card">
+        <div class="um-stat-icon icon-teal">
+          <i class="bi bi-heart-pulse-fill"></i>
+        </div>
+        <div>
+          <div class="um-stat-val" id="statVeterinarians">—</div>
+          <div class="um-stat-lbl">Veterinarians</div>
+        </div>
+      </div>
+        <div class="um-stat-card">
           <div class="um-stat-icon icon-rose"><i class="bi bi-person-heart-fill"></i></div>
           <div><div class="um-stat-val" id="statPublic">—</div><div class="um-stat-lbl">Public Users</div></div>
         </div>
@@ -84,7 +93,7 @@
             <!-- Tabs -->
             <div class="um-tabs">
               <button class="um-tab active" data-tab="all">All Users</button>
-              <button class="um-tab" data-tab="staff">Admin &amp; Staff</button>
+              <button class="um-tab" data-tab="staff">Management Users</button>
               <button class="um-tab" data-tab="public">Public Users</button>
             </div>
           </div>
@@ -95,8 +104,9 @@
             </div>
             <select class="filter-select" id="filterRole">
               <option value="">All roles</option>
-              <option value="Admin">Admin</option>
+              <option value="Admin">Administrator</option>
               <option value="Staff">Staff</option>
+              <option value="Veterinarian">Veterinarian</option>
               <option value="Public">Public</option>
             </select>
             <select class="filter-select" id="filterStatus">
@@ -132,11 +142,11 @@
   </div><!-- /stage -->
 </div><!-- /shell -->
 
-<!-- ADD / EDIT MODAL (Admin/Staff only) -->
+<!-- ADD / EDIT MODAL (Management users only) -->
 <div class="um-modal-backdrop" id="userModalBackdrop">
   <div class="um-modal" id="userModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="um-modal-header">
-      <h2 id="modalTitle">Add User</h2>
+      <h2 id="modalTitle">Add Management User</h2>
       <button class="modal-close-btn" id="modalCloseBtn" type="button"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="um-modal-body">
@@ -168,6 +178,7 @@
               <option value="">Select role…</option>
               <option value="Admin">Administrator</option>
               <option value="Staff">Staff</option>
+              <option value="Veterinarian">Veterinarian</option>
             </select>
             <span class="form-err" id="errRole"></span>
           </div>
@@ -197,8 +208,8 @@
         </div>
         <div class="permissions-section" id="permissionsSection">
           <div class="perm-section-title">
-            <i class="bi bi-key-fill"></i> Module Permissions
-            <span class="perm-hint">Auto-filled by role — customise as needed.</span>
+            <i class="bi bi-key-fill"></i> Role Permissions
+            <span class="perm-hint">Permissions are automatically assigned based on the selected role.</span>
           </div>
           <div class="perm-grid" id="permGrid"></div>
         </div>

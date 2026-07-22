@@ -4,10 +4,11 @@ import "../css/adminDashboard.css";
 import "../css/sidebar.css";
 import "../css/inventory.css";
 
-import { protectManagementPage } from "../auth/authGuard.js";
+import { protectPageByModule } from "../auth/authGuard.js";
 import { renderTopbarUser } from "../components/management/topbarUser.js";
 import { loadSidebar } from "../components/management/sidebarLoader.js";
 import { getUserName } from "../utils/storage.js";
+import { hasPermission } from "../auth/permissions.js";
 
 import {
   getInventoryItems,
@@ -192,6 +193,7 @@ let editingItemId = null;
 let activeStockStatus = "";
 let stockInMode = "single";
 let stockOutMode = "single";
+let currentRole = "";
 
 /* ══════════════════════════════════════════════════════
    CATEGORY COLORS
@@ -430,8 +432,20 @@ function renderTable() {
       </td>
       <td>
         <button class="tbl-action-btn" title="View" data-action="view" data-id="${item.id}"><i class="bi bi-eye"></i></button>
-        <button class="tbl-action-btn stock-in" title="Stock In" data-action="stockin" data-id="${item.id}"><i class="bi bi-plus-lg"></i></button>
-        <button class="tbl-action-btn use" title="Record Usage" data-action="use" data-id="${item.id}"><i class="bi bi-dash-lg"></i></button>
+       ${
+  can("stock_in")
+    ? `<button class="tbl-action-btn stock-in" title="Stock In" data-action="stockin" data-id="${item.id}">
+        <i class="bi bi-plus-lg"></i>
+      </button>`
+    : ""
+}
+${
+  can("consume_general")
+    ? `<button class="tbl-action-btn use" title="Record Usage" data-action="use" data-id="${item.id}">
+        <i class="bi bi-dash-lg"></i>
+      </button>`
+    : ""
+}
       </td>
     </tr>
   `
@@ -511,9 +525,21 @@ function renderCards() {
           ${daysBadge(item)}
         </div>
         <div class="inv-card-footer">
-          <button class="inv-card-btn" data-action="stockin" data-id="${item.id}"><i class="bi bi-plus-lg"></i> Stock In</button>
-          <button class="inv-card-btn card-use" data-action="use" data-id="${item.id}"><i class="bi bi-dash-lg"></i> Use</button>
-        </div>
+  ${
+    can("stock_in")
+      ? `<button class="inv-card-btn" data-action="stockin" data-id="${item.id}">
+          <i class="bi bi-plus-lg"></i> Stock In
+        </button>`
+      : ""
+  }
+  ${
+    can("consume_general")
+      ? `<button class="inv-card-btn card-use" data-action="use" data-id="${item.id}">
+          <i class="bi bi-dash-lg"></i> Use
+        </button>`
+      : ""
+  }
+</div>
       </div>
     `;
     })
@@ -749,11 +775,34 @@ function renderDrawer(item) {
     </div>
 
     <div class="drawer-footer">
-      <button class="btn-ghost-clay" id="drawerCloseBtn"><i class="bi bi-x"></i> Close</button>
-      <button class="btn-outline-add" id="drawerEditBtn"><i class="bi bi-pencil"></i> Edit</button>
-      <button class="btn-primary-clay" style="background:var(--amber);flex:1" id="drawerUseBtn"><i class="bi bi-dash-lg"></i> Record Usage</button>
-      <button class="btn-primary-clay" style="flex:1" id="drawerStockInBtn"><i class="bi bi-plus-lg"></i> Stock In</button>
-    </div>
+  <button class="btn-ghost-clay" id="drawerCloseBtn">
+    <i class="bi bi-x"></i> Close
+  </button>
+
+  ${
+    can("edit")
+      ? `<button class="btn-outline-add" id="drawerEditBtn">
+          <i class="bi bi-pencil"></i> Edit
+        </button>`
+      : ""
+  }
+
+  ${
+    can("consume_general")
+      ? `<button class="btn-primary-clay" style="background:var(--amber);flex:1" id="drawerUseBtn">
+          <i class="bi bi-dash-lg"></i> Record Usage
+        </button>`
+      : ""
+  }
+
+  ${
+    can("stock_in")
+      ? `<button class="btn-primary-clay" style="flex:1" id="drawerStockInBtn">
+          <i class="bi bi-plus-lg"></i> Stock In
+        </button>`
+      : ""
+  }
+</div>
   `;
 
   document.getElementById("drawerCloseX")?.addEventListener("click", closeDrawer);
@@ -868,6 +917,14 @@ window.addEventListener("animua:stockDeduct", async (e) => {
   }
 });
 
+function can(action) {
+  return hasPermission(
+    currentRole,
+    "inventory",
+    action
+  );
+}
+
 /* ── Batch helpers ──────────────────────────────────── */
 function addStockInBatchRow(prefill = {}) {
   const wrap = document.getElementById("stockInBatchRows");
@@ -970,6 +1027,11 @@ function addStockOutBatchRow(prefill = {}) {
 }
 
 function openBatchStockIn() {
+  if (!can("stock_in")) {
+  showToast("error", "You do not have permission to stock in inventory items.");
+  return;
+}
+
   stockInMode = "batch";
 
   document.getElementById("stockInTitle").textContent = "Batch Stock In";
@@ -996,6 +1058,11 @@ function openBatchStockIn() {
 }
 
 function openBatchStockOut() {
+  if (!can("consume_general")) {
+  showToast("error", "You do not have permission to record general inventory usage.");
+  return;
+}
+
   stockOutMode = "batch";
 
   document.getElementById("stockOutSubtitle").textContent = "Record usage for multiple items";
@@ -1018,6 +1085,10 @@ function openBatchStockOut() {
 }
 
 async function saveBatchStockIn() {
+  if (!can("stock_in")) {
+  showToast("error", "You do not have permission to stock in inventory items.");
+  return;
+}
   const rows = [...document.querySelectorAll("#stockInBatchRows .batch-row")];
   const batchDate = document.getElementById("fStockDate").value || today();
   const supplier = document.getElementById("fStockSupplier").value.trim();
@@ -1083,6 +1154,11 @@ async function saveBatchStockIn() {
 }
 
 async function saveBatchStockOut() {
+  if (!can("consume_general")) {
+  showToast("error", "You do not have permission to record general inventory usage.");
+  return;
+}
+
   const rows = [...document.querySelectorAll("#stockOutBatchRows .batch-row")];
   const batchDate = document.getElementById("fOutDate").value || today();
   const notes = document.getElementById("fOutNotes").value.trim();
@@ -1172,6 +1248,10 @@ async function saveBatchStockOut() {
 
 /* ── Stock In Modal ─────────────────────────────────── */
 function openStockIn(prefillId = null) {
+  if (!can("stock_in")) {
+  showToast("error", "You do not have permission to stock in inventory items.");
+  return;
+}
   stockInMode = "single";
 
   const singleWrap = document.getElementById("stockInSingleFields");
@@ -1198,6 +1278,11 @@ function openStockIn(prefillId = null) {
 }
 
 async function saveStockIn() {
+  if (!can("stock_in")) {
+  showToast("error", "You do not have permission to stock in inventory items.");
+  return;
+}
+
   const id = document.getElementById("fStockItemSelect").value;
   const qty = parseInt(document.getElementById("fStockQty").value, 10);
 
@@ -1253,6 +1338,11 @@ async function saveStockIn() {
 
 /* ── Stock Out Modal ────────────────────────────────── */
 function openStockOut(id) {
+  if (!can("consume_general")) {
+  showToast("error", "You do not have permission to record general inventory usage.");
+  return;
+}
+
   stockOutMode = "single";
 
   const singleWrap = document.getElementById("stockOutSingleFields");
@@ -1277,6 +1367,11 @@ function openStockOut(id) {
 }
 
 async function saveStockOut() {
+  if (!can("consume_general")) {
+  showToast("error", "You do not have permission to record general inventory usage.");
+  return;
+}
+
   const id = document.getElementById("fOutItemId").value;
   const qty = parseInt(document.getElementById("fOutQty").value, 10);
 
@@ -1367,6 +1462,18 @@ async function saveStockOut() {
 
 /* ── Add/Edit Item Modal ────────────────────────────── */
 function openItemModal(id = null) {
+  const requiredPermission = id ? "edit" : "create";
+
+if (!can(requiredPermission)) {
+  showToast(
+    "error",
+    id
+      ? "You do not have permission to edit inventory items."
+      : "You do not have permission to add inventory items."
+  );
+  return;
+}
+
   editingItemId = id;
   const item = id ? store.find((i) => i.id === id) : null;
 
@@ -1388,6 +1495,18 @@ function openItemModal(id = null) {
 }
 
 async function saveItem() {
+  const requiredPermission = editingItemId ? "edit" : "create";
+
+if (!can(requiredPermission)) {
+  showToast(
+    "error",
+    editingItemId
+      ? "You do not have permission to edit inventory items."
+      : "You do not have permission to add inventory items."
+  );
+  return;
+}
+
   const itemIdInput = document.getElementById("fItemId");
   const name = document.getElementById("fItemName").value.trim();
   const cat = document.getElementById("fItemCategory").value;
@@ -1531,7 +1650,8 @@ function showToast(type, msg) {
 /* ── Init ───────────────────────────────────────────── */
 async function init() {
   try {
-    protectManagementPage();
+    const session = await protectPageByModule("inventory");
+    currentRole = session.role;
     renderTopbarUser();
     await loadSidebar();
 
@@ -1575,9 +1695,33 @@ async function init() {
       renderView();
     });
 
-    document.getElementById("btnStockIn")?.addEventListener("click", () => openBatchStockIn());
-    document.getElementById("btnRecordUsage")?.addEventListener("click", () => openBatchStockOut());
-    document.getElementById("btnAddItem")?.addEventListener("click", () => openItemModal());
+    const stockInButton = document.getElementById("btnStockIn");
+const recordUsageButton = document.getElementById("btnRecordUsage");
+const addItemButton = document.getElementById("btnAddItem");
+
+if (stockInButton) {
+  stockInButton.style.display = can("stock_in") ? "" : "none";
+
+  if (can("stock_in")) {
+    stockInButton.addEventListener("click", () => openBatchStockIn());
+  }
+}
+
+if (recordUsageButton) {
+  recordUsageButton.style.display = can("consume_general") ? "" : "none";
+
+  if (can("consume_general")) {
+    recordUsageButton.addEventListener("click", () => openBatchStockOut());
+  }
+}
+
+if (addItemButton) {
+  addItemButton.style.display = can("create") ? "" : "none";
+
+  if (can("create")) {
+    addItemButton.addEventListener("click", () => openItemModal());
+  }
+}
 
     document.getElementById("addStockInBatchRow")?.addEventListener("click", () => {
       addStockInBatchRow();

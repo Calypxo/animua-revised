@@ -3,232 +3,125 @@ import "../css/adminDashboard.css";
 import "../css/sidebar.css";
 import "../css/surrenderRequests.css";
 
-import { protectManagementPage } from "../auth/authGuard.js";
+import { protectPageByModule } from "../auth/authGuard.js";
+import { hasPermission } from "../auth/permissions.js";
 import { renderTopbarUser }      from "../components/management/topbarUser.js";
 import { loadSidebar }           from "../components/management/sidebarLoader.js";
 import { getUserName }           from "../utils/storage.js";
 
-/* ══════════════════════════════════════════════════════
-   NLP MOCK ENGINE
-   In production this calls your NLP backend endpoint.
-   For now we simulate classification with keyword rules.
+const SURRENDER_REQUESTS_API_URL =
+  "http://localhost:5000/api/surrenders";
 
-   Categories:  Medical | Financial | Relocation |
-                Behavioral | Overcrowding | Abandonment Risk |
-                Owner Incapacity | Other
 
-   Urgency:     Critical (90–100) | High (65–89) |
-                Medium (40–64)    | Low (0–39)
-══════════════════════════════════════════════════════ */
-const NLP_RULES = [
-  {
-    category: "Medical",
-    keywords: ["sick","illness","disease","cancer","tumor","injury","injured","surgery","treatment","veterinary","vet","allergy","paralyzed","dying","terminal","disabled"],
-    baseUrgency: 85,
-    urgencyBoost: ["dying","terminal","critical","emergency","cannot afford treatment"],
-  },
-  {
-    category: "Abandonment Risk",
-    keywords: ["abandon","leave","street","throw","nowhere","no choice","give up","no option","dispose","get rid"],
-    baseUrgency: 90,
-    urgencyBoost: ["already on the street","will leave","days left"],
-  },
-  {
-    category: "Owner Incapacity",
-    keywords: ["hospital","bedridden","disability","nursing home","elderly","senior","alone","no one to care","caregiver","health condition","accident","operation"],
-    baseUrgency: 75,
-    urgencyBoost: ["hospitalized","bedridden","no family"],
-  },
-  {
-    category: "Financial",
-    keywords: ["afford","money","financial","cost","expensive","budget","income","job","unemployed","poverty","struggling","cannot pay","no funds"],
-    baseUrgency: 55,
-    urgencyBoost: ["no income","lost job","bankrupt"],
-  },
-  {
-    category: "Relocation",
-    keywords: ["moving","relocate","transfer","abroad","migration","new home","condo","apartment","landlord","no pets allowed","rules","not allowed"],
-    baseUrgency: 40,
-    urgencyBoost: ["leaving country","days before moving","eviction"],
-  },
-  {
-    category: "Behavioral",
-    keywords: ["aggressive","biting","attack","dangerous","destructive","noise","barking","scratching","fear","anxiety","behavior","temper","violent"],
-    baseUrgency: 60,
-    urgencyBoost: ["bit a child","attacked","hospitalized someone"],
-  },
-  {
-    category: "Overcrowding",
-    keywords: ["too many","multiple pets","cannot handle","too much","overwhelmed","litter","puppies","kittens","several"],
-    baseUrgency: 35,
-    urgencyBoost: ["no space","10 or more"],
-  },
-];
+async function getPublicSubmittedRequests() {
+  try {
+    const token = localStorage.getItem("animua_token");
 
-function mockNlpAnalyze(reasonText) {
-  const text     = reasonText.toLowerCase();
-  let bestMatch  = { category:"Other", urgencyScore:20, confidence:0.45, keywords:[] };
-  let best       = 0;
+    const response = await fetch(SURRENDER_REQUESTS_API_URL, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-  for (const rule of NLP_RULES) {
-    const hits = rule.keywords.filter(k => text.includes(k));
-    if (hits.length === 0) continue;
+    const data = await response.json();
 
-    const score     = hits.length / rule.keywords.length;
-    const boosted   = rule.urgencyBoost.some(b => text.includes(b));
-    const urgency   = Math.min(100, rule.baseUrgency + (boosted ? 15 : 0) + (hits.length > 3 ? 5 : 0));
-    const confidence= Math.min(0.98, 0.55 + score * 0.5);
-
-    if (score > best) {
-      best      = score;
-      bestMatch = { category:rule.category, urgencyScore:urgency, confidence, keywords:hits.slice(0,5) };
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to fetch surrender requests from backend.");
     }
+
+    const savedRequests = data.requests || [];
+
+    return savedRequests.map((request, index) => {
+      const ownerName = request.owner?.name || "Unknown Owner";
+      const petName = request.pet?.name || "Unnamed Pet";
+      const species = request.pet?.species || "Dog";
+
+      return {
+        id: request.id || `SR-PUBLIC-${String(index + 1).padStart(3, "0")}`,
+        status: request.status || "Pending",
+        submittedAt: request.submittedAt || new Date().toISOString().split("T")[0],
+
+        owner: {
+          name: ownerName,
+          contact: request.owner?.contact || "—",
+          address: request.owner?.address || "—",
+          barangay: request.owner?.barangay || "Not specified",
+          idType: "Online Account",
+          color: "#6f191c",
+          initials: ownerName
+            .split(" ")
+            .map(name => name[0])
+            .join("")
+            .toUpperCase()
+            .slice(0, 2),
+        },
+
+        pet: {
+          name: petName,
+          species: species,
+          breed: request.pet?.breed || "Not specified",
+          age: request.pet?.age || "Not specified",
+          sex: request.pet?.sex || "Not specified",
+        },
+
+        surrenderReason: request.surrenderReason || "No reason provided.",
+
+        agreement: request.agreement || null,
+
+        nlp: {
+          sentiment: request.nlp?.sentiment || "Neutral",
+          category: request.nlp?.category || "Other",
+          urgencyLabel: request.nlp?.urgencyLabel || "Low",
+          urgencyScore: request.nlp?.urgencyScore || 20,
+          confidence: request.nlp?.confidence || 0.5,
+          keywords: request.nlp?.keywords || [],
+          suggestedPriority: request.nlp?.suggestedPriority || "Normal Priority",
+          source: request.nlp?.source || "TF-IDF + Logistic Regression",
+        },
+
+        documents: [
+          {
+            name: "Online surrender form",
+            status: "submitted",
+          },
+          {
+            name: "Agreement and consent",
+            status: request.agreement?.agreedToTerms ? "submitted" : "missing",
+          },
+        ],
+
+        docsSubmitted: request.agreement?.agreedToTerms ? 2 : 1,
+        totalDocs: 2,
+
+        reviewedBy: request.reviewedBy || null,
+        reviewedAt: request.reviewedAt || null,
+        reviewNotes: request.reviewNotes || null,
+        rejectedReason: request.rejectedReason || null,
+        intakeId: request.intakeId || null,
+        dropoffDate: request.dropoffDate || null,
+
+        source: request.source || "Public Form",
+      };
+    });
+  } catch (error) {
+    console.error("Failed to load surrender requests from backend:", error);
+    return [];
   }
-
-  // Map score to label
-  const urgencyLabel = bestMatch.urgencyScore >= 85 ? "Critical"
-    : bestMatch.urgencyScore >= 65 ? "High"
-    : bestMatch.urgencyScore >= 40 ? "Medium" : "Low";
-
-  return { ...bestMatch, urgencyLabel };
 }
-
-/* ══════════════════════════════════════════════════════
-   ANGELES CITY BARANGAYS
-══════════════════════════════════════════════════════ */
-const ANGELES_BARANGAYS = [
-  "Agapito del Rosario","Amsic","Anunas","Balibago","Capaya","Claro M. Recto",
-  "Cuayan","Cutcut","Cutud","Lourdes Norte","Lourdes Sur","Lourdes Sur Este",
-  "Malabanias","Margot","Mining","Ninoy Aquino","Pampang","Pandan","Plaridel",
-  "Pulung Cacutud","Pulung Maragul","Pulungbulu","Salapungan","San Jose",
-  "San Nicolas","Santa Teresita","Santa Trinidad","Santo Cristo","Santo Domingo",
-  "Santo Rosario","Sapalibutad","Sapangbato","Sergio Bernal","Silangan",
-  "Tabun","Virgen Delos Remedios",
-];
-
-/* ══════════════════════════════════════════════════════
-   MOCK SURRENDER REQUESTS (15 records)
-══════════════════════════════════════════════════════ */
-const RAW_REASONS = [
-  "My dog has a terminal illness and I cannot afford the expensive veterinary treatment. He is suffering and I want him to be cared for properly.",
-  "We are relocating abroad next week and the country we are moving to does not allow pets. We have no other family members who can take care of our cat.",
-  "My cat has become extremely aggressive lately, biting family members including my young child. It is no longer safe to keep her at home.",
-  "I lost my job three months ago and I can no longer afford food and veterinary care for my dogs. I have two dogs and it is becoming very difficult financially.",
-  "I am bedridden due to a serious accident and I am hospitalized. I have no family members in Angeles City who can take care of my dog.",
-  "My landlord just gave us a notice that no pets are allowed in our new apartment. We are moving out in a few days and cannot keep our rabbit.",
-  "I have too many cats now — my cat had three litters this year and I have 12 cats. I cannot handle all of them and I am overwhelmed.",
-  "My dog was diagnosed with cancer and requires surgery. I have no money to pay for the operation and I feel it is better for him to be with people who can afford treatment.",
-  "I will be leaving for abroad for work in two weeks. I have no one to leave my dog with and I am afraid she will be abandoned if I cannot find a home for her.",
-  "My elderly mother who was the primary caregiver of our pet passed away. I live abroad and I cannot come home to care for the dog personally.",
-  "My dog has been attacking our neighbors and has bitten two people already. We are afraid of legal consequences and cannot control his aggressive behavior.",
-  "We are financially struggling and can barely feed ourselves. We feel terrible but we cannot provide proper care for our pets anymore.",
-  "I am moving to a condo unit that strictly prohibits pets. I tried looking for a new owner but I have not found one in time.",
-  "My cat is very sick and I cannot afford treatment. She has not been eating for days and I am worried she will die without proper medical care.",
-  "I have 3 dogs and my new apartment only allows one pet. I need to surrender 2 of my dogs as the landlord requires it.",
-];
-
-const OWNER_NAMES = [
-  "Maria Santos","Juan Dela Cruz","Ana Reyes","Carlo Garcia","Liza Bautista",
-  "Ramon Valdez","Karen Cruz","Paolo Mendoza","Rosa Jimenez","Andres Tan",
-  "Sophia Lim","Miguel Aquino","Crisanta Ocampo","Eduardo Flores","Beatriz Ramos",
-];
-
-const PET_DATA = [
-  { name:"Bruno",   species:"Dog", breed:"Aspin",             age:"3 years", sex:"Male" },
-  { name:"Whiskers",species:"Cat", breed:"Domestic Shorthair",age:"2 years", sex:"Female" },
-  { name:"Princess",species:"Cat", breed:"Persian Mix",       age:"4 years", sex:"Female" },
-  { name:"Bantay",  species:"Dog", breed:"Aspin",             age:"5 years", sex:"Male" },
-  { name:"Buddy",   species:"Dog", breed:"Labrador Mix",      age:"2 years", sex:"Male" },
-  { name:"Mochi",   species:"Rabbit",breed:"Holland Lop",     age:"1 year",  sex:"Female" },
-  { name:"Shadow",  species:"Dog", breed:"Aspin",             age:"1 year",  sex:"Male" },
-  { name:"Rex",     species:"Dog", breed:"German Shepherd",   age:"4 years", sex:"Male" },
-  { name:"Cleo",    species:"Cat", breed:"Siamese",           age:"3 years", sex:"Female" },
-  { name:"Choco",   species:"Dog", breed:"Shih Tzu Mix",      age:"6 years", sex:"Female" },
-  { name:"Simba",   species:"Dog", breed:"Aspin",             age:"2 years", sex:"Male" },
-  { name:"Luna",    species:"Cat", breed:"Puspin",            age:"1 year",  sex:"Female" },
-  { name:"Kiko",    species:"Dog", breed:"Aspin",             age:"3 years", sex:"Male" },
-  { name:"Nala",    species:"Cat", breed:"Domestic Longhair", age:"5 years", sex:"Female" },
-  { name:"Pugoy",   species:"Dog", breed:"Aspin",             age:"4 years", sex:"Male" },
-];
-
-const AVATAR_COLORS = [
-  "#6f191c","#2558a8","#186534","#b86a00","#0d6e6e",
-  "#9b2c4e","#3d2b8a","#1a6b5a","#7a3b00","#1a4e7a",
-  "#6f191c","#2558a8","#186534","#b86a00","#0d6e6e",
-];
-
-const DOCS_TEMPLATES = [
-  ["Valid government ID","Proof of residence","Pet vaccination records","Signed surrender form"],
-  ["Valid government ID","Proof of residence","Signed surrender form"],
-  ["Valid government ID","Proof of residence","Pet vaccination records","Medical certificate","Signed surrender form"],
-];
-
-const STATUSES = ["Pending","Pending","Pending","Pending","Pending","Approved","Approved","Converted","Rejected","Pending","Pending","Approved","Pending","Pending","Rejected"];
-
-const DATES = [
-  "2025-03-20","2025-03-19","2025-03-18","2025-03-17","2025-03-17",
-  "2025-03-15","2025-03-14","2025-03-10","2025-03-09","2025-03-18",
-  "2025-03-16","2025-03-12","2025-03-20","2025-03-19","2025-03-08",
-];
-
-// Build the mock records with NLP already applied
-const mockRequests = RAW_REASONS.map((reason, i) => {
-  const nlp      = mockNlpAnalyze(reason);
-  const status   = STATUSES[i];
-  const pet      = PET_DATA[i];
-  const barangay = ANGELES_BARANGAYS[i % ANGELES_BARANGAYS.length];
-
-  // Document list with random completion
-  const docTemplate = DOCS_TEMPLATES[i % DOCS_TEMPLATES.length];
-  const docs = docTemplate.map(d => ({
-    name:   d,
-    status: Math.random() > 0.25 ? "submitted" : Math.random() > 0.4 ? "pending" : "missing",
-  }));
-  const docsSubmitted = docs.filter(d => d.status === "submitted").length;
-
-  return {
-    id:            `SR-2025-${String(i + 1).padStart(3,"0")}`,
-    status,
-    submittedAt:   DATES[i],
-    owner: {
-      name:        OWNER_NAMES[i],
-      contact:     `09${String(Math.floor(Math.random()*900000000+100000000))}`,
-      address:     `${Math.floor(Math.random()*200+1)} ${["Rizal St.","Mabini Ave.","Sto. Rosario St.","MacArthur Hwy","Sto. Tomas","Del Pilar St."][i%6]}`,
-      barangay,
-      idType:      ["PhilHealth","UMID","Voter's ID","Driver's License","Passport","Postal ID"][i%6],
-      color:       AVATAR_COLORS[i],
-      initials:    OWNER_NAMES[i].split(" ").map(n=>n[0]).join("").toUpperCase().slice(0,2),
-    },
-    pet,
-    surrenderReason: reason,
-    nlp: {
-      category:    nlp.category,
-      urgencyLabel:nlp.urgencyLabel,
-      urgencyScore:nlp.urgencyScore,
-      confidence:  nlp.confidence,
-      keywords:    nlp.keywords,
-    },
-    documents:       docs,
-    docsSubmitted,
-    totalDocs:       docs.length,
-    reviewedBy:      status !== "Pending" ? "Ana Santos" : null,
-    reviewedAt:      status !== "Pending" ? "2025-03-16" : null,
-    reviewNotes:     status === "Approved"  ? "All documents verified. Schedule drop-off." : null,
-    rejectedReason:  status === "Rejected"  ? "Incomplete documents submitted. Please resubmit with all required IDs and proof of residence." : null,
-    intakeId:        status === "Converted" ? `INT-2025-${String(i+1).padStart(3,"0")}` : null,
-    dropoffDate:     status === "Converted" ? "2025-03-18" : null,
-  };
-});
-
 /* ══════════════════════════════════════════════════════
    STATE
 ══════════════════════════════════════════════════════ */
-let filtered    = [...mockRequests];
+let publicRequests = [];
+let allRequests = [];
+
+let filtered = [];
 let currentPage = 1;
 const PAGE_SIZE = 8;
 let activeTab   = "all";
 let activeId    = null;
 let confirmMode = null;
+let currentRole = "";
 
 /* ══════════════════════════════════════════════════════
    HELPERS
@@ -274,12 +167,12 @@ const URGENCY_PCT  = { Critical:95, High:75, Medium:50, Low:25 };
 ══════════════════════════════════════════════════════ */
 function renderStats() {
   const set = (id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
-  set("statTotal",    mockRequests.length);
-  set("statPending",  mockRequests.filter(r=>r.status==="Pending").length);
-  set("statCritical", mockRequests.filter(r=>r.nlp.urgencyLabel==="Critical").length);
-  set("statApproved", mockRequests.filter(r=>r.status==="Approved").length);
-  set("statConverted",mockRequests.filter(r=>r.status==="Converted").length);
-  set("statRejected", mockRequests.filter(r=>r.status==="Rejected").length);
+  set("statTotal", allRequests.length);
+  set("statPending", allRequests.filter(r => r.status === "Pending").length);
+  set("statCritical", allRequests.filter(r => r.nlp.urgencyLabel === "Critical").length);
+  set("statApproved", allRequests.filter(r => r.status === "Approved").length);
+  set("statConverted", allRequests.filter(r => r.status === "Converted").length);
+  set("statRejected", allRequests.filter(r => r.status === "Rejected").length);
 }
 
 /* ══════════════════════════════════════════════════════
@@ -290,7 +183,7 @@ function applyFilters() {
   const urg  = document.getElementById("filterUrgency")?.value||"";
   const cat  = document.getElementById("filterCategory")?.value||"";
 
-  filtered = mockRequests.filter(r => {
+  filtered = allRequests.filter(r => {
     if (activeTab !== "all" && r.status !== activeTab) return false;
     if (urg && r.nlp.urgencyLabel !== urg)  return false;
     if (cat && r.nlp.category     !== cat)  return false;
@@ -389,7 +282,7 @@ function renderPagination() {
    DRAWER
 ══════════════════════════════════════════════════════ */
 function openDrawer(id) {
-  const r = mockRequests.find(x => x.id === id);
+  const r = allRequests.find(x => x.id === id);
   if (!r) return;
   activeId = id;
   document.querySelectorAll("tr[data-id]").forEach(row => row.classList.toggle("row-active", row.dataset.id === id));
@@ -414,11 +307,13 @@ function renderDrawer(r) {
   // ── NLP analysis section ─────────────────────────────
   const nlpSection = `
     <div class="drawer-section">
-      <div class="drawer-section-title"><i class="bi bi-cpu"></i> NLP Analysis (Mock)</div>
+      <div class="drawer-section-title"><i class="bi bi-cpu"></i> Sentiment Analysis</div>
       <div class="nlp-analysis-card">
         <div class="nlp-analysis-header">
           <span class="nlp-chip"><i class="bi bi-cpu-fill"></i> NLP Classified</span>
-          <span style="font-size:0.75rem;color:var(--stone)">Simulated result</span>
+          <span style="font-size:0.75rem;color:var(--stone)">
+            ${r.nlp.source || "TF-IDF + Logistic Regression"}
+          </span>
         </div>
         <div class="nlp-category-row">
           <div>
@@ -427,6 +322,24 @@ function renderDrawer(r) {
           </div>
           <div class="nlp-confidence">Confidence: <span>${confPct}%</span></div>
         </div>
+        <div style="margin-top:10px">
+        <div style="font-size:0.72rem;font-weight:700;color:var(--stone);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em">
+          Sentiment Result
+        </div>
+
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span class="nlp-cat-badge cat-other">
+            <i class="bi bi-chat-heart-fill"></i>
+            ${r.nlp.sentiment || "Neutral"}
+          </span>
+
+          <span style="font-size:0.75rem;color:var(--stone)">
+            ${r.nlp.confidence < 0.5
+              ? "Low confidence — needs staff review"
+              : `Suggested Priority: ${r.nlp.suggestedPriority || "Normal Priority"}`}
+          </span>
+        </div>
+      </div>
         <div>
           <div style="font-size:0.72rem;font-weight:700;color:var(--stone);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em">Urgency Level</div>
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
@@ -563,21 +476,37 @@ function renderDrawer(r) {
   // ── Footer buttons ────────────────────────────────────
   let footerBtns = `<button class="btn-ghost-clay" id="drawerCloseBtn"><i class="bi bi-x"></i> Close</button>`;
   if (r.status === "Pending") {
+  footerBtns += `
+    ${
+      can("reject")
+        ? `<button class="btn-danger-outline" id="drawerRejectBtn">
+            <i class="bi bi-x-lg"></i> Reject
+          </button>`
+        : ""
+    }
+    ${
+      can("approve")
+        ? `<button class="btn-approve-confirm" id="drawerApproveBtn">
+            <i class="bi bi-check-lg"></i> Approve
+          </button>`
+        : ""
+    }`;
+}
+    if (r.status === "Approved") {
     footerBtns += `
-      <button class="btn-danger-outline" id="drawerRejectBtn"><i class="bi bi-x-lg"></i> Reject</button>
-      <button class="btn-approve-confirm" id="drawerApproveBtn"><i class="bi bi-check-lg"></i> Approve</button>`;
-  }
-  if (r.status === "Approved") {
-    footerBtns += `
-      <button class="btn-danger-outline"  id="drawerRejectBtn"><i class="bi bi-x-lg"></i> Reject</button>
-      <button class="btn-convert-confirm" id="drawerConvertBtn"><i class="bi bi-arrow-right-circle-fill"></i> Convert to Intake</button>`;
+      <button class="btn-ghost-clay" disabled>
+        <i class="bi bi-info-circle"></i> Waiting for intake submission
+      </button>`;
   }
 
   inner.innerHTML = `
     <div class="drawer-header">
       <div class="drawer-header-left">
         <h3>${r.id}</h3>
-        <p>${r.owner.name} · ${emoji(r.pet.species)} ${r.pet.name} · ${statusBadge(r.status)}</p>
+        <p>
+        ${r.owner.name} · ${emoji(r.pet.species)} ${r.pet.name} · ${statusBadge(r.status)}
+        ${r.source ? ` · <span style="color:var(--stone);font-size:0.78rem">${r.source}</span>` : ""}
+      </p>
       </div>
       <button class="drawer-close-btn" id="drawerCloseX"><i class="bi bi-x-lg"></i></button>
     </div>
@@ -594,7 +523,28 @@ function renderDrawer(r) {
   document.getElementById("drawerCloseBtn")?.addEventListener("click",  closeDrawer);
   document.getElementById("drawerApproveBtn")?.addEventListener("click",()=> openApproveModal(r.id));
   document.getElementById("drawerRejectBtn")?.addEventListener("click", ()=> openRejectModal(r.id));
-  document.getElementById("drawerConvertBtn")?.addEventListener("click",()=> openConvertModal(r.id));
+  //document.getElementById("drawerConvertBtn")?.addEventListener("click",()=> openConvertModal(r.id));
+}
+
+async function updateSurrenderStatusInBackend(id, payload) {
+  const token = localStorage.getItem("animua_token");
+
+  const response = await fetch(`http://localhost:5000/api/surrenders/${id}/status`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to update surrender request.");
+  }
+
+  return data.request;
 }
 
 /* ══════════════════════════════════════════════════════
@@ -602,7 +552,14 @@ function renderDrawer(r) {
 ══════════════════════════════════════════════════════ */
 // Approve
 function openApproveModal(id) {
-  const r = mockRequests.find(x=>x.id===id);
+  if (!can("approve")) {
+  showToast(
+    "error",
+    "You do not have permission to approve surrender requests."
+  );
+  return;
+}
+  const r = allRequests.find(x => x.id === id)
   if (!r) return;
   confirmMode = { type:"approve", id };
   document.getElementById("approveConfirmMsg").textContent =
@@ -610,21 +567,71 @@ function openApproveModal(id) {
   document.getElementById("approveNotes").value = "";
   openModal("approveModalBackdrop");
 }
-function executeApprove() {
-  const r = mockRequests.find(x=>x.id===confirmMode.id);
+async function executeApprove() {
+  if (!can("approve")) {
+  showToast(
+    "error",
+    "You do not have permission to approve surrender requests."
+  );
+  return;
+}
+  const r = allRequests.find(x => x.id === confirmMode.id);
+
   if (!r) return;
-  r.status      = "Approved";
-  r.reviewedBy  = getUserName() || "Admin";
-  r.reviewedAt  = new Date().toISOString().split("T")[0];
-  r.reviewNotes = document.getElementById("approveNotes").value.trim() || null;
-  closeModal("approveModalBackdrop");
-  renderStats(); applyFilters(); renderDrawer(r);
-  showToast("success", `Request ${r.id} approved.`);
+
+  try {
+    const reviewNotes = document.getElementById("approveNotes").value.trim() || null;
+
+    const updatedRequest = await updateSurrenderStatusInBackend(r.id, {
+      status: "Approved",
+      reviewNotes,
+    });
+
+    Object.assign(r, updatedRequest);
+
+    sessionStorage.setItem(
+      "approved_surrender_for_intake",
+      JSON.stringify({
+        surrenderId: r.id,
+        ownerName: r.owner?.name || "",
+        ownerContact: r.owner?.contact || "",
+        approvedDate: new Date().toISOString().split("T")[0],
+
+        petName: r.pet?.name || "",
+        species: r.pet?.species || "",
+        breed: r.pet?.breed || "",
+        sex: r.pet?.sex || "",
+        age: r.pet?.age || "",
+        colorMarkings: r.pet?.colorMarkings || "",
+        vaccinationHistory: r.pet?.vaccinationHistory || "",
+        surrenderReason: r.surrenderReason || "",
+      })
+    );
+
+    closeModal("approveModalBackdrop");
+
+    showToast("success", `Request ${r.id} approved. Redirecting to Animal Intake...`);
+
+    setTimeout(() => {
+      window.location.href = "/pages/intakeList.html?source=surrender";
+    }, 900);
+
+  } catch (error) {
+    console.error("Approve surrender request error:", error);
+    showToast("error", error.message || "Failed to approve request.");
+  }
 }
 
 // Reject
 function openRejectModal(id) {
-  const r = mockRequests.find(x=>x.id===id);
+  if (!can("reject")) {
+  showToast(
+    "error",
+    "You do not have permission to reject surrender requests."
+  );
+  return;
+}
+  const r = allRequests.find(x=>x.id===id);
   if (!r) return;
   confirmMode = { type:"reject", id };
   document.getElementById("rejectConfirmMsg").textContent =
@@ -633,21 +640,48 @@ function openRejectModal(id) {
   document.getElementById("errRejectReason").textContent = "";
   openModal("rejectModalBackdrop");
 }
-function executeReject() {
+async function executeReject() {
+  if (!can("reject")) {
+  showToast(
+    "error",
+    "You do not have permission to reject surrender requests."
+  );
+  return;
+}
   const reason = document.getElementById("rejectReason")?.value.trim();
-  if (!reason) { document.getElementById("errRejectReason").textContent = "A reason is required."; return; }
-  const r = mockRequests.find(x=>x.id===confirmMode.id);
+
+  if (!reason) {
+    document.getElementById("errRejectReason").textContent = "A reason is required.";
+    return;
+  }
+
+  const r = allRequests.find(x => x.id === confirmMode.id);
+
   if (!r) return;
-  r.status         = "Rejected";
-  r.rejectedReason = reason;
-  closeModal("rejectModalBackdrop");
-  renderStats(); applyFilters(); renderDrawer(r);
-  showToast("info", `Request ${r.id} rejected.`);
+
+  try {
+    const updatedRequest = await updateSurrenderStatusInBackend(r.id, {
+      status: "Rejected",
+      rejectedReason: reason,
+    });
+
+    Object.assign(r, updatedRequest);
+
+    closeModal("rejectModalBackdrop");
+    renderStats();
+    applyFilters();
+    renderDrawer(r);
+
+    showToast("info", `Request ${r.id} rejected.`);
+  } catch (error) {
+    console.error("Reject surrender request error:", error);
+    showToast("error", error.message || "Failed to reject request.");
+  }
 }
 
 // Convert to intake
 function openConvertModal(id) {
-  const r = mockRequests.find(x=>x.id===id);
+  const r = allRequests.find(x=>x.id===id);
   if (!r) return;
   confirmMode = { type:"convert", id };
   document.getElementById("convertConfirmMsg").textContent =
@@ -655,16 +689,31 @@ function openConvertModal(id) {
   document.getElementById("fDropoffDate").value = new Date().toISOString().split("T")[0];
   openModal("convertModalBackdrop");
 }
-function executeConvert() {
-  const r = mockRequests.find(x=>x.id===confirmMode.id);
+async function executeConvert() {
+  const r = allRequests.find(x => x.id === confirmMode.id);
+
   if (!r) return;
-  const seq      = mockRequests.filter(x=>x.status==="Converted").length + 1;
-  r.status       = "Converted";
-  r.intakeId     = `INT-2025-${String(seq).padStart(3,"0")}`;
-  r.dropoffDate  = document.getElementById("fDropoffDate").value;
-  closeModal("convertModalBackdrop");
-  renderStats(); applyFilters(); renderDrawer(r);
-  showToast("success", `Intake record ${r.intakeId} created from ${r.id}.`);
+
+  try {
+    const dropoffDate = document.getElementById("fDropoffDate").value;
+
+    const updatedRequest = await updateSurrenderStatusInBackend(r.id, {
+      status: "Converted",
+      dropoffDate,
+    });
+
+    Object.assign(r, updatedRequest);
+
+    closeModal("convertModalBackdrop");
+    renderStats();
+    applyFilters();
+    renderDrawer(r);
+
+    showToast("success", `Intake record ${r.intakeId} created from ${r.id}.`);
+  } catch (error) {
+    console.error("Convert surrender request error:", error);
+    showToast("error", error.message || "Failed to convert request.");
+  }
 }
 
 /* ══════════════════════════════════════════════════════
@@ -690,9 +739,20 @@ function showToast(type,msg) {
 ══════════════════════════════════════════════════════ */
 async function init() {
   try {
-    await protectManagementPage();
+    const session = await protectPageByModule("surrender");
+    currentRole = session.role;
     renderTopbarUser();
     loadSidebar(); 
+
+    publicRequests = await getPublicSubmittedRequests();
+
+    if (!Array.isArray(publicRequests)) {
+      console.warn("Public requests was not an array. Resetting to empty array.", publicRequests);
+      publicRequests = [];
+    }
+
+    allRequests = [...publicRequests];
+    filtered = [...allRequests];
 
     renderStats();
     applyFilters();

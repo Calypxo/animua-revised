@@ -8,7 +8,7 @@ const authorizeRole = require("../middleware/roleMiddleware");
 router.get(
   "/stats",
   authenticateToken,
-  authorizeRole("Admin", "Staff"),
+  authorizeRole("Admin", "Staff", "Veterinarian"),
   getDashboardStats
 );
 

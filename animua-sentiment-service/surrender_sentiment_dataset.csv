@@ -1,0 +1,494 @@
+﻿reason,sentiment,category
+My dog is very sick and needs help immediately,Urgent,Medical
+My cat is badly injured and cannot stand,Urgent,Medical
+The dog is bleeding and needs emergency care,Urgent,Medical
+My pet has a terminal illness and is suffering,Urgent,Medical
+My dog has cancer and needs surgery,Urgent,Medical
+The animal is weak and has not eaten for days,Urgent,Medical
+My dog was hit by a vehicle and needs treatment,Urgent,Medical
+My cat is dying and I cannot afford treatment,Urgent,Medical
+The dog has a serious disease and needs urgent help,Urgent,Medical
+My pet is paralyzed and requires veterinary care,Urgent,Medical
+I cannot afford food and medicine anymore,Negative,Financial
+I lost my job and cannot care for my dog,Negative,Financial
+We are financially struggling and cannot provide proper care,Negative,Financial
+I have no money for veterinary treatment,Negative,Financial
+The cost of feeding my pets is too expensive,Negative,Financial
+I am unemployed and cannot support my cat,Negative,Financial
+We have no income and cannot pay for pet needs,Negative,Financial
+I cannot pay for the operation of my dog,Negative,Financial
+We are struggling with expenses and pet care,Negative,Financial
+I can barely feed my family and pets,Negative,Financial
+We are moving to another city and cannot bring our pet,Neutral,Relocation
+We are relocating abroad next week,Neutral,Relocation
+Our new apartment does not allow pets,Neutral,Relocation
+The landlord said pets are not allowed,Neutral,Relocation
+I am moving to a condo that prohibits pets,Neutral,Relocation
+Aalis na po kami sa Pilipinas at hindi namin madadala ang aso namin,Neutral,Relocation
+Mag-migrate po kami sa ibang bansa at hindi namin kayang isama ang pusa namin,Neutral,Relocation
+Lilipat po kami sa Paris France at complicated ang documents ng alaga namin,Neutral,Relocation
+Hindi po namin madadala ang aso namin dahil aalis kami ng bansa,Neutral,Relocation
+Mag-aabroad po kami at bawal o mahirap dalhin ang pets doon,Neutral,Relocation
+Aalis po kami papuntang ibang bansa at walang maiiwan sa alaga namin,Neutral,Relocation
+Migrating po kami at hindi allowed dalhin ang pet sa pupuntahan namin,Neutral,Relocation
+Hindi namin maisasama ang alaga namin dahil sa travel documents,Neutral,Relocation
+We are migrating to another country and cannot bring our dog,Neutral,Relocation
+We are leaving the Philippines and cannot take our pet with us,Neutral,Relocation
+We are moving abroad and the pet documents are complicated,Neutral,Relocation
+We cannot bring our dog because we are migrating to France,Neutral,Relocation
+We are transferring to another home with no pet space,Neutral,Relocation
+I will leave the country for work,Neutral,Relocation
+We are migrating and cannot bring the cat,Neutral,Relocation
+Our new place has strict no pet rules,Neutral,Relocation
+We have to move out and cannot keep the dog,Neutral,Relocation
+My dog is aggressive and keeps biting people,Urgent,Behavioral
+The dog attacked our neighbor,Urgent,Behavioral
+My cat keeps scratching and biting my child,Urgent,Behavioral
+The animal is dangerous and difficult to control,Urgent,Behavioral
+My dog bit two people already,Urgent,Behavioral
+The pet shows violent behavior at home,Urgent,Behavioral
+My dog is attacking other animals,Urgent,Behavioral
+We are afraid because the dog is aggressive,Urgent,Behavioral
+The animal has serious behavior problems,Negative,Behavioral
+The dog barks loudly and destroys things,Negative,Behavioral
+I have too many cats and cannot handle them,Negative,Overcrowding
+My cat had many kittens and we have no space,Negative,Overcrowding
+We have multiple pets and are overwhelmed,Negative,Overcrowding
+There are too many puppies in our house,Negative,Overcrowding
+I cannot manage several animals anymore,Negative,Overcrowding
+We have no space for all our pets,Negative,Overcrowding
+My dog will be abandoned if nobody takes her,Urgent,Abandonment Risk
+I have no choice but to leave the dog on the street,Urgent,Abandonment Risk
+The pet has nowhere to go,Urgent,Abandonment Risk
+I might have to abandon my cat if no one helps,Urgent,Abandonment Risk
+We need help or the animal will be left outside,Urgent,Abandonment Risk
+I am hospitalized and no one can care for my dog,Urgent,Owner Incapacity
+I am bedridden and cannot take care of my pet,Urgent,Owner Incapacity
+My elderly mother passed away and she was the caregiver,Negative,Owner Incapacity
+I have a serious health condition and cannot care for the animal,Negative,Owner Incapacity
+The owner is disabled and needs help surrendering the pet,Negative,Owner Incapacity
+I want my dog to find a better home,Neutral,Other
+I can no longer give enough time to my pet,Neutral,Other
+I want my cat to be cared for by another family,Neutral,Other
+We think the animal deserves a better home,Neutral,Other
+I am looking for a safer place for my pet,Neutral,Other
+Hindi ko na po kayang alagaan ang aso ko dahil nawalan ako ng trabaho,Negative,Financial
+Wala na po kaming budget para sa pagkain at gamot ng pusa ko,Negative,Financial
+Hindi ko na afford ang vet treatment ng aso ko,Negative,Financial
+May sakit po ang aso ko at kailangan niya ng gamot,Urgent,Medical
+Sugatan po ang pusa ko at hindi na siya makatayo,Urgent,Medical
+Nabangga po ang aso ko at kailangan ng tulong agad,Urgent,Medical
+Lilipat po kami ng bahay at bawal ang pets sa bagong apartment,Neutral,Relocation
+Mag-aabroad po ako at wala pong maiiwan sa aso ko,Neutral,Relocation
+Bawal po ang pusa sa lilipatan naming condo,Neutral,Relocation
+Nangangagat po ang aso ko at delikado na sa bata,Urgent,Behavioral
+Inatake po ng aso ko ang kapitbahay namin,Urgent,Behavioral
+Sobrang aggressive po ng aso namin at hindi na namin makontrol,Urgent,Behavioral
+Sobrang dami na po ng pusa namin at hindi na kaya alagaan,Negative,Overcrowding
+Nagkaanak po ang pusa ko at marami na silang kuting,Negative,Overcrowding
+Wala na po kaming space dahil marami na kaming alaga,Negative,Overcrowding
+Baka maiwan po sa kalsada ang aso kung walang kukuha,Urgent,Abandonment Risk
+Wala na po siyang mapupuntahan at kailangan namin ng tulong,Urgent,Abandonment Risk
+Naospital po ako at walang mag-aalaga sa aso ko,Urgent,Owner Incapacity
+Bedridden na po ako at hindi ko na maalagaan ang alaga ko,Urgent,Owner Incapacity
+Gusto ko lang po sana makahanap ng mas mabuting tahanan para sa aso ko,Neutral,Other
+Dahil po aso ko ay may sakit at hindi na namin kaya ang gamutan.,Negative,Medical
+Aso ko po ay hindi na kumakain at kailangan ng vet.,Negative,Medical
+Kailangan po naming isuko dahil aso ko ay may sugat na lumalala araw-araw.,Negative,Medical
+Humihingi po kami ng tulong kasi aso ko ay kailangan ng operasyon pero hindi namin afford.,Negative,Medical
+"Sana po matulungan kami, aso ko ay nanghihina at hirap nang makalakad.",Negative,Medical
+Dahil po aso ko ay may bukol at kailangan ng checkup.,Negative,Medical
+Aso ko po ay may infection at wala kaming panggamot.,Negative,Medical
+Kailangan po naming isuko dahil aso ko ay may seizure at kailangan bantayan lagi.,Negative,Medical
+Humihingi po kami ng tulong kasi aso ko ay may respiratory problem at laging hinihingal.,Negative,Medical
+"Sana po matulungan kami, aso ko ay may chronic illness at tuloy-tuloy ang gastos.",Negative,Medical
+Dahil po pusa namin ay may sakit at hindi na namin kaya ang gamutan.,Negative,Medical
+Pusa namin po ay hindi na kumakain at kailangan ng vet.,Negative,Medical
+Kailangan po naming isuko dahil pusa namin ay may sugat na lumalala araw-araw.,Negative,Medical
+Humihingi po kami ng tulong kasi pusa namin ay kailangan ng operasyon pero hindi namin afford.,Negative,Medical
+"Sana po matulungan kami, pusa namin ay nanghihina at hirap nang makalakad.",Negative,Medical
+Dahil po pusa namin ay may bukol at kailangan ng checkup.,Negative,Medical
+Pusa namin po ay may infection at wala kaming panggamot.,Negative,Medical
+Kailangan po naming isuko dahil pusa namin ay may seizure at kailangan bantayan lagi.,Negative,Medical
+Humihingi po kami ng tulong kasi pusa namin ay may respiratory problem at laging hinihingal.,Negative,Medical
+"Sana po matulungan kami, pusa namin ay may chronic illness at tuloy-tuloy ang gastos.",Negative,Medical
+Dahil po puppy namin ay may sakit at hindi na namin kaya ang gamutan.,Negative,Medical
+Puppy namin po ay hindi na kumakain at kailangan ng vet.,Negative,Medical
+Kailangan po naming isuko dahil puppy namin ay may sugat na lumalala araw-araw.,Negative,Medical
+Humihingi po kami ng tulong kasi puppy namin ay kailangan ng operasyon pero hindi namin afford.,Negative,Medical
+"Sana po matulungan kami, puppy namin ay nanghihina at hirap nang makalakad.",Negative,Medical
+Dahil po puppy namin ay may bukol at kailangan ng checkup.,Negative,Medical
+Puppy namin po ay may infection at wala kaming panggamot.,Negative,Medical
+Kailangan po naming isuko dahil puppy namin ay may seizure at kailangan bantayan lagi.,Negative,Medical
+Humihingi po kami ng tulong kasi puppy namin ay may respiratory problem at laging hinihingal.,Negative,Medical
+"Sana po matulungan kami, puppy namin ay may chronic illness at tuloy-tuloy ang gastos.",Negative,Medical
+Dahil po senior dog namin ay may sakit at hindi na namin kaya ang gamutan.,Negative,Medical
+Senior dog namin po ay hindi na kumakain at kailangan ng vet.,Negative,Medical
+Kailangan po naming isuko dahil senior dog namin ay may sugat na lumalala araw-araw.,Negative,Medical
+Humihingi po kami ng tulong kasi senior dog namin ay kailangan ng operasyon pero hindi namin afford.,Negative,Medical
+"Sana po matulungan kami, senior dog namin ay nanghihina at hirap nang makalakad.",Negative,Medical
+Dahil po senior dog namin ay may bukol at kailangan ng checkup.,Negative,Medical
+Senior dog namin po ay may infection at wala kaming panggamot.,Negative,Medical
+Kailangan po naming isuko dahil senior dog namin ay may seizure at kailangan bantayan lagi.,Negative,Medical
+Humihingi po kami ng tulong kasi senior dog namin ay may respiratory problem at laging hinihingal.,Negative,Medical
+"Sana po matulungan kami, senior dog namin ay may chronic illness at tuloy-tuloy ang gastos.",Negative,Medical
+Dahil po alaga namin ay may sakit at hindi na namin kaya ang gamutan.,Negative,Medical
+Alaga namin po ay hindi na kumakain at kailangan ng vet.,Negative,Medical
+Kailangan po naming isuko dahil alaga namin ay may sugat na lumalala araw-araw.,Negative,Medical
+Humihingi po kami ng tulong kasi alaga namin ay kailangan ng operasyon pero hindi namin afford.,Negative,Medical
+"Sana po matulungan kami, alaga namin ay nanghihina at hirap nang makalakad.",Negative,Medical
+Dahil po alaga namin ay may bukol at kailangan ng checkup.,Negative,Medical
+Alaga namin po ay may infection at wala kaming panggamot.,Negative,Medical
+Kailangan po naming isuko dahil alaga namin ay may seizure at kailangan bantayan lagi.,Negative,Medical
+Humihingi po kami ng tulong kasi alaga namin ay may respiratory problem at laging hinihingal.,Negative,Medical
+"Sana po matulungan kami, alaga namin ay may chronic illness at tuloy-tuloy ang gastos.",Negative,Medical
+Dahil po pamilya namin ay nawalan ng trabaho kaya hindi na kaya ang pagkain ng alaga.,Negative,Financial
+Pamilya namin po ay walang sapat na budget para sa pet food at vet.,Negative,Financial
+Kailangan po naming isuko dahil pamilya namin ay kapos sa pera at hindi na masuportahan ang alaga.,Negative,Financial
+Humihingi po kami ng tulong kasi pamilya namin ay may biglaang gastos kaya wala nang budget sa pet care.,Negative,Financial
+"Sana po matulungan kami, pamilya namin ay hindi na kayang bumili ng gamot at vitamins.",Negative,Financial
+Dahil po pamilya namin ay hindi na sapat ang sahod para sa needs ng alaga.,Negative,Financial
+Pamilya namin po ay nagsara ang negosyo kaya hindi na kaya ang expenses.,Negative,Financial
+Kailangan po naming isuko dahil pamilya namin ay kailangang unahin ang pagkain ng pamilya.,Negative,Financial
+Humihingi po kami ng tulong kasi pamilya namin ay hindi na mabayaran ang vet bills.,Negative,Financial
+"Sana po matulungan kami, pamilya namin ay hirap na financially at kailangan ng shelter assistance.",Negative,Financial
+Dahil po ako ay nawalan ng trabaho kaya hindi na kaya ang pagkain ng alaga.,Negative,Financial
+Ako po ay walang sapat na budget para sa pet food at vet.,Negative,Financial
+Kailangan po naming isuko dahil ako ay kapos sa pera at hindi na masuportahan ang alaga.,Negative,Financial
+Humihingi po kami ng tulong kasi ako ay may biglaang gastos kaya wala nang budget sa pet care.,Negative,Financial
+"Sana po matulungan kami, ako ay hindi na kayang bumili ng gamot at vitamins.",Negative,Financial
+Dahil po ako ay hindi na sapat ang sahod para sa needs ng alaga.,Negative,Financial
+Ako po ay nagsara ang negosyo kaya hindi na kaya ang expenses.,Negative,Financial
+Kailangan po naming isuko dahil ako ay kailangang unahin ang pagkain ng pamilya.,Negative,Financial
+Humihingi po kami ng tulong kasi ako ay hindi na mabayaran ang vet bills.,Negative,Financial
+"Sana po matulungan kami, ako ay hirap na financially at kailangan ng shelter assistance.",Negative,Financial
+Dahil po kami ay nawalan ng trabaho kaya hindi na kaya ang pagkain ng alaga.,Negative,Financial
+Kami po ay walang sapat na budget para sa pet food at vet.,Negative,Financial
+Kailangan po naming isuko dahil kami ay kapos sa pera at hindi na masuportahan ang alaga.,Negative,Financial
+Humihingi po kami ng tulong kasi kami ay may biglaang gastos kaya wala nang budget sa pet care.,Negative,Financial
+"Sana po matulungan kami, kami ay hindi na kayang bumili ng gamot at vitamins.",Negative,Financial
+Dahil po kami ay hindi na sapat ang sahod para sa needs ng alaga.,Negative,Financial
+Kami po ay nagsara ang negosyo kaya hindi na kaya ang expenses.,Negative,Financial
+Kailangan po naming isuko dahil kami ay kailangang unahin ang pagkain ng pamilya.,Negative,Financial
+Humihingi po kami ng tulong kasi kami ay hindi na mabayaran ang vet bills.,Negative,Financial
+"Sana po matulungan kami, kami ay hirap na financially at kailangan ng shelter assistance.",Negative,Financial
+Dahil po nanay ko ay nawalan ng trabaho kaya hindi na kaya ang pagkain ng alaga.,Negative,Financial
+Nanay ko po ay walang sapat na budget para sa pet food at vet.,Negative,Financial
+Kailangan po naming isuko dahil nanay ko ay kapos sa pera at hindi na masuportahan ang alaga.,Negative,Financial
+Humihingi po kami ng tulong kasi nanay ko ay may biglaang gastos kaya wala nang budget sa pet care.,Negative,Financial
+"Sana po matulungan kami, nanay ko ay hindi na kayang bumili ng gamot at vitamins.",Negative,Financial
+Dahil po nanay ko ay hindi na sapat ang sahod para sa needs ng alaga.,Negative,Financial
+Nanay ko po ay nagsara ang negosyo kaya hindi na kaya ang expenses.,Negative,Financial
+Kailangan po naming isuko dahil nanay ko ay kailangang unahin ang pagkain ng pamilya.,Negative,Financial
+Humihingi po kami ng tulong kasi nanay ko ay hindi na mabayaran ang vet bills.,Negative,Financial
+"Sana po matulungan kami, nanay ko ay hirap na financially at kailangan ng shelter assistance.",Negative,Financial
+Dahil po household namin ay nawalan ng trabaho kaya hindi na kaya ang pagkain ng alaga.,Negative,Financial
+Household namin po ay walang sapat na budget para sa pet food at vet.,Negative,Financial
+Kailangan po naming isuko dahil household namin ay kapos sa pera at hindi na masuportahan ang alaga.,Negative,Financial
+Humihingi po kami ng tulong kasi household namin ay may biglaang gastos kaya wala nang budget sa pet care.,Negative,Financial
+"Sana po matulungan kami, household namin ay hindi na kayang bumili ng gamot at vitamins.",Negative,Financial
+Dahil po household namin ay hindi na sapat ang sahod para sa needs ng alaga.,Negative,Financial
+Household namin po ay nagsara ang negosyo kaya hindi na kaya ang expenses.,Negative,Financial
+Kailangan po naming isuko dahil household namin ay kailangang unahin ang pagkain ng pamilya.,Negative,Financial
+Humihingi po kami ng tulong kasi household namin ay hindi na mabayaran ang vet bills.,Negative,Financial
+"Sana po matulungan kami, household namin ay hirap na financially at kailangan ng shelter assistance.",Negative,Financial
+Dahil po kami ay lilipat ng bahay at bawal ang pets sa lilipatan.,Neutral,Relocation
+Kami po ay mag-aabroad at hindi madadala ang alaga.,Neutral,Relocation
+Kailangan po naming isuko dahil kami ay magrerelocate sa apartment na may no pets policy.,Neutral,Relocation
+Humihingi po kami ng tulong kasi kami ay lilipat sa condo na bawal ang animals.,Neutral,Relocation
+"Sana po matulungan kami, kami ay aalis ng Angeles City at walang mag-aalaga.",Neutral,Relocation
+Dahil po kami ay magmi-migrate at hindi kaya ang pet travel documents.,Neutral,Relocation
+Kami po ay nasa temporary housing at bawal ang pets.,Neutral,Relocation
+Kailangan po naming isuko dahil kami ay lilipat sa bahay ng kamag-anak na ayaw ng pets.,Neutral,Relocation
+Humihingi po kami ng tulong kasi kami ay may work transfer at hindi maisasama ang alaga.,Neutral,Relocation
+"Sana po matulungan kami, kami ay mapapaalis sa rental at bawal ang pet sa bagong unit.",Neutral,Relocation
+Dahil po pamilya namin ay lilipat ng bahay at bawal ang pets sa lilipatan.,Neutral,Relocation
+Pamilya namin po ay mag-aabroad at hindi madadala ang alaga.,Neutral,Relocation
+Kailangan po naming isuko dahil pamilya namin ay magrerelocate sa apartment na may no pets policy.,Neutral,Relocation
+Humihingi po kami ng tulong kasi pamilya namin ay lilipat sa condo na bawal ang animals.,Neutral,Relocation
+"Sana po matulungan kami, pamilya namin ay aalis ng Angeles City at walang mag-aalaga.",Neutral,Relocation
+Dahil po pamilya namin ay magmi-migrate at hindi kaya ang pet travel documents.,Neutral,Relocation
+Pamilya namin po ay nasa temporary housing at bawal ang pets.,Neutral,Relocation
+Kailangan po naming isuko dahil pamilya namin ay lilipat sa bahay ng kamag-anak na ayaw ng pets.,Neutral,Relocation
+Humihingi po kami ng tulong kasi pamilya namin ay may work transfer at hindi maisasama ang alaga.,Neutral,Relocation
+"Sana po matulungan kami, pamilya namin ay mapapaalis sa rental at bawal ang pet sa bagong unit.",Neutral,Relocation
+Dahil po ako ay lilipat ng bahay at bawal ang pets sa lilipatan.,Neutral,Relocation
+Ako po ay mag-aabroad at hindi madadala ang alaga.,Neutral,Relocation
+Kailangan po naming isuko dahil ako ay magrerelocate sa apartment na may no pets policy.,Neutral,Relocation
+Humihingi po kami ng tulong kasi ako ay lilipat sa condo na bawal ang animals.,Neutral,Relocation
+"Sana po matulungan kami, ako ay aalis ng Angeles City at walang mag-aalaga.",Neutral,Relocation
+Dahil po ako ay magmi-migrate at hindi kaya ang pet travel documents.,Neutral,Relocation
+Ako po ay nasa temporary housing at bawal ang pets.,Neutral,Relocation
+Kailangan po naming isuko dahil ako ay lilipat sa bahay ng kamag-anak na ayaw ng pets.,Neutral,Relocation
+Humihingi po kami ng tulong kasi ako ay may work transfer at hindi maisasama ang alaga.,Neutral,Relocation
+"Sana po matulungan kami, ako ay mapapaalis sa rental at bawal ang pet sa bagong unit.",Neutral,Relocation
+Dahil po may-ari ay lilipat ng bahay at bawal ang pets sa lilipatan.,Neutral,Relocation
+May-ari po ay mag-aabroad at hindi madadala ang alaga.,Neutral,Relocation
+Kailangan po naming isuko dahil may-ari ay magrerelocate sa apartment na may no pets policy.,Neutral,Relocation
+Humihingi po kami ng tulong kasi may-ari ay lilipat sa condo na bawal ang animals.,Neutral,Relocation
+"Sana po matulungan kami, may-ari ay aalis ng Angeles City at walang mag-aalaga.",Neutral,Relocation
+Dahil po may-ari ay magmi-migrate at hindi kaya ang pet travel documents.,Neutral,Relocation
+May-ari po ay nasa temporary housing at bawal ang pets.,Neutral,Relocation
+Kailangan po naming isuko dahil may-ari ay lilipat sa bahay ng kamag-anak na ayaw ng pets.,Neutral,Relocation
+Humihingi po kami ng tulong kasi may-ari ay may work transfer at hindi maisasama ang alaga.,Neutral,Relocation
+"Sana po matulungan kami, may-ari ay mapapaalis sa rental at bawal ang pet sa bagong unit.",Neutral,Relocation
+Dahil po buong household namin ay lilipat ng bahay at bawal ang pets sa lilipatan.,Neutral,Relocation
+Buong household namin po ay mag-aabroad at hindi madadala ang alaga.,Neutral,Relocation
+Kailangan po naming isuko dahil buong household namin ay magrerelocate sa apartment na may no pets policy.,Neutral,Relocation
+Humihingi po kami ng tulong kasi buong household namin ay lilipat sa condo na bawal ang animals.,Neutral,Relocation
+"Sana po matulungan kami, buong household namin ay aalis ng Angeles City at walang mag-aalaga.",Neutral,Relocation
+Dahil po buong household namin ay magmi-migrate at hindi kaya ang pet travel documents.,Neutral,Relocation
+Buong household namin po ay nasa temporary housing at bawal ang pets.,Neutral,Relocation
+Kailangan po naming isuko dahil buong household namin ay lilipat sa bahay ng kamag-anak na ayaw ng pets.,Neutral,Relocation
+Humihingi po kami ng tulong kasi buong household namin ay may work transfer at hindi maisasama ang alaga.,Neutral,Relocation
+"Sana po matulungan kami, buong household namin ay mapapaalis sa rental at bawal ang pet sa bagong unit.",Neutral,Relocation
+Dahil po aso namin ay nangangagat at delikado na sa bata.,Negative,Behavioral
+Aso namin po ay aggressive sa ibang tao at hindi na makontrol.,Negative,Behavioral
+Kailangan po naming isuko dahil aso namin ay umaatake kapag may bisita.,Negative,Behavioral
+Humihingi po kami ng tulong kasi aso namin ay nakagat ang kapitbahay at natatakot na kami.,Negative,Behavioral
+"Sana po matulungan kami, aso namin ay naninira ng gamit sa bahay.",Negative,Behavioral
+Dahil po aso namin ay hindi tumitigil sa pagkahol at may reklamo sa kapitbahay.,Negative,Behavioral
+Aso namin po ay nangangalmot at nasusugatan ang bata.,Negative,Behavioral
+Kailangan po naming isuko dahil aso namin ay nakikipag-away sa ibang pets.,Negative,Behavioral
+Humihingi po kami ng tulong kasi aso namin ay laging tumatakas at problema sa barangay.,Negative,Behavioral
+"Sana po matulungan kami, aso namin ay kailangan ng experienced handler dahil sa behavior.",Negative,Behavioral
+Dahil po pusa namin ay nangangagat at delikado na sa bata.,Negative,Behavioral
+Pusa namin po ay aggressive sa ibang tao at hindi na makontrol.,Negative,Behavioral
+Kailangan po naming isuko dahil pusa namin ay umaatake kapag may bisita.,Negative,Behavioral
+Humihingi po kami ng tulong kasi pusa namin ay nakagat ang kapitbahay at natatakot na kami.,Negative,Behavioral
+"Sana po matulungan kami, pusa namin ay naninira ng gamit sa bahay.",Negative,Behavioral
+Dahil po pusa namin ay hindi tumitigil sa pagkahol at may reklamo sa kapitbahay.,Negative,Behavioral
+Pusa namin po ay nangangalmot at nasusugatan ang bata.,Negative,Behavioral
+Kailangan po naming isuko dahil pusa namin ay nakikipag-away sa ibang pets.,Negative,Behavioral
+Humihingi po kami ng tulong kasi pusa namin ay laging tumatakas at problema sa barangay.,Negative,Behavioral
+"Sana po matulungan kami, pusa namin ay kailangan ng experienced handler dahil sa behavior.",Negative,Behavioral
+Dahil po alaga namin ay nangangagat at delikado na sa bata.,Negative,Behavioral
+Alaga namin po ay aggressive sa ibang tao at hindi na makontrol.,Negative,Behavioral
+Kailangan po naming isuko dahil alaga namin ay umaatake kapag may bisita.,Negative,Behavioral
+Humihingi po kami ng tulong kasi alaga namin ay nakagat ang kapitbahay at natatakot na kami.,Negative,Behavioral
+"Sana po matulungan kami, alaga namin ay naninira ng gamit sa bahay.",Negative,Behavioral
+Dahil po alaga namin ay hindi tumitigil sa pagkahol at may reklamo sa kapitbahay.,Negative,Behavioral
+Alaga namin po ay nangangalmot at nasusugatan ang bata.,Negative,Behavioral
+Kailangan po naming isuko dahil alaga namin ay nakikipag-away sa ibang pets.,Negative,Behavioral
+Humihingi po kami ng tulong kasi alaga namin ay laging tumatakas at problema sa barangay.,Negative,Behavioral
+"Sana po matulungan kami, alaga namin ay kailangan ng experienced handler dahil sa behavior.",Negative,Behavioral
+Dahil po dog namin ay nangangagat at delikado na sa bata.,Negative,Behavioral
+Dog namin po ay aggressive sa ibang tao at hindi na makontrol.,Negative,Behavioral
+Kailangan po naming isuko dahil dog namin ay umaatake kapag may bisita.,Negative,Behavioral
+Humihingi po kami ng tulong kasi dog namin ay nakagat ang kapitbahay at natatakot na kami.,Negative,Behavioral
+"Sana po matulungan kami, dog namin ay naninira ng gamit sa bahay.",Negative,Behavioral
+Dahil po dog namin ay hindi tumitigil sa pagkahol at may reklamo sa kapitbahay.,Negative,Behavioral
+Dog namin po ay nangangalmot at nasusugatan ang bata.,Negative,Behavioral
+Kailangan po naming isuko dahil dog namin ay nakikipag-away sa ibang pets.,Negative,Behavioral
+Humihingi po kami ng tulong kasi dog namin ay laging tumatakas at problema sa barangay.,Negative,Behavioral
+"Sana po matulungan kami, dog namin ay kailangan ng experienced handler dahil sa behavior.",Negative,Behavioral
+Dahil po pet namin ay nangangagat at delikado na sa bata.,Negative,Behavioral
+Pet namin po ay aggressive sa ibang tao at hindi na makontrol.,Negative,Behavioral
+Kailangan po naming isuko dahil pet namin ay umaatake kapag may bisita.,Negative,Behavioral
+Humihingi po kami ng tulong kasi pet namin ay nakagat ang kapitbahay at natatakot na kami.,Negative,Behavioral
+"Sana po matulungan kami, pet namin ay naninira ng gamit sa bahay.",Negative,Behavioral
+Dahil po pet namin ay hindi tumitigil sa pagkahol at may reklamo sa kapitbahay.,Negative,Behavioral
+Pet namin po ay nangangalmot at nasusugatan ang bata.,Negative,Behavioral
+Kailangan po naming isuko dahil pet namin ay nakikipag-away sa ibang pets.,Negative,Behavioral
+Humihingi po kami ng tulong kasi pet namin ay laging tumatakas at problema sa barangay.,Negative,Behavioral
+"Sana po matulungan kami, pet namin ay kailangan ng experienced handler dahil sa behavior.",Negative,Behavioral
+Dahil po bahay namin ay sobrang dami na at hindi na maalagaan lahat.,Negative,Overcrowding
+Bahay namin po ay kulang na ang space at pagkain.,Negative,Overcrowding
+Kailangan po naming isuko dahil bahay namin ay sunod-sunod nanganak kaya dumami sila.,Negative,Overcrowding
+Humihingi po kami ng tulong kasi bahay namin ay overcrowded na at hindi healthy ang environment.,Negative,Overcrowding
+"Sana po matulungan kami, bahay namin ay kulang ang kulungan at tulugan.",Negative,Overcrowding
+Dahil po bahay namin ay hindi na kayang linisin ang kalat ng maraming pets.,Negative,Overcrowding
+Bahay namin po ay nag-aaway-away dahil masikip.,Negative,Overcrowding
+Kailangan po naming isuko dahil bahay namin ay may bagong litter at hindi kaya alagaan lahat.,Negative,Overcrowding
+Humihingi po kami ng tulong kasi bahay namin ay hindi na mabigyan ng attention ang bawat isa.,Negative,Overcrowding
+"Sana po matulungan kami, bahay namin ay kailangan bawasan para maalagaan ang natitira.",Negative,Overcrowding
+Dahil po mga alaga namin ay sobrang dami na at hindi na maalagaan lahat.,Negative,Overcrowding
+Mga alaga namin po ay kulang na ang space at pagkain.,Negative,Overcrowding
+Kailangan po naming isuko dahil mga alaga namin ay sunod-sunod nanganak kaya dumami sila.,Negative,Overcrowding
+Humihingi po kami ng tulong kasi mga alaga namin ay overcrowded na at hindi healthy ang environment.,Negative,Overcrowding
+"Sana po matulungan kami, mga alaga namin ay kulang ang kulungan at tulugan.",Negative,Overcrowding
+Dahil po mga alaga namin ay hindi na kayang linisin ang kalat ng maraming pets.,Negative,Overcrowding
+Mga alaga namin po ay nag-aaway-away dahil masikip.,Negative,Overcrowding
+Kailangan po naming isuko dahil mga alaga namin ay may bagong litter at hindi kaya alagaan lahat.,Negative,Overcrowding
+Humihingi po kami ng tulong kasi mga alaga namin ay hindi na mabigyan ng attention ang bawat isa.,Negative,Overcrowding
+"Sana po matulungan kami, mga alaga namin ay kailangan bawasan para maalagaan ang natitira.",Negative,Overcrowding
+Dahil po mga pusa namin ay sobrang dami na at hindi na maalagaan lahat.,Negative,Overcrowding
+Mga pusa namin po ay kulang na ang space at pagkain.,Negative,Overcrowding
+Kailangan po naming isuko dahil mga pusa namin ay sunod-sunod nanganak kaya dumami sila.,Negative,Overcrowding
+Humihingi po kami ng tulong kasi mga pusa namin ay overcrowded na at hindi healthy ang environment.,Negative,Overcrowding
+"Sana po matulungan kami, mga pusa namin ay kulang ang kulungan at tulugan.",Negative,Overcrowding
+Dahil po mga pusa namin ay hindi na kayang linisin ang kalat ng maraming pets.,Negative,Overcrowding
+Mga pusa namin po ay nag-aaway-away dahil masikip.,Negative,Overcrowding
+Kailangan po naming isuko dahil mga pusa namin ay may bagong litter at hindi kaya alagaan lahat.,Negative,Overcrowding
+Humihingi po kami ng tulong kasi mga pusa namin ay hindi na mabigyan ng attention ang bawat isa.,Negative,Overcrowding
+"Sana po matulungan kami, mga pusa namin ay kailangan bawasan para maalagaan ang natitira.",Negative,Overcrowding
+Dahil po mga aso namin ay sobrang dami na at hindi na maalagaan lahat.,Negative,Overcrowding
+Mga aso namin po ay kulang na ang space at pagkain.,Negative,Overcrowding
+Kailangan po naming isuko dahil mga aso namin ay sunod-sunod nanganak kaya dumami sila.,Negative,Overcrowding
+Humihingi po kami ng tulong kasi mga aso namin ay overcrowded na at hindi healthy ang environment.,Negative,Overcrowding
+"Sana po matulungan kami, mga aso namin ay kulang ang kulungan at tulugan.",Negative,Overcrowding
+Dahil po mga aso namin ay hindi na kayang linisin ang kalat ng maraming pets.,Negative,Overcrowding
+Mga aso namin po ay nag-aaway-away dahil masikip.,Negative,Overcrowding
+Kailangan po naming isuko dahil mga aso namin ay may bagong litter at hindi kaya alagaan lahat.,Negative,Overcrowding
+Humihingi po kami ng tulong kasi mga aso namin ay hindi na mabigyan ng attention ang bawat isa.,Negative,Overcrowding
+"Sana po matulungan kami, mga aso namin ay kailangan bawasan para maalagaan ang natitira.",Negative,Overcrowding
+Dahil po pets namin ay sobrang dami na at hindi na maalagaan lahat.,Negative,Overcrowding
+Pets namin po ay kulang na ang space at pagkain.,Negative,Overcrowding
+Kailangan po naming isuko dahil pets namin ay sunod-sunod nanganak kaya dumami sila.,Negative,Overcrowding
+Humihingi po kami ng tulong kasi pets namin ay overcrowded na at hindi healthy ang environment.,Negative,Overcrowding
+"Sana po matulungan kami, pets namin ay kulang ang kulungan at tulugan.",Negative,Overcrowding
+Dahil po pets namin ay hindi na kayang linisin ang kalat ng maraming pets.,Negative,Overcrowding
+Pets namin po ay nag-aaway-away dahil masikip.,Negative,Overcrowding
+Kailangan po naming isuko dahil pets namin ay may bagong litter at hindi kaya alagaan lahat.,Negative,Overcrowding
+Humihingi po kami ng tulong kasi pets namin ay hindi na mabigyan ng attention ang bawat isa.,Negative,Overcrowding
+"Sana po matulungan kami, pets namin ay kailangan bawasan para maalagaan ang natitira.",Negative,Overcrowding
+Dahil po aso namin ay baka maiwan sa kalsada kung walang kukuha agad.,Urgent,Abandonment Risk
+Aso namin po ay may balak itapon sa labas kung walang tutulong.,Urgent,Abandonment Risk
+Kailangan po naming isuko dahil aso namin ay nanganganib maging stray dahil wala nang caretaker.,Urgent,Abandonment Risk
+Humihingi po kami ng tulong kasi aso namin ay baka pakawalan na lang ng kasama namin sa bahay.,Urgent,Abandonment Risk
+"Sana po matulungan kami, aso namin ay walang mapupuntahan at delikado sa labas.",Urgent,Abandonment Risk
+Dahil po aso namin ay kailangan ng shelter bago tuluyang mapabayaan.,Urgent,Abandonment Risk
+Aso namin po ay baka iwan sa bakanteng lote.,Urgent,Abandonment Risk
+Kailangan po naming isuko dahil aso namin ay baka iligaw sa ibang barangay.,Urgent,Abandonment Risk
+Humihingi po kami ng tulong kasi aso namin ay may deadline kami umalis at wala siyang matutuluyan.,Urgent,Abandonment Risk
+"Sana po matulungan kami, aso namin ay urgent dahil baka bukas wala na siyang mag-aalaga.",Urgent,Abandonment Risk
+Dahil po pusa namin ay baka maiwan sa kalsada kung walang kukuha agad.,Urgent,Abandonment Risk
+Pusa namin po ay may balak itapon sa labas kung walang tutulong.,Urgent,Abandonment Risk
+Kailangan po naming isuko dahil pusa namin ay nanganganib maging stray dahil wala nang caretaker.,Urgent,Abandonment Risk
+Humihingi po kami ng tulong kasi pusa namin ay baka pakawalan na lang ng kasama namin sa bahay.,Urgent,Abandonment Risk
+"Sana po matulungan kami, pusa namin ay walang mapupuntahan at delikado sa labas.",Urgent,Abandonment Risk
+Dahil po pusa namin ay kailangan ng shelter bago tuluyang mapabayaan.,Urgent,Abandonment Risk
+Pusa namin po ay baka iwan sa bakanteng lote.,Urgent,Abandonment Risk
+Kailangan po naming isuko dahil pusa namin ay baka iligaw sa ibang barangay.,Urgent,Abandonment Risk
+Humihingi po kami ng tulong kasi pusa namin ay may deadline kami umalis at wala siyang matutuluyan.,Urgent,Abandonment Risk
+"Sana po matulungan kami, pusa namin ay urgent dahil baka bukas wala na siyang mag-aalaga.",Urgent,Abandonment Risk
+Dahil po alaga namin ay baka maiwan sa kalsada kung walang kukuha agad.,Urgent,Abandonment Risk
+Alaga namin po ay may balak itapon sa labas kung walang tutulong.,Urgent,Abandonment Risk
+Kailangan po naming isuko dahil alaga namin ay nanganganib maging stray dahil wala nang caretaker.,Urgent,Abandonment Risk
+Humihingi po kami ng tulong kasi alaga namin ay baka pakawalan na lang ng kasama namin sa bahay.,Urgent,Abandonment Risk
+"Sana po matulungan kami, alaga namin ay walang mapupuntahan at delikado sa labas.",Urgent,Abandonment Risk
+Dahil po alaga namin ay kailangan ng shelter bago tuluyang mapabayaan.,Urgent,Abandonment Risk
+Alaga namin po ay baka iwan sa bakanteng lote.,Urgent,Abandonment Risk
+Kailangan po naming isuko dahil alaga namin ay baka iligaw sa ibang barangay.,Urgent,Abandonment Risk
+Humihingi po kami ng tulong kasi alaga namin ay may deadline kami umalis at wala siyang matutuluyan.,Urgent,Abandonment Risk
+"Sana po matulungan kami, alaga namin ay urgent dahil baka bukas wala na siyang mag-aalaga.",Urgent,Abandonment Risk
+Dahil po kutings namin ay baka maiwan sa kalsada kung walang kukuha agad.,Urgent,Abandonment Risk
+Kutings namin po ay may balak itapon sa labas kung walang tutulong.,Urgent,Abandonment Risk
+Kailangan po naming isuko dahil kutings namin ay nanganganib maging stray dahil wala nang caretaker.,Urgent,Abandonment Risk
+Humihingi po kami ng tulong kasi kutings namin ay baka pakawalan na lang ng kasama namin sa bahay.,Urgent,Abandonment Risk
+"Sana po matulungan kami, kutings namin ay walang mapupuntahan at delikado sa labas.",Urgent,Abandonment Risk
+Dahil po kutings namin ay kailangan ng shelter bago tuluyang mapabayaan.,Urgent,Abandonment Risk
+Kutings namin po ay baka iwan sa bakanteng lote.,Urgent,Abandonment Risk
+Kailangan po naming isuko dahil kutings namin ay baka iligaw sa ibang barangay.,Urgent,Abandonment Risk
+Humihingi po kami ng tulong kasi kutings namin ay may deadline kami umalis at wala siyang matutuluyan.,Urgent,Abandonment Risk
+"Sana po matulungan kami, kutings namin ay urgent dahil baka bukas wala na siyang mag-aalaga.",Urgent,Abandonment Risk
+Dahil po pet namin ay baka maiwan sa kalsada kung walang kukuha agad.,Urgent,Abandonment Risk
+Pet namin po ay may balak itapon sa labas kung walang tutulong.,Urgent,Abandonment Risk
+Kailangan po naming isuko dahil pet namin ay nanganganib maging stray dahil wala nang caretaker.,Urgent,Abandonment Risk
+Humihingi po kami ng tulong kasi pet namin ay baka pakawalan na lang ng kasama namin sa bahay.,Urgent,Abandonment Risk
+"Sana po matulungan kami, pet namin ay walang mapupuntahan at delikado sa labas.",Urgent,Abandonment Risk
+Dahil po pet namin ay kailangan ng shelter bago tuluyang mapabayaan.,Urgent,Abandonment Risk
+Pet namin po ay baka iwan sa bakanteng lote.,Urgent,Abandonment Risk
+Kailangan po naming isuko dahil pet namin ay baka iligaw sa ibang barangay.,Urgent,Abandonment Risk
+Humihingi po kami ng tulong kasi pet namin ay may deadline kami umalis at wala siyang matutuluyan.,Urgent,Abandonment Risk
+"Sana po matulungan kami, pet namin ay urgent dahil baka bukas wala na siyang mag-aalaga.",Urgent,Abandonment Risk
+Dahil po owner ay naospital at wala nang mag-aalaga sa alaga.,Negative,Owner Incapacity
+Owner po ay may sakit at hindi na kaya ang daily pet care.,Negative,Owner Incapacity
+Kailangan po naming isuko dahil owner ay senior citizen na at hirap nang mag-alaga.,Negative,Owner Incapacity
+Humihingi po kami ng tulong kasi owner ay bedridden at walang ibang caretaker.,Negative,Owner Incapacity
+"Sana po matulungan kami, owner ay may disability at hindi na kaya pakainin at linisin ang pet.",Negative,Owner Incapacity
+Dahil po owner ay naaksidente at hindi na makalakad para mag-alaga.,Negative,Owner Incapacity
+Owner po ay may operation at matagal mawawala sa bahay.,Negative,Owner Incapacity
+Kailangan po naming isuko dahil owner ay pumanaw at walang family na kukuha sa pet.,Negative,Owner Incapacity
+Humihingi po kami ng tulong kasi owner ay nasa dialysis at madalas wala sa bahay.,Negative,Owner Incapacity
+"Sana po matulungan kami, owner ay hindi na physically capable mag-alaga.",Negative,Owner Incapacity
+Dahil po primary caregiver ay naospital at wala nang mag-aalaga sa alaga.,Negative,Owner Incapacity
+Primary caregiver po ay may sakit at hindi na kaya ang daily pet care.,Negative,Owner Incapacity
+Kailangan po naming isuko dahil primary caregiver ay senior citizen na at hirap nang mag-alaga.,Negative,Owner Incapacity
+Humihingi po kami ng tulong kasi primary caregiver ay bedridden at walang ibang caretaker.,Negative,Owner Incapacity
+"Sana po matulungan kami, primary caregiver ay may disability at hindi na kaya pakainin at linisin ang pet.",Negative,Owner Incapacity
+Dahil po primary caregiver ay naaksidente at hindi na makalakad para mag-alaga.,Negative,Owner Incapacity
+Primary caregiver po ay may operation at matagal mawawala sa bahay.,Negative,Owner Incapacity
+Kailangan po naming isuko dahil primary caregiver ay pumanaw at walang family na kukuha sa pet.,Negative,Owner Incapacity
+Humihingi po kami ng tulong kasi primary caregiver ay nasa dialysis at madalas wala sa bahay.,Negative,Owner Incapacity
+"Sana po matulungan kami, primary caregiver ay hindi na physically capable mag-alaga.",Negative,Owner Incapacity
+Dahil po nanay ko ay naospital at wala nang mag-aalaga sa alaga.,Negative,Owner Incapacity
+Nanay ko po ay may sakit at hindi na kaya ang daily pet care.,Negative,Owner Incapacity
+Kailangan po naming isuko dahil nanay ko ay senior citizen na at hirap nang mag-alaga.,Negative,Owner Incapacity
+Humihingi po kami ng tulong kasi nanay ko ay bedridden at walang ibang caretaker.,Negative,Owner Incapacity
+"Sana po matulungan kami, nanay ko ay may disability at hindi na kaya pakainin at linisin ang pet.",Negative,Owner Incapacity
+Dahil po nanay ko ay naaksidente at hindi na makalakad para mag-alaga.,Negative,Owner Incapacity
+Nanay ko po ay may operation at matagal mawawala sa bahay.,Negative,Owner Incapacity
+Kailangan po naming isuko dahil nanay ko ay pumanaw at walang family na kukuha sa pet.,Negative,Owner Incapacity
+Humihingi po kami ng tulong kasi nanay ko ay nasa dialysis at madalas wala sa bahay.,Negative,Owner Incapacity
+"Sana po matulungan kami, nanay ko ay hindi na physically capable mag-alaga.",Negative,Owner Incapacity
+Dahil po lolo ko ay naospital at wala nang mag-aalaga sa alaga.,Negative,Owner Incapacity
+Lolo ko po ay may sakit at hindi na kaya ang daily pet care.,Negative,Owner Incapacity
+Kailangan po naming isuko dahil lolo ko ay senior citizen na at hirap nang mag-alaga.,Negative,Owner Incapacity
+Humihingi po kami ng tulong kasi lolo ko ay bedridden at walang ibang caretaker.,Negative,Owner Incapacity
+"Sana po matulungan kami, lolo ko ay may disability at hindi na kaya pakainin at linisin ang pet.",Negative,Owner Incapacity
+Dahil po lolo ko ay naaksidente at hindi na makalakad para mag-alaga.,Negative,Owner Incapacity
+Lolo ko po ay may operation at matagal mawawala sa bahay.,Negative,Owner Incapacity
+Kailangan po naming isuko dahil lolo ko ay pumanaw at walang family na kukuha sa pet.,Negative,Owner Incapacity
+Humihingi po kami ng tulong kasi lolo ko ay nasa dialysis at madalas wala sa bahay.,Negative,Owner Incapacity
+"Sana po matulungan kami, lolo ko ay hindi na physically capable mag-alaga.",Negative,Owner Incapacity
+Dahil po ako ay naospital at wala nang mag-aalaga sa alaga.,Negative,Owner Incapacity
+Ako po ay may sakit at hindi na kaya ang daily pet care.,Negative,Owner Incapacity
+Kailangan po naming isuko dahil ako ay senior citizen na at hirap nang mag-alaga.,Negative,Owner Incapacity
+Humihingi po kami ng tulong kasi ako ay bedridden at walang ibang caretaker.,Negative,Owner Incapacity
+"Sana po matulungan kami, ako ay may disability at hindi na kaya pakainin at linisin ang pet.",Negative,Owner Incapacity
+Dahil po ako ay naaksidente at hindi na makalakad para mag-alaga.,Negative,Owner Incapacity
+Ako po ay may operation at matagal mawawala sa bahay.,Negative,Owner Incapacity
+Kailangan po naming isuko dahil ako ay pumanaw at walang family na kukuha sa pet.,Negative,Owner Incapacity
+Humihingi po kami ng tulong kasi ako ay nasa dialysis at madalas wala sa bahay.,Negative,Owner Incapacity
+"Sana po matulungan kami, ako ay hindi na physically capable mag-alaga.",Negative,Owner Incapacity
+Dahil po alaga namin ay gusto lang naming makahanap ng mas maalagang pamilya.,Neutral,Other
+Alaga namin po ay mas bagay sa bahay na may malaking space.,Neutral,Other
+Kailangan po naming isuko dahil alaga namin ay hindi emergency pero kailangan ng rehoming support.,Neutral,Other
+Humihingi po kami ng tulong kasi alaga namin ay gusto naming dumaan sa tamang adoption process.,Neutral,Other
+"Sana po matulungan kami, alaga namin ay hindi na namin nabibigyan ng sapat na attention.",Neutral,Other
+Dahil po alaga namin ay mas kailangan ng owner na may mas maraming oras.,Neutral,Other
+Alaga namin po ay maayos naman pero kailangan ng better match.,Neutral,Other
+Kailangan po naming isuko dahil alaga namin ay gusto naming mahanapan ng permanent home.,Neutral,Other
+"Humihingi po kami ng tulong kasi alaga namin ay wala namang sakit o danger, rehoming lang.",Neutral,Other
+"Sana po matulungan kami, alaga namin ay gusto naming mapunta sa pet-friendly na pamilya.",Neutral,Other
+Dahil po pet namin ay gusto lang naming makahanap ng mas maalagang pamilya.,Neutral,Other
+Pet namin po ay mas bagay sa bahay na may malaking space.,Neutral,Other
+Kailangan po naming isuko dahil pet namin ay hindi emergency pero kailangan ng rehoming support.,Neutral,Other
+Humihingi po kami ng tulong kasi pet namin ay gusto naming dumaan sa tamang adoption process.,Neutral,Other
+"Sana po matulungan kami, pet namin ay hindi na namin nabibigyan ng sapat na attention.",Neutral,Other
+Dahil po pet namin ay mas kailangan ng owner na may mas maraming oras.,Neutral,Other
+Pet namin po ay maayos naman pero kailangan ng better match.,Neutral,Other
+Kailangan po naming isuko dahil pet namin ay gusto naming mahanapan ng permanent home.,Neutral,Other
+"Humihingi po kami ng tulong kasi pet namin ay wala namang sakit o danger, rehoming lang.",Neutral,Other
+"Sana po matulungan kami, pet namin ay gusto naming mapunta sa pet-friendly na pamilya.",Neutral,Other
+Dahil po aso namin ay gusto lang naming makahanap ng mas maalagang pamilya.,Neutral,Other
+Aso namin po ay mas bagay sa bahay na may malaking space.,Neutral,Other
+Kailangan po naming isuko dahil aso namin ay hindi emergency pero kailangan ng rehoming support.,Neutral,Other
+Humihingi po kami ng tulong kasi aso namin ay gusto naming dumaan sa tamang adoption process.,Neutral,Other
+"Sana po matulungan kami, aso namin ay hindi na namin nabibigyan ng sapat na attention.",Neutral,Other
+Dahil po aso namin ay mas kailangan ng owner na may mas maraming oras.,Neutral,Other
+Aso namin po ay maayos naman pero kailangan ng better match.,Neutral,Other
+Kailangan po naming isuko dahil aso namin ay gusto naming mahanapan ng permanent home.,Neutral,Other
+"Humihingi po kami ng tulong kasi aso namin ay wala namang sakit o danger, rehoming lang.",Neutral,Other
+"Sana po matulungan kami, aso namin ay gusto naming mapunta sa pet-friendly na pamilya.",Neutral,Other
+Dahil po pusa namin ay gusto lang naming makahanap ng mas maalagang pamilya.,Neutral,Other
+Pusa namin po ay mas bagay sa bahay na may malaking space.,Neutral,Other
+Kailangan po naming isuko dahil pusa namin ay hindi emergency pero kailangan ng rehoming support.,Neutral,Other
+Humihingi po kami ng tulong kasi pusa namin ay gusto naming dumaan sa tamang adoption process.,Neutral,Other
+"Sana po matulungan kami, pusa namin ay hindi na namin nabibigyan ng sapat na attention.",Neutral,Other
+Dahil po pusa namin ay mas kailangan ng owner na may mas maraming oras.,Neutral,Other
+Pusa namin po ay maayos naman pero kailangan ng better match.,Neutral,Other
+Kailangan po naming isuko dahil pusa namin ay gusto naming mahanapan ng permanent home.,Neutral,Other
+"Humihingi po kami ng tulong kasi pusa namin ay wala namang sakit o danger, rehoming lang.",Neutral,Other
+"Sana po matulungan kami, pusa namin ay gusto naming mapunta sa pet-friendly na pamilya.",Neutral,Other
+Dahil po siya ay gusto lang naming makahanap ng mas maalagang pamilya.,Neutral,Other
+Siya po ay mas bagay sa bahay na may malaking space.,Neutral,Other
+Kailangan po naming isuko dahil siya ay hindi emergency pero kailangan ng rehoming support.,Neutral,Other
+Humihingi po kami ng tulong kasi siya ay gusto naming dumaan sa tamang adoption process.,Neutral,Other
+"Sana po matulungan kami, siya ay hindi na namin nabibigyan ng sapat na attention.",Neutral,Other
+Dahil po siya ay mas kailangan ng owner na may mas maraming oras.,Neutral,Other
+Siya po ay maayos naman pero kailangan ng better match.,Neutral,Other
+Kailangan po naming isuko dahil siya ay gusto naming mahanapan ng permanent home.,Neutral,Other
+"Humihingi po kami ng tulong kasi siya ay wala namang sakit o danger, rehoming lang.",Neutral,Other
+"Sana po matulungan kami, siya ay gusto naming mapunta sa pet-friendly na pamilya.",Neutral,Other

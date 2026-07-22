@@ -135,24 +135,7 @@
           <p>Please fill out the form completely for proper assessment.</p>
         </div>
 
-        <form class="surrender-form">
-          <!-- Top Control Fields -->
-          <div class="surrender-form-grid">
-            <div class="form-group">
-              <label for="controlNo">Control No.</label>
-              <input type="text" id="controlNo" name="controlNo">
-            </div>
-
-            <div class="form-group">
-              <label for="dateFiled">Date</label>
-              <input type="date" id="dateFiled" name="dateFiled">
-            </div>
-
-            <div class="form-group">
-              <label for="timeFiled">Time</label>
-              <input type="time" id="timeFiled" name="timeFiled">
-            </div>
-          </div>
+        <form class="surrender-form" id="surrenderForm">
 
           <!-- Pet Owner Information -->
           <div class="document-form-section">
@@ -165,9 +148,63 @@
               </div>
 
               <div class="form-group full">
-                <label for="ownerAddress">Address</label>
-                <input type="text" id="ownerAddress" name="ownerAddress" required>
-              </div>
+              <label for="ownerAddress">House No. / Street / Subdivision</label>
+              <input
+                type="text"
+                id="ownerAddress"
+                name="ownerAddress"
+                placeholder="Example: 123 Rizal St."
+                required
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="ownerBarangay">Barangay <span class="req">*</span></label>
+              <select id="ownerBarangay" name="ownerBarangay" required>
+                <option value="">Select barangay in Angeles City</option>
+                <option value="Agapito del Rosario">Agapito del Rosario</option>
+                <option value="Amsic">Amsic</option>
+                <option value="Anunas">Anunas</option>
+                <option value="Balibago">Balibago</option>
+                <option value="Capaya">Capaya</option>
+                <option value="Claro M. Recto">Claro M. Recto</option>
+                <option value="Cuayan">Cuayan</option>
+                <option value="Cutcut">Cutcut</option>
+                <option value="Cutud">Cutud</option>
+                <option value="Lourdes Norte">Lourdes Norte</option>
+                <option value="Lourdes Sur">Lourdes Sur</option>
+                <option value="Lourdes Sur Este">Lourdes Sur Este</option>
+                <option value="Malabanias">Malabanias</option>
+                <option value="Margot">Margot</option>
+                <option value="Mining">Mining</option>
+                <option value="Ninoy Aquino">Ninoy Aquino</option>
+                <option value="Pampang">Pampang</option>
+                <option value="Pandan">Pandan</option>
+                <option value="Plaridel">Plaridel</option>
+                <option value="Pulung Cacutud">Pulung Cacutud</option>
+                <option value="Pulung Maragul">Pulung Maragul</option>
+                <option value="Pulungbulu">Pulungbulu</option>
+                <option value="Salapungan">Salapungan</option>
+                <option value="San Jose">San Jose</option>
+                <option value="San Nicolas">San Nicolas</option>
+                <option value="Santa Teresita">Santa Teresita</option>
+                <option value="Santa Trinidad">Santa Trinidad</option>
+                <option value="Santo Cristo">Santo Cristo</option>
+                <option value="Santo Domingo">Santo Domingo</option>
+                <option value="Santo Rosario">Santo Rosario</option>
+                <option value="Sapalibutad">Sapalibutad</option>
+                <option value="Sapangbato">Sapangbato</option>
+                <option value="Sergio Bernal">Sergio Bernal</option>
+                <option value="Silangan">Silangan</option>
+                <option value="Tabun">Tabun</option>
+                <option value="Virgen Delos Remedios">Virgen Delos Remedios</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="ownerCity">City</label>
+              <input type="text" id="ownerCity" name="ownerCity" value="Angeles City" readonly>
+            </div>
 
               <div class="form-group">
                 <label for="contactNo">Contact No.</label>
@@ -248,89 +285,36 @@
 
           <!-- Waiver -->
           <div class="document-form-section">
-            <h3>Waiver</h3>
-
-            <div class="form-group full">
-              <label for="waiverName">Ako si</label>
-              <input type="text" id="waiverName" name="waiverName">
-            </div>
-
-            <div class="form-group full">
-              <label for="waiverAddress">May sapat na gulang, Pilipino at kasalukuyang naninirahan sa</label>
-              <input type="text" id="waiverAddress" name="waiverAddress">
-            </div>
+            <h3>Kasunduan at Pahintulot</h3>
 
             <div class="waiver-box">
               <p>
-                ay kusang loob na nagsasaad ng mga sumusunod:
+                Sa pamamagitan ng pagsusumite ng form na ito, aking pinatutunayan na ang lahat ng
+                impormasyong ibinigay ko ay totoo, tama, at kumpleto ayon sa aking kaalaman.
               </p>
+
               <p>
-                Aking pinapatunayan na boluntaryong sinusuko ang aking karapatan sa pag-aari ng
-                nasabing alaga at hindi ako maghahabla o manghahabol sa Angeles City Veterinary Office
-                patungkol sa naturang pagsuko.
+                Nauunawaan ko na ang pagsusumite ng surrender request ay hindi nangangahulugan ng
+                awtomatikong pagtanggap ng aking alaga sa shelter. Ang bawat request ay dadaan muna
+                sa pagsusuri ng shelter staff.
               </p>
+
               <p>
-                Aking inihahayag na, aking nabasa at naintindahan ang kasulatang ito bago ko lagdaan
-                at buong kalooban akong naglapat ng “Release Waiver” ng aking Karapatan na naayon sa batas.
+                Nauunawaan ko rin na ang pagtanggap ng alaga ay nakadepende sa beripikasyon ng
+                impormasyon, kalagayan ng alaga, at availability ng shelter space.
               </p>
+
               <p>
-                Sa katunayan ng lahat, ako ay lumalagda sa ibaba nito ngayong ika _____ araw,
-                buwan ng __________ sa Angeles City Veterinary Office.
+                Kung maaprubahan ang aking request, kusang-loob kong isusuko ang aking alaga sa
+                Angeles City Veterinary Office / shelter at nauunawaan kong ito ay maaaring magresulta
+                sa permanenteng paglipat ng responsibilidad at pag-aalaga sa nasabing hayop.
               </p>
             </div>
 
-            <div class="surrender-form-grid">
-              <div class="form-group">
-                <label for="waiverDay">Araw</label>
-                <input type="text" id="waiverDay" name="waiverDay">
-              </div>
-
-              <div class="form-group">
-                <label for="waiverMonth">Buwan</label>
-                <input type="text" id="waiverMonth" name="waiverMonth">
-              </div>
-
-              <div class="form-group full">
-                <label for="ownerSignature">Name and Signature of Owner</label>
-                <input type="text" id="ownerSignature" name="ownerSignature">
-              </div>
-            </div>
-          </div>
-
-          <!-- Evaluation -->
-          <div class="document-form-section">
-            <h3>Office Use</h3>
-
-            <div class="surrender-form-grid">
-              <div class="form-group full">
-                <label for="evaluation">Evaluation</label>
-                <textarea id="evaluation" name="evaluation" rows="3"></textarea>
-              </div>
-
-              <div class="form-group">
-                <label for="evaluator">Evaluator</label>
-                <input type="text" id="evaluator" name="evaluator">
-              </div>
-
-              <div class="form-group">
-                <label for="evaluatorSignature">Name and Signature</label>
-                <input type="text" id="evaluatorSignature" name="evaluatorSignature">
-              </div>
-            </div>
-
-            <div class="approval-grid">
-              <div class="approval-box">
-                <label>Approved By:</label>
-                <input type="text" value="Eder I. Pasamonte" readonly>
-                <small>Team Leader</small>
-              </div>
-
-              <div class="approval-box">
-                <label>Noted By:</label>
-                <input type="text" value="Dr. Joanna D. Marimla" readonly>
-                <small>Veterinarian</small>
-              </div>
-            </div>
+            <label class="check-option agreement-option">
+              <input type="checkbox" id="agreeAllTerms" required>
+              <span>Nabasa ko at sumasang-ayon ako sa lahat ng mga tuntunin at pahayag na nakasaad sa itaas.</span>
+            </label>
           </div>
 
           <div class="form-actions">
@@ -526,5 +510,12 @@
 </div>
 
 <script type="module" src="../../src/public/js/public-ui.js"></script>
+<<<<<<< HEAD
 <script type="module" src="../../src/auth/authModal.js"></script></body>
 </html>
+=======
+<script type="module" src="../../src/auth/authModal.js"></script>
+<script type="module" src="../../src/public/js/surrenderForm.js"></script>
+</body>
+</html>
+>>>>>>> 8c76e329d3ff001d2178f9f031b2d9a7600f79a0
