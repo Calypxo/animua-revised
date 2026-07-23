@@ -129,11 +129,16 @@ function applyFilters() {
   const q       = (document.getElementById("searchIntake")?.value  || "").toLowerCase().trim();
   const source  = document.getElementById("filterSource")?.value   || "";
   const species = document.getElementById("filterSpecies")?.value  || "";
+  const dateFrom = document.getElementById("filterDateFrom")?.value || "";
+  const dateTo   = document.getElementById("filterDateTo")?.value   || "";
 
   filtered = intakeRecords.filter(r => {
     if (activeTab !== "all" && r.status !== activeTab) return false;
     if (source && r.source !== source) return false;
     if (species && r.species !== species) return false;
+    const intakeDate = String(r.intakeDate || "").slice(0, 10);
+    if (dateFrom && (!intakeDate || intakeDate < dateFrom)) return false;
+    if (dateTo && (!intakeDate || intakeDate > dateTo)) return false;
 
     const id = (r.id || "").toLowerCase();
     const description = intakeLabel(r).toLowerCase();
@@ -152,6 +157,21 @@ function applyFilters() {
   renderPagination();
 }
 
+function clearFilters() {
+  ["searchIntake", "filterSource", "filterSpecies", "filterDateFrom", "filterDateTo"].forEach(id => {
+    const field = document.getElementById(id);
+    if (field) field.value = "";
+  });
+
+  activeTab = "all";
+  document.querySelectorAll(".intake-tab").forEach(tab => {
+    const isAll = tab.dataset.tab === "all";
+    tab.classList.toggle("active", isAll);
+    tab.setAttribute("aria-selected", String(isAll));
+  });
+  applyFilters();
+}
+
 /* ══════════════════════════════════════════════════════
    TABLE
 ══════════════════════════════════════════════════════ */
@@ -163,7 +183,8 @@ function renderTable() {
   const page  = filtered.slice(start, start + PAGE_SIZE);
 
   if (!page.length) {
-    tbody.innerHTML = `<tr><td colspan="8" class="text-center py-5 text-muted">No intake records found.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><span class="empty-state-icon"><i class="bi bi-inbox"></i></span><strong>No intake records found</strong><p>Try changing or clearing the active filters.</p><button type="button" id="emptyClearFilters">Clear filters</button></div></td></tr>`;
+    document.getElementById("emptyClearFilters")?.addEventListener("click", clearFilters);
     return;
   }
 
@@ -186,8 +207,8 @@ function renderTable() {
 
     return `
     <tr style="cursor:pointer" data-id="${r.id}">
-      <td style="font-family:var(--mono);font-size:0.76rem;color:var(--stone)">${r.id}</td>
-      <td>
+      <td data-label="Intake ID" style="font-family:var(--mono);font-size:0.76rem;color:var(--stone)">${r.id}</td>
+      <td data-label="Animal">
         <div class="animal-cell">
           <div class="animal-thumb ${speciesThumb(r.species)}">${speciesEmoji(r.species)}</div>
           <div>
@@ -196,19 +217,19 @@ function renderTable() {
           </div>
         </div>
       </td>
-      <td>${sourceBadge(r.source)}</td>
-      <td>${condBadge(r.condition)}</td>
-      <td style="font-size:0.83rem;color:var(--stone)">${r.encodedBy}</td>
-      <td style="font-family:var(--mono);font-size:0.76rem;color:var(--stone)">${formatDate(r.intakeDate)}</td>
-      <td>${statusBadge(r.status)}</td>
-      <td>
-        <button class="tbl-action-btn" title="View Details" data-action="view" data-id="${r.id}">
+      <td data-label="Source">${sourceBadge(r.source)}</td>
+      <td data-label="Condition">${condBadge(r.condition)}</td>
+      <td data-label="Encoded by" style="font-size:0.83rem;color:var(--stone)">${r.encodedBy}</td>
+      <td data-label="Date" style="font-family:var(--mono);font-size:0.76rem;color:var(--stone)">${formatDate(r.intakeDate)}</td>
+      <td data-label="Status">${statusBadge(r.status)}</td>
+      <td data-label="Actions" class="table-actions">
+        <button class="tbl-action-btn" title="View Details" aria-label="View ${r.id}" data-action="view" data-id="${r.id}">
           <i class="bi bi-eye"></i>
         </button>
-        ${canEdit    ? `<button class="tbl-action-btn" title="Edit" data-action="edit" data-id="${r.id}"><i class="bi bi-pencil"></i></button>` : ""}
-        ${canApprove ? `<button class="tbl-action-btn approve" title="Approve" data-action="approve" data-id="${r.id}"><i class="bi bi-check-lg"></i></button>` : ""}
-        ${canReject  ? `<button class="tbl-action-btn reject"  title="Reject"  data-action="reject"  data-id="${r.id}"><i class="bi bi-x-lg"></i></button>` : ""}
-        ${canConvert ? `<button class="tbl-action-btn convert" title="Convert to Profile" data-action="convert" data-id="${r.id}"><i class="bi bi-arrow-right-circle"></i></button>` : ""}
+        ${canEdit    ? `<button class="tbl-action-btn" title="Edit" aria-label="Edit ${r.id}" data-action="edit" data-id="${r.id}"><i class="bi bi-pencil"></i></button>` : ""}
+        ${canApprove ? `<button class="tbl-action-btn approve" title="Approve" aria-label="Approve ${r.id}" data-action="approve" data-id="${r.id}"><i class="bi bi-check-lg"></i></button>` : ""}
+        ${canReject  ? `<button class="tbl-action-btn reject" title="Reject" aria-label="Reject ${r.id}" data-action="reject" data-id="${r.id}"><i class="bi bi-x-lg"></i></button>` : ""}
+        ${canConvert ? `<button class="tbl-action-btn convert" title="Convert to Profile" aria-label="Convert ${r.id} to profile" data-action="convert" data-id="${r.id}"><i class="bi bi-arrow-right-circle"></i></button>` : ""}
       </td>
     </tr>`;
   }).join("");
@@ -673,8 +694,17 @@ async function saveIntake(asDraft = false) {
   }
 
   const payload = collectFormData(asDraft);
+  const draftButton = document.getElementById("btnSaveDraft");
+  const submitButton = document.getElementById("btnSubmitIntake");
+  const activeButton = asDraft ? draftButton : submitButton;
+  const activeLabel = activeButton?.innerHTML;
 
   try {
+    [draftButton, submitButton].forEach(button => {
+      if (button) button.disabled = true;
+    });
+    if (activeButton) activeButton.innerHTML = `<span class="button-spinner" aria-hidden="true"></span>${asDraft ? "Saving draft…" : "Submitting…"}`;
+
     let createdOrUpdatedData = null;
 
     if (editingId) {
@@ -722,6 +752,11 @@ async function saveIntake(asDraft = false) {
   } catch (err) {
     console.error("[saveIntake]", err);
     showToast("error", err.message || "Failed to save intake record.");
+  } finally {
+    [draftButton, submitButton].forEach(button => {
+      if (button) button.disabled = false;
+    });
+    if (activeButton && activeLabel) activeButton.innerHTML = activeLabel;
   }
 }
 
@@ -934,7 +969,14 @@ async function executeConfirmAction() {
   return;
 }
 
+  const actionButton = document.getElementById("confirmAction");
+  const actionLabel = actionButton?.innerHTML;
+
   try {
+    if (actionButton) {
+      actionButton.disabled = true;
+      actionButton.innerHTML = `<span class="button-spinner" aria-hidden="true"></span>Working…`;
+    }
     if (confirmAction === "approve") {
       await approveIntake(confirmTargetId);
       showToast("success", "Intake approved.");
@@ -960,6 +1002,11 @@ async function executeConfirmAction() {
   } catch (err) {
     console.error("[executeConfirmAction]", err);
     showToast("error", err.message || "Action failed.");
+  } finally {
+    if (actionButton) {
+      actionButton.disabled = false;
+      if (actionLabel) actionButton.innerHTML = actionLabel;
+    }
   }
 }
 
@@ -981,8 +1028,22 @@ async function loadIntakeRecords() {
 /* ══════════════════════════════════════════════════════
    MODAL HELPERS
 ══════════════════════════════════════════════════════ */
-function openModal(id)  { document.getElementById(id)?.classList.add("open"); }
-function closeModal(id) { document.getElementById(id)?.classList.remove("open"); }
+let modalTrigger = null;
+function openModal(id) {
+  const modal = document.getElementById(id);
+  if (!modal) return;
+  modalTrigger = document.activeElement;
+  modal.classList.add("open");
+  document.body.classList.add("modal-open");
+  requestAnimationFrame(() => modal.querySelector("button, input, select, textarea")?.focus());
+}
+function closeModal(id) {
+  const modal = document.getElementById(id);
+  if (!modal) return;
+  modal.classList.remove("open");
+  if (!document.querySelector(".um-modal-backdrop.open")) document.body.classList.remove("modal-open");
+  if (modalTrigger instanceof HTMLElement) modalTrigger.focus();
+}
 function closeAll()     {
   ["intakeModalBackdrop","viewModalBackdrop","confirmModalBackdrop"].forEach(closeModal);
 }
@@ -1047,8 +1108,12 @@ if (params.get("source") === "surrender") {
     // Tabs
     document.querySelectorAll(".intake-tab").forEach(btn => {
       btn.addEventListener("click", () => {
-        document.querySelectorAll(".intake-tab").forEach(t => t.classList.remove("active"));
+        document.querySelectorAll(".intake-tab").forEach(t => {
+          t.classList.remove("active");
+          t.setAttribute("aria-selected", "false");
+        });
         btn.classList.add("active");
+        btn.setAttribute("aria-selected", "true");
         activeTab = btn.dataset.tab;
         applyFilters();
       });
@@ -1058,6 +1123,9 @@ if (params.get("source") === "surrender") {
     document.getElementById("searchIntake")?.addEventListener("input",  applyFilters);
     document.getElementById("filterSource")?.addEventListener("change", applyFilters);
     document.getElementById("filterSpecies")?.addEventListener("change",applyFilters);
+    document.getElementById("filterDateFrom")?.addEventListener("change", applyFilters);
+    document.getElementById("filterDateTo")?.addEventListener("change", applyFilters);
+    document.getElementById("clearIntakeFilters")?.addEventListener("click", clearFilters);
 
     // Add new intake
     const newIntakeButton =
