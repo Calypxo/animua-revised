@@ -31,10 +31,10 @@ router.put(
   ctrl.updateAnimal
 );
 
-// Send animal to quarantine
+// Place animal in quarantine
 router.patch(
   "/:id/send-to-quarantine",
-  authorize("Admin", "Staff"),
+  authorize("Admin", "Veterinarian"),
   ctrl.sendToQuarantine
 );
 
@@ -86,6 +86,13 @@ router.patch(
   "/:id/archive",
   authorize("Admin"),
   ctrl.archiveAnimal
+);
+
+// Restore archived animal
+router.patch(
+  "/:id/restore",
+  authorize("Admin"),
+  ctrl.restoreAnimal
 );
 
 console.log("Animal routes loaded");

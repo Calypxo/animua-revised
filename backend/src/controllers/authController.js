@@ -14,6 +14,29 @@ const RECAPTCHA_SECRET_KEY =
 const CURRENT_POLICY_VERSION = "1.0";
 const EMAIL_HERO_IMAGE_PATH = path.join(__dirname, "../assets/cityvet-services-email.jpg");
 
+async function writeAccountAuditLog({
+  action,
+  user,
+  before = {},
+  after = {},
+}) {
+  try {
+    await db.collection("auditLogs").add({
+      action,
+      module: "Account Settings",
+      targetId: user.email,
+      targetName: user.fullName || user.email,
+      performedBy: user.email,
+      performedByName: user.fullName || user.email,
+      before,
+      after,
+      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+    });
+  } catch (error) {
+    console.warn("[Account Audit Log]", error.message);
+  }
+}
+
 // EMAIL TRANSPORTER
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -656,17 +679,39 @@ exports.discardUnverifiedRegistration = async (req, res) => {
   }
 };
 
+exports.getCurrentAccount = async (req, res) => {
+  return res.status(200).json({
+    account: {
+      email: req.user.email,
+      fullName: req.user.fullName,
+      role: req.user.role,
+      status: req.user.status,
+    },
+  });
+};
+
 exports.updateUsername = async (req, res) => {
   try {
     const email = req.user?.email;
-    const fullName = req.body.fullName?.trim();
+    const fullName = typeof req.body?.fullName === "string"
+      ? req.body.fullName.trim().replace(/\s+/g, " ")
+      : "";
 
     if (!email) {
       return res.status(401).json({ message: "Unauthorized." });
     }
 
-    if (!fullName || fullName.length < 2) {
-      return res.status(400).json({ message: "Username must be at least 2 characters." });
+    if (!fullName || fullName.length < 2 || fullName.length > 80) {
+      return res.status(400).json({
+        message: "Display name must be between 2 and 80 characters.",
+      });
+    }
+
+    if (!/^[\p{L}\p{M}][\p{L}\p{M} .'-]*$/u.test(fullName)) {
+      return res.status(400).json({
+        message:
+          "Display name may contain letters, spaces, periods, apostrophes, and hyphens only.",
+      });
     }
 
     const userRef = db.collection("users").doc(email);
@@ -684,13 +729,24 @@ exports.updateUsername = async (req, res) => {
     });
 
     if (userData.firebaseUid) {
-      await admin.auth().updateUser(userData.firebaseUid, {
-        displayName: fullName
-      });
+      try {
+        await admin.auth().updateUser(userData.firebaseUid, {
+          displayName: fullName
+        });
+      } catch (firebaseError) {
+        console.warn("[Update Firebase Display Name]", firebaseError.message);
+      }
     }
 
+    await writeAccountAuditLog({
+      action: "account.profile_updated",
+      user: { ...req.user, fullName },
+      before: { fullName: userData.fullName || "" },
+      after: { fullName },
+    });
+
     return res.status(200).json({
-      message: "Username updated successfully.",
+      message: "Display name updated successfully.",
       fullName
     });
   } catch (error) {
@@ -704,14 +760,31 @@ exports.updateUsername = async (req, res) => {
 exports.changePassword = async (req, res) => {
   try {
     const email = req.user?.email;
-    const { oldPassword, newPassword } = req.body;
+    const { oldPassword, newPassword } = req.body || {};
 
     if (!email) {
       return res.status(401).json({ message: "Unauthorized." });
     }
 
-    if (!oldPassword || !newPassword) {
+    if (
+      typeof oldPassword !== "string" ||
+      typeof newPassword !== "string" ||
+      !oldPassword ||
+      !newPassword
+    ) {
       return res.status(400).json({ message: "Current and new password are required." });
+    }
+
+    if (oldPassword.length > 128 || newPassword.length > 128) {
+      return res.status(400).json({
+        message: "Passwords must not exceed 128 characters.",
+      });
+    }
+
+    if (oldPassword === newPassword) {
+      return res.status(400).json({
+        message: "New password must be different from the current password.",
+      });
     }
 
     if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(newPassword)) {
@@ -747,10 +820,20 @@ exports.changePassword = async (req, res) => {
     });
 
     if (userData.firebaseUid) {
-      await admin.auth().updateUser(userData.firebaseUid, {
-        password: newPassword
-      });
+      try {
+        await admin.auth().updateUser(userData.firebaseUid, {
+          password: newPassword
+        });
+      } catch (firebaseError) {
+        console.warn("[Update Firebase Password]", firebaseError.message);
+      }
     }
+
+    await writeAccountAuditLog({
+      action: "account.password_changed",
+      user: req.user,
+      after: { passwordChanged: true },
+    });
 
     return res.status(200).json({
       message: "Password changed successfully."

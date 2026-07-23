@@ -13,10 +13,13 @@ const dashboardRoutes = require("./src/routes/dashboardRoutes");
 
 const publicRoutes = require("./src/routes/publicRoutes");
 const adoptionRoutes = require("./src/routes/adoptionRoutes");
+const announcementRoutes = require("./src/routes/announcementRoutes");
 const predictiveRoutes = require("./src/routes/predictiveRoutes");
 const matchRoutes = require("./src/routes/matchRoutes");
 const chatbotRoutes = require("./src/routes/chatbotRoutes");
 const surrenderRoutes = require("./src/routes/surrenderRoutes");
+const auditRoutes = require("./src/routes/auditRoutes");
+const reportRoutes = require("./src/routes/reportRoutes");
 
 const authenticateToken = require("./src/middleware/authMiddleware");
 const authorizeRole = require("./src/middleware/roleMiddleware");
@@ -86,10 +89,13 @@ app.use("/api/dashboard", dashboardRoutes);
 
 app.use("/api/public", publicRoutes);
 app.use("/api/adoptions", adoptionRoutes);
+app.use("/api/announcements", announcementRoutes);
 app.use("/api/predictive", predictiveRoutes);
 app.use("/api/chatbot", chatbotRoutes);
 app.use("/api/surrenders", surrenderRoutes);
 app.use("/api", matchRoutes);
+app.use("/api/audit", auditRoutes);
+app.use("/api/reports", reportRoutes);
 
 app.get("/", (req, res) => {
   res.send("ANIMUA Backend is Live!");

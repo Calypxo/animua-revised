@@ -347,7 +347,7 @@ button { font: inherit; cursor: pointer; border: none; background: none; }
 /* ── KPI strip ──────────────────────────────────────── */
 .kpi-strip {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 14px;
 }
 
@@ -951,4 +951,13 @@ button { font: inherit; cursor: pointer; border: none; background: none; }
   .kpi-strip { grid-template-columns: 1fr 1fr; }
   .topbar-right { gap: 6px; }
   .action-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.user-chip[role="link"] {
+  cursor:pointer;
+}
+
+.user-chip[role="link"]:focus-visible {
+  outline:3px solid rgba(111,25,28,.2);
+  outline-offset:2px;
 }

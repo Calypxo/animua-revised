@@ -32,6 +32,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const topResults = savedResults.slice(0, 5);
 
   shell.innerHTML = topResults.map(pet => {
+    const displayLabel =
+      pet.displayLabel ||
+      pet.shelterLabel ||
+      pet.identifyingDescription ||
+      pet.name ||
+      `Animal ${pet.id || pet.petId || ""}`.trim();
     const traits = [];
     if (Number(pet.affectionLevel)    >= 4) traits.push("affectionate");
     if (Number(pet.playfulness)       >= 4) traits.push("playful");
@@ -40,14 +46,15 @@ document.addEventListener("DOMContentLoaded", () => {
     if (Number(pet.groomingNeeds) > 0 && Number(pet.groomingNeeds) <= 2) traits.push("low-maintenance grooming");
     if (Number(pet.noiseLevel)    > 0 && Number(pet.noiseLevel)    <= 2) traits.push("relatively quiet");
     const summary = traits.length
-      ? `${pet.name || "This pet"} is a strong match because this pet is ${traits.join(", ")}.`
-      : `${pet.name || "This pet"} is one of the strongest compatibility matches based on your answers.`;
+      ? `${displayLabel} is a strong match because this animal is ${traits.join(", ")}.`
+      : `${displayLabel} is one of the strongest compatibility matches based on your answers.`;
 
     return `
       <article class="result-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:22px;padding:22px;margin-bottom:16px;box-shadow:0 4px 16px rgba(0,0,0,0.05)">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px;flex-wrap:wrap">
           <div>
-            <h2 style="font-size:1.3rem;font-weight:800;margin-bottom:4px">${pet.name || "Unknown Pet"}</h2>
+            <h2 style="font-size:1.3rem;font-weight:800;margin-bottom:4px">${displayLabel}</h2>
+            <p style="color:#9ca3af;font-size:0.76rem;margin-bottom:2px">Shelter description · Animal ID: ${pet.id||pet.petId||""}</p>
             <p style="color:#6b7280;font-size:0.875rem">${pet.breed || "Mixed Breed"} · ${pet.species || "Pet"}</p>
           </div>
           <div style="background:rgba(87,134,188,0.1);color:#2558a8;border:1px solid rgba(87,134,188,0.2);border-radius:999px;padding:8px 14px;font-weight:700;white-space:nowrap">

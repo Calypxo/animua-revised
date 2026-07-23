@@ -35,13 +35,6 @@
 }
 
 html { scroll-behavior: smooth; }
-<<<<<<< HEAD
-
-body {
-  font-family: var(--sans);
-  background: var(--animua-warm-cream);
-=======
-<<<<<<< HEAD
 
 body {
   font-family: var(--sans);
@@ -651,12 +644,9 @@ body {
   .phase-intro  { padding: 16px 18px; }
   .question-card, .filter-section { padding: 20px 18px; }
 }
-=======
-
 body {
   font-family: var(--sans);
   background: var(--cream);
->>>>>>> 8c76e329d3ff001d2178f9f031b2d9a7600f79a0
   color: var(--dark);
   min-height: 100vh;
 }
@@ -1426,7 +1416,3 @@ body {
     border-radius: 28px;
   }
 }
-<<<<<<< HEAD
-=======
->>>>>>> 606b1bdf2899e5df758b6f4b01e816169754fd59
->>>>>>> 8c76e329d3ff001d2178f9f031b2d9a7600f79a0

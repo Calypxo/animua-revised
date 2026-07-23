@@ -1,4 +1,7 @@
 const { db } = require("../config/firebase");
+const {
+  buildShelterLabel,
+} = require("../utils/animalIdentity");
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
 const OPENAI_MODEL = process.env.OPENAI_MODEL || process.env.CHATBOT_MODEL || "gpt-4o-mini";
@@ -53,7 +56,13 @@ async function getPublicContext() {
 
   const pets = petsSnapshot.docs.map((doc) => {
     const pet = doc.data();
-    return [pet.name, pet.species, pet.breed, pet.sex, pet.ageEstimate].filter(Boolean).join(" - ");
+    return [
+      buildShelterLabel(pet, doc.id),
+      pet.species,
+      pet.breed,
+      pet.sex,
+      pet.ageEstimate,
+    ].filter(Boolean).join(" - ");
   });
 
   const events = eventsSnapshot.docs.map((doc) => {

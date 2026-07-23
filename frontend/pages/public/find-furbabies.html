@@ -29,6 +29,7 @@
     <nav class="navbar" id="navbar">
       <a href="home.html">Home</a>
       <a href="find-furbabies.html" class="active">Find Furbabies</a>
+      <a href="announcements.html">Announcements</a>
       <a href="surrender.html">Surrender</a>
       <a href="contact.html">Contact Us</a>
     </nav>
@@ -155,7 +156,7 @@
 
           <div class="search-box">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="petSearch" placeholder="Search pet name...">
+            <input type="text" id="petSearch" placeholder="Search description, breed, or color...">
           </div>
         </div>
       </div>
@@ -165,7 +166,7 @@
       <div class="empty-state" id="emptyState">
         <i class="fa-solid fa-face-sad-tear"></i>
         <h3>No pets matched your search.</h3>
-        <p>Try another name or switch your filter.</p>
+        <p>Try another description, breed, or color, or switch the species filter.</p>
       </div>
     </div>
   </section>
@@ -239,8 +240,13 @@
           </div>
 
           <div class="profile-meta-card">
-            <span class="meta-label">Size</span>
-            <strong id="profileSize">Unknown</strong>
+            <span class="meta-label">Breed</span>
+            <strong id="profileBreed">Not recorded</strong>
+          </div>
+
+          <div class="profile-meta-card">
+            <span class="meta-label">Color / markings</span>
+            <strong id="profileColor">Not recorded</strong>
           </div>
         </div>
 

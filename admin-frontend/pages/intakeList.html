@@ -187,9 +187,16 @@
         <div class="form-section">
           <div class="form-section-title"><i class="bi bi-heart-pulse"></i> Animal Information</div>
           <div class="form-grid">
+            <div class="form-group form-full">
+              <label class="form-lbl" for="fIdentifyingDescription">Identifying Description <span class="req">*</span></label>
+              <textarea class="form-inp form-textarea" id="fIdentifyingDescription" rows="2"
+                placeholder="e.g. Brown dog with a white chest and white left front paw"></textarea>
+              <span class="form-err" id="errIdentifyingDescription"></span>
+            </div>
             <div class="form-group">
-              <label class="form-lbl" for="fAnimalName">Animal Name / Alias</label>
-              <input type="text" class="form-inp" id="fAnimalName" placeholder="e.g. Unknown / Brownie" />
+              <label class="form-lbl" for="fPreviousName">Known Previous Name</label>
+              <input type="text" class="form-inp" id="fPreviousName"
+                placeholder="Owner surrender only; not a shelter-assigned name" />
             </div>
             <div class="form-group">
               <label class="form-lbl" for="fSpecies">Species <span class="req">*</span></label>
@@ -268,6 +275,21 @@
                 <label class="radio-opt"><input type="radio" name="vaccinated" value="Unknown" id="vacUnk" checked /> Unknown</label>
               </div>
             </div>
+            <div class="form-group">
+              <label class="form-lbl" for="fAlteredStatus">Spay / Neuter Status</label>
+              <select class="form-inp" id="fAlteredStatus">
+                <option value="Unknown">Unknown</option>
+                <option value="Spayed">Spayed</option>
+                <option value="Neutered">Neutered</option>
+                <option value="Intact">Intact</option>
+                <option value="Not applicable">Not applicable</option>
+              </select>
+            </div>
+            <div class="form-group form-full">
+              <label class="form-lbl" for="fVisibleDefects">Visible Defects / Special Physical Features</label>
+              <textarea class="form-inp form-textarea" id="fVisibleDefects" rows="2"
+                placeholder="Describe any visible defect, disability, missing limb, impaired vision, or distinctive feature"></textarea>
+            </div>
           </div>
         </div>
 
@@ -284,8 +306,9 @@
               <span class="form-err" id="errIntakeDate"></span>
             </div>
             <div class="form-group">
-              <label class="form-lbl" for="fLocation">Found / Picked Up At</label>
+              <label class="form-lbl" for="fLocation">Found / Picked Up At <span class="req">*</span></label>
               <input type="text" class="form-inp" id="fLocation" placeholder="e.g. Brgy. Sto. Domingo, Angeles City" />
+              <span class="form-err" id="errLocation"></span>
             </div>
             <div class="form-group form-full">
               <label class="form-lbl" for="fIntakeNotes">Additional Notes</label>

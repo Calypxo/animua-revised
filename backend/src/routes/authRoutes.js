@@ -7,6 +7,7 @@ const {
   confirmEmailVerificationOtp,
   confirmPhoneVerification,
   discardUnverifiedRegistration,
+  getCurrentAccount,
   updateUsername,
   changePassword
 } = require("../controllers/authController");
@@ -22,5 +23,9 @@ router.post("/discard-unverified-registration", discardUnverifiedRegistration);
 
 router.put("/update-username", verifyToken, updateUsername);
 router.put("/change-password", verifyToken, changePassword);
+
+router.get("/account", verifyToken, getCurrentAccount);
+router.patch("/account/profile", verifyToken, updateUsername);
+router.patch("/account/password", verifyToken, changePassword);
 
 module.exports = router;

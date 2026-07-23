@@ -87,6 +87,28 @@ function today() {
   return new Date().toISOString().split("T")[0];
 }
 
+function intakeLabel(record = {}) {
+  const legacyName = String(record.animalName || "").trim();
+  const meaningfulLegacyName =
+    legacyName &&
+    !["unknown", "unnamed", "unnamed pet"].includes(
+      legacyName.toLowerCase()
+    );
+
+  return (
+    record.identifyingDescription ||
+    record.shelterLabel ||
+    [
+      record.color,
+      record.ageEstimate,
+      record.sex,
+      record.species,
+    ].filter(Boolean).join(" ") ||
+    (meaningfulLegacyName ? legacyName : "") ||
+    record.id ||
+    "Shelter animal"
+  );
+}
 
 /* ══════════════════════════════════════════════════════
    STATS
@@ -114,11 +136,11 @@ function applyFilters() {
     if (species && r.species !== species) return false;
 
     const id = (r.id || "").toLowerCase();
-    const animalName = (r.animalName || "").toLowerCase();
+    const description = intakeLabel(r).toLowerCase();
     const speciesName = (r.species || "").toLowerCase();
     const breed = (r.breed || "").toLowerCase();
 
-    if (q && !id.includes(q) && !animalName.includes(q) && !speciesName.includes(q) && !breed.includes(q)) {
+    if (q && !id.includes(q) && !description.includes(q) && !speciesName.includes(q) && !breed.includes(q)) {
       return false;
     }
 
@@ -169,7 +191,7 @@ function renderTable() {
         <div class="animal-cell">
           <div class="animal-thumb ${speciesThumb(r.species)}">${speciesEmoji(r.species)}</div>
           <div>
-            <div class="animal-name">${r.animalName || "Unknown"}</div>
+            <div class="animal-name">${intakeLabel(r)}</div>
             <div class="animal-sub">${r.species}${r.breed ? " · " + r.breed : ""}</div>
           </div>
         </div>
@@ -398,7 +420,12 @@ function openApprovedSurrenderIntakeModal() {
   document.getElementById("fIntakeId").value = "";
   document.getElementById("fIntakeDate").value = today();
 
-  document.getElementById("fAnimalName").value = surrender.petName || "";
+  document.getElementById("fIdentifyingDescription").value =
+    surrender.colorMarkings ||
+    [surrender.color, surrender.species].filter(Boolean).join(" ") ||
+    "";
+  document.getElementById("fPreviousName").value =
+    surrender.petName || "";
   document.getElementById("fSpecies").value = surrender.species || "";
   document.getElementById("fBreed").value = surrender.breed || "";
   document.getElementById("fSex").value = surrender.sex || "";
@@ -465,7 +492,10 @@ function openEditModal(id) {
   document.getElementById("intakeModalTitle").textContent    = `Edit Intake — ${r.id}`;
   document.getElementById("intakeModalSubtitle").textContent = "Update the intake details below.";
   document.getElementById("fIntakeId").value  = id;
-  document.getElementById("fAnimalName").value = r.animalName || "";
+  document.getElementById("fIdentifyingDescription").value =
+    r.identifyingDescription || intakeLabel(r);
+  document.getElementById("fPreviousName").value =
+    r.previousName || "";
   document.getElementById("fSpecies").value    = r.species;
   document.getElementById("fBreed").value      = r.breed     || "";
   document.getElementById("fSex").value        = r.sex;
@@ -474,6 +504,10 @@ function openEditModal(id) {
   document.getElementById("fCondition").value  = r.condition;
   document.getElementById("fWeight").value     = r.weight    || "";
   document.getElementById("fConditionNotes").value = r.conditionNotes || "";
+  document.getElementById("fAlteredStatus").value =
+    r.alteredStatus || "Unknown";
+  document.getElementById("fVisibleDefects").value =
+    r.visibleDefects || "";
   document.getElementById("fIntakeDate").value = r.intakeDate || today();
   document.getElementById("fLocation").value   = r.location  || "";
   document.getElementById("fIntakeNotes").value = r.intakeNotes || "";
@@ -517,7 +551,10 @@ function collectFormData(asDraft = false) {
   const vaccinated= document.querySelector("input[name='vaccinated']:checked")?.value || "Unknown";
 
   const record = {
-    animalName:     document.getElementById("fAnimalName").value.trim()       || "Unknown",
+    identifyingDescription:
+      document.getElementById("fIdentifyingDescription").value.trim(),
+    previousName:
+      document.getElementById("fPreviousName").value.trim(),
     species:        document.getElementById("fSpecies").value,
     breed:          document.getElementById("fBreed").value.trim(),
     sex:            document.getElementById("fSex").value,
@@ -527,7 +564,12 @@ function collectFormData(asDraft = false) {
     condition:      document.getElementById("fCondition").value,
     weight:         document.getElementById("fWeight").value,
     conditionNotes: document.getElementById("fConditionNotes").value.trim(),
-    injuries, vaccinated,
+    injuries,
+    vaccinated,
+    alteredStatus:
+      document.getElementById("fAlteredStatus").value || "Unknown",
+    visibleDefects:
+      document.getElementById("fVisibleDefects").value.trim(),
     intakeDate:     document.getElementById("fIntakeDate").value,
     location:       document.getElementById("fLocation").value.trim(),
     intakeNotes:    document.getElementById("fIntakeNotes").value.trim(),
@@ -566,12 +608,27 @@ function validateForm() {
   const sex       = document.getElementById("fSex").value;
   const condition = document.getElementById("fCondition").value;
   const date      = document.getElementById("fIntakeDate").value;
+  const description =
+    document.getElementById("fIdentifyingDescription").value.trim();
+  const location =
+    document.getElementById("fLocation").value.trim();
 
   if (!source)    { setErr("errSource",    "Please select an intake source."); valid = false; }
   if (!species)   { setErr("errSpecies",   "Species is required.");            valid = false; }
   if (!sex)       { setErr("errSex",       "Sex is required.");                valid = false; }
   if (!condition) { setErr("errCondition", "Condition is required.");          valid = false; }
   if (!date)      { setErr("errIntakeDate","Intake date is required.");        valid = false; }
+  if (!description) {
+    setErr(
+      "errIdentifyingDescription",
+      "Describe the animal's color, markings, or other identifying features."
+    );
+    valid = false;
+  }
+  if (!location) {
+    setErr("errLocation", "Found or pickup location is required.");
+    valid = false;
+  }
 
   if (source === "Barangay Impound") {
     const bn = document.getElementById("fBarangayName")?.value.trim();
@@ -731,7 +788,7 @@ function openViewModal(id) {
     <div class="intake-id-header">
       <span class="intake-id-badge">${r.id}</span>
       <div>
-        <div class="intake-animal-name">${r.animalName || "Unknown"} &nbsp; ${speciesEmoji(r.species)}</div>
+        <div class="intake-animal-name">${intakeLabel(r)} &nbsp; ${speciesEmoji(r.species)}</div>
         <div class="intake-animal-meta">${r.species}${r.breed ? " · " + r.breed : ""} · ${r.sex}</div>
       </div>
       <div class="ms-auto d-flex gap-2 flex-wrap">
@@ -748,6 +805,9 @@ function openViewModal(id) {
         <div class="view-field"><div class="view-field-lbl">Weight</div><div class="view-field-val">${r.weight ? r.weight + " kg" : "Not recorded"}</div></div>
         <div class="view-field"><div class="view-field-lbl">Injuries</div><div class="view-field-val">${r.injuries||"Unknown"}</div></div>
         <div class="view-field"><div class="view-field-lbl">Vaccinated</div><div class="view-field-val">${r.vaccinated||"Unknown"}</div></div>
+        <div class="view-field"><div class="view-field-lbl">Spay / Neuter Status</div><div class="view-field-val">${r.alteredStatus||"Unknown"}</div></div>
+        ${r.previousName ? `<div class="view-field"><div class="view-field-lbl">Known Previous Name</div><div class="view-field-val">${r.previousName}</div></div>` : ""}
+        ${r.visibleDefects ? `<div class="view-field view-full"><div class="view-field-lbl">Visible Defects / Features</div><div class="view-field-val">${r.visibleDefects}</div></div>` : ""}
         ${r.conditionNotes ? `<div class="view-field view-full"><div class="view-field-lbl">Condition Notes</div><div class="view-field-val">${r.conditionNotes}</div></div>` : ""}
       </div>
     </div>
@@ -815,7 +875,7 @@ function openConfirmModal(action, id) {
   const cfg = {
     approve: {
       title:    "Approve Intake",
-      msg:      `Approve intake record ${id} for ${r.animalName}? This will allow the record to be converted to an Animal Profile.`,
+      msg:      `Approve intake record ${id} for ${intakeLabel(r)}? This will allow the record to be converted to an Animal Profile.`,
       iconCls:  "approve",
       iconIcon: "bi-check-circle-fill",
       btnCls:   "btn-approve",
@@ -823,7 +883,7 @@ function openConfirmModal(action, id) {
     },
     reject: {
       title:    "Reject Intake",
-      msg:      `Reject intake record ${id} for ${r.animalName}? Please provide a reason below.`,
+      msg:      `Reject intake record ${id} for ${intakeLabel(r)}? Please provide a reason below.`,
       iconCls:  "reject",
       iconIcon: "bi-x-circle-fill",
       btnCls:   "btn-reject",
@@ -831,7 +891,7 @@ function openConfirmModal(action, id) {
     },
     convert: {
       title:    "Convert to Animal Profile",
-      msg:      `Convert ${r.animalName} (${id}) to a full Animal Profile? This will move the animal into the profiling stage.`,
+      msg:      `Convert ${intakeLabel(r)} (${id}) to a full Animal Profile? This will move the animal into the profiling stage.`,
       iconCls:  "convert",
       iconIcon: "bi-arrow-right-circle-fill",
       btnCls:   "btn-convert",

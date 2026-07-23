@@ -2,11 +2,15 @@ import "../css/archivedRecords.css";
 import "../css/adminDashboard.css";
 import "../css/sidebar.css";
 
-import { protectManagementPage } from "../auth/authGuard.js";
+import { protectPageByModule } from "../auth/authGuard.js";
+import { hasPermission } from "../auth/permissions.js";
 import { renderTopbarUser } from "../components/management/topbarUser.js";
 import { loadSidebar } from "../components/management/sidebarLoader.js";
 
-const STORAGE_KEY = "animua_archived_records_mock";
+import {
+  getArchivedRecords,
+  restoreArchivedAnimal,
+} from "../services/archive.service.js";
 
 const state = {
   records: [],
@@ -20,158 +24,8 @@ const state = {
   selectedRecordId: null
 };
 
-function seedRecords() {
-  const existing = localStorage.getItem(STORAGE_KEY);
-  if (existing) return;
-
-  const sampleRecords = [
-    {
-      id: "ARC-001",
-      module: "Animal Management",
-      type: "Animal Record",
-      title: "Loki",
-      recordId: "ANIM-2025-091",
-      reason: "Duplicate",
-      archivedDate: "2026-04-11",
-      archivedTime: "03:40 PM",
-      archivedBy: "Animua Admin",
-      description: "Duplicate animal intake record archived to keep the master record clean.",
-      relatedInfo: "Species: Dog · Breed: Mixed Breed · Sex: Male"
-    },
-    {
-      id: "ARC-002",
-      module: "Adoption Management",
-      type: "Adoption Record",
-      title: "Completed Adoption Case",
-      recordId: "ADP-2025-101",
-      reason: "Completed",
-      archivedDate: "2026-04-08",
-      archivedTime: "01:15 PM",
-      archivedBy: "Staff Andrea Villanueva",
-      description: "Old adoption case archived after full completion and documentation.",
-      relatedInfo: "Adopter: Ruben Santiago · Pet: Tala"
-    },
-    {
-      id: "ARC-003",
-      module: "Post Adoption",
-      type: "Post-Adoption Case",
-      title: "Finalized Monitoring Case",
-      recordId: "PAC-2025-013",
-      reason: "Completed",
-      archivedDate: "2026-04-09",
-      archivedTime: "10:05 AM",
-      archivedBy: "Staff Maria Santos",
-      description: "Post-adoption monitoring case archived after successful closure.",
-      relatedInfo: "Pet: Tala · Final Status: Closed"
-    },
-    {
-      id: "ARC-004",
-      module: "Inventory",
-      type: "Inventory Item",
-      title: "Old Syringe Box Listing",
-      recordId: "INV-2025-044",
-      reason: "Replaced",
-      archivedDate: "2026-04-10",
-      archivedTime: "09:55 AM",
-      archivedBy: "Staff Kevin Dela Cruz",
-      description: "Old inventory listing archived and replaced by a new standardized item entry.",
-      relatedInfo: "Category: Consumable · Unit: box"
-    },
-    {
-      id: "ARC-005",
-      module: "User Management",
-      type: "User Account",
-      title: "Former Volunteer Account",
-      recordId: "USR-2025-019",
-      reason: "Inactive",
-      archivedDate: "2026-04-07",
-      archivedTime: "04:22 PM",
-      archivedBy: "Animua Admin",
-      description: "User account archived due to long-term inactivity.",
-      relatedInfo: "Role: Volunteer · Access: Removed"
-    },
-    {
-      id: "ARC-006",
-      module: "Animal Management",
-      type: "Animal Record",
-      title: "Transferred Cat Record",
-      recordId: "ANIM-2025-133",
-      reason: "Transferred",
-      archivedDate: "2026-04-05",
-      archivedTime: "02:30 PM",
-      archivedBy: "Staff Andrea Villanueva",
-      description: "Animal record archived after transfer to partner rescue group.",
-      relatedInfo: "Species: Cat · Transfer: Partner Shelter"
-    },
-    {
-      id: "ARC-007",
-      module: "Inventory",
-      type: "Inventory Item",
-      title: "Expired Medicine Entry",
-      recordId: "INV-2025-052",
-      reason: "Inactive",
-      archivedDate: "2026-04-06",
-      archivedTime: "11:42 AM",
-      archivedBy: "Staff Kevin Dela Cruz",
-      description: "Inventory item archived after being marked expired and no longer active.",
-      relatedInfo: "Category: Antibiotic"
-    },
-    {
-      id: "ARC-008",
-      module: "Adoption Management",
-      type: "Adoption Record",
-      title: "Duplicate Adoption Application",
-      recordId: "ADP-2026-004",
-      reason: "Duplicate",
-      archivedDate: "2026-04-04",
-      archivedTime: "08:50 AM",
-      archivedBy: "Animua Admin",
-      description: "Duplicate application archived to avoid conflicting approval records.",
-      relatedInfo: "Applicant matched an existing record"
-    },
-    {
-      id: "ARC-009",
-      module: "Post Adoption",
-      type: "Post-Adoption Case",
-      title: "Replaced Monitoring File",
-      recordId: "PAC-2026-002-OLD",
-      reason: "Replaced",
-      archivedDate: "2026-04-03",
-      archivedTime: "05:10 PM",
-      archivedBy: "Staff Maria Santos",
-      description: "Old case entry archived after record restructuring.",
-      relatedInfo: "Replaced by PAC-2026-002"
-    },
-    {
-      id: "ARC-010",
-      module: "User Management",
-      type: "User Account",
-      title: "Old Staff Account",
-      recordId: "USR-2024-008",
-      reason: "Inactive",
-      archivedDate: "2026-04-02",
-      archivedTime: "01:08 PM",
-      archivedBy: "Animua Admin",
-      description: "Former staff account archived after deactivation.",
-      relatedInfo: "Role: Shelter Staff"
-    }
-  ];
-
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(sampleRecords));
-}
-
-function getRecords() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-  } catch (error) {
-    console.error("Failed to parse archived records:", error);
-    return [];
-  }
-}
-
-function saveRecords(records) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
-}
+let currentRole = "";
+let restoreInProgress = false;
 
 function getEl(id) {
   return document.getElementById(id);
@@ -229,7 +83,11 @@ function getReasonClass(reason) {
   if (reason === "Inactive") return "reason-inactive";
   if (reason === "Transferred") return "reason-transferred";
   if (reason === "Replaced") return "reason-replaced";
-  return "reason-inactive";
+  return "reason-other";
+}
+
+function can(action) {
+  return hasPermission(currentRole, "archive", action);
 }
 
 function renderAlertBar() {
@@ -241,7 +99,7 @@ function renderAlertBar() {
       <i class="bi bi-archive-fill"></i>
       <div>
         <strong>${state.filteredRecords.length} archived record${state.filteredRecords.length !== 1 ? "s" : ""} found</strong><br />
-        Review archived items from different modules and restore them when needed.
+        Review archived animal records and restore them when needed.
       </div>
     </div>
   `;
@@ -339,7 +197,18 @@ function renderTable() {
       <td>
         <div class="action-group">
           <button class="detail-btn" data-view-id="${escapeHtml(item.id)}">View</button>
-          <button class="restore-btn" data-restore-id="${escapeHtml(item.id)}">Restore</button>
+          ${
+              can("restore") && item.sourceType === "animal"
+          ? `
+            <button
+              class="restore-btn"
+              data-restore-id="${escapeHtml(item.id)}"
+            >
+              Restore
+            </button>
+          `
+          : ""
+            }
         </div>
       </td>
     </tr>
@@ -398,10 +267,21 @@ function openViewModal(id) {
   const item = state.records.find((record) => record.id === id);
   if (!item) return;
 
-  state.selectedRecordId = id;
-
   const content = getEl("viewArchiveContent");
-  content.innerHTML = `
+const backdrop = getEl(
+  "viewArchiveModalBackdrop"
+);
+
+if (!content || !backdrop) {
+  console.error(
+    "Archive modal elements are missing."
+  );
+  return;
+}
+
+state.selectedRecordId = id;
+
+content.innerHTML = `
     <div class="archive-detail-grid">
       <div class="archive-detail-item">
         <div class="archive-detail-label">Archive ID</div>
@@ -455,21 +335,107 @@ function openViewModal(id) {
     </div>
   `;
 
-  getEl("viewArchiveModalBackdrop").classList.add("open");
+  const restoreButton = getEl("modalRestoreBtn");
+
+  if (restoreButton) {
+  restoreButton.style.display =
+    can("restore") &&
+    item.sourceType === "animal"
+      ? ""
+      : "none";
+}
+
+  backdrop.classList.add("open");
 }
 
 function closeViewModal() {
-  getEl("viewArchiveModalBackdrop").classList.remove("open");
+  const backdrop = getEl(
+    "viewArchiveModalBackdrop"
+  );
+
+  backdrop?.classList.remove("open");
   state.selectedRecordId = null;
 }
 
-function restoreRecord(id) {
-  const updated = state.records.filter((item) => item.id !== id);
-  state.records = updated;
-  saveRecords(updated);
-  applyFilters();
-  closeViewModal();
-  showToast("Archived record restored.", "success");
+async function restoreRecord(id) {
+  if (!can("restore")) {
+    showToast(
+      "You do not have permission to restore archived records.",
+      "warning"
+    );
+
+    return;
+  }
+
+  const item = state.records.find(
+    (record) => record.id === id
+  );
+
+  if (!item) {
+    showToast(
+      "Archived record was not found.",
+      "warning"
+    );
+
+    return;
+  }
+
+  if (
+    item.sourceType !== "animal"
+  ) {
+    showToast(
+      "This record type cannot be restored yet.",
+      "warning"
+    );
+
+    return;
+  }
+
+if (restoreInProgress) {
+  return;
+}
+
+const confirmed = window.confirm(
+  `Restore ${item.title} from the archive?`
+);
+
+if (!confirmed) {
+  return;
+}
+
+restoreInProgress = true;
+
+  try {
+    const result =
+      await restoreArchivedAnimal(
+        item.sourceId
+      );
+
+    closeViewModal();
+
+    await loadArchivedRecords();
+
+    showToast(
+      `${item.title} restored to ${
+        result?.status ||
+        "active records"
+      }.`,
+      "success"
+    );
+  } catch (error) {
+    console.error(
+      "[restoreRecord]",
+      error
+    );
+
+    showToast(
+      error.message ||
+        "Failed to restore archived record.",
+      "warning"
+    );
+  } finally {
+    restoreInProgress = false;
+  }
 }
 
 function exportArchive() {
@@ -525,9 +491,26 @@ function resetFilters() {
   state.reason = "";
   state.currentPage = 1;
 
-  getEl("searchArchive").value = "";
-  getEl("filterType").value = "";
-  getEl("filterReason").value = "";
+const searchInput =
+  getEl("searchArchive");
+
+const typeFilter =
+  getEl("filterType");
+
+const reasonFilter =
+  getEl("filterReason");
+
+if (searchInput) {
+  searchInput.value = "";
+}
+
+if (typeFilter) {
+  typeFilter.value = "";
+}
+
+if (reasonFilter) {
+  reasonFilter.value = "";
+}
 
   document.querySelectorAll(".archive-tab").forEach((btn) => {
     btn.classList.toggle("active", btn.dataset.tab === "all");
@@ -551,6 +534,167 @@ function bindTabs() {
       applyFilters();
     });
   });
+}
+
+function populateSelect(
+  id,
+  values,
+  defaultLabel
+) {
+  const select = getEl(id);
+
+  if (!select) {
+    return;
+  }
+
+  const selectedValue =
+    select.value;
+
+  const uniqueValues = [
+    ...new Set(
+      values
+        .filter(Boolean)
+        .map((value) =>
+          String(value).trim()
+        )
+    ),
+  ].sort((a, b) =>
+    a.localeCompare(b)
+  );
+
+  select.innerHTML = `
+    <option value="">
+      ${escapeHtml(defaultLabel)}
+    </option>
+
+    ${uniqueValues
+      .map(
+        (value) => `
+          <option value="${escapeHtml(value)}">
+            ${escapeHtml(value)}
+          </option>
+        `
+      )
+      .join("")}
+  `;
+
+  if (
+    uniqueValues.includes(
+      selectedValue
+    )
+  ) {
+    select.value = selectedValue;
+  }
+}
+
+function populateArchiveFilters() {
+  const types = state.records.map(
+    (record) => record.type
+  );
+
+  const reasons = state.records.map(
+    (record) => record.reason
+  );
+
+  if (
+    state.type &&
+    !types.includes(state.type)
+  ) {
+    state.type = "";
+  }
+
+  if (
+    state.reason &&
+    !reasons.includes(state.reason)
+  ) {
+    state.reason = "";
+  }
+
+  populateSelect(
+    "filterType",
+    types,
+    "All Record Types"
+  );
+
+  populateSelect(
+    "filterReason",
+    reasons,
+    "All Reasons"
+  );
+
+  const typeFilter =
+    getEl("filterType");
+
+  const reasonFilter =
+    getEl("filterReason");
+
+  if (typeFilter) {
+    typeFilter.value = state.type;
+  }
+
+  if (reasonFilter) {
+    reasonFilter.value =
+      state.reason;
+  }
+}
+
+function syncArchiveTabs() {
+  const availableModules =
+    new Set(
+      state.records.map(
+        (record) => record.module
+      )
+    );
+
+  document
+    .querySelectorAll(".archive-tab")
+    .forEach((button) => {
+      const tab =
+        button.dataset.tab;
+
+      const isAvailable =
+        tab === "all" ||
+        availableModules.has(tab);
+
+      button.hidden = !isAvailable;
+    });
+
+  if (
+    state.activeTab !== "all" &&
+    !availableModules.has(
+      state.activeTab
+    )
+  ) {
+    state.activeTab = "all";
+  }
+
+  document
+    .querySelectorAll(".archive-tab")
+    .forEach((button) => {
+      button.classList.toggle(
+        "active",
+        button.dataset.tab ===
+          state.activeTab
+      );
+    });
+}
+
+async function loadArchivedRecords() {
+  const records =
+    await getArchivedRecords();
+
+  state.records =
+    Array.isArray(records)
+      ? records
+      : [];
+
+  state.filteredRecords = [
+    ...state.records,
+  ];
+
+  populateArchiveFilters();
+  syncArchiveTabs();
+  applyFilters();
 }
 
 function bindFilters() {
@@ -596,24 +740,41 @@ function bindButtons() {
 
 async function initArchivedRecordsPage() {
   try {
-    await protectManagementPage();
+    const session =
+      await protectPageByModule(
+        "archive"
+      );
+
+    currentRole = session.role;
+
     renderTopbarUser();
     loadSidebar();
-
-
-    seedRecords();
-    state.records = getRecords();
-    state.filteredRecords = [...state.records];
 
     bindTabs();
     bindFilters();
     bindButtons();
+
+    await loadArchivedRecords();
+  } catch (error) {
+    console.error(
+      "Archived Records page init failed:",
+      error
+    );
+
+    state.records = [];
+    state.filteredRecords = [];
+
     applyFilters();
 
-    document.body.classList.remove("loading");
-  } catch (error) {
-    console.error("Archived Records page init failed:", error);
-    document.body.classList.remove("loading");
+    showToast(
+      error.message ||
+        "Unable to load archived records.",
+      "warning"
+    );
+  } finally {
+    document.body.classList.remove(
+      "loading"
+    );
   }
 }
 

@@ -245,6 +245,22 @@
   box-shadow: 0 2px 8px rgba(151,10,18,0.3);
 }
 
+.pet-ready-badge {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.94);
+  color: #1a7a40;
+  font-size: 10px;
+  font-weight: 800;
+  box-shadow: 0 2px 8px rgba(31,41,55,.14);
+}
+
 .pet-card-body {
   padding: 18px 18px 18px;
   display: flex;
@@ -260,12 +276,66 @@
   font-size: 1.6rem; font-weight: 800;
   color: #1a1a2e;
   line-height: 0.96;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-clamp: 2;
+  overflow: hidden;
 }
 
 .pet-meta {
   color: #9ca3af;
   font-size: 12px; font-weight: 500;
   margin-bottom: 10px;
+}
+
+.pet-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 10px 0 12px;
+}
+
+.pet-fact {
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  padding: 8px;
+  border-radius: 10px;
+  background: #fdfaf7;
+  border: 1px solid rgba(151,10,18,.07);
+}
+
+.pet-fact > i {
+  width: 14px;
+  margin-top: 2px;
+  color: #970a12;
+  font-size: 11px;
+  text-align: center;
+}
+
+.pet-fact span {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.pet-fact small {
+  color: #9ca3af;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.pet-fact strong {
+  overflow: hidden;
+  color: #2b2b2b;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.3;
+  text-overflow: ellipsis;
 }
 
 .pet-description {
@@ -287,7 +357,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-bottom: 0;
+  margin-bottom: 14px;
 }
 
 .trait-chip {
@@ -1486,30 +1556,6 @@
   border-radius: 999px;
   white-space: nowrap;
   border: none;
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-}
-.form-actions .primary-btn {
-  flex: 1;
-  background: linear-gradient(135deg, var(--crimson), var(--orange));
-  color: var(--white);
-  box-shadow: 0 14px 28px rgba(151,10,18,0.18);
-}
-.form-actions .primary-btn:hover {
-  transform: translateY(-3px);
-}
-.form-actions .secondary-btn {
-  background: var(--white);
-  color: var(--dark);
-  border: 1px solid rgba(0,0,0,0.08) !important;
-}
-.form-actions .secondary-btn:hover {
-  background: #fff2ec;
-  transform: translateY(-2px);
-}
-=======
->>>>>>> 8c76e329d3ff001d2178f9f031b2d9a7600f79a0
 }
 .form-actions .primary-btn {
   flex: 1;
@@ -1711,7 +1757,3 @@
     border-radius: 34px;
   }
 }
-<<<<<<< HEAD
-=======
->>>>>>> 606b1bdf2899e5df758b6f4b01e816169754fd59
->>>>>>> 8c76e329d3ff001d2178f9f031b2d9a7600f79a0

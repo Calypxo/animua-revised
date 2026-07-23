@@ -85,6 +85,7 @@ function mapAdoptionFromBackend(a) {
 
     rejectedReason: a.rejectedReason || "",
     adoptionDate: a.adoptionDate || "",
+    adoptedName: a.adoptedName || "",
     processedBy: a.processedBy || "",
   };
 }
@@ -500,6 +501,7 @@ function renderDrawerContent(app) {
       <div style="background:var(--green-soft);border-radius:var(--radius-md);padding:14px 16px">
         <div class="drawer-info-grid" style="background:transparent">
           <div class="drawer-info-item" style="background:rgba(255,255,255,0.6)"><div class="drawer-info-lbl">Adoption Date</div><div class="drawer-info-val">${formatDate(app.adoptionDate)}</div></div>
+          <div class="drawer-info-item" style="background:rgba(255,255,255,0.6)"><div class="drawer-info-lbl">Adopter-Given Name</div><div class="drawer-info-val">${app.adoptedName||"—"}</div></div>
           <div class="drawer-info-item" style="background:rgba(255,255,255,0.6)"><div class="drawer-info-lbl">Processed By</div><div class="drawer-info-val">${app.processedBy||"—"}</div></div>
         </div>
       </div>
@@ -650,6 +652,8 @@ function openFinalizeModal(id) {
     `Confirm adoption of ${app.animal.name} by ${app.adopter.name}? This will mark the animal as Adopted.`;
   document.getElementById("fAdoptionDate").value  = new Date().toISOString().split("T")[0];
   document.getElementById("fAdoptionStaff").value = getUserName() || "";
+  document.getElementById("fAdoptedName").value = "";
+  document.getElementById("errAdoptedName").textContent = "";
   openModal("finalizeModalBackdrop");
 }
 
@@ -661,10 +665,19 @@ async function executeFinalize() {
   );
   return;
 }
+  const adoptedName =
+    document.getElementById("fAdoptedName").value.trim();
+  if (adoptedName.length < 2) {
+    document.getElementById("errAdoptedName").textContent =
+      "Enter the name chosen by the adopter.";
+    return;
+  }
+
   try {
     await finalizeAdoption(confirmMode.id, {
       adoptionDate: document.getElementById("fAdoptionDate").value,
       processedBy: document.getElementById("fAdoptionStaff").value.trim() || getUserName() || "Staff",
+      adoptedName,
     });
 
     closeModal("finalizeModalBackdrop");

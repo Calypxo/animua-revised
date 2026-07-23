@@ -1,12 +1,11 @@
-import "../css/auditTrail.css";
 import "../css/adminDashboard.css";
 import "../css/sidebar.css";
+import "../css/auditTrail.css";
 
 import { protectPageByModule } from "../auth/authGuard.js";
 import { renderTopbarUser } from "../components/management/topbarUser.js";
 import { loadSidebar } from "../components/management/sidebarLoader.js";
-
-const STORAGE_KEY = "animua_audit_trail_mock";
+import { getAuditLogs } from "../services/audit.service.js";
 
 const state = {
   logs: [],
@@ -16,157 +15,9 @@ const state = {
   action: "",
   status: "",
   currentPage: 1,
-  pageSize: 8
+  pageSize: 8,
+  loadError: "",
 };
-
-function seedLogs() {
-  const existing = localStorage.getItem(STORAGE_KEY);
-  if (existing) return;
-
-  const sampleLogs = [
-    {
-      id: "AUD-001",
-      date: "2026-04-13",
-      time: "09:12 AM",
-      actor: "Animua Admin",
-      role: "Administrator",
-      module: "Animal Management",
-      action: "Updated",
-      record: "ANIM-2026-003",
-      status: "Success",
-      details: "Updated animal profile details for Luna.",
-      ipAddress: "192.168.1.10"
-    },
-    {
-      id: "AUD-002",
-      date: "2026-04-13",
-      time: "09:45 AM",
-      actor: "Staff Maria Santos",
-      role: "Shelter Staff",
-      module: "Post Adoption",
-      action: "Scheduled",
-      record: "PAC-2026-001",
-      status: "Success",
-      details: "Scheduled follow-up visit for Luna on April 18, 2026.",
-      ipAddress: "192.168.1.12"
-    },
-    {
-      id: "AUD-003",
-      date: "2026-04-13",
-      time: "10:03 AM",
-      actor: "Staff Kevin Dela Cruz",
-      role: "Shelter Staff",
-      module: "Inventory",
-      action: "Updated",
-      record: "INV-2026-011",
-      status: "Success",
-      details: "Recorded usage for deworming medicine.",
-      ipAddress: "192.168.1.14"
-    },
-    {
-      id: "AUD-004",
-      date: "2026-04-13",
-      time: "10:20 AM",
-      actor: "Animua Admin",
-      role: "Administrator",
-      module: "User Management",
-      action: "Created",
-      record: "USR-2026-004",
-      status: "Success",
-      details: "Created a new staff account for inventory monitoring.",
-      ipAddress: "192.168.1.10"
-    },
-    {
-      id: "AUD-005",
-      date: "2026-04-13",
-      time: "11:02 AM",
-      actor: "Staff Andrea Villanueva",
-      role: "Shelter Staff",
-      module: "Adoption Management",
-      action: "Approved",
-      record: "ADP-2026-017",
-      status: "Success",
-      details: "Approved an adoption application for Panda.",
-      ipAddress: "192.168.1.16"
-    },
-    {
-      id: "AUD-006",
-      date: "2026-04-13",
-      time: "11:25 AM",
-      actor: "Unknown User",
-      role: "Unverified",
-      module: "Authentication",
-      action: "Logged In",
-      record: "LOGIN-2026-009",
-      status: "Failed",
-      details: "Failed login attempt detected due to invalid password.",
-      ipAddress: "192.168.1.50"
-    },
-    {
-      id: "AUD-007",
-      date: "2026-04-12",
-      time: "03:40 PM",
-      actor: "Animua Admin",
-      role: "Administrator",
-      module: "Animal Management",
-      action: "Deleted",
-      record: "ANIM-2025-091",
-      status: "Warning",
-      details: "Archived duplicate animal intake record.",
-      ipAddress: "192.168.1.10"
-    },
-    {
-      id: "AUD-008",
-      date: "2026-04-12",
-      time: "04:10 PM",
-      actor: "Staff Maria Santos",
-      role: "Shelter Staff",
-      module: "Post Adoption",
-      action: "Updated",
-      record: "PAC-2026-002",
-      status: "Success",
-      details: "Logged visit results for Mochi and marked case for reassessment.",
-      ipAddress: "192.168.1.12"
-    },
-    {
-      id: "AUD-009",
-      date: "2026-04-12",
-      time: "04:30 PM",
-      actor: "Animua Admin",
-      role: "Administrator",
-      module: "Authentication",
-      action: "Logged In",
-      record: "LOGIN-2026-008",
-      status: "Success",
-      details: "Administrator successfully logged in.",
-      ipAddress: "192.168.1.10"
-    },
-    {
-      id: "AUD-010",
-      date: "2026-04-11",
-      time: "01:18 PM",
-      actor: "Staff Kevin Dela Cruz",
-      role: "Shelter Staff",
-      module: "Inventory",
-      action: "Created",
-      record: "INV-2026-021",
-      status: "Success",
-      details: "Added a new medical supply item to the inventory list.",
-      ipAddress: "192.168.1.14"
-    }
-  ];
-
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(sampleLogs));
-}
-
-function getLogs() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-  } catch (error) {
-    console.error("Failed to parse audit logs:", error);
-    return [];
-  }
-}
 
 function getEl(id) {
   return document.getElementById(id);
@@ -209,9 +60,54 @@ function escapeHtml(value = "") {
 }
 
 function getActionClass(action) {
-  if (["Created", "Approved", "Scheduled"].includes(action)) return "action-created";
-  if (["Updated", "Logged In"].includes(action)) return "action-updated";
-  if (action === "Deleted") return "action-deleted";
+  const normalized =
+    normalize(action);
+
+  const positiveActions = [
+    "created",
+    "approved",
+    "converted",
+    "scheduled",
+    "marked ready",
+  ];
+
+  const updateActions = [
+    "updated",
+    "logged in",
+    "behavioral assessment",
+    "sent to quarantine",
+  ];
+
+  const destructiveActions = [
+    "deleted",
+    "archived",
+    "rejected",
+  ];
+
+  if (
+    positiveActions.includes(
+      normalized
+    )
+  ) {
+    return "action-created";
+  }
+
+  if (
+    destructiveActions.includes(
+      normalized
+    )
+  ) {
+    return "action-deleted";
+  }
+
+  if (
+    updateActions.includes(
+      normalized
+    )
+  ) {
+    return "action-updated";
+  }
+
   return "action-updated";
 }
 
@@ -259,6 +155,19 @@ function renderAlert() {
   const bar = getEl("auditAlertBar");
   if (!bar) return;
 
+  if (state.loadError) {
+    bar.innerHTML = `
+      <div class="alert-row alert-error">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <div>
+          <strong>Audit logs could not load</strong><br />
+          ${escapeHtml(state.loadError)}
+        </div>
+      </div>
+    `;
+    return;
+  }
+
   bar.innerHTML = `
     <div class="alert-row alert-info">
       <i class="bi bi-clock-history"></i>
@@ -281,6 +190,19 @@ function renderTable() {
   if (!tbody) return;
 
   const rows = getPagedLogs();
+
+  if (state.loadError) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" class="audit-error-cell">
+          <i class="bi bi-cloud-slash"></i>
+          <strong>Unable to retrieve audit records</strong>
+          <span>Check the backend connection, then reload this page.</span>
+        </td>
+      </tr>
+    `;
+    return;
+  }
 
   if (!rows.length) {
     tbody.innerHTML = `
@@ -335,6 +257,12 @@ function renderPagination() {
   if (!bar) return;
 
   const total = state.filteredLogs.length;
+
+  if (state.loadError || total === 0) {
+    bar.innerHTML = "";
+    return;
+  }
+
   const totalPages = Math.max(1, Math.ceil(total / state.pageSize));
 
   const pageButtons = [];
@@ -442,6 +370,11 @@ function closeViewModal() {
 }
 
 function exportLogs() {
+  if (!state.filteredLogs.length) {
+    showToast("There are no audit logs to export.", "info");
+    return;
+  }
+
   const headers = ["Audit ID", "Date", "Time", "Actor", "Role", "Module", "Action", "Record", "Status", "Details", "IP Address"];
   const rows = state.filteredLogs.map((log) => [
     log.id,
@@ -490,6 +423,80 @@ function resetFilters() {
   showToast("Filters reset.", "info");
 }
 
+function populateSelect(
+  id,
+  values,
+  defaultLabel
+) {
+  const select = getEl(id);
+  if (!select) return;
+
+  const currentValue =
+    select.value;
+
+  const uniqueValues = [
+    ...new Set(
+      values
+        .filter(Boolean)
+        .map((value) =>
+          String(value).trim()
+        )
+    ),
+  ].sort((a, b) =>
+    a.localeCompare(b)
+  );
+
+  select.innerHTML = `
+    <option value="">
+      ${escapeHtml(defaultLabel)}
+    </option>
+
+    ${uniqueValues
+      .map(
+        (value) => `
+          <option value="${escapeHtml(value)}">
+            ${escapeHtml(value)}
+          </option>
+        `
+      )
+      .join("")}
+  `;
+
+  if (
+    uniqueValues.includes(
+      currentValue
+    )
+  ) {
+    select.value = currentValue;
+  }
+}
+
+function populateFilterOptions() {
+  populateSelect(
+    "filterModule",
+    state.logs.map(
+      (log) => log.module
+    ),
+    "All Modules"
+  );
+
+  populateSelect(
+    "filterAction",
+    state.logs.map(
+      (log) => log.action
+    ),
+    "All Actions"
+  );
+
+  populateSelect(
+    "filterStatus",
+    state.logs.map(
+      (log) => log.status
+    ),
+    "All Statuses"
+  );
+}
+
 function bindFilters() {
   getEl("searchAudit")?.addEventListener("input", (e) => {
     state.search = e.target.value;
@@ -535,23 +542,51 @@ function bindButtons() {
 
 async function initAuditTrailPage() {
   try {
-    await protectPageByModule("audit");
+    await protectPageByModule(
+      "audit"
+    );
 
     renderTopbarUser();
     loadSidebar();
 
-    seedLogs();
-    state.logs = getLogs();
-    state.filteredLogs = [...state.logs];
+    state.logs =
+      await getAuditLogs();
+
+    state.loadError = "";
+
+    state.filteredLogs = [
+      ...state.logs,
+    ];
+
+    populateFilterOptions();
+
+    bindFilters();
+    bindButtons();
+    applyFilters();
+  } catch (error) {
+    console.error(
+      "Audit Trail page init failed:",
+      error
+    );
+
+    state.logs = [];
+    state.filteredLogs = [];
+    state.loadError =
+      error.message ||
+      "Unable to load audit logs.";
 
     bindFilters();
     bindButtons();
     applyFilters();
 
-    document.body.classList.remove("loading");
-  } catch (error) {
-    console.error("Audit Trail page init failed:", error);
-    document.body.classList.remove("loading");
+    showToast(
+      state.loadError,
+      "info"
+    );
+  } finally {
+    document.body.classList.remove(
+      "loading"
+    );
   }
 }
 

@@ -14,6 +14,7 @@ export default defineConfig({
         compatibilityResults:    resolve(__dirname, 'pages/public/compatibilityResults.html'),
         quizLanding:             resolve(__dirname, 'pages/public/quizLanding.html'),
         contact:                 resolve(__dirname, 'pages/public/contact.html'),
+        announcements:           resolve(__dirname, 'pages/public/announcements.html'),
         surrender:               resolve(__dirname, 'pages/public/surrender.html'),
         verifyEmailAction:       resolve(__dirname, 'pages/public/verify-email-action.html'),
         verifySuccess:           resolve(__dirname, 'pages/public/verify-success.html'),

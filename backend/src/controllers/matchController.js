@@ -1,5 +1,8 @@
 const PYTHON_MATCHER_URL =
   process.env.PYTHON_MATCHER_URL || "http://127.0.0.1:8001/score";
+const {
+  buildShelterLabel,
+} = require("../utils/animalIdentity");
 
 exports.matchPets = async (req, res) => {
   try {
@@ -14,10 +17,14 @@ exports.matchPets = async (req, res) => {
 
     let animals = snapshot.docs.map((doc) => {
       const data = doc.data();
+      const displayLabel = buildShelterLabel(data, doc.id);
 
       return {
         id: doc.id,
         ...data,
+        name: displayLabel,
+        displayLabel,
+        shelterLabel: displayLabel,
         photoUrl: data.photoURL || data.photoUrl || "",
         age: data.ageEstimate || data.age || "",
       };

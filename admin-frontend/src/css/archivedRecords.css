@@ -298,6 +298,11 @@
   color: var(--blue);
 }
 
+.reason-other {
+  background: #f1f3f5;
+  color: #495057;
+}
+
 .date-cell {
   font-family: var(--mono);
   font-size: 0.78rem;

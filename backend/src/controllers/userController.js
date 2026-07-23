@@ -23,7 +23,7 @@ const ROLE_PERMISSIONS = {
   },
   Staff: {
     dashboard: ["view"],
-    animals: ["view", "edit_basic", "upload_photo", "send_to_quarantine", "process_adoption"],
+    animals: ["view", "edit_basic", "upload_photo", "process_adoption"],
     intake: ["view", "create", "edit", "approve", "reject", "convert"],
     surrender: ["view", "approve", "reject", "convert"],
     quarantine: ["view"],
@@ -34,7 +34,7 @@ const ROLE_PERMISSIONS = {
   },
   Veterinarian: {
     dashboard: ["view"],
-    animals: ["view", "edit_behavioral", "add_medical", "edit_medical", "set_clearance"],
+    animals: ["view", "send_to_quarantine", "edit_behavioral", "add_medical", "edit_medical", "set_clearance"],
     quarantine: ["view"],
     inventory: ["view", "consume"],
     reports: ["view"],

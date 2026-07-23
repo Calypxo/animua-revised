@@ -678,9 +678,9 @@ function setupHomeStories() {
           .map(
             (pet) => `
               <button type="button" class="story-pet-card" data-pet-id="${escapeHtml(pet.id || "")}">
-                <img src="${escapeHtml(pet.photoURL || pet.image || fallbackPetImage(pet))}" alt="${escapeHtml(pet.name || "Adoptable furbaby")}">
+                <img src="${escapeHtml(pet.photoURL || pet.image || fallbackPetImage(pet))}" alt="${escapeHtml(pet.displayLabel || pet.shelterLabel || pet.name || `Animal ${pet.id}`)}">
                 <span class="story-pet-info">
-                  <strong>${escapeHtml(pet.name || "Unnamed Furbaby")}</strong>
+                  <strong>${escapeHtml(pet.displayLabel || pet.shelterLabel || pet.name || `Animal ${pet.id}`)}</strong>
                   <small>${escapeHtml(petTypeLabel(pet))}</small>
                   <span>${escapeHtml(pet.ageEstimate || pet.age || "Unknown age")} · ${escapeHtml(pet.sex || "Unknown sex")}</span>
                   <em>${escapeHtml(pet.status || "Ready")}</em>
@@ -773,9 +773,9 @@ function setupHomeStories() {
             const adoptionDate = pet.adoptionDate || "";
             return `
               <article class="story-pet-card story-pet-card-static">
-                <img src="${escapeHtml(getPetImage(pet))}" alt="${escapeHtml(pet.name || "Adopted furbaby")}">
+                <img src="${escapeHtml(getPetImage(pet))}" alt="${escapeHtml(pet.adoptedName || pet.name || pet.displayLabel || "Adopted furbaby")}">
                 <span class="story-pet-info">
-                  <strong>${escapeHtml(pet.name || "Unnamed Furbaby")}</strong>
+                  <strong>${escapeHtml(pet.adoptedName || pet.name || pet.displayLabel || `Animal ${pet.id}`)}</strong>
                   <small>${escapeHtml(petTypeLabel(pet))}</small>
                   <span>${escapeHtml([pet.ageEstimate || pet.age || "", pet.sex || ""].filter(Boolean).join(" - ") || "Adopted animal")}</span>
                   <em>${escapeHtml(adoptionDate ? `Adopted ${adoptionDate}` : "Adopted")}</em>
@@ -1019,11 +1019,11 @@ function setupFeaturedFurbabies() {
             tabindex="0"
             role="button"
             aria-expanded="false"
-            aria-label="Show details for ${escapeHtml(pet.name || "this furbaby")}"
+            aria-label="Show details for ${escapeHtml(pet.displayLabel || pet.shelterLabel || pet.name || `Animal ${pet.id}`)}"
           >
-            <img src="${escapeHtml(pet.photoURL || fallbackPetImage(pet))}" alt="${escapeHtml(pet.name || "Adoptable furbaby")}">
+            <img src="${escapeHtml(pet.photoURL || fallbackPetImage(pet))}" alt="${escapeHtml(pet.displayLabel || pet.shelterLabel || pet.name || `Animal ${pet.id}`)}">
             <div class="featured-furbaby-overlay">
-              <h3>${escapeHtml(pet.name || "Unnamed Furbaby")}</h3>
+              <h3>${escapeHtml(pet.displayLabel || pet.shelterLabel || pet.name || `Animal ${pet.id}`)}</h3>
               <button type="button" class="featured-furbaby-profile" data-pet-id="${escapeHtml(pet.id || "")}">
                 View Profile
               </button>
@@ -1413,7 +1413,14 @@ document.addEventListener("DOMContentLoaded", () => {
   if (window.location.pathname.includes("login.html") && authModal) {
     authModal.classList.remove("hidden");
   }
-const shouldOpenAuthModal = localStorage.getItem("animua_open_auth_modal") === "true";
+
+  if (window.location.hash === "#login" && authModal) {
+    showLoginView();
+    openAuthModal();
+    window.history.replaceState(null, "", window.location.pathname + window.location.search);
+  }
+
+  const shouldOpenAuthModal = localStorage.getItem("animua_open_auth_modal") === "true";
   if (shouldOpenAuthModal) {
     showLoginView();
     openAuthModal();

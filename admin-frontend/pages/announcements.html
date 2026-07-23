@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>ANIMUA — Announcements</title>
+
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+    rel="stylesheet"
+  />
+
+  <script type="module" src="../src/management/announcements.js"></script>
+</head>
+
+<body class="loading">
+  <div class="shell">
+    <div id="sidebar-container"></div>
+
+    <div class="stage">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button id="sidebarToggle" class="icon-btn" type="button" aria-label="Toggle sidebar">
+            <i class="bi bi-list"></i>
+          </button>
+          <nav class="announcement-breadcrumb" aria-label="Breadcrumb">
+            <span class="breadcrumb-link">Community</span>
+            <i class="bi bi-chevron-right breadcrumb-sep"></i>
+            <span class="breadcrumb-current">Announcements</span>
+          </nav>
+        </div>
+
+        <div class="topbar-right">
+          <button class="icon-btn notif-btn" type="button" aria-label="Notifications">
+            <i class="bi bi-bell-fill"></i>
+            <span class="notif-dot"></span>
+          </button>
+          <div class="user-chip">
+            <div class="user-avatar" id="topbar-initials">AU</div>
+            <div class="user-meta">
+              <span id="display-name">Admin User</span>
+              <small id="display-role">Admin</small>
+            </div>
+            <i class="bi bi-chevron-down caret"></i>
+          </div>
+        </div>
+      </header>
+
+      <main class="main-content page-body">
+        <section class="page-header">
+          <div>
+            <h1 class="page-title">Announcements &amp; Events</h1>
+            <p class="page-sub">Create public updates, events, and advisories for the ANIMUA portal.</p>
+          </div>
+
+          <button id="btnNewAnnouncement" class="btn-primary-clay" type="button">
+            <i class="bi bi-plus-lg"></i>
+            Create Post
+          </button>
+        </section>
+
+        <section class="feed-layout">
+          <aside class="feed-filters">
+            <label>
+              Search
+              <input id="searchAnnouncement" type="text" placeholder="Search title or caption..." />
+            </label>
+
+            <label>
+              Type
+              <select id="filterType">
+                <option value="">All Types</option>
+                <option value="Announcement">Announcement</option>
+                <option value="Event">Event</option>
+                <option value="Advisory">Advisory</option>
+              </select>
+            </label>
+
+            <label>
+              Status
+              <select id="filterStatus">
+                <option value="">All Status</option>
+                <option value="Published">Published</option>
+                <option value="Draft">Draft</option>
+              </select>
+            </label>
+          </aside>
+
+          <section>
+            <div id="announcementFeed" class="announcement-feed"></div>
+          </section>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div id="announcementModalBackdrop" class="modal-backdrop-custom">
+    <div class="announcement-modal">
+      <div class="modal-head">
+        <div>
+          <span class="composer-eyebrow">Community publisher</span>
+          <h2 id="announcementModalTitle">Create Post</h2>
+          <p>Share an update with the ANIMUA community.</p>
+        </div>
+
+        <button id="announcementModalClose" class="icon-btn" type="button">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <form id="announcementForm" class="announcement-form composer-layout">
+        <section class="composer-media-column" aria-label="Post media">
+          <div id="mediaPreview" class="media-preview">
+            <img id="mediaPreviewImage" alt="Post media preview" hidden />
+
+            <div class="media-placeholder">
+              <div class="media-placeholder-icon">
+                <i class="bi bi-image"></i>
+              </div>
+              <strong>Add a cover image</strong>
+              <span>Paste a public image URL below to preview your post.</span>
+            </div>
+          </div>
+
+          <label class="media-url-control">
+            <span>Media URL</span>
+            <div class="input-with-icon">
+              <i class="bi bi-link-45deg"></i>
+              <input id="fImageUrl" type="url" placeholder="https://example.com/photo.jpg" />
+            </div>
+            <small id="mediaPreviewStatus">JPG, PNG, or WebP links work best.</small>
+          </label>
+        </section>
+
+        <section class="composer-fields" aria-label="Post details">
+          <div class="composer-author">
+            <div class="composer-author-avatar"><i class="bi bi-heart-fill"></i></div>
+            <div>
+              <strong>ANIMUA Angeles City</strong>
+              <span><i class="bi bi-globe2"></i> Community post</span>
+            </div>
+          </div>
+
+          <label class="composer-control composer-title-control">
+            <span>Post title</span>
+            <input id="fTitle" type="text" placeholder="Tell everyone what this post is about" required />
+          </label>
+
+          <label class="composer-control">
+            <span>Description</span>
+            <textarea id="fCaption" rows="6" placeholder="Share news, event details, or an important advisory..." required></textarea>
+          </label>
+
+          <div class="two-col">
+            <label class="composer-control">
+              <span>Post type</span>
+              <select id="fType">
+                <option value="Announcement">Announcement</option>
+                <option value="Event">Event</option>
+                <option value="Advisory">Advisory</option>
+              </select>
+            </label>
+
+            <label class="composer-control">
+              <span>Status</span>
+              <select id="fStatus">
+                <option value="Published">Publish now</option>
+                <option value="Draft">Save as draft</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="two-col">
+            <label class="composer-control">
+              <span>Event date</span>
+              <input id="fEventDate" type="date" />
+            </label>
+
+            <label class="composer-control">
+              <span>Location</span>
+              <input id="fLocation" type="text" placeholder="Add a location" />
+            </label>
+          </div>
+
+          <label class="composer-control">
+            <span>Audience</span>
+            <select id="fVisibleToPublic">
+              <option value="true">Public — visible on the public portal</option>
+              <option value="false">Internal — hidden from the public portal</option>
+            </select>
+          </label>
+
+          <div class="modal-actions">
+            <button id="announcementCancelBtn" class="secondary-btn" type="button">Cancel</button>
+            <button class="primary-btn composer-submit" type="submit">
+              <i class="bi bi-send-fill"></i>
+              Publish Post
+            </button>
+          </div>
+        </section>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="announcementToast" class="announcement-toast">
+    <i id="toastIcon" class="bi bi-check-circle-fill"></i>
+    <span id="toastMsg">Saved.</span>
+  </div>
+</body>
+</html>

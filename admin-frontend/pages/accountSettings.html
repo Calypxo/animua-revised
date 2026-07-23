@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ANIMUA — Account Settings</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/css/adminDashboard.css" />
+  <link rel="stylesheet" href="/src/css/sidebar.css" />
+  <link rel="stylesheet" href="/src/css/accountSettings.css" />
+</head>
+<body class="loading">
+  <div class="shell">
+    <div id="sidebar-container"></div>
+    <div class="stage">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button id="sidebarToggle" class="icon-btn" type="button" aria-label="Toggle sidebar">
+            <i class="bi bi-list"></i>
+          </button>
+          <nav class="d-flex align-items-center">
+            <span class="account-breadcrumb">Account</span>
+            <i class="bi bi-chevron-right account-breadcrumb-separator"></i>
+            <span class="account-breadcrumb-current">Settings</span>
+          </nav>
+        </div>
+        <div class="topbar-right">
+          <div class="user-chip">
+            <div class="user-avatar" id="topbar-initials">AU</div>
+            <div class="user-meta">
+              <span id="display-name">Management User</span>
+              <small id="display-role">Role</small>
+            </div>
+            <i class="bi bi-chevron-down caret"></i>
+          </div>
+        </div>
+      </header>
+
+      <main class="page-body account-page">
+        <section class="account-header">
+          <div>
+            <p class="account-eyebrow">Personal account</p>
+            <h1>Account Settings</h1>
+            <p>Manage the name shown across ANIMUA and keep your password secure.</p>
+          </div>
+          <div class="account-security-badge">
+            <i class="bi bi-shield-check"></i>
+            Protected management account
+          </div>
+        </section>
+
+        <section class="account-profile-summary">
+          <div class="account-avatar" id="accountAvatar">AU</div>
+          <div>
+            <h2 id="accountName">Management User</h2>
+            <p id="accountEmail">Loading account…</p>
+            <span id="accountRole" class="account-role">Role</span>
+          </div>
+        </section>
+
+        <div class="account-grid">
+          <section class="account-card">
+            <div class="account-card-heading">
+              <div class="account-card-icon"><i class="bi bi-person-badge"></i></div>
+              <div>
+                <h2>Profile information</h2>
+                <p>This name appears in the sidebar, activity records, and staff actions.</p>
+              </div>
+            </div>
+            <form id="profileForm" novalidate>
+              <label class="account-field">
+                <span>Display name</span>
+                <input id="displayNameInput" type="text" minlength="2" maxlength="80" autocomplete="name" required />
+                <small id="displayNameError" class="account-error"></small>
+              </label>
+              <label class="account-field">
+                <span>Email address</span>
+                <input id="emailInput" type="email" readonly />
+                <small>Email changes require administrator support.</small>
+              </label>
+              <label class="account-field">
+                <span>System role</span>
+                <input id="roleInput" type="text" readonly />
+                <small>Role and permissions are controlled by an administrator.</small>
+              </label>
+              <div class="account-form-actions">
+                <button class="account-primary-button" id="saveProfileButton" type="submit">
+                  <i class="bi bi-check2-circle"></i> Save profile
+                </button>
+              </div>
+            </form>
+          </section>
+
+          <section class="account-card">
+            <div class="account-card-heading">
+              <div class="account-card-icon security"><i class="bi bi-key"></i></div>
+              <div>
+                <h2>Change password</h2>
+                <p>Your current password is required. You will sign in again after changing it.</p>
+              </div>
+            </div>
+            <form id="passwordForm" novalidate>
+              <label class="account-field">
+                <span>Current password</span>
+                <div class="password-input-wrap">
+                  <input id="currentPassword" type="password" autocomplete="current-password" required />
+                  <button type="button" class="password-toggle" data-target="currentPassword" aria-label="Show current password"><i class="bi bi-eye"></i></button>
+                </div>
+              </label>
+              <label class="account-field">
+                <span>New password</span>
+                <div class="password-input-wrap">
+                  <input id="newPassword" type="password" minlength="8" maxlength="128" autocomplete="new-password" required />
+                  <button type="button" class="password-toggle" data-target="newPassword" aria-label="Show new password"><i class="bi bi-eye"></i></button>
+                </div>
+              </label>
+              <div class="password-strength" aria-live="polite">
+                <div class="strength-bar"><span id="strengthFill"></span></div>
+                <span id="strengthLabel">Enter a new password</span>
+              </div>
+              <ul class="password-rules" id="passwordRules">
+                <li data-rule="length"><i class="bi bi-circle"></i> At least 8 characters</li>
+                <li data-rule="upper"><i class="bi bi-circle"></i> One uppercase letter</li>
+                <li data-rule="lower"><i class="bi bi-circle"></i> One lowercase letter</li>
+                <li data-rule="number"><i class="bi bi-circle"></i> One number</li>
+                <li data-rule="special"><i class="bi bi-circle"></i> One special character</li>
+              </ul>
+              <label class="account-field">
+                <span>Confirm new password</span>
+                <div class="password-input-wrap">
+                  <input id="confirmPassword" type="password" autocomplete="new-password" required />
+                  <button type="button" class="password-toggle" data-target="confirmPassword" aria-label="Show confirmed password"><i class="bi bi-eye"></i></button>
+                </div>
+                <small id="passwordError" class="account-error"></small>
+              </label>
+              <div class="account-form-actions">
+                <button class="account-primary-button" id="changePasswordButton" type="submit">
+                  <i class="bi bi-shield-lock"></i> Change password
+                </button>
+              </div>
+            </form>
+          </section>
+        </div>
+        <div class="account-live-status" id="accountStatus" role="status" aria-live="polite"></div>
+      </main>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script type="module" src="/src/management/accountSettings.js"></script>
+</body>
+</html>

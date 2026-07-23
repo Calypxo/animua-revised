@@ -15,7 +15,8 @@ const profileName = document.getElementById("profileName");
 const profileDescription = document.getElementById("profileDescription");
 const profileAge = document.getElementById("profileAge");
 const profileSex = document.getElementById("profileSex");
-const profileSize = document.getElementById("profileSize");
+const profileBreed = document.getElementById("profileBreed");
+const profileColor = document.getElementById("profileColor");
 const profileStatus = document.getElementById("profileStatus");
 const profileTraits = document.getElementById("profileTraits");
 const profileMatch = document.getElementById("profileMatch");
@@ -38,6 +39,55 @@ console.log("petNameField:", petNameField);
 let currentFilter = "all";
 let currentPetForAdoption = null;
 
+function textOr(value, fallback = "Not recorded") {
+  const text = String(value ?? "").trim();
+  return text || fallback;
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function formatAlteredStatus(status, sex) {
+  const value = String(status || "").trim();
+  const normalized = value.toLowerCase();
+  if (!value || normalized === "unknown") return null;
+  if (["yes", "altered", "done"].includes(normalized)) {
+    if (String(sex).toLowerCase() === "female") return "Spayed";
+    if (String(sex).toLowerCase() === "male") return "Neutered";
+    return "Spayed / neutered";
+  }
+  if (["no", "not altered", "intact"].includes(normalized)) return "Not yet spayed / neutered";
+  return value;
+}
+
+function formatVaccinationStatus(status) {
+  const value = String(status || "").trim();
+  const normalized = value.toLowerCase();
+  if (!value || normalized === "unknown") return null;
+  if (["yes", "vaccinated", "complete", "completed", "up to date"].includes(normalized)) {
+    return "Vaccinated";
+  }
+  if (["no", "not vaccinated"].includes(normalized)) return "Vaccination pending";
+  return value;
+}
+
+function behaviorLabels(assessment) {
+  if (!assessment || typeof assessment !== "object") return [];
+  const labels = [];
+  if (Number(assessment.friendlinessToHumans) >= 4) labels.push("People-friendly");
+  if (Number(assessment.goodWithKids) >= 4) labels.push("Good with children");
+  if (Number(assessment.goodWithOtherPets) >= 4) labels.push("Good with pets");
+  if (Number(assessment.energyLevel) >= 4) labels.push("High energy");
+  else if (Number(assessment.energyLevel) > 0 && Number(assessment.energyLevel) <= 2) labels.push("Calm");
+  return labels;
+}
+
 function mapPetFromBackend(pet) {
   const rawSpecies = (pet.species || "").toLowerCase();
   const type =
@@ -47,14 +97,35 @@ function mapPetFromBackend(pet) {
 
   return {
     id: pet.id,
-    name: pet.name || "Unnamed Pet",
+    name:
+      pet.displayLabel ||
+      pet.shelterLabel ||
+      pet.identifyingDescription ||
+      `Animal ${pet.id}`,
     type,
+    species: pet.species || (type === "dog" ? "Dog" : type === "cat" ? "Cat" : "Other"),
+    breed: textOr(pet.breed, "Mixed / not recorded"),
     age: pet.ageEstimate || "Unknown age",
     sex: pet.sex || "Unknown",
-    size: pet.size || "Unknown",
+    color: textOr(pet.colorMarkings || pet.color),
     status: pet.status || "Ready for Adoption",
-    traits: [],
-    description: pet.initialCondition || "This rescued pet is looking for a loving home.",
+    traits: [
+      formatAlteredStatus(pet.alteredStatus, pet.sex),
+      formatVaccinationStatus(pet.vaccinated),
+      pet.visibleDefects
+        ? "Special care needs"
+        : null,
+      ...behaviorLabels(pet.behavioralAssessment),
+    ].filter(Boolean),
+    description:
+      [
+        pet.conditionNotes,
+        pet.visibleDefects
+          ? `Special care note: ${pet.visibleDefects}`
+          : "",
+      ].filter(Boolean).join(" ") ||
+      pet.initialCondition ||
+      "Ready to meet adopters and find a safe, caring home.",
     match: "Best for adopters ready to provide a safe, caring, and responsible home.",
     image:
     pet.photoURL ||
@@ -113,34 +184,49 @@ function renderPets(list) {
   list.forEach((pet, index) => {
     const card = document.createElement("div");
     card.className = "pet-card reveal";
+    const petType = pet.type === "dog" ? "Dog" : pet.type === "cat" ? "Cat" : "Pet";
+    const facts = [
+      ["fa-venus-mars", "Sex", pet.sex],
+      ["fa-cake-candles", "Estimated age", pet.age],
+      ["fa-paw", "Breed", pet.breed],
+      ["fa-palette", "Color / markings", pet.color],
+    ];
     card.innerHTML = `
       <div class="pet-card-image">
-        <img src="${pet.image}" alt="${pet.name}">
+        <img src="${escapeHtml(pet.image)}" alt="${escapeHtml(pet.name)}">
         <span class="pet-badge">
-          ${pet.type === "dog" ? "Dog" : pet.type === "cat" ? "Cat" : "Pet"}
+          ${petType}
         </span>
+        <span class="pet-ready-badge"><i class="fa-solid fa-circle-check"></i> Ready</span>
       </div>
       <div class="pet-card-body">
         <div class="pet-card-top">
           <div>
-            <h3>${pet.name}</h3>
+            <h3>${escapeHtml(pet.name)}</h3>
+            <p class="pet-reference">Animal ID: ${escapeHtml(pet.id)}</p>
           </div>
         </div>
-        <p class="pet-meta">${pet.age} • ${pet.sex} • ${pet.size}</p>
-        <p class="pet-description">${pet.description}</p>
+        <div class="pet-facts">
+          ${facts.map(([icon, label, value]) => `
+            <div class="pet-fact">
+              <i class="fa-solid ${icon}" aria-hidden="true"></i>
+              <span><small>${label}</small><strong>${escapeHtml(value)}</strong></span>
+            </div>
+          `).join("")}
+        </div>
+        <p class="pet-description">${escapeHtml(pet.description)}</p>
         <div class="pet-traits">
-          ${pet.traits.map((trait) => `<span class="trait-chip">${trait}</span>`).join("")}
+          ${pet.traits.slice(0, 5).map((trait) => `<span class="trait-chip">${escapeHtml(trait)}</span>`).join("")}
         </div>
         <div class="pet-actions">
-          <button class="btn secondary-btn view-profile-btn" data-id="${pet.id}">View Pet Profile</button>
-          <button class="btn primary-btn adopt-btn" data-id="${pet.id}">Adopt Now</button>
+          <button class="btn secondary-btn view-profile-btn" data-id="${escapeHtml(pet.id)}">View Pet Profile</button>
+          <button class="btn primary-btn adopt-btn" data-id="${escapeHtml(pet.id)}">Adopt Now</button>
         </div>
       </div>
     `;
 
     petsGrid.appendChild(card);
 
-    // add this block
     const img = card.querySelector('.pet-card-image img');
     img.addEventListener('load', function() {
       this.style.objectPosition = this.naturalHeight > this.naturalWidth
@@ -186,7 +272,17 @@ function applyFilters() {
 
   const filtered = pets.filter((pet) => {
     const matchesFilter = currentFilter === "all" || pet.type === currentFilter;
-    const matchesSearch = pet.name.toLowerCase().includes(searchValue);
+    const searchableDetails = [
+      pet.name,
+      pet.id,
+      pet.species,
+      pet.breed,
+      pet.sex,
+      pet.age,
+      pet.color,
+      pet.description,
+    ].join(" ").toLowerCase();
+    const matchesSearch = searchableDetails.includes(searchValue);
     return matchesFilter && matchesSearch;
   });
 
@@ -223,7 +319,8 @@ function openProfileModal(pet) {
   profileDescription.textContent = pet.description;
   profileAge.textContent = pet.age;
   profileSex.textContent = pet.sex;
-  profileSize.textContent = pet.size;
+  profileBreed.textContent = pet.breed;
+  profileColor.textContent = pet.color;
   profileStatus.textContent = pet.status;
   profileMatch.textContent = pet.match;
 

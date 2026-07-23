@@ -27,9 +27,6 @@ import {
 
 import {
   getInventoryItems,
-  getInventoryItemById,
-  updateInventoryItem,
-  addInventoryTransaction,
 } from "../services/inventoryFirestore.service.js";
 
 const TRAITS = [
@@ -64,6 +61,30 @@ let currentRole = "";
 let medicalInventoryItems = [];
 
 const speciesEmoji = s => ({ Dog: "🐶", Cat: "🐱", Rabbit: "🐰", Bird: "🐦" }[s] || "🐾");
+
+function animalDisplayLabel(record = animal || {}) {
+  const legacyName = String(record.name || "").trim();
+  const meaningfulLegacyName =
+    legacyName &&
+    !["unknown", "unnamed", "unnamed pet"].includes(
+      legacyName.toLowerCase()
+    );
+
+  return (
+    record.adoptedName ||
+    record.identifyingDescription ||
+    record.shelterLabel ||
+    [
+      record.color,
+      record.ageEstimate,
+      record.sex,
+      record.species,
+    ].filter(Boolean).join(" ") ||
+    (meaningfulLegacyName ? legacyName : "") ||
+    record.id ||
+    "Shelter animal"
+  );
+}
 
 const statusCfg = {
   Profiling:  { cls: "badge-profiling",  bg: "var(--amber-soft)", color: "var(--amber)" },
@@ -189,13 +210,14 @@ async function refreshAnimal() {
 }
 
 function renderHero() {
-  document.title = `ANIMUA — ${animal.name}`;
-  document.getElementById("profileBreadcrumb").textContent = animal.name;
-  document.getElementById("profileName").textContent = animal.name;
+  const displayLabel = animalDisplayLabel();
+  document.title = `ANIMUA — ${displayLabel}`;
+  document.getElementById("profileBreadcrumb").textContent = displayLabel;
+  document.getElementById("profileName").textContent = displayLabel;
   document.getElementById("profileStatusBadge").innerHTML = statusBadge(animal.status);
   const profilePhotoEl = document.getElementById("profilePhoto");
   profilePhotoEl.innerHTML = animal.photoURL
-    ? `<img src="${animal.photoURL}" alt="${animal.name}" />`
+    ? `<img src="${animal.photoURL}" alt="${displayLabel}" />`
     : speciesEmoji(animal.species);
 
   document.getElementById("profileMeta").innerHTML = `
@@ -228,7 +250,7 @@ function renderHero() {
 
     btn.innerHTML = `
       <i class="bi bi-shield-plus"></i>
-      Send to Quarantine
+      Place in Quarantine
     `;
 
     btn.onclick = sendToQuarantine;
@@ -316,8 +338,8 @@ async function uploadAnimalPhoto() {
     const ph = document.getElementById("profilePhoto");
 
     ph.innerHTML = animal.photoURL
-      ? `<img src="${animal.photoURL}" alt="${animal.name}" />`
-      : `<span>${(animal.name || "A")[0]}</span>`;
+      ? `<img src="${animal.photoURL}" alt="${animalDisplayLabel()}" />`
+      : `<span>${animalDisplayLabel()[0]}</span>`;
 
     input.value = "";
 
@@ -338,7 +360,7 @@ function renderOverviewTab() {
 
   document.getElementById("basicInfoGrid").innerHTML = `
     ${infoField("Animal ID", `<span style="font-family:var(--mono);font-size:0.82rem">${animal.id}</span>`)}
-    ${infoField("Name / Alias", animal.name)}
+    ${infoField("Shelter Description", animalDisplayLabel())}
     ${infoField("Species", animal.species)}
     ${infoField("Breed", animal.breed || "Unknown")}
     ${infoField("Sex", animal.sex)}
@@ -360,6 +382,9 @@ function renderOverviewTab() {
     ${infoField("Initial Condition", animal.initialCondition || "—")}
     ${infoField("Injuries at Intake", animal.injuries || "Unknown")}
     ${infoField("Vaccinated at Intake", animal.vaccinated || "Unknown")}
+    ${infoField("Spay / Neuter Status", animal.alteredStatus || "Unknown")}
+    ${infoField("Visible Defects / Features", animal.visibleDefects || "None recorded")}
+    ${infoField("Known Previous Name", animal.previousName || "None recorded")}
     ${infoField("Condition Notes", animal.conditionNotes ? `<span style="font-size:0.84rem;color:var(--stone)">${animal.conditionNotes}</span>` : "None recorded")}`;
     
 }
@@ -689,12 +714,12 @@ function renderHistoryTab() {
 
 async function sendToQuarantine() {
   if (!can("send_to_quarantine")) {
-  showToast(
-    "error",
-    "You do not have permission to send animals to quarantine."
-  );
-  return;
-}
+    showToast(
+      "error",
+      "Only a veterinarian or administrator can place an animal in quarantine."
+    );
+    return;
+  }
 
   if (animal.status !== "Profiling") {
     showToast(
@@ -725,7 +750,7 @@ async function sendToQuarantine() {
 
     showToast(
       "success",
-      `${animal.name} has been sent to quarantine.`
+      `${animalDisplayLabel()} has been placed in quarantine.`
     );
   } catch (error) {
     console.error("[sendToQuarantine]", error);
@@ -868,8 +893,8 @@ if (inventorySelect) {
     ${medicalInventoryItems
       .map(
         (item) => `
-          <option value="${item.id}">
-            ${item.name.trim()} — ${item.currentStock} ${item.unit || "pcs"} available
+          <option value="${item.docId}">
+            ${item.name.trim()} - ${item.currentStock} ${item.unit || "pcs"} available
           </option>
         `
       )
@@ -978,8 +1003,14 @@ if (typeSelect) {
       document.getElementById("fMedInventoryItem");
 
     if (medInventoryInput) {
+      const linkedInventoryItem =
+        medicalInventoryItems.find(
+          (item) =>
+            item.docId === record.inventoryItemId ||
+            item.itemId === record.inventoryItemId
+        );
       medInventoryInput.value =
-        record.inventoryItemId || "";
+        linkedInventoryItem?.docId || "";
     }
 
     const medQuantityInput =
@@ -1091,11 +1122,6 @@ async function saveMedicalRecord() {
       ? selectedClearance
       : null;
 
-  const inventoryItem =
-    medicalInventoryItems.find(
-      (item) => item.id === inventoryItemId
-    );
-
   const payload = {
   type,
   date,
@@ -1133,12 +1159,6 @@ async function saveMedicalRecord() {
 
   inventoryItemId,
   quantityUsed,
-
-  inventoryItemName:
-    inventoryItem?.name || "",
-
-  inventoryUnit:
-    inventoryItem?.unit || "",
 };
 
   try {
@@ -1154,28 +1174,18 @@ async function saveMedicalRecord() {
         "Medical record updated."
       );
     } else {
-      const deductionResult =
-        await deductMedicalInventory({
-          inventoryItemId,
-          quantityUsed,
-          date,
-          type,
-          treatment: payload.treatment,
-          notes: payload.notes,
-        });
-
-      await addMedicalRecordApi(
+      const result = await addMedicalRecordApi(
         animal.id,
         payload
       );
 
-      if (deductionResult) {
+      if (result.inventory) {
         showToast(
           "success",
           `Medical record added and ${quantityUsed} ${
-            deductionResult.unit
+            result.inventory.unit
           } deducted from ${
-            deductionResult.itemName
+            result.inventory.itemName
           }.`
         );
       } else {
@@ -1203,7 +1213,7 @@ async function saveMedicalRecord() {
 function mapInventoryItem(item, index = 0) {
   return {
     docId: item.docId || "",
-    id:
+    itemId:
       item.id ||
       item.itemId ||
       item.docId ||
@@ -1245,173 +1255,6 @@ function mapInventoryItem(item, index = 0) {
 
     averageInventory:
       Number(item.averageInventory || item.currentStock || 0),
-  };
-}
-
-function rfClassify(item) {
-  const dailyUsage =
-    Number(item.avgMonthlyUsage || 0) / 30;
-
-  const reorderPoint = Math.max(
-    1,
-    Math.ceil(
-      dailyUsage *
-        Number(item.leadTimeDays || 0)
-    )
-  );
-
-  const criticalPoint = Math.max(
-    1,
-    Math.floor(reorderPoint * 0.5)
-  );
-
-  const daysUntilStockout =
-    Number(item.avgMonthlyUsage || 0) > 0
-      ? Math.round(
-          (Number(item.currentStock || 0) /
-            Number(item.avgMonthlyUsage || 0)) *
-            30
-        )
-      : 999;
-
-  const daysToRestock = Math.max(
-    0,
-    daysUntilStockout -
-      Number(item.leadTimeDays || 0)
-  );
-
-  const isFast =
-    (Number(item.monthlyTurnoverRatio || 0) >=
-      0.5 &&
-      Number(item.recencyDays || 0) <= 7) ||
-    Number(item.stockoutFrequency || 0) > 0;
-
-  const stockStatus =
-    Number(item.currentStock || 0) <=
-    criticalPoint
-      ? "Critical"
-      : Number(item.currentStock || 0) <=
-        reorderPoint
-      ? "Low"
-      : "OK";
-
-  const reorderRisk =
-    Number(item.currentStock || 0) <
-      Number(item.avgMonthlyUsage || 0) ||
-    Number(item.stockoutFrequency || 0) > 0
-      ? "Review"
-      : "OK";
-
-  return {
-    movement: isFast ? "Fast" : "Slow",
-    reorderPoint,
-    daysUntilStockout,
-    daysToRestock,
-    stockStatus,
-    reorderRisk,
-  };
-}
-
-async function deductMedicalInventory({
-  inventoryItemId,
-  quantityUsed,
-  date,
-  type,
-  treatment,
-  notes,
-}) {
-  if (!inventoryItemId || quantityUsed < 1) {
-    return;
-  }
-
-  const item =
-    await getInventoryItemById(inventoryItemId);
-
-  const currentStock =
-    Number(item.currentStock || 0);
-
-  if (quantityUsed > currentStock) {
-    throw new Error(
-      `${item.name} only has ${currentStock} ${
-        item.unit || "pcs"
-      } available.`
-    );
-  }
-
-  const newStock =
-    currentStock - quantityUsed;
-
-  const updatedLocal = {
-    ...item,
-    currentStock: newStock,
-    recencyDays: 0,
-    stockoutFrequency:
-      newStock <= 0
-        ? Number(item.stockoutFrequency || 0) + 1
-        : Number(item.stockoutFrequency || 0),
-  };
-
-  updatedLocal.monthlyTurnoverRatio =
-    Number(updatedLocal.averageInventory || 0) >
-    0
-      ? Number(
-          (
-            Number(
-              updatedLocal.avgMonthlyUsage || 0
-            ) /
-            Number(
-              updatedLocal.averageInventory || 0
-            )
-          ).toFixed(2)
-        )
-      : 0;
-
-  Object.assign(
-    updatedLocal,
-    rfClassify(updatedLocal)
-  );
-
-  await updateInventoryItem(inventoryItemId, {
-    currentStock: updatedLocal.currentStock,
-    recencyDays: updatedLocal.recencyDays,
-    stockoutFrequency:
-      updatedLocal.stockoutFrequency,
-    monthlyTurnoverRatio:
-      updatedLocal.monthlyTurnoverRatio,
-    movementLabel: updatedLocal.movement,
-    movement: updatedLocal.movement,
-    reorderRisk: updatedLocal.reorderRisk,
-    reorderPoint: updatedLocal.reorderPoint,
-    daysUntilStockout:
-      updatedLocal.daysUntilStockout,
-    daysToRestock:
-      updatedLocal.daysToRestock,
-    stockStatus: updatedLocal.stockStatus,
-  });
-
-  await addInventoryTransaction(
-    inventoryItemId,
-    {
-      type: "out",
-      qty: quantityUsed,
-      date,
-      animal: animal.name || animal.id,
-      procedure: type,
-      notes:
-        treatment ||
-        notes ||
-        "Medical quarantine usage",
-      staff:
-        getUserName()?.split(" ")[0] ||
-        "Veterinarian",
-    }
-  );
-
-  return {
-    itemName: item.name,
-    unit: item.unit || "pcs",
-    newStock,
-    stockStatus: updatedLocal.stockStatus,
   };
 }
 
@@ -1504,7 +1347,7 @@ async function markReadyForAdoption() {
 
     showToast(
       "success",
-      `${animal.name} is now ready for adoption.`
+      `${animalDisplayLabel()} is now ready for adoption.`
     );
   } catch (error) {
     console.error("[markReadyForAdoption]", error);
@@ -1536,7 +1379,9 @@ function openEditModal() {
   }
 
   document.getElementById("eName").value =
-    animal.name || "";
+    animal.identifyingDescription ||
+    animal.shelterLabel ||
+    animalDisplayLabel();
 
   document.getElementById("eSpecies").value =
     animal.species || "Dog";
@@ -1578,9 +1423,11 @@ async function saveEditProfile() {
   }
 
   const payload = {
-  name:
-    document.getElementById("eName").value.trim() ||
-    animal.name,
+  identifyingDescription:
+    document.getElementById("eName").value.trim(),
+
+  shelterLabel:
+    document.getElementById("eName").value.trim(),
 
   species:
     document.getElementById("eSpecies").value,
@@ -1800,7 +1647,7 @@ async function init() {
 
       showToast(
         "info",
-        `${animal.name} has been archived.`
+        `${animalDisplayLabel()} has been archived.`
       );
     } catch (err) {
       console.error("[archiveAnimal]", err);
@@ -1849,7 +1696,7 @@ async function init() {
       photoElement.innerHTML = `
         <img
           src="${readerEvent.target.result}"
-          alt="${animal.name}"
+          alt="${animalDisplayLabel()}"
         />
       `;
     };

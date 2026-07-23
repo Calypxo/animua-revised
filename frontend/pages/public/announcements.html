@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Read the latest public announcements, events, and advisories from ANIMUA Angeles City." />
+  <title>ANIMUA | Announcements</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="../../src/css/global.css">
+  <link rel="stylesheet" href="../../src/css/public/announcements.css">
+  <link rel="stylesheet" href="../../src/css/public/public-design-system.css">
+</head>
+<body class="announcements-page">
+  <header class="header" id="top">
+    <div class="container nav-shell">
+      <a href="home.html" class="logo" aria-label="ANIMUA home">
+        <img src="../../src/assets/images/animua-logo-transparent.png" alt="ANIMUA" class="navbar-logo-img">
+        <span class="navbar-brand-copy"><span class="navbar-brand-name">ANIMUA</span><span class="navbar-brand-tagline">Connect. Learn. Adopt.</span></span>
+      </a>
+      <nav class="navbar" id="navbar" aria-label="Main navigation">
+        <a href="home.html">Home</a>
+        <a href="find-furbabies.html">Find Furbabies</a>
+        <a href="announcements.html" class="active" aria-current="page">Announcements</a>
+        <a href="surrender.html">Surrender</a>
+        <a href="contact.html">Contact Us</a>
+      </nav>
+      <div class="nav-actions">
+        <div class="user-actions-wrap">
+          <div class="notification-wrap">
+            <button class="notification-btn" id="notificationBtn" type="button" aria-label="Notifications"><i class="fa-regular fa-bell"></i><span class="notification-dot"></span></button>
+            <div class="notification-popup" id="notificationPopup"><div class="notification-popup-head"><h4>Community updates</h4></div><ul class="notification-list"><li>You are viewing the latest announcements from ANIMUA management.</li></ul></div>
+          </div>
+          <a href="home.html#login" class="login-btn" data-login-link aria-label="Go to login"><i class="fa-regular fa-user"></i><span class="sr-only">Login</span></a>
+          <div id="userLoggedInBox" class="hidden user-pill"><span id="loggedUserName" class="user-pill-name"></span><button id="logoutBtn" type="button" class="logout-icon-btn user-pill-logout" aria-label="Logout"><i class="fa-solid fa-right-from-bracket"></i></button></div>
+        </div>
+        <button class="menu-toggle" id="menuToggle" type="button" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+      </div>
+    </div>
+  </header>
+  <main>
+    <section class="announcements-hero">
+      <div class="container announcements-hero-layout">
+        <div><span class="section-label">Community Bulletin</span><h1>Updates that keep our community connected.</h1><p>See official announcements, upcoming events, and important advisories published by ANIMUA management.</p></div>
+        <div class="announcements-hero-mark" aria-hidden="true"><i class="fa-solid fa-bullhorn"></i></div>
+      </div>
+    </section>
+    <section class="announcements-section" aria-labelledby="announcementsHeading">
+      <div class="container">
+        <div class="announcement-toolbar">
+          <div><span class="section-label">Latest Posts</span><h2 id="announcementsHeading">Public announcements</h2></div>
+          <div class="announcement-controls" aria-label="Filter announcements">
+            <label class="announcement-search"><span class="sr-only">Search announcements</span><i class="fa-solid fa-magnifying-glass"></i><input id="announcementSearch" type="search" placeholder="Search updates..." autocomplete="off"></label>
+            <label><span class="sr-only">Filter by type</span><select id="announcementType"><option value="">All updates</option><option value="Announcement">Announcements</option><option value="Event">Events</option><option value="Advisory">Advisories</option></select></label>
+          </div>
+        </div>
+        <div id="announcementStatus" class="announcement-status" role="status" aria-live="polite"><i class="fa-solid fa-spinner fa-spin"></i><span>Loading the latest updates...</span></div>
+        <div id="announcementFeed" class="public-announcement-feed" aria-live="polite"></div>
+      </div>
+    </section>
+  </main>
+  <footer class="footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <a href="home.html" class="logo footer-logo"><img src="../../src/assets/images/animua-logo-transparent.png" alt="ANIMUA" class="footer-logo-img"><span class="footer-brand-copy"><span class="footer-brand-name">ANIMUA</span><span class="footer-brand-tagline">Angeles City Animal Welfare Portal</span></span></a>
+        <p>Connecting people with shelter animals through responsible adoption, community updates, and shelter-reviewed services.</p>
+      </div>
+      <div class="footer-links"><h4>Explore</h4><a href="home.html">Home</a><a href="find-furbabies.html">Find Furbabies</a><a href="announcements.html">Announcements</a><a href="contact.html">Contact the Shelter</a></div>
+    </div>
+    <div class="footer-bottom"><div class="container"><p>&copy; 2026 ANIMUA. All rights reserved.</p></div></div>
+  </footer>
+  <script type="module" src="../../src/public/js/public-ui.js"></script>
+  <script type="module" src="../../src/public/js/announcements.js"></script>
+</body>
+</html>

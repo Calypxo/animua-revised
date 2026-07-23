@@ -25,6 +25,17 @@
 
 .filter-select { height:38px; padding:0 12px; border-radius:8px; border:1px solid var(--border-md); background:var(--cream-2); font:0.82rem/1 var(--font); color:var(--ink); outline:none; cursor:pointer; }
 .filter-select:focus { border-color:var(--clay-mid); background:#fff; box-shadow:0 0 0 3px var(--clay-muted); }
+.report-filter-grid { display:grid; grid-template-columns:repeat(3,minmax(150px,1fr)) auto auto; gap:12px; align-items:end; }
+.report-filter-grid label { display:flex; flex-direction:column; gap:6px; color:var(--stone); font-size:.76rem; font-weight:700; }
+.report-filter-grid .filter-select { width:100%; cursor:text; }
+.report-secondary-btn { background:var(--stone); }
+@media (max-width:900px) { .report-filter-grid { grid-template-columns:1fr 1fr; } }
+@media print {
+  #sidebar-container,.topbar,.report-filter-card,.report-tabs,.btn-export { display:none !important; }
+  .stage { margin-left:0 !important; }
+  .page-body { padding:0 !important; }
+  .rpt-card { box-shadow:none; border:0; }
+}
 
 /* ── Report type tabs ────────────────────────────────── */
 .report-tabs {

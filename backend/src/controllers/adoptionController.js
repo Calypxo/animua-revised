@@ -1,4 +1,8 @@
 const { db, admin } = require("../config/firebase");
+const {
+  buildShelterLabel,
+  cleanText,
+} = require("../utils/animalIdentity");
 
 const ADOPTION_COL = "adoptions";
 const ANIMAL_COL = "animals";
@@ -7,7 +11,6 @@ exports.createAdoption = async (req, res) => {
   try {
     const {
       pet_id,
-      pet_name,
       compatibility,
       full_name,
       age,
@@ -37,6 +40,13 @@ exports.createAdoption = async (req, res) => {
     if (!animalDoc.exists) {
       return res.status(404).json({ message: "Selected pet was not found." });
     }
+    const animalData = animalDoc.data();
+    if (animalData.status !== "Ready") {
+      return res.status(400).json({
+        message: "Only animals marked Ready can receive adoption applications.",
+      });
+    }
+    const petLabel = buildShelterLabel(animalData, pet_id);
 
     const year = new Date().getFullYear();
 
@@ -52,7 +62,8 @@ exports.createAdoption = async (req, res) => {
       applicationYear: year,
 
       pet_id,
-      pet_name,
+      pet_name: petLabel,
+      pet_label: petLabel,
       compatibility: compatibility
         ? {
             source: "quiz", // optional but recommended
@@ -127,7 +138,10 @@ exports.getAllAdoptions = async (req, res) => {
 
         let animal = {
           id: data.pet_id || "",
-          name: data.pet_name || "Unknown",
+          name:
+            data.pet_label ||
+            data.pet_name ||
+            `Animal ${data.pet_id || doc.id}`,
           species: "Unknown",
           breed: "Unknown",
           status: "",
@@ -143,7 +157,10 @@ exports.getAllAdoptions = async (req, res) => {
 
               animal = {
                 id: animalDoc.id,
-                name: animalData.name || data.pet_name || "Unknown",
+                name: buildShelterLabel(animalData, animalDoc.id),
+                shelterLabel:
+                  buildShelterLabel(animalData, animalDoc.id),
+                adoptedName: animalData.adoptedName || "",
                 species: animalData.species || "Unknown",
                 breed: animalData.breed || "Unknown",
                 status: animalData.status || "",
@@ -159,7 +176,11 @@ exports.getAllAdoptions = async (req, res) => {
           id: doc.id,
           applicationId: data.applicationId || doc.id,
           pet_id: data.pet_id || "",
-          pet_name: data.pet_name || "Unknown",
+          pet_name:
+            data.pet_label || data.pet_name || "Unknown",
+          pet_label:
+            data.pet_label || data.pet_name || "Unknown",
+          adoptedName: data.adoptedName || "",
           animal,
           applicant: data.applicant || {},
           other_information: data.other_information || {},
@@ -221,7 +242,15 @@ exports.getAdoptionById = async (req, res) => {
     const adoption = {
       id: doc.id,
       pet_id: data.pet_id || "",
-      pet_name: data.pet_name || "Unknown",
+      pet_name:
+        data.pet_label ||
+        data.pet_name ||
+        `Animal ${data.pet_id || doc.id}`,
+      pet_label:
+        data.pet_label ||
+        data.pet_name ||
+        `Animal ${data.pet_id || doc.id}`,
+      adoptedName: data.adoptedName || "",
       applicant: data.applicant || {},
       other_information: data.other_information || {},
       declaration: data.declaration || {},
@@ -338,7 +367,18 @@ exports.rejectAdoption = async (req, res) => {
 exports.finalizeAdoption = async (req, res) => {
   try {
     const { id } = req.params;
-    const { adoptionDate, processedBy } = req.body;
+    const { adoptionDate, processedBy, adoptedName } = req.body;
+    const finalAdoptedName = cleanText(adoptedName);
+
+    if (
+      finalAdoptedName.length < 2 ||
+      finalAdoptedName.length > 60
+    ) {
+      return res.status(400).json({
+        message:
+          "The adopter-given animal name must be between 2 and 60 characters.",
+      });
+    }
 
     const adoptionRef = db.collection(ADOPTION_COL).doc(id);
     const adoptionDoc = await adoptionRef.get();
@@ -383,6 +423,7 @@ exports.finalizeAdoption = async (req, res) => {
       status: "Finalized",
       adoptionDate: finalAdoptionDate,
       processedBy: finalProcessedBy,
+      adoptedName: finalAdoptedName,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
@@ -392,6 +433,11 @@ exports.finalizeAdoption = async (req, res) => {
     visibleToPublic: false,
     adoptionStatus: "Adopted",
     adoptionDate: finalAdoptionDate,
+    name: finalAdoptedName,
+    adoptedName: finalAdoptedName,
+    nameAssignedBy:
+      adoptionData.applicant?.full_name || "",
+    nameAssignedAt: finalAdoptionDate,
     adopterName: adoptionData.applicant?.full_name || "",
     adoptionStaff: finalProcessedBy,
     processedBy: finalProcessedBy,
@@ -399,7 +445,7 @@ exports.finalizeAdoption = async (req, res) => {
     history: admin.firestore.FieldValue.arrayUnion({
       date: finalAdoptionDate,
       event: "Adopted",
-      detail: `Adopted by ${adoptionData.applicant?.full_name || "Unknown adopter"}`,
+      detail: `Adopted by ${adoptionData.applicant?.full_name || "Unknown adopter"} and named ${finalAdoptedName}`,
       actor: finalProcessedBy,
     }),
     updatedAt: admin.firestore.FieldValue.serverTimestamp(),

@@ -661,12 +661,6 @@ body {
   .stat-item { padding: 10px 20px; }
   .steps { grid-template-columns: 1fr; }
   .notice-card { padding: 24px 18px; }
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-}
-=======
->>>>>>> 8c76e329d3ff001d2178f9f031b2d9a7600f79a0
 }
 
 /* =========================
@@ -826,7 +820,3 @@ body {
     border-radius: 32px;
   }
 }
-<<<<<<< HEAD
-=======
->>>>>>> 606b1bdf2899e5df758b6f4b01e816169754fd59
->>>>>>> 8c76e329d3ff001d2178f9f031b2d9a7600f79a0

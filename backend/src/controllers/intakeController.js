@@ -1,5 +1,9 @@
 // backend/src/controllers/intakeController.js
 const { db, admin } = require("../config/firebase");
+const {
+  buildShelterLabel,
+  cleanText,
+} = require("../utils/animalIdentity");
 
 // ── COLLECTION NAMES ──────────────────────────────────
 const INTAKE_COL = "intakeRecords";
@@ -54,18 +58,30 @@ exports.getIntakeById = async (req, res) => {
 exports.createIntake = async (req, res) => {
   try {
     const {
-      animalName, species, breed, sex, ageEstimate, color,
+      animalName, identifyingDescription, previousName,
+      species, breed, sex, ageEstimate, color,
       source, condition, weight, conditionNotes,
-      injuries, vaccinated,
+      injuries, vaccinated, alteredStatus, visibleDefects,
       intakeDate, location, intakeNotes,
       barangayDetails, surrenderRefId,
       ownerName, ownerContact, surrenderApprovedDate,
       status, // "Pending" or "Draft"
     } = req.body;
 
-    // Validation
-    if (!species || !sex || !condition || !source || !intakeDate) {
-      return res.status(400).json({ message: "Required fields missing: species, sex, condition, source, intakeDate." });
+    const recordStatus = status === "Draft" ? "Draft" : "Pending";
+    const description = cleanText(
+      identifyingDescription || animalName || color
+    );
+
+    if (
+      recordStatus !== "Draft" &&
+      (!description || !species || !sex || !condition ||
+        !source || !intakeDate || !cleanText(location))
+    ) {
+      return res.status(400).json({
+        message:
+          "Required fields missing: identifyingDescription, species, sex, condition, source, intakeDate, location.",
+      });
     }
 
     const validSources = ["Rescue", "Barangay Impound", "Approved Surrender"];
@@ -91,7 +107,12 @@ exports.createIntake = async (req, res) => {
     const intakeId = `INT-${year}-${seq}`;
 
     const record = {
-      animalName:    animalName || "Unknown",
+      animalName:    "",
+      identifyingDescription: description,
+      previousName:
+        source === "Approved Surrender"
+          ? cleanText(previousName || animalName)
+          : cleanText(previousName),
       species, breed: breed || "", sex,
       ageEstimate:   ageEstimate || "",
       color:         color || "",
@@ -101,6 +122,8 @@ exports.createIntake = async (req, res) => {
       conditionNotes: conditionNotes || "",
       injuries:      injuries || "Unknown",
       vaccinated:    vaccinated || "Unknown",
+      alteredStatus: alteredStatus || "Unknown",
+      visibleDefects: cleanText(visibleDefects),
       intakeDate,
       location:      location || "",
       intakeNotes:   intakeNotes || "",
@@ -109,7 +132,7 @@ exports.createIntake = async (req, res) => {
       ownerName:            source === "Approved Surrender" ? (ownerName       || "")   : "",
       ownerContact:         source === "Approved Surrender" ? (ownerContact    || "")   : "",
       surrenderApprovedDate:source === "Approved Surrender" ? (surrenderApprovedDate || "") : "",
-      status:        status === "Draft" ? "Draft" : "Pending",
+      status:        recordStatus,
       intakeYear:    year,
       encodedBy:     req.user?.fullName || req.user?.email || "Staff",
       encodedByEmail:req.user?.email    || "",
@@ -127,7 +150,7 @@ exports.createIntake = async (req, res) => {
       action:          "intake.created",
       module:          "Intake Management",
       targetId:        intakeId,
-      targetName:      `${animalName || "Unknown"} (${species})`,
+      targetName:      buildShelterLabel(record, intakeId),
       performedBy:     req.user?.email,
       performedByName: req.user?.fullName,
       after:           { source, species, condition, status: record.status },
@@ -153,9 +176,11 @@ exports.updateIntake = async (req, res) => {
     }
 
   const allowed = [
-    "animalName","species","breed","sex","ageEstimate","color",
+    "identifyingDescription","previousName",
+    "species","breed","sex","ageEstimate","color",
     "source",
     "condition","weight","conditionNotes","injuries","vaccinated",
+    "alteredStatus","visibleDefects",
     "intakeDate","location","intakeNotes",
     "barangayDetails","surrenderRefId","ownerName","ownerContact","surrenderApprovedDate",
     "status", "photoURL", "cageNumber", "housingType"
@@ -166,6 +191,40 @@ exports.updateIntake = async (req, res) => {
       if (req.body[key] !== undefined) updates[key] = req.body[key];
     });
 
+    if (
+      updates.identifyingDescription !== undefined
+    ) {
+      updates.identifyingDescription =
+        cleanText(updates.identifyingDescription);
+      updates.animalName = "";
+    }
+
+    const candidate = { ...current, ...updates };
+    if (candidate.status === "Pending") {
+      const description = cleanText(
+        candidate.identifyingDescription ||
+        candidate.animalName ||
+        candidate.color
+      );
+
+      if (
+        !description ||
+        !candidate.species ||
+        !candidate.sex ||
+        !candidate.condition ||
+        !candidate.source ||
+        !candidate.intakeDate ||
+        !cleanText(candidate.location)
+      ) {
+        return res.status(400).json({
+          message:
+            "Submitted intake records require an identifying description, species, sex, condition, source, intake date, and location.",
+        });
+      }
+      updates.identifyingDescription = description;
+      updates.animalName = "";
+    }
+
     updates.updatedAt  = admin.firestore.FieldValue.serverTimestamp();
     updates.updatedBy  = req.user?.email;
 
@@ -173,7 +232,7 @@ exports.updateIntake = async (req, res) => {
 
     await writeAuditLog({
       action: "intake.updated", module: "Intake Management",
-      targetId: id, targetName: current.animalName,
+      targetId: id, targetName: buildShelterLabel(current, id),
       performedBy: req.user?.email, performedByName: req.user?.fullName,
       before: { status: current.status }, after: { status: updates.status || current.status },
     });
@@ -209,7 +268,7 @@ exports.approveIntake = async (req, res) => {
 
     await writeAuditLog({
       action: "intake.approved", module: "Intake Management",
-      targetId: id, targetName: current.animalName,
+      targetId: id, targetName: buildShelterLabel(current, id),
       performedBy: req.user?.email, performedByName: req.user?.fullName,
       before: { status: "Pending" }, after: { status: "Approved" },
     });
@@ -248,7 +307,7 @@ exports.rejectIntake = async (req, res) => {
 
     await writeAuditLog({
       action: "intake.rejected", module: "Intake Management",
-      targetId: id, targetName: current.animalName,
+      targetId: id, targetName: buildShelterLabel(current, id),
       performedBy: req.user?.email, performedByName: req.user?.fullName,
       before: { status: "Pending" }, after: { status: "Rejected", reason },
     });
@@ -298,12 +357,18 @@ exports.convertToProfile = async (req, res) => {
     const today = new Date().toISOString().split("T")[0];
     const actor = req.user?.fullName || req.user?.email || "Admin";
 
+    const shelterLabel = buildShelterLabel(intake, animalId);
     const animalProfile = {
       intakeId: id,
       intakeYear: year,
 
       // Basic profile
-      name: intake.animalName || "Unknown",
+      name: "",
+      adoptedName: "",
+      previousName: intake.previousName || "",
+      identifyingDescription:
+        intake.identifyingDescription || shelterLabel,
+      shelterLabel,
       species: intake.species || "",
       breed: intake.breed || "",
       sex: intake.sex || "Unknown",
@@ -321,6 +386,8 @@ exports.convertToProfile = async (req, res) => {
       weight: intake.weight || null,
       injuries: intake.injuries || "Unknown",
       vaccinated: intake.vaccinated || "Unknown",
+      alteredStatus: intake.alteredStatus || "Unknown",
+      visibleDefects: intake.visibleDefects || "",
       conditionNotes: intake.conditionNotes || "",
 
       // References
@@ -348,7 +415,7 @@ exports.convertToProfile = async (req, res) => {
       adoptionStaff: "",
 
       // General notes
-      notes: "",
+      notes: intake.intakeNotes || "",
 
       // Timeline / history
       history: [
@@ -391,7 +458,7 @@ exports.convertToProfile = async (req, res) => {
       action: "intake.converted",
       module: "Intake Management",
       targetId: id,
-      targetName: intake.animalName || "Unknown",
+      targetName: shelterLabel,
       performedBy: req.user?.email,
       performedByName: req.user?.fullName,
       before: { status: "Approved" },

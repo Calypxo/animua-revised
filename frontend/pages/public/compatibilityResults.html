@@ -72,6 +72,16 @@ function matchLabel(pct) {
   return               { text:"Partial Match",    cls:"t-diff"  };
 }
 
+function animalLabel(pet = {}) {
+  return (
+    pet.displayLabel ||
+    pet.shelterLabel ||
+    pet.identifyingDescription ||
+    pet.name ||
+    `Animal ${pet.id || pet.petId || ""}`.trim()
+  );
+}
+
 function traitSymbol(petVal, userVal) {
   if (!userVal) return { cls:"t-ok", sym:"–" };
   const d = Math.abs(petVal - userVal);
@@ -92,7 +102,7 @@ function buildSummary(pet) {
   if (Number(pet.noiseLevel) > 0 && Number(pet.noiseLevel) <= 2) traits.push("a quiet companion");
   if (Number(pet.adaptability) >= 4) traits.push("adaptable to new routines");
 
-  const name = `<strong>${pet.name || "This pet"}</strong>`;
+  const name = `<strong>${animalLabel(pet)}</strong>`;
   const pct = Math.round(Number(pet.matchPercent || 0));
   const species = (pet.species || "pet").toLowerCase();
 
@@ -111,6 +121,7 @@ function buildSummary(pet) {
 function buildCard(pet, rank, prefs) {
   const pct = Math.round(Number(pet.matchPercent || 0));
   const petImage = pet.photoURL || pet.photoUrl || "/images/default-pet.jpg";
+  const displayLabel = animalLabel(pet);
 
   const bestMatchBadge = rank === 0
     ? `<div class="best-match-badge"><i class="bi bi-stars"></i> Recommended for You</div>`
@@ -162,10 +173,11 @@ function buildCard(pet, rank, prefs) {
             </div>
 
             <div class="pet-media">
-              <img src="${petImage}" alt="${pet.name || "Pet"}" class="pet-image">
+              <img src="${petImage}" alt="${displayLabel}" class="pet-image">
             </div>
 
-            <div class="pet-name">${pet.name || "Unknown Pet"}</div>
+            <div class="pet-name">${displayLabel}</div>
+            <div style="color:var(--stone-2);font-size:0.76rem;margin-top:4px">Shelter description · Animal ID: ${petId}</div>
             ${bestMatchBadge}
 
             <div class="pet-sub">

@@ -95,6 +95,12 @@
   color: var(--teal);
 }
 
+.alert-error {
+  background: var(--rose-soft);
+  border-color: rgba(155, 44, 78, 0.18);
+  color: var(--rose);
+}
+
 .alert-row i {
   font-size: 1rem;
   flex-shrink: 0;
@@ -181,6 +187,34 @@
 
 .shelter-table tbody tr:last-child td {
   border-bottom: none;
+}
+
+.shelter-table .audit-error-cell {
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.audit-error-cell i,
+.audit-error-cell strong,
+.audit-error-cell span {
+  display: block;
+}
+
+.audit-error-cell i {
+  margin-bottom: 10px;
+  color: var(--rose);
+  font-size: 1.8rem;
+}
+
+.audit-error-cell strong {
+  color: var(--ink);
+  font-size: 0.95rem;
+}
+
+.audit-error-cell span {
+  margin-top: 4px;
+  color: var(--stone);
+  font-size: 0.8rem;
 }
 
 .shelter-table tbody tr:hover td {

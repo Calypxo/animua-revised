@@ -56,22 +56,6 @@ function daysBadge(days) {
   return `<span class="days-badge ${cls}">${days}d</span>`;
 }
 
-function compatBar(assessment) {
-  if (!assessment) return `<span class="compat-label label-none">—</span>`;
-
-  const vals = Object.values(assessment);
-  const avg = (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1);
-  const pct = (avg / 5) * 100;
-
-  return `
-    <div class="compat-bar-wrap">
-      <div class="compat-bar">
-        <div class="compat-bar-fill fill-mid" style="width:${pct}%"></div>
-      </div>
-      <span class="compat-label label-mid">${avg}/5</span>
-    </div>`;
-}
-
 async function loadAnimals() {
   try {
     const data = await getAllAnimals();
@@ -101,6 +85,30 @@ function renderStats() {
   set("statReady",      animals.filter(a=>a.status==="Ready").length);
   set("statAdopted",    animals.filter(a=>a.status==="Adopted").length);
   set("statArchived",   animals.filter(a=>a.status==="Archived").length);
+}
+
+function animalDisplayLabel(record = {}) {
+  const legacyName = String(record.name || "").trim();
+  const meaningfulLegacyName =
+    legacyName &&
+    !["unknown", "unnamed", "unnamed pet"].includes(
+      legacyName.toLowerCase()
+    );
+
+  return (
+    record.adoptedName ||
+    record.identifyingDescription ||
+    record.shelterLabel ||
+    [
+      record.color,
+      record.ageEstimate,
+      record.sex,
+      record.species,
+    ].filter(Boolean).join(" ") ||
+    (meaningfulLegacyName ? legacyName : "") ||
+    record.id ||
+    "Shelter animal"
+  );
 }
 
 /* ══════════════════════════════════════════════════════
@@ -135,7 +143,7 @@ function applyFilters() {
     if (sex && a.sex !== sex) return false;
 
     const id = (a.id || "").toLowerCase();
-    const name = (a.name || "").toLowerCase();
+    const name = animalDisplayLabel(a).toLowerCase();
     const breed = (a.breed || "").toLowerCase();
     const speciesName = (a.species || "").toLowerCase();
 
@@ -164,7 +172,7 @@ function renderTable() {
   const page = filtered.slice(start, start + PAGE_SIZE);
 
   if (!page.length) {
-    tbody.innerHTML = `<tr><td colspan="8" class="text-center py-5 text-muted">No animals found.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-muted">No animals found.</td></tr>`;
     return;
   }
 
@@ -177,7 +185,7 @@ function renderTable() {
           <div class="animal-thumb">
             ${
               a.photoURL
-                ? `<img src="${a.photoURL}" alt="${a.name}" class="animal-thumb-img">`
+                ? `<img src="${a.photoURL}" alt="${animalDisplayLabel(a)}" class="animal-thumb-img">`
                 : `<div class="animal-thumb-fallback">${
                     a.species === "Dog" ? "🐶" :
                     a.species === "Cat" ? "🐱" :
@@ -187,7 +195,7 @@ function renderTable() {
           </div>
 
           <div class="animal-meta">
-            <div class="animal-name">${a.name || "Unnamed"}</div>
+            <div class="animal-name">${animalDisplayLabel(a)}</div>
             <div class="animal-id">${a.id}</div>
           </div>
         </div>
@@ -212,7 +220,6 @@ function renderTable() {
         </span>
       </td>
       <td>${daysBadge(days)}</td>
-      <td>${compatBar(a.behavioralAssessment)}</td>
       <td>${statusBadge(a.status)}</td>
       <td>
         <button class="tbl-action-btn" title="View Profile" data-id="${a.id || ""}">

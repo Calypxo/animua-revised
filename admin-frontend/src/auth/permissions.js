@@ -82,6 +82,14 @@ export const ROLE_PERMISSIONS = {
     audit: [
       "view",
     ],
+
+    announcements: [
+      "view", 
+      "create", 
+      "edit", 
+      "delete", 
+      "publish"
+    ],
   },
 
   Staff: {
@@ -93,7 +101,6 @@ export const ROLE_PERMISSIONS = {
       "view",
       "edit_basic",
       "upload_photo",
-      "send_to_quarantine",
       "mark_ready",
       "process_adoption",
     ],
@@ -141,6 +148,13 @@ export const ROLE_PERMISSIONS = {
     archive: [
       "view",
     ],
+
+    announcements: [
+      "view", 
+      "create", 
+      "edit", 
+      "publish"
+    ],
   },
 
   Veterinarian: {
@@ -150,6 +164,7 @@ export const ROLE_PERMISSIONS = {
 
     animals: [
       "view",
+      "send_to_quarantine",
       "edit_behavioral",
       "add_medical",
       "edit_medical",
@@ -171,6 +186,13 @@ export const ROLE_PERMISSIONS = {
 
     archive: [
       "view",
+    ],
+
+    announcements: [
+      "view", 
+      "create", 
+      "edit", 
+      "publish"
     ],
   },
 };

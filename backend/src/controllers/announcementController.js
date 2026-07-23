@@ -1,0 +1,224 @@
+const { db, admin } = require("../config/firebase");
+
+const ANNOUNCEMENT_COL = "announcements";
+
+function isManagementRole(role) {
+  return ["Admin", "Staff", "Veterinarian"].includes(role);
+}
+
+function normalizeAnnouncement(data = {}) {
+  return {
+    title: String(data.title || "").trim(),
+    type: String(data.type || "Announcement").trim(),
+    caption: String(data.caption || "").trim(),
+    imageUrl: String(data.imageUrl || "").trim(),
+    eventDate: String(data.eventDate || "").trim(),
+    location: String(data.location || "").trim(),
+    status: String(data.status || "Published").trim(),
+    visibleToPublic: data.visibleToPublic !== false,
+  };
+}
+
+exports.getPublicAnnouncements = async (req, res) => {
+  try {
+    const snapshot = await db
+      .collection(ANNOUNCEMENT_COL)
+      .get();
+
+    const announcements = snapshot.docs
+      .map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }))
+      .filter((item) => {
+        return item.visibleToPublic === true && item.status === "Published";
+      })
+      .sort((a, b) => {
+        const dateA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+        const dateB = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+        return dateB - dateA;
+      })
+      .map((item) => ({
+        id: item.id,
+        title: item.title,
+        type: item.type,
+        caption: item.caption,
+        imageUrl: item.imageUrl,
+        eventDate: item.eventDate,
+        location: item.location,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+      }));
+
+    return res.status(200).json({ announcements });
+  } catch (error) {
+    console.error("[getPublicAnnouncements]", error);
+    return res.status(500).json({
+      message: "Failed to load public announcements.",
+      error: error.message,
+    });
+  }
+};
+
+exports.getAllAnnouncements = async (req, res) => {
+  try {
+    if (!isManagementRole(req.user?.role)) {
+      return res.status(403).json({
+        message: "Only management users can view announcements.",
+      });
+    }
+
+    const snapshot = await db
+      .collection(ANNOUNCEMENT_COL)
+      .get();
+
+    const announcements = snapshot.docs
+      .map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }))
+      .sort((a, b) => {
+        const dateA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+        const dateB = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+        return dateB - dateA;
+      });
+
+    return res.status(200).json({ announcements });
+  } catch (error) {
+    console.error("[getAllAnnouncements]", error);
+    return res.status(500).json({
+      message: "Failed to load announcements.",
+      error: error.message,
+    });
+  }
+};
+
+exports.createAnnouncement = async (req, res) => {
+  try {
+    if (!isManagementRole(req.user?.role)) {
+      return res.status(403).json({
+        message: "Only management users can create announcements.",
+      });
+    }
+
+    const payload = normalizeAnnouncement(req.body);
+
+    if (!payload.title) {
+      return res.status(400).json({
+        message: "Title is required.",
+      });
+    }
+
+    if (!payload.caption) {
+      return res.status(400).json({
+        message: "Caption or description is required.",
+      });
+    }
+
+    const announcementData = {
+      ...payload,
+
+      createdBy: req.user.email || "",
+      createdByName: req.user.fullName || req.user.email || "ANIMUA User",
+      createdByRole: req.user.role || "",
+
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedBy: req.user.email || "",
+    };
+
+    const docRef = await db
+      .collection(ANNOUNCEMENT_COL)
+      .add(announcementData);
+
+    return res.status(201).json({
+      message: "Announcement created successfully.",
+      announcementId: docRef.id,
+    });
+  } catch (error) {
+    console.error("[createAnnouncement]", error.message);
+    return res.status(500).json({
+      message: "Failed to create announcement.",
+    });
+  }
+};
+
+exports.updateAnnouncement = async (req, res) => {
+  try {
+    if (!isManagementRole(req.user?.role)) {
+      return res.status(403).json({
+        message: "Only management users can update announcements.",
+      });
+    }
+
+    const { id } = req.params;
+    const announcementRef = db.collection(ANNOUNCEMENT_COL).doc(id);
+    const announcementDoc = await announcementRef.get();
+
+    if (!announcementDoc.exists) {
+      return res.status(404).json({
+        message: "Announcement not found.",
+      });
+    }
+
+    const payload = normalizeAnnouncement(req.body);
+
+    if (!payload.title) {
+      return res.status(400).json({
+        message: "Title is required.",
+      });
+    }
+
+    if (!payload.caption) {
+      return res.status(400).json({
+        message: "Caption or description is required.",
+      });
+    }
+
+    await announcementRef.update({
+      ...payload,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedBy: req.user.email || "",
+    });
+
+    return res.status(200).json({
+      message: "Announcement updated successfully.",
+    });
+  } catch (error) {
+    console.error("[updateAnnouncement]", error.message);
+    return res.status(500).json({
+      message: "Failed to update announcement.",
+    });
+  }
+};
+
+exports.deleteAnnouncement = async (req, res) => {
+  try {
+    if (req.user?.role !== "Admin") {
+      return res.status(403).json({
+        message: "Only Admin can delete announcements.",
+      });
+    }
+
+    const { id } = req.params;
+    const announcementRef = db.collection(ANNOUNCEMENT_COL).doc(id);
+    const announcementDoc = await announcementRef.get();
+
+    if (!announcementDoc.exists) {
+      return res.status(404).json({
+        message: "Announcement not found.",
+      });
+    }
+
+    await announcementRef.delete();
+
+    return res.status(200).json({
+      message: "Announcement deleted successfully.",
+    });
+  } catch (error) {
+    console.error("[deleteAnnouncement]", error.message);
+    return res.status(500).json({
+      message: "Failed to delete announcement.",
+    });
+  }
+};

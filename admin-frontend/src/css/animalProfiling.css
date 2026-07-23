@@ -146,20 +146,6 @@
 .days-warn   { background:var(--amber-soft); color:var(--amber); }
 .days-urgent { background:var(--clay-soft);  color:var(--clay); }
 
-/* Compat bar */
-.compat-bar-wrap { display:flex; align-items:center; gap:8px; }
-.compat-bar { flex:1; height:5px; background:var(--cream-3); border-radius:999px; overflow:hidden; }
-.compat-bar-fill { height:100%; border-radius:999px; }
-.fill-high { background:var(--green); }
-.fill-mid  { background:var(--amber); }
-.fill-low  { background:var(--clay); }
-.fill-none { background:var(--stone-3); }
-.compat-label { font-size:0.75rem; font-weight:700; font-family:var(--mono); min-width:32px; text-align:right; }
-.label-high { color:var(--green); }
-.label-mid  { color:var(--amber); }
-.label-low  { color:var(--clay); }
-.label-none { color:var(--stone-2); }
-
 /* Action buttons */
 .tbl-action-btn {
   width:30px; height:30px; border-radius:8px; border:1px solid var(--border-md);

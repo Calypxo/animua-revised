@@ -108,6 +108,13 @@
           <div class="kpi-trend kpi-trend-blue"><i class="bi bi-clipboard2-pulse"></i><span id="quarantineTrend">—</span></div>
         </article>
 
+        <article class="kpi-card" id="kpi-profiling">
+          <div class="kpi-head"><div class="kpi-icon kpi-amber"><i class="bi bi-clipboard2-check"></i></div><span class="kpi-pill">Profile</span></div>
+          <h2 id="profilingCount" class="kpi-counter">0</h2>
+          <p>Profiling</p>
+          <div class="kpi-trend kpi-trend-amber"><span id="profilingTrend">—</span></div>
+        </article>
+
         <article class="kpi-card" id="kpi-ready">
           <div class="kpi-head">
             <div class="kpi-icon kpi-green"><i class="bi bi-house-heart-fill"></i></div>
@@ -126,6 +133,13 @@
           <h2 id="adoptedCount" class="kpi-counter" data-target="0">0</h2>
           <p>Adopted</p>
           <div class="kpi-trend kpi-trend-rose"><i class="bi bi-arrow-up-short"></i><span id="adoptedTrend">—</span></div>
+        </article>
+
+        <article class="kpi-card" id="kpi-archived">
+          <div class="kpi-head"><div class="kpi-icon"><i class="bi bi-archive-fill"></i></div><span class="kpi-pill">Records</span></div>
+          <h2 id="archivedCount" class="kpi-counter">0</h2>
+          <p>Archived</p>
+          <div class="kpi-trend"><span id="archivedTrend">—</span></div>
         </article>
 
       </section>
@@ -192,7 +206,7 @@
                   <option value="medical">Medical</option>
                   <option value="transfer">Transfer</option>
                 </select>
-                <a href="/pages/management/animalRecords.html" class="text-btn">View all →</a>
+                <a href="/pages/auditTrail.html" class="text-btn">View all →</a>
               </div>
             </div>
             <div class="table-responsive">
@@ -250,36 +264,13 @@
             <div class="panel">
               <div class="panel-head">
                 <div>
-                  <h3>Compatibility Queue</h3>
-                  <p>Pending AI matches</p>
+                  <h3>Pending Applications</h3>
+                  <p>Adoption applications awaiting review</p>
                 </div>
-                <a href="/pages/management/adoptionRequests.html" class="text-btn">See all →</a>
+                <a href="/pages/adoptionApplications.html" class="text-btn">See all →</a>
               </div>
               <div class="compat-list" id="compatList">
-                <div class="compat-item">
-                  <div class="compat-avatar compat-dog"><i class="bi bi-emoji-smile"></i></div>
-                  <div class="compat-info">
-                    <strong>Buddy</strong>
-                    <span>Matched with Santos family</span>
-                  </div>
-                  <div class="compat-score score-high">94%</div>
-                </div>
-                <div class="compat-item">
-                  <div class="compat-avatar compat-cat"><i class="bi bi-emoji-smile"></i></div>
-                  <div class="compat-info">
-                    <strong>Mochi</strong>
-                    <span>Matched with Dela Cruz family</span>
-                  </div>
-                  <div class="compat-score score-mid">77%</div>
-                </div>
-                <div class="compat-item">
-                  <div class="compat-avatar compat-dog"><i class="bi bi-emoji-smile"></i></div>
-                  <div class="compat-info">
-                    <strong>Rex</strong>
-                    <span>Awaiting applicant profile</span>
-                  </div>
-                  <div class="compat-score score-pending">—</div>
-                </div>
+                <p class="text-muted mb-0">Loading live applications…</p>
               </div>
             </div>
 
@@ -316,29 +307,29 @@
               </div>
             </div>
             <div class="action-grid">
-              <a href="/pages/management/animalRecords.html" class="action-tile">
+              <a href="/pages/intakeList.html" class="action-tile">
                 <div class="action-tile-icon tile-clay"><i class="bi bi-plus-square-fill"></i></div>
                 <span>Add Animal</span>
               </a>
-              <a href="/pages/management/adoptionRequests.html" class="action-tile">
+              <a href="/pages/adoptionApplications.html" class="action-tile">
                 <div class="action-tile-icon tile-rose"><i class="bi bi-heart-fill"></i></div>
                 <span>Adoptions</span>
               </a>
-              <a href="/pages/management/reports.html" class="action-tile">
+              <a href="/pages/reports.html" class="action-tile">
                 <div class="action-tile-icon tile-blue"><i class="bi bi-bar-chart-line-fill"></i></div>
                 <span>Reports</span>
               </a>
-              <a href="/pages/management/medical.html" class="action-tile">
+              <a href="/pages/animalProfiling.html" class="action-tile">
                 <div class="action-tile-icon tile-green"><i class="bi bi-clipboard2-heart-fill"></i></div>
                 <span>Medical</span>
               </a>
-              <a href="/pages/management/staff.html" class="action-tile">
+              <a href="/pages/userManagement.html" class="action-tile">
                 <div class="action-tile-icon tile-amber"><i class="bi bi-people-fill"></i></div>
                 <span>Staff</span>
               </a>
-              <a href="/pages/management/foster.html" class="action-tile">
+              <a href="/pages/inventory.html" class="action-tile">
                 <div class="action-tile-icon tile-teal"><i class="bi bi-house-door-fill"></i></div>
-                <span>Foster</span>
+                <span>Inventory</span>
               </a>
             </div>
           </div>
@@ -349,48 +340,13 @@
           <div class="panel h-100">
             <div class="panel-head">
               <div>
-                <h3>Today's Schedule</h3>
-                <p>Priority queue</p>
+                <h3>Inventory Attention</h3>
+                <p>Low and critical stock</p>
               </div>
               <button class="dot-btn"><i class="bi bi-three-dots"></i></button>
             </div>
             <div class="sched-stack" id="schedStack">
-              <div class="sched-item sched-active">
-                <span class="sched-time">09:00</span>
-                <div>
-                  <strong>Intake review</strong>
-                  <p>Morning shelter check-in</p>
-                </div>
-                <span class="sched-tag tag-now">Now</span>
-              </div>
-              <div class="sched-item">
-                <span class="sched-time">11:00</span>
-                <div>
-                  <strong>Medical status review</strong>
-                  <p>Quarantine and treatment updates</p>
-                </div>
-              </div>
-              <div class="sched-item">
-                <span class="sched-time">13:30</span>
-                <div>
-                  <strong>Compatibility assessments</strong>
-                  <p>AI match review for 3 pending pairs</p>
-                </div>
-              </div>
-              <div class="sched-item">
-                <span class="sched-time">14:00</span>
-                <div>
-                  <strong>Adoption shortlist</strong>
-                  <p>Finalize ready-for-adoption candidates</p>
-                </div>
-              </div>
-              <div class="sched-item">
-                <span class="sched-time">16:00</span>
-                <div>
-                  <strong>Foster family visit</strong>
-                  <p>Orientation for 2 new foster applicants</p>
-                </div>
-              </div>
+              <p class="text-muted mb-0">Loading live inventory…</p>
             </div>
           </div>
         </div>
@@ -408,7 +364,7 @@
               </div>
               <div class="d-flex gap-2 align-items-center">
                 <input type="text" class="filter-select" id="animalSearch" placeholder="Search animals…" style="width:180px" />
-                <a href="/pages/management/animalRecords.html" class="text-btn">View all →</a>
+                <a href="/pages/animalProfiling.html" class="text-btn">View all →</a>
               </div>
             </div>
             <div class="table-responsive">
@@ -416,13 +372,13 @@
                 <thead>
                   <tr>
                     <th>ID</th>
-                    <th>Name</th>
+                    <th>Shelter Description</th>
                     <th>Species</th>
                     <th>Breed</th>
                     <th>Age</th>
                     <th>Status</th>
                     <th>Days in Shelter</th>
-                    <th>Compatibility</th>
+                    <th>Behavioral Assessment</th>
                     <th>Action</th>
                   </tr>
                 </thead>

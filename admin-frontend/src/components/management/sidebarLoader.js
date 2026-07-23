@@ -9,6 +9,8 @@ import {
   normalizeRole,
 } from "../../auth/permissions.js";
 
+import Swal from "sweetalert2";
+
 export function loadSidebar() {
   const container = document.getElementById("sidebar-container");
 
@@ -51,6 +53,8 @@ export function loadSidebar() {
 
         ${renderAdoptionSection(role)}
 
+        ${renderCommunitySection(role)}
+
         ${renderLogisticsSection(role)}
 
       </nav>
@@ -69,6 +73,15 @@ export function loadSidebar() {
           </div>
 
         </div>
+
+        <a
+          href="/pages/accountSettings.html"
+          class="account-settings-btn"
+          id="sidebar-account-settings"
+        >
+          <i class="bi bi-gear"></i>
+          <span>Account Settings</span>
+        </a>
 
         <button
           id="sidebar-logout"
@@ -149,15 +162,22 @@ function renderAdoptionSection(role) {
       label: "Adoption Apps",
     }),
 
-    renderNavItem({
-      allowed: canAccessModule(role, "adoption"),
-      href: "/pages/postAdoption.html",
-      icon: "bi-chat-heart",
-      label: "Post-Adoption",
-    }),
   ].join("");
 
   return renderSection("Adoption & Matching", links);
+}
+
+function renderCommunitySection(role) {
+  const links = [
+    renderNavItem({
+      allowed: canAccessModule(role, "announcements"),
+      href: "/pages/announcements.html",
+      icon: "bi-megaphone",
+      label: "Announcements",
+    }),
+  ].join("");
+
+  return renderSection("Community", links);
 }
 
 function renderLogisticsSection(role) {
@@ -169,12 +189,8 @@ function renderLogisticsSection(role) {
       label: "Inventory",
     }),
 
-    /*
-     * Reports currently follows dashboard access.
-     * Later, we can create a separate "reports" permission.
-     */
     renderNavItem({
-      allowed: canAccessModule(role, "dashboard"),
+      allowed: canAccessModule(role, "reports"),
       href: "/pages/reports.html",
       icon: "bi-bar-chart",
       label: "Reports",
@@ -298,6 +314,15 @@ function setActiveNav() {
       link.setAttribute("aria-current", "page");
     }
   });
+
+  const accountLink = document.getElementById("sidebar-account-settings");
+  if (
+    accountLink &&
+    currentPath === normalizePath(accountLink.getAttribute("href"))
+  ) {
+    accountLink.classList.add("active");
+    accountLink.setAttribute("aria-current", "page");
+  }
 }
 
 function normalizePath(path) {
@@ -425,18 +450,14 @@ function setupLogout() {
     return;
   }
 
-  logoutButton.addEventListener("click", () => {
-    if (window.Swal) {
-      showLogoutConfirmation();
-      return;
-    }
-
-    logoutUser();
-  });
+  logoutButton.addEventListener(
+    "click",
+    showLogoutConfirmation
+  );
 }
 
 function showLogoutConfirmation() {
-  window.Swal.fire({
+  Swal.fire({
     title: "Sign out?",
     text: "You'll be returned to the login screen.",
     icon: "question",

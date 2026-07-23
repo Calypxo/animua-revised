@@ -1,4 +1,7 @@
 const { db } = require("../config/firebase");
+const {
+  buildShelterLabel,
+} = require("../utils/animalIdentity");
 
 const ANIMAL_COL = "animals";
 const EVENT_COL = "events";
@@ -72,20 +75,30 @@ exports.getPublicPets = async (req, res) => {
 
     let pets = snapshot.docs.map((doc) => {
       const data = doc.data();
+      const displayLabel = buildShelterLabel(data, doc.id);
 
       return {
         id: doc.id,
-        name: data.name || "Unknown",
+        name: data.adoptedName || "",
+        displayLabel,
+        shelterLabel: displayLabel,
+        identifyingDescription:
+          data.identifyingDescription || displayLabel,
         species: data.species || "",
         breed: data.breed || "",
         sex: data.sex || "Unknown",
         ageEstimate: data.ageEstimate || "",
         color: data.color || "",
+        colorMarkings: data.colorMarkings || data.color || "",
         photoURL: data.photoURL || "",
         source: data.source || "",
         intakeDate: data.intakeDate || "",
         intakeLocation: data.intakeLocation || "",
         initialCondition: data.initialCondition || "",
+        conditionNotes: data.conditionNotes || "",
+        vaccinated: data.vaccinated || "Unknown",
+        alteredStatus: data.alteredStatus || "Unknown",
+        visibleDefects: data.visibleDefects || "",
         behavioralAssessment: data.behavioralAssessment || null,
         status: data.status || "Ready",
       };
@@ -103,12 +116,12 @@ exports.getPublicPets = async (req, res) => {
     if (search) {
       const q = search.toLowerCase().trim();
       pets = pets.filter((pet) => {
-        const name = (pet.name || "").toLowerCase();
+        const label = (pet.displayLabel || "").toLowerCase();
         const breed = (pet.breed || "").toLowerCase();
         const speciesName = (pet.species || "").toLowerCase();
 
         return (
-          name.includes(q) ||
+          label.includes(q) ||
           breed.includes(q) ||
           speciesName.includes(q)
         );
@@ -144,6 +157,7 @@ exports.getPublicPetById = async (req, res) => {
     }
 
     const data = doc.data();
+    const displayLabel = buildShelterLabel(data, doc.id);
 
     // Only allow public access to Ready animals
     if (data.status !== "Ready") {
@@ -154,18 +168,26 @@ exports.getPublicPetById = async (req, res) => {
 
     const pet = {
       id: doc.id,
-      name: data.name || "Unknown",
+      name: data.adoptedName || "",
+      displayLabel,
+      shelterLabel: displayLabel,
+      identifyingDescription:
+        data.identifyingDescription || displayLabel,
       species: data.species || "",
       breed: data.breed || "",
       sex: data.sex || "Unknown",
       ageEstimate: data.ageEstimate || "",
       color: data.color || "",
+      colorMarkings: data.colorMarkings || data.color || "",
       photoURL: data.photoURL || "",
       source: data.source || "",
       intakeDate: data.intakeDate || "",
       intakeLocation: data.intakeLocation || "",
       initialCondition: data.initialCondition || "",
       conditionNotes: data.conditionNotes || "",
+      vaccinated: data.vaccinated || "Unknown",
+      alteredStatus: data.alteredStatus || "Unknown",
+      visibleDefects: data.visibleDefects || "",
       behavioralAssessment: data.behavioralAssessment || null,
       status: data.status || "Ready",
     };
