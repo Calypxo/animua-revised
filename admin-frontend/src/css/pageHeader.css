@@ -229,7 +229,7 @@
 .system-summary-metric[data-tone="rose"] .system-summary-icon { color: #b73558; background: #fbeaf0; }
 .system-summary-metric[data-tone="stone"] .system-summary-icon { color: #68615c; background: #f1eeeb; }
 .system-summary-copy { min-width: 0; display: grid; gap: 4px; }
-.system-summary-copy strong { color: #161d28; font: 800 1.65rem/1 "Outfit", sans-serif; }
+.system-summary-copy strong { color: #161d28; overflow-wrap: anywhere; font: 800 1.65rem/1 "Outfit", sans-serif; }
 .system-summary-copy small { color: #746963; font-size: .61rem; font-weight: 750; line-height: 1.3; }
 .system-page-header :is(button, a):focus-visible { outline: 3px solid rgba(255,185,30,.6); outline-offset: 3px; }
 

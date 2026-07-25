@@ -39,38 +39,52 @@
       </header>
 
       <main class="page-body account-page">
-        <section class="account-header">
-          <div>
-            <p class="account-eyebrow">Personal account</p>
-            <h1>Account Settings</h1>
-            <p>Manage the name shown across ANIMUA and keep your password secure.</p>
-          </div>
-          <div class="account-security-badge">
-            <i class="bi bi-shield-check"></i>
-            Protected management account
-          </div>
-        </section>
+        <div id="pageHeaderMount"></div>
 
-        <section class="account-profile-summary">
+        <div class="settings-workspace">
+        <aside class="account-profile-summary" aria-label="Account overview">
+          <div class="account-profile-intro">
           <div class="account-avatar" id="accountAvatar">AU</div>
           <div>
+            <span class="identity-label">Signed in as</span>
             <h2 id="accountName">Management User</h2>
             <p id="accountEmail">Loading account…</p>
             <span id="accountRole" class="account-role">Role</span>
           </div>
-        </section>
+          </div>
+
+          <div class="account-health">
+            <div class="account-health-title">
+              <span>Account health</span>
+              <strong><i class="bi bi-shield-check"></i> Protected</strong>
+            </div>
+            <div class="health-progress"><span></span></div>
+            <p>Your profile is connected to a protected management account.</p>
+          </div>
+
+          <nav class="settings-nav" aria-label="Account settings sections">
+            <a href="#profileSettings"><i class="bi bi-person-badge"></i><span>Profile information</span><i class="bi bi-chevron-right"></i></a>
+            <a href="#securitySettings"><i class="bi bi-key"></i><span>Password &amp; security</span><i class="bi bi-chevron-right"></i></a>
+          </nav>
+
+          <div class="account-support-note">
+            <i class="bi bi-info-circle"></i>
+            <p>Email and role changes are managed by an administrator.</p>
+          </div>
+        </aside>
 
         <div class="account-grid">
-          <section class="account-card">
+          <section class="account-card" id="profileSettings">
             <div class="account-card-heading">
               <div class="account-card-icon"><i class="bi bi-person-badge"></i></div>
               <div>
                 <h2>Profile information</h2>
                 <p>This name appears in the sidebar, activity records, and staff actions.</p>
               </div>
+              <span class="section-state"><i class="bi bi-check-circle-fill"></i> Complete</span>
             </div>
-            <form id="profileForm" novalidate>
-              <label class="account-field">
+            <form id="profileForm" class="profile-form-grid" novalidate>
+              <label class="account-field field-full">
                 <span>Display name</span>
                 <input id="displayNameInput" type="text" minlength="2" maxlength="80" autocomplete="name" required />
                 <small id="displayNameError" class="account-error"></small>
@@ -85,7 +99,7 @@
                 <input id="roleInput" type="text" readonly />
                 <small>Role and permissions are controlled by an administrator.</small>
               </label>
-              <div class="account-form-actions">
+              <div class="account-form-actions field-full">
                 <button class="account-primary-button" id="saveProfileButton" type="submit">
                   <i class="bi bi-check2-circle"></i> Save profile
                 </button>
@@ -93,15 +107,20 @@
             </form>
           </section>
 
-          <section class="account-card">
+          <section class="account-card security-card" id="securitySettings">
             <div class="account-card-heading">
               <div class="account-card-icon security"><i class="bi bi-key"></i></div>
               <div>
                 <h2>Change password</h2>
                 <p>Your current password is required. You will sign in again after changing it.</p>
               </div>
+              <span class="section-state secure"><i class="bi bi-lock-fill"></i> Secure</span>
             </div>
-            <form id="passwordForm" novalidate>
+            <div class="security-callout">
+              <i class="bi bi-shield-lock-fill"></i>
+              <div><strong>Create a strong, unique password</strong><span>After a successful update, all current account access will return to the sign-in screen.</span></div>
+            </div>
+            <form id="passwordForm" class="security-form-grid" novalidate>
               <label class="account-field">
                 <span>Current password</span>
                 <div class="password-input-wrap">
@@ -116,18 +135,18 @@
                   <button type="button" class="password-toggle" data-target="newPassword" aria-label="Show new password"><i class="bi bi-eye"></i></button>
                 </div>
               </label>
-              <div class="password-strength" aria-live="polite">
+              <div class="password-strength field-full" aria-live="polite">
                 <div class="strength-bar"><span id="strengthFill"></span></div>
                 <span id="strengthLabel">Enter a new password</span>
               </div>
-              <ul class="password-rules" id="passwordRules">
+              <ul class="password-rules field-full" id="passwordRules">
                 <li data-rule="length"><i class="bi bi-circle"></i> At least 8 characters</li>
                 <li data-rule="upper"><i class="bi bi-circle"></i> One uppercase letter</li>
                 <li data-rule="lower"><i class="bi bi-circle"></i> One lowercase letter</li>
                 <li data-rule="number"><i class="bi bi-circle"></i> One number</li>
                 <li data-rule="special"><i class="bi bi-circle"></i> One special character</li>
               </ul>
-              <label class="account-field">
+              <label class="account-field field-full confirm-field">
                 <span>Confirm new password</span>
                 <div class="password-input-wrap">
                   <input id="confirmPassword" type="password" autocomplete="new-password" required />
@@ -135,13 +154,14 @@
                 </div>
                 <small id="passwordError" class="account-error"></small>
               </label>
-              <div class="account-form-actions">
+              <div class="account-form-actions field-full">
                 <button class="account-primary-button" id="changePasswordButton" type="submit">
                   <i class="bi bi-shield-lock"></i> Change password
                 </button>
               </div>
             </form>
           </section>
+        </div>
         </div>
         <div class="account-live-status" id="accountStatus" role="status" aria-live="polite"></div>
       </main>

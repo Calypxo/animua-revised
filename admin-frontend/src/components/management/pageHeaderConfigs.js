@@ -255,5 +255,29 @@ export const PAGE_HEADER_CONFIGS = Object.freeze({
       { id: "archiveInventory", icon: "bi-box-seam-fill", label: "Inventory Records", tone: "amber" },
       { id: "archiveUsers", icon: "bi-people-fill", label: "User Records", tone: "blue" }
     ]
+  },
+  accountSettings: {
+    headingId: "pageTitle",
+    eyebrow: "Personal Workspace",
+    title: "Account Settings",
+    description: "Manage the identity shown across ANIMUA and keep your management account protected with clear, secure controls.",
+    watermarkIcon: "bi-person-gear",
+    highlights: [
+      { icon: "bi-person-check", label: "Consistent identity" },
+      { icon: "bi-shield-lock", label: "Protected credentials" },
+      { icon: "bi-eye", label: "Clear account status" }
+    ],
+    queue: { liveLabel: "Protected session active", label: "Security standard", title: "Password requirements enabled", value: 5, unit: "rules" },
+    actions: [
+      { href: "#profileSettings", icon: "bi-person-badge", label: "Edit profile" },
+      { href: "#securitySettings", icon: "bi-key", label: "Update password", variant: "secondary" }
+    ],
+    summaryLabel: "Account snapshot",
+    metrics: [
+      { id: "settingProfileStatus", icon: "bi-person-check-fill", label: "Profile Status", value: "Ready" },
+      { id: "settingRole", icon: "bi-shield-check", label: "System Role", value: "Role", tone: "blue" },
+      { id: "settingEmailStatus", icon: "bi-envelope-check-fill", label: "Email Status", value: "Managed", tone: "green" },
+      { id: "settingSecurityScore", icon: "bi-lock-fill", label: "Security Rules", value: "5/5", tone: "amber" }
+    ]
   }
 });

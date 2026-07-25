@@ -5,6 +5,8 @@ import Swal from "sweetalert2";
 import { protectManagementPage } from "../auth/authGuard.js";
 import { renderTopbarUser } from "../components/management/topbarUser.js";
 import { loadSidebar } from "../components/management/sidebarLoader.js";
+import { renderPageHeader } from "../components/management/pageHeader.js";
+import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.js";
 import { apiFetch } from "../utils/api.js";
 import { clearUserSession } from "../utils/storage.js";
 
@@ -26,6 +28,10 @@ function renderAccount() {
   document.getElementById("displayNameInput").value = account.fullName;
   document.getElementById("emailInput").value = account.email;
   document.getElementById("roleInput").value = account.role;
+  document.getElementById("settingRole").textContent = account.role;
+  document.getElementById("settingProfileStatus").textContent = "Complete";
+  document.getElementById("settingEmailStatus").textContent = account.email ? "Verified" : "Pending";
+  document.getElementById("settingSecurityScore").textContent = "5/5";
 }
 
 function validateDisplayName(value) {
@@ -116,7 +122,7 @@ async function changePassword(event) {
     text: "You will be signed out and asked to log in with the new password.",
     showCancelButton: true,
     confirmButtonText: "Change password",
-    confirmButtonColor: "#6f191c",
+    confirmButtonColor: "#ef1725",
   });
   if (!confirmed.isConfirmed) return;
   const button = document.getElementById("changePasswordButton");
@@ -130,7 +136,7 @@ async function changePassword(event) {
       icon: "success",
       title: "Password changed",
       text: "Sign in again using your new password.",
-      confirmButtonColor: "#6f191c",
+      confirmButtonColor: "#ef1725",
     });
     clearUserSession();
     window.location.replace("/pages/admin-login.html");
@@ -158,6 +164,7 @@ async function init() {
     await protectManagementPage();
     renderTopbarUser();
     loadSidebar();
+    renderPageHeader(PAGE_HEADER_CONFIGS.accountSettings);
     const result = await apiFetch("/auth/account");
     account = result.account;
     renderAccount();
