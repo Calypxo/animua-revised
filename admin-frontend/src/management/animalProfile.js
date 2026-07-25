@@ -5,7 +5,7 @@ import "../css/animalProfiling.css";
 
 import { protectPageByModule } from "../auth/authGuard.js";
 import { renderTopbarUser } from "../components/management/topbarUser.js";
-import { loadSidebar } from "../components/management/sidebarLoader.js";
+import { loadSidebar, navigateManagementPage } from "../components/management/sidebarLoader.js";
 import {
   getUserName,
 } from "../utils/storage.js";
@@ -188,7 +188,7 @@ async function loadAnimal() {
   const id = params.get("id");
 
   if (!id) {
-    window.location.href = "/pages/animalProfiling.html";
+    navigateManagementPage("/pages/animalProfiling.html");
     return;
   }
 
@@ -199,7 +199,7 @@ async function loadAnimal() {
   } catch (err) {
     console.error("[loadAnimal]", err);
     alert("Animal not found.");
-    window.location.href = "/pages/animalProfiling.html";
+    navigateManagementPage("/pages/animalProfiling.html");
   }
 }
 
@@ -280,10 +280,11 @@ function renderHero() {
     `;
 
     btn.onclick = () => {
-      window.location.href =
+      navigateManagementPage(
         `/pages/adoptionApplications.html?animalId=${encodeURIComponent(
           animal.id
-        )}`;
+        )}`
+      );
     };
   }
 }

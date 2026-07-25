@@ -12,6 +12,47 @@ const escapeHtml = (value) => String(value ?? "")
   .replaceAll("'", "&#039;");
 
 const normalizePath = (path = "") => path.split("?")[0].split("#")[0].replace(/\/+$/, "") || "/";
+const EMBED_PARAM = "animuaShell";
+
+function isEmbeddedView() {
+  return window.self !== window.top && new URLSearchParams(window.location.search).get(EMBED_PARAM) === "1";
+}
+
+function managementUrl(value) {
+  try {
+    const url = new URL(value, window.location.href);
+    if (url.origin !== window.location.origin || !url.pathname.startsWith("/pages/")) return null;
+    url.searchParams.delete(EMBED_PARAM);
+    return url;
+  } catch {
+    return null;
+  }
+}
+
+function cleanLocation(url) {
+  return `${url.pathname}${url.search}${url.hash}`;
+}
+
+export function navigateManagementPage(target) {
+  const url = managementUrl(target);
+  if (!url) {
+    window.location.assign(target);
+    return;
+  }
+
+  if (isEmbeddedView()) {
+    window.parent.postMessage({ type: "animua:navigate", href: cleanLocation(url) }, window.location.origin);
+    return;
+  }
+
+  const shell = window.__animuaPersistentNavigation;
+  if (shell?.navigate) {
+    shell.navigate(cleanLocation(url));
+    return;
+  }
+
+  window.location.assign(cleanLocation(url));
+}
 
 function initials(name) {
   return String(name || "ANIMUA User")
@@ -97,17 +138,26 @@ function systemNavigation(role) {
     </section>`;
 }
 
-function setActiveNavigation(sidebar) {
-  const current = normalizePath(window.location.pathname);
+function setActiveNavigation(sidebar, pathname = window.location.pathname) {
+  const current = normalizePath(pathname);
   sidebar.querySelectorAll("a.nav-item").forEach((item) => {
     const active = current === normalizePath(item.getAttribute("href"));
     item.classList.toggle("active", active);
+    item.removeAttribute("aria-current");
     if (active) {
       item.setAttribute("aria-current", "page");
       const group = item.closest("[data-nav-group]");
       if (group) setGroupExpanded(group, true);
     }
   });
+
+  const accountLink = sidebar.querySelector(".sidebar-account");
+  if (accountLink) {
+    const active = current === normalizePath(accountLink.getAttribute("href"));
+    accountLink.classList.toggle("active", active);
+    if (active) accountLink.setAttribute("aria-current", "page");
+    else accountLink.removeAttribute("aria-current");
+  }
 }
 
 function setGroupExpanded(group, expanded) {
@@ -131,17 +181,20 @@ function bindSidebar(container, sidebar, overlay) {
   };
 
   toggle?.setAttribute("aria-controls", "sidebar");
-  toggle?.addEventListener("click", () => {
+  const toggleSidebar = () => {
     if (window.innerWidth <= 768) {
       const open = sidebar.classList.toggle("mobile-show");
       overlay.classList.toggle("active", open);
-      toggle.setAttribute("aria-expanded", String(open));
+      toggle?.setAttribute("aria-expanded", String(open));
       return;
     }
     const collapsed = sidebar.classList.toggle("collapsed");
     container.classList.toggle("sidebar-collapsed", collapsed);
-    toggle.setAttribute("aria-expanded", String(!collapsed));
-  });
+    toggle?.setAttribute("aria-expanded", String(!collapsed));
+  };
+
+  toggle?.addEventListener("click", toggleSidebar);
+  container.__animuaSidebarController = { toggle: toggleSidebar, closeMobile };
 
   overlay.addEventListener("click", closeMobile);
   document.addEventListener("keydown", (event) => {
@@ -168,6 +221,161 @@ function bindSidebar(container, sidebar, overlay) {
   });
 }
 
+function setupEmbeddedBridge(container) {
+  document.documentElement.classList.add("animua-embedded-page");
+  container.hidden = true;
+  container.setAttribute("aria-hidden", "true");
+
+  const send = (message) => window.parent.postMessage(message, window.location.origin);
+  const toggle = document.getElementById("sidebarToggle");
+  toggle?.addEventListener("click", (event) => {
+    event.preventDefault();
+    send({ type: "animua:toggle-sidebar" });
+  });
+
+  document.addEventListener("click", (event) => {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    const anchor = event.target.closest("a[href]");
+    if (!anchor || anchor.hasAttribute("download") || anchor.target === "_blank") return;
+    const url = managementUrl(anchor.href);
+    if (!url || (normalizePath(url.pathname) === normalizePath(window.location.pathname) && url.hash)) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    send({ type: "animua:navigate", href: cleanLocation(url) });
+  }, true);
+
+  const notifyReady = () => send({ type: "animua:page-ready", path: cleanLocation(new URL(window.location.href)) });
+  if (!document.body.classList.contains("loading")) {
+    notifyReady();
+  } else {
+    const observer = new MutationObserver(() => {
+      if (document.body.classList.contains("loading")) return;
+      observer.disconnect();
+      notifyReady();
+    });
+    observer.observe(document.body, { attributes: true, attributeFilter: ["class"] });
+  }
+}
+
+function setupPersistentNavigation(container, sidebar) {
+  const existing = window.__animuaPersistentNavigation;
+  if (existing) {
+    existing.container = container;
+    existing.sidebar = sidebar;
+    setActiveNavigation(sidebar, window.location.pathname);
+    return;
+  }
+
+  const stage = document.querySelector(".shell > .stage");
+  if (!stage) return;
+
+  const state = {
+    container,
+    sidebar,
+    stage,
+    frame: null,
+    loader: null,
+    fallbackTimer: null,
+    navigate: null,
+  };
+
+  const markReady = () => {
+    window.clearTimeout(state.fallbackTimer);
+    state.stage.classList.remove("is-navigating");
+    state.stage.setAttribute("aria-busy", "false");
+    state.frame?.classList.add("is-ready");
+    try {
+      if (state.frame?.contentDocument?.title) document.title = state.frame.contentDocument.title;
+    } catch {
+      // The management pages are same-origin; keep the existing title if access is unavailable.
+    }
+  };
+
+  const ensureFrame = () => {
+    if (state.frame) return state.frame;
+
+    const frame = document.createElement("iframe");
+    frame.className = "persistent-page-frame";
+    frame.title = "ANIMUA management workspace";
+    frame.setAttribute("aria-label", "ANIMUA management workspace");
+
+    const loader = document.createElement("div");
+    loader.className = "persistent-page-loader";
+    loader.setAttribute("role", "status");
+    loader.setAttribute("aria-live", "polite");
+    loader.innerHTML = '<span class="persistent-loader-mark"><i class="bi bi-heart-pulse-fill"></i></span><span>Opening workspace</span>';
+
+    frame.addEventListener("load", () => {
+      try {
+        if (frame.contentWindow?.location.pathname.endsWith("/admin-login.html")) {
+          window.location.replace("/pages/admin-login.html");
+          return;
+        }
+      } catch {
+        // Same-origin management routes normally expose their path here.
+      }
+      window.clearTimeout(state.fallbackTimer);
+      state.fallbackTimer = window.setTimeout(markReady, 5000);
+    });
+
+    state.frame = frame;
+    state.loader = loader;
+    state.stage.classList.add("persistent-shell-stage");
+    state.stage.replaceChildren(frame, loader);
+    return frame;
+  };
+
+  state.navigate = (target, { historyMode = "push" } = {}) => {
+    const url = managementUrl(target);
+    if (!url) {
+      window.location.assign(target);
+      return;
+    }
+
+    const destination = cleanLocation(url);
+    const current = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+    if (destination === current && !state.frame) return;
+    if (destination === current && state.frame?.dataset.destination === destination) return;
+
+    if (historyMode === "push") history.pushState({ ...(history.state || {}), animuaPath: destination }, "", destination);
+    else if (historyMode === "replace") history.replaceState({ ...(history.state || {}), animuaPath: destination }, "", destination);
+
+    setActiveNavigation(state.sidebar, url.pathname);
+    state.container.__animuaSidebarController?.closeMobile();
+
+    const embeddedUrl = new URL(url.href);
+    embeddedUrl.searchParams.set(EMBED_PARAM, "1");
+    const frame = ensureFrame();
+    frame.dataset.destination = destination;
+    frame.classList.remove("is-ready");
+    state.stage.classList.add("is-navigating");
+    state.stage.setAttribute("aria-busy", "true");
+    frame.src = cleanLocation(embeddedUrl);
+  };
+
+  history.replaceState({ ...(history.state || {}), animuaPath: `${window.location.pathname}${window.location.search}${window.location.hash}` }, "", window.location.href);
+
+  document.addEventListener("click", (event) => {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    const anchor = event.target.closest("a[href]");
+    if (!anchor || anchor.hasAttribute("download") || anchor.target === "_blank") return;
+    const url = managementUrl(anchor.href);
+    if (!url || (normalizePath(url.pathname) === normalizePath(window.location.pathname) && url.hash)) return;
+    event.preventDefault();
+    state.navigate(cleanLocation(url));
+  }, true);
+
+  window.addEventListener("popstate", () => state.navigate(window.location.href, { historyMode: "none" }));
+  window.addEventListener("message", (event) => {
+    if (event.origin !== window.location.origin || event.source !== state.frame?.contentWindow) return;
+    if (event.data?.type === "animua:navigate") state.navigate(event.data.href);
+    if (event.data?.type === "animua:toggle-sidebar") state.container.__animuaSidebarController?.toggle();
+    if (event.data?.type === "animua:page-ready") markReady();
+  });
+
+  window.__animuaPersistentNavigation = state;
+}
+
 export function loadSidebar() {
   const container = document.getElementById("sidebar-container");
   if (!container) return;
@@ -177,6 +385,11 @@ export function loadSidebar() {
   if (!role) {
     clearUserSession();
     window.location.replace("/pages/admin-login.html");
+    return;
+  }
+
+  if (isEmbeddedView()) {
+    setupEmbeddedBridge(container);
     return;
   }
 
@@ -202,5 +415,5 @@ export function loadSidebar() {
   const overlay = container.querySelector("#sidebar-overlay");
   setActiveNavigation(sidebar);
   bindSidebar(container, sidebar, overlay);
+  setupPersistentNavigation(container, sidebar);
 }
-

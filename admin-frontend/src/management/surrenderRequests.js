@@ -8,7 +8,7 @@ import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.
 import { protectPageByModule } from "../auth/authGuard.js";
 import { hasPermission } from "../auth/permissions.js";
 import { renderTopbarUser }      from "../components/management/topbarUser.js";
-import { loadSidebar }           from "../components/management/sidebarLoader.js";
+import { loadSidebar, navigateManagementPage } from "../components/management/sidebarLoader.js";
 import { getUserName }           from "../utils/storage.js";
 
 renderPageHeader(PAGE_HEADER_CONFIGS.surrenders);
@@ -621,7 +621,7 @@ async function executeApprove() {
     showToast("success", `Request ${r.id} approved. Redirecting to Animal Intake...`);
 
     setTimeout(() => {
-      window.location.href = "/pages/intakeList.html?source=surrender";
+      navigateManagementPage("/pages/intakeList.html?source=surrender");
     }, 900);
 
   } catch (error) {

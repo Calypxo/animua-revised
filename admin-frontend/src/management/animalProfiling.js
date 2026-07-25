@@ -7,7 +7,7 @@ import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.
 
 import { protectManagementPage } from "../auth/authGuard.js";
 import { renderTopbarUser }      from "../components/management/topbarUser.js";
-import { loadSidebar }           from "../components/management/sidebarLoader.js";
+import { loadSidebar, navigateManagementPage } from "../components/management/sidebarLoader.js";
 import { getAllAnimals }         from "../services/animal.service.js";
 
 renderPageHeader(PAGE_HEADER_CONFIGS.animalProfiling);
@@ -260,7 +260,7 @@ function renderTable() {
   tbody.querySelectorAll(".animal-record-card[data-id]").forEach(card => {
     const openProfile = () => {
       if (!card.dataset.id) return;
-      window.location.href = `/pages/animalProfile.html?id=${card.dataset.id}`;
+      navigateManagementPage(`/pages/animalProfile.html?id=${card.dataset.id}`);
     };
     card.addEventListener("click", openProfile);
     card.addEventListener("keydown", event => {
@@ -274,7 +274,7 @@ function renderTable() {
     btn.addEventListener("click", e => {
       e.stopPropagation();
       if (!btn.dataset.id) return;
-      window.location.href = `/pages/animalProfile.html?id=${btn.dataset.id}`;
+      navigateManagementPage(`/pages/animalProfile.html?id=${btn.dataset.id}`);
     });
   });
 }
