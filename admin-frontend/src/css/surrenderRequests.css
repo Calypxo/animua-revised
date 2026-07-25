@@ -625,11 +625,48 @@
 .surrender-requests-page .search-pill-sm:focus-within,
 .surrender-requests-page .filter-select:focus { border-color: var(--brand-red); background: #fff; box-shadow: 0 0 0 3px rgba(239,41,45,.1); outline: 0; }
 
-.surrender-requests-page .table-responsive { overflow-x: auto; background: #fffdf9; }
-.surrender-requests-page .shelter-table { min-width: 1040px; background: #fffdf9; color: #332d2b; font: 500 12px/1.35 'Inter', sans-serif; }
+.surrender-requests-page .table-responsive {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden !important;
+  background: #fffdf9;
+}
+.surrender-requests-page .shelter-table {
+  width: 100% !important;
+  min-width: 0;
+  table-layout: fixed !important;
+  background: #fffdf9;
+  color: #332d2b;
+  font: 500 12px/1.35 'Inter', sans-serif;
+}
+.surrender-requests-page .shelter-table .col-owner { width: 23%; }
+.surrender-requests-page .shelter-table .col-pet { width: 19%; }
+.surrender-requests-page .shelter-table .col-category { width: 15%; }
+.surrender-requests-page .shelter-table .col-urgency { width: 12%; }
+.surrender-requests-page .shelter-table .col-submitted { width: 12%; }
+.surrender-requests-page .shelter-table .col-status { width: 12%; }
+.surrender-requests-page .shelter-table .col-action { width: 7%; }
 .surrender-requests-page .shelter-table thead { background: linear-gradient(90deg,var(--brand-red-deep),var(--brand-red)); }
 .surrender-requests-page .shelter-table thead th { padding: 14px 15px; border-bottom: 0; background: transparent; color: #fff; font: 800 10px/1 'Inter', sans-serif; letter-spacing: .07em; }
 .surrender-requests-page .shelter-table tbody td { padding: 15px; border-bottom: 1px solid #f2ddd7; background: #fffdf9; color: #4a413e; font: 500 12px/1.4 'Inter', sans-serif; }
+.surrender-requests-page .shelter-table :is(th,td):first-child { padding-left: 26px !important; }
+.surrender-requests-page .shelter-table :is(th,td):last-child {
+  padding-right: 22px !important;
+  text-align: right;
+}
+.surrender-requests-page .shelter-table :is(th,td) { min-width: 0; box-sizing: border-box; }
+.surrender-requests-page .owner-cell,
+.surrender-requests-page .pet-mini { min-width: 0; }
+.surrender-requests-page .owner-cell > div:last-child,
+.surrender-requests-page .pet-mini > div:last-child { min-width: 0; }
+.surrender-requests-page .owner-name,
+.surrender-requests-page .owner-barangay,
+.surrender-requests-page .pet-mini-name,
+.surrender-requests-page .pet-mini-breed {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .surrender-requests-page .shelter-table tbody tr:nth-child(even) td { background: #fff9f2; }
 .surrender-requests-page .shelter-table tbody tr:hover td { background: #ffefe9; }
 .surrender-requests-page .shelter-table tbody tr.row-active td { background: #ffe8e3 !important; }
@@ -758,6 +795,8 @@
   .surrender-requests-page .sr-drawer { width: min(760px, calc(100vw - 290px)); }
 }
 @media (max-width: 1100px) {
+  .surrender-requests-page .table-responsive { overflow-x: auto !important; }
+  .surrender-requests-page .shelter-table { min-width: 940px; }
   .surrender-requests-page .sr-layout.drawer-open .sr-drawer {
     top: 76px;
     right: 14px;
@@ -780,7 +819,8 @@
 @media (max-width: 720px) {
   .surrender-requests-page .records-heading { display: block; }
   .surrender-requests-page .records-legend { margin-top: 10px; }
-  .surrender-requests-page .shelter-table { min-width: 0; }
+  .surrender-requests-page .table-responsive { overflow-x: hidden !important; }
+  .surrender-requests-page .shelter-table { min-width: 0; table-layout: auto !important; }
   .surrender-requests-page .shelter-table thead { display: none; }
   .surrender-requests-page .shelter-table tbody { display: grid; gap: 10px; padding: 12px; background: #fbf4eb; }
   .surrender-requests-page .shelter-table tbody tr[data-id] { display: block; overflow: hidden; border: 1px solid var(--brand-border); border-radius: 13px; background: #fff; }
