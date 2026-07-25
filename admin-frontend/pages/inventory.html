@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="/src/css/sidebar.css" />
   <link rel="stylesheet" href="/src/css/inventory.css" />
 </head>
-<body class="loading">
+<body class="loading inventory-page">
 <div class="shell">
   <div id="sidebar-container"></div>
   <div class="stage">
@@ -57,7 +57,9 @@
           <div class="panel-head flex-column gap-3">
 
             <!-- Category tabs -->
-            <div class="inv-tabs" id="categoryTabs">
+            <div class="inv-category-strip">
+              <div class="inv-category-label"><i class="bi bi-tags-fill"></i> Categories</div>
+              <div class="inv-tabs" id="categoryTabs" role="tablist" aria-label="Inventory categories">
               <button class="inv-tab active" data-tab="all">All</button>
               <button class="inv-tab" data-tab="Antibiotic">Antibiotic</button>
               <button class="inv-tab" data-tab="Antiparasitic">Antiparasitic</button>
@@ -66,59 +68,126 @@
               <button class="inv-tab" data-tab="Equipment">Equipment</button>
               <button class="inv-tab" data-tab="Supplement">Supplement</button>
               <button class="inv-tab" data-tab="Vaccine">Vaccine</button>
+              </div>
             </div>
 
-            <div class="d-flex gap-2 flex-wrap align-items-center justify-content-between w-100">
-              <div class="d-flex gap-2 flex-wrap">
-                <div class="search-pill-sm">
+            <div class="inventory-filter-toolbar">
+              <div class="inventory-filter-controls">
+                <div class="search-pill-sm inventory-search">
                   <i class="bi bi-search"></i>
                   <input type="text" id="searchInventory" placeholder="Search item, ID, category…" autocomplete="off" />
                 </div>
-                <select class="filter-select" id="filterMovement">
+                <select class="filter-select" id="filterMovement" aria-label="Filter by movement">
                   <option value="">All movement</option>
                   <option value="Fast">Fast Moving</option>
                   <option value="Slow">Slow Moving</option>
                 </select>
-                <select class="filter-select" id="filterRisk">
+                <select class="filter-select" id="filterRisk" aria-label="Filter by reorder risk">
                   <option value="">All risk</option>
                   <option value="Review">Needs Review</option>
                   <option value="OK">OK</option>
                 </select>
-                <select class="filter-select" id="filterStockStatus">
+                <select class="filter-select" id="filterStockStatus" aria-label="Filter by stock status">
                   <option value="">All status</option>
                   <option value="Critical">Critical</option>
                   <option value="Low">Low</option>
                   <option value="OK">OK</option>
                 </select>
+                <button class="inventory-clear-filters" id="clearInventoryFilters" type="button" disabled>
+                  <i class="bi bi-arrow-counterclockwise"></i><span>Clear</span>
+                </button>
               </div>
-              <div class="d-flex gap-2">
-                <button class="view-btn active" id="btnTableView" title="Table view"><i class="bi bi-table"></i></button>
-                <button class="view-btn" id="btnCardView" title="Card view"><i class="bi bi-grid-3x3-gap-fill"></i></button>
+              <div class="inventory-view-tools" role="group" aria-label="Inventory view">
+                <button class="view-btn active" id="btnTableView" title="Table view" aria-label="Table view"><i class="bi bi-table"></i></button>
+                <button class="view-btn" id="btnCardView" title="Card view" aria-label="Card view"><i class="bi bi-grid-3x3-gap-fill"></i></button>
               </div>
+            </div>
+            <div class="inventory-filter-summary" aria-live="polite">
+              <span id="filterResultsCount">Showing all inventory items</span>
+              <span><i class="bi bi-lightning-charge-fill"></i> Filters update instantly</span>
             </div>
           </div>
 
           <!-- TABLE VIEW -->
-          <div id="tableView">
-            <div class="table-responsive">
-              <table class="shelter-table">
-                <thead>
-                  <tr>
-                    <th>Item</th>
-                    <th>Category</th>
-                    <th>Current Stock</th>
-                    <th>Days Until Stockout</th>
-                    <th>Movement</th>
-                    <th>Reorder Risk</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="inventoryTableBody">
-                  <tr><td colspan="7" class="text-center py-5"><div class="um-spinner"></div></td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
+<!-- TABLE VIEW -->
+<div id="tableView">
+  <div class="table-responsive inventory-table-wrap">
+    <table class="shelter-table inventory-smart-table">
+
+      <colgroup>
+        <col class="col-item" />
+        <col class="col-category" />
+        <col class="col-stock" />
+        <col class="col-forecast" />
+        <col class="col-movement" />
+        <col class="col-status" />
+        <col class="col-actions" />
+      </colgroup>
+
+      <thead>
+        <tr>
+          <th>
+            <span class="table-heading">
+              <i class="bi bi-box-seam"></i>
+              Inventory Item
+            </span>
+          </th>
+
+          <th>
+            <span class="table-heading">
+              <i class="bi bi-tags"></i>
+              Category
+            </span>
+          </th>
+
+          <th>
+            <span class="table-heading">
+              <i class="bi bi-bar-chart"></i>
+              Availability
+            </span>
+          </th>
+
+          <th>
+            <span class="table-heading">
+              <i class="bi bi-graph-down-arrow"></i>
+              Stock Forecast
+            </span>
+          </th>
+
+          <th>
+            <span class="table-heading">
+              <i class="bi bi-activity"></i>
+              Movement
+            </span>
+          </th>
+
+          <th>
+            <span class="table-heading">
+              <i class="bi bi-shield-check"></i>
+              Stock Health
+            </span>
+          </th>
+
+          <th class="actions-heading">
+            <span class="table-heading">
+              Actions
+            </span>
+          </th>
+        </tr>
+      </thead>
+
+      <tbody id="inventoryTableBody">
+        <tr>
+          <td colspan="7" class="inventory-loading-cell">
+            <div class="um-spinner"></div>
+            <span>Loading inventory items…</span>
+          </td>
+        </tr>
+      </tbody>
+
+    </table>
+  </div>
+</div>
 
           <!-- CARD VIEW -->
           <div id="cardView" style="display:none">

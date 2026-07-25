@@ -194,7 +194,6 @@ let activeTab = "all";
 let activeItemId = null;
 let viewMode = "table";
 let editingItemId = null;
-let activeStockStatus = "";
 let stockInMode = "single";
 let stockOutMode = "single";
 let currentRole = "";
@@ -202,33 +201,8 @@ let currentRole = "";
 /* ══════════════════════════════════════════════════════
    CATEGORY COLORS
 ══════════════════════════════════════════════════════ */
-const CAT_COLORS = {
-  Antibiotic: { bg: "#f3e8ff", color: "#6b21a8" },
-  Antiparasitic: { bg: "var(--teal-soft)", color: "var(--teal)" },
-  Antifungal: { bg: "#fef3c7", color: "#92400e" },
-  Anesthetic: { bg: "var(--rose-soft)", color: "var(--rose)" },
-  Supplement: { bg: "var(--green-soft)", color: "var(--green)" },
-  Vaccine: { bg: "var(--blue-soft)", color: "var(--blue)" },
-  Consumable: { bg: "var(--amber-soft)", color: "var(--amber)" },
-  "Surgical Supply": { bg: "var(--clay-soft)", color: "var(--clay)" },
-  Equipment: { bg: "var(--cream-3)", color: "var(--stone)" },
-  Disinfectant: { bg: "var(--teal-soft)", color: "var(--teal)" },
-  "Topical Medicine": { bg: "var(--rose-soft)", color: "var(--rose)" },
-  "Hormonal Medicine": { bg: "#fef3c7", color: "#92400e" },
-  "Respiratory Medicine": { bg: "var(--blue-soft)", color: "var(--blue)" },
-  "Pain Relief": { bg: "var(--amber-soft)", color: "var(--amber)" },
-  Sedative: { bg: "var(--clay-soft)", color: "var(--clay)" },
-  Diagnostic: { bg: "var(--blue-soft)", color: "var(--blue)" },
-  Feed: { bg: "var(--green-soft)", color: "var(--green)" },
-  "Shelter Supply": { bg: "var(--cream-3)", color: "var(--stone)" },
-};
-
 const catBadge = (cat) => {
-  const c = CAT_COLORS[cat] || {
-    bg: "var(--cream-3)",
-    color: "var(--stone)",
-  };
-  return `<span class="cat-badge" style="background:${c.bg};color:${c.color}">${cat}</span>`;
+  return `<span class="cat-badge" title="${cat}">${cat}</span>`;
 };
 
 const today = () => new Date().toISOString().split("T")[0];
@@ -291,7 +265,8 @@ function renderAlerts() {
 
   bar.querySelectorAll("[data-stock-status]").forEach((el) => {
     el.addEventListener("click", () => {
-      activeStockStatus = el.dataset.stockStatus || "Critical";
+      const stockStatusFilter = document.getElementById("filterStockStatus");
+      if (stockStatusFilter) stockStatusFilter.value = el.dataset.stockStatus || "Critical";
 
       const riskFilter = document.getElementById("filterRisk");
       if (riskFilter) riskFilter.value = "";
@@ -315,10 +290,7 @@ function applyFilters() {
 
   const movement = document.getElementById("filterMovement")?.value || "";
   const risk = document.getElementById("filterRisk")?.value || "";
-  const stockStatus =
-    activeStockStatus ||
-    document.getElementById("filterStockStatus")?.value ||
-    "";
+  const stockStatus = document.getElementById("filterStockStatus")?.value || "";
 
   filtered = store.filter((item) => {
     if (activeTab !== "all" && item.category !== activeTab) return false;
@@ -338,19 +310,51 @@ function applyFilters() {
 
   const so = { Critical: 0, Low: 1, OK: 2 };
   filtered.sort((a, b) => {
-    const d = (so[a.stockStatus] || 2) - (so[b.stockStatus] || 2);
+    const d = (so[a.stockStatus] ?? 2) - (so[b.stockStatus] ?? 2);
     return d !== 0 ? d : a.daysUntilStockout - b.daysUntilStockout;
   });
+
+  const countLabel = document.getElementById("filterResultsCount");
+  if (countLabel) {
+    countLabel.textContent = filtered.length === store.length
+      ? `Showing all ${store.length} inventory items`
+      : `Showing ${filtered.length} of ${store.length} inventory items`;
+  }
+
+  const clearButton = document.getElementById("clearInventoryFilters");
+  if (clearButton) {
+    clearButton.disabled = !(q || movement || risk || stockStatus || activeTab !== "all");
+  }
 
   currentPage = 1;
   renderView();
   renderPagination();
 }
 
-/* ── Stock helpers ──────────────────────────────────── */
+function clearInventoryFilters() {
+  activeTab = "all";
+  ["searchInventory", "filterMovement", "filterRisk", "filterStockStatus"].forEach((id) => {
+    const control = document.getElementById(id);
+    if (control) control.value = "";
+  });
+
+  document.querySelectorAll("#categoryTabs .inv-tab").forEach((tab) => {
+    const isAll = tab.dataset.tab === "all";
+    tab.classList.toggle("active", isAll);
+    tab.setAttribute("aria-selected", String(isAll));
+  });
+  applyFilters();
+}
+
 function stockBar(item) {
   const base = Number(item.averageInventory || 0) || 1;
-  const pct = Math.min(100, Math.round((Number(item.currentStock || 0) / base) * 100));
+
+  const pct = Math.min(
+    100,
+    Math.round(
+      (Number(item.currentStock || 0) / base) * 100
+    )
+  );
 
   const fillCls =
     item.stockStatus === "Critical"
@@ -359,31 +363,43 @@ function stockBar(item) {
       ? "fill-low"
       : "fill-ok";
 
-  const valCls =
-    item.stockStatus === "Critical"
-      ? "days-crit"
-      : item.stockStatus === "Low"
-      ? "days-warn"
-      : "days-ok";
-
   return `
     <div class="stock-cell">
-      <span class="stock-val ${valCls}">
-        ${item.currentStock}
-        <span style="font-size:0.7rem;font-weight:500;color:var(--stone)">${formatUnit(item.currentStock, item.unit)}</span>
-      </span>
+      <div class="stock-main">
+        <span class="stock-val">
+          ${item.currentStock}
+        </span>
+
+        <span class="stock-unit">
+          ${formatUnit(item.currentStock, item.unit)} available
+        </span>
+      </div>
+
       <div class="stock-bar-wrap">
         <div class="stock-bar">
-          <div class="stock-bar-fill ${fillCls}" style="width:${pct}%"></div>
+          <div
+            class="stock-bar-fill ${fillCls}"
+            style="width:${pct}%"
+          ></div>
         </div>
-        <span style="font-size:0.68rem;font-family:var(--mono);color:var(--stone)">${pct}%</span>
+
+        <span class="stock-percent">
+          ${pct}%
+        </span>
       </div>
     </div>
   `;
 }
 
 function daysBadge(item) {
-  if (item.daysUntilStockout >= 999) return `<span class="days-cell days-ok">—</span>`;
+  if (item.daysUntilStockout >= 999) {
+    return `
+      <span class="days-cell days-ok">
+        <i class="bi bi-infinity"></i>
+        Stable
+      </span>
+    `;
+  }
 
   const cls =
     item.daysUntilStockout <= 14
@@ -392,7 +408,24 @@ function daysBadge(item) {
       ? "days-warn"
       : "days-ok";
 
-  return `<span class="days-cell ${cls}">${item.daysUntilStockout}d</span>`;
+  const icon =
+    item.daysUntilStockout <= 14
+      ? "bi-exclamation-triangle-fill"
+      : item.daysUntilStockout <= 30
+      ? "bi-clock-fill"
+      : "bi-calendar-check-fill";
+
+  const label =
+    item.daysUntilStockout === 1
+      ? "1 Day Left"
+      : `${item.daysUntilStockout} Days Left`;
+
+  return `
+    <span class="days-cell ${cls}">
+      <i class="bi ${icon}"></i>
+      ${label}
+    </span>
+  `;
 }
 
 /* ── Table view ─────────────────────────────────────── */
@@ -404,57 +437,175 @@ function renderTable() {
   const page = filtered.slice(start, start + PAGE_SIZE);
 
   if (!page.length) {
-    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-muted">No items found.</td></tr>`;
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" class="inventory-loading-cell">
+          <i class="bi bi-inbox" style="font-size:1.5rem"></i>
+          <span>No inventory items found.</span>
+        </td>
+      </tr>
+    `;
     return;
   }
 
   tbody.innerHTML = page
-    .map(
-      (item) => `
-    <tr data-id="${item.id}" class="${item.id === activeItemId ? "row-active" : ""}">
-      <td>
-        <div class="item-name-cell">
-          <div class="item-name">${item.name.trim()}</div>
-          <div class="item-id">${item.id}</div>
-        </div>
-      </td>
-      <td>${catBadge(item.category)}</td>
-      <td>${stockBar(item)}</td>
-      <td>${daysBadge(item)}</td>
-      <td>
-        <span class="movement-badge movement-${item.movement.toLowerCase()}">
-          <i class="bi ${item.movement === "Fast" ? "bi-lightning-charge-fill" : "bi-hourglass"}"></i>${item.movement}
-        </span>
-      </td>
-      <td>
-        <span class="${item.reorderRisk === "Review" ? "risk-review" : "risk-ok"}">
-          <i class="bi ${
-            item.reorderRisk === "Review"
-              ? "bi-exclamation-circle-fill"
-              : "bi-check-circle-fill"
-          }"></i> ${item.reorderRisk}
-        </span>
-      </td>
-      <td>
-        <button class="tbl-action-btn" title="View" data-action="view" data-id="${item.id}"><i class="bi bi-eye"></i></button>
-       ${
-  can("stock_in")
-    ? `<button class="tbl-action-btn stock-in" title="Stock In" data-action="stockin" data-id="${item.id}">
-        <i class="bi bi-plus-lg"></i>
-      </button>`
-    : ""
-}
-${
-  can("consume_general")
-    ? `<button class="tbl-action-btn use" title="Record Usage" data-action="use" data-id="${item.id}">
-        <i class="bi bi-dash-lg"></i>
-      </button>`
-    : ""
-}
-      </td>
-    </tr>
-  `
-    )
+    .map((item) => {
+      const rowStatusClass =
+        item.stockStatus === "Critical"
+          ? "row-critical"
+          : item.stockStatus === "Low"
+          ? "row-low"
+          : "";
+
+      const itemIcon =
+        item.category === "Antibiotic"
+          ? "bi-capsule"
+          : item.category === "Vaccine"
+          ? "bi-eyedropper"
+          : item.category === "Disinfectant"
+          ? "bi-droplet-fill"
+          : item.category === "Equipment"
+          ? "bi-tools"
+          : item.category === "Feed"
+          ? "bi-basket2-fill"
+          : item.category === "Supplement"
+          ? "bi-heart-pulse-fill"
+          : item.category === "Surgical Supply"
+          ? "bi-bandaid-fill"
+          : item.category === "Consumable"
+          ? "bi-box-seam-fill"
+          : "bi-box2-heart-fill";
+
+      const stockHealthClass =
+        item.stockStatus === "Critical"
+          ? "risk-critical"
+          : item.reorderRisk === "Review"
+          ? "risk-review"
+          : "risk-ok";
+
+      const stockHealthIcon =
+        item.stockStatus === "Critical"
+          ? "bi-exclamation-octagon-fill"
+          : item.reorderRisk === "Review"
+          ? "bi-exclamation-circle-fill"
+          : "bi-check-circle-fill";
+
+      const stockHealthText =
+        item.stockStatus === "Critical"
+          ? "Critical"
+          : item.reorderRisk === "Review"
+          ? "Review Soon"
+          : "Healthy";
+
+      return `
+        <tr
+          data-id="${item.id}"
+          class="
+            ${item.id === activeItemId ? "row-active" : ""}
+            ${rowStatusClass}
+          "
+        >
+          <td>
+            <div class="item-name-cell">
+              <div class="item-icon">
+                <i class="bi ${itemIcon}"></i>
+              </div>
+
+              <div class="item-content">
+                <div class="item-name" title="${item.name.trim()}">
+                  ${item.name.trim()}
+                </div>
+
+                <div class="item-meta">
+                  <span class="item-id">${item.id}</span>
+                  <span class="item-meta-dot"></span>
+                  <span class="item-status-label">
+                    ${item.stockStatus === "OK" ? "In Stock" : item.stockStatus}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </td>
+
+          <td>
+            ${catBadge(item.category)}
+          </td>
+
+          <td>
+            ${stockBar(item)}
+          </td>
+
+          <td>
+            ${daysBadge(item)}
+          </td>
+
+          <td>
+            <span class="movement-badge movement-${item.movement.toLowerCase()}">
+              <i class="bi ${
+                item.movement === "Fast"
+                  ? "bi-lightning-charge-fill"
+                  : "bi-hourglass-split"
+              }"></i>
+
+              ${item.movement === "Fast" ? "Fast Moving" : "Slow Moving"}
+            </span>
+          </td>
+
+          <td>
+            <span class="${stockHealthClass}">
+              <i class="bi ${stockHealthIcon}"></i>
+              ${stockHealthText}
+            </span>
+          </td>
+
+          <td>
+            <div class="table-actions">
+              <button
+                class="tbl-action-btn"
+                title="View"
+                data-action="view"
+                data-id="${item.id}"
+                aria-label="View ${item.name.trim()}"
+              >
+                <i class="bi bi-eye"></i>
+              </button>
+
+              ${
+                can("stock_in")
+                  ? `
+                    <button
+                      class="tbl-action-btn stock-in"
+                      title="Stock In"
+                      data-action="stockin"
+                      data-id="${item.id}"
+                      aria-label="Stock in ${item.name.trim()}"
+                    >
+                      <i class="bi bi-plus-lg"></i>
+                    </button>
+                  `
+                  : ""
+              }
+
+              ${
+                can("consume_general")
+                  ? `
+                    <button
+                      class="tbl-action-btn use"
+                      title="Record Usage"
+                      data-action="use"
+                      data-id="${item.id}"
+                      aria-label="Record usage for ${item.name.trim()}"
+                    >
+                      <i class="bi bi-dash-lg"></i>
+                    </button>
+                  `
+                  : ""
+              }
+            </div>
+          </td>
+        </tr>
+      `;
+    })
     .join("");
 
   tbody.querySelectorAll("tr[data-id]").forEach((row) => {
@@ -467,10 +618,20 @@ ${
   tbody.querySelectorAll("[data-action]").forEach((btn) => {
     btn.addEventListener("click", (e) => {
       e.stopPropagation();
+
       const { action, id } = btn.dataset;
-      if (action === "view") openDrawer(id);
-      if (action === "stockin") openStockIn(id);
-      if (action === "use") openStockOut(id);
+
+      if (action === "view") {
+        openDrawer(id);
+      }
+
+      if (action === "stockin") {
+        openStockIn(id);
+      }
+
+      if (action === "use") {
+        openStockOut(id);
+      }
     });
   });
 }
@@ -1595,20 +1756,17 @@ function buildCategoryTabs() {
   const container = document.getElementById("categoryTabs");
   if (!container) return;
 
-  const categories = [
-    "all",
-    ...new Set(
-      store
-        .map((i) => (i.category || "").trim())
-        .filter(Boolean)
-    ),
-  ];
+  const categoryNames = [...new Set(
+    store.map((i) => (i.category || "").trim()).filter(Boolean)
+  )].sort((a, b) => a.localeCompare(b));
+  const categories = ["all", ...categoryNames];
 
   container.innerHTML = categories
     .map(
       (c) =>
-        `<button class="inv-tab ${c === activeTab ? "active" : ""}" data-tab="${c}">
-          ${c === "all" ? "All" : c}
+        `<button class="inv-tab ${c === activeTab ? "active" : ""}" data-tab="${c}" role="tab" aria-selected="${c === activeTab}">
+          <span>${c === "all" ? "All" : c}</span>
+          <small>${c === "all" ? store.length : store.filter((item) => item.category === c).length}</small>
         </button>`
     )
     .join("");
@@ -1617,9 +1775,10 @@ function buildCategoryTabs() {
     btn.addEventListener("click", () => {
       container.querySelectorAll(".inv-tab").forEach((t) => t.classList.remove("active"));
       btn.classList.add("active");
+      container.querySelectorAll(".inv-tab").forEach((tab) => tab.setAttribute("aria-selected", String(tab === btn)));
       activeTab = btn.dataset.tab;
-      activeStockStatus = "";
       applyFilters();
+      btn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
     });
   });
 }
@@ -1663,24 +1822,22 @@ async function init() {
     await loadInventory();
 
     document.getElementById("searchInventory")?.addEventListener("input", () => {
-      activeStockStatus = "";
       applyFilters();
     });
 
     document.getElementById("filterMovement")?.addEventListener("change", () => {
-      activeStockStatus = "";
       applyFilters();
     });
 
     document.getElementById("filterRisk")?.addEventListener("change", () => {
-      activeStockStatus = "";
       applyFilters();
     });
 
     document.getElementById("filterStockStatus")?.addEventListener("change", () => {
-      activeStockStatus = "";
       applyFilters();
     });
+
+    document.getElementById("clearInventoryFilters")?.addEventListener("click", clearInventoryFilters);
 
     document.getElementById("btnTableView")?.addEventListener("click", () => {
       viewMode = "table";
