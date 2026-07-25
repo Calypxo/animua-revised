@@ -1,0 +1,143 @@
+:root {
+  --management-modal-width: 56vw;
+  --management-modal-radius: 30px;
+  --management-modal-shadow: -24px 0 70px rgba(43, 22, 19, 0.24);
+}
+
+body.management-modal-open,
+body.management-drawer-open {
+  overflow: hidden !important;
+}
+
+.management-modal-layer {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2500 !important;
+  display: flex !important;
+  align-items: stretch !important;
+  justify-content: flex-end !important;
+  padding: 0 !important;
+  background: rgba(30, 20, 18, 0.5) !important;
+  -webkit-backdrop-filter: blur(11px) saturate(0.88) !important;
+  backdrop-filter: blur(11px) saturate(0.88) !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transition: opacity 220ms ease, visibility 220ms ease !important;
+}
+
+.management-modal-layer.open {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+.management-modal-layer > .management-side-modal {
+  width: var(--management-modal-width) !important;
+  min-width: 50vw !important;
+  max-width: none !important;
+  height: 100dvh !important;
+  max-height: 100dvh !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  border: 1px solid rgba(255, 255, 255, 0.72) !important;
+  border-right: 0 !important;
+  border-radius: var(--management-modal-radius) 0 0 var(--management-modal-radius) !important;
+  background: #fffdfa !important;
+  box-shadow: var(--management-modal-shadow) !important;
+  transform: translate3d(104%, 0, 0) !important;
+  transform-origin: right center !important;
+  transition: transform 280ms cubic-bezier(.22, .8, .24, 1) !important;
+}
+
+.management-modal-layer.open > .management-side-modal {
+  transform: translate3d(0, 0, 0) !important;
+}
+
+.management-side-modal > :is(.um-modal-header, .modal-head) {
+  flex: 0 0 auto !important;
+  padding: 24px 28px 20px !important;
+  border-bottom: 1px solid #eadfd4 !important;
+  background: linear-gradient(135deg, #fffaf4 0%, #fff 72%) !important;
+}
+
+.management-side-modal > :is(.um-modal-body, .announcement-form) {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #d9c8bc transparent;
+}
+
+.management-side-modal > .um-modal-body {
+  padding: 26px 28px !important;
+  background: #fffdfa !important;
+}
+
+.management-side-modal > :is(.um-modal-footer, .modal-actions) {
+  flex: 0 0 auto !important;
+  padding: 17px 28px !important;
+  border-top: 1px solid #eadfd4 !important;
+  background: rgba(255, 250, 244, 0.96) !important;
+}
+
+.announcement-modal.management-side-modal .announcement-form.composer-layout {
+  grid-template-columns: 1fr !important;
+  gap: 24px !important;
+  padding: 26px 28px 32px !important;
+}
+
+.announcement-modal.management-side-modal .composer-media-column {
+  position: static !important;
+}
+
+.announcement-modal.management-side-modal .media-preview {
+  aspect-ratio: 16 / 8.5 !important;
+  max-height: 340px;
+}
+
+.announcement-modal.management-side-modal .modal-actions {
+  position: sticky;
+  bottom: -32px;
+  z-index: 3;
+  margin: 28px -28px -32px !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .management-modal-layer,
+  .management-modal-layer > .management-side-modal {
+    transition-duration: 1ms !important;
+  }
+}
+
+@media (max-width: 800px) {
+  :root { --management-modal-width: 100vw; }
+
+  .management-modal-layer > .management-side-modal {
+    width: 100vw !important;
+    min-width: 100vw !important;
+    border-left: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  .management-side-modal > :is(.um-modal-header, .modal-head) {
+    padding: 20px 18px 17px !important;
+  }
+
+  .management-side-modal > .um-modal-body,
+  .announcement-modal.management-side-modal .announcement-form.composer-layout {
+    padding-inline: 18px !important;
+  }
+
+  .management-side-modal > .um-modal-footer {
+    padding: 14px 18px !important;
+  }
+
+  .announcement-modal.management-side-modal .modal-actions {
+    margin-inline: -18px !important;
+  }
+}

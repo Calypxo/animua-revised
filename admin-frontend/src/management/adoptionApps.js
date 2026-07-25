@@ -248,7 +248,7 @@ function renderTable() {
   const page  = filtered.slice(start, start+PAGE_SIZE);
 
   if (!page.length) {
-    tbody.innerHTML = `<tr><td colspan="9" class="text-center py-5 text-muted">No applications found.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" class="text-center py-5 text-muted">No applications found.</td></tr>`;
     return;
   }
 
@@ -329,6 +329,8 @@ function openDrawer(id) {
 
   // Open drawer panel
   document.getElementById("aaLayout")?.classList.add("drawer-open");
+  document.getElementById("aaDrawer")?.setAttribute("aria-hidden", "false");
+  document.body.classList.add("management-drawer-open");
 
   renderDrawerContent(app);
 }
@@ -336,6 +338,8 @@ function openDrawer(id) {
 function closeDrawer() {
   activeAppId = null;
   document.getElementById("aaLayout")?.classList.remove("drawer-open");
+  document.getElementById("aaDrawer")?.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("management-drawer-open");
   document.querySelectorAll("tr[data-id]").forEach(r => r.classList.remove("row-active"));
 }
 
@@ -555,12 +559,25 @@ if (app.status === "Approved") {
   inner.innerHTML = `
     <div class="drawer-header">
       <div class="drawer-header-left">
+        <span class="drawer-eyebrow">Application details</span>
         <h3>${app.applicationId}</h3>
-        <p>${app.adopter.name} → ${emoji(app.animal.species)} ${app.animal.name} · ${statusBadge(app.status)}</p>
+        <p>Submitted ${formatDate(app.submitted)} · ${app.type}</p>
       </div>
+      <div class="drawer-header-status">${statusBadge(app.status)}</div>
       <button class="drawer-close-btn" id="drawerCloseX"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="drawer-body">
+      <section class="application-journey" aria-label="Applicant and animal summary">
+        <div class="journey-person">
+          <span class="journey-avatar" style="background:${app.adopter.color}">${app.adopter.initials}</span>
+          <span><small>Applicant</small><strong>${app.adopter.name}</strong></span>
+        </div>
+        <span class="journey-link"><i class="bi bi-arrow-right"></i><small>applied for</small></span>
+        <div class="journey-animal">
+          <span class="journey-avatar journey-pet">${emoji(app.animal.species)}</span>
+          <span><small>Animal</small><strong>${app.animal.name}</strong></span>
+        </div>
+      </section>
       ${compatSection}
       ${adopterSection}
       ${animalSection}
@@ -604,10 +621,10 @@ async function approveApp(id) {
 }
 
 function openRejectModal(id) {
-  if (!can("finalize")) {
+  if (!can("reject")) {
   showToast(
     "error",
-    "You do not have permission to finalize adoptions."
+    "You do not have permission to reject adoption applications."
   );
   return;
 }
@@ -745,6 +762,7 @@ async function init() {
 
     document.getElementById("searchApps")?.addEventListener("input",  applyFilters);
     document.getElementById("filterType")?.addEventListener("change", applyFilters);
+    document.getElementById("aaDrawerBackdrop")?.addEventListener("click", closeDrawer);
 
     // Reject modal
     document.getElementById("rejectModalClose")?.addEventListener("click",  ()=>closeModal("rejectModalBackdrop"));
@@ -761,7 +779,16 @@ async function init() {
       document.getElementById(id)?.addEventListener("click",e=>{if(e.target.id===id)closeModal(id);});
     });
 
-    document.addEventListener("keydown", e => { if(e.key==="Escape"){ closeModal("rejectModalBackdrop"); closeModal("finalizeModalBackdrop"); } });
+    document.addEventListener("keydown", e => {
+      if (e.key !== "Escape") return;
+      const hasOpenModal = document.querySelector(".um-modal-backdrop.open");
+      if (hasOpenModal) {
+        closeModal("rejectModalBackdrop");
+        closeModal("finalizeModalBackdrop");
+      } else {
+        closeDrawer();
+      }
+    });
 
     document.body.classList.remove("loading");
   } catch(err) {

@@ -2,6 +2,7 @@ import "../../css/sidebarRefresh.css";
 import "../../css/pageSkeleton.css";
 
 import Swal from "sweetalert2";
+import { initializeManagementModals } from "./managementModal.js";
 import { clearUserSession, getUserName, getUserRole } from "../../utils/storage.js";
 import { canAccessModule, normalizeRole } from "../../auth/permissions.js";
 import { workspaceSkeletonMarkup } from "./pageSkeleton.js";
@@ -392,6 +393,8 @@ function setupPersistentNavigation(container, sidebar) {
 export function loadSidebar() {
   const container = document.getElementById("sidebar-container");
   if (!container) return;
+
+  initializeManagementModals();
 
   const name = getUserName() || "ANIMUA User";
   const role = normalizeRole(getUserRole());

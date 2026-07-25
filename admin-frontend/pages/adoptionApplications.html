@@ -39,12 +39,22 @@
 
       <div id="pageHeaderMount"></div>
 
-      <!-- Main layout: table + drawer -->
+      <!-- Main review workspace -->
       <div class="aa-layout" id="aaLayout">
 
         <!-- Table panel -->
         <div class="panel aa-table-panel" id="aaTablePanel">
           <div class="panel-head flex-column gap-3">
+            <div class="aa-panel-intro">
+              <div class="aa-panel-heading">
+                <span class="aa-panel-icon"><i class="bi bi-file-earmark-heart-fill"></i></span>
+                <span>
+                  <strong>Application review queue</strong>
+                  <small>Compare applicant information, animal needs, and compatibility before making a decision.</small>
+                </span>
+              </div>
+              <span class="aa-panel-tip"><i class="bi bi-layout-sidebar-inset-reverse"></i> Select a row to review details</span>
+            </div>
             <div class="d-flex align-items-center justify-content-between w-100 flex-wrap gap-2">
               <!-- Type tabs -->
               <div class="aa-tabs">
@@ -77,25 +87,28 @@
                   <th>Applicant</th>
                   <th>Animal</th>
                   <th>Type</th>
+                  <th>Match</th>
                   <th>Submitted</th>
                   <th>Status</th>
                   <th></th>
                 </tr>
               </thead>
               <tbody id="appsTableBody">
-                <tr><td colspan="7" class="text-center py-5"><div class="um-spinner"></div></td></tr>
+                <tr><td colspan="8" class="text-center py-5"><div class="um-spinner"></div></td></tr>
               </tbody>
             </table>
           </div>
           <div class="um-pagination" id="paginationBar"></div>
         </div>
 
+        <button class="aa-drawer-backdrop" id="aaDrawerBackdrop" type="button" aria-label="Close application details"></button>
+
         <!-- Detail drawer (slides in from right) -->
-        <div class="aa-drawer" id="aaDrawer">
+        <aside class="aa-drawer" id="aaDrawer" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Adoption application details">
           <div class="aa-drawer-inner" id="aaDrawerInner">
             <!-- Populated by JS -->
           </div>
-        </div>
+        </aside>
 
       </div><!-- /aa-layout -->
     </div><!-- /page-body -->
