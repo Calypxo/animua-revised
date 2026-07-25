@@ -15,9 +15,18 @@ const escapeHtml = (value) => String(value ?? "")
 
 const normalizePath = (path = "") => path.split("?")[0].split("#")[0].replace(/\/+$/, "") || "/";
 const EMBED_PARAM = "animuaShell";
+const WORKSPACE_FRAME_NAME = "animua-management-workspace";
 
 function isEmbeddedView() {
-  return window.self !== window.top && new URLSearchParams(window.location.search).get(EMBED_PARAM) === "1";
+  if (window.self === window.top) return false;
+  if (window.name === WORKSPACE_FRAME_NAME) return true;
+
+  try {
+    return window.parent.location.origin === window.location.origin;
+  } catch {
+    // The whole app may itself be hosted inside a cross-origin preview frame.
+    return false;
+  }
 }
 
 function managementUrl(value) {
@@ -298,6 +307,7 @@ function setupPersistentNavigation(container, sidebar) {
 
     const frame = document.createElement("iframe");
     frame.className = "persistent-page-frame";
+    frame.name = WORKSPACE_FRAME_NAME;
     frame.title = "ANIMUA management workspace";
     frame.setAttribute("aria-label", "ANIMUA management workspace");
 

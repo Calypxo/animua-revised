@@ -129,8 +129,14 @@ function mountInitialSkeleton() {
   const body = document.body;
   if (!body?.classList.contains("loading")) return;
 
-  const embedded = window.self !== window.top
-    && new URLSearchParams(window.location.search).get("animuaShell") === "1";
+  let embedded = window.self !== window.top && window.name === "animua-management-workspace";
+  if (!embedded && window.self !== window.top) {
+    try {
+      embedded = window.parent.location.origin === window.location.origin;
+    } catch {
+      embedded = false;
+    }
+  }
   if (embedded || document.getElementById("animua-initial-skeleton")) return;
 
   const loader = document.createElement("div");
