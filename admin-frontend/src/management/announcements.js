@@ -46,15 +46,34 @@ function setHeaderValue(id, value) {
 
 function renderHeaderStats() {
   const drafts = state.announcements.filter((item) => item.status === "Draft").length;
+  const published = state.announcements.filter((item) => item.status === "Published").length;
+  const publicPosts = state.announcements.filter((item) => item.status === "Published" && item.visibleToPublic !== false).length;
+  const countType = (type) => state.announcements.filter((item) => normalizePostType(item.type) === type).length;
+
   setHeaderValue("announcementTotal", state.announcements.length);
-  setHeaderValue("announcementPublished", state.announcements.filter((item) => item.status === "Published").length);
+  setHeaderValue("announcementPublished", published);
   setHeaderValue("announcementDrafts", drafts);
   setHeaderValue("heroDraftCount", drafts);
-  setHeaderValue("announcementEvents", state.announcements.filter((item) => item.type === "Event").length);
+  setHeaderValue("announcementEvents", countType("Upcoming Events"));
+  setHeaderValue("channelPublishedCount", published);
+  setHeaderValue("channelPublicCount", publicPosts);
+  setHeaderValue("insightPublished", published);
+  setHeaderValue("insightDrafts", drafts);
+  setHeaderValue("insightPublic", publicPosts);
+  setHeaderValue("categoryNewsCount", countType("News & Article"));
+  setHeaderValue("categorySuccessCount", countType("Success Stories"));
+  setHeaderValue("categoryEventCount", countType("Upcoming Events"));
 }
 
 function normalize(value) {
   return String(value || "").toLowerCase().trim();
+}
+
+function normalizePostType(value) {
+  const type = normalize(value);
+  if (type.includes("event")) return "Upcoming Events";
+  if (type.includes("success")) return "Success Stories";
+  return "News & Article";
 }
 
 function escapeHtml(value = "") {
@@ -114,9 +133,10 @@ function showToast(message, type = "success") {
 }
 
 function getTypeClass(type) {
-  if (type === "Event") return "type-event";
-  if (type === "Advisory") return "type-advisory";
-  return "type-announcement";
+  const normalizedType = normalizePostType(type);
+  if (normalizedType === "Upcoming Events") return "type-event";
+  if (normalizedType === "Success Stories") return "type-success";
+  return "type-news";
 }
 
 function applyFilters() {
@@ -131,7 +151,7 @@ function applyFilters() {
   }
 
   if (state.type) {
-    list = list.filter((item) => item.type === state.type);
+    list = list.filter((item) => normalizePostType(item.type) === state.type);
   }
 
   if (state.status) {
@@ -162,9 +182,10 @@ function renderFeed() {
     .map((item) => {
       const canEdit = can("edit");
       const canDelete = can("delete");
+      const postType = normalizePostType(item.type);
 
       return `
-        <article class="post-card">
+        <article class="post-card" data-post-type="${escapeHtml(postType)}">
           <div class="post-header">
             <div class="post-avatar">
               <i class="bi bi-heart-fill"></i>
@@ -192,7 +213,7 @@ function renderFeed() {
 
           <div class="post-body">
             <div class="post-type ${getTypeClass(item.type)}">
-              ${escapeHtml(item.type || "Announcement")}
+              ${escapeHtml(postType)}
             </div>
 
             <h3>${escapeHtml(item.title)}</h3>
@@ -216,6 +237,11 @@ function renderFeed() {
                 `
                 : ""
             }
+          </div>
+
+          <div class="post-reach">
+            <span><i class="bi ${item.visibleToPublic === false ? "bi-lock-fill" : "bi-globe2"}"></i> ${item.visibleToPublic === false ? "Internal post" : "Visible on the public community page"}</span>
+            <span><i class="bi bi-layout-text-window-reverse"></i> ${escapeHtml(postType)}</span>
           </div>
 
           <div class="post-actions">
@@ -275,10 +301,23 @@ function resetForm() {
   state.editingId = null;
 
   getEl("announcementForm").reset();
-  getEl("fType").value = "Announcement";
+  getEl("fType").value = "News & Article";
   getEl("fStatus").value = "Published";
   getEl("fVisibleToPublic").value = "true";
   updateMediaPreview("");
+  syncEventFields();
+}
+
+function syncEventFields() {
+  const isEvent = getEl("fType")?.value === "Upcoming Events";
+  const fields = getEl("eventFields");
+  if (!fields) return;
+
+  fields.hidden = !isEvent;
+  fields.querySelectorAll("input").forEach((input) => {
+    input.disabled = !isEvent;
+    if (!isEvent) input.value = "";
+  });
 }
 
 function updateMediaPreview(value) {
@@ -317,13 +356,15 @@ function updateMediaPreview(value) {
   image.src = url;
 }
 
-function openCreateModal() {
+function openCreateModal(defaultType = "News & Article") {
   if (!can("create")) {
     showToast("You do not have permission to create announcements.", "warning");
     return;
   }
 
   resetForm();
+  getEl("fType").value = normalizePostType(defaultType);
+  syncEventFields();
   getEl("announcementModalTitle").textContent = "Create Post";
   getEl("announcementModalBackdrop").classList.add("open");
 }
@@ -341,13 +382,16 @@ function openEditModal(id) {
 
   getEl("announcementModalTitle").textContent = "Edit Post";
   getEl("fTitle").value = item.title || "";
-  getEl("fType").value = item.type || "Announcement";
+  getEl("fType").value = normalizePostType(item.type);
   getEl("fCaption").value = item.caption || "";
   getEl("fImageUrl").value = item.imageUrl || "";
-  getEl("fEventDate").value = item.eventDate || "";
-  getEl("fLocation").value = item.location || "";
   getEl("fStatus").value = item.status || "Published";
   getEl("fVisibleToPublic").value = item.visibleToPublic === false ? "false" : "true";
+  syncEventFields();
+  if (normalizePostType(item.type) === "Upcoming Events") {
+    getEl("fEventDate").value = item.eventDate || "";
+    getEl("fLocation").value = item.location || "";
+  }
   updateMediaPreview(item.imageUrl || "");
 
   getEl("announcementModalBackdrop").classList.add("open");
@@ -361,7 +405,7 @@ function closeModal() {
 function getFormPayload() {
   return {
     title: getEl("fTitle").value.trim(),
-    type: getEl("fType").value,
+    type: normalizePostType(getEl("fType").value),
     caption: getEl("fCaption").value.trim(),
     imageUrl: getEl("fImageUrl").value.trim(),
     eventDate: getEl("fEventDate").value,
@@ -448,7 +492,13 @@ function bindEvents() {
 
   if (newButton) {
     newButton.style.display = can("create") ? "" : "none";
-    newButton.addEventListener("click", openCreateModal);
+    newButton.addEventListener("click", () => openCreateModal());
+  }
+
+  const quickCreate = getEl("quickCreatePost");
+  if (quickCreate) {
+    quickCreate.hidden = !can("create");
+    quickCreate.addEventListener("click", () => openCreateModal());
   }
 
   getEl("announcementForm")?.addEventListener("submit", saveAnnouncement);
@@ -457,6 +507,7 @@ function bindEvents() {
   getEl("fImageUrl")?.addEventListener("input", (event) => {
     updateMediaPreview(event.target.value);
   });
+  getEl("fType")?.addEventListener("change", syncEventFields);
 
   getEl("announcementModalBackdrop")?.addEventListener("click", (event) => {
     if (event.target.id === "announcementModalBackdrop") closeModal();
@@ -469,12 +520,27 @@ function bindEvents() {
 
   getEl("filterType")?.addEventListener("change", (event) => {
     state.type = event.target.value;
+    document.querySelectorAll("[data-category-type]").forEach((item) => {
+      item.classList.toggle("is-active", item.dataset.categoryType === state.type);
+    });
     applyFilters();
   });
 
   getEl("filterStatus")?.addEventListener("change", (event) => {
     state.status = event.target.value;
     applyFilters();
+  });
+
+  document.querySelectorAll("[data-category-type]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const selected = button.dataset.categoryType || "";
+      state.type = state.type === selected ? "" : selected;
+      getEl("filterType").value = state.type;
+      document.querySelectorAll("[data-category-type]").forEach((item) => {
+        item.classList.toggle("is-active", item.dataset.categoryType === state.type);
+      });
+      applyFilters();
+    });
   });
 }
 

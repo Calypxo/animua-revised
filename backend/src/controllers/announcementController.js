@@ -6,10 +6,17 @@ function isManagementRole(role) {
   return ["Admin", "Staff", "Veterinarian"].includes(role);
 }
 
+function normalizeAnnouncementType(value) {
+  const type = String(value || "").toLowerCase().trim();
+  if (type.includes("event")) return "Upcoming Events";
+  if (type.includes("success")) return "Success Stories";
+  return "News & Article";
+}
+
 function normalizeAnnouncement(data = {}) {
   return {
     title: String(data.title || "").trim(),
-    type: String(data.type || "Announcement").trim(),
+    type: normalizeAnnouncementType(data.type),
     caption: String(data.caption || "").trim(),
     imageUrl: String(data.imageUrl || "").trim(),
     eventDate: String(data.eventDate || "").trim(),
@@ -41,7 +48,7 @@ exports.getPublicAnnouncements = async (req, res) => {
       .map((item) => ({
         id: item.id,
         title: item.title,
-        type: item.type,
+        type: normalizeAnnouncementType(item.type),
         caption: item.caption,
         imageUrl: item.imageUrl,
         eventDate: item.eventDate,
@@ -73,10 +80,14 @@ exports.getAllAnnouncements = async (req, res) => {
       .get();
 
     const announcements = snapshot.docs
-      .map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }))
+      .map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          type: normalizeAnnouncementType(data.type),
+        };
+      })
       .sort((a, b) => {
         const dateA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
         const dateB = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;

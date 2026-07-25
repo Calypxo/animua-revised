@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Read the latest public announcements, events, and advisories from ANIMUA Angeles City." />
-  <title>ANIMUA | Announcements</title>
+  <meta name="description" content="Follow ANIMUA news and articles, success stories, and upcoming animal-welfare events in Angeles City." />
+  <title>ANIMUA | Community Stories & Events</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -41,23 +41,87 @@
     </div>
   </header>
   <main>
-    <section class="announcements-hero">
-      <div class="container announcements-hero-layout">
-        <div><span class="section-label">Community Bulletin</span><h1>Updates that keep our community connected.</h1><p>See official announcements, upcoming events, and important advisories published by ANIMUA management.</p></div>
-        <div class="announcements-hero-mark" aria-hidden="true"><i class="fa-solid fa-bullhorn"></i></div>
+    <section class="community-cover" aria-labelledby="communityTitle">
+      <div class="container community-cover-inner">
+        <div class="community-cover-copy">
+          <span class="community-eyebrow"><i class="fa-solid fa-circle-check"></i> Official ANIMUA channel</span>
+          <h1 id="communityTitle">Stories, updates, and moments that move our community.</h1>
+          <p>Follow shelter news, celebrate animals finding their people, and discover meaningful ways to join upcoming events.</p>
+        </div>
+        <div class="cover-orbit" aria-hidden="true"><i class="fa-solid fa-heart-pulse"></i></div>
       </div>
     </section>
-    <section class="announcements-section" aria-labelledby="announcementsHeading">
-      <div class="container">
-        <div class="announcement-toolbar">
-          <div><span class="section-label">Latest Posts</span><h2 id="announcementsHeading">Public announcements</h2></div>
-          <div class="announcement-controls" aria-label="Filter announcements">
-            <label class="announcement-search"><span class="sr-only">Search announcements</span><i class="fa-solid fa-magnifying-glass"></i><input id="announcementSearch" type="search" placeholder="Search updates..." autocomplete="off"></label>
-            <label><span class="sr-only">Filter by type</span><select id="announcementType"><option value="">All updates</option><option value="Announcement">Announcements</option><option value="Event">Events</option><option value="Advisory">Advisories</option></select></label>
-          </div>
+
+    <section class="community-profile-wrap">
+      <div class="container community-profile">
+        <div class="community-avatar"><i class="fa-solid fa-heart-pulse"></i></div>
+        <div class="community-profile-copy">
+          <span>Angeles City Animal Welfare Portal</span>
+          <h2>ANIMUA Community</h2>
+          <p>Connect. Learn. Adopt.</p>
         </div>
-        <div id="announcementStatus" class="announcement-status" role="status" aria-live="polite"><i class="fa-solid fa-spinner fa-spin"></i><span>Loading the latest updates...</span></div>
-        <div id="announcementFeed" class="public-announcement-feed" aria-live="polite"></div>
+        <div class="community-stats" aria-label="Community channel statistics">
+          <span><strong id="publicPostCount">0</strong>Posts</span>
+          <span><strong id="publicStoryCount">0</strong>Success stories</span>
+          <span><strong id="publicEventCount">0</strong>Upcoming events</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="community-categories" aria-labelledby="categoryHeading">
+      <div class="container">
+        <div class="category-heading-row">
+          <div><span class="section-label">Explore the channel</span><h2 id="categoryHeading">Choose what matters to you</h2></div>
+          <button id="showAllAnnouncements" class="show-all-posts" type="button">View all posts <i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+        <div class="public-category-rail">
+          <button class="public-category-card" type="button" data-public-type="News & Article">
+            <span class="public-category-visual is-news"><i class="fa-regular fa-newspaper"></i></span>
+            <span><strong>News &amp; Article</strong><small>Shelter updates, public advisories, and useful animal-care information.</small></span>
+            <i class="fa-solid fa-arrow-right category-arrow"></i>
+          </button>
+          <button class="public-category-card" type="button" data-public-type="Success Stories">
+            <span class="public-category-visual is-success"><i class="fa-solid fa-house-circle-check"></i></span>
+            <span><strong>Success Stories</strong><small>Heartwarming adoptions, recoveries, reunions, and community milestones.</small></span>
+            <i class="fa-solid fa-arrow-right category-arrow"></i>
+          </button>
+          <button class="public-category-card" type="button" data-public-type="Upcoming Events">
+            <span class="public-category-visual is-event"><i class="fa-regular fa-calendar-check"></i></span>
+            <span><strong>Upcoming Events</strong><small>Adoption days, volunteer activities, clinics, and local outreach.</small></span>
+            <i class="fa-solid fa-arrow-right category-arrow"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="announcements-section" aria-labelledby="announcementsHeading">
+      <div class="container public-social-layout">
+        <div class="public-feed-column">
+          <div class="announcement-toolbar">
+            <div><span class="section-label">Community feed</span><h2 id="announcementsHeading">Latest from ANIMUA</h2></div>
+            <div class="announcement-controls" aria-label="Filter announcements">
+              <label class="announcement-search"><span class="sr-only">Search announcements</span><i class="fa-solid fa-magnifying-glass"></i><input id="announcementSearch" type="search" placeholder="Search stories and updates..." autocomplete="off"></label>
+              <label><span class="sr-only">Filter by type</span><select id="announcementType"><option value="">All content</option><option value="News & Article">News &amp; Article</option><option value="Success Stories">Success Stories</option><option value="Upcoming Events">Upcoming Events</option></select></label>
+            </div>
+          </div>
+
+          <div id="announcementStatus" class="announcement-status" role="status" aria-live="polite"><i class="fa-solid fa-spinner fa-spin"></i><span>Loading the latest updates...</span></div>
+          <div id="featuredAnnouncement" class="featured-announcement" aria-live="polite"></div>
+          <div class="feed-section-heading"><h3>Recent posts</h3><span id="feedResultLabel">All community content</span></div>
+          <div id="announcementFeed" class="public-announcement-feed" aria-live="polite"></div>
+        </div>
+
+        <aside class="public-feed-sidebar" aria-label="Community highlights">
+          <section class="public-side-card channel-about-card">
+            <div class="side-card-heading"><span>About this channel</span><i class="fa-solid fa-circle-info"></i></div>
+            <p>Every post is reviewed and published by ANIMUA management for the Angeles City animal-welfare community.</p>
+            <div class="channel-trust-row"><i class="fa-solid fa-shield-heart"></i><span><strong>Official source</strong>Verified shelter information</span></div>
+          </section>
+          <section class="public-side-card">
+            <div class="side-card-heading"><span>Upcoming near you</span><i class="fa-regular fa-calendar"></i></div>
+            <div id="upcomingEventList" class="upcoming-event-list"></div>
+          </section>
+        </aside>
       </div>
     </section>
   </main>

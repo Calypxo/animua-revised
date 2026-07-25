@@ -50,36 +50,92 @@
       <main class="main-content page-body">
         <div id="pageHeaderMount"></div>
 
-        <section class="feed-layout">
-          <aside class="feed-filters">
-            <label>
-              Search
-              <input id="searchAnnouncement" type="text" placeholder="Search title or caption..." />
-            </label>
+        <section class="social-channel" aria-label="Community publishing workspace">
+          <div class="channel-profile-card">
+            <div class="channel-profile-avatar"><i class="bi bi-heart-pulse-fill" aria-hidden="true"></i></div>
+            <div class="channel-profile-copy">
+              <span class="channel-kicker">Official community channel</span>
+              <h2>ANIMUA Angeles City</h2>
+              <p>Publish shelter news, celebrate successful placements, and invite the community to upcoming events.</p>
+            </div>
+            <div class="channel-profile-meta" aria-label="Channel status">
+              <span><strong id="channelPublishedCount">0</strong> published</span>
+              <span><strong id="channelPublicCount">0</strong> public</span>
+            </div>
+          </div>
 
-            <label>
-              Type
-              <select id="filterType">
-                <option value="">All Types</option>
-                <option value="Announcement">Announcement</option>
-                <option value="Event">Event</option>
-                <option value="Advisory">Advisory</option>
-              </select>
-            </label>
+          <div class="announcement-category-rail" aria-label="Content categories">
+            <button class="category-story" type="button" data-category-type="News & Article">
+              <span class="category-story-ring"><i class="bi bi-newspaper"></i></span>
+              <strong>News &amp; Article</strong>
+              <small><span id="categoryNewsCount">0</span> posts</small>
+            </button>
+            <button class="category-story" type="button" data-category-type="Success Stories">
+              <span class="category-story-ring is-success"><i class="bi bi-heart-fill"></i></span>
+              <strong>Success Stories</strong>
+              <small><span id="categorySuccessCount">0</span> posts</small>
+            </button>
+            <button class="category-story" type="button" data-category-type="Upcoming Events">
+              <span class="category-story-ring is-event"><i class="bi bi-calendar2-heart-fill"></i></span>
+              <strong>Upcoming Events</strong>
+              <small><span id="categoryEventCount">0</span> posts</small>
+            </button>
+          </div>
 
-            <label>
-              Status
-              <select id="filterStatus">
-                <option value="">All Status</option>
-                <option value="Published">Published</option>
-                <option value="Draft">Draft</option>
-              </select>
-            </label>
-          </aside>
+          <div class="feed-layout">
+            <section class="feed-center" aria-label="Announcement feed">
+              <button id="quickCreatePost" class="quick-composer" type="button">
+                <span class="quick-composer-avatar"><i class="bi bi-heart-fill"></i></span>
+                <span class="quick-composer-prompt">Share an update with the ANIMUA community...</span>
+                <span class="quick-composer-action"><i class="bi bi-plus-lg"></i> Create post</span>
+              </button>
 
-          <section>
-            <div id="announcementFeed" class="announcement-feed"></div>
-          </section>
+              <div class="feed-filters" aria-label="Filter posts">
+                <label class="feed-search">
+                  <span class="sr-only">Search posts</span>
+                  <i class="bi bi-search" aria-hidden="true"></i>
+                  <input id="searchAnnouncement" type="search" placeholder="Search posts, people, or places..." />
+                </label>
+                <label>
+                  <span class="sr-only">Filter by type</span>
+                  <select id="filterType">
+                    <option value="">All content</option>
+                    <option value="News & Article">News &amp; Article</option>
+                    <option value="Success Stories">Success Stories</option>
+                    <option value="Upcoming Events">Upcoming Events</option>
+                  </select>
+                </label>
+                <label>
+                  <span class="sr-only">Filter by status</span>
+                  <select id="filterStatus">
+                    <option value="">Any status</option>
+                    <option value="Published">Published</option>
+                    <option value="Draft">Draft</option>
+                  </select>
+                </label>
+              </div>
+
+              <div id="announcementFeed" class="announcement-feed"></div>
+            </section>
+
+            <aside class="feed-insights" aria-label="Publishing insights">
+              <section class="insight-card">
+                <div class="insight-card-head"><span>Publishing pulse</span><i class="bi bi-activity"></i></div>
+                <div class="insight-stat"><span>Published posts</span><strong id="insightPublished">0</strong></div>
+                <div class="insight-stat"><span>Drafts in progress</span><strong id="insightDrafts">0</strong></div>
+                <div class="insight-stat"><span>Public visibility</span><strong id="insightPublic">0</strong></div>
+              </section>
+
+              <section class="insight-card editorial-guide">
+                <div class="insight-card-head"><span>Before you publish</span><i class="bi bi-stars"></i></div>
+                <ul>
+                  <li><i class="bi bi-check2-circle"></i><span>Use a clear, community-focused headline.</span></li>
+                  <li><i class="bi bi-check2-circle"></i><span>Add a strong landscape image when possible.</span></li>
+                  <li><i class="bi bi-check2-circle"></i><span>Include a date and location for upcoming events.</span></li>
+                </ul>
+              </section>
+            </aside>
+          </div>
         </section>
       </main>
     </div>
@@ -147,9 +203,9 @@
             <label class="composer-control">
               <span>Post type</span>
               <select id="fType">
-                <option value="Announcement">Announcement</option>
-                <option value="Event">Event</option>
-                <option value="Advisory">Advisory</option>
+                <option value="News & Article">News &amp; Article</option>
+                <option value="Success Stories">Success Stories</option>
+                <option value="Upcoming Events">Upcoming Events</option>
               </select>
             </label>
 
@@ -162,7 +218,7 @@
             </label>
           </div>
 
-          <div class="two-col">
+          <div class="two-col" id="eventFields">
             <label class="composer-control">
               <span>Event date</span>
               <input id="fEventDate" type="date" />

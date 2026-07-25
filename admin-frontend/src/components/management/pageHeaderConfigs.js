@@ -166,12 +166,12 @@ export const PAGE_HEADER_CONFIGS = Object.freeze({
     headingId: "pageTitle",
     eyebrow: "Community Engagement",
     title: "Announcements",
-    description: "Publish clear shelter updates, events, and advisories while keeping every community message organized and current.",
+    description: "Publish trusted news and articles, celebrate success stories, and keep the community informed about upcoming events.",
     watermarkIcon: "bi-megaphone-fill",
     highlights: [
-      { icon: "bi-send-check", label: "Fast publishing" },
-      { icon: "bi-calendar-event", label: "Event-ready posts" },
-      { icon: "bi-eye", label: "Status visibility" }
+      { icon: "bi-newspaper", label: "News & articles" },
+      { icon: "bi-heart", label: "Success stories" },
+      { icon: "bi-calendar-event", label: "Upcoming events" }
     ],
     queue: { liveLabel: "Publisher active", label: "Editorial queue", title: "Draft posts awaiting publication", valueId: "heroDraftCount", unit: "drafts" },
     actions: [{ id: "btnNewAnnouncement", icon: "bi-plus-lg", label: "Create community post" }],
@@ -180,7 +180,7 @@ export const PAGE_HEADER_CONFIGS = Object.freeze({
       { id: "announcementTotal", icon: "bi-megaphone-fill", label: "All Posts" },
       { id: "announcementPublished", icon: "bi-send-check-fill", label: "Published", tone: "green" },
       { id: "announcementDrafts", icon: "bi-pencil-square", label: "Drafts", tone: "amber" },
-      { id: "announcementEvents", icon: "bi-calendar-event-fill", label: "Events", tone: "blue" }
+      { id: "announcementEvents", icon: "bi-calendar-event-fill", label: "Upcoming Events", tone: "blue" }
     ]
   },
   reports: {
