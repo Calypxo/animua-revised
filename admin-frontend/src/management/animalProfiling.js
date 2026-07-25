@@ -2,11 +2,15 @@
 import "../css/adminDashboard.css";
 import "../css/sidebar.css";
 import "../css/animalProfiling.css";
+import { renderPageHeader } from "../components/management/pageHeader.js";
+import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.js";
 
 import { protectManagementPage } from "../auth/authGuard.js";
 import { renderTopbarUser }      from "../components/management/topbarUser.js";
 import { loadSidebar }           from "../components/management/sidebarLoader.js";
 import { getAllAnimals }         from "../services/animal.service.js";
+
+renderPageHeader(PAGE_HEADER_CONFIGS.animalProfiling);
 
 
 let animals = [];

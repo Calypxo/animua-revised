@@ -2,6 +2,8 @@
 import "../css/adminDashboard.css";
 import "../css/sidebar.css";
 import "../css/intake.css";
+import { renderPageHeader } from "../components/management/pageHeader.js";
+import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.js";
 
 import { protectPageByModule }         from "../auth/authGuard.js";
 import { hasPermission }               from "../auth/permissions.js";
@@ -20,6 +22,8 @@ import {
   rejectIntake,
   convertToProfile
 } from "../services/intake.service.js";
+
+renderPageHeader(PAGE_HEADER_CONFIGS.intake);
 
 /* ══════════════════════════════════════════════════════
    MOCK DATA

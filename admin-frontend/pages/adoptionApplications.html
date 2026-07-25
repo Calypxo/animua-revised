@@ -37,41 +37,7 @@
 
     <div class="page-body">
 
-      <!-- Page header -->
-      <div class="page-header mb-4">
-        <div>
-          <h1 class="page-title">Adoption Applications</h1>
-          <p class="page-sub">Review and process adoption requests — both direct browse and AI-matched applications.</p>
-        </div>
-      </div>
-
-      <!-- Stats strip -->
-      <div class="aa-stats mb-4">
-        <div class="aa-stat-card">
-          <div class="aa-stat-icon icon-clay"><i class="bi bi-file-earmark-heart-fill"></i></div>
-          <div><div class="aa-stat-val" id="statTotal">0</div><div class="aa-stat-lbl">Total Applications</div></div>
-        </div>
-        <div class="aa-stat-card">
-          <div class="aa-stat-icon icon-amber"><i class="bi bi-hourglass-split"></i></div>
-          <div><div class="aa-stat-val" id="statPending">0</div><div class="aa-stat-lbl">Pending Review</div></div>
-        </div>
-        <div class="aa-stat-card">
-          <div class="aa-stat-icon icon-blue"><i class="bi bi-clipboard2-check-fill"></i></div>
-          <div><div class="aa-stat-val" id="statApproved">0</div><div class="aa-stat-lbl">Approved</div></div>
-        </div>
-        <div class="aa-stat-card">
-          <div class="aa-stat-icon icon-green"><i class="bi bi-balloon-heart-fill"></i></div>
-          <div><div class="aa-stat-val" id="statFinalized">0</div><div class="aa-stat-lbl">Finalized</div></div>
-        </div>
-        <div class="aa-stat-card">
-          <div class="aa-stat-icon icon-rose"><i class="bi bi-x-circle-fill"></i></div>
-          <div><div class="aa-stat-val" id="statRejected">0</div><div class="aa-stat-lbl">Rejected</div></div>
-        </div>
-        <div class="aa-stat-card">
-          <div class="aa-stat-icon icon-teal"><i class="bi bi-cpu"></i></div>
-          <div><div class="aa-stat-val" id="statQuizMatch">0</div><div class="aa-stat-lbl">AI Quiz Match</div></div>
-        </div>
-      </div>
+      <div id="pageHeaderMount"></div>
 
       <!-- Main layout: table + drawer -->
       <div class="aa-layout" id="aaLayout">

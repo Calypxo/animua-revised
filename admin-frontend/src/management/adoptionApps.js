@@ -2,6 +2,8 @@
 import "../css/adminDashboard.css";
 import "../css/sidebar.css";
 import "../css/adoptionApps.css";
+import { renderPageHeader } from "../components/management/pageHeader.js";
+import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.js";
 
 import { protectPageByModule } from "../auth/authGuard.js";
 import { hasPermission } from "../auth/permissions.js";
@@ -14,6 +16,8 @@ import {
   rejectAdoption,
   finalizeAdoption
 } from "../services/adoption.service.js";
+
+renderPageHeader(PAGE_HEADER_CONFIGS.adoptions);
 
 
 
@@ -198,8 +202,10 @@ function can(action) {
 ══════════════════════════════════════════════════════ */
 function renderStats() {
   const set = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
+  const pendingCount = adoptionApps.filter(a=>a.status==="Pending").length;
   set("statTotal",    adoptionApps.length);
-  set("statPending",  adoptionApps.filter(a=>a.status==="Pending").length);
+  set("statPending",  pendingCount);
+  set("heroPendingCount", pendingCount);
   set("statApproved", adoptionApps.filter(a=>a.status==="Approved").length);
   set("statFinalized",adoptionApps.filter(a=>a.status==="Finalized").length);
   set("statRejected", adoptionApps.filter(a=>a.status==="Rejected").length);

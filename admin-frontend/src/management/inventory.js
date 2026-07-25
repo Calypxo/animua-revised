@@ -3,6 +3,8 @@
 import "../css/adminDashboard.css";
 import "../css/sidebar.css";
 import "../css/inventory.css";
+import { renderPageHeader } from "../components/management/pageHeader.js";
+import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.js";
 
 import { protectPageByModule } from "../auth/authGuard.js";
 import { renderTopbarUser } from "../components/management/topbarUser.js";
@@ -18,6 +20,8 @@ import {
   addInventoryTransaction,
   getItemTransactions
 } from "../services/inventoryFirestore.service.js";
+
+renderPageHeader(PAGE_HEADER_CONFIGS.inventory);
 
 /* ══════════════════════════════════════════════════════
    Local recalculation helper
@@ -251,6 +255,7 @@ function renderStats() {
 
   set("statTotal", store.length);
   set("statCritical", critical);
+  set("heroCriticalCount", critical);
   set("statLow", low);
   set("statFast", fast);
 }

@@ -37,52 +37,7 @@
 
     <div class="page-body">
 
-      <div class="page-header mb-4">
-        <div>
-          <h1 class="page-title">Inventory Management</h1>
-          <p class="page-sub">Real-time stock tracking, movement monitoring, and automated restock alerts.</p>
-        </div>
-        <div class="d-flex gap-2 flex-wrap align-items-center">
-          <button class="btn-primary-clay" id="btnStockIn"><i class="bi bi-plus-lg"></i> Stock In</button>
-          <button class="btn-outline-add" id="btnRecordUsage"><i class="bi bi-dash-lg"></i> Record Usage</button>
-          <button class="btn-outline-add" id="btnAddItem"><i class="bi bi-box-seam"></i> Add Item</button>
-        </div>
-      </div>
-
-      <!-- Stats -->
-      <div class="inv-stats mb-4">
-        <div class="inv-stat-card">
-          <div class="inv-stat-icon icon-clay"><i class="bi bi-boxes"></i></div>
-          <div>
-            <div class="inv-stat-val" id="statTotal">81</div>
-            <div class="inv-stat-lbl">Total Items</div>
-          </div>
-        </div>
-
-        <div class="inv-stat-card">
-          <div class="inv-stat-icon icon-rose"><i class="bi bi-exclamation-triangle-fill"></i></div>
-          <div>
-            <div class="inv-stat-val" id="statCritical">0</div>
-            <div class="inv-stat-lbl">Critical Stock</div>
-          </div>
-        </div>
-
-        <div class="inv-stat-card">
-          <div class="inv-stat-icon icon-amber"><i class="bi bi-arrow-down-circle-fill"></i></div>
-          <div>
-            <div class="inv-stat-val" id="statLow">0</div>
-            <div class="inv-stat-lbl">Low Stock</div>
-          </div>
-        </div>
-
-        <div class="inv-stat-card">
-          <div class="inv-stat-icon icon-teal"><i class="bi bi-cpu"></i></div>
-          <div>
-            <div class="inv-stat-val" id="statFast">18</div>
-            <div class="inv-stat-lbl">Fast-Moving</div>
-          </div>
-        </div>
-      </div>
+      <div id="pageHeaderMount"></div>
 
       <!-- Alerts -->
       <div id="alertsBar" class="mb-4">

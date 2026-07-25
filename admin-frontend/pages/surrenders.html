@@ -40,61 +40,7 @@
 
     <div class="page-body">
 
-      <!-- Page header -->
-      <section class="page-header surrender-hero" aria-labelledby="pageTitle">
-        <i class="bi bi-house-heart-fill hero-watermark" aria-hidden="true"></i>
-        <div class="page-header-copy">
-          <span class="page-eyebrow">Animal Management</span>
-          <h1 class="page-title" id="pageTitle">Surrender Requests</h1>
-          <p class="page-sub">Review owner submissions, prioritize urgent cases, and guide approved animals into the intake workflow.</p>
-          <div class="hero-status-list" aria-label="Surrender review capabilities">
-            <span><i class="bi bi-shield-check"></i> Verified decisions</span>
-            <span><i class="bi bi-stars"></i> Assisted classification</span>
-            <span><i class="bi bi-arrow-right-circle"></i> Intake handoff</span>
-          </div>
-        </div>
-        <aside class="hero-operations" aria-label="Surrender request status">
-          <div class="hero-live-status"><span class="live-indicator"></span> Review desk active</div>
-          <div class="hero-queue-overview">
-            <div>
-              <span>Priority queue</span>
-              <strong>Requests awaiting review</strong>
-            </div>
-            <div class="hero-queue-badge"><strong id="heroPendingCount">0</strong><small>pending</small></div>
-          </div>
-          <button class="hero-review-button" type="button" id="reviewPendingBtn">
-            <i class="bi bi-inbox"></i> Review pending requests
-          </button>
-        </aside>
-      </section>
-
-      <!-- Stats -->
-      <section class="sr-stats" aria-label="Surrender request summary">
-        <div class="sr-stat-card">
-          <div class="sr-stat-icon icon-clay"><i class="bi bi-file-earmark-text-fill"></i></div>
-          <div><div class="sr-stat-val" id="statTotal">0</div><div class="sr-stat-lbl">Total Requests</div></div>
-        </div>
-        <div class="sr-stat-card">
-          <div class="sr-stat-icon icon-amber"><i class="bi bi-hourglass-split"></i></div>
-          <div><div class="sr-stat-val" id="statPending">0</div><div class="sr-stat-lbl">Pending Review</div></div>
-        </div>
-        <div class="sr-stat-card">
-          <div class="sr-stat-icon icon-rose"><i class="bi bi-exclamation-triangle-fill"></i></div>
-          <div><div class="sr-stat-val" id="statCritical">0</div><div class="sr-stat-lbl">Critical Urgency</div></div>
-        </div>
-        <div class="sr-stat-card">
-          <div class="sr-stat-icon icon-blue"><i class="bi bi-check-circle-fill"></i></div>
-          <div><div class="sr-stat-val" id="statApproved">0</div><div class="sr-stat-lbl">Approved</div></div>
-        </div>
-        <div class="sr-stat-card">
-          <div class="sr-stat-icon icon-green"><i class="bi bi-arrow-right-circle-fill"></i></div>
-          <div><div class="sr-stat-val" id="statConverted">0</div><div class="sr-stat-lbl">Converted to Intake</div></div>
-        </div>
-        <div class="sr-stat-card">
-          <div class="sr-stat-icon icon-stone"><i class="bi bi-x-circle-fill"></i></div>
-          <div><div class="sr-stat-val" id="statRejected">0</div><div class="sr-stat-lbl">Rejected</div></div>
-        </div>
-      </section>
+      <div id="pageHeaderMount"></div>
 
       <!-- NLP note banner -->
       <aside class="nlp-banner" aria-label="Classification status">

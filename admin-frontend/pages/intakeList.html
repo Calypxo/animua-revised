@@ -41,57 +41,7 @@
 
     <div class="page-body">
 
-      <!-- Page header -->
-      <section class="page-header intake-hero" aria-labelledby="pageTitle">
-        <i class="bi bi-heart-pulse-fill hero-watermark" aria-hidden="true"></i>
-        <div class="page-header-copy">
-          <span class="page-eyebrow">Animal Management</span>
-          <h1 class="page-title" id="pageTitle">Intake Management</h1>
-          <p class="page-sub">Review incoming cases, document animal condition, and move approved records into profiling and care monitoring.</p>
-          <div class="hero-status-list" aria-label="Intake process summary">
-            <span><i class="bi bi-shield-check"></i> Role-based review</span>
-            <span><i class="bi bi-arrow-repeat"></i> Guided conversion</span>
-            <span><i class="bi bi-clipboard2-pulse"></i> Care-ready records</span>
-          </div>
-        </div>
-        <aside class="hero-operations" aria-label="Intake actions">
-          <div class="hero-live-status"><span class="live-indicator"></span> Intake desk active</div>
-          <div class="hero-queue-overview">
-            <div>
-              <span>Priority queue</span>
-              <strong>Records awaiting review</strong>
-            </div>
-            <div class="hero-queue-badge"><strong id="heroPendingCount">0</strong><small>pending</small></div>
-          </div>
-          <button class="btn-primary-clay" id="btnNewIntake" type="button">
-            <i class="bi bi-plus-lg"></i> Create Intake Record
-          </button>
-        </aside>
-      </section>
-
-      <!-- Stats -->
-      <section class="intake-stats" aria-label="Intake summary">
-        <div class="intake-stat-card">
-          <div class="isc-icon icon-clay"><i class="bi bi-inbox-fill"></i></div>
-          <div><div class="isc-val" id="statAll">0</div><div class="isc-lbl">Total Records</div></div>
-        </div>
-        <div class="intake-stat-card">
-          <div class="isc-icon icon-amber"><i class="bi bi-hourglass-split"></i></div>
-          <div><div class="isc-val" id="statPending">0</div><div class="isc-lbl">Pending Review</div></div>
-        </div>
-        <div class="intake-stat-card">
-          <div class="isc-icon icon-blue"><i class="bi bi-clipboard2-check-fill"></i></div>
-          <div><div class="isc-val" id="statApproved">0</div><div class="isc-lbl">Approved</div></div>
-        </div>
-        <div class="intake-stat-card">
-          <div class="isc-icon icon-green"><i class="bi bi-arrow-right-circle-fill"></i></div>
-          <div><div class="isc-val" id="statConverted">0</div><div class="isc-lbl">Converted to Profile</div></div>
-        </div>
-        <div class="intake-stat-card">
-          <div class="isc-icon icon-rose"><i class="bi bi-x-circle-fill"></i></div>
-          <div><div class="isc-val" id="statRejected">0</div><div class="isc-lbl">Rejected</div></div>
-        </div>
-      </section>
+      <div id="pageHeaderMount"></div>
 
       <section class="workflow-card" aria-labelledby="workflowTitle">
         <div class="workflow-intro">

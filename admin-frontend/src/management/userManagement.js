@@ -2,6 +2,8 @@
 import "../css/adminDashboard.css";
 import "../css/sidebar.css";
 import "../css/userManagement.css";
+import { renderPageHeader } from "../components/management/pageHeader.js";
+import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.js";
 
 import {
   protectPageByModule,
@@ -31,6 +33,8 @@ import {
   updateUser,
   toggleUserStatus,
 } from "../services/users.service.js";
+
+renderPageHeader(PAGE_HEADER_CONFIGS.users);
 
 /* ── Constants ───────────────────────────────────────── */
 const ALL_PERMISSIONS = [

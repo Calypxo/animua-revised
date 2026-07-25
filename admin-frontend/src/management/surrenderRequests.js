@@ -2,12 +2,16 @@
 import "../css/adminDashboard.css";
 import "../css/sidebar.css";
 import "../css/surrenderRequests.css";
+import { renderPageHeader } from "../components/management/pageHeader.js";
+import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.js";
 
 import { protectPageByModule } from "../auth/authGuard.js";
 import { hasPermission } from "../auth/permissions.js";
 import { renderTopbarUser }      from "../components/management/topbarUser.js";
 import { loadSidebar }           from "../components/management/sidebarLoader.js";
 import { getUserName }           from "../utils/storage.js";
+
+renderPageHeader(PAGE_HEADER_CONFIGS.surrenders);
 
 const SURRENDER_REQUESTS_API_URL =
   "http://localhost:5000/api/surrenders";

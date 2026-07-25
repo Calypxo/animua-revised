@@ -40,70 +40,7 @@
 
     <div class="page-body">
 
-      <section class="ap-page-hero" aria-labelledby="userManagementTitle">
-        <i class="bi bi-people-fill ap-hero-watermark" aria-hidden="true"></i>
-        <div class="ap-hero-copy">
-          <span class="ap-eyebrow">System Administration</span>
-          <h1 id="userManagementTitle">User Management</h1>
-          <p>Keep the care team organized, review account health, and manage permissions from one reliable directory.</p>
-          <div class="ap-hero-highlights" aria-label="User management benefits">
-            <span><i class="bi bi-shield-check"></i> Role-based access</span>
-            <span><i class="bi bi-person-check"></i> Account oversight</span>
-            <span><i class="bi bi-key"></i> Controlled permissions</span>
-          </div>
-        </div>
-        <aside class="ap-hero-queue um-account-health" aria-label="Account health summary">
-          <div class="um-health-heading">
-            <span>Account health</span>
-            <strong><i class="bi bi-broadcast-pin"></i> Live directory</strong>
-          </div>
-          <div class="um-health-metrics">
-            <div><span class="um-health-dot is-active"></span><strong id="statActive">—</strong><small>Active accounts</small></div>
-            <div><span class="um-health-dot is-inactive"></span><strong id="statInactive">—</strong><small>Inactive accounts</small></div>
-          </div>
-          <p><i class="bi bi-info-circle"></i> Status changes immediately affect system access.</p>
-          <button class="um-add-user-btn" id="btnAddUser" type="button">
-            <i class="bi bi-person-plus-fill"></i>
-            <span>Add management user</span>
-          </button>
-        </aside>
-      </section>
-
-      <section class="um-role-overview" aria-labelledby="roleOverviewTitle">
-        <div class="um-section-heading">
-          <div>
-            <span>Directory composition</span>
-            <h2 id="roleOverviewTitle">Who has access</h2>
-          </div>
-          <p>Role assignments determine each person’s available tools and responsibilities.</p>
-        </div>
-        <div class="um-role-grid">
-          <article class="um-role-card">
-            <span class="um-role-icon is-active"><i class="bi bi-person-check-fill"></i></span>
-            <div><strong id="statActiveDirectory">0</strong><span>Active accounts</span></div>
-          </article>
-          <article class="um-role-card is-total">
-            <span class="um-role-icon"><i class="bi bi-people-fill"></i></span>
-            <div><strong id="statTotal">—</strong><span>Total accounts</span></div>
-          </article>
-          <article class="um-role-card">
-            <span class="um-role-icon is-admin"><i class="bi bi-shield-lock-fill"></i></span>
-            <div><strong id="statAdmins">—</strong><span>Administrators</span></div>
-          </article>
-          <article class="um-role-card">
-            <span class="um-role-icon is-staff"><i class="bi bi-person-badge-fill"></i></span>
-            <div><strong id="statStaff">—</strong><span>Shelter staff</span></div>
-          </article>
-          <article class="um-role-card">
-            <span class="um-role-icon is-vet"><i class="bi bi-heart-pulse-fill"></i></span>
-            <div><strong id="statVeterinarians">—</strong><span>Veterinarians</span></div>
-          </article>
-          <article class="um-role-card">
-            <span class="um-role-icon is-public"><i class="bi bi-globe2"></i></span>
-            <div><strong id="statPublic">—</strong><span>Public users</span></div>
-          </article>
-        </div>
-      </section>
+      <div id="pageHeaderMount"></div>
 
       <section class="ap-workflow" aria-labelledby="workflowTitle">
         <div class="ap-workflow-intro"><span class="ap-section-kicker">Access workflow</span><h2 id="workflowTitle">A clear path from account to audit</h2><p>Every stage keeps access intentional, visible, and accountable.</p></div>
