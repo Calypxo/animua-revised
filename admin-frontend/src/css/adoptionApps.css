@@ -23,10 +23,10 @@
 .aa-stat-icon { width:44px;height:44px; border-radius:13px; display:flex;align-items:center;justify-content:center; font-size:1.1rem;flex-shrink:0; }
 .icon-clay  { background:var(--clay-soft);  color:var(--clay); }
 .icon-amber { background:var(--amber-soft); color:var(--amber); }
-.icon-blue  { background:var(--blue-soft);  color:var(--blue); }
+.icon-blue  { background:#fff0ed; color:#ef1725; }
 .icon-green { background:var(--green-soft); color:var(--green); }
 .icon-rose  { background:var(--rose-soft);  color:var(--rose); }
-.icon-teal  { background:var(--teal-soft);  color:var(--teal); }
+.icon-teal  { background:#e7f6ed; color:#23734c; }
 .icon-stone { background:var(--cream-3);    color:var(--stone); }
 .aa-stat-val { font-size:1.7rem;font-weight:800;color:var(--ink);line-height:1; }
 .aa-stat-lbl { font-size:0.78rem;color:var(--stone);font-weight:500;margin-top:3px; }
@@ -116,7 +116,7 @@
 .animal-mini-name  { font-size:0.84rem;font-weight:700;color:var(--ink); }
 .animal-mini-breed { font-size:0.72rem;color:var(--stone); }
 .thumb-dog   { background:var(--amber-soft); }
-.thumb-cat   { background:var(--blue-soft); }
+.thumb-cat   { background:#fff0cc; }
 .thumb-other { background:var(--cream-3); }
 
 /* Application type badge */
@@ -127,7 +127,7 @@
   white-space:nowrap;
 }
 .type-direct { background:var(--cream-3);color:var(--stone); }
-.type-quiz   { background:var(--teal-soft);color:var(--teal); }
+.type-quiz   { background:#fff0ed;color:#c90f1d; }
 
 /* Compat score pill */
 .compat-pill {
@@ -153,7 +153,7 @@
   font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;
 }
 .badge-pending   { background:var(--amber-soft); color:var(--amber); }
-.badge-approved  { background:var(--blue-soft);  color:var(--blue); }
+.badge-approved  { background:#e7f6ed; color:#23734c; }
 .badge-finalized { background:var(--green-soft); color:var(--green); }
 .badge-rejected  { background:var(--clay-soft);  color:var(--clay); }
 
@@ -290,10 +290,10 @@
 .btn-primary-clay:hover { background:var(--clay-mid);transform:translateY(-1px); }
 
 .btn-approve-app {
-  display:inline-flex;align-items:center;gap:7px;padding:9px 18px;background:var(--blue);color:#fff;
+  display:inline-flex;align-items:center;gap:7px;padding:9px 18px;background:#ef1725;color:#fff;
   border:none;border-radius:var(--radius-sm);font:600 0.875rem/1 var(--font);cursor:pointer;transition:background var(--dur);
 }
-.btn-approve-app:hover { background:#1a4a90; }
+.btn-approve-app:hover { background:#c90f1d; }
 
 .btn-finalize {
   display:inline-flex;align-items:center;gap:7px;padding:9px 18px;background:var(--green);color:#fff;
@@ -360,7 +360,7 @@
 .um-toast.show { opacity:1;transform:translateY(0); }
 .um-toast.toast-success { background:var(--green); }
 .um-toast.toast-error   { background:var(--clay); }
-.um-toast.toast-info    { background:var(--blue); }
+.um-toast.toast-info    { background:#1f2329; }
 .um-toast.toast-warning { background:var(--amber); }
 
 /* Spinner */
@@ -882,4 +882,181 @@
   .adoption-applications-page .aa-panel-intro { padding: 20px 16px 14px; }
   .adoption-applications-page .aa-toolbar-layout { padding: 14px 16px 16px; }
   .adoption-applications-page .aa-filter-toolbar { grid-template-columns: 1fr; }
+}
+
+/* Adoption records use the same table language as every management workspace. */
+.management-consistent-ui.adoption-applications-page,
+.management-consistent-ui.adoption-applications-page :is(button,input,select,textarea,table) {
+  font-family: "Outfit", sans-serif !important;
+}
+
+.management-consistent-ui.adoption-applications-page .aa-table-panel {
+  border: 1px solid var(--animua-line) !important;
+  border-radius: 22px !important;
+  background: #fff !important;
+  box-shadow: 0 14px 36px rgba(70,37,31,.065) !important;
+}
+
+.management-consistent-ui.adoption-applications-page .aa-table-panel .table-responsive {
+  background: #fff !important;
+}
+
+.management-consistent-ui.adoption-applications-page .aa-table-panel .shelter-table {
+  min-width: 1040px;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  color: var(--animua-text) !important;
+  font-size: .79rem !important;
+}
+
+.management-consistent-ui.adoption-applications-page .aa-table-panel .shelter-table thead th {
+  padding: 13px 15px !important;
+  border-top: 1px solid var(--animua-line) !important;
+  border-bottom: 1px solid var(--animua-line) !important;
+  color: #7b6b64 !important;
+  background: #fff7ed !important;
+  font-family: "Outfit", sans-serif !important;
+  font-size: .65rem !important;
+  font-weight: 800 !important;
+  letter-spacing: .07em !important;
+}
+
+.management-consistent-ui.adoption-applications-page .aa-table-panel .shelter-table tbody td {
+  padding: 14px 15px !important;
+  border-bottom: 1px solid #f0e7df !important;
+  color: #443a37 !important;
+  background: #fff !important;
+  font-family: "Outfit", sans-serif !important;
+}
+
+.management-consistent-ui.adoption-applications-page .aa-table-panel .shelter-table tbody tr:hover td {
+  background: #fffaf4 !important;
+}
+
+.management-consistent-ui.adoption-applications-page .aa-table-panel .shelter-table tbody tr.row-active td {
+  background: #fff0ed !important;
+}
+
+.management-consistent-ui.adoption-applications-page :is(.app-id-cell,.shelter-table tbody td:nth-child(6)) {
+  color: #786d68 !important;
+  font-family: "DM Mono", monospace !important;
+  font-size: .69rem !important;
+  font-style: normal !important;
+}
+
+.management-consistent-ui.adoption-applications-page .app-id-cell {
+  color: #c90f1d !important;
+  font-weight: 700 !important;
+}
+
+.management-consistent-ui.adoption-applications-page .applicant-avatar {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  color: #fff !important;
+  background: #ef1725 !important;
+  box-shadow: 0 6px 14px rgba(239,23,37,.14);
+  font-family: "Outfit", sans-serif !important;
+}
+
+.management-consistent-ui.adoption-applications-page :is(.applicant-name,.animal-mini-name) {
+  color: #1f2329 !important;
+  font-family: "Outfit", sans-serif !important;
+  font-weight: 750 !important;
+}
+
+.management-consistent-ui.adoption-applications-page :is(.applicant-email,.animal-mini-breed) {
+  color: #786d68 !important;
+  font-family: "Outfit", sans-serif !important;
+}
+
+.management-consistent-ui.adoption-applications-page .animal-mini-thumb {
+  color: #1f2329 !important;
+  background: #fff0cc !important;
+}
+
+.management-consistent-ui.adoption-applications-page .app-type-badge {
+  border: 1px solid #ead9cc !important;
+  color: #5f4f48 !important;
+  background: #fff4e9 !important;
+  font-family: "Outfit", sans-serif !important;
+}
+
+.management-consistent-ui.adoption-applications-page .type-quiz {
+  border-color: #f4cac5 !important;
+  color: #c90f1d !important;
+  background: #fff0ed !important;
+}
+
+.management-consistent-ui.adoption-applications-page .compat-pill {
+  border: 1px solid transparent !important;
+  font-family: "Outfit", sans-serif !important;
+  font-size: .7rem !important;
+  font-style: normal !important;
+  font-weight: 800 !important;
+}
+
+.management-consistent-ui.adoption-applications-page .compat-high {
+  border-color: #c6e7d3 !important;
+  color: #23734c !important;
+  background: #e7f6ed !important;
+}
+
+.management-consistent-ui.adoption-applications-page .compat-mid {
+  border-color: #f2d58f !important;
+  color: #805300 !important;
+  background: #fff0cc !important;
+}
+
+.management-consistent-ui.adoption-applications-page .compat-low {
+  border-color: #f4cac5 !important;
+  color: #c90f1d !important;
+  background: #fff0ed !important;
+}
+
+.management-consistent-ui.adoption-applications-page .compat-none {
+  border-color: #eadfd4 !important;
+  color: #675b55 !important;
+  background: #fff9f0 !important;
+}
+
+.management-consistent-ui.adoption-applications-page .status-badge {
+  border: 1px solid transparent !important;
+  font-family: "Outfit", sans-serif !important;
+  font-size: .66rem !important;
+  font-weight: 800 !important;
+}
+
+.management-consistent-ui.adoption-applications-page .badge-approved,
+.management-consistent-ui.adoption-applications-page .badge-finalized {
+  border-color: #c6e7d3 !important;
+  color: #23734c !important;
+  background: #e7f6ed !important;
+}
+
+.management-consistent-ui.adoption-applications-page .badge-pending {
+  border-color: #f2d58f !important;
+  color: #805300 !important;
+  background: #fff0cc !important;
+}
+
+.management-consistent-ui.adoption-applications-page .badge-rejected {
+  border-color: #f4cac5 !important;
+  color: #c90f1d !important;
+  background: #fff0ed !important;
+}
+
+.management-consistent-ui.adoption-applications-page .tbl-action-btn {
+  width: 36px !important;
+  height: 36px !important;
+  border: 1px solid #f1d0ca !important;
+  border-radius: 11px !important;
+  color: #ef1725 !important;
+  background: #fff0ed !important;
+}
+
+.management-consistent-ui.adoption-applications-page .tbl-action-btn:hover {
+  border-color: #ef1725 !important;
+  color: #fff !important;
+  background: #ef1725 !important;
 }

@@ -417,3 +417,152 @@ body.management-drawer-open {
   .aa-drawer .drawer-body,
   .surrender-requests-page .sr-drawer .drawer-body { padding: 20px 18px 28px !important; }
 }
+
+/* Adoption details: Intake-derived shell with the approved ANIMUA palette. */
+.aa-drawer,
+.aa-drawer :is(button,input,select,textarea) {
+  font-family: "Outfit", sans-serif !important;
+}
+
+.aa-drawer-inner {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+.aa-drawer .drawer-eyebrow {
+  color: var(--management-modal-red) !important;
+  font-family: "Outfit", sans-serif !important;
+  font-size: .65rem !important;
+  font-weight: 800 !important;
+  letter-spacing: .09em !important;
+}
+
+.aa-drawer .drawer-header-status {
+  display: flex !important;
+  align-items: center !important;
+}
+
+.aa-drawer .application-journey {
+  margin: 0 0 20px !important;
+  padding: 18px 20px !important;
+  border: 1px solid var(--management-modal-line) !important;
+  border-radius: 15px !important;
+  background: linear-gradient(135deg,#fff6ef 0%,#fffdfb 76%) !important;
+}
+
+.aa-drawer .journey-avatar {
+  color: #fff !important;
+  background: var(--management-modal-red) !important;
+  box-shadow: 0 7px 16px rgba(239,23,37,.15) !important;
+}
+
+.aa-drawer .journey-pet {
+  color: var(--management-modal-ink) !important;
+  background: #fff0cc !important;
+  box-shadow: none !important;
+}
+
+.aa-drawer .application-journey :is(strong,small),
+.aa-drawer :is(.compat-ring-info h4,.compat-ring-info p,.drawer-trait-name,.no-score-box p,.req-item-name,.quiz-q,.quiz-a) {
+  font-family: "Outfit", sans-serif !important;
+}
+
+.aa-drawer .journey-link {
+  color: var(--management-modal-red) !important;
+}
+
+.aa-drawer :is(.compat-ring-wrap,.no-score-box,.quiz-answers-wrap) {
+  border: 1px solid #eee1d8 !important;
+  border-radius: 12px !important;
+  background: #fff !important;
+}
+
+.aa-drawer .compat-ring-track {
+  stroke: #f0e4dc !important;
+}
+
+.aa-drawer .compat-ring-pct {
+  color: var(--management-modal-ink) !important;
+  font-family: "DM Mono", monospace !important;
+}
+
+.aa-drawer .compat-ring-sub,
+.aa-drawer .drawer-trait-score,
+.aa-drawer .quiz-a {
+  font-family: "DM Mono", monospace !important;
+}
+
+.aa-drawer .drawer-trait-track {
+  background: #f0e4dc !important;
+}
+
+.aa-drawer .no-score-box > i,
+.aa-drawer a[href*="animalProfile"] {
+  color: var(--management-modal-red) !important;
+}
+
+.aa-drawer .req-submitted {
+  color: #23734c !important;
+  background: #e7f6ed !important;
+}
+
+.aa-drawer .req-pending {
+  color: #805300 !important;
+  background: #fff0cc !important;
+}
+
+.aa-drawer .req-missing {
+  color: #675b55 !important;
+  background: #fff9f0 !important;
+}
+
+.aa-drawer .status-badge,
+.management-modal-layer .status-badge {
+  font-family: "Outfit", sans-serif !important;
+  font-size: .66rem !important;
+  font-weight: 800 !important;
+}
+
+.aa-drawer :is(.badge-approved,.badge-finalized) {
+  color: #23734c !important;
+  background: #e7f6ed !important;
+}
+
+.aa-drawer .badge-pending {
+  color: #805300 !important;
+  background: #fff0cc !important;
+}
+
+.aa-drawer .badge-rejected {
+  color: #c90f1d !important;
+  background: #fff0ed !important;
+}
+
+.aa-drawer .btn-approve-app,
+.aa-drawer .btn-finalize,
+.management-modal-layer :is(.btn-reject-confirm,.btn-finalize) {
+  border: 1px solid var(--management-modal-red) !important;
+  color: #fff !important;
+  background: var(--management-modal-red) !important;
+}
+
+.aa-drawer .btn-approve-app:hover,
+.aa-drawer .btn-finalize:hover,
+.management-modal-layer :is(.btn-reject-confirm,.btn-finalize):hover {
+  background: var(--management-modal-red-dark) !important;
+}
+
+.aa-drawer :is(.btn-ghost-clay,.btn-danger-outline) {
+  border: 1px solid #dfd3cb !important;
+  color: #4f4743 !important;
+  background: #fff !important;
+}
+
+.aa-drawer .btn-danger-outline {
+  border-color: #f0bdb7 !important;
+  color: var(--management-modal-red) !important;
+}

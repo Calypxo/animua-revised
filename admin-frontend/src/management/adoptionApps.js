@@ -36,7 +36,7 @@ const QUIZ_DIMENSIONS = [
   { key:"adaptability",         label:"Routine stability" },
 ];
 
-const AVATAR_COLORS = ["#6f191c","#2558a8","#186534","#b86a00","#0d6e6e","#9b2c4e","#3d2b8a","#1a6b5a"];
+const AVATAR_COLOR = "#ef1725";
 
 function mapAdoptionFromBackend(a) {
   const compatibility = a.compatibility || null;
@@ -72,7 +72,7 @@ function mapAdoptionFromBackend(a) {
       address: a.applicant?.address || "",
       idType: a.applicant?.idType || "N/A",
       occupation: a.applicant?.occupation || "",
-      color: AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)],
+      color: AVATAR_COLOR,
       initials: (a.applicant?.full_name || "U")
         .split(" ")
         .map(n => n[0])
@@ -175,10 +175,10 @@ function formatDate(d) {
 }
 
 function compatColor(score) {
-  if (!score) return { ring:"#d4cfc9", cls:"compat-none" };
-  if (score >= 75) return { ring:"#186534", cls:"compat-high" };
-  if (score >= 55) return { ring:"#b86a00", cls:"compat-mid" };
-  return { ring:"#6f191c", cls:"compat-low" };
+  if (!score) return { ring:"#a89c96", cls:"compat-none" };
+  if (score >= 75) return { ring:"#23734c", cls:"compat-high" };
+  if (score >= 55) return { ring:"#ffb51b", cls:"compat-mid" };
+  return { ring:"#ef1725", cls:"compat-low" };
 }
 
 function compatPill(score, type) {
@@ -257,7 +257,7 @@ function renderTable() {
       <td class="app-id-cell">${a.applicationId}</td>
       <td>
         <div class="applicant-cell">
-          <div class="applicant-avatar" style="background:${a.adopter.color}">${a.adopter.initials}</div>
+          <div class="applicant-avatar">${a.adopter.initials}</div>
           <div>
             <div class="applicant-name">${a.adopter.name}</div>
             <div class="applicant-email">${a.adopter.email}</div>
@@ -385,13 +385,13 @@ function renderDrawerContent(app) {
             const petVal     = (app.animal.vector[QUIZ_DIMENSIONS.indexOf(d)]||0) * 20;
             const adopterVal = (app.adopterAnswers?.[d.key]||0) * 20;
             const diff       = Math.abs(petVal - adopterVal);
-            const barColor   = diff <= 20 ? "#186534" : diff <= 40 ? "#b86a00" : "#6f191c";
+            const barColor   = diff <= 20 ? "#23734c" : diff <= 40 ? "#ffb51b" : "#ef1725";
             return `
               <div class="drawer-trait-row">
                 <span class="drawer-trait-name">${d.label}</span>
                 <div style="display:flex;flex-direction:column;gap:2px;flex:1">
                   <div class="drawer-trait-track" title="${app.animal.name}: ${Math.round(petVal)}%">
-                    <div class="drawer-trait-fill" style="width:${petVal}%;background:#2558a8"></div>
+                    <div class="drawer-trait-fill" style="width:${petVal}%;background:#ef1725"></div>
                   </div>
                   <div class="drawer-trait-track" title="Adopter: ${Math.round(adopterVal)}%">
                     <div class="drawer-trait-fill" style="width:${adopterVal}%;background:${barColor}"></div>
@@ -402,8 +402,8 @@ function renderDrawerContent(app) {
           }).join("")}
         </div>
         <div class="mt-2" style="font-size:0.72rem;color:var(--stone);display:flex;gap:12px">
-          <span style="display:flex;align-items:center;gap:4px"><span style="display:inline-block;width:10px;height:4px;background:#2558a8;border-radius:2px"></span>Pet trait</span>
-          <span style="display:flex;align-items:center;gap:4px"><span style="display:inline-block;width:10px;height:4px;background:#186534;border-radius:2px"></span>Adopter answer</span>
+          <span style="display:flex;align-items:center;gap:4px"><span style="display:inline-block;width:10px;height:4px;background:#ef1725;border-radius:2px"></span>Pet trait</span>
+          <span style="display:flex;align-items:center;gap:4px"><span style="display:inline-block;width:10px;height:4px;background:#23734c;border-radius:2px"></span>Adopter answer</span>
         </div>
 
         ${app.quizTopMatches ? `
@@ -569,7 +569,7 @@ if (app.status === "Approved") {
     <div class="drawer-body">
       <section class="application-journey" aria-label="Applicant and animal summary">
         <div class="journey-person">
-          <span class="journey-avatar" style="background:${app.adopter.color}">${app.adopter.initials}</span>
+          <span class="journey-avatar">${app.adopter.initials}</span>
           <span><small>Applicant</small><strong>${app.adopter.name}</strong></span>
         </div>
         <span class="journey-link"><i class="bi bi-arrow-right"></i><small>applied for</small></span>
