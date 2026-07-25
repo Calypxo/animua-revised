@@ -11,7 +11,9 @@ import {
 
 import Swal from "sweetalert2";
 
-export function loadSidebar() {
+export { loadSidebar } from "./sidebarV2.js";
+
+function loadLegacySidebar() {
   const container = document.getElementById("sidebar-container");
 
   if (!container) {

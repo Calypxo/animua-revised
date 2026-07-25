@@ -1,3 +1,4 @@
+import "../../css/managementRefresh.css";
 import "../../css/pageHeader.css";
 
 const escapeHtml = value => String(value ?? "")

@@ -8,6 +8,8 @@ import { protectPageByModule } from "../auth/authGuard.js";
 import { hasPermission } from "../auth/permissions.js";
 import { renderTopbarUser } from "../components/management/topbarUser.js";
 import { loadSidebar } from "../components/management/sidebarLoader.js";
+import { renderPageHeader } from "../components/management/pageHeader.js";
+import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.js";
 
 import {
   getAnnouncements,
@@ -35,6 +37,20 @@ function can(action) {
 
 function getEl(id) {
   return document.getElementById(id);
+}
+
+function setHeaderValue(id, value) {
+  const element = getEl(id);
+  if (element) element.textContent = value;
+}
+
+function renderHeaderStats() {
+  const drafts = state.announcements.filter((item) => item.status === "Draft").length;
+  setHeaderValue("announcementTotal", state.announcements.length);
+  setHeaderValue("announcementPublished", state.announcements.filter((item) => item.status === "Published").length);
+  setHeaderValue("announcementDrafts", drafts);
+  setHeaderValue("heroDraftCount", drafts);
+  setHeaderValue("announcementEvents", state.announcements.filter((item) => item.type === "Event").length);
 }
 
 function normalize(value) {
@@ -123,6 +139,7 @@ function applyFilters() {
   }
 
   state.filtered = list;
+  renderHeaderStats();
   renderFeed();
 }
 
@@ -468,6 +485,7 @@ async function initAnnouncementsPage() {
 
     renderTopbarUser();
     loadSidebar();
+    renderPageHeader(PAGE_HEADER_CONFIGS.announcements);
 
     bindEvents();
 

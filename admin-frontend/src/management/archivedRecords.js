@@ -6,6 +6,8 @@ import { protectPageByModule } from "../auth/authGuard.js";
 import { hasPermission } from "../auth/permissions.js";
 import { renderTopbarUser } from "../components/management/topbarUser.js";
 import { loadSidebar } from "../components/management/sidebarLoader.js";
+import { renderPageHeader } from "../components/management/pageHeader.js";
+import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.js";
 
 import {
   getArchivedRecords,
@@ -130,6 +132,20 @@ function applyFilters() {
   }
 
   state.filteredRecords = records;
+
+  const moduleCount = (name) => state.records.filter((item) => item.module === name).length;
+  const headerValues = {
+    archiveTotal: state.records.length,
+    archiveAnimals: moduleCount("Animal Management"),
+    archiveAdoptions: moduleCount("Adoption Management"),
+    archiveInventory: moduleCount("Inventory"),
+    archiveUsers: moduleCount("User Management"),
+    heroArchiveCount: state.filteredRecords.length,
+  };
+  Object.entries(headerValues).forEach(([id, value]) => {
+    const element = getEl(id);
+    if (element) element.textContent = value;
+  });
 
   const totalPages = Math.max(1, Math.ceil(state.filteredRecords.length / state.pageSize));
   if (state.currentPage > totalPages) state.currentPage = totalPages;
@@ -749,6 +765,7 @@ async function initArchivedRecordsPage() {
 
     renderTopbarUser();
     loadSidebar();
+    renderPageHeader(PAGE_HEADER_CONFIGS.archivedRecords);
 
     bindTabs();
     bindFilters();

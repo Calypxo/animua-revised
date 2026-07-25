@@ -1,4 +1,28 @@
 export const PAGE_HEADER_CONFIGS = Object.freeze({
+  dashboard: {
+    headingId: "pageTitle",
+    eyebrow: "Shelter Operations",
+    title: "Command Center",
+    description: "Monitor animal care, intake movement, adoption readiness, and shelter priorities from one coordinated view.",
+    watermarkIcon: "bi-grid-1x2-fill",
+    highlights: [
+      { icon: "bi-activity", label: "Live shelter health" },
+      { icon: "bi-arrow-left-right", label: "Workflow visibility" },
+      { icon: "bi-shield-check", label: "Actionable priorities" }
+    ],
+    queue: { liveLabel: "Shelter desk active", label: "Priority queue", title: "Animals currently in intake", valueId: "heroIntakeCount", unit: "in intake" },
+    actions: [{ href: "/pages/intakeList.html", icon: "bi-arrow-right", label: "Open intake queue" }],
+    summaryLabel: "Shelter snapshot",
+    metrics: [
+      { id: "headerTotalPetsCount", icon: "bi-heart-pulse-fill", label: "Total Animals" },
+      { id: "headerIntakeCount", icon: "bi-box-arrow-in-down", label: "In Intake", tone: "amber" },
+      { id: "headerProfilingCount", icon: "bi-clipboard2-check-fill", label: "Profiling", tone: "blue" },
+      { id: "headerQuarantineCount", icon: "bi-shield-plus", label: "Quarantine", tone: "rose" },
+      { id: "headerReadyCount", icon: "bi-house-heart-fill", label: "Adoption Ready", tone: "green" },
+      { id: "headerAdoptedCount", icon: "bi-balloon-heart-fill", label: "Adopted", tone: "rose" },
+      { id: "headerArchivedCount", icon: "bi-archive-fill", label: "Archived", tone: "stone" }
+    ]
+  },
   intake: {
     headingId: "pageTitle",
     eyebrow: "Animal Management",
@@ -136,6 +160,100 @@ export const PAGE_HEADER_CONFIGS = Object.freeze({
       { id: "statCritical", icon: "bi-exclamation-triangle-fill", label: "Critical Stock", tone: "rose" },
       { id: "statLow", icon: "bi-arrow-down-circle-fill", label: "Low Stock", tone: "amber" },
       { id: "statFast", icon: "bi-activity", label: "Fast-Moving", tone: "green" }
+    ]
+  },
+  announcements: {
+    headingId: "pageTitle",
+    eyebrow: "Community Engagement",
+    title: "Announcements",
+    description: "Publish clear shelter updates, events, and advisories while keeping every community message organized and current.",
+    watermarkIcon: "bi-megaphone-fill",
+    highlights: [
+      { icon: "bi-send-check", label: "Fast publishing" },
+      { icon: "bi-calendar-event", label: "Event-ready posts" },
+      { icon: "bi-eye", label: "Status visibility" }
+    ],
+    queue: { liveLabel: "Publisher active", label: "Editorial queue", title: "Draft posts awaiting publication", valueId: "heroDraftCount", unit: "drafts" },
+    actions: [{ id: "btnNewAnnouncement", icon: "bi-plus-lg", label: "Create community post" }],
+    summaryLabel: "Publishing summary",
+    metrics: [
+      { id: "announcementTotal", icon: "bi-megaphone-fill", label: "All Posts" },
+      { id: "announcementPublished", icon: "bi-send-check-fill", label: "Published", tone: "green" },
+      { id: "announcementDrafts", icon: "bi-pencil-square", label: "Drafts", tone: "amber" },
+      { id: "announcementEvents", icon: "bi-calendar-event-fill", label: "Events", tone: "blue" }
+    ]
+  },
+  reports: {
+    headingId: "pageTitle",
+    eyebrow: "Operational Intelligence",
+    title: "Reports Center",
+    description: "Explore live shelter data, narrow records by date, and export reliable operational reports for review and planning.",
+    watermarkIcon: "bi-bar-chart-fill",
+    highlights: [
+      { icon: "bi-database-check", label: "Live records" },
+      { icon: "bi-funnel", label: "Focused filters" },
+      { icon: "bi-file-earmark-arrow-down", label: "Ready to export" }
+    ],
+    queue: { liveLabel: "Reporting service active", label: "Current report", title: "Records in the selected view", valueId: "heroReportCount", unit: "records" },
+    actions: [
+      { id: "btnPrint", icon: "bi-printer-fill", label: "Print / PDF" },
+      { id: "btnCsv", icon: "bi-filetype-csv", label: "Export CSV", variant: "secondary" }
+    ],
+    summaryLabel: "Reporting snapshot",
+    metrics: [
+      { id: "reportSourceCount", icon: "bi-collection-fill", label: "Available Reports" },
+      { id: "reportAllCount", icon: "bi-database-fill", label: "Live Records", tone: "blue" },
+      { id: "reportVisibleCount", icon: "bi-funnel-fill", label: "Visible Records", tone: "amber" },
+      { id: "reportGeneratedCount", icon: "bi-clock-history", label: "Generated Today", tone: "green", value: 1 }
+    ]
+  },
+  auditTrail: {
+    headingId: "pageTitle",
+    eyebrow: "System Governance",
+    title: "Audit Trail",
+    description: "Review staff actions, system events, and affected records with a clear, searchable history of administrative activity.",
+    watermarkIcon: "bi-journal-check",
+    highlights: [
+      { icon: "bi-shield-lock", label: "Accountability built in" },
+      { icon: "bi-search", label: "Traceable actions" },
+      { icon: "bi-file-earmark-arrow-down", label: "Exportable logs" }
+    ],
+    queue: { liveLabel: "Audit monitor active", label: "Attention queue", title: "Warnings and failed events", valueId: "heroAuditAttention", unit: "events" },
+    actions: [
+      { id: "btnExportAudit", icon: "bi-download", label: "Export audit log" },
+      { id: "btnResetFilters", icon: "bi-arrow-counterclockwise", label: "Reset filters", variant: "secondary" }
+    ],
+    summaryLabel: "Audit summary",
+    metrics: [
+      { id: "auditTotal", icon: "bi-journal-text", label: "All Events" },
+      { id: "auditSuccess", icon: "bi-check-circle-fill", label: "Successful", tone: "green" },
+      { id: "auditWarning", icon: "bi-exclamation-triangle-fill", label: "Warnings", tone: "amber" },
+      { id: "auditFailed", icon: "bi-x-octagon-fill", label: "Failed", tone: "rose" }
+    ]
+  },
+  archivedRecords: {
+    headingId: "pageTitle",
+    eyebrow: "Records Governance",
+    title: "Archived Records",
+    description: "Review retained records across shelter modules, understand why they were archived, and restore eligible animal profiles safely.",
+    watermarkIcon: "bi-archive-fill",
+    highlights: [
+      { icon: "bi-folder-check", label: "Centralized archive" },
+      { icon: "bi-clock-history", label: "Clear record history" },
+      { icon: "bi-arrow-clockwise", label: "Controlled restoration" }
+    ],
+    queue: { liveLabel: "Archive service active", label: "Current view", title: "Records matching your filters", valueId: "heroArchiveCount", unit: "records" },
+    actions: [
+      { id: "btnExportArchive", icon: "bi-download", label: "Export archive" },
+      { id: "btnResetFilters", icon: "bi-arrow-counterclockwise", label: "Reset filters", variant: "secondary" }
+    ],
+    summaryLabel: "Archive summary",
+    metrics: [
+      { id: "archiveTotal", icon: "bi-archive-fill", label: "All Records" },
+      { id: "archiveAnimals", icon: "bi-heart-pulse-fill", label: "Animal Records", tone: "green" },
+      { id: "archiveAdoptions", icon: "bi-house-heart-fill", label: "Adoption Records", tone: "rose" },
+      { id: "archiveInventory", icon: "bi-box-seam-fill", label: "Inventory Records", tone: "amber" },
+      { id: "archiveUsers", icon: "bi-people-fill", label: "User Records", tone: "blue" }
     ]
   }
 });

@@ -4,6 +4,8 @@ import "../components/global/welcome.js";
 import { protectManagementPage } from "../auth/authGuard.js";
 import { renderTopbarUser } from "../components/management/topbarUser.js";
 import { loadSidebar } from "../components/management/sidebarLoader.js";
+import { renderPageHeader } from "../components/management/pageHeader.js";
+import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.js";
 import { apiFetch } from "../utils/api.js";
 
 let animals = [];
@@ -43,12 +45,20 @@ function setCounter(id, value) {
 function populateCounts(data) {
   [
     ["totalPetsCount", data.totalPets],
+    ["headerTotalPetsCount", data.totalPets],
     ["intakeCount", data.intake],
+    ["headerIntakeCount", data.intake],
+    ["heroIntakeCount", data.intake],
     ["profilingCount", data.profiling],
+    ["headerProfilingCount", data.profiling],
     ["quarantineCount", data.quarantine],
+    ["headerQuarantineCount", data.quarantine],
     ["readyCount", data.readyForAdoption],
+    ["headerReadyCount", data.readyForAdoption],
     ["adoptedCount", data.adopted],
+    ["headerAdoptedCount", data.adopted],
     ["archivedCount", data.archived],
+    ["headerArchivedCount", data.archived],
   ].forEach(([id, value]) => setCounter(id, value));
   const trends = {
     totalTrend: "Live records",
@@ -78,7 +88,7 @@ function renderCharts(data) {
     data: {
       labels: data.monthlyData.labels,
       datasets: [
-        { label: "Intake", data: data.monthlyData.intake, backgroundColor: "rgba(111,25,28,.16)", borderColor: "#97262b", borderWidth: 2, borderRadius: 6 },
+        { label: "Intake", data: data.monthlyData.intake, backgroundColor: "rgba(239,23,37,.15)", borderColor: "#ef1725", borderWidth: 2, borderRadius: 6 },
         { label: "Adoptions", data: data.monthlyData.adoptions, backgroundColor: "rgba(24,101,52,.16)", borderColor: "#186534", borderWidth: 2, borderRadius: 6 },
       ],
     },
@@ -96,7 +106,7 @@ function renderCharts(data) {
     : '<p class="text-muted">No current animal records.</p>';
   stayChart = chart("stayChart", stayChart, {
     type: "bar",
-    data: { labels: data.stayDistribution.labels, datasets: [{ label: "Animals", data: data.stayDistribution.data, backgroundColor: ["#186534","#2558a8","#b86a00","#97262b","#6f191c"], borderRadius: 8 }] },
+    data: { labels: data.stayDistribution.labels, datasets: [{ label: "Animals", data: data.stayDistribution.data, backgroundColor: ["#186534","#2558a8","#ffb91e","#ff4437","#ef1725"], borderRadius: 8 }] },
     options: { indexAxis: "y", responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { precision: 0 } } } },
   });
 }
@@ -142,6 +152,7 @@ async function init() {
     await protectManagementPage();
     renderTopbarUser();
     loadSidebar();
+    renderPageHeader(PAGE_HEADER_CONFIGS.dashboard);
     const data = await apiFetch("/dashboard/stats");
     document.getElementById("live-date").textContent = new Date().toLocaleDateString("en-PH", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
     const name = localStorage.getItem("user_name") || "Admin";

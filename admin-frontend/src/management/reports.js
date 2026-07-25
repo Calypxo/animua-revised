@@ -4,6 +4,8 @@ import "../css/reports.css";
 import { protectManagementPage } from "../auth/authGuard.js";
 import { renderTopbarUser } from "../components/management/topbarUser.js";
 import { loadSidebar } from "../components/management/sidebarLoader.js";
+import { renderPageHeader } from "../components/management/pageHeader.js";
+import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.js";
 import { apiFetch } from "../utils/api.js";
 
 const CONFIG = {
@@ -20,7 +22,7 @@ const text=(v)=>v===null||v===undefined||v===""?"—":String(v);
 
 function workspace(){
  document.querySelector(".page-body").innerHTML =
- '<div class="page-header mb-4"><div><h1 class="page-title">Operational Reports</h1><p class="page-sub">Live, read-only shelter records with date filtering and export.</p></div><div class="d-flex gap-2 flex-wrap"><button class="btn-export" id="btnPrint"><i class="bi bi-printer-fill"></i> Print / PDF</button><button class="btn-export btn-export-csv" id="btnCsv"><i class="bi bi-filetype-csv"></i> Export CSV</button></div></div>'+
+ '<div id="pageHeaderMount"></div>'+
  '<div class="rpt-card mb-4 report-filter-card"><div class="report-filter-grid"><label>From<input class="filter-select" type="date" id="dateFrom"></label><label>To<input class="filter-select" type="date" id="dateTo"></label><label>Search<input class="filter-select" type="search" id="reportSearch" placeholder="Search current report"></label><button class="btn-export" id="btnApply"><i class="bi bi-funnel-fill"></i> Apply</button><button class="btn-export report-secondary-btn" id="btnClear">Clear</button></div></div>'+
  '<div class="report-tabs mb-4" id="liveReportTabs"></div><div class="kpi-row mb-4" id="reportSummary"></div>'+
  '<div class="rpt-card"><div class="rpt-card-head"><div><h3 id="reportTitle">Report</h3><p id="reportMeta">Loading live records…</p></div></div><div class="table-responsive"><table class="rpt-table"><thead><tr id="reportHead"></tr></thead><tbody id="reportBody"></tbody></table></div></div>';
@@ -50,6 +52,8 @@ function summary(list){
 function render(){
  const c=CONFIG[active];if(!c)return;
  const list=rows();
+ const allCount=Object.values(payload.reports).reduce((total,records)=>total+(Array.isArray(records)?records.length:0),0);
+ [["reportSourceCount",payload.available.length],["reportAllCount",allCount],["reportVisibleCount",list.length],["heroReportCount",list.length]].forEach(([id,value])=>{const element=document.getElementById(id);if(element)element.textContent=value;});
  document.getElementById("reportTitle").textContent=c.label+" Report";
  document.getElementById("reportMeta").textContent=list.length+" live record(s) · Generated "+new Date(payload.generatedAt).toLocaleString("en-PH");
  document.getElementById("reportHead").innerHTML=c.columns.map((x)=>"<th>"+esc(x[1])+"</th>").join("");
@@ -66,7 +70,7 @@ function csv(){
 function error(e){console.error(e);const body=document.getElementById("reportBody");if(body)body.innerHTML='<tr><td class="text-danger">'+esc(e.message)+"</td></tr>";}
 async function init(){
  try{
-  await protectManagementPage();renderTopbarUser();loadSidebar();workspace();
+  await protectManagementPage();renderTopbarUser();loadSidebar();workspace();renderPageHeader(PAGE_HEADER_CONFIGS.reports);
   const now=new Date();document.getElementById("dateFrom").value=now.getFullYear()+"-01-01";document.getElementById("dateTo").value=now.toISOString().slice(0,10);
   document.getElementById("btnApply").addEventListener("click",()=>load().catch(error));
   document.getElementById("btnClear").addEventListener("click",()=>{

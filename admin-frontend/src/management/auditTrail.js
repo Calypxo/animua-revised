@@ -5,6 +5,8 @@ import "../css/auditTrail.css";
 import { protectPageByModule } from "../auth/authGuard.js";
 import { renderTopbarUser } from "../components/management/topbarUser.js";
 import { loadSidebar } from "../components/management/sidebarLoader.js";
+import { renderPageHeader } from "../components/management/pageHeader.js";
+import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.js";
 import { getAuditLogs } from "../services/audit.service.js";
 
 const state = {
@@ -143,6 +145,19 @@ function applyFilters() {
   }
 
   state.filteredLogs = logs;
+  const warningCount = state.logs.filter((log) => log.status === "Warning").length;
+  const failedCount = state.logs.filter((log) => log.status === "Failed").length;
+  const headerValues = {
+    auditTotal: state.logs.length,
+    auditSuccess: state.logs.filter((log) => log.status === "Success").length,
+    auditWarning: warningCount,
+    auditFailed: failedCount,
+    heroAuditAttention: warningCount + failedCount,
+  };
+  Object.entries(headerValues).forEach(([id, value]) => {
+    const element = getEl(id);
+    if (element) element.textContent = value;
+  });
   const totalPages = Math.max(1, Math.ceil(state.filteredLogs.length / state.pageSize));
   if (state.currentPage > totalPages) state.currentPage = totalPages;
 
@@ -548,6 +563,7 @@ async function initAuditTrailPage() {
 
     renderTopbarUser();
     loadSidebar();
+    renderPageHeader(PAGE_HEADER_CONFIGS.auditTrail);
 
     state.logs =
       await getAuditLogs();
