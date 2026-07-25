@@ -223,13 +223,12 @@ function renderTable() {
   const page  = filtered.slice(start, start+PAGE_SIZE);
 
   if (!page.length) {
-    tbody.innerHTML = `<tr><td colspan="8" class="text-center py-5 text-muted">No surrender requests found.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-muted">No surrender requests found.</td></tr>`;
     return;
   }
 
   tbody.innerHTML = page.map(r => `
     <tr data-id="${r.id}" class="${r.id===activeId?"row-active":""}">
-      <td data-label="Request ID" class="request-code">${r.id}</td>
       <td data-label="Owner">
         <div class="owner-cell">
           <div class="owner-avatar" style="background:${r.owner.color}">${r.owner.initials}</div>
@@ -784,6 +783,7 @@ async function init() {
     document.getElementById("searchSR")?.addEventListener("input",      applyFilters);
     document.getElementById("filterUrgency")?.addEventListener("change", applyFilters);
     document.getElementById("filterCategory")?.addEventListener("change",applyFilters);
+    document.getElementById("srDrawerBackdrop")?.addEventListener("click", closeDrawer);
 
     // Reject modal
     document.getElementById("rejectModalClose")?.addEventListener("click",  ()=>closeModal("rejectModalBackdrop"));
@@ -805,7 +805,12 @@ async function init() {
       document.getElementById(id)?.addEventListener("click",e=>{if(e.target.id===id)closeModal(id);});
     });
 
-    document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeAllModals(); });
+    document.addEventListener("keydown",e=>{
+      if(e.key!=="Escape") return;
+      const hasOpenModal = document.querySelector(".um-modal-backdrop.open");
+      if(hasOpenModal) closeAllModals();
+      else closeDrawer();
+    });
 
     document.body.classList.remove("loading");
   } catch(err) {

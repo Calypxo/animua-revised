@@ -740,3 +740,146 @@
     justify-content: center;
   }
 }
+
+/* Match the shared management records workspace. */
+.adoption-applications-page .aa-table-panel {
+  border-color: #eadfd4;
+  border-radius: 18px;
+  box-shadow: 0 12px 28px rgba(74,44,34,.08);
+}
+
+.adoption-applications-page .aa-table-panel .panel-head {
+  display: block !important;
+  gap: 0 !important;
+  padding: 0;
+  border-bottom: 0;
+  background: #fff;
+}
+
+.adoption-applications-page .aa-panel-intro {
+  padding: 23px 25px 17px;
+  border-bottom: 1px solid #f0ddd6;
+  background: #fff;
+}
+
+.adoption-applications-page .aa-panel-icon {
+  width: 42px;
+  height: 42px;
+  flex-basis: 42px;
+  border-radius: 12px;
+  color: #ef1725;
+  background: #fff0e8;
+  box-shadow: none;
+}
+
+.adoption-applications-page .aa-panel-heading > span:last-child::before {
+  content: "Records";
+  display: block;
+  margin-bottom: 5px;
+  color: #c90f1d;
+  font: 800 .63rem/1 "Outfit", sans-serif;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.adoption-applications-page .aa-panel-heading strong {
+  color: #1f2329;
+  font: 800 1.25rem/1.15 "Outfit", sans-serif;
+}
+
+.adoption-applications-page .aa-panel-heading small {
+  color: #786d68;
+  font: 500 .75rem/1.45 "Outfit", sans-serif;
+}
+
+.adoption-applications-page .aa-panel-tip {
+  border: 0;
+  padding: 0;
+  color: #786d68;
+  background: transparent;
+  font: 650 .66rem/1 "Outfit", sans-serif;
+}
+
+.adoption-applications-page .aa-panel-tip i { color: #ef1725; }
+
+.adoption-applications-page .aa-toolbar-layout {
+  display: block;
+  padding: 16px 25px 20px;
+  background: linear-gradient(180deg,#fffaf6,#fff7f1);
+}
+
+.adoption-applications-page .aa-tabs {
+  width: max-content;
+  gap: 24px;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid #eadbd4;
+  border-radius: 0;
+  background: transparent;
+  flex-wrap: nowrap;
+}
+
+.adoption-applications-page .aa-tab {
+  position: relative;
+  min-height: 38px;
+  padding: 5px 1px 12px;
+  border-radius: 0;
+  color: #7c706a;
+  background: transparent;
+  box-shadow: none;
+  font: 700 .72rem/1 "Outfit", sans-serif;
+}
+
+.adoption-applications-page .aa-tab::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 3px;
+  border-radius: 999px 999px 0 0;
+  background: #ef1725;
+  opacity: 0;
+  transform: scaleX(.35);
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.adoption-applications-page .aa-tab:hover,
+.adoption-applications-page .aa-tab.active { color: #c90f1d; background: transparent; box-shadow: none; }
+.adoption-applications-page .aa-tab.active::after { opacity: 1; transform: scaleX(1); }
+
+.adoption-applications-page .aa-filter-toolbar {
+  display: grid;
+  grid-template-columns: minmax(260px,1.5fr) minmax(180px,.75fr);
+  gap: 9px;
+  margin-top: 15px;
+}
+
+.adoption-applications-page :is(.search-pill-sm,.filter-select) {
+  width: 100%;
+  min-width: 0;
+  height: 44px;
+  border: 1px solid #e2cfc7;
+  border-radius: 12px;
+  color: #514946;
+  background: #fff;
+  font: 500 .75rem/1 "Outfit", sans-serif;
+}
+
+.adoption-applications-page .search-pill-sm { padding: 0 13px; }
+.adoption-applications-page .search-pill-sm i { width: 27px; height: 27px; display: grid; place-items: center; border-radius: 50%; color: #ef1725; background: #fff0eb; }
+.adoption-applications-page :is(.search-pill-sm:focus-within,.filter-select:focus) { border-color: #ef1725; box-shadow: 0 0 0 3px rgba(239,23,37,.1); outline: 0; }
+.adoption-applications-page .aa-table-panel .table-responsive { background: #fffdf9; }
+.adoption-applications-page .aa-table-panel .shelter-table { min-width: 1040px; }
+.adoption-applications-page .aa-table-panel .um-pagination { padding: 16px 20px; border-top: 1px solid #f0ddd6; background: #fffaf6; }
+
+@media (max-width: 900px) {
+  .adoption-applications-page .aa-panel-intro { align-items: flex-start; }
+  .adoption-applications-page .aa-panel-tip { display: none; }
+}
+
+@media (max-width: 700px) {
+  .adoption-applications-page .aa-panel-intro { padding: 20px 16px 14px; }
+  .adoption-applications-page .aa-toolbar-layout { padding: 14px 16px 16px; }
+  .adoption-applications-page .aa-filter-toolbar { grid-template-columns: 1fr; }
+}

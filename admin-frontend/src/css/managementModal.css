@@ -364,10 +364,49 @@ body.management-drawer-open {
 }
 
 .surrender-requests-page .sr-layout.drawer-open::before {
+  display: none !important;
+}
+
+.surrender-requests-page .sr-drawer-backdrop {
+  position: fixed !important;
+  inset: 0 !important;
   z-index: 2490 !important;
+  display: block !important;
+  padding: 0 !important;
+  border: 0 !important;
   background: rgba(30,20,18,.5) !important;
   -webkit-backdrop-filter: blur(11px) saturate(.88) !important;
   backdrop-filter: blur(11px) saturate(.88) !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transition: opacity 220ms ease, visibility 220ms ease !important;
+}
+
+.surrender-requests-page .sr-layout.drawer-open .sr-drawer-backdrop {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+.surrender-requests-page .sr-drawer-inner {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+.surrender-requests-page .sr-drawer .drawer-body {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  touch-action: pan-y !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: #d9c8bc transparent !important;
 }
 
 @media (max-width: 800px) {

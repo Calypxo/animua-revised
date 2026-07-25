@@ -83,7 +83,7 @@
                 <span>Search requests</span>
                 <div class="search-pill-sm">
                   <i class="bi bi-search"></i>
-                  <input type="search" id="searchSR" placeholder="Owner, animal, barangay, or request ID" autocomplete="off" />
+                  <input type="search" id="searchSR" placeholder="Owner, animal, or barangay" autocomplete="off" />
                 </div>
               </label>
               <label class="filter-field" for="filterUrgency">
@@ -117,7 +117,6 @@
             <table class="shelter-table">
               <thead>
                 <tr>
-                  <th>Request ID</th>
                   <th>Owner</th>
                   <th>Pet</th>
                   <th>NLP Category</th>
@@ -128,12 +127,14 @@
                 </tr>
               </thead>
               <tbody id="srTableBody">
-                <tr><td colspan="8" class="text-center py-5"><div class="um-spinner"></div></td></tr>
+                <tr><td colspan="7" class="text-center py-5"><div class="um-spinner"></div></td></tr>
               </tbody>
             </table>
           </div>
           <div class="um-pagination" id="paginationBar"></div>
         </section>
+
+        <button class="sr-drawer-backdrop" id="srDrawerBackdrop" type="button" aria-label="Close surrender request details"></button>
 
         <!-- Detail drawer -->
         <div class="sr-drawer" id="srDrawer">
