@@ -71,7 +71,7 @@ export function renderPageHeader(config = {}, target = "#pageHeaderMount") {
       </aside>
     </section>
     ${metrics.length ? `
-      <section class="system-summary" style="--summary-count:${metrics.length}" aria-label="${escapeHtml(config.summaryLabel || `${config.title || "Page"} summary`)}">
+      <section class="system-summary" data-count="${metrics.length}" style="--summary-count:${metrics.length}" aria-label="${escapeHtml(config.summaryLabel || `${config.title || "Page"} summary`)}">
         <span class="system-summary-label">${escapeHtml(config.summaryLabel || "Summary")}</span>
         ${metrics.map(renderMetric).join("")}
       </section>` : ""}`;

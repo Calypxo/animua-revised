@@ -146,6 +146,15 @@
   transition: color 160ms ease, background 160ms ease;
 }
 
+/* Legacy sidebar.css colors nested icons directly. Keep the refreshed icon
+   tile as the single color source so icons remain visible on the white shell. */
+.sidebar .nav-icon > i {
+  width: auto;
+  color: currentColor;
+  font-size: 1em;
+  text-align: center;
+}
+
 .nav-item:hover .nav-icon,
 .nav-group-toggle:hover .nav-icon,
 .nav-group.expanded > .nav-group-toggle .nav-icon {
@@ -197,7 +206,24 @@
 }
 
 .nav-submenu > .nav-item { min-height: 42px; padding: 5px 8px; font-size: 0.81rem; }
-.nav-submenu > .nav-item .nav-icon { flex-basis: 30px; width: 30px; height: 30px; border-radius: 9px; }
+.nav-submenu > .nav-item .nav-icon {
+  flex-basis: 30px;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  color: #786b66;
+  background: #f6f2ef;
+}
+
+.nav-submenu > .nav-item:hover .nav-icon {
+  color: var(--sb-red);
+  background: #ffe8df;
+}
+
+.nav-submenu > .nav-item.active .nav-icon {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.2);
+}
 
 .sidebar-signout { color: #b33b43; }
 
