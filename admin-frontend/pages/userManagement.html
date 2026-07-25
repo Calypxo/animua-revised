@@ -10,8 +10,10 @@
   <link rel="stylesheet" href="/src/css/adminDashboard.css" />
   <link rel="stylesheet" href="/src/css/sidebar.css" />
   <link rel="stylesheet" href="/src/css/userManagement.css" />
+  <link rel="stylesheet" href="/src/css/animalProfiling.css" />
+  <link rel="stylesheet" href="/src/css/userManagementProfiling.css" />
 </head>
-<body class="loading user-management-page">
+<body class="loading ap-list-page user-management-page">
 <div class="shell">
   <div id="sidebar-container"></div>
   <div class="stage">
@@ -21,7 +23,7 @@
       <div class="topbar-left">
         <button id="sidebarToggle" class="icon-btn" type="button"><i class="bi bi-list"></i></button>
         <nav class="d-flex align-items-center">
-          <span class="breadcrumb-link">Main</span>
+          <span class="breadcrumb-link">System Administration</span>
           <i class="bi bi-chevron-right breadcrumb-sep"></i>
           <span class="breadcrumb-current">User Management</span>
         </nav>
@@ -38,18 +40,19 @@
 
     <div class="page-body">
 
-      <section class="um-command-hero" aria-labelledby="userManagementTitle">
-        <div class="um-command-copy">
-          <span class="um-kicker">System Administration</span>
+      <section class="ap-page-hero" aria-labelledby="userManagementTitle">
+        <i class="bi bi-people-fill ap-hero-watermark" aria-hidden="true"></i>
+        <div class="ap-hero-copy">
+          <span class="ap-eyebrow">System Administration</span>
           <h1 id="userManagementTitle">User Management</h1>
           <p>Keep the care team organized, review account health, and manage permissions from one reliable directory.</p>
-          <div class="um-hero-highlights" aria-label="User management benefits">
+          <div class="ap-hero-highlights" aria-label="User management benefits">
             <span><i class="bi bi-shield-check"></i> Role-based access</span>
             <span><i class="bi bi-person-check"></i> Account oversight</span>
             <span><i class="bi bi-key"></i> Controlled permissions</span>
           </div>
         </div>
-        <div class="um-account-health" aria-label="Account health summary">
+        <aside class="ap-hero-queue um-account-health" aria-label="Account health summary">
           <div class="um-health-heading">
             <span>Account health</span>
             <strong><i class="bi bi-broadcast-pin"></i> Live directory</strong>
@@ -63,7 +66,7 @@
             <i class="bi bi-person-plus-fill"></i>
             <span>Add management user</span>
           </button>
-        </div>
+        </aside>
       </section>
 
       <section class="um-role-overview" aria-labelledby="roleOverviewTitle">
@@ -75,6 +78,10 @@
           <p>Role assignments determine each person’s available tools and responsibilities.</p>
         </div>
         <div class="um-role-grid">
+          <article class="um-role-card">
+            <span class="um-role-icon is-active"><i class="bi bi-person-check-fill"></i></span>
+            <div><strong id="statActiveDirectory">0</strong><span>Active accounts</span></div>
+          </article>
           <article class="um-role-card is-total">
             <span class="um-role-icon"><i class="bi bi-people-fill"></i></span>
             <div><strong id="statTotal">—</strong><span>Total accounts</span></div>
@@ -98,32 +105,44 @@
         </div>
       </section>
 
-      <section class="um-directory-panel" aria-labelledby="directoryTitle">
-        <div class="um-directory-heading">
+      <section class="ap-workflow" aria-labelledby="workflowTitle">
+        <div class="ap-workflow-intro"><span class="ap-section-kicker">Access workflow</span><h2 id="workflowTitle">A clear path from account to audit</h2><p>Every stage keeps access intentional, visible, and accountable.</p></div>
+        <div class="ap-workflow-steps">
+          <div class="ap-workflow-step is-active"><span><i class="bi bi-person-plus"></i></span><small>01</small><strong>Account</strong></div>
+          <div class="ap-workflow-step"><span><i class="bi bi-person-badge"></i></span><small>02</small><strong>Role</strong></div>
+          <div class="ap-workflow-step"><span><i class="bi bi-key"></i></span><small>03</small><strong>Permissions</strong></div>
+          <div class="ap-workflow-step"><span><i class="bi bi-activity"></i></span><small>04</small><strong>Activity</strong></div>
+          <div class="ap-workflow-step"><span><i class="bi bi-toggle-on"></i></span><small>05</small><strong>Status</strong></div>
+          <div class="ap-workflow-step"><span><i class="bi bi-journal-check"></i></span><small>06</small><strong>Audit</strong></div>
+        </div>
+      </section>
+
+      <section class="um-directory-panel ap-records-panel" aria-labelledby="directoryTitle">
+        <div class="um-directory-heading ap-records-heading">
           <div>
-            <span class="um-section-label">Account directory</span>
-            <h2 id="directoryTitle">Manage people and permissions</h2>
+            <span class="um-section-label ap-section-kicker">Account directory</span>
+            <h2 id="directoryTitle">User records</h2>
             <p id="userResultCount">Loading directory…</p>
           </div>
-          <span class="um-directory-legend"><i class="bi bi-info-circle"></i> Select a user to review account details</span>
+          <span class="um-directory-legend ap-records-legend"><i class="bi bi-info-circle"></i> Select a record to review account details</span>
         </div>
 
-        <div class="um-directory-toolbar">
-          <div class="um-tabs-wrap">
-            <span>Account type</span>
-            <div class="um-tabs" role="tablist" aria-label="Account groups">
-              <button class="um-tab active" data-tab="all" role="tab" aria-selected="true">All users <span id="tabAllCount">0</span></button>
-              <button class="um-tab" data-tab="staff" role="tab" aria-selected="false">Care team <span id="tabStaffCount">0</span></button>
-              <button class="um-tab" data-tab="public" role="tab" aria-selected="false">Public <span id="tabPublicCount">0</span></button>
+        <div class="um-directory-toolbar ap-toolbar">
+          <div class="um-tabs-wrap ap-tabs-wrap">
+            <span class="ap-filter-label">Account type</span>
+            <div class="um-tabs ap-tabs" role="tablist" aria-label="Account groups">
+              <button class="um-tab ap-tab active" data-tab="all" role="tab" aria-selected="true">All users <span id="tabAllCount">0</span></button>
+              <button class="um-tab ap-tab" data-tab="staff" role="tab" aria-selected="false">Care team <span id="tabStaffCount">0</span></button>
+              <button class="um-tab ap-tab" data-tab="public" role="tab" aria-selected="false">Public <span id="tabPublicCount">0</span></button>
             </div>
           </div>
-          <div class="um-filter-bar" aria-label="Directory filters">
-          <label class="um-search-field" for="searchUsers">
+          <div class="um-filter-bar ap-filter-toolbar" aria-label="Directory filters">
+          <label class="um-search-field ap-filter-field ap-search-filter" for="searchUsers">
             <i class="bi bi-search"></i>
             <span class="visually-hidden">Search users</span>
             <input type="search" id="searchUsers" placeholder="Search by name or email" autocomplete="off" />
           </label>
-          <label class="um-select-field">
+          <label class="um-select-field ap-filter-field">
             <span>Role</span>
             <select id="filterRole">
               <option value="">All roles</option>
@@ -133,7 +152,7 @@
               <option value="Public">Public</option>
             </select>
           </label>
-          <label class="um-select-field">
+          <label class="um-select-field ap-filter-field">
             <span>Status</span>
             <select id="filterStatus">
               <option value="">All statuses</option>
@@ -149,26 +168,12 @@
               <option value="50">50</option>
             </select>
           </label>
-          <button class="um-clear-filters" id="clearUserFilters" type="button"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
+          <button class="um-clear-filters ap-clear-btn" id="clearUserFilters" type="button"><i class="bi bi-arrow-counterclockwise"></i> Clear</button>
           </div>
         </div>
 
-        <div class="table-responsive um-table-shell" tabindex="0" aria-label="Scrollable user directory">
-          <table class="shelter-table um-user-table" id="userTable">
-            <thead>
-              <tr>
-                <th>User</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Created</th>
-                <th>Last activity</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="userTableBody" aria-live="polite">
-              <tr><td colspan="6" class="um-table-message"><div class="um-spinner"></div></td></tr>
-            </tbody>
-          </table>
+        <div class="animal-record-list user-record-list" id="userTableBody" role="list" aria-live="polite">
+          <div class="ap-record-loading"><div class="um-spinner"></div><span>Loading user accounts…</span></div>
         </div>
         <div class="um-pagination" id="paginationBar"></div>
       </section>

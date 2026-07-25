@@ -1,0 +1,209 @@
+/* User Management — shared visual language with Animal Profiling */
+.ap-list-page.user-management-page .um-account-health {
+  display: block;
+  min-height: 0;
+}
+
+.ap-list-page.user-management-page .um-health-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  padding: 0 0 14px;
+  border-bottom: 1px solid var(--ap-border);
+}
+
+.ap-list-page.user-management-page .um-health-heading > span {
+  color: var(--ap-muted);
+  font-size: .7rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.ap-list-page.user-management-page .um-health-heading strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #187b55;
+  font-size: .72rem;
+}
+
+.ap-list-page.user-management-page .um-health-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 16px 0 12px;
+}
+
+.ap-list-page.user-management-page .um-health-metrics > div {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 4px 8px;
+  padding: 12px;
+  border: 1px solid var(--ap-border);
+  border-radius: 10px;
+  background: #fffaf4;
+}
+
+.ap-list-page.user-management-page .um-health-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #27a775;
+}
+
+.ap-list-page.user-management-page .um-health-dot.is-inactive { background: var(--ap-red); }
+.ap-list-page.user-management-page .um-health-metrics strong { color: var(--ap-ink); font: 800 1.45rem/1 "Outfit", sans-serif; }
+.ap-list-page.user-management-page .um-health-metrics small { grid-column: 1 / -1; color: var(--ap-muted); font-size: .64rem; font-weight: 700; }
+.ap-list-page.user-management-page .um-account-health > p { margin: 0 0 14px; color: var(--ap-muted); font-size: .68rem; }
+
+.ap-list-page.user-management-page .um-add-user-btn {
+  width: 100%;
+  height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 0;
+  border-radius: 11px;
+  color: #fff;
+  background: var(--ap-ink);
+  font: 800 .78rem/1 "Inter", sans-serif;
+}
+
+.ap-list-page.user-management-page .um-add-user-btn:hover { color: #fff; background: var(--ap-red-dark); transform: translateY(-1px); }
+
+.ap-list-page.user-management-page .um-role-overview {
+  position: relative;
+  z-index: 2;
+  width: calc(100% - 44px);
+  margin: -58px auto 30px;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--ap-border);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 16px 38px rgba(71,42,30,.12);
+}
+
+.ap-list-page.user-management-page .um-role-overview .um-section-heading { display: none; }
+
+.ap-list-page.user-management-page .um-role-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0;
+}
+
+.ap-list-page.user-management-page .um-role-card {
+  min-height: 118px;
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  padding: 22px 18px;
+  border: 0;
+  border-right: 1px solid var(--ap-border);
+  border-radius: 0;
+  background: #fff;
+  box-shadow: none;
+}
+
+.ap-list-page.user-management-page .um-role-card:last-child { border-right: 0; }
+.ap-list-page.user-management-page .um-role-card:hover { background: var(--ap-cream-2); transform: none; }
+.ap-list-page.user-management-page .um-role-card.is-total { order: 1; }
+.ap-list-page.user-management-page .um-role-card:has(.is-active) { order: 2; }
+.ap-list-page.user-management-page .um-role-card:has(.is-admin) { order: 3; }
+.ap-list-page.user-management-page .um-role-card:has(.is-staff) { order: 4; }
+.ap-list-page.user-management-page .um-role-card:has(.is-vet) { order: 5; }
+.ap-list-page.user-management-page .um-role-card:has(.is-public) { order: 6; }
+
+.ap-list-page.user-management-page .um-role-icon {
+  flex: 0 0 auto;
+  width: 39px;
+  height: 39px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  color: var(--ap-red);
+  background: #fff0e8;
+}
+
+.ap-list-page.user-management-page .um-role-icon.is-active { color: #b56c00; background: #fff2d3; }
+.ap-list-page.user-management-page .um-role-icon.is-admin { color: #3c607f; background: #edf3f7; }
+.ap-list-page.user-management-page .um-role-icon.is-staff { color: #187b55; background: #e8f5ee; }
+.ap-list-page.user-management-page .um-role-icon.is-vet { color: #b73558; background: #fbeaf0; }
+.ap-list-page.user-management-page .um-role-icon.is-public { color: #68615c; background: #f1eeeb; }
+.ap-list-page.user-management-page .um-role-card > div { min-width: 0; display: grid; }
+.ap-list-page.user-management-page .um-role-card strong { color: var(--ap-ink); font: 800 1.8rem/1 "Outfit", sans-serif; }
+.ap-list-page.user-management-page .um-role-card > div > span { max-width: 105px; margin-top: 5px; color: var(--ap-muted); font-size: .69rem; font-weight: 700; line-height: 1.35; }
+
+.ap-list-page.user-management-page .um-directory-panel { padding: 0; }
+.ap-list-page.user-management-page .um-directory-heading { margin: 0; }
+.ap-list-page.user-management-page .um-directory-toolbar { display: block; }
+.ap-list-page.user-management-page .um-tabs-wrap { display: block; }
+.ap-list-page.user-management-page .um-tabs { display: flex; }
+.ap-list-page.user-management-page .um-tab > span { min-width: 18px; padding: 3px 5px; border-radius: 999px; background: #f1e8df; font: 700 .56rem/1 "DM Mono", monospace; }
+
+.ap-list-page.user-management-page .um-filter-bar {
+  grid-template-columns: minmax(260px, 2fr) minmax(150px, .8fr) minmax(150px, .8fr) minmax(90px, .45fr) auto;
+}
+
+.ap-list-page.user-management-page .um-search-field { position: relative; display: block; }
+.ap-list-page.user-management-page .um-search-field > i { position: absolute; z-index: 1; left: 14px; bottom: 14px; color: #998e87; font-size: .82rem; }
+.ap-list-page.user-management-page .um-page-size-field > span { display: block; margin-bottom: 8px; color: #756b64; font: 800 .64rem/1 "Inter", sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+.ap-list-page.user-management-page .um-page-size-field select { width: 100%; height: 43px; padding: 0 34px 0 13px; border: 1px solid #ddcfc4; border-radius: 10px; color: var(--ap-ink); background: #fff; font: 500 .8rem/1 "Inter", sans-serif; }
+
+.ap-list-page.user-management-page .user-record-avatar {
+  color: #fff;
+  background:
+    radial-gradient(circle at 72% 25%, rgba(255,255,255,.2), transparent 5.5rem),
+    linear-gradient(145deg, color-mix(in srgb, var(--user-avatar-color) 74%, white), var(--user-avatar-color));
+}
+
+.ap-list-page.user-management-page .user-record-avatar span { color: #fff; text-shadow: 0 2px 12px rgba(0,0,0,.12); }
+.ap-list-page.user-management-page .user-record-avatar small { color: rgba(255,255,255,.8); }
+.ap-list-page.user-management-page .animal-record-id { right: 10px; left: 10px; max-width: calc(100% - 20px); }
+
+.ap-list-page.user-management-page .animal-type-badge.role-admin { color: #753236; background: #f8e6e5; border-color: #ecd1d0; }
+.ap-list-page.user-management-page .animal-type-badge.role-staff { color: #17695f; background: #e2f2ef; border-color: #cde6e1; }
+.ap-list-page.user-management-page .animal-type-badge.role-veterinarian { color: #315b87; background: #e7eff8; border-color: #d3e1ef; }
+.ap-list-page.user-management-page .animal-type-badge.role-public { color: #7b4c6c; background: #f5e9f1; border-color: #ead7e4; }
+.ap-list-page.user-management-page .status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 9px; }
+.ap-list-page.user-management-page .status-badge i { font-size: .4rem; }
+.ap-list-page.user-management-page .status-badge.badge-active { color: #187b55; background: #e5f4ec; }
+.ap-list-page.user-management-page .status-badge.badge-inactive { color: var(--ap-red-deep); background: #ffe7df; }
+
+.ap-list-page.user-management-page .user-card-footer-actions { display: grid; grid-template-columns: minmax(0, 1fr) 38px; gap: 8px; }
+.ap-list-page.user-management-page .user-action-menu { position: relative; }
+.ap-list-page.user-management-page .user-menu-trigger { width: 38px; height: 38px; display: grid; place-items: center; border: 1px solid #dfd1c6; border-radius: 8px; color: var(--ap-red-deep); background: #fff; }
+.ap-list-page.user-management-page .user-menu-trigger:hover { color: #fff; border-color: var(--ap-red); background: var(--ap-red); }
+.ap-list-page.user-management-page .user-menu-popover { z-index: 20; right: 0; bottom: calc(100% + 7px); top: auto; min-width: 190px; }
+.ap-list-page.user-management-page .user-record-message { grid-column: 1 / -1; }
+
+@media (max-width: 1280px) {
+  .ap-list-page.user-management-page .um-role-grid { grid-template-columns: repeat(3, 1fr); }
+  .ap-list-page.user-management-page .um-role-card:nth-child(3n) { border-right: 0; }
+  .ap-list-page.user-management-page .um-role-card:nth-child(-n+3) { border-bottom: 1px solid var(--ap-border); }
+  .ap-list-page.user-management-page .um-filter-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ap-list-page.user-management-page .um-search-field { grid-column: 1 / -1; }
+}
+
+@media (max-width: 720px) {
+  .ap-list-page.user-management-page .um-role-overview { width: calc(100% - 20px); }
+  .ap-list-page.user-management-page .um-role-grid { grid-template-columns: repeat(2, 1fr); }
+  .ap-list-page.user-management-page .um-role-card:nth-child(odd) { border-right: 1px solid var(--ap-border); }
+  .ap-list-page.user-management-page .um-role-card:nth-child(even) { border-right: 0; }
+  .ap-list-page.user-management-page .um-role-card:nth-child(-n+4) { border-bottom: 1px solid var(--ap-border); }
+  .ap-list-page.user-management-page .um-filter-bar { grid-template-columns: 1fr; }
+  .ap-list-page.user-management-page .um-search-field { grid-column: auto; }
+}
+
+@media (max-width: 480px) {
+  .ap-list-page.user-management-page .um-role-card { min-height: 104px; padding: 17px 12px; gap: 10px; }
+  .ap-list-page.user-management-page .um-role-icon { width: 34px; height: 34px; }
+  .ap-list-page.user-management-page .um-health-metrics { grid-template-columns: 1fr; }
+}

@@ -248,6 +248,7 @@ function renderStats(summary) {
 
   setStatValue("statTotal", stats.total);
   setStatValue("statActive", stats.active);
+  setStatValue("statActiveDirectory", stats.active);
   setStatValue("statInactive", stats.inactive);
   setStatValue("statAdmins", stats.admins);
   setStatValue("statStaff", stats.staff);
@@ -265,7 +266,7 @@ function setLoading(v) {
 
 function setTableMsg(html) {
   const b = document.getElementById("userTableBody");
-  if (b) b.innerHTML = `<tr><td colspan="6" class="um-table-message">${html}</td></tr>`;
+  if (b) b.innerHTML = `<div class="ap-record-loading user-record-message">${html}</div>`;
 }
 
 /* ── Tabs ────────────────────────────────────────────── */
@@ -381,72 +382,79 @@ function clearUserFilters() {
 
 /* ── Table ───────────────────────────────────────────── */
 function renderTable() {
-  const tbody = document.getElementById("userTableBody");
-  if (!tbody || isLoading) return;
+  const list = document.getElementById("userTableBody");
+  if (!list || isLoading) return;
 
   const start = (currentPage - 1) * pageSize;
-  const page  = filteredUsers.slice(start, start + pageSize);
+  const page = filteredUsers.slice(start, start + pageSize);
 
-  if (!page.length) { setTableMsg("No users found."); return; }
+  if (!page.length) {
+    list.innerHTML = `<div class="ap-empty-state"><span><i class="bi bi-search"></i></span><strong>No matching user accounts</strong><p>Adjust your search or account filters to view more records.</p><button type="button" id="emptyClearUserFilters">Clear all filters</button></div>`;
+    document.getElementById("emptyClearUserFilters")?.addEventListener("click", clearUserFilters);
+    return;
+  }
 
   const roleCfg = {
     Admin: { cls: "role-admin", icon: "bi-shield-fill", label: "Administrator" },
     Staff: { cls: "role-staff", icon: "bi-person-badge-fill", label: "Staff" },
     Veterinarian: { cls: "role-veterinarian", icon: "bi-heart-pulse-fill", label: "Veterinarian" },
-    Public: { cls: "role-public", icon: "bi-person-fill", label: "Public user" }
+    Public: { cls: "role-public", icon: "bi-globe2", label: "Public user" }
   };
 
-  tbody.innerHTML = page.map((u, pageIndex) => {
+  list.innerHTML = page.map((u, pageIndex) => {
     const normalizedRole = getDisplayRole(u.role);
     const rc = roleCfg[normalizedRole] || roleCfg.Public;
     const isPublic = normalizedRole === "Public";
     const isActive = u.status === "Active";
     const dname = displayName(u);
+    const email = u.email || u.id;
+    const permissionCount = isPublic ? 0 : getPermissionsForRole(normalizedRole).length;
     const menuId = `user-actions-${start + pageIndex}`;
     const editAction = !isPublic && can("edit")
       ? `<button type="button" role="menuitem" data-action="edit" data-id="${u.id}"><i class="bi bi-person-gear"></i><span>Change role</span></button>`
       : "";
     const toggleAction = can("delete")
-      ? `<div class="user-action-divider" role="separator"></div>
-         <button type="button" role="menuitem" class="${isActive ? "is-danger" : "is-success"}" data-action="toggle" data-id="${u.id}">
-           <i class="bi ${isActive ? "bi-person-x" : "bi-person-check"}"></i>
-           <span>${isActive ? "Deactivate account" : "Activate account"}</span>
-         </button>`
+      ? `<div class="user-action-divider" role="separator"></div><button type="button" role="menuitem" class="${isActive ? "is-danger" : "is-success"}" data-action="toggle" data-id="${u.id}"><i class="bi ${isActive ? "bi-person-x" : "bi-person-check"}"></i><span>${isActive ? "Deactivate account" : "Activate account"}</span></button>`
       : "";
-    const actions = `
-      <div class="user-action-menu">
-        <button type="button" class="user-menu-trigger" aria-label="Actions for ${dname}" aria-haspopup="menu" aria-expanded="false" aria-controls="${menuId}" data-action="menu">
-          <i class="bi bi-three-dots-vertical"></i>
-        </button>
-        <div class="user-menu-popover" id="${menuId}" role="menu" hidden>
-          <button type="button" role="menuitem" data-action="view" data-id="${u.id}"><i class="bi bi-eye"></i><span>View profile</span></button>
-          ${editAction}
-          ${toggleAction}
-        </div>
-      </div>`;
 
     return `
-      <tr class="${isPublic ? "public-row" : ""}" data-id="${u.id}" tabindex="0" aria-label="Open account details for ${dname}">
-        <td data-label="User"><div class="user-cell"><div class="user-thumb" style="background:${u.color || rndColor()}">${initials(u)}</div><div><div class="user-fullname">${dname}</div><div class="user-id-text">${u.email || u.id}</div></div></div></td>
-        <td data-label="Role"><span class="role-badge ${rc.cls}"><i class="bi ${rc.icon}"></i>${rc.label}</span></td>
-        <td data-label="Status"><span class="status-badge ${isActive ? "badge-active" : "badge-inactive"}"><i class="bi bi-circle-fill"></i>${isActive ? "Active" : "Deactivated"}</span></td>
-        <td data-label="Created"><span class="user-date">${formatCreatedDate(u.createdAt)}</span></td>
-        <td data-label="Last activity"><span class="user-date ${u.lastLogin ? "" : "is-empty"}">${formatLastActivity(u.lastLogin)}</span></td>
-        <td data-label="Actions"><div class="user-row-actions">${actions}</div></td>
-      </tr>`;
+      <article class="animal-record-card user-record-card ${isPublic ? "public-row" : ""}" data-id="${u.id}" role="listitem" tabindex="0" aria-label="Open account details for ${dname}">
+        <div class="animal-record-media user-record-media" style="--user-avatar-color:${u.color || rndColor()}">
+          <div class="animal-record-fallback user-record-avatar"><span>${initials(u)}</span><small>${rc.label}</small></div>
+          <span class="animal-record-id"><i class="bi bi-envelope"></i>${email}</span>
+        </div>
+        <div class="animal-record-content">
+          <div class="animal-record-badges"><span class="animal-type-badge role-badge ${rc.cls}"><i class="bi ${rc.icon}"></i>${rc.label}</span><span class="status-badge ${isActive ? "badge-active" : "badge-inactive"}"><i class="bi bi-circle-fill"></i>${isActive ? "Active" : "Inactive"}</span></div>
+          <div class="animal-record-heading"><div><h3>${dname}</h3><p><i class="bi bi-envelope"></i>${email}</p></div><div class="animal-care-time" aria-label="${permissionCount} assigned permissions"><strong>${permissionCount}</strong><span>permissions</span></div></div>
+          <div class="animal-record-facts">
+            <div class="animal-record-source"><i class="bi bi-person-badge"></i><span><small>Access role</small><strong>${rc.label}</strong></span></div>
+            <div><i class="bi bi-calendar3"></i><span><small>Created</small><strong>${formatCreatedDate(u.createdAt)}</strong></span></div>
+            <div><i class="bi bi-activity"></i><span><small>Last activity</small><strong>${formatLastActivity(u.lastLogin)}</strong></span></div>
+          </div>
+          <div class="animal-record-footer">
+            <div class="animal-record-note"><i class="bi ${isActive ? "bi-shield-check" : "bi-shield-exclamation"}"></i><span>${isActive ? "This account currently has system access." : "This account is inactive and cannot access the system."}</span></div>
+            <div class="user-card-footer-actions">
+              <button class="animal-record-open" type="button" data-action="view" data-id="${u.id}" aria-label="View account for ${dname}"><span>View account details</span><i class="bi bi-arrow-up-right"></i></button>
+              <div class="user-action-menu">
+                <button type="button" class="user-menu-trigger" aria-label="More actions for ${dname}" aria-haspopup="menu" aria-expanded="false" aria-controls="${menuId}" data-action="menu"><i class="bi bi-three-dots-vertical"></i></button>
+                <div class="user-menu-popover" id="${menuId}" role="menu" hidden><button type="button" role="menuitem" data-action="view" data-id="${u.id}"><i class="bi bi-eye"></i><span>View account</span></button>${editAction}${toggleAction}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>`;
   }).join("");
 
-  // Row click
-  tbody.querySelectorAll("tr[data-id]").forEach(row => {
-    row.addEventListener("click", e => {
-      if (e.target.closest("[data-action]")) return;
-      openViewModal(row.dataset.id);
+  list.querySelectorAll(".user-record-card[data-id]").forEach(card => {
+    card.addEventListener("click", event => {
+      if (event.target.closest("[data-action]")) return;
+      openViewModal(card.dataset.id);
     });
-    row.addEventListener("keydown", e => {
-      if (e.key !== "Enter" && e.key !== " ") return;
-      if (e.target.closest("[data-action]")) return;
-      e.preventDefault();
-      openViewModal(row.dataset.id);
+    card.addEventListener("keydown", event => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      if (event.target.closest("[data-action]")) return;
+      event.preventDefault();
+      openViewModal(card.dataset.id);
     });
   });
 
@@ -458,12 +466,12 @@ function renderTable() {
   };
 
   const closeOtherMenus = current => {
-    tbody.querySelectorAll(".user-action-menu").forEach(menuWrap => {
+    list.querySelectorAll(".user-action-menu").forEach(menuWrap => {
       if (menuWrap !== current) closeMenu(menuWrap);
     });
   };
 
-  tbody.querySelectorAll("[data-action]").forEach(btn => {
+  list.querySelectorAll("[data-action]").forEach(btn => {
     btn.addEventListener("click", e => {
       e.stopPropagation();
       const { action, id } = btn.dataset;
@@ -484,7 +492,7 @@ function renderTable() {
     });
   });
 
-  tbody.querySelectorAll(".user-action-menu").forEach(menuWrap => {
+  list.querySelectorAll(".user-action-menu").forEach(menuWrap => {
     menuWrap.addEventListener("focusout", e => {
       if (!menuWrap.contains(e.relatedTarget)) closeMenu(menuWrap);
     });
