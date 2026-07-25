@@ -293,12 +293,14 @@ function openDrawer(id) {
   activeId = id;
   document.querySelectorAll("tr[data-id]").forEach(row => row.classList.toggle("row-active", row.dataset.id === id));
   document.getElementById("srLayout")?.classList.add("drawer-open");
+  document.body.classList.add("management-drawer-open");
   renderDrawer(r);
 }
 
 function closeDrawer() {
   activeId = null;
   document.getElementById("srLayout")?.classList.remove("drawer-open");
+  document.body.classList.remove("management-drawer-open");
   document.querySelectorAll("tr[data-id]").forEach(r => r.classList.remove("row-active"));
 }
 

@@ -3,6 +3,7 @@ import "../../css/pageSkeleton.css";
 
 import Swal from "sweetalert2";
 import { initializeManagementModals } from "./managementModal.js";
+import { initializeManagementConsistency } from "./managementConsistency.js";
 import { clearUserSession, getUserName, getUserRole } from "../../utils/storage.js";
 import { canAccessModule, normalizeRole } from "../../auth/permissions.js";
 import { workspaceSkeletonMarkup } from "./pageSkeleton.js";
@@ -395,6 +396,7 @@ export function loadSidebar() {
   if (!container) return;
 
   initializeManagementModals();
+  initializeManagementConsistency();
 
   const name = getUserName() || "ANIMUA User";
   const role = normalizeRole(getUserRole());

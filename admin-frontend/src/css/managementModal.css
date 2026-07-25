@@ -2,6 +2,13 @@
   --management-modal-width: 56vw;
   --management-modal-radius: 30px;
   --management-modal-shadow: -24px 0 70px rgba(43, 22, 19, 0.24);
+  --management-modal-red: #ef1725;
+  --management-modal-red-dark: #c90f1d;
+  --management-modal-ink: #1f2329;
+  --management-modal-muted: #756b67;
+  --management-modal-line: #eadfd4;
+  --management-modal-cream: #fff9f4;
+  --management-modal-section: #fffcf9;
 }
 
 body.management-modal-open,
@@ -140,4 +147,234 @@ body.management-drawer-open {
   .announcement-modal.management-side-modal .modal-actions {
     margin-inline: -18px !important;
   }
+}
+
+/* Intake is the canonical management modal: these rules give every workflow
+   the same shell, section rhythm, controls and detail presentation. */
+.management-modal-layer > .management-side-modal,
+.aa-drawer,
+.surrender-requests-page .sr-drawer {
+  font-family: "Outfit", sans-serif !important;
+  color: var(--management-modal-ink) !important;
+  background: #fffdfb !important;
+}
+
+.management-side-modal > :is(.um-modal-header, .modal-head),
+.management-side-modal #viewItemModalInner > .drawer-header,
+.aa-drawer .drawer-header,
+.surrender-requests-page .sr-drawer .drawer-header {
+  min-height: 108px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  padding: 25px 34px 22px !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--management-modal-line) !important;
+  background: var(--management-modal-cream) !important;
+}
+
+.management-side-modal :is(.um-modal-header,.modal-head,.drawer-header) > :first-child,
+.aa-drawer .drawer-header-left,
+.surrender-requests-page .drawer-header-left { min-width: 0 !important; flex: 1 !important; }
+
+.management-side-modal :is(.um-modal-header,.modal-head,.drawer-header) :is(h2,h3),
+.aa-drawer .drawer-header h3,
+.surrender-requests-page .drawer-header h3 {
+  margin: 0 !important;
+  color: var(--management-modal-ink) !important;
+  font-family: "Outfit", sans-serif !important;
+  font-size: 1.34rem !important;
+  font-weight: 800 !important;
+  line-height: 1.18 !important;
+}
+
+.management-side-modal :is(.modal-subtitle,.drawer-header p),
+.aa-drawer .drawer-header p,
+.surrender-requests-page .drawer-header p {
+  margin: 5px 0 0 !important;
+  color: var(--management-modal-muted) !important;
+  font-size: .76rem !important;
+  line-height: 1.45 !important;
+}
+
+.management-side-modal :is(.modal-close-btn,.drawer-close-btn),
+.aa-drawer .drawer-close-btn,
+.surrender-requests-page .drawer-close-btn {
+  width: 40px !important;
+  height: 40px !important;
+  flex: 0 0 40px !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  border: 1px solid #e5d8cf !important;
+  border-radius: 50% !important;
+  color: #786a65 !important;
+  background: #fff !important;
+}
+
+.management-side-modal :is(.modal-close-btn,.drawer-close-btn):hover,
+.aa-drawer .drawer-close-btn:hover,
+.surrender-requests-page .drawer-close-btn:hover {
+  border-color: #f0bdb7 !important;
+  color: var(--management-modal-red) !important;
+  background: #fff0ed !important;
+}
+
+.management-side-modal > .um-modal-body,
+.management-side-modal #viewItemModalInner > .drawer-body,
+.aa-drawer .drawer-body,
+.surrender-requests-page .sr-drawer .drawer-body {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  padding: 28px 34px 34px !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  background: #fffdfb !important;
+  scrollbar-width: thin;
+  scrollbar-color: #d9c8bc transparent;
+}
+
+.management-side-modal :is(.form-section,.view-section,.drawer-section),
+.aa-drawer .drawer-section,
+.surrender-requests-page .drawer-section {
+  margin: 0 0 20px !important;
+  padding: 21px !important;
+  border: 1px solid var(--management-modal-line) !important;
+  border-radius: 15px !important;
+  background: var(--management-modal-section) !important;
+  box-shadow: none !important;
+}
+
+.management-side-modal :is(.form-section-title,.view-section-title,.drawer-section-title),
+.aa-drawer .drawer-section-title,
+.surrender-requests-page .drawer-section-title {
+  min-height: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin: 0 0 18px !important;
+  padding: 0 0 13px !important;
+  border-bottom: 1px solid #eee1d7 !important;
+  color: #2b2528 !important;
+  font-family: "Outfit", sans-serif !important;
+  font-size: .82rem !important;
+  font-weight: 800 !important;
+}
+
+.management-side-modal :is(.form-section-title,.drawer-section-title) > i,
+.aa-drawer .drawer-section-title > i,
+.surrender-requests-page .drawer-section-title > i {
+  width: 30px !important;
+  height: 30px !important;
+  display: grid !important;
+  place-items: center !important;
+  margin: -4px 0 !important;
+  border-radius: 50% !important;
+  color: var(--management-modal-red) !important;
+  background: #fff0e8 !important;
+}
+
+.management-side-modal :is(input,select,textarea),
+.aa-drawer :is(input,select,textarea),
+.surrender-requests-page .sr-drawer :is(input,select,textarea) {
+  border: 1px solid #dfd3cb !important;
+  border-radius: 10px !important;
+  color: var(--management-modal-ink) !important;
+  background: #fff !important;
+  font-family: "Outfit", sans-serif !important;
+}
+
+.management-side-modal :is(input,select):not([type="radio"]):not([type="checkbox"]) { min-height: 44px !important; }
+.management-side-modal :is(input,select,textarea):focus { border-color: var(--management-modal-red) !important; box-shadow: 0 0 0 4px rgba(239,23,37,.09) !important; outline: 0 !important; }
+
+.management-side-modal :is(.audit-detail-grid,.archive-detail-grid,.drawer-info-grid,.view-details-grid),
+.aa-drawer .drawer-info-grid,
+.surrender-requests-page .drawer-info-grid { gap: 12px !important; }
+
+.management-side-modal :is(.audit-detail-item,.archive-detail-item,.drawer-info-item,.view-detail-item),
+.aa-drawer .drawer-info-item,
+.surrender-requests-page .drawer-info-item {
+  min-height: 74px !important;
+  padding: 14px 16px !important;
+  border: 1px solid #eee1d8 !important;
+  border-radius: 12px !important;
+  background: #fff !important;
+}
+
+.management-side-modal :is(.audit-detail-label,.archive-detail-label,.drawer-info-lbl,.view-detail-lbl),
+.aa-drawer .drawer-info-lbl,
+.surrender-requests-page .drawer-info-lbl {
+  color: #887a73 !important;
+  font-size: .61rem !important;
+  font-weight: 800 !important;
+  letter-spacing: .06em !important;
+  text-transform: uppercase !important;
+}
+
+.management-side-modal :is(.audit-detail-value,.archive-detail-value,.drawer-info-val,.view-detail-val),
+.aa-drawer .drawer-info-val,
+.surrender-requests-page .drawer-info-val {
+  margin-top: 5px !important;
+  color: #3a3230 !important;
+  font-family: "Outfit", sans-serif !important;
+  font-size: .8rem !important;
+  font-weight: 650 !important;
+  line-height: 1.45 !important;
+}
+
+.management-side-modal > .um-modal-footer,
+.management-side-modal #viewItemModalInner > .drawer-footer,
+.aa-drawer .drawer-footer,
+.surrender-requests-page .sr-drawer .drawer-footer {
+  min-height: 76px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+  padding: 15px 26px !important;
+  border-top: 1px solid var(--management-modal-line) !important;
+  background: var(--management-modal-cream) !important;
+}
+
+.management-side-modal :is(.um-modal-footer,.drawer-footer,.modal-actions) :is(button,.btn),
+.aa-drawer .drawer-footer button,
+.surrender-requests-page .drawer-footer button {
+  min-height: 46px !important;
+  padding: 0 20px !important;
+  border-radius: 999px !important;
+  font-family: "Outfit", sans-serif !important;
+  font-size: .78rem !important;
+  font-weight: 800 !important;
+}
+
+.aa-drawer,
+.surrender-requests-page .sr-drawer {
+  position: fixed !important;
+  inset: 0 0 0 auto !important;
+  z-index: 2500 !important;
+  width: var(--management-modal-width) !important;
+  min-width: 50vw !important;
+  max-width: none !important;
+  max-height: 100dvh !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(255,255,255,.72) !important;
+  border-right: 0 !important;
+  border-radius: var(--management-modal-radius) 0 0 var(--management-modal-radius) !important;
+  box-shadow: var(--management-modal-shadow) !important;
+}
+
+.surrender-requests-page .sr-layout.drawer-open::before {
+  z-index: 2490 !important;
+  background: rgba(30,20,18,.5) !important;
+  -webkit-backdrop-filter: blur(11px) saturate(.88) !important;
+  backdrop-filter: blur(11px) saturate(.88) !important;
+}
+
+@media (max-width: 800px) {
+  .aa-drawer,
+  .surrender-requests-page .sr-drawer { width: 100vw !important; min-width: 100vw !important; border: 0 !important; border-radius: 0 !important; }
+  .management-side-modal > .um-modal-body,
+  .management-side-modal #viewItemModalInner > .drawer-body,
+  .aa-drawer .drawer-body,
+  .surrender-requests-page .sr-drawer .drawer-body { padding: 20px 18px 28px !important; }
 }

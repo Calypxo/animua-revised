@@ -583,7 +583,7 @@ function renderPagination() {
   let h = `<span class="page-info">Showing ${total ? start : 0}–${end} of ${total}</span>`;
   h += `<button class="page-btn" id="pagePrev" ${currentPage === 1 ? "disabled" : ""}><i class="bi bi-chevron-left"></i></button>`;
 
-  for (let i = 1; i <= Math.min(pages, 8); i++) {
+  for (let i = 1; i <= pages; i++) {
     h += `<button class="page-btn ${i === currentPage ? "active" : ""}" data-page="${i}">${i}</button>`;
   }
 
