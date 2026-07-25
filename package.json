@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "build": "npm --prefix admin-frontend install && npm --prefix admin-frontend run build -- --outDir ../dist --emptyOutDir"
+  },
   "dependencies": {
     "firebase": "^12.12.0"
   }
