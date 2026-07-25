@@ -97,7 +97,7 @@ const AVATAR_COLORS = [
   "#1a4e7a",
 ];
 
-let pageSize = 25;
+let pageSize = 10;
 
 /* ── State ───────────────────────────────────────────── */
 let allUsers      = [];
@@ -966,7 +966,7 @@ if (addUserButton) {
     document.getElementById("filterStatus")?.addEventListener("change",applyFilters);
     document.getElementById("clearUserFilters")?.addEventListener("click",clearUserFilters);
     document.getElementById("pageSize")?.addEventListener("change", event => {
-      pageSize = Number.parseInt(event.target.value, 10) || 25;
+      pageSize = Number.parseInt(event.target.value, 10) || 10;
       currentPage = 1;
       renderTable();
       renderPagination();
