@@ -279,17 +279,9 @@
   position: absolute;
   inset: 0;
   z-index: 2;
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: 10px;
-  color: #8a7d76;
-  background:
-    radial-gradient(circle at 100% 0, rgba(255, 185, 30, 0.11), transparent 24rem),
-    var(--cream, #fff9f0);
-  font: 750 0.72rem/1 "Outfit", sans-serif;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  display: flex;
+  overflow: hidden;
+  background: var(--cream, #fff9f0);
   opacity: 0;
   pointer-events: none;
   transition: opacity 140ms ease;
@@ -297,26 +289,8 @@
 
 .persistent-shell-stage.is-navigating .persistent-page-loader { opacity: 1; }
 
-.persistent-loader-mark {
-  width: 46px;
-  height: 46px;
-  display: grid;
-  place-items: center;
-  border-radius: 15px;
-  color: #fff;
-  background: linear-gradient(145deg, #ff4437, var(--sb-red));
-  box-shadow: 0 11px 24px rgba(239, 23, 37, 0.22);
-  font-size: 1rem;
-  animation: persistentPulse 1.1s ease-in-out infinite alternate;
-}
-
 html.animua-embedded-page #sidebar-container { display: none !important; }
 html.animua-embedded-page .shell > .stage { width: 100%; border-left: 0; }
-
-@keyframes persistentPulse {
-  from { transform: scale(0.94); box-shadow: 0 8px 18px rgba(239, 23, 37, 0.18); }
-  to { transform: scale(1.03); box-shadow: 0 14px 28px rgba(239, 23, 37, 0.28); }
-}
 
 #sidebar-container.sidebar-collapsed { width: 78px; min-width: 78px; }
 .sidebar.collapsed { width: 78px; }
@@ -360,5 +334,4 @@ html.animua-embedded-page .shell > .stage { width: 100%; border-left: 0; }
 
 @media (prefers-reduced-motion: reduce) {
   .sidebar, #sidebar-container, .nav-item, .nav-group-toggle, .nav-submenu, .nav-chevron, .persistent-page-frame, .persistent-page-loader { transition-duration: 0.01ms !important; }
-  .persistent-loader-mark { animation: none; }
 }

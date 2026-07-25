@@ -1,8 +1,10 @@
 import "../../css/sidebarRefresh.css";
+import "../../css/pageSkeleton.css";
 
 import Swal from "sweetalert2";
 import { clearUserSession, getUserName, getUserRole } from "../../utils/storage.js";
 import { canAccessModule, normalizeRole } from "../../auth/permissions.js";
+import { workspaceSkeletonMarkup } from "./pageSkeleton.js";
 
 const escapeHtml = (value) => String(value ?? "")
   .replaceAll("&", "&amp;")
@@ -303,7 +305,8 @@ function setupPersistentNavigation(container, sidebar) {
     loader.className = "persistent-page-loader";
     loader.setAttribute("role", "status");
     loader.setAttribute("aria-live", "polite");
-    loader.innerHTML = '<span class="persistent-loader-mark"><i class="bi bi-heart-pulse-fill"></i></span><span>Opening workspace</span>';
+    loader.setAttribute("aria-label", "Loading ANIMUA workspace");
+    loader.innerHTML = workspaceSkeletonMarkup();
 
     frame.addEventListener("load", () => {
       try {
