@@ -21,8 +21,7 @@ let activeTab   = "all";
 /* ══════════════════════════════════════════════════════
    HELPERS
 ══════════════════════════════════════════════════════ */
-const speciesEmoji = s => ({ Dog:"🐶", Cat:"🐱", Rabbit:"🐰", Bird:"🐦" }[s] || "🐾");
-const speciesThumb = s => ({ Dog:"thumb-dog", Cat:"thumb-cat", Rabbit:"thumb-rabbit", Bird:"thumb-bird" }[s] || "thumb-other");
+const speciesInitial = species => String(species || "Animal").charAt(0).toUpperCase();
 
 const statusCfg = {
   Profiling:  { cls:"badge-profiling",  icon:"bi-clipboard2-fill" },
@@ -56,6 +55,24 @@ function daysBadge(days) {
   return `<span class="days-badge ${cls}">${days}d</span>`;
 }
 
+function formatRecordDate(value) {
+  const date = parseDateValue(value);
+  if (!date || isNaN(date)) return "Not recorded";
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+
+function lifecycleMessage(status) {
+  const messages = {
+    Profiling: "Profile details are being completed before quarantine placement.",
+    Quarantine: "Under quarantine and medical monitoring.",
+    Ready: "Cleared for adoption and ready for applicant review.",
+    Adopted: "Placement completed; record retained for post-adoption history.",
+    Fostered: "Currently placed in an approved foster home.",
+    Archived: "This animal record is archived and no longer active.",
+  };
+  return messages[status] || "Open the profile to review the current care stage.";
+}
+
 async function loadAnimals() {
   try {
     const data = await getAllAnimals();
@@ -79,8 +96,10 @@ async function loadAnimals() {
 ══════════════════════════════════════════════════════ */
 function renderStats() {
   const set = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
+  const profilingCount = animals.filter(a=>a.status==="Profiling").length;
   set("statTotal",      animals.length);
-  set("statProfiling",  animals.filter(a=>a.status==="Profiling").length);
+  set("statProfiling",  profilingCount);
+  set("heroProfilingCount", profilingCount);
   set("statQuarantine", animals.filter(a=>a.status==="Quarantine").length);
   set("statReady",      animals.filter(a=>a.status==="Ready").length);
   set("statAdopted",    animals.filter(a=>a.status==="Adopted").length);
@@ -161,6 +180,21 @@ function applyFilters() {
   renderPagination();
 }
 
+function clearAnimalFilters() {
+  ["searchAnimals", "filterSpecies", "filterSex"].forEach(id => {
+    const control = document.getElementById(id);
+    if (control) control.value = "";
+  });
+
+  activeTab = "all";
+  document.querySelectorAll(".ap-tab").forEach(tab => {
+    const selected = tab.dataset.tab === "all";
+    tab.classList.toggle("active", selected);
+    tab.setAttribute("aria-selected", String(selected));
+  });
+  applyFilters();
+}
+
 /* ══════════════════════════════════════════════════════
    TABLE
 ══════════════════════════════════════════════════════ */
@@ -172,71 +206,67 @@ function renderTable() {
   const page = filtered.slice(start, start + PAGE_SIZE);
 
   if (!page.length) {
-    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-muted">No animals found.</td></tr>`;
+    tbody.innerHTML = `<div class="ap-empty-state"><span><i class="bi bi-search"></i></span><strong>No matching animal profiles</strong><p>Adjust your search or lifecycle filters to view more records.</p><button type="button" id="emptyClearAnimalFilters">Clear all filters</button></div>`;
+    document.getElementById("emptyClearAnimalFilters")?.addEventListener("click", clearAnimalFilters);
     return;
   }
 
   tbody.innerHTML = page.map(a => {
     const days = daysSince(a.intakeDate);
+    const displayLabel = animalDisplayLabel(a);
+    const housingLabel = a.cageNumber
+      ? `Cage ${a.cageNumber}`
+      : a.housingType || "Unassigned";
     return `
-    <tr data-id="${a.id || ""}">
-      <td>
-        <div class="animal-cell">
-          <div class="animal-thumb">
-            ${
-              a.photoURL
-                ? `<img src="${a.photoURL}" alt="${animalDisplayLabel(a)}" class="animal-thumb-img">`
-                : `<div class="animal-thumb-fallback">${
-                    a.species === "Dog" ? "🐶" :
-                    a.species === "Cat" ? "🐱" :
-                    "🐾"
-                  }</div>`
-            }
-          </div>
-
-          <div class="animal-meta">
-            <div class="animal-name">${animalDisplayLabel(a)}</div>
-            <div class="animal-id">${a.id}</div>
-          </div>
+    <article class="animal-record-card" data-id="${a.id || ""}" role="listitem" tabindex="0" aria-label="Open profile for ${displayLabel}">
+      <div class="animal-record-media">
+        ${a.photoURL
+          ? `<img src="${a.photoURL}" alt="${displayLabel}" class="animal-record-photo">`
+          : `<div class="animal-record-fallback"><span>${speciesInitial(a.species)}</span><small>${a.species || "Animal"}</small></div>`}
+        <span class="animal-record-id"><i class="bi bi-upc-scan"></i>${a.id || "No ID"}</span>
+      </div>
+      <div class="animal-record-content">
+        <div class="animal-record-badges">
+          <span class="animal-type-badge"><i class="bi bi-tag"></i>${a.species || "Unknown"} / ${a.breed || "Unknown breed"}</span>
+          ${statusBadge(a.status)}
         </div>
-      </td>
-      <td>
-        <div style="font-weight:600;font-size:0.84rem">${a.species || "Unknown"}</div>
-        <div style="font-size:0.76rem;color:var(--stone)">${a.breed || "Unknown"}</div>
-      </td>
-      <td>
-        <div style="font-size:0.84rem;font-weight:600">${a.sex || "Unknown"}</div>
-        <div style="font-size:0.76rem;color:var(--stone)">${a.ageEstimate || "—"}</div>
-      </td>
-      <td>
-        <span class="source-badge ${
-          a.source === "Rescue"
-            ? "source-rescue"
-            : a.source === "Barangay Impound"
-            ? "source-barangay"
-            : "source-surrender"
-        }">
-          ${a.source || "Unknown"}
-        </span>
-      </td>
-      <td>${daysBadge(days)}</td>
-      <td>${statusBadge(a.status)}</td>
-      <td>
-        <button class="tbl-action-btn" title="View Profile" data-id="${a.id || ""}">
-          <i class="bi bi-arrow-right-short" style="font-size:1.1rem"></i>
-        </button>
-      </td>
-    </tr>`;
+
+        <div class="animal-record-heading">
+          <div>
+            <h3>${displayLabel}</h3>
+            <p><i class="bi bi-gender-ambiguous"></i>${a.sex || "Unknown sex"}<span>·</span>${a.ageEstimate || "Age unknown"}</p>
+          </div>
+          <div class="animal-care-time" aria-label="${days} days in care"><strong>${days}</strong><span>days in care</span></div>
+        </div>
+
+        <div class="animal-record-facts">
+          <div class="animal-record-source"><i class="bi bi-box-arrow-in-down"></i><span><small>Intake source</small><strong>${a.source || "Unknown"}</strong></span></div>
+          <div><i class="bi bi-calendar3"></i><span><small>Intake date</small><strong>${formatRecordDate(a.intakeDate)}</strong></span></div>
+          <div><i class="bi bi-door-open"></i><span><small>Current housing</small><strong>${housingLabel}</strong></span></div>
+        </div>
+
+        <div class="animal-record-footer">
+          <div class="animal-record-note"><i class="bi bi-info-circle"></i><span>${lifecycleMessage(a.status)}</span></div>
+          <button class="animal-record-open" type="button" aria-label="View profile for ${displayLabel}" data-id="${a.id || ""}"><span>View complete profile</span><i class="bi bi-arrow-up-right"></i></button>
+        </div>
+      </div>
+    </article>`;
   }).join("");
 
-  tbody.querySelectorAll("tr[data-id]").forEach(row => {
-    row.addEventListener("click", () => {
-      if (!row.dataset.id) return;
-      window.location.href = `/pages/animalProfile.html?id=${row.dataset.id}`;
+  tbody.querySelectorAll(".animal-record-card[data-id]").forEach(card => {
+    const openProfile = () => {
+      if (!card.dataset.id) return;
+      window.location.href = `/pages/animalProfile.html?id=${card.dataset.id}`;
+    };
+    card.addEventListener("click", openProfile);
+    card.addEventListener("keydown", event => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      openProfile();
     });
   });
 
-  tbody.querySelectorAll("[data-id]").forEach(btn => {
+  tbody.querySelectorAll(".animal-record-open[data-id]").forEach(btn => {
     btn.addEventListener("click", e => {
       e.stopPropagation();
       if (!btn.dataset.id) return;
@@ -308,8 +338,12 @@ async function init() {
 
     document.querySelectorAll(".ap-tab").forEach(btn => {
       btn.addEventListener("click", () => {
-        document.querySelectorAll(".ap-tab").forEach(t => t.classList.remove("active"));
+        document.querySelectorAll(".ap-tab").forEach(t => {
+          t.classList.remove("active");
+          t.setAttribute("aria-selected", "false");
+        });
         btn.classList.add("active");
+        btn.setAttribute("aria-selected", "true");
         activeTab = btn.dataset.tab;
         applyFilters();
       });
@@ -318,6 +352,7 @@ async function init() {
     document.getElementById("searchAnimals")?.addEventListener("input", applyFilters);
     document.getElementById("filterSpecies")?.addEventListener("change", applyFilters);
     document.getElementById("filterSex")?.addEventListener("change", applyFilters);
+    document.getElementById("clearAnimalFilters")?.addEventListener("click", clearAnimalFilters);
 
     document.body.classList.remove("loading");
   } catch (err) {

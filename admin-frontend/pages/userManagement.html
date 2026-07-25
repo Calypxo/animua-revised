@@ -6,12 +6,12 @@
   <title>ANIMUA — User Management</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/src/css/adminDashboard.css" />
   <link rel="stylesheet" href="/src/css/sidebar.css" />
   <link rel="stylesheet" href="/src/css/userManagement.css" />
 </head>
-<body class="loading">
+<body class="loading user-management-page">
 <div class="shell">
   <div id="sidebar-container"></div>
   <div class="stage">
@@ -38,105 +38,140 @@
 
     <div class="page-body">
 
-      <!-- Page header -->
-      <div class="page-header mb-4">
-        <div>
-          <h1 class="page-title">User Management</h1>
-         <p class="page-sub">Manage all system accounts — Administrators, Staff, Veterinarians, and registered Public users.</p>
+      <section class="um-command-hero" aria-labelledby="userManagementTitle">
+        <div class="um-command-copy">
+          <span class="um-kicker">System Administration</span>
+          <h1 id="userManagementTitle">User Management</h1>
+          <p>Keep the care team organized, review account health, and manage permissions from one reliable directory.</p>
+          <div class="um-hero-highlights" aria-label="User management benefits">
+            <span><i class="bi bi-shield-check"></i> Role-based access</span>
+            <span><i class="bi bi-person-check"></i> Account oversight</span>
+            <span><i class="bi bi-key"></i> Controlled permissions</span>
+          </div>
         </div>
-        <button class="btn-primary-clay" id="btnAddUser" type="button">
-          <i class="bi bi-person-plus-fill"></i> Add Management User
-        </button>
-      </div>
+        <div class="um-account-health" aria-label="Account health summary">
+          <div class="um-health-heading">
+            <span>Account health</span>
+            <strong><i class="bi bi-broadcast-pin"></i> Live directory</strong>
+          </div>
+          <div class="um-health-metrics">
+            <div><span class="um-health-dot is-active"></span><strong id="statActive">—</strong><small>Active accounts</small></div>
+            <div><span class="um-health-dot is-inactive"></span><strong id="statInactive">—</strong><small>Inactive accounts</small></div>
+          </div>
+          <p><i class="bi bi-info-circle"></i> Status changes immediately affect system access.</p>
+          <button class="um-add-user-btn" id="btnAddUser" type="button">
+            <i class="bi bi-person-plus-fill"></i>
+            <span>Add management user</span>
+          </button>
+        </div>
+      </section>
 
-      <!-- Stats strip — 6 cards -->
-      <div class="um-stats mb-4">
-        <div class="um-stat-card">
-          <div class="um-stat-icon icon-clay"><i class="bi bi-people-fill"></i></div>
-          <div><div class="um-stat-val" id="statTotal">—</div><div class="um-stat-lbl">Total Users</div></div>
-        </div>
-        <div class="um-stat-card">
-          <div class="um-stat-icon icon-green"><i class="bi bi-person-check-fill"></i></div>
-          <div><div class="um-stat-val" id="statActive">—</div><div class="um-stat-lbl">Active</div></div>
-        </div>
-        <div class="um-stat-card">
-          <div class="um-stat-icon icon-stone"><i class="bi bi-person-dash-fill"></i></div>
-          <div><div class="um-stat-val" id="statInactive">—</div><div class="um-stat-lbl">Inactive</div></div>
-        </div>
-        <div class="um-stat-card">
-          <div class="um-stat-icon icon-blue"><i class="bi bi-shield-lock-fill"></i></div>
-          <div><div class="um-stat-val" id="statAdmins">—</div><div class="um-stat-lbl">Administrators</div></div>
-        </div>
-        <div class="um-stat-card">
-          <div class="um-stat-icon icon-amber"><i class="bi bi-person-badge-fill"></i></div>
-          <div><div class="um-stat-val" id="statStaff">—</div><div class="um-stat-lbl">Staff</div></div>
-        </div>
-        <div class="um-stat-card">
-        <div class="um-stat-icon icon-teal">
-          <i class="bi bi-heart-pulse-fill"></i>
-        </div>
-        <div>
-          <div class="um-stat-val" id="statVeterinarians">—</div>
-          <div class="um-stat-lbl">Veterinarians</div>
-        </div>
-      </div>
-        <div class="um-stat-card">
-          <div class="um-stat-icon icon-rose"><i class="bi bi-person-heart-fill"></i></div>
-          <div><div class="um-stat-val" id="statPublic">—</div><div class="um-stat-lbl">Public Users</div></div>
-        </div>
-      </div>
-
-      <!-- Table panel -->
-      <div class="panel">
-        <div class="panel-head">
+      <section class="um-role-overview" aria-labelledby="roleOverviewTitle">
+        <div class="um-section-heading">
           <div>
-            <!-- Tabs -->
-            <div class="um-tabs">
-              <button class="um-tab active" data-tab="all">All Users</button>
-              <button class="um-tab" data-tab="staff">Management Users</button>
-              <button class="um-tab" data-tab="public">Public Users</button>
+            <span>Directory composition</span>
+            <h2 id="roleOverviewTitle">Who has access</h2>
+          </div>
+          <p>Role assignments determine each person’s available tools and responsibilities.</p>
+        </div>
+        <div class="um-role-grid">
+          <article class="um-role-card is-total">
+            <span class="um-role-icon"><i class="bi bi-people-fill"></i></span>
+            <div><strong id="statTotal">—</strong><span>Total accounts</span></div>
+          </article>
+          <article class="um-role-card">
+            <span class="um-role-icon is-admin"><i class="bi bi-shield-lock-fill"></i></span>
+            <div><strong id="statAdmins">—</strong><span>Administrators</span></div>
+          </article>
+          <article class="um-role-card">
+            <span class="um-role-icon is-staff"><i class="bi bi-person-badge-fill"></i></span>
+            <div><strong id="statStaff">—</strong><span>Shelter staff</span></div>
+          </article>
+          <article class="um-role-card">
+            <span class="um-role-icon is-vet"><i class="bi bi-heart-pulse-fill"></i></span>
+            <div><strong id="statVeterinarians">—</strong><span>Veterinarians</span></div>
+          </article>
+          <article class="um-role-card">
+            <span class="um-role-icon is-public"><i class="bi bi-globe2"></i></span>
+            <div><strong id="statPublic">—</strong><span>Public users</span></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="um-directory-panel" aria-labelledby="directoryTitle">
+        <div class="um-directory-heading">
+          <div>
+            <span class="um-section-label">Account directory</span>
+            <h2 id="directoryTitle">Manage people and permissions</h2>
+            <p id="userResultCount">Loading directory…</p>
+          </div>
+          <span class="um-directory-legend"><i class="bi bi-info-circle"></i> Select a user to review account details</span>
+        </div>
+
+        <div class="um-directory-toolbar">
+          <div class="um-tabs-wrap">
+            <span>Account type</span>
+            <div class="um-tabs" role="tablist" aria-label="Account groups">
+              <button class="um-tab active" data-tab="all" role="tab" aria-selected="true">All users <span id="tabAllCount">0</span></button>
+              <button class="um-tab" data-tab="staff" role="tab" aria-selected="false">Care team <span id="tabStaffCount">0</span></button>
+              <button class="um-tab" data-tab="public" role="tab" aria-selected="false">Public <span id="tabPublicCount">0</span></button>
             </div>
           </div>
-          <div class="um-filters">
-            <div class="search-pill-sm">
-              <i class="bi bi-search"></i>
-              <input type="text" id="searchUsers" placeholder="Search name, email…" autocomplete="off" />
-            </div>
-            <select class="filter-select" id="filterRole">
+          <div class="um-filter-bar" aria-label="Directory filters">
+          <label class="um-search-field" for="searchUsers">
+            <i class="bi bi-search"></i>
+            <span class="visually-hidden">Search users</span>
+            <input type="search" id="searchUsers" placeholder="Search by name or email" autocomplete="off" />
+          </label>
+          <label class="um-select-field">
+            <span>Role</span>
+            <select id="filterRole">
               <option value="">All roles</option>
               <option value="Admin">Administrator</option>
               <option value="Staff">Staff</option>
               <option value="Veterinarian">Veterinarian</option>
               <option value="Public">Public</option>
             </select>
-            <select class="filter-select" id="filterStatus">
-              <option value="">All status</option>
+          </label>
+          <label class="um-select-field">
+            <span>Status</span>
+            <select id="filterStatus">
+              <option value="">All statuses</option>
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
             </select>
+          </label>
+          <label class="um-select-field um-page-size-field">
+            <span>Rows</span>
+            <select id="pageSize" aria-label="Rows per page">
+              <option value="10">10</option>
+              <option value="25" selected>25</option>
+              <option value="50">50</option>
+            </select>
+          </label>
+          <button class="um-clear-filters" id="clearUserFilters" type="button"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
           </div>
         </div>
 
-        <div class="table-responsive">
-          <table class="shelter-table" id="userTable">
+        <div class="table-responsive um-table-shell" tabindex="0" aria-label="Scrollable user directory">
+          <table class="shelter-table um-user-table" id="userTable">
             <thead>
               <tr>
                 <th>User</th>
-                <th>Email</th>
                 <th>Role</th>
-                <th>Permissions / Info</th>
-                <th>Last Login</th>
                 <th>Status</th>
+                <th>Created</th>
+                <th>Last activity</th>
                 <th>Actions</th>
               </tr>
             </thead>
-            <tbody id="userTableBody">
-              <tr><td colspan="7" class="text-center py-5 text-muted">Loading users…</td></tr>
+            <tbody id="userTableBody" aria-live="polite">
+              <tr><td colspan="6" class="um-table-message"><div class="um-spinner"></div></td></tr>
             </tbody>
           </table>
         </div>
         <div class="um-pagination" id="paginationBar"></div>
-      </div>
+      </section>
 
     </div><!-- /page-body -->
   </div><!-- /stage -->

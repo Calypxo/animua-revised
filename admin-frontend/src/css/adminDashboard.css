@@ -961,3 +961,120 @@ button { font: inherit; cursor: pointer; border: none; background: none; }
   outline:3px solid rgba(111,25,28,.2);
   outline-offset:2px;
 }
+
+/* Shared admin header sizing */
+:root {
+  --admin-topbar-height: 68px;
+  --admin-page-header-height: 76px;
+  --admin-page-title-size: 1.75rem;
+  --admin-workspace-header-height: 300px;
+}
+
+.topbar {
+  width: 100%;
+  height: var(--admin-topbar-height) !important;
+  min-height: var(--admin-topbar-height);
+  padding: 0 28px !important;
+  align-items: center !important;
+  box-sizing: border-box;
+}
+
+.topbar-left,
+.topbar-right {
+  min-width: 0;
+  height: 100%;
+  align-items: center;
+}
+
+.topbar .icon-btn {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+}
+
+.topbar .user-chip {
+  min-height: 48px;
+  box-sizing: border-box;
+}
+
+.topbar .user-avatar {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+}
+
+.page-header:not(.intake-hero):not(.surrender-hero),
+.account-header {
+  min-height: var(--admin-page-header-height);
+  align-items: center !important;
+  margin-bottom: 24px !important;
+  box-sizing: border-box;
+}
+
+.page-header:not(.intake-hero):not(.surrender-hero) .page-title,
+.account-header h1 {
+  margin-bottom: 6px !important;
+  font-size: var(--admin-page-title-size) !important;
+  font-weight: 800 !important;
+  line-height: 1.1 !important;
+  letter-spacing: -.025em !important;
+}
+
+.page-header:not(.intake-hero):not(.surrender-hero) .page-sub,
+.account-header p {
+  margin-top: 0 !important;
+  font-size: .875rem !important;
+  line-height: 1.5 !important;
+}
+
+:is(.intake-hero, .ap-page-hero, .um-command-hero, .surrender-hero) {
+  min-height: var(--admin-workspace-header-height) !important;
+  padding-top: 46px !important;
+  padding-bottom: 92px !important;
+  border-radius: 24px !important;
+  box-sizing: border-box;
+}
+
+:is(.intake-hero .page-title, .ap-page-hero h1, .um-command-hero h1, .surrender-hero .page-title) {
+  font-size: clamp(2.45rem, 4vw, 4.3rem) !important;
+  font-weight: 800 !important;
+  line-height: .98 !important;
+  letter-spacing: -.045em !important;
+}
+
+@media (max-width: 768px) {
+  :root {
+    --admin-topbar-height: 64px;
+    --admin-page-header-height: 68px;
+    --admin-page-title-size: 1.55rem;
+  }
+
+  .topbar {
+    padding: 0 14px 0 68px !important;
+  }
+
+  .topbar .user-chip { min-height: 42px; }
+  .topbar .user-avatar { width: 32px; height: 32px; flex-basis: 32px; }
+
+  :is(.intake-hero, .ap-page-hero, .um-command-hero, .surrender-hero) {
+    min-height: 0 !important;
+    padding-top: 28px !important;
+    padding-bottom: 58px !important;
+    border-radius: 16px !important;
+  }
+
+  :is(.intake-hero .page-title, .ap-page-hero h1, .um-command-hero h1, .surrender-hero .page-title) {
+    font-size: 2.375rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .topbar {
+    padding-right: 10px !important;
+  }
+
+  .page-header:not(.intake-hero):not(.surrender-hero),
+  .account-header {
+    min-height: 0;
+  }
+}

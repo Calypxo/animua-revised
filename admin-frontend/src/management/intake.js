@@ -43,7 +43,7 @@ let currentRole = "";
 /* ══════════════════════════════════════════════════════
    HELPERS
 ══════════════════════════════════════════════════════ */
-const speciesEmoji = s => ({ Dog:"🐶", Cat:"🐱", Rabbit:"🐰", Bird:"🐦" }[s] || "🐾");
+const speciesInitial = s => String(s || "Animal").charAt(0).toUpperCase();
 const speciesThumb = s => ({ Dog:"thumb-dog", Cat:"thumb-cat", Rabbit:"thumb-rabbit", Bird:"thumb-bird" }[s] || "thumb-other");
 
 const sourceCfg = {
@@ -115,8 +115,10 @@ function intakeLabel(record = {}) {
 ══════════════════════════════════════════════════════ */
 function renderStats() {
   const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  const pendingCount = intakeRecords.filter(r => r.status === "Pending").length;
   set("statAll",       intakeRecords.length);
-  set("statPending",   intakeRecords.filter(r => r.status === "Pending").length);
+  set("statPending",   pendingCount);
+  set("heroPendingCount", pendingCount);
   set("statApproved",  intakeRecords.filter(r => r.status === "Approved").length);
   set("statConverted", intakeRecords.filter(r => r.status === "Converted").length);
   set("statRejected",  intakeRecords.filter(r => r.status === "Rejected").length);
@@ -207,10 +209,10 @@ function renderTable() {
 
     return `
     <tr style="cursor:pointer" data-id="${r.id}">
-      <td data-label="Intake ID" style="font-family:var(--mono);font-size:0.76rem;color:var(--stone)">${r.id}</td>
+      <td data-label="Intake ID" class="intake-code">${r.id}</td>
       <td data-label="Animal">
         <div class="animal-cell">
-          <div class="animal-thumb ${speciesThumb(r.species)}">${speciesEmoji(r.species)}</div>
+          <div class="animal-thumb ${speciesThumb(r.species)}" aria-hidden="true">${speciesInitial(r.species)}</div>
           <div>
             <div class="animal-name">${intakeLabel(r)}</div>
             <div class="animal-sub">${r.species}${r.breed ? " · " + r.breed : ""}</div>
@@ -219,8 +221,8 @@ function renderTable() {
       </td>
       <td data-label="Source">${sourceBadge(r.source)}</td>
       <td data-label="Condition">${condBadge(r.condition)}</td>
-      <td data-label="Encoded by" style="font-size:0.83rem;color:var(--stone)">${r.encodedBy}</td>
-      <td data-label="Date" style="font-family:var(--mono);font-size:0.76rem;color:var(--stone)">${formatDate(r.intakeDate)}</td>
+      <td data-label="Encoded by" class="encoded-by">${r.encodedBy}</td>
+      <td data-label="Date" class="intake-date">${formatDate(r.intakeDate)}</td>
       <td data-label="Status">${statusBadge(r.status)}</td>
       <td data-label="Actions" class="table-actions">
         <button class="tbl-action-btn" title="View Details" aria-label="View ${r.id}" data-action="view" data-id="${r.id}">
@@ -823,7 +825,7 @@ function openViewModal(id) {
     <div class="intake-id-header">
       <span class="intake-id-badge">${r.id}</span>
       <div>
-        <div class="intake-animal-name">${intakeLabel(r)} &nbsp; ${speciesEmoji(r.species)}</div>
+        <div class="intake-animal-name">${intakeLabel(r)}</div>
         <div class="intake-animal-meta">${r.species}${r.breed ? " · " + r.breed : ""} · ${r.sex}</div>
       </div>
       <div class="ms-auto d-flex gap-2 flex-wrap">

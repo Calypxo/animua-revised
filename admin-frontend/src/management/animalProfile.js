@@ -60,7 +60,7 @@ let editingMedId = null;
 let currentRole = "";
 let medicalInventoryItems = [];
 
-const speciesEmoji = s => ({ Dog: "🐶", Cat: "🐱", Rabbit: "🐰", Bird: "🐦" }[s] || "🐾");
+const speciesInitial = species => String(species || "Animal").charAt(0).toUpperCase();
 
 function animalDisplayLabel(record = animal || {}) {
   const legacyName = String(record.name || "").trim();
@@ -218,24 +218,18 @@ function renderHero() {
   const profilePhotoEl = document.getElementById("profilePhoto");
   profilePhotoEl.innerHTML = animal.photoURL
     ? `<img src="${animal.photoURL}" alt="${displayLabel}" />`
-    : speciesEmoji(animal.species);
+    : `<span class="profile-photo-initial" aria-label="${animal.species || "Animal"}">${speciesInitial(animal.species)}</span>`;
 
   document.getElementById("profileMeta").innerHTML = `
-    <span><i class="bi bi-tag-fill" style="color:var(--clay)"></i> ${animal.id}</span>
-    <span>·</span>
-    <span>${animal.species} · ${animal.breed || "Unknown breed"}</span>
-    <span>·</span>
-    <span>${animal.sex}</span>
-    <span>·</span>
-    <span>${animal.ageEstimate || "Age unknown"}</span>
-    <span>·</span>
-    <span>${daysSince(animal.intakeDate)}d in shelter</span>`;
+    <div class="profile-meta-item"><span>Record ID</span><strong><i class="bi bi-upc-scan"></i>${animal.id}</strong></div>
+    <div class="profile-meta-item"><span>Animal</span><strong>${animal.species || "Unknown"} · ${animal.breed || "Unknown breed"}</strong></div>
+    <div class="profile-meta-item"><span>Sex & age</span><strong>${animal.sex || "Unknown"} · ${animal.ageEstimate || "Age unknown"}</strong></div>
+    <div class="profile-meta-item"><span>Time in care</span><strong>${daysSince(animal.intakeDate)} days</strong></div>`;
 
-  const sc = statusCfg[animal.status] || statusCfg.Profiling;
   document.getElementById("profileTags").innerHTML = `
-    <span class="profile-tag" style="background:${sc.bg};color:${sc.color}">${animal.status}</span>
-    <span class="profile-tag" style="background:var(--cream-2);color:var(--stone)">${animal.source}</span>
-    <span class="profile-tag" style="background:var(--cream-2);color:var(--stone)">${animal.color || "Unknown color"}</span>`;
+    <span class="profile-tag"><i class="bi bi-box-arrow-in-down"></i>${animal.source || "Source unknown"}</span>
+    <span class="profile-tag"><i class="bi bi-palette"></i>${animal.color || "Color not recorded"}</span>
+    <span class="profile-tag"><i class="bi bi-door-open"></i>${animal.cageNumber || animal.housingType || "Housing unassigned"}</span>`;
 
   const btn = document.getElementById("btnStatusChange");
 
@@ -359,7 +353,7 @@ function renderOverviewTab() {
     `<div class="info-item"><div class="info-lbl">${lbl}</div><div class="info-val">${val || "—"}</div></div>`;
 
   document.getElementById("basicInfoGrid").innerHTML = `
-    ${infoField("Animal ID", `<span style="font-family:var(--mono);font-size:0.82rem">${animal.id}</span>`)}
+    ${infoField("Animal ID", `<span class="record-code">${animal.id}</span>`)}
     ${infoField("Shelter Description", animalDisplayLabel())}
     ${infoField("Species", animal.species)}
     ${infoField("Breed", animal.breed || "Unknown")}
@@ -385,7 +379,7 @@ function renderOverviewTab() {
     ${infoField("Spay / Neuter Status", animal.alteredStatus || "Unknown")}
     ${infoField("Visible Defects / Features", animal.visibleDefects || "None recorded")}
     ${infoField("Known Previous Name", animal.previousName || "None recorded")}
-    ${infoField("Condition Notes", animal.conditionNotes ? `<span style="font-size:0.84rem;color:var(--stone)">${animal.conditionNotes}</span>` : "None recorded")}`;
+    ${infoField("Condition Notes", animal.conditionNotes ? `<span class="record-note">${animal.conditionNotes}</span>` : "None recorded")}`;
     
 }
 
@@ -410,7 +404,7 @@ if (addMedicalButton) {
     <div class="behavioral-empty">
       <i class="bi bi-shield-plus"></i>
       <p>This animal has not entered quarantine yet.</p>
-      <p style="font-size:0.82rem;color:var(--stone-2)">
+      <p class="empty-state-detail">
         Complete the basic profile and select
         “Send to Quarantine” before adding medical records.
       </p>
@@ -516,10 +510,10 @@ function renderBehavioralTab() {
     lbl.textContent = "Add Assessment";
     el.innerHTML = `
       <div class="behavioral-empty">
-        <i class="bi bi-cpu"></i>
+        <i class="bi bi-sliders"></i>
         <p>No behavioral assessment recorded yet.</p>
-        <p style="font-size:0.82rem;color:var(--stone-2)">
-          Record the animal's behavioral dimensions for compatibility matching.
+        <p class="empty-state-detail">
+          Record observed behavior to support responsible adopter matching.
         </p>
       </div>`;
     return;
@@ -538,11 +532,11 @@ function renderBehavioralTab() {
             Assessed by ${animal.behavioralAssessor || "Staff"} ·
             ${formatDate(animal.behavioralDate || animal.intakeDate)}
           </p>
-          <p style="margin-top:6px;font-size:0.82rem;color:var(--ink-3)">
+          <p class="behavioral-summary">
             ${traitCount} behavioral dimensions scored on a 1–5 scale.
           </p>
           ${animal.behavioralNotes
-            ? `<p style="margin-top:6px;font-size:0.82rem;color:var(--ink-3)">"${animal.behavioralNotes}"</p>`
+            ? `<p class="behavioral-note">${animal.behavioralNotes}</p>`
             : ""}
         </div>
       </div>
@@ -572,11 +566,11 @@ function renderAdoptionTab() {
   if (animal.status === "Adopted") {
     btn.style.display = "none";
     el.innerHTML = `
-      <div class="adoption-ready-banner" style="background:var(--rose-soft);border-color:rgba(155,44,78,0.2)">
-        <i class="bi bi-balloon-heart-fill" style="color:var(--rose)"></i>
+      <div class="adoption-ready-banner is-adopted">
+        <i class="bi bi-balloon-heart-fill"></i>
         <div>
-          <h4 style="color:var(--rose)">Animal Adopted!</h4>
-          <p style="color:#6b1432">This animal has found their forever home.</p>
+          <h4>Adoption completed</h4>
+          <p>This record has moved into post-adoption care.</p>
         </div>
       </div>
       <div class="adoption-status-card">
@@ -603,7 +597,7 @@ function renderAdoptionTab() {
       <div class="qs-grid">
         <div class="qs-item"><div class="qs-lbl">Behavioral Dimensions</div><div class="qs-val">${countScoredTraits(animal.behavioralAssessment)} recorded</div></div>
         <div class="qs-item"><div class="qs-lbl">Days Waiting</div><div class="qs-val">${daysSince(animal.intakeDate)}d</div></div>
-        <div class="qs-item"><div class="qs-lbl">Behavioral Assessment</div><div class="qs-val">${animal.behavioralAssessment ? "✓ Complete" : "✗ Pending"}</div></div>
+        <div class="qs-item"><div class="qs-lbl">Behavioral Assessment</div><div class="qs-val"><span class="readiness-value ${animal.behavioralAssessment ? "is-complete" : "is-pending"}"><i class="bi ${animal.behavioralAssessment ? "bi-check-circle-fill" : "bi-clock-fill"}"></i>${animal.behavioralAssessment ? "Complete" : "Pending"}</span></div></div>
       </div>
     </div>
     <div class="mt-3">
@@ -660,28 +654,28 @@ btn.style.display = canMarkReady ? "" : "none";
   el.innerHTML = `
     <div class="adoption-status-card">
       <div class="qs-title mb-3"><i class="bi bi-info-circle-fill"></i> Adoption Readiness</div>
-      <div class="qs-grid" style="margin-bottom:16px">
+      <div class="qs-grid readiness-grid">
         <div class="qs-item"><div class="qs-lbl">Current Status</div><div class="qs-val">${animal.status}</div></div>
         <div class="qs-item"><div class="qs-lbl">Behavioral Assessment</div>
-          <div class="qs-val" style="color:${animal.behavioralAssessment ? "var(--green)" : "var(--clay)"}">
-            ${animal.behavioralAssessment ? "✓ Complete" : "✗ Pending"}
+          <div class="qs-val">
+            <span class="readiness-value ${animal.behavioralAssessment ? "is-complete" : "is-pending"}"><i class="bi ${animal.behavioralAssessment ? "bi-check-circle-fill" : "bi-clock-fill"}"></i>${animal.behavioralAssessment ? "Complete" : "Pending"}</span>
           </div>
         </div>
         <div class="qs-item"><div class="qs-lbl">Medical Clearance</div>
-          <div class="qs-val" style="color:${clearanceStatus === "Cleared"? "var(--green)" : "var(--amber)"}">
-            ${clearanceStatus === "Cleared" ? "✓ Cleared" : "⚠ Not cleared"}
+          <div class="qs-val">
+            <span class="readiness-value ${clearanceStatus === "Cleared" ? "is-complete" : "is-pending"}"><i class="bi ${clearanceStatus === "Cleared" ? "bi-check-circle-fill" : "bi-exclamation-circle-fill"}"></i>${clearanceStatus === "Cleared" ? "Cleared" : "Not cleared"}</span>
           </div>
         </div>
       </div>
       ${missingItems.length ? `
-        <div style="background:var(--amber-soft);border-radius:10px;padding:12px 16px;">
-          <p style="font-size:0.82rem;font-weight:700;color:var(--amber);margin-bottom:8px"><i class="bi bi-exclamation-triangle-fill me-1"></i>Required before marking Ready:</p>
-          <ul style="margin:0;padding-left:18px;font-size:0.82rem;color:var(--ink-3)">
+        <div class="readiness-callout is-pending">
+          <p><i class="bi bi-exclamation-triangle-fill"></i> Required before marking ready</p>
+          <ul>
             ${missingItems.map(m => `<li>${m}</li>`).join("")}
           </ul>
         </div>` : `
-        <div style="background:var(--green-soft);border-radius:10px;padding:12px 16px;">
-          <p style="font-size:0.82rem;font-weight:700;color:var(--green);margin:0"><i class="bi bi-check-circle-fill me-1"></i>All requirements met. Animal can be marked as Ready for Adoption.</p>
+        <div class="readiness-callout is-complete">
+          <p><i class="bi bi-check-circle-fill"></i> All requirements are complete. This animal can be marked ready for adoption.</p>
         </div>`}
     </div>`;
 }
@@ -690,7 +684,7 @@ function renderHistoryTab() {
   const hist = (animal.history || []).slice().reverse();
   if (!hist.length) {
     document.getElementById("historyTimeline").innerHTML =
-      `<p style="color:var(--stone);font-size:0.88rem">No history recorded yet.</p>`;
+      `<div class="history-empty"><i class="bi bi-clock-history"></i><strong>No history recorded</strong><span>Lifecycle events will appear here as the record progresses.</span></div>`;
     return;
   }
 
@@ -786,21 +780,36 @@ function openBehavioralModal() {
   document.getElementById("behavioralNotes").value = animal.behavioralNotes || "";
   document.getElementById("behavioralAssessor").value = animal.behavioralAssessor || getUserName()?.split(" ")[0] || "";
 
+  const behaviorGroups = [
+    { title: "Activity & routine", icon: "bi-activity", keys: ["energyLevel", "exerciseNeeds", "playfulness", "attentionNeeds"] },
+    { title: "Social comfort", icon: "bi-people", keys: ["friendlinessToHumans", "goodWithKids", "goodWithOtherPets", "strangerTolerance", "affectionLevel"] },
+    { title: "Home fit", icon: "bi-house-check", keys: ["independenceLevel", "noiseLevel", "spaceNeeds", "adaptability", "trainingDifficulty"] },
+    { title: "Support & safety", icon: "bi-shield-check", keys: ["separationAnxiety", "aggressive", "specialNeeds"] },
+  ];
+
   const grid = document.getElementById("traitGrid");
-  grid.innerHTML = TRAITS.map((t, i) => {
-    const val = ba[t.key] ?? 3;
-    return `
-      <div class="trait-modal-row">
-        <div class="trait-modal-header">
-          <span class="trait-modal-name">${t.label}</span>
-          <span class="trait-modal-score" id="score-${t.key}">${val}</span>
-        </div>
-        <input type="range" class="trait-slider" id="slider-${t.key}"
-          min="1" max="5" step="1" value="${val}"
-          style="--val:${val}" />
-        <div class="trait-modal-desc">${t.desc}</div>
-      </div>`;
-  }).join("");
+  grid.innerHTML = behaviorGroups.map(group => `
+    <section class="trait-group" aria-labelledby="group-${group.keys[0]}">
+      <header class="trait-group-header">
+        <span><i class="bi ${group.icon}" aria-hidden="true"></i></span>
+        <div><strong id="group-${group.keys[0]}">${group.title}</strong><small>${group.keys.length} observations</small></div>
+      </header>
+      <div class="trait-group-list">
+        ${group.keys.map(key => {
+          const trait = TRAITS.find(item => item.key === key);
+          const val = ba[key] ?? 3;
+          return `
+            <div class="trait-modal-row">
+              <div class="trait-modal-header">
+                <label class="trait-modal-name" for="slider-${key}">${trait.label}</label>
+                <output class="trait-modal-score" id="score-${key}" for="slider-${key}">${val}</output>
+              </div>
+              <input type="range" class="trait-slider" id="slider-${key}" min="1" max="5" step="1" value="${val}" style="--val:${val}" aria-describedby="desc-${key}" />
+              <div class="trait-modal-desc" id="desc-${key}">${trait.desc}</div>
+            </div>`;
+        }).join("")}
+      </div>
+    </section>`).join("");
 
   TRAITS.forEach(t => {
     const slider = document.getElementById(`slider-${t.key}`);
@@ -1490,16 +1499,43 @@ async function saveEditProfile() {
   }
 }
 
+function activateProfileTab(tabName, moveFocus = false) {
+  const buttons = [...document.querySelectorAll(".profile-tab")];
+  const selectedButton = buttons.find(button => button.dataset.tab === tabName) || buttons[0];
+  if (!selectedButton) return;
+
+  buttons.forEach(button => {
+    const selected = button === selectedButton;
+    button.classList.toggle("active", selected);
+    button.setAttribute("aria-selected", String(selected));
+    button.tabIndex = selected ? 0 : -1;
+  });
+
+  document.querySelectorAll(".tab-content").forEach(panel => {
+    const selected = panel.id === `tab-${selectedButton.dataset.tab}`;
+    panel.classList.toggle("active", selected);
+    panel.hidden = !selected;
+  });
+
+  window.history.replaceState(null, "", `#${selectedButton.dataset.tab}`);
+  if (moveFocus) selectedButton.focus();
+}
+
 function bindTabs() {
-  document.querySelectorAll(".profile-tab").forEach(btn => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll(".profile-tab").forEach(t => t.classList.remove("active"));
-      document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
-      btn.classList.add("active");
-      const tab = document.getElementById(`tab-${btn.dataset.tab}`);
-      if (tab) tab.classList.add("active");
+  const buttons = [...document.querySelectorAll(".profile-tab")];
+  buttons.forEach((button, index) => {
+    button.addEventListener("click", () => activateProfileTab(button.dataset.tab));
+    button.addEventListener("keydown", event => {
+      if (!["ArrowDown", "ArrowUp", "ArrowRight", "ArrowLeft"].includes(event.key)) return;
+      event.preventDefault();
+      const forward = event.key === "ArrowDown" || event.key === "ArrowRight";
+      const nextIndex = (index + (forward ? 1 : -1) + buttons.length) % buttons.length;
+      activateProfileTab(buttons[nextIndex].dataset.tab, true);
     });
   });
+
+  const requestedTab = window.location.hash.replace("#", "");
+  activateProfileTab(buttons.some(button => button.dataset.tab === requestedTab) ? requestedTab : "overview");
 }
 
 function openModal(id) {

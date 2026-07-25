@@ -126,7 +126,7 @@ let currentRole = "";
 /* ══════════════════════════════════════════════════════
    HELPERS
 ══════════════════════════════════════════════════════ */
-const emoji = s => ({Dog:"🐶",Cat:"🐱",Rabbit:"🐰",Bird:"🐦"}[s]||"🐾");
+const emoji = s => ({Dog:"D",Cat:"C",Rabbit:"R",Bird:"B"}[s]||"A");
 const thumbCls = s => ({Dog:"thumb-dog",Cat:"thumb-cat"}[s]||"thumb-other");
 
 function formatDate(d) {
@@ -167,8 +167,10 @@ const URGENCY_PCT  = { Critical:95, High:75, Medium:50, Low:25 };
 ══════════════════════════════════════════════════════ */
 function renderStats() {
   const set = (id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
+  const pendingCount = allRequests.filter(r => r.status === "Pending").length;
   set("statTotal", allRequests.length);
-  set("statPending", allRequests.filter(r => r.status === "Pending").length);
+  set("statPending", pendingCount);
+  set("heroPendingCount", pendingCount);
   set("statCritical", allRequests.filter(r => r.nlp.urgencyLabel === "Critical").length);
   set("statApproved", allRequests.filter(r => r.status === "Approved").length);
   set("statConverted", allRequests.filter(r => r.status === "Converted").length);
@@ -223,8 +225,8 @@ function renderTable() {
 
   tbody.innerHTML = page.map(r => `
     <tr data-id="${r.id}" class="${r.id===activeId?"row-active":""}">
-      <td style="font-family:var(--mono);font-size:0.76rem;color:var(--stone)">${r.id}</td>
-      <td>
+      <td data-label="Request ID" class="request-code">${r.id}</td>
+      <td data-label="Owner">
         <div class="owner-cell">
           <div class="owner-avatar" style="background:${r.owner.color}">${r.owner.initials}</div>
           <div>
@@ -233,7 +235,7 @@ function renderTable() {
           </div>
         </div>
       </td>
-      <td>
+      <td data-label="Pet">
         <div class="pet-mini">
           <div class="pet-mini-thumb ${thumbCls(r.pet.species)}">${emoji(r.pet.species)}</div>
           <div>
@@ -242,11 +244,11 @@ function renderTable() {
           </div>
         </div>
       </td>
-      <td>${catBadge(r.nlp.category)}</td>
-      <td><span class="urgency-badge ${urgencyCls(r.nlp.urgencyLabel)}">${r.nlp.urgencyLabel}</span></td>
-      <td style="font-family:var(--mono);font-size:0.76rem;color:var(--stone)">${formatDate(r.submittedAt)}</td>
-      <td>${statusBadge(r.status)}</td>
-      <td>
+      <td data-label="Category">${catBadge(r.nlp.category)}</td>
+      <td data-label="Urgency"><span class="urgency-badge ${urgencyCls(r.nlp.urgencyLabel)}">${r.nlp.urgencyLabel}</span></td>
+      <td data-label="Submitted" class="submitted-date">${formatDate(r.submittedAt)}</td>
+      <td data-label="Status">${statusBadge(r.status)}</td>
+      <td data-label="Actions">
         <button class="tbl-action-btn" data-action="view" data-id="${r.id}" title="View">
           <i class="bi bi-chevron-right"></i>
         </button>
@@ -306,7 +308,7 @@ function renderDrawer(r) {
 
   // ── NLP analysis section ─────────────────────────────
   const nlpSection = `
-    <div class="drawer-section">
+    <div class="drawer-section drawer-section-analysis">
       <div class="drawer-section-title"><i class="bi bi-cpu"></i> Sentiment Analysis</div>
       <div class="nlp-analysis-card">
         <div class="nlp-analysis-header">
@@ -361,13 +363,15 @@ function renderDrawer(r) {
         </div>` : ""}
       </div>
 
-      <div style="font-size:0.72rem;font-weight:700;color:var(--stone);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.06em">Surrender Reason (Owner's Words)</div>
-      <div class="reason-box">"${r.surrenderReason}"</div>
+      <div class="surrender-reason-panel">
+        <div class="surrender-reason-label">Surrender Reason (Owner's Words)</div>
+        <div class="reason-box">"${r.surrenderReason}"</div>
+      </div>
     </div>`;
 
   // ── Owner section ─────────────────────────────────────
   const ownerSection = `
-    <div class="drawer-section">
+    <div class="drawer-section drawer-section-owner">
       <div class="drawer-section-title"><i class="bi bi-person-fill"></i> Owner Information</div>
       <div class="drawer-info-grid">
         <div class="drawer-info-item drawer-info-full">
@@ -399,7 +403,7 @@ function renderDrawer(r) {
 
   // ── Pet section ───────────────────────────────────────
   const petSection = `
-    <div class="drawer-section">
+    <div class="drawer-section drawer-section-pet">
       <div class="drawer-section-title"><i class="bi bi-heart-pulse"></i> Pet Information</div>
       <div class="drawer-info-grid">
         <div class="drawer-info-item">
@@ -423,7 +427,7 @@ function renderDrawer(r) {
 
   // ── Documents section ─────────────────────────────────
   const docsSection = `
-    <div class="drawer-section">
+    <div class="drawer-section drawer-section-documents">
       <div class="drawer-section-title"><i class="bi bi-folder-fill"></i> Documents (${r.docsSubmitted}/${r.totalDocs})</div>
       <div class="doc-list">
         ${r.documents.map(d => {
@@ -508,7 +512,7 @@ function renderDrawer(r) {
         ${r.source ? ` · <span style="color:var(--stone);font-size:0.78rem">${r.source}</span>` : ""}
       </p>
       </div>
-      <button class="drawer-close-btn" id="drawerCloseX"><i class="bi bi-x-lg"></i></button>
+      <button class="drawer-close-btn" id="drawerCloseX" aria-label="Close request details"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="drawer-body">
       ${nlpSection}
@@ -763,6 +767,12 @@ async function init() {
         document.querySelectorAll(".sr-tab").forEach(t=>t.classList.remove("active"));
         btn.classList.add("active"); activeTab=btn.dataset.tab; applyFilters();
       });
+    });
+
+    document.getElementById("reviewPendingBtn")?.addEventListener("click", () => {
+      const pendingTab = document.querySelector('.sr-tab[data-tab="Pending"]');
+      pendingTab?.click();
+      document.getElementById("srTablePanel")?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
 
     document.getElementById("searchSR")?.addEventListener("input",      applyFilters);

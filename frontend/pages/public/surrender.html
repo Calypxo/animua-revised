@@ -9,11 +9,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="../../src/css/global.css">
+  <link rel="stylesheet" href="../../src/css/public/public-design-system.css">
   <link rel="stylesheet" href="../../src/css/public/surrender.css">
-<link rel="stylesheet" href="../../src/css/global.css">
-<link rel="stylesheet" href="../../src/css/public/public-design-system.css">
 </head>
-<body>
+<body class="surrender-page">
 
   <!-- Header -->
 <header class="header" id="home">
@@ -78,24 +78,33 @@
 </header>
 
   <!-- Surrender Hero -->
-  <section class="surrender-page-hero">
+  <section class="surrender-page-hero" aria-labelledby="surrenderPageTitle">
     <div class="container surrender-page-hero-grid">
       <div class="surrender-page-text reveal">
-        <span class="section-label">Animal Surrender</span>
-        <h1>Request for Animal Surrender</h1>
-        <p>
-          Before submitting a request, please understand that shelter space is limited.
-          Surrendering an animal means a permanent transfer of ownership.
+        <span class="section-label">Animal surrender support</span>
+        <h1 id="surrenderPageTitle">A careful next step for you and your animal.</h1>
+        <p class="surrender-hero-lead">
+          Tell us about your situation so the Angeles City shelter team can review the safest available option.
+          You can write in English, Tagalog, or Taglish.
         </p>
-        <p>
-          We strongly encourage owners to first explore rehoming through trusted family,
-          friends, or personal networks before proceeding with shelter surrender.
-        </p>
+        <div class="surrender-hero-assurances" aria-label="What to expect">
+          <span><i class="fa-solid fa-shield-heart" aria-hidden="true"></i> Respectful review</span>
+          <span><i class="fa-solid fa-location-dot" aria-hidden="true"></i> Angeles City residents</span>
+          <span><i class="fa-solid fa-clock" aria-hidden="true"></i> Status updates available</span>
+        </div>
+        <div class="surrender-hero-actions">
+          <a class="btn primary-btn" href="#surrenderRequestWorkspace">Start your request</a>
+          <a class="surrender-text-link" href="#mySurrenderRequests">Track a submitted request <i class="fa-solid fa-arrow-down" aria-hidden="true"></i></a>
+        </div>
       </div>
 
-      <div class="surrender-page-image reveal">
-        <img src="../../src/assets/images/surrender.jpg" alt="Dog waiting for surrender support">
-      </div>
+      <figure class="surrender-page-image reveal">
+        <img src="../../src/assets/images/surrender.jpg" alt="A dog receiving calm care and support">
+        <figcaption>
+          <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+          <span><strong>Submitting is a request for review.</strong> It does not automatically confirm shelter acceptance.</span>
+        </figcaption>
+      </figure>
     </div>
   </section>
 
@@ -103,229 +112,184 @@
   <section class="surrender-notice-section">
     <div class="container">
       <div class="surrender-notice-box reveal">
-        <h2>Important Reminders</h2>
+        <div class="surrender-notice-heading">
+          <span class="section-label">Before you begin</span>
+          <h2>What happens after you submit</h2>
+          <p>Your request moves through a clear review process. Shelter space and the animal's current needs are considered before a decision is made.</p>
+        </div>
         <div class="surrender-notice-grid">
           <div class="notice-item">
-            <i class="fa-solid fa-circle-exclamation"></i>
-            <span>Shelter intake depends on available space and evaluation.</span>
+            <span class="notice-number">01</span>
+            <div><strong>Submit for review</strong><span>Complete the form with honest owner, animal, and situation details.</span></div>
           </div>
           <div class="notice-item">
-            <i class="fa-solid fa-house-circle-exclamation"></i>
-            <span>Rehoming through personal networks is encouraged first.</span>
+            <span class="notice-number">02</span>
+            <div><strong>Shelter assessment</strong><span>Staff reviews the request, available space, and the animal's needs.</span></div>
           </div>
           <div class="notice-item">
-            <i class="fa-solid fa-file-circle-check"></i>
-            <span>Submitting this form does not guarantee automatic acceptance.</span>
+            <span class="notice-number">03</span>
+            <div><strong>Decision and next step</strong><span>You can return here to see whether the request is pending, approved, rejected, or converted to intake.</span></div>
           </div>
-          <div class="notice-item">
-            <i class="fa-solid fa-file-circle-check"></i>
-            <span>Please provide honest and complete animal information.</span>
-          </div>
+        </div>
+        <div class="surrender-gentle-notice" role="note">
+          <i class="fa-solid fa-house-circle-check" aria-hidden="true"></i>
+          <p><strong>If it is safe and possible,</strong> consider trusted family, friends, or a responsible rehoming network while your request is under review.</p>
         </div>
       </div>
     </div>
   </section>
 
   <!-- Surrender Form -->
-  <section class="surrender-form-section">
+  <section class="surrender-form-section" id="surrenderRequestWorkspace">
     <div class="container">
-      <div class="surrender-form-wrap reveal">
-        <div class="section-heading center-heading">
-          <span class="section-label">Surrender Form</span>
-          <h2>City Veterinarian Surrender Form</h2>
-          <p>Please fill out the form completely for proper assessment.</p>
+      <section class="request-status-panel reveal" id="mySurrenderRequests" aria-labelledby="requestStatusTitle">
+        <div class="request-status-heading">
+          <div><span class="section-label">Your request history</span><h2 id="requestStatusTitle">Track submitted requests</h2><p>Sign in with the same account used to submit. Statuses here match the shelter's review and intake workflow.</p></div>
+          <button type="button" class="status-refresh-btn" id="refreshRequestStatus" aria-label="Refresh surrender request statuses"><i class="fa-solid fa-rotate" aria-hidden="true"></i><span>Refresh</span></button>
         </div>
+        <div class="request-history-content" id="requestHistoryContent" aria-live="polite"><div class="surrender-state surrender-state-loading"><i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i><p>Checking your request history…</p></div></div>
+      </section>
 
-        <form class="surrender-form" id="surrenderForm">
+      <div class="surrender-workspace reveal">
+        <aside class="surrender-progress-rail" aria-label="Surrender request progress">
+          <div class="progress-rail-intro"><span>Request guide</span><h2>Four clear steps</h2><p>Your information is reviewed only for this surrender request.</p></div>
+          <nav class="surrender-step-nav" aria-label="Form steps">
+            <button type="button" class="surrender-step-link is-active" data-step-link="1" aria-current="step"><span>1</span><div><strong>Requester</strong><small>Identity and location</small></div></button>
+            <button type="button" class="surrender-step-link" data-step-link="2"><span>2</span><div><strong>Animal</strong><small>Profile and care details</small></div></button>
+            <button type="button" class="surrender-step-link" data-step-link="3"><span>3</span><div><strong>Situation</strong><small>Reason and context</small></div></button>
+            <button type="button" class="surrender-step-link" data-step-link="4"><span>4</span><div><strong>Review</strong><small>Agreement and submit</small></div></button>
+          </nav>
+          <div class="account-identity-card" id="accountIdentityCard"><span class="identity-icon"><i class="fa-solid fa-user-shield" aria-hidden="true"></i></span><div><small>Submitting account</small><strong id="accountIdentityName">Sign in required</strong><span id="accountIdentityEmail">Use your own Animua account.</span></div></div>
+          <div class="progress-support-note"><i class="fa-solid fa-circle-question" aria-hidden="true"></i><p>Need help before submitting? <a href="contact.html">Contact the shelter team</a>.</p></div>
+        </aside>
+
+        <div class="surrender-form-wrap">
+          <header class="surrender-form-heading">
+            <div><span class="section-label">Surrender request</span><h2>Tell us what your animal needs</h2><p>Fields marked <span class="req" aria-hidden="true">*</span> are required. Unknown animal details can be entered as “Unknown.”</p></div>
+            <span class="form-save-note"><i class="fa-solid fa-lock" aria-hidden="true"></i> Account verified on submit</span>
+          </header>
+          <div class="mobile-form-progress" aria-live="polite"><div><strong>Step <span id="currentStepText">1</span> of 4</strong><span id="currentStepLabel">Requester information</span></div><div class="form-progress-track"><span id="formProgressBar"></span></div></div>
+          <div class="form-feedback hidden" id="formFeedback" role="alert" tabindex="-1"></div>
+
+          <form class="surrender-form" id="surrenderForm" novalidate>
 
           <!-- Pet Owner Information -->
-          <div class="document-form-section">
-            <h3>Pet Owner Information</h3>
+          <section class="document-form-section surrender-step-panel is-active" data-step="1" aria-labelledby="requesterStepTitle">
+            <div class="step-section-heading"><span class="step-section-icon"><i class="fa-solid fa-user" aria-hidden="true"></i></span><div><span>Step 1</span><h3 id="requesterStepTitle">Owner or requester information</h3><p>We use these details to verify residency and contact you about the review.</p></div></div>
+            <div class="identity-explanation" role="note"><i class="fa-solid fa-id-card" aria-hidden="true"></i><p>Your name and email come from the signed-in account and cannot be changed here. This prevents a request from being submitted under another person's identity.</p></div>
 
             <div class="surrender-form-grid">
               <div class="form-group full">
-                <label for="ownerName">Name</label>
-                <input type="text" id="ownerName" name="ownerName" required>
+                <label for="ownerName">Account name <span class="req">*</span></label>
+                <input type="text" id="ownerName" name="ownerName" required aria-describedby="ownerNameHelp ownerNameError">
+                <small class="field-help" id="ownerNameHelp">Verified from your Animua account.</small><small class="field-error" id="ownerNameError"></small>
               </div>
-
               <div class="form-group full">
-              <label for="ownerAddress">House No. / Street / Subdivision</label>
-              <input
-                type="text"
-                id="ownerAddress"
-                name="ownerAddress"
-                placeholder="Example: 123 Rizal St."
-                required
-              >
-            </div>
-
-            <div class="form-group">
-              <label for="ownerBarangay">Barangay <span class="req">*</span></label>
-              <select id="ownerBarangay" name="ownerBarangay" required>
-                <option value="">Select barangay in Angeles City</option>
-                <option value="Agapito del Rosario">Agapito del Rosario</option>
-                <option value="Amsic">Amsic</option>
-                <option value="Anunas">Anunas</option>
-                <option value="Balibago">Balibago</option>
-                <option value="Capaya">Capaya</option>
-                <option value="Claro M. Recto">Claro M. Recto</option>
-                <option value="Cuayan">Cuayan</option>
-                <option value="Cutcut">Cutcut</option>
-                <option value="Cutud">Cutud</option>
-                <option value="Lourdes Norte">Lourdes Norte</option>
-                <option value="Lourdes Sur">Lourdes Sur</option>
-                <option value="Lourdes Sur Este">Lourdes Sur Este</option>
-                <option value="Malabanias">Malabanias</option>
-                <option value="Margot">Margot</option>
-                <option value="Mining">Mining</option>
-                <option value="Ninoy Aquino">Ninoy Aquino</option>
-                <option value="Pampang">Pampang</option>
-                <option value="Pandan">Pandan</option>
-                <option value="Plaridel">Plaridel</option>
-                <option value="Pulung Cacutud">Pulung Cacutud</option>
-                <option value="Pulung Maragul">Pulung Maragul</option>
-                <option value="Pulungbulu">Pulungbulu</option>
-                <option value="Salapungan">Salapungan</option>
-                <option value="San Jose">San Jose</option>
-                <option value="San Nicolas">San Nicolas</option>
-                <option value="Santa Teresita">Santa Teresita</option>
-                <option value="Santa Trinidad">Santa Trinidad</option>
-                <option value="Santo Cristo">Santo Cristo</option>
-                <option value="Santo Domingo">Santo Domingo</option>
-                <option value="Santo Rosario">Santo Rosario</option>
-                <option value="Sapalibutad">Sapalibutad</option>
-                <option value="Sapangbato">Sapangbato</option>
-                <option value="Sergio Bernal">Sergio Bernal</option>
-                <option value="Silangan">Silangan</option>
-                <option value="Tabun">Tabun</option>
-                <option value="Virgen Delos Remedios">Virgen Delos Remedios</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label for="ownerCity">City</label>
-              <input type="text" id="ownerCity" name="ownerCity" value="Angeles City" readonly>
-            </div>
-
-              <div class="form-group">
-                <label for="contactNo">Contact No.</label>
-                <input type="text" id="contactNo" name="contactNo" required>
+                <label for="ownerEmail">Account email</label>
+                <input type="email" id="ownerEmail" name="ownerEmail" aria-describedby="ownerEmailHelp">
+                <small class="field-help" id="ownerEmailHelp">Status updates are associated with this email.</small>
               </div>
-
               <div class="form-group">
-                <label for="ownerEmail">Email</label>
-                <input type="email" id="ownerEmail" name="ownerEmail">
+                <label for="contactNo">Contact number <span class="req">*</span></label>
+                <input type="tel" id="contactNo" name="contactNo" inputmode="tel" autocomplete="tel" placeholder="Example: 09XX XXX XXXX" required aria-describedby="contactHelp contactError">
+                <small class="field-help" id="contactHelp">Provide a number shelter staff can reach.</small><small class="field-error" id="contactError"></small>
+              </div>
+              <div class="form-group">
+                <label for="ownerCity">City</label>
+                <input type="text" id="ownerCity" name="ownerCity" value="Angeles City" readonly aria-describedby="cityHelp">
+                <small class="field-help" id="cityHelp">Requests are currently limited to Angeles City.</small>
+              </div>
+              <div class="form-group full">
+                <label for="ownerAddress">House no., street, or subdivision <span class="req">*</span></label>
+                <input type="text" id="ownerAddress" name="ownerAddress" autocomplete="street-address" placeholder="Example: 123 Rizal Street" required aria-describedby="addressHelp addressError">
+                <small class="field-help" id="addressHelp">Enter enough detail for residency verification.</small><small class="field-error" id="addressError"></small>
+              </div>
+              <div class="form-group full">
+                <label for="ownerBarangay">Barangay in Angeles City <span class="req">*</span></label>
+                <select id="ownerBarangay" name="ownerBarangay" required aria-describedby="barangayHelp barangayError">
+                  <option value="">Select your barangay</option>
+                  <option value="Agapito del Rosario">Agapito del Rosario</option><option value="Amsic">Amsic</option><option value="Anunas">Anunas</option><option value="Balibago">Balibago</option><option value="Capaya">Capaya</option><option value="Claro M. Recto">Claro M. Recto</option><option value="Cuayan">Cuayan</option><option value="Cutcut">Cutcut</option><option value="Cutud">Cutud</option><option value="Lourdes Norte">Lourdes Norte</option><option value="Lourdes Sur">Lourdes Sur</option><option value="Lourdes Sur Este">Lourdes Sur Este</option><option value="Malabanias">Malabanias</option><option value="Margot">Margot</option><option value="Mining">Mining</option><option value="Ninoy Aquino">Ninoy Aquino</option><option value="Pampang">Pampang</option><option value="Pandan">Pandan</option><option value="Plaridel">Plaridel</option><option value="Pulung Cacutud">Pulung Cacutud</option><option value="Pulung Maragul">Pulung Maragul</option><option value="Pulungbulu">Pulungbulu</option><option value="Salapungan">Salapungan</option><option value="San Jose">San Jose</option><option value="San Nicolas">San Nicolas</option><option value="Santa Teresita">Santa Teresita</option><option value="Santa Trinidad">Santa Trinidad</option><option value="Santo Cristo">Santo Cristo</option><option value="Santo Domingo">Santo Domingo</option><option value="Santo Rosario">Santo Rosario</option><option value="Sapalibutad">Sapalibutad</option><option value="Sapangbato">Sapangbato</option><option value="Sergio Bernal">Sergio Bernal</option><option value="Silangan">Silangan</option><option value="Tabun">Tabun</option><option value="Virgen Delos Remedios">Virgen Delos Remedios</option>
+                </select>
+                <small class="field-help" id="barangayHelp">Only supported Angeles City barangays can be submitted.</small><small class="field-error" id="barangayError"></small>
               </div>
             </div>
-          </div>
+            <div class="step-actions step-actions-end"><button type="button" class="btn primary-btn" data-next-step="2">Continue to animal details <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button></div>
+          </section>
 
           <!-- Pet Information -->
-          <div class="document-form-section">
-            <h3>Pet Information</h3>
-
+          <section class="document-form-section surrender-step-panel" data-step="2" aria-labelledby="animalStepTitle" hidden>
+            <div class="step-section-heading"><span class="step-section-icon"><i class="fa-solid fa-paw" aria-hidden="true"></i></span><div><span>Step 2</span><h3 id="animalStepTitle">Animal information</h3><p>Share what you know. Use “Unknown” rather than guessing.</p></div></div>
             <div class="surrender-form-grid">
-              <div class="form-group">
-                <label for="petName">Name</label>
-                <input type="text" id="petName" name="petName">
-              </div>
-
-              <div class="form-group">
-                <label for="species">Species</label>
-                <input type="text" id="species" name="species" placeholder="Dog / Cat">
-              </div>
-
-              <div class="form-group">
-                <label for="breed">Breed</label>
-                <input type="text" id="breed" name="breed">
-              </div>
-
-              <div class="form-group">
-                <label for="petAge">Age</label>
-                <input type="text" id="petAge" name="petAge">
-              </div>
-
-              <div class="form-group">
-                <label for="petSex">Sex</label>
-                <input type="text" id="petSex" name="petSex">
-              </div>
-
-              <div class="form-group full">
-                <label for="colorMarkings">Color Markings</label>
-                <input type="text" id="colorMarkings" name="colorMarkings">
-              </div>
-
-              <div class="form-group full">
-                <label>Status</label>
+              <div class="form-group"><label for="petName">Animal's name</label><input type="text" id="petName" name="petName" placeholder="Name or Unknown"></div>
+              <div class="form-group"><label for="species">Species</label><select id="species" name="species"><option value="">Select species</option><option value="Dog">Dog</option><option value="Cat">Cat</option><option value="Unknown">Unknown</option></select></div>
+              <div class="form-group"><label for="breed">Breed</label><input type="text" id="breed" name="breed" placeholder="Breed, mixed breed, or Unknown"></div>
+              <div class="form-group"><label for="petAge">Age or estimate</label><input type="text" id="petAge" name="petAge" placeholder="Example: 2 years or Unknown"></div>
+              <div class="form-group"><label for="petSex">Sex</label><select id="petSex" name="petSex"><option value="">Select sex</option><option value="Male">Male</option><option value="Female">Female</option><option value="Unknown">Unknown</option></select></div>
+              <div class="form-group"><label for="colorMarkings">Color and identifying markings</label><input type="text" id="colorMarkings" name="colorMarkings" placeholder="Example: white coat, brown patch"></div>
+              <fieldset class="form-group full choice-fieldset">
+                <legend>Reproductive status</legend><p class="field-help">Choose the closest known answer.</p>
                 <div class="surrender-check-row">
-                  <label class="check-option">
-                    <input type="checkbox" name="status" value="Intact">
-                    <span>Intact</span>
-                  </label>
-
-                  <label class="check-option">
-                    <input type="checkbox" name="status" value="Neutered">
-                    <span>Neutered</span>
-                  </label>
+                  <label class="check-option"><input type="radio" name="status" value="Intact"><span><strong>Intact</strong><small>Not spayed or neutered</small></span></label>
+                  <label class="check-option"><input type="radio" name="status" value="Neutered"><span><strong>Spayed / neutered</strong><small>Procedure completed</small></span></label>
+                  <label class="check-option"><input type="radio" name="status" value="Unknown"><span><strong>Unknown</strong><small>Not sure or no record</small></span></label>
                 </div>
-              </div>
-
-              <div class="form-group full">
-                <label for="vaccinationHistory">Vaccination History</label>
-                <input type="text" id="vaccinationHistory" name="vaccinationHistory">
-              </div>
+              </fieldset>
+              <div class="form-group full"><label for="vaccinationHistory">Vaccination and health history</label><textarea id="vaccinationHistory" name="vaccinationHistory" rows="4" placeholder="List known vaccines, health conditions, medicines, or write Unknown."></textarea><small class="field-help">Include recent care or special needs if known.</small></div>
             </div>
-          </div>
+            <div class="step-actions"><button type="button" class="btn secondary-btn" data-previous-step="1"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back</button><button type="button" class="btn primary-btn" data-next-step="3">Continue to situation <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button></div>
+          </section>
 
           <!-- Reasons -->
-          <div class="document-form-section">
-            <h3>Reasons for Surrendering</h3>
-            <div class="form-group full">
-              <textarea id="reasons" name="reasons" rows="6" required></textarea>
+          <section class="document-form-section surrender-step-panel" data-step="3" aria-labelledby="reasonStepTitle" hidden>
+            <div class="step-section-heading"><span class="step-section-icon"><i class="fa-solid fa-comment-dots" aria-hidden="true"></i></span><div><span>Step 3</span><h3 id="reasonStepTitle">Reason and current situation</h3><p>A complete, honest explanation helps staff assess the safest next step without judgment.</p></div></div>
+            <div class="reason-guidance" role="note"><div><i class="fa-solid fa-language" aria-hidden="true"></i><strong>Tagalog and Taglish are welcome.</strong></div><p>You may include how long you have cared for the animal, the main reason for surrender, current health or behavior concerns, housing urgency, and any support already explored.</p></div>
+            <div class="form-group full reason-field">
+              <div class="label-row"><label for="reasons">Please explain your reason <span class="req">*</span></label><span id="reasonCount">0 characters</span></div>
+              <textarea id="reasons" name="reasons" rows="9" required aria-describedby="reasonHelp reasonError" placeholder="Halimbawa: Hindi na po pinapayagan ang alaga sa aming inuupahan…"></textarea>
+              <small class="field-help" id="reasonHelp">Your exact explanation remains part of the request used by the existing shelter assessment process.</small><small class="field-error" id="reasonError"></small>
             </div>
-          </div>
+            <div class="step-actions"><button type="button" class="btn secondary-btn" data-previous-step="2"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back</button><button type="button" class="btn primary-btn" data-next-step="4">Review your request <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button></div>
+          </section>
 
           <!-- Waiver -->
-          <div class="document-form-section">
-            <h3>Kasunduan at Pahintulot</h3>
+          <section class="document-form-section surrender-step-panel" data-step="4" aria-labelledby="reviewStepTitle" hidden>
+            <div class="step-section-heading"><span class="step-section-icon"><i class="fa-solid fa-clipboard-check" aria-hidden="true"></i></span><div><span>Step 4</span><h3 id="reviewStepTitle">Review and agreement</h3><p>Check the summary, read the agreement, and submit only when everything is correct.</p></div></div>
 
-            <div class="waiver-box">
-              <p>
-                Sa pamamagitan ng pagsusumite ng form na ito, aking pinatutunayan na ang lahat ng
-                impormasyong ibinigay ko ay totoo, tama, at kumpleto ayon sa aking kaalaman.
-              </p>
-
-              <p>
-                Nauunawaan ko na ang pagsusumite ng surrender request ay hindi nangangahulugan ng
-                awtomatikong pagtanggap ng aking alaga sa shelter. Ang bawat request ay dadaan muna
-                sa pagsusuri ng shelter staff.
-              </p>
-
-              <p>
-                Nauunawaan ko rin na ang pagtanggap ng alaga ay nakadepende sa beripikasyon ng
-                impormasyon, kalagayan ng alaga, at availability ng shelter space.
-              </p>
-
-              <p>
-                Kung maaprubahan ang aking request, kusang-loob kong isusuko ang aking alaga sa
-                Angeles City Veterinary Office / shelter at nauunawaan kong ito ay maaaring magresulta
-                sa permanenteng paglipat ng responsibilidad at pag-aalaga sa nasabing hayop.
-              </p>
+            <div class="review-summary" id="reviewSummary">
+              <article><span>Requester</span><strong id="reviewOwnerName">—</strong><p id="reviewOwnerContact">—</p></article>
+              <article><span>Location</span><strong id="reviewBarangay">—</strong><p id="reviewAddress">—</p></article>
+              <article><span>Animal</span><strong id="reviewPetName">—</strong><p id="reviewPetDetails">—</p></article>
+              <article class="review-reason"><span>Reason provided</span><p id="reviewReason">—</p></article>
             </div>
 
-            <label class="check-option agreement-option">
-              <input type="checkbox" id="agreeAllTerms" required>
-              <span>Nabasa ko at sumasang-ayon ako sa lahat ng mga tuntunin at pahayag na nakasaad sa itaas.</span>
-            </label>
-          </div>
+            <article class="waiver-card" aria-labelledby="agreementTitle">
+              <header><span><i class="fa-solid fa-file-signature" aria-hidden="true"></i></span><div><h4 id="agreementTitle">Kasunduan at pahintulot</h4><p>Please read all statements before agreeing.</p></div></header>
+              <div class="waiver-box">
+                <p>Sa pamamagitan ng pagsusumite ng form na ito, aking pinatutunayan na ang lahat ng impormasyong ibinigay ko ay totoo, tama, at kumpleto ayon sa aking kaalaman.</p>
+                <p>Nauunawaan ko na ang pagsusumite ng surrender request ay hindi nangangahulugan ng awtomatikong pagtanggap ng aking alaga sa shelter. Ang bawat request ay dadaan muna sa pagsusuri ng shelter staff.</p>
+                <p>Nauunawaan ko rin na ang pagtanggap ng alaga ay nakadepende sa beripikasyon ng impormasyon, kalagayan ng alaga, at availability ng shelter space.</p>
+                <p>Kung maaprubahan ang aking request, kusang-loob kong isusuko ang aking alaga sa Angeles City Veterinary Office / shelter at nauunawaan kong ito ay maaaring magresulta sa permanenteng paglipat ng responsibilidad at pag-aalaga sa nasabing hayop.</p>
+              </div>
+              <label class="agreement-option" for="agreeAllTerms"><input type="checkbox" id="agreeAllTerms" required aria-describedby="agreementHelp agreementError"><span><strong>Nabasa ko at sumasang-ayon ako.</strong><small id="agreementHelp">I confirm all information is accurate and understand this request may be approved or rejected after review.</small></span></label>
+              <small class="field-error agreement-error" id="agreementError"></small>
+            </article>
 
-          <div class="form-actions">
-            <button type="submit" class="btn primary-btn">Submit Request</button>
-            <a href="home.html" class="btn secondary-btn">Back to Home</a>
-          </div>
+            <div class="submission-expectation" role="note"><i class="fa-solid fa-circle-info" aria-hidden="true"></i><p><strong>After submission:</strong> your request will show as Pending. This does not guarantee immediate acceptance. Return to this page to track the shelter's decision.</p></div>
+            <div class="step-actions final-step-actions"><button type="button" class="btn secondary-btn" data-previous-step="3"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back</button><button type="submit" class="btn primary-btn submit-request-btn" id="submitSurrenderBtn"><span>Submit surrender request</span><i class="fa-solid fa-paper-plane" aria-hidden="true"></i></button></div>
+          </section>
         </form>
+
+        <section class="surrender-success-panel hidden" id="surrenderSuccessPanel" role="status" aria-live="polite" tabindex="-1">
+          <span class="success-panel-icon"><i class="fa-solid fa-check" aria-hidden="true"></i></span><span class="section-label">Request received</span><h2>Thank you for sharing the details carefully.</h2>
+          <p>Your request is now <strong>Pending review</strong>. Submission does not guarantee immediate shelter acceptance.</p>
+          <div class="success-request-id"><span>Request ID</span><strong id="submittedRequestId">—</strong></div>
+          <div class="success-next-steps"><p><strong>What happens next?</strong></p><ol><li>Shelter staff reviews your information.</li><li>Your status is updated to Approved or Rejected.</li><li>If an approved request becomes an intake record, it will show as Converted.</li></ol></div>
+          <div class="success-actions"><button type="button" class="btn primary-btn" id="trackSubmittedRequest">View request status</button><button type="button" class="btn secondary-btn" id="startAnotherRequest">Start another request</button></div>
+        </section>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
   <!-- Footer -->
   <footer class="footer" id="contact">

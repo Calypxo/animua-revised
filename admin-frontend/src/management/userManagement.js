@@ -93,7 +93,7 @@ const AVATAR_COLORS = [
   "#1a4e7a",
 ];
 
-const PAGE_SIZE = 8;
+let pageSize = 25;
 
 /* ── State ───────────────────────────────────────────── */
 let allUsers      = [];
@@ -104,6 +104,7 @@ let editingId     = null;
 let togglingId    = null;
 let isLoading     = false;
 let currentRole = "";
+let removeMenuDismissListener = null;
 
 /* ── Helpers ─────────────────────────────────────────── */
 const initials  = u => `${(u.firstName||u.fullName||"?")[0]}${(u.lastName||"")[0]||""}`.toUpperCase();
@@ -122,6 +123,36 @@ function formatLastLogin(ts) {
   if (d === 1) return "Yesterday";
   if (d < 7)   return `${d} days ago`;
   return date.toLocaleDateString("en-PH", { month:"short", day:"numeric", year:"numeric" });
+}
+
+function parseTimestamp(value) {
+  if (!value) return null;
+  const date = value._seconds
+    ? new Date(value._seconds * 1000)
+    : value.seconds
+      ? new Date(value.seconds * 1000)
+      : new Date(value);
+  return isNaN(date) ? null : date;
+}
+
+function formatCreatedDate(value) {
+  const date = parseTimestamp(value);
+  return date
+    ? date.toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" })
+    : "Not recorded";
+}
+
+function formatLastActivity(value) {
+  const date = parseTimestamp(value);
+  return date
+    ? date.toLocaleString("en-US", {
+        month: "short",
+        day: "2-digit",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit"
+      })
+    : "No activity yet";
 }
 
 function displayName(u) {
@@ -222,6 +253,9 @@ function renderStats(summary) {
   setStatValue("statStaff", stats.staff);
   setStatValue("statVeterinarians", stats.veterinarians ?? stats.vets ?? 0);
   setStatValue("statPublic", stats.public);
+  setStatValue("tabAllCount", stats.total);
+  setStatValue("tabStaffCount", Math.max(0, stats.total - stats.public));
+  setStatValue("tabPublicCount", stats.public);
 }
 
 function setLoading(v) {
@@ -231,15 +265,19 @@ function setLoading(v) {
 
 function setTableMsg(html) {
   const b = document.getElementById("userTableBody");
-  if (b) b.innerHTML = `<tr><td colspan="7" class="text-center py-5">${html}</td></tr>`;
+  if (b) b.innerHTML = `<tr><td colspan="6" class="um-table-message">${html}</td></tr>`;
 }
 
 /* ── Tabs ────────────────────────────────────────────── */
 function bindTabs() {
   document.querySelectorAll(".um-tab").forEach(btn => {
     btn.addEventListener("click", () => {
-      document.querySelectorAll(".um-tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".um-tab").forEach(t => {
+        t.classList.remove("active");
+        t.setAttribute("aria-selected", "false");
+      });
       btn.classList.add("active");
+      btn.setAttribute("aria-selected", "true");
       activeTab = btn.dataset.tab;
       // sync role filter dropdown
       const rf = document.getElementById("filterRole");
@@ -314,9 +352,31 @@ function applyFilters() {
     return true;
   });
 
+  const resultCount = document.getElementById("userResultCount");
+  if (resultCount) {
+    const accountLabel = filteredUsers.length === 1 ? "account" : "accounts";
+    resultCount.textContent = `${filteredUsers.length} ${accountLabel} shown · ${allUsers.length} total`;
+  }
+
   currentPage = 1;
   renderTable();
   renderPagination();
+}
+
+function clearUserFilters() {
+  const search = document.getElementById("searchUsers");
+  const role = document.getElementById("filterRole");
+  const status = document.getElementById("filterStatus");
+  if (search) search.value = "";
+  if (role) role.value = "";
+  if (status) status.value = "";
+  activeTab = "all";
+  document.querySelectorAll(".um-tab").forEach(tab => {
+    const isActive = tab.dataset.tab === "all";
+    tab.classList.toggle("active", isActive);
+    tab.setAttribute("aria-selected", String(isActive));
+  });
+  applyFilters();
 }
 
 /* ── Table ───────────────────────────────────────────── */
@@ -324,112 +384,56 @@ function renderTable() {
   const tbody = document.getElementById("userTableBody");
   if (!tbody || isLoading) return;
 
-  const start = (currentPage - 1) * PAGE_SIZE;
-  const page  = filteredUsers.slice(start, start + PAGE_SIZE);
+  const start = (currentPage - 1) * pageSize;
+  const page  = filteredUsers.slice(start, start + pageSize);
 
   if (!page.length) { setTableMsg("No users found."); return; }
 
-  tbody.innerHTML = page.map(u => {
+  const roleCfg = {
+    Admin: { cls: "role-admin", icon: "bi-shield-fill", label: "Administrator" },
+    Staff: { cls: "role-staff", icon: "bi-person-badge-fill", label: "Staff" },
+    Veterinarian: { cls: "role-veterinarian", icon: "bi-heart-pulse-fill", label: "Veterinarian" },
+    Public: { cls: "role-public", icon: "bi-person-fill", label: "Public user" }
+  };
+
+  tbody.innerHTML = page.map((u, pageIndex) => {
     const normalizedRole = getDisplayRole(u.role);
-    const ini = initials(u);
-    const color = u.color || rndColor();
+    const rc = roleCfg[normalizedRole] || roleCfg.Public;
     const isPublic = normalizedRole === "Public";
     const isActive = u.status === "Active";
     const dname = displayName(u);
-
-    // Role badge
-    const roleCfg = {
-      Admin: {
-        cls: "role-admin",
-        icon: "bi-shield-fill",
-        label: "Admin"
-      },
-      Staff: {
-        cls: "role-staff",
-        icon: "bi-person-badge-fill",
-        label: "Staff"
-      },
-      Veterinarian: {
-        cls: "role-veterinarian",
-        icon: "bi-heart-pulse-fill",
-        label: "Veterinarian"
-      },
-      Public: {
-        cls: "role-public",
-        icon: "bi-person-fill",
-        label: "Public"
-      }
-    };
-    const rc = roleCfg[normalizedRole] || roleCfg.Public;
-
-    // Permissions / info column
-    let permCol;
-    if (isPublic) {
-      permCol = `<span class="public-info-tag"><i class="bi bi-globe me-1"></i>Public portal user</span>`;
-    } else {
-      const assignedPermissions = getPermissionsForRole(normalizedRole);
-      const perms = assignedPermissions.slice(0, 3);
-      const extra = assignedPermissions.length - 3;
-
-      permCol = perms
-        .map(permission => {
-          return `
-            <span class="perm-tag">
-              ${labelPerm(permission)}
-            </span>
-          `;
-        })
-        .join("") + (
-          extra > 0
-            ? `<span class="perm-tag-more">+${extra}</span>`
-            : ""
-        );
-
-      if (!permCol) {
-        permCol = `
-          <span
-            style="
-              color: var(--stone-2);
-              font-size: 0.78rem;
-            "
-          >
-            None assigned
-          </span>
-        `;
-      }
-    }
-
-    // Actions — Public users: view + toggle only, no edit
+    const menuId = `user-actions-${start + pageIndex}`;
+    const editAction = !isPublic && can("edit")
+      ? `<button type="button" role="menuitem" data-action="edit" data-id="${u.id}"><i class="bi bi-person-gear"></i><span>Change role</span></button>`
+      : "";
+    const toggleAction = can("delete")
+      ? `<div class="user-action-divider" role="separator"></div>
+         <button type="button" role="menuitem" class="${isActive ? "is-danger" : "is-success"}" data-action="toggle" data-id="${u.id}">
+           <i class="bi ${isActive ? "bi-person-x" : "bi-person-check"}"></i>
+           <span>${isActive ? "Deactivate account" : "Activate account"}</span>
+         </button>`
+      : "";
     const actions = `
-      <button class="tbl-action-btn" title="View" data-action="view" data-id="${u.id}"><i class="bi bi-eye"></i></button>
-      ${!isPublic ? `<button class="tbl-action-btn" title="Edit" data-action="edit" data-id="${u.id}"><i class="bi bi-pencil"></i></button>` : ""}
-      <button class="tbl-action-btn ${isActive?"danger":"success"}"
-        title="${isActive?"Deactivate":"Activate"}" data-action="toggle" data-id="${u.id}">
-        <i class="bi ${isActive?"bi-person-x":"bi-person-check"}"></i>
-      </button>`;
+      <div class="user-action-menu">
+        <button type="button" class="user-menu-trigger" aria-label="Actions for ${dname}" aria-haspopup="menu" aria-expanded="false" aria-controls="${menuId}" data-action="menu">
+          <i class="bi bi-three-dots-vertical"></i>
+        </button>
+        <div class="user-menu-popover" id="${menuId}" role="menu" hidden>
+          <button type="button" role="menuitem" data-action="view" data-id="${u.id}"><i class="bi bi-eye"></i><span>View profile</span></button>
+          ${editAction}
+          ${toggleAction}
+        </div>
+      </div>`;
 
     return `
-    <tr class="${isPublic?"public-row":""}" data-id="${u.id}" style="cursor:pointer">
-      <td>
-        <div class="user-cell">
-          <div class="user-thumb" style="background:${color}">${ini}</div>
-          <div>
-            <div class="user-fullname">${dname}</div>
-            <div class="user-id-text">${u.id}</div>
-          </div>
-        </div>
-      </td>
-      <td style="font-size:0.84rem;color:var(--stone)">${u.email||u.id}</td>
-      <td><span class="role-badge ${rc.cls}"><i class="bi ${rc.icon}"></i> ${rc.label}</span></td>
-      <td><div class="perm-tags">${permCol}</div></td>
-      <td style="font-family:var(--mono);font-size:0.76rem;color:var(--stone)">${formatLastLogin(u.lastLogin)}</td>
-      <td>
-        <span class="status-badge ${isActive?"badge-active":"badge-inactive"}">
-          <i class="bi ${isActive?"bi-circle-fill":"bi-circle"}"></i> ${u.status}
-        </span>
-      </td>
-      <td>${actions}</td>
-    </tr>`;
+      <tr class="${isPublic ? "public-row" : ""}" data-id="${u.id}" tabindex="0" aria-label="Open account details for ${dname}">
+        <td data-label="User"><div class="user-cell"><div class="user-thumb" style="background:${u.color || rndColor()}">${initials(u)}</div><div><div class="user-fullname">${dname}</div><div class="user-id-text">${u.email || u.id}</div></div></div></td>
+        <td data-label="Role"><span class="role-badge ${rc.cls}"><i class="bi ${rc.icon}"></i>${rc.label}</span></td>
+        <td data-label="Status"><span class="status-badge ${isActive ? "badge-active" : "badge-inactive"}"><i class="bi bi-circle-fill"></i>${isActive ? "Active" : "Deactivated"}</span></td>
+        <td data-label="Created"><span class="user-date">${formatCreatedDate(u.createdAt)}</span></td>
+        <td data-label="Last activity"><span class="user-date ${u.lastLogin ? "" : "is-empty"}">${formatLastActivity(u.lastLogin)}</span></td>
+        <td data-label="Actions"><div class="user-row-actions">${actions}</div></td>
+      </tr>`;
   }).join("");
 
   // Row click
@@ -438,17 +442,65 @@ function renderTable() {
       if (e.target.closest("[data-action]")) return;
       openViewModal(row.dataset.id);
     });
+    row.addEventListener("keydown", e => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      if (e.target.closest("[data-action]")) return;
+      e.preventDefault();
+      openViewModal(row.dataset.id);
+    });
   });
+
+  const closeMenu = menuWrap => {
+    const menu = menuWrap.querySelector(".user-menu-popover");
+    const trigger = menuWrap.querySelector(".user-menu-trigger");
+    menu.hidden = true;
+    trigger.setAttribute("aria-expanded", "false");
+  };
+
+  const closeOtherMenus = current => {
+    tbody.querySelectorAll(".user-action-menu").forEach(menuWrap => {
+      if (menuWrap !== current) closeMenu(menuWrap);
+    });
+  };
 
   tbody.querySelectorAll("[data-action]").forEach(btn => {
     btn.addEventListener("click", e => {
       e.stopPropagation();
       const { action, id } = btn.dataset;
+      if (action === "menu") {
+        const menuWrap = btn.closest(".user-action-menu");
+        const menu = menuWrap.querySelector(".user-menu-popover");
+        const willOpen = menu.hidden;
+        closeOtherMenus(menuWrap);
+        menu.hidden = !willOpen;
+        btn.setAttribute("aria-expanded", String(willOpen));
+        if (willOpen) menu.querySelector('[role="menuitem"]')?.focus();
+        return;
+      }
+      closeOtherMenus(null);
       if (action==="view")   openViewModal(id);
       if (action==="edit")   openEditModal(id);
       if (action==="toggle") openToggleModal(id);
     });
   });
+
+  tbody.querySelectorAll(".user-action-menu").forEach(menuWrap => {
+    menuWrap.addEventListener("focusout", e => {
+      if (!menuWrap.contains(e.relatedTarget)) closeMenu(menuWrap);
+    });
+    menuWrap.addEventListener("keydown", e => {
+      if (e.key !== "Escape") return;
+      closeMenu(menuWrap);
+      menuWrap.querySelector(".user-menu-trigger").focus();
+    });
+  });
+
+  removeMenuDismissListener?.();
+  const dismissMenus = event => {
+    if (!event.target.closest(".user-action-menu")) closeOtherMenus(null);
+  };
+  document.addEventListener("pointerdown", dismissMenus);
+  removeMenuDismissListener = () => document.removeEventListener("pointerdown", dismissMenus);
 }
 
 /* ── Pagination ──────────────────────────────────────── */
@@ -456,13 +508,21 @@ function renderPagination() {
   const bar = document.getElementById("paginationBar");
   if (!bar) return;
   const total = filteredUsers.length;
-  const pages = Math.max(1, Math.ceil(total/PAGE_SIZE));
-  const start = Math.min((currentPage-1)*PAGE_SIZE+1, total);
-  const end   = Math.min(currentPage*PAGE_SIZE, total);
+  const pages = Math.max(1, Math.ceil(total/pageSize));
+  const start = Math.min((currentPage-1)*pageSize+1, total);
+  const end   = Math.min(currentPage*pageSize, total);
 
   let h = `<span class="page-info">Showing ${total?start:0}–${end} of ${total}</span>`;
   h += `<button class="page-btn" id="pagePrev" ${currentPage===1?"disabled":""}><i class="bi bi-chevron-left"></i></button>`;
-  for (let i=1;i<=pages;i++) h+=`<button class="page-btn ${i===currentPage?"active":""}" data-page="${i}">${i}</button>`;
+  const visiblePages = pages <= 7
+    ? Array.from({ length: pages }, (_, index) => index + 1)
+    : [...new Set([1, pages, currentPage - 1, currentPage, currentPage + 1])]
+        .filter(pageNumber => pageNumber >= 1 && pageNumber <= pages)
+        .sort((a, b) => a - b);
+  visiblePages.forEach((pageNumber, index) => {
+    if (index && pageNumber - visiblePages[index - 1] > 1) h += `<span class="page-ellipsis" aria-hidden="true">…</span>`;
+    h += `<button class="page-btn ${pageNumber===currentPage?"active":""}" data-page="${pageNumber}">${pageNumber}</button>`;
+  });
   h += `<button class="page-btn" id="pageNext" ${currentPage===pages?"disabled":""}><i class="bi bi-chevron-right"></i></button>`;
   bar.innerHTML = h;
 
@@ -879,8 +939,26 @@ if (addUserButton) {
   }
 }
     document.getElementById("searchUsers")?.addEventListener("input",applyFilters);
-    document.getElementById("filterRole")?.addEventListener("change",applyFilters);
+    document.getElementById("filterRole")?.addEventListener("change", () => {
+      const selectedRole = document.getElementById("filterRole")?.value || "";
+      if (activeTab === "public" && selectedRole !== "Public") {
+        activeTab = "all";
+        document.querySelectorAll(".um-tab").forEach(tab => {
+          const isActive = tab.dataset.tab === "all";
+          tab.classList.toggle("active", isActive);
+          tab.setAttribute("aria-selected", String(isActive));
+        });
+      }
+      applyFilters();
+    });
     document.getElementById("filterStatus")?.addEventListener("change",applyFilters);
+    document.getElementById("clearUserFilters")?.addEventListener("click",clearUserFilters);
+    document.getElementById("pageSize")?.addEventListener("change", event => {
+      pageSize = Number.parseInt(event.target.value, 10) || 25;
+      currentPage = 1;
+      renderTable();
+      renderPagination();
+    });
     document.getElementById("fFirstName")?.addEventListener("input",updateAvatarPreview);
     document.getElementById("fLastName")?.addEventListener("input",updateAvatarPreview);
     document.getElementById("fRole")?.addEventListener("change",onRoleChange);

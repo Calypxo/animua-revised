@@ -6,110 +6,85 @@
   <title>ANIMUA — Animal Profiling</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/src/css/adminDashboard.css" />
   <link rel="stylesheet" href="/src/css/sidebar.css" />
   <link rel="stylesheet" href="/src/css/animalProfiling.css" />
 </head>
-<body class="loading">
+<body class="loading ap-list-page">
 <div class="shell">
   <div id="sidebar-container"></div>
   <div class="stage">
-
     <header class="topbar">
       <div class="topbar-left">
-        <button id="sidebarToggle" class="icon-btn"><i class="bi bi-list"></i></button>
-        <nav class="d-flex align-items-center">
-          <span class="breadcrumb-link">Animal Management</span>
-          <i class="bi bi-chevron-right breadcrumb-sep"></i>
-          <span class="breadcrumb-current">Animal Profiling</span>
-        </nav>
+        <button id="sidebarToggle" class="icon-btn" type="button" aria-label="Toggle navigation"><i class="bi bi-list" aria-hidden="true"></i></button>
+        <nav class="d-flex align-items-center" aria-label="Breadcrumb"><span class="breadcrumb-link">Animal Management</span><i class="bi bi-chevron-right breadcrumb-sep" aria-hidden="true"></i><span class="breadcrumb-current" aria-current="page">Animal Profiling</span></nav>
       </div>
       <div class="topbar-right">
-        <button class="icon-btn notif-btn"><i class="bi bi-bell-fill"></i><span class="notif-dot"></span></button>
-        <div class="user-chip">
-          <div class="user-avatar" id="topbar-initials">AS</div>
-          <div class="user-meta"><span id="display-name">Admin</span><small id="display-role">Administrator</small></div>
-          <i class="bi bi-chevron-down caret"></i>
-        </div>
+        <button class="icon-btn notif-btn" type="button" aria-label="Notifications"><i class="bi bi-bell-fill" aria-hidden="true"></i><span class="notif-dot"></span></button>
+        <div class="user-chip"><div class="user-avatar" id="topbar-initials">AS</div><div class="user-meta"><span id="display-name">Admin</span><small id="display-role">Administrator</small></div><i class="bi bi-chevron-down caret" aria-hidden="true"></i></div>
       </div>
     </header>
 
-    <div class="page-body">
-
-      <div class="page-header mb-4">
-        <div>
-          <h1 class="page-title">Animal Profiling</h1>
-          <p class="page-sub">View and manage animal profiles across all lifecycle stages.</p>
+    <main class="page-body">
+      <section class="ap-page-hero" aria-labelledby="pageTitle">
+        <i class="bi bi-person-vcard-fill ap-hero-watermark" aria-hidden="true"></i>
+        <div class="ap-hero-copy">
+          <span class="ap-eyebrow">Animal Management</span>
+          <h1 id="pageTitle">Animal Profiling</h1>
+          <p>Complete shelter profiles, monitor care stages, and prepare animals for safe adoption through one coordinated workspace.</p>
+          <div class="ap-hero-highlights" aria-label="Workspace benefits"><span><i class="bi bi-check2-circle" aria-hidden="true"></i> Complete records</span><span><i class="bi bi-heart-pulse" aria-hidden="true"></i> Visible care stages</span><span><i class="bi bi-shield-check" aria-hidden="true"></i> Adoption-ready data</span></div>
         </div>
-      </div>
+        <aside class="ap-hero-queue" aria-label="Profiling queue">
+          <div class="ap-live-status"><span></span> Profiling desk active</div>
+          <div class="ap-queue-overview"><div><small>Priority queue</small><strong>Profiles requiring completion</strong></div><div class="ap-queue-count"><strong id="heroProfilingCount">0</strong><span>profiles</span></div></div>
+          <a class="ap-queue-action" href="#animalRecords">Review profiling queue <i class="bi bi-arrow-down" aria-hidden="true"></i></a>
+        </aside>
+      </section>
 
-      <!-- Stats -->
-      <div class="ap-stats mb-4">
-        <div class="ap-stat-card"><div class="ap-stat-icon icon-clay"><i class="bi bi-heart-pulse-fill"></i></div><div><div class="ap-stat-val" id="statTotal">0</div><div class="ap-stat-lbl">Total Animals</div></div></div>
-        <div class="ap-stat-card"><div class="ap-stat-icon icon-amber"><i class="bi bi-clipboard2-fill"></i></div><div><div class="ap-stat-val" id="statProfiling">0</div><div class="ap-stat-lbl">In Profiling</div></div></div>
-        <div class="ap-stat-card"><div class="ap-stat-icon icon-blue"><i class="bi bi-shield-plus"></i></div><div><div class="ap-stat-val" id="statQuarantine">0</div><div class="ap-stat-lbl">Quarantine</div></div></div>
-        <div class="ap-stat-card"><div class="ap-stat-icon icon-green"><i class="bi bi-house-heart-fill"></i></div><div><div class="ap-stat-val" id="statReady">0</div><div class="ap-stat-lbl">Ready for Adoption</div></div></div>
-        <div class="ap-stat-card"><div class="ap-stat-icon icon-rose"><i class="bi bi-balloon-heart-fill"></i></div><div><div class="ap-stat-val" id="statAdopted">0</div><div class="ap-stat-lbl">Adopted</div></div></div>
-        <div class="ap-stat-card"><div class="ap-stat-icon icon-stone"><i class="bi bi-archive-fill"></i></div><div><div class="ap-stat-val" id="statArchived">0</div><div class="ap-stat-lbl">Archived</div></div></div>
-      </div>
+      <section class="ap-stats" aria-label="Animal lifecycle summary">
+        <article class="ap-stat-card"><div class="ap-stat-icon icon-clay"><i class="bi bi-heart-pulse-fill"></i></div><div><div class="ap-stat-val" id="statTotal">0</div><div class="ap-stat-lbl">Total Animals</div></div></article>
+        <article class="ap-stat-card"><div class="ap-stat-icon icon-amber"><i class="bi bi-clipboard2-check-fill"></i></div><div><div class="ap-stat-val" id="statProfiling">0</div><div class="ap-stat-lbl">In Profiling</div></div></article>
+        <article class="ap-stat-card"><div class="ap-stat-icon icon-blue"><i class="bi bi-shield-plus"></i></div><div><div class="ap-stat-val" id="statQuarantine">0</div><div class="ap-stat-lbl">Quarantine</div></div></article>
+        <article class="ap-stat-card"><div class="ap-stat-icon icon-green"><i class="bi bi-house-heart-fill"></i></div><div><div class="ap-stat-val" id="statReady">0</div><div class="ap-stat-lbl">Ready for Adoption</div></div></article>
+        <article class="ap-stat-card"><div class="ap-stat-icon icon-rose"><i class="bi bi-balloon-heart-fill"></i></div><div><div class="ap-stat-val" id="statAdopted">0</div><div class="ap-stat-lbl">Adopted</div></div></article>
+        <article class="ap-stat-card"><div class="ap-stat-icon icon-stone"><i class="bi bi-archive-fill"></i></div><div><div class="ap-stat-val" id="statArchived">0</div><div class="ap-stat-lbl">Archived</div></div></article>
+      </section>
 
-      <!-- Table panel -->
-      <div class="panel">
-        <div class="panel-head">
-          <div class="ap-tabs">
-            <button class="ap-tab active" data-tab="all">All</button>
-            <button class="ap-tab" data-tab="Profiling">Profiling</button>
-            <button class="ap-tab" data-tab="Quarantine">Quarantine</button>
-            <button class="ap-tab" data-tab="Ready">Ready</button>
-            <button class="ap-tab" data-tab="Adopted">Adopted</button>
-            <button class="ap-tab" data-tab="Archived">Archived</button>
-          </div>
-          <div class="d-flex gap-2 flex-wrap align-items-center">
-            <div class="search-pill-sm">
-              <i class="bi bi-search"></i>
-              <input type="text" id="searchAnimals" placeholder="Search name, ID, breed…" autocomplete="off" />
-            </div>
-            <select class="filter-select" id="filterSpecies">
-              <option value="">All species</option>
-              <option>Dog</option><option>Cat</option>
-              <option>Rabbit</option><option>Bird</option><option>Other</option>
-            </select>
-            <select class="filter-select" id="filterSex">
-              <option value="">Any sex</option>
-              <option>Male</option><option>Female</option><option>Unknown</option>
-            </select>
+      <section class="ap-workflow" aria-labelledby="workflowTitle">
+        <div class="ap-workflow-intro"><span class="ap-section-kicker">Lifecycle workflow</span><h2 id="workflowTitle">A clear path from profile to placement</h2><p>Each stage keeps the team aligned on the next action and the animal’s current care status.</p></div>
+        <div class="ap-workflow-steps">
+          <div class="ap-workflow-step is-active"><span><i class="bi bi-person-vcard"></i></span><small>01</small><strong>Profile</strong></div>
+          <div class="ap-workflow-step"><span><i class="bi bi-shield-plus"></i></span><small>02</small><strong>Quarantine</strong></div>
+          <div class="ap-workflow-step"><span><i class="bi bi-heart-pulse"></i></span><small>03</small><strong>Medical</strong></div>
+          <div class="ap-workflow-step"><span><i class="bi bi-house-check"></i></span><small>04</small><strong>Ready</strong></div>
+          <div class="ap-workflow-step"><span><i class="bi bi-people"></i></span><small>05</small><strong>Adoption</strong></div>
+          <div class="ap-workflow-step"><span><i class="bi bi-archive"></i></span><small>06</small><strong>Archive</strong></div>
+        </div>
+      </section>
+
+      <section class="panel ap-records-panel" id="animalRecords" aria-labelledby="recordsTitle">
+        <div class="ap-records-heading"><div><span class="ap-section-kicker">Profile directory</span><h2 id="recordsTitle">Animal records</h2><p>Search, review, and track every shelter profile.</p></div><span class="ap-records-legend"><i class="bi bi-info-circle"></i> Select a record to open the full profile</span></div>
+        <div class="ap-toolbar">
+          <div class="ap-tabs-wrap"><span class="ap-filter-label">Lifecycle stage</span><div class="ap-tabs" role="tablist" aria-label="Animal lifecycle stage">
+            <button class="ap-tab active" type="button" role="tab" aria-selected="true" data-tab="all">All</button><button class="ap-tab" type="button" role="tab" aria-selected="false" data-tab="Profiling">Profiling</button><button class="ap-tab" type="button" role="tab" aria-selected="false" data-tab="Quarantine">Quarantine</button><button class="ap-tab" type="button" role="tab" aria-selected="false" data-tab="Ready">Ready</button><button class="ap-tab" type="button" role="tab" aria-selected="false" data-tab="Adopted">Adopted</button><button class="ap-tab" type="button" role="tab" aria-selected="false" data-tab="Archived">Archived</button>
+          </div></div>
+          <div class="ap-filter-toolbar">
+            <label class="ap-filter-field ap-search-filter"><span>Search records</span><div class="ap-control"><i class="bi bi-search"></i><input type="search" id="searchAnimals" placeholder="Name, ID, breed, or species" autocomplete="off" /></div></label>
+            <label class="ap-filter-field"><span>Species</span><select id="filterSpecies"><option value="">All species</option><option>Dog</option><option>Cat</option><option>Rabbit</option><option>Bird</option><option>Other</option></select></label>
+            <label class="ap-filter-field"><span>Sex</span><select id="filterSex"><option value="">Any sex</option><option>Male</option><option>Female</option><option>Unknown</option></select></label>
+            <button class="ap-clear-btn" id="clearAnimalFilters" type="button"><i class="bi bi-arrow-counterclockwise"></i> Clear</button>
           </div>
         </div>
-
-        <div class="table-responsive">
-          <table class="shelter-table">
-            <thead>
-              <tr>
-                <th>Animal</th>
-                <th>Species / Breed</th>
-                <th>Sex / Age</th>
-                <th>Source</th>
-                <th>Days in Shelter</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="animalTableBody">
-              <tr><td colspan="7" class="text-center py-5"><div class="um-spinner"></div></td></tr>
-            </tbody>
-          </table>
+        <div class="animal-record-list" id="animalTableBody" role="list" aria-live="polite">
+          <div class="ap-record-loading"><div class="um-spinner"></div><span>Loading animal profiles…</span></div>
         </div>
         <div class="um-pagination" id="paginationBar"></div>
-      </div>
-
-    </div>
+      </section>
+    </main>
   </div>
 </div>
-
-<!-- Toast -->
-<div class="um-toast" id="umToast"><i class="bi" id="toastIcon"></i><span id="toastMsg"></span></div>
-
+<div class="um-toast" id="umToast" role="status" aria-live="polite"><i class="bi" id="toastIcon"></i><span id="toastMsg"></span></div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script type="module" src="/src/management/animalProfiling.js"></script>
 </body>

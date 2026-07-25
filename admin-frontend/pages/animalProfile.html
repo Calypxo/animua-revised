@@ -6,27 +6,27 @@
   <title>ANIMUA — Animal Profile</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/src/css/adminDashboard.css" />
   <link rel="stylesheet" href="/src/css/sidebar.css" />
   <link rel="stylesheet" href="/src/css/animalProfiling.css" />
 </head>
-<body class="loading">
+<body class="loading animal-profile-page">
 <div class="shell">
   <div id="sidebar-container"></div>
   <div class="stage">
 
     <header class="topbar">
       <div class="topbar-left">
-        <button id="sidebarToggle" class="icon-btn"><i class="bi bi-list"></i></button>
-        <nav class="d-flex align-items-center">
+        <button id="sidebarToggle" class="icon-btn" type="button" aria-label="Toggle navigation"><i class="bi bi-list" aria-hidden="true"></i></button>
+        <nav class="d-flex align-items-center" aria-label="Breadcrumb">
           <span class="breadcrumb-link"><a href="/pages/animalProfiling.html">Animal Profiling</a></span>
           <i class="bi bi-chevron-right breadcrumb-sep"></i>
-          <span class="breadcrumb-current" id="profileBreadcrumb">Loading…</span>
+          <span class="breadcrumb-current" id="profileBreadcrumb" aria-current="page">Loading…</span>
         </nav>
       </div>
       <div class="topbar-right">
-        <button class="icon-btn notif-btn"><i class="bi bi-bell-fill"></i><span class="notif-dot"></span></button>
+        <button class="icon-btn notif-btn" type="button" aria-label="Notifications"><i class="bi bi-bell-fill" aria-hidden="true"></i><span class="notif-dot"></span></button>
         <div class="user-chip">
           <div class="user-avatar" id="topbar-initials">AS</div>
           <div class="user-meta"><span id="display-name">Admin</span><small id="display-role">Administrator</small></div>
@@ -35,51 +35,60 @@
       </div>
     </header>
 
-    <div class="page-body">
+    <main class="page-body">
 
-      <!-- Profile hero -->
-      <div class="profile-hero mb-4" id="profileHero">
-        <div class="profile-photo-wrap">
-          <div class="profile-photo" id="profilePhoto">🐾</div>
-          <label for="photoInput" class="photo-upload-btn" title="Upload photo">
-             <i class="bi bi-camera-fill"></i>
-          </label>
-          <!-- Hidden file input -->
-          <input type="file" id="photoInput" accept="image/*" style="display: none;" />
+      <section class="profile-hero" id="profileHero" aria-labelledby="profileName">
+        <div class="profile-portrait-panel">
+          <div class="profile-photo-wrap">
+            <div class="profile-photo" id="profilePhoto"><span aria-hidden="true">A</span></div>
+            <label for="photoInput" class="photo-upload-btn" title="Upload animal photo" aria-label="Upload animal photo"><i class="bi bi-camera-fill" aria-hidden="true"></i></label>
+            <input type="file" id="photoInput" accept="image/*" hidden />
+          </div>
+          <span class="profile-photo-caption">Shelter record photo</span>
         </div>
         <div class="profile-hero-info">
-          <div class="d-flex align-items-center gap-3 flex-wrap mb-1">
+          <span class="profile-kicker">Animal case file</span>
+          <div class="profile-title-row">
             <h1 class="profile-name" id="profileName">Loading…</h1>
             <span id="profileStatusBadge"></span>
           </div>
           <div class="profile-meta" id="profileMeta"></div>
-          <div class="profile-tags mt-2" id="profileTags"></div>
+          <div class="profile-tags" id="profileTags"></div>
         </div>
-        <div class="profile-hero-actions ms-auto">
-          <button class="btn-ghost-clay" id="btnEditProfile"><i class="bi bi-pencil-fill"></i> Edit</button>
-          <button class="btn-primary-clay" id="btnStatusChange" style="display:none"></button>
-          <div class="dropdown">
-            <button class="btn-ghost-clay" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></button>
-            <ul class="dropdown-menu dropdown-menu-end ap-dropdown">
-              <li><a class="dropdown-item" id="ddArchive"><i class="bi bi-archive"></i> Archive</a></li>
-              <li><a class="dropdown-item" id="ddPrint"><i class="bi bi-printer"></i> Print Profile</a></li>
-            </ul>
+        <aside class="profile-action-panel" aria-label="Profile actions">
+          <div class="profile-action-copy"><span>Record controls</span><p>Keep identification, housing, and care details current.</p></div>
+          <div class="profile-hero-actions">
+            <button class="btn-ghost-clay" type="button" id="btnEditProfile"><i class="bi bi-pencil" aria-hidden="true"></i> Edit profile</button>
+            <button class="btn-primary-clay" type="button" id="btnStatusChange" style="display:none"></button>
+            <div class="dropdown">
+              <button class="btn-ghost-clay profile-more-btn" type="button" data-bs-toggle="dropdown" aria-label="More profile actions"><i class="bi bi-three-dots" aria-hidden="true"></i><span>More actions</span></button>
+              <ul class="dropdown-menu dropdown-menu-end ap-dropdown">
+                <li><a class="dropdown-item" id="ddArchive"><i class="bi bi-archive"></i> Archive</a></li>
+                <li><a class="dropdown-item" id="ddPrint"><i class="bi bi-printer"></i> Print Profile</a></li>
+              </ul>
+            </div>
           </div>
-        </div>
-      </div>
+        </aside>
+      </section>
+
+      <section class="profile-context-strip" aria-label="How to use this record">
+        <i class="bi bi-journal-medical" aria-hidden="true"></i>
+        <div><strong>One record, shared across the care team</strong><span>Review intake facts, clinical notes, behavior, placement readiness, and history below.</span></div>
+      </section>
 
       <!-- 5-Tab Panel -->
-      <div class="panel profile-panel">
-        <div class="profile-tabs-bar">
-          <button class="profile-tab active" data-tab="overview"><i class="bi bi-grid-1x2"></i> Overview</button>
-          <button class="profile-tab" data-tab="medical"><i class="bi bi-clipboard2-pulse"></i> Medical / Quarantine</button>
-          <button class="profile-tab" data-tab="behavioral"><i class="bi bi-cpu"></i> Behavioral Assessment</button>
-          <button class="profile-tab" data-tab="adoption"><i class="bi bi-house-heart"></i> Adoption Status</button>
-          <button class="profile-tab" data-tab="history"><i class="bi bi-clock-history"></i> History</button>
+      <section class="panel profile-panel" aria-label="Animal record sections">
+        <div class="profile-tabs-heading"><small>Record sections</small><strong>Care file</strong></div>
+        <div class="profile-tabs-bar" role="tablist" aria-label="Profile sections">
+          <button class="profile-tab active" type="button" role="tab" aria-selected="true" aria-controls="tab-overview" data-tab="overview"><i class="bi bi-card-list"></i><span>Overview</span></button>
+          <button class="profile-tab" type="button" role="tab" aria-selected="false" aria-controls="tab-medical" data-tab="medical"><i class="bi bi-clipboard2-pulse"></i><span>Medical &amp; quarantine</span></button>
+          <button class="profile-tab" type="button" role="tab" aria-selected="false" aria-controls="tab-behavioral" data-tab="behavioral"><i class="bi bi-sliders"></i><span>Behavioral assessment</span></button>
+          <button class="profile-tab" type="button" role="tab" aria-selected="false" aria-controls="tab-adoption" data-tab="adoption"><i class="bi bi-house-heart"></i><span>Adoption status</span></button>
+          <button class="profile-tab" type="button" role="tab" aria-selected="false" aria-controls="tab-history" data-tab="history"><i class="bi bi-clock-history"></i><span>History</span></button>
         </div>
 
         <!-- ── TAB: Overview ── -->
-        <div class="tab-content active" id="tab-overview">
+        <div class="tab-content active" id="tab-overview" role="tabpanel">
           <div class="row g-4">
             <div class="col-lg-6">
               <div class="info-card">
@@ -103,9 +112,9 @@
         </div>
 
         <!-- ── TAB: Medical / Quarantine ── -->
-        <div class="tab-content" id="tab-medical">
-          <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-            <h4 class="tab-section-title">Medical Records</h4>
+        <div class="tab-content" id="tab-medical" role="tabpanel">
+          <div class="profile-section-header">
+            <div class="profile-section-title-wrap"><h4 class="tab-section-title">Medical Records</h4><p class="tab-section-sub">Clinical visits, treatments, and quarantine clearance.</p></div>
             <button class="btn-primary-clay btn-sm-clay" id="btnAddMedical">
               <i class="bi bi-plus-lg"></i> Add Medical Record
             </button>
@@ -116,23 +125,23 @@
         </div>
 
         <!-- ── TAB: Behavioral Assessment ── -->
-        <div class="tab-content" id="tab-behavioral">
-          <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-            <div>
+        <div class="tab-content" id="tab-behavioral" role="tabpanel">
+          <div class="profile-section-header">
+            <div class="profile-section-title-wrap">
               <h4 class="tab-section-title">Behavioral Assessment</h4>
-              <p class="tab-section-sub">Trait scores used for AI compatibility matching (cosine similarity).</p>
+              <p class="tab-section-sub">Observed traits used to support responsible adopter matching.</p>
             </div>
             <button class="btn-primary-clay" id="btnEditBehavioral">
-              <i class="bi bi-cpu"></i> <span id="behavioralBtnLabel">Add Assessment</span>
+              <i class="bi bi-sliders"></i> <span id="behavioralBtnLabel">Add Assessment</span>
             </button>
           </div>
           <div id="behavioralContent"></div>
         </div>
 
         <!-- ── TAB: Adoption Status ── -->
-        <div class="tab-content" id="tab-adoption">
-          <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-            <h4 class="tab-section-title">Adoption Status</h4>
+        <div class="tab-content" id="tab-adoption" role="tabpanel">
+          <div class="profile-section-header">
+            <div class="profile-section-title-wrap"><h4 class="tab-section-title">Adoption Status</h4><p class="tab-section-sub">Review care requirements and placement readiness.</p></div>
             <button class="btn-primary-clay btn-sm-clay" id="btnMarkReady" style="display:none">
               <i class="bi bi-house-heart-fill"></i> Mark as Ready for Adoption
             </button>
@@ -141,13 +150,13 @@
         </div>
 
         <!-- ── TAB: History ── -->
-        <div class="tab-content" id="tab-history">
-          <h4 class="tab-section-title mb-3">Lifecycle History</h4>
+        <div class="tab-content" id="tab-history" role="tabpanel">
+          <div class="profile-section-header"><div class="profile-section-title-wrap"><h4 class="tab-section-title">Lifecycle History</h4><p class="tab-section-sub">A chronological record of major shelter events.</p></div></div>
           <div id="historyTimeline"></div>
         </div>
 
-      </div><!-- /panel -->
-    </div><!-- /page-body -->
+      </section><!-- /panel -->
+    </main><!-- /page-body -->
   </div><!-- /stage -->
 </div><!-- /shell -->
 
@@ -230,31 +239,35 @@
      BEHAVIORAL ASSESSMENT MODAL
 ══════════════════════════════════════ -->
 <div class="um-modal-backdrop" id="behavioralModalBackdrop">
-  <div class="um-modal ap-modal" role="dialog" aria-modal="true">
+  <div class="um-modal ap-modal behavioral-modal" role="dialog" aria-modal="true" aria-labelledby="behavioralModalTitle">
     <div class="um-modal-header">
       <div>
-        <h2>Behavioral Assessment</h2>
-        <p class="modal-subtitle">Rate each trait from 1 (lowest) to 5 (highest). These scores are used for compatibility matching.</p>
+        <span class="modal-kicker">Care observation</span>
+        <h2 id="behavioralModalTitle">Behavioral Assessment</h2>
+        <p class="modal-subtitle">Score observed behavior from 1 (low) to 5 (high). Use recent, consistent observations.</p>
       </div>
-      <button class="modal-close-btn" id="behavioralModalClose"><i class="bi bi-x-lg"></i></button>
+      <button class="modal-close-btn" type="button" id="behavioralModalClose" aria-label="Close behavioral assessment"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
     </div>
     <div class="um-modal-body">
       <form id="behavioralForm">
+        <div class="trait-scale-guide" aria-label="Scoring guide"><span><strong>1</strong> Low</span><span><strong>3</strong> Moderate</span><span><strong>5</strong> High</span></div>
         <div class="trait-grid" id="traitGrid"></div>
-        <div class="form-group mt-4">
-          <label class="form-lbl" for="behavioralNotes">Assessment Notes</label>
-          <textarea class="form-inp form-textarea" id="behavioralNotes" rows="3"
-            placeholder="Describe any observed behaviors, triggers, special conditions…"></textarea>
-        </div>
-        <div class="form-group mt-3">
-          <label class="form-lbl" for="behavioralAssessor">Assessed By</label>
-          <input type="text" class="form-inp" id="behavioralAssessor" placeholder="Staff name" />
+        <div class="behavioral-form-meta">
+          <div class="form-group">
+            <label class="form-lbl" for="behavioralNotes">Observation notes</label>
+            <textarea class="form-inp form-textarea" id="behavioralNotes" rows="2" placeholder="Add triggers, handling guidance, or context for these scores…"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-lbl" for="behavioralAssessor">Assessed by</label>
+            <input type="text" class="form-inp" id="behavioralAssessor" placeholder="Staff name" />
+          </div>
         </div>
       </form>
     </div>
     <div class="um-modal-footer">
-      <button class="btn-ghost-clay" id="behavioralModalCancel">Cancel</button>
-      <button class="btn-primary-clay" id="behavioralModalSave">
+      <span class="modal-save-hint"><i class="bi bi-shield-check"></i> Scores remain editable until adoption or archive.</span>
+      <button class="btn-ghost-clay" type="button" id="behavioralModalCancel">Cancel</button>
+      <button class="btn-primary-clay" type="button" id="behavioralModalSave">
         <i class="bi bi-floppy-fill"></i> Save Assessment
       </button>
     </div>
@@ -356,7 +369,7 @@
 </div>
 
 <!-- Toast -->
-<div class="um-toast" id="umToast"><i class="bi" id="toastIcon"></i><span id="toastMsg"></span></div>
+<div class="um-toast" id="umToast" role="status" aria-live="polite"><i class="bi" id="toastIcon"></i><span id="toastMsg"></span></div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script type="module" src="/src/management/animalProfile.js"></script>
