@@ -1,4 +1,5 @@
 import "../css/archivedRecords.css";
+import "../css/recordsWorkspace.css";
 import "../css/adminDashboard.css";
 import "../css/sidebar.css";
 
@@ -79,6 +80,15 @@ function getModuleClass(module) {
   return "module-animal";
 }
 
+function getModuleIcon(module = "") {
+  if (module === "Animal Management") return "bi-heart-pulse";
+  if (module === "Adoption Management") return "bi-house-heart";
+  if (module === "Post Adoption") return "bi-clipboard2-heart";
+  if (module === "Inventory") return "bi-box-seam";
+  if (module === "User Management") return "bi-people";
+  return "bi-archive";
+}
+
 function getReasonClass(reason) {
   if (reason === "Duplicate") return "reason-duplicate";
   if (reason === "Completed") return "reason-completed";
@@ -96,13 +106,16 @@ function renderAlertBar() {
   const bar = getEl("archiveAlertBar");
   if (!bar) return;
 
+  const restorable = state.filteredRecords.filter((item) => item.sourceType === "animal").length;
   bar.innerHTML = `
-    <div class="alert-row alert-info">
-      <i class="bi bi-archive-fill"></i>
-      <div>
-        <strong>${state.filteredRecords.length} archived record${state.filteredRecords.length !== 1 ? "s" : ""} found</strong><br />
-        Review archived animal records and restore them when needed.
+    <div class="archive-signal-card">
+      <span class="signal-icon"><i class="bi bi-archive-fill"></i></span>
+      <div class="signal-copy">
+        <span class="signal-kicker">Vault overview</span>
+        <strong>${state.filteredRecords.length} retained record${state.filteredRecords.length === 1 ? "" : "s"} in this view</strong>
+        <small>${restorable ? `${restorable} animal profile${restorable === 1 ? " is" : "s are"} eligible for controlled restoration.` : "These records are retained as read-only management history."}</small>
       </div>
+      <span class="vault-count"><strong>${restorable}</strong><small>restorable</small></span>
     </div>
   `;
 }
@@ -146,6 +159,8 @@ function applyFilters() {
     const element = getEl(id);
     if (element) element.textContent = value;
   });
+  const resultLabel = getEl("archiveResultLabel");
+  if (resultLabel) resultLabel.textContent = `${state.filteredRecords.length} record${state.filteredRecords.length === 1 ? "" : "s"}`;
 
   const totalPages = Math.max(1, Math.ceil(state.filteredRecords.length / state.pageSize));
   if (state.currentPage > totalPages) state.currentPage = totalPages;
@@ -170,8 +185,12 @@ function renderTable() {
   if (!rows.length) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="7" class="text-center py-5 text-muted">
-          No archived records found.
+        <td colspan="7">
+          <div class="records-empty-state">
+            <span><i class="bi bi-archive"></i></span>
+            <strong>No archived records match</strong>
+            <small>Change the module, record type, reason, or search term to broaden this view.</small>
+          </div>
         </td>
       </tr>
     `;
@@ -179,10 +198,12 @@ function renderTable() {
   }
 
   tbody.innerHTML = rows.map((item) => `
-    <tr>
+    <tr class="archive-row">
       <td>
-        <span class="record-title">${escapeHtml(item.title)}</span>
-        <span class="record-sub">${escapeHtml(item.recordId)} · ${escapeHtml(item.id)}</span>
+        <div class="archive-record-cell">
+          <span class="record-icon ${getModuleClass(item.module)}"><i class="bi ${getModuleIcon(item.module)}"></i></span>
+          <span><strong class="record-title">${escapeHtml(item.title)}</strong><small class="record-sub">${escapeHtml(item.recordId)} · ${escapeHtml(item.id)}</small></span>
+        </div>
       </td>
 
       <td>
@@ -208,11 +229,11 @@ function renderTable() {
         </div>
       </td>
 
-      <td>${escapeHtml(item.archivedBy)}</td>
+      <td><span class="archiver-cell"><i class="bi bi-person-check"></i>${escapeHtml(item.archivedBy)}</span></td>
 
       <td>
         <div class="action-group">
-          <button class="detail-btn" data-view-id="${escapeHtml(item.id)}">View</button>
+          <button class="detail-btn" data-view-id="${escapeHtml(item.id)}">Review <i class="bi bi-arrow-right"></i></button>
           ${
               can("restore") && item.sourceType === "animal"
           ? `
@@ -220,7 +241,7 @@ function renderTable() {
               class="restore-btn"
               data-restore-id="${escapeHtml(item.id)}"
             >
-              Restore
+              <i class="bi bi-arrow-clockwise"></i> Restore
             </button>
           `
           : ""
@@ -298,6 +319,11 @@ if (!content || !backdrop) {
 state.selectedRecordId = id;
 
 content.innerHTML = `
+    <div class="archive-detail-hero">
+      <span class="detail-hero-icon ${getModuleClass(item.module)}"><i class="bi ${getModuleIcon(item.module)}"></i></span>
+      <div><span>Archived management record</span><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.recordId)} · archived by ${escapeHtml(item.archivedBy)}</p></div>
+      <span class="reason-badge ${getReasonClass(item.reason)}">${escapeHtml(item.reason)}</span>
+    </div>
     <div class="archive-detail-grid">
       <div class="archive-detail-item">
         <div class="archive-detail-label">Archive ID</div>

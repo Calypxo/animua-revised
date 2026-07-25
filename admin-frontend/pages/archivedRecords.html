@@ -48,21 +48,40 @@
       <div class="page-body">
         <div id="pageHeaderMount"></div>
 
-        <div id="archiveAlertBar" class="mb-4"></div>
-
-        <div class="panel archive-panel">
-          <div class="panel-head flex-column gap-3">
-            <div class="archive-tabs" id="archiveTabs">
-              <button class="archive-tab active" data-tab="all">All</button>
-              <button class="archive-tab" data-tab="Animal Management">Animals</button>
-              <button class="archive-tab" data-tab="Adoption Management">Adoptions</button>
-              <button class="archive-tab" data-tab="Post Adoption">Post Adoption</button>
-              <button class="archive-tab" data-tab="Inventory">Inventory</button>
-              <button class="archive-tab" data-tab="User Management">Users</button>
+        <section class="archive-signal-layout" aria-label="Archive summary">
+          <div id="archiveAlertBar"></div>
+          <aside class="retention-card">
+            <span class="retention-icon"><i class="bi bi-shield-lock"></i></span>
+            <div>
+              <span class="retention-kicker">Protected records vault</span>
+              <strong>Archived data stays available for review</strong>
+              <small>Only eligible animal profiles can be restored. Other records remain read-only for governance.</small>
             </div>
+          </aside>
+        </section>
 
-            <div class="d-flex gap-2 flex-wrap align-items-center justify-content-between w-100">
-              <div class="d-flex gap-2 flex-wrap">
+        <section class="panel archive-panel">
+          <div class="records-toolbar archive-toolbar">
+            <div class="records-heading">
+              <span class="records-heading-icon"><i class="bi bi-archive-fill"></i></span>
+              <div>
+                <h2>Records vault</h2>
+                <p>Find retained records and review their archive history before restoring eligible profiles.</p>
+              </div>
+            </div>
+            <div class="archive-tabs" id="archiveTabs">
+              <button class="archive-tab active" data-tab="all"><i class="bi bi-collection"></i> All</button>
+              <button class="archive-tab" data-tab="Animal Management"><i class="bi bi-heart-pulse"></i> Animals</button>
+              <button class="archive-tab" data-tab="Adoption Management"><i class="bi bi-house-heart"></i> Adoptions</button>
+              <button class="archive-tab" data-tab="Post Adoption"><i class="bi bi-clipboard2-heart"></i> Post Adoption</button>
+              <button class="archive-tab" data-tab="Inventory"><i class="bi bi-box-seam"></i> Inventory</button>
+              <button class="archive-tab" data-tab="User Management"><i class="bi bi-people"></i> Users</button>
+            </div>
+          </div>
+
+          <div class="archive-filter-grid">
+              <label class="filter-field filter-field-search">
+                <span>Search the vault</span>
                 <div class="search-pill-sm">
                   <i class="bi bi-search"></i>
                   <input
@@ -72,7 +91,10 @@
                     autocomplete="off"
                   />
                 </div>
+              </label>
 
+              <label class="filter-field">
+                <span>Record type</span>
                 <select class="filter-select" id="filterType">
                   <option value="">All types</option>
                   <option value="Animal Record">Animal Record</option>
@@ -81,7 +103,10 @@
                   <option value="Inventory Item">Inventory Item</option>
                   <option value="User Account">User Account</option>
                 </select>
+              </label>
 
+              <label class="filter-field">
+                <span>Archive reason</span>
                 <select class="filter-select" id="filterReason">
                   <option value="">All reasons</option>
                   <option value="Duplicate">Duplicate</option>
@@ -90,11 +115,18 @@
                   <option value="Transferred">Transferred</option>
                   <option value="Replaced">Replaced</option>
                 </select>
-              </div>
-            </div>
+              </label>
           </div>
 
-          <div class="table-responsive">
+          <div class="table-section-head">
+            <div>
+              <span class="section-kicker">Retained history</span>
+              <h3>Archived management records</h3>
+            </div>
+            <span class="result-count" id="archiveResultLabel">0 records</span>
+          </div>
+
+          <div class="table-responsive records-table-wrap">
             <table class="shelter-table">
               <thead>
                 <tr>
@@ -118,7 +150,7 @@
           </div>
 
           <div class="um-pagination" id="paginationBar"></div>
-        </div>
+        </section>
       </div>
     </div>
   </div>

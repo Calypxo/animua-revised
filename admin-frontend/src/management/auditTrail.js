@@ -1,6 +1,7 @@
 import "../css/adminDashboard.css";
 import "../css/sidebar.css";
 import "../css/auditTrail.css";
+import "../css/recordsWorkspace.css";
 
 import { protectPageByModule } from "../auth/authGuard.js";
 import { renderTopbarUser } from "../components/management/topbarUser.js";
@@ -16,6 +17,7 @@ const state = {
   module: "",
   action: "",
   status: "",
+  view: "all",
   currentPage: 1,
   pageSize: 8,
   loadError: "",
@@ -120,6 +122,20 @@ function getStatusClass(status) {
   return "status-success";
 }
 
+function getInitials(name = "") {
+  return String(name).split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "SY";
+}
+
+function getModuleIcon(module = "") {
+  const value = normalize(module);
+  if (value.includes("animal")) return "bi-heart-pulse";
+  if (value.includes("adoption")) return "bi-house-heart";
+  if (value.includes("inventory")) return "bi-box-seam";
+  if (value.includes("user")) return "bi-people";
+  if (value.includes("auth")) return "bi-shield-lock";
+  return "bi-grid";
+}
+
 function applyFilters() {
   let logs = [...state.logs];
 
@@ -144,6 +160,12 @@ function applyFilters() {
     logs = logs.filter((log) => log.status === state.status);
   }
 
+  if (state.view === "attention") {
+    logs = logs.filter((log) => log.status === "Warning" || log.status === "Failed");
+  } else if (state.view === "success") {
+    logs = logs.filter((log) => log.status === "Success");
+  }
+
   state.filteredLogs = logs;
   const warningCount = state.logs.filter((log) => log.status === "Warning").length;
   const failedCount = state.logs.filter((log) => log.status === "Failed").length;
@@ -157,6 +179,11 @@ function applyFilters() {
   Object.entries(headerValues).forEach(([id, value]) => {
     const element = getEl(id);
     if (element) element.textContent = value;
+  });
+  const resultLabel = getEl("auditResultLabel");
+  if (resultLabel) resultLabel.textContent = `${state.filteredLogs.length} event${state.filteredLogs.length === 1 ? "" : "s"}`;
+  document.querySelectorAll("[data-audit-view]").forEach((button) => {
+    button.classList.toggle("active", button.dataset.auditView === state.view);
   });
   const totalPages = Math.max(1, Math.ceil(state.filteredLogs.length / state.pageSize));
   if (state.currentPage > totalPages) state.currentPage = totalPages;
@@ -183,15 +210,23 @@ function renderAlert() {
     return;
   }
 
+  const attention = state.logs.filter((log) => log.status === "Warning" || log.status === "Failed").length;
   bar.innerHTML = `
-    <div class="alert-row alert-info">
-      <i class="bi bi-clock-history"></i>
-      <div>
-        <strong>${state.filteredLogs.length} audit log${state.filteredLogs.length !== 1 ? "s" : ""} found</strong><br />
-        Review user activities and system changes from the recent records below.
+    <div class="audit-signal-card ${attention ? "has-attention" : "is-clear"}">
+      <span class="signal-icon"><i class="bi ${attention ? "bi-exclamation-triangle-fill" : "bi-check-circle-fill"}"></i></span>
+      <div class="signal-copy">
+        <span class="signal-kicker">Current review queue</span>
+        <strong>${attention ? `${attention} event${attention === 1 ? "" : "s"} need attention` : "No unresolved events detected"}</strong>
+        <small>${attention ? "Warnings and failed actions are grouped in the attention view for faster review." : "Management activity is completing without warnings or failures."}</small>
       </div>
+      <button class="signal-action" type="button" data-signal-attention>${attention ? "Review now" : "View activity"}<i class="bi bi-arrow-right"></i></button>
     </div>
   `;
+  bar.querySelector("[data-signal-attention]")?.addEventListener("click", () => {
+    state.view = attention ? "attention" : "all";
+    state.currentPage = 1;
+    applyFilters();
+  });
 }
 
 function getPagedLogs() {
@@ -222,8 +257,12 @@ function renderTable() {
   if (!rows.length) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="7" class="text-center py-5 text-muted">
-          No audit logs found.
+        <td colspan="7">
+          <div class="records-empty-state">
+            <span><i class="bi bi-search"></i></span>
+            <strong>No matching activity</strong>
+            <small>Try a broader search or reset one of the selected filters.</small>
+          </div>
         </td>
       </tr>
     `;
@@ -231,18 +270,17 @@ function renderTable() {
   }
 
   tbody.innerHTML = rows.map((log) => `
-    <tr>
+    <tr class="audit-row">
       <td>
-        <div class="time-cell">
-          ${escapeHtml(log.date)}<br />
-          ${escapeHtml(log.time)}
+        <div class="event-time-cell">
+          <span class="event-dot ${getStatusClass(log.status)}"><i class="bi ${log.status === "Success" ? "bi-check-lg" : log.status === "Warning" ? "bi-exclamation-lg" : "bi-x-lg"}"></i></span>
+          <span><strong>${escapeHtml(log.date)}</strong><small>${escapeHtml(log.time)}</small></span>
         </div>
       </td>
       <td>
-        <span class="actor-name">${escapeHtml(log.actor)}</span>
-        <span class="sub-text">${escapeHtml(log.role)}</span>
+        <div class="actor-cell"><span class="actor-avatar">${escapeHtml(getInitials(log.actor))}</span><span><strong>${escapeHtml(log.actor)}</strong><small>${escapeHtml(log.role)}</small></span></div>
       </td>
-      <td>${escapeHtml(log.module)}</td>
+      <td><span class="module-cell"><i class="bi ${getModuleIcon(log.module)}"></i>${escapeHtml(log.module)}</span></td>
       <td>
         <span class="action-badge ${getActionClass(log.action)}">
           ${escapeHtml(log.action)}
@@ -257,7 +295,7 @@ function renderTable() {
         </span>
       </td>
       <td>
-        <button class="detail-btn" data-view-id="${escapeHtml(log.id)}">View</button>
+        <button class="detail-btn" data-view-id="${escapeHtml(log.id)}" aria-label="View ${escapeHtml(log.record)} details">Review <i class="bi bi-arrow-right"></i></button>
       </td>
     </tr>
   `).join("");
@@ -319,6 +357,11 @@ function openViewModal(id) {
 
   const content = getEl("viewAuditContent");
   content.innerHTML = `
+    <div class="audit-detail-hero ${getStatusClass(log.status)}">
+      <span class="detail-hero-icon"><i class="bi ${log.status === "Success" ? "bi-check-circle-fill" : log.status === "Warning" ? "bi-exclamation-triangle-fill" : "bi-x-octagon-fill"}"></i></span>
+      <div><span>Recorded management event</span><h3>${escapeHtml(log.action)} · ${escapeHtml(log.record)}</h3><p>${escapeHtml(log.actor)} performed this action in ${escapeHtml(log.module)}.</p></div>
+      <span class="status-badge ${getStatusClass(log.status)}">${escapeHtml(log.status)}</span>
+    </div>
     <div class="audit-detail-grid">
       <div class="audit-detail-item">
         <div class="audit-detail-label">Audit ID</div>
@@ -427,6 +470,7 @@ function resetFilters() {
   state.module = "";
   state.action = "";
   state.status = "";
+  state.view = "all";
   state.currentPage = 1;
 
   getEl("searchAudit").value = "";
@@ -533,8 +577,19 @@ function bindFilters() {
 
   getEl("filterStatus")?.addEventListener("change", (e) => {
     state.status = e.target.value;
+    state.view = "all";
     state.currentPage = 1;
     applyFilters();
+  });
+
+  document.querySelectorAll("[data-audit-view]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.view = button.dataset.auditView;
+      state.status = "";
+      getEl("filterStatus").value = "";
+      state.currentPage = 1;
+      applyFilters();
+    });
   });
 }
 

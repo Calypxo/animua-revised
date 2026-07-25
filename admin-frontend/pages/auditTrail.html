@@ -48,12 +48,37 @@
       <div class="page-body">
         <div id="pageHeaderMount"></div>
 
-        <div id="auditAlertBar" class="mb-4"></div>
+        <section class="audit-signal-layout" aria-label="Audit activity summary">
+          <div id="auditAlertBar"></div>
+          <aside class="integrity-card">
+            <span class="integrity-icon"><i class="bi bi-shield-check"></i></span>
+            <div>
+              <span class="integrity-kicker">System integrity</span>
+              <strong>Every management action is traceable</strong>
+              <small>Review exceptions first, then inspect the complete activity history when needed.</small>
+            </div>
+          </aside>
+        </section>
 
-        <div class="panel audit-panel">
-          <div class="panel-head flex-column gap-3">
-            <div class="d-flex gap-2 flex-wrap align-items-center justify-content-between w-100">
-              <div class="d-flex gap-2 flex-wrap">
+        <section class="panel audit-panel">
+          <div class="records-toolbar">
+            <div class="records-heading">
+              <span class="records-heading-icon"><i class="bi bi-activity"></i></span>
+              <div>
+                <h2>Activity explorer</h2>
+                <p>Search and review staff actions, affected records, and system outcomes.</p>
+              </div>
+            </div>
+            <div class="audit-view-switch" aria-label="Audit log views">
+              <button class="audit-view-btn active" data-audit-view="all"><i class="bi bi-list-ul"></i> All activity</button>
+              <button class="audit-view-btn" data-audit-view="attention"><i class="bi bi-exclamation-circle"></i> Needs attention</button>
+              <button class="audit-view-btn" data-audit-view="success"><i class="bi bi-check2-circle"></i> Successful</button>
+            </div>
+          </div>
+
+          <div class="audit-filter-grid">
+              <label class="filter-field filter-field-search">
+                <span>Search activity</span>
                 <div class="search-pill-sm">
                   <i class="bi bi-search"></i>
                   <input
@@ -63,7 +88,10 @@
                     autocomplete="off"
                   />
                 </div>
+              </label>
 
+              <label class="filter-field">
+                <span>Module</span>
                 <select class="filter-select" id="filterModule">
                   <option value="">All modules</option>
                   <option value="Animal Management">Animal Management</option>
@@ -73,7 +101,10 @@
                   <option value="User Management">User Management</option>
                   <option value="Authentication">Authentication</option>
                 </select>
+              </label>
 
+              <label class="filter-field">
+                <span>Action</span>
                 <select class="filter-select" id="filterAction">
                   <option value="">All actions</option>
                   <option value="Created">Created</option>
@@ -83,18 +114,28 @@
                   <option value="Logged In">Logged In</option>
                   <option value="Scheduled">Scheduled</option>
                 </select>
+              </label>
 
+              <label class="filter-field">
+                <span>Outcome</span>
                 <select class="filter-select" id="filterStatus">
                   <option value="">All status</option>
                   <option value="Success">Success</option>
                   <option value="Warning">Warning</option>
                   <option value="Failed">Failed</option>
                 </select>
-              </div>
-            </div>
+              </label>
           </div>
 
-          <div class="table-responsive">
+          <div class="table-section-head">
+            <div>
+              <span class="section-kicker">Chronological record</span>
+              <h3>Recent management activity</h3>
+            </div>
+            <span class="result-count" id="auditResultLabel">0 events</span>
+          </div>
+
+          <div class="table-responsive records-table-wrap">
             <table class="shelter-table">
               <thead>
                 <tr>
@@ -118,7 +159,7 @@
           </div>
 
           <div class="um-pagination" id="paginationBar"></div>
-        </div>
+        </section>
       </div>
     </div>
   </div>
