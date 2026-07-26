@@ -488,11 +488,18 @@ if (adoptionForm) {
         signature_name: document.getElementById("signatureName").value,
       };
 
+      const token = localStorage.getItem("animua_token");
+      const headers = {
+        "Content-Type": "application/json"
+      };
+
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
       const res = await fetch(`${API_BASE_URL}/adoptions`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers,
         body: JSON.stringify(formData)
       });
 

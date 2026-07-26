@@ -16,6 +16,7 @@ export default defineConfig({
         contact:                 resolve(__dirname, 'pages/public/contact.html'),
         announcements:           resolve(__dirname, 'pages/public/announcements.html'),
         surrender:               resolve(__dirname, 'pages/public/surrender.html'),
+        mySubmissions:           resolve(__dirname, 'pages/public/my-submissions.html'),
         verifyEmailAction:       resolve(__dirname, 'pages/public/verify-email-action.html'),
         verifySuccess:           resolve(__dirname, 'pages/public/verify-success.html'),
       },

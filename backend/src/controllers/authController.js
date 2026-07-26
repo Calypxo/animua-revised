@@ -12,7 +12,8 @@ const RECAPTCHA_SECRET_KEY =
   process.env.GOOGLE_RECAPTCHA_SECRET_KEY ||
   "";
 const CURRENT_POLICY_VERSION = "1.0";
-const EMAIL_HERO_IMAGE_PATH = path.join(__dirname, "../assets/cityvet-services-email.jpg");
+const EMAIL_HERO_IMAGE_PATH = path.join(__dirname, "../assets/animua-services-email-banner.png");
+const EMAIL_HERO_IMAGE_CID = "animua-cityvet-banner";
 
 async function writeAccountAuditLog({
   action,
@@ -56,10 +57,106 @@ function escapeHtml(value = "") {
   }[character]));
 }
 
+function normalizeProfileText(value = "", maxLength = 160) {
+  return typeof value === "string"
+    ? value.trim().replace(/\s+/g, " ").slice(0, maxLength)
+    : "";
+}
+
+function normalizePreferredLanguage(value = "") {
+  const language = normalizeProfileText(value, 40);
+  return language || "English";
+}
+
+function normalizeProfilePhoto(value = "") {
+  if (!value) return "";
+
+  if (
+    typeof value !== "string" ||
+    value.length > 450000 ||
+    !/^data:image\/(png|jpe?g|webp);base64,[A-Za-z0-9+/=]+$/i.test(value)
+  ) {
+    return null;
+  }
+
+  return value;
+}
+
+function getStoredFullName(account = {}, firebaseUser = null) {
+  const storedFullName = normalizeProfileText(account.fullName || "", 80);
+  if (storedFullName) return storedFullName;
+
+  const composedName = normalizeProfileText(
+    `${account.firstName || ""} ${account.lastName || ""}`,
+    80
+  );
+  if (composedName) return composedName;
+
+  return normalizeProfileText(firebaseUser?.displayName || "", 80);
+}
+
+function splitFullName(fullName = "") {
+  const cleanName = normalizeProfileText(fullName, 80);
+  const parts = cleanName.split(" ").filter(Boolean);
+
+  if (parts.length <= 1) {
+    return {
+      firstName: cleanName,
+      lastName: "",
+    };
+  }
+
+  return {
+    firstName: parts.slice(0, -1).join(" "),
+    lastName: parts.at(-1),
+  };
+}
+
+function normalizeNotificationSettings(settings = {}) {
+  const source = settings && typeof settings === "object" ? settings : {};
+
+  return {
+    applicationUpdates: source.applicationUpdates !== false,
+    surrenderRequestUpdates: source.surrenderRequestUpdates !== false,
+    announcementsEvents: source.announcementsEvents !== false,
+  };
+}
+
+function serializeAccount(account = {}, fallback = {}) {
+  const firebaseUser = fallback.firebaseUser || null;
+
+  return {
+    email: account.email || firebaseUser?.email || fallback.email || "",
+    fullName: getStoredFullName(account, firebaseUser),
+    role: account.role || "Public",
+    status: account.status || "Active",
+    phone: account.phone || "",
+    preferredLanguage: account.preferredLanguage || "English",
+    profilePhotoDataUrl: account.profilePhotoDataUrl || "",
+    notificationSettings: normalizeNotificationSettings(account.notificationSettings),
+    notificationPreference:
+      account.notificationPreference || "Email and push notifications",
+    privacyPreference: account.privacyPreference || "Standard privacy",
+    createdAt: account.createdAt?.toDate
+      ? account.createdAt.toDate().toISOString()
+      : account.createdAt || "",
+  };
+}
+
 function formatOtpForEmail(otp = "") {
   return String(otp)
     .split("")
-    .map((digit) => `<span style="display:inline-block;padding:0 7px;">${escapeHtml(digit)}</span>`)
+    .map((digit) => `
+      <td align="center" valign="middle" style="padding:0 4px;">
+        <table role="presentation" width="52" height="60" cellspacing="0" cellpadding="0" border="0" style="width:52px;height:60px;border:1px solid #ead2c7;border-radius:11px;background:#fffdfb;border-collapse:separate;box-shadow:0 2px 6px rgba(107,33,25,0.04);">
+          <tr>
+            <td align="center" valign="middle" width="52" height="60" style="width:52px;height:60px;padding:0;color:#7b261d;font-family:Segoe UI,Arial,sans-serif;font-size:35px;line-height:1;font-weight:900;text-align:center;vertical-align:middle;mso-line-height-rule:exactly;">
+              ${escapeHtml(digit)}
+            </td>
+          </tr>
+        </table>
+      </td>
+    `)
     .join("");
 }
 
@@ -68,9 +165,25 @@ function getEmailHeroImageSrc() {
   if (configuredUrl) return configuredUrl;
 
   const appBaseUrl = process.env.APP_BASE_URL?.trim().replace(/\/+$/, "");
-  if (appBaseUrl) return `${appBaseUrl}/images/cityvet-services-email.jpg`;
+  if (appBaseUrl && isPublicEmailAssetBaseUrl(appBaseUrl)) {
+    return `${appBaseUrl}/images/animua-services-email-banner.png`;
+  }
 
-  return "cid:cityvet-services-email";
+  return `cid:${EMAIL_HERO_IMAGE_CID}`;
+}
+
+function isPublicEmailAssetBaseUrl(url = "") {
+  try {
+    const parsedUrl = new URL(url);
+    const hostname = parsedUrl.hostname.toLowerCase();
+
+    return parsedUrl.protocol === "https:" &&
+      hostname !== "localhost" &&
+      hostname !== "127.0.0.1" &&
+      hostname !== "::1";
+  } catch {
+    return false;
+  }
 }
 
 async function sendEmailVerificationOtp({ email, fullName, otp }) {
@@ -83,85 +196,101 @@ async function sendEmailVerificationOtp({ email, fullName, otp }) {
     to: email,
     subject: "Your ANIMUA verification code",
     html: `
-      <div style="display:none;max-height:0;overflow:hidden;color:#f8f3ef;font-size:1px;line-height:1px;">
-        Use this six-digit code to verify your ANIMUA email address.
+      <div style="display:none;max-height:0;overflow:hidden;color:#fbf6f2;font-size:1px;line-height:1px;">
+        Use this verification code to confirm your ANIMUA email address.
       </div>
-      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0;padding:0;background:#f8f3ef;font-family:Segoe UI,Arial,sans-serif;color:#2d3338;">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0;padding:0;background:#ffffff;font-family:Segoe UI,Arial,sans-serif;color:#282828;">
         <tr>
-          <td align="center" style="padding:28px 12px;">
-            <table role="presentation" width="640" cellspacing="0" cellpadding="0" border="0" style="width:640px;max-width:100%;background:#ffffff;border:1px solid #eadbd5;border-radius:14px;overflow:hidden;box-shadow:0 14px 34px rgba(93,31,25,0.10);">
+          <td align="center" style="padding:28px 14px 38px;">
+            <table role="presentation" width="760" cellspacing="0" cellpadding="0" border="0" style="width:760px;max-width:100%;background:#ffffff;border:1px solid #eaded6;border-radius:14px;overflow:hidden;box-shadow:0 10px 30px rgba(52,33,24,0.08);">
               <tr>
-                <td align="center" style="padding:26px 28px 18px;background:#ffffff;">
-                  <div style="font-size:35px;line-height:1;font-weight:900;letter-spacing:0.03em;color:#6f2119;">ANIMUA</div>
-                  <div style="margin-top:6px;font-size:12px;font-weight:700;color:#b8792b;">Compassion. Connection. Care.</div>
+                <td align="center" style="padding:0;background:#f5aa19;">
+                  <img src="${heroImageSrc}" width="760" alt="ANIMUA services banner" style="display:block;width:100%;max-width:760px;height:auto;border:0;outline:none;text-decoration:none;line-height:100%;color:#7b261d;font-family:Segoe UI,Arial,sans-serif;font-size:12px;text-align:center;">
                 </td>
               </tr>
               <tr>
-                <td>
-                  <img src="${heroImageSrc}" width="640" alt="Angeles City Veterinary Office services" style="display:block;width:100%;max-width:640px;height:auto;border:0;line-height:100%;">
+                <td align="center" style="padding:34px 36px 10px;background:#ffffff;">
+                  <h1 style="margin:0;color:#7b261d;font-family:Segoe UI,Arial,sans-serif;font-size:31px;line-height:1.2;font-weight:900;text-align:center;">Verify your email address</h1>
+                  <div style="width:72px;margin:11px auto 14px;border-top:2px solid #efbd29;font-size:0;line-height:0;">&nbsp;</div>
+                  <p style="margin:0 0 9px;color:#2c2c2c;font-family:Segoe UI,Arial,sans-serif;font-size:16px;line-height:1.45;font-weight:800;text-align:center;">Hello, ${safeFullName}!</p>
+                  <p style="margin:0;color:#4a4f54;font-family:Segoe UI,Arial,sans-serif;font-size:15px;line-height:1.55;text-align:center;">Thank you for creating an ANIMUA account.<br>Use the verification code below to confirm your email address.</p>
                 </td>
               </tr>
               <tr>
-                <td align="center" style="padding:30px 34px 18px;background:#ffffff;">
-                  <h1 style="margin:0;color:#6f2119;font-size:30px;line-height:1.2;font-weight:900;">Verify your email</h1>
-                  <div style="width:112px;margin:14px auto 22px;border-top:2px solid #d9a544;"></div>
-                  <p style="margin:0 0 10px;color:#2d3338;font-size:16px;line-height:1.6;font-weight:800;">Hello, ${safeFullName}!</p>
-                  <p style="margin:0;color:#4f575d;font-size:15px;line-height:1.65;">Thank you for creating an ANIMUA account. Use the verification code below to confirm your email address.</p>
-                </td>
-              </tr>
-              <tr>
-                <td align="center" style="padding:10px 34px 16px;background:#ffffff;">
-                  <div style="max-width:420px;margin:0 auto;padding:18px 14px;border:1.5px solid #8e2f25;border-radius:12px;background:#fffdfb;color:#6f2119;font-size:34px;line-height:1.25;font-weight:900;letter-spacing:0.18em;text-align:center;">
-                    ${formattedOtp}
-                  </div>
-                  <p style="margin:16px 0 0;color:#6b625e;font-size:14px;line-height:1.5;">Valid for 10 minutes</p>
-                </td>
-              </tr>
-              <tr>
-                <td style="padding:8px 34px 0;background:#ffffff;">
-                  <div style="border-top:1px solid #eadbd5;"></div>
-                </td>
-              </tr>
-              <tr>
-                <td style="padding:18px 34px 18px;background:#ffffff;">
-                  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                <td align="center" style="padding:9px 36px 22px;background:#ffffff;">
+                  <table role="presentation" width="430" cellspacing="0" cellpadding="0" border="0" style="width:430px;max-width:100%;background:#f8f1ed;border-radius:14px;box-shadow:0 8px 20px rgba(78,45,33,0.07);">
                     <tr>
-                      <td width="52" valign="top" style="padding-right:14px;">
-                        <div style="width:42px;height:42px;border-radius:50%;background:#f5e7e2;color:#6f2119;text-align:center;line-height:42px;font-size:22px;font-weight:900;">!</div>
+                      <td align="center" style="padding:17px 16px 5px;color:#7b261d;font-family:Segoe UI,Arial,sans-serif;font-size:13px;line-height:1.3;font-weight:900;text-transform:uppercase;">
+                        YOUR VERIFICATION CODE
                       </td>
-                      <td valign="top">
-                        <p style="margin:0 0 5px;color:#6f2119;font-size:15px;line-height:1.4;font-weight:900;">For your security</p>
-                        <p style="margin:0;color:#40474c;font-size:14px;line-height:1.55;">Never share this code with anyone. ANIMUA staff will never ask for your verification code.</p>
+                    </tr>
+                    <tr>
+                      <td align="center" style="padding:9px 20px 14px;">
+                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center">
+                          <tr>${formattedOtp}</tr>
+                        </table>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td align="center" style="padding:0 16px 17px;color:#4f5052;font-family:Segoe UI,Arial,sans-serif;font-size:14px;line-height:1.4;">
+                        Valid for 10 minutes.
                       </td>
                     </tr>
                   </table>
                 </td>
               </tr>
               <tr>
-                <td style="padding:0 34px;background:#ffffff;">
-                  <div style="border-top:1px solid #eadbd5;"></div>
+                <td style="padding:0 112px;background:#ffffff;">
+                  <div style="border-top:1px solid #e8ded8;font-size:0;line-height:0;">&nbsp;</div>
                 </td>
               </tr>
               <tr>
-                <td style="padding:18px 34px 28px;background:#ffffff;">
-                  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                <td align="center" style="padding:20px 90px 30px;background:#ffffff;">
+                  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:520px;">
                     <tr>
-                      <td width="52" valign="top" style="padding-right:14px;">
-                        <div style="width:42px;height:42px;border-radius:50%;background:#fff4df;color:#8e2f25;text-align:center;line-height:42px;font-size:20px;font-weight:900;">?</div>
+                      <td width="50%" valign="top" style="padding:0 26px 0 0;">
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                          <tr>
+                            <td width="58" valign="top" style="padding:0 14px 0 0;">
+                              <table role="presentation" width="52" height="52" cellspacing="0" cellpadding="0" border="0" style="width:52px;height:52px;border-collapse:separate;">
+                                <tr>
+                                  <td width="52" height="52" align="center" valign="middle" style="width:52px;height:52px;border-radius:26px;background:#f4ebe5;color:#7b261d;font-family:Segoe UI,Arial,sans-serif;font-size:24px;line-height:1;font-weight:900;text-align:center;mso-line-height-rule:exactly;">&#10003;</td>
+                                </tr>
+                              </table>
+                            </td>
+                            <td valign="top" style="padding-top:2px;">
+                              <p style="margin:0 0 6px;color:#7b261d;font-family:Segoe UI,Arial,sans-serif;font-size:15px;line-height:1.3;font-weight:900;">For your security</p>
+                              <p style="margin:0;color:#303133;font-family:Segoe UI,Arial,sans-serif;font-size:13px;line-height:1.5;">Never share this code with anyone. ANIMUA staff will never ask for your verification code.</p>
+                            </td>
+                          </tr>
+                        </table>
                       </td>
-                      <td valign="top">
-                        <p style="margin:0 0 5px;color:#6f2119;font-size:15px;line-height:1.4;font-weight:900;">Need help?</p>
-                        <p style="margin:0;color:#40474c;font-size:14px;line-height:1.55;">Contact the Angeles City Veterinary Office for questions or assistance.</p>
+                      <td width="1" style="background:#eadfd8;font-size:0;line-height:0;">&nbsp;</td>
+                      <td width="50%" valign="top" style="padding:0 0 0 26px;">
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                          <tr>
+                            <td width="58" valign="top" style="padding:0 14px 0 0;">
+                              <table role="presentation" width="52" height="52" cellspacing="0" cellpadding="0" border="0" style="width:52px;height:52px;border-collapse:separate;">
+                                <tr>
+                                  <td width="52" height="52" align="center" valign="middle" style="width:52px;height:52px;border-radius:26px;background:#f4ebe5;color:#7b261d;font-family:Segoe UI,Arial,sans-serif;font-size:29px;line-height:1;font-weight:900;text-align:center;mso-line-height-rule:exactly;">?</td>
+                                </tr>
+                              </table>
+                            </td>
+                            <td valign="top" style="padding-top:2px;">
+                              <p style="margin:0 0 6px;color:#7b261d;font-family:Segoe UI,Arial,sans-serif;font-size:15px;line-height:1.3;font-weight:900;">Need help?</p>
+                              <p style="margin:0;color:#303133;font-family:Segoe UI,Arial,sans-serif;font-size:13px;line-height:1.5;">Contact the Angeles City Veterinary Office for questions or assistance.</p>
+                            </td>
+                          </tr>
+                        </table>
                       </td>
                     </tr>
                   </table>
-                  <p style="margin:22px 0 0;color:#687077;font-size:13px;line-height:1.55;text-align:center;">If you did not create an ANIMUA account, you may safely ignore this email.</p>
                 </td>
               </tr>
               <tr>
-                <td align="center" style="padding:18px 24px 22px;background:#f8f3ef;color:#6f2119;">
-                  <p style="margin:0 0 8px;font-size:13px;line-height:1.4;font-weight:900;">&copy; 2026 ANIMUA</p>
-                  <p style="margin:0;color:#6b625e;font-size:12px;line-height:1.5;">This is an automated message. Please do not reply directly to this email.</p>
+                <td align="center" style="padding:20px 24px 18px;background:#fbf6f2;color:#7b261d;">
+                  <p style="margin:0 0 10px;color:#77777a;font-family:Segoe UI,Arial,sans-serif;font-size:13px;line-height:1.45;text-align:center;">This is an automated message. Please do not reply directly to this email.</p>
+                  <p style="margin:0;color:#7b261d;font-family:Segoe UI,Arial,sans-serif;font-size:16px;line-height:1.4;font-weight:900;text-align:center;">&copy; 2026 ANIMUA</p>
                 </td>
               </tr>
             </table>
@@ -169,13 +298,17 @@ async function sendEmailVerificationOtp({ email, fullName, otp }) {
         </tr>
       </table>
     `,
-    attachments: [
-      {
-        filename: "cityvet-services-email.jpg",
-        path: EMAIL_HERO_IMAGE_PATH,
-        cid: "cityvet-services-email"
-      }
-    ]
+    attachments: heroImageSrc.startsWith("cid:")
+      ? [
+          {
+            filename: "animua-services-email-banner.png",
+            path: EMAIL_HERO_IMAGE_PATH,
+            cid: EMAIL_HERO_IMAGE_CID,
+            contentType: "image/png",
+            contentDisposition: "inline"
+          }
+        ]
+      : []
   };
 
   await transporter.sendMail(mailOptions);
@@ -347,7 +480,7 @@ exports.requestEmailVerificationOtp = async (req, res) => {
       const existing = existingOtpDoc.data();
       const createdAt = existing.createdAt?.toDate ? existing.createdAt.toDate() : null;
 
-      if (createdAt && Date.now() - createdAt.getTime() < 60 * 1000) {
+      if (createdAt && Date.now() - createdAt.getTime() < 30 * 1000) {
         return res.status(429).json({ message: "Please wait before requesting another email OTP." });
       }
     }
@@ -594,6 +727,7 @@ if (!userData.emailVerified && !userData.phoneVerified) {
       role: userData.role,
       fullName: userData.fullName,
       email: userData.email,
+      account: serializeAccount(userData, { email }),
       emailVerified: Boolean(userData.emailVerified),
       phoneVerified: Boolean(userData.phoneVerified)
     });
@@ -672,6 +806,10 @@ exports.discardUnverifiedRegistration = async (req, res) => {
       }
     }
 
+    await db.collection("emailVerificationOtps").doc(email).delete().catch((error) => {
+      console.warn("[Discard Email OTP Cleanup Warning]", error.message);
+    });
+
     return res.status(200).json({ message: "Unverified registration discarded." });
   } catch (error) {
     console.error("[Discard Unverified Registration Error]", error.message);
@@ -680,14 +818,36 @@ exports.discardUnverifiedRegistration = async (req, res) => {
 };
 
 exports.getCurrentAccount = async (req, res) => {
-  return res.status(200).json({
-    account: {
-      email: req.user.email,
-      fullName: req.user.fullName,
-      role: req.user.role,
-      status: req.user.status,
-    },
-  });
+  try {
+    const userDoc = await db.collection("users").doc(req.user.email).get();
+
+    if (!userDoc.exists) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    const userData = userDoc.data() || {};
+    let firebaseUser = null;
+
+    try {
+      firebaseUser = userData.firebaseUid
+        ? await admin.auth().getUser(userData.firebaseUid)
+        : await admin.auth().getUserByEmail(req.user.email);
+    } catch (firebaseError) {
+      if (firebaseError.code !== "auth/user-not-found") {
+        console.warn("[Get Current Account Firebase Fallback]", firebaseError.message);
+      }
+    }
+
+    return res.status(200).json({
+      account: serializeAccount(userData, {
+        email: req.user.email || userDoc.id,
+        firebaseUser,
+      }),
+    });
+  } catch (error) {
+    console.error("[Get Current Account Error]", error.message);
+    return res.status(500).json({ message: "Internal server error." });
+  }
 };
 
 exports.updateUsername = async (req, res) => {
@@ -722,9 +882,46 @@ exports.updateUsername = async (req, res) => {
     }
 
     const userData = userDoc.data();
+    const hasField = (field) =>
+      Object.prototype.hasOwnProperty.call(req.body || {}, field);
+    const phone = hasField("phone")
+      ? normalizeProfileText(req.body.phone, 32)
+      : userData.phone || "";
+    const preferredLanguage = hasField("preferredLanguage")
+      ? normalizePreferredLanguage(req.body.preferredLanguage)
+      : userData.preferredLanguage || "English";
+    const notificationPreference = hasField("notificationPreference")
+      ? normalizeProfileText(req.body.notificationPreference, 80) ||
+        "Email and push notifications"
+      : userData.notificationPreference || "Email and push notifications";
+    const notificationSettings = hasField("notificationSettings")
+      ? normalizeNotificationSettings(req.body.notificationSettings)
+      : normalizeNotificationSettings(userData.notificationSettings);
+    const privacyPreference = hasField("privacyPreference")
+      ? normalizeProfileText(req.body.privacyPreference, 80) || "Standard privacy"
+      : userData.privacyPreference || "Standard privacy";
+    const profilePhotoDataUrl = hasField("profilePhotoDataUrl")
+      ? normalizeProfilePhoto(req.body.profilePhotoDataUrl)
+      : userData.profilePhotoDataUrl || "";
+
+    if (profilePhotoDataUrl === null) {
+      return res.status(400).json({
+        message: "Profile photo must be a valid PNG, JPG, or WebP image under 450 KB.",
+      });
+    }
+
+    const splitName = splitFullName(fullName);
 
     await userRef.update({
       fullName,
+      firstName: splitName.firstName,
+      lastName: splitName.lastName,
+      phone,
+      preferredLanguage,
+      notificationPreference,
+      notificationSettings,
+      privacyPreference,
+      profilePhotoDataUrl,
       updatedAt: admin.firestore.FieldValue.serverTimestamp()
     });
 
@@ -741,12 +938,38 @@ exports.updateUsername = async (req, res) => {
     await writeAccountAuditLog({
       action: "account.profile_updated",
       user: { ...req.user, fullName },
-      before: { fullName: userData.fullName || "" },
-      after: { fullName },
+      before: {
+        fullName: userData.fullName || "",
+        firstName: userData.firstName || "",
+        lastName: userData.lastName || "",
+        phone: userData.phone || "",
+        preferredLanguage: userData.preferredLanguage || "English",
+        notificationSettings: normalizeNotificationSettings(userData.notificationSettings),
+      },
+      after: {
+        fullName,
+        firstName: splitName.firstName,
+        lastName: splitName.lastName,
+        phone,
+        preferredLanguage,
+        notificationSettings,
+      },
     });
 
     return res.status(200).json({
       message: "Display name updated successfully.",
+      account: serializeAccount({
+        ...userData,
+        fullName,
+        firstName: splitName.firstName,
+        lastName: splitName.lastName,
+        phone,
+        preferredLanguage,
+        notificationPreference,
+        notificationSettings,
+        privacyPreference,
+        profilePhotoDataUrl,
+      }, { email }),
       fullName
     });
   } catch (error) {
@@ -810,6 +1033,19 @@ exports.changePassword = async (req, res) => {
       return res.status(401).json({ message: "Current password is incorrect." });
     }
 
+    if (userData.firebaseUid) {
+      try {
+        await admin.auth().updateUser(userData.firebaseUid, {
+          password: newPassword
+        });
+      } catch (firebaseError) {
+        console.warn("[Update Firebase Password Failed]", firebaseError.message);
+        return res.status(502).json({
+          message: "Password was not changed because Firebase could not update your login password. Please try again."
+        });
+      }
+    }
+
     const newStoredPassword = IS_INSECURE_MODE
       ? newPassword
       : await bcrypt.hash(newPassword, 12);
@@ -818,16 +1054,6 @@ exports.changePassword = async (req, res) => {
       password: newStoredPassword,
       updatedAt: admin.firestore.FieldValue.serverTimestamp()
     });
-
-    if (userData.firebaseUid) {
-      try {
-        await admin.auth().updateUser(userData.firebaseUid, {
-          password: newPassword
-        });
-      } catch (firebaseError) {
-        console.warn("[Update Firebase Password]", firebaseError.message);
-      }
-    }
 
     await writeAccountAuditLog({
       action: "account.password_changed",

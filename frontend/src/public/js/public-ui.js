@@ -5,6 +5,52 @@ import { handleRegistration } from "../../auth/register.js";
 import { API_BASE_URL } from "../../utils/api.js";
 import { db } from "../../utils/firebase.js";
 
+const CHATBOT_MIN_TYPING_MS = 1000;
+const NEWS_CCA_CAT_RESCUE_IMAGE = new URL(
+  "../../assets/images/news-cca-cat-rescue.png",
+  import.meta.url
+).href;
+const NEWS_BALIBAGO_DOG_RESCUE_IMAGE = new URL(
+  "../../assets/images/news-balibago-dog-rescue.jpg",
+  import.meta.url
+).href;
+const NEWS_NEPO_STRAY_CATS_RESCUE_IMAGE = new URL(
+  "../../assets/images/news-angeles-stray-cats-rescue.png",
+  import.meta.url
+).href;
+const NEWS_NEPO_STRAY_CATS_STORY_IMAGE = new URL(
+  "../../assets/images/news-nepo-stray-cats-rescue.jpg",
+  import.meta.url
+).href;
+const HIGHLIGHT_NEWS_ALERT_IMAGE = new URL(
+  "../../assets/images/highlight-news-alert.jpg",
+  import.meta.url
+).href;
+const HIGHLIGHT_SUCCESS_STORY_IMAGE = new URL(
+  "../../assets/images/highlight-success-story.jpg",
+  import.meta.url
+).href;
+const HIGHLIGHT_UPCOMING_EVENT_IMAGE = new URL(
+  "../../assets/images/highlight-upcoming-event.jpg",
+  import.meta.url
+).href;
+const SUCCESS_ZACH_ADOPTION_IMAGE = new URL(
+  "../../assets/images/success-zach-adoption.jpg",
+  import.meta.url
+).href;
+const SUCCESS_LOLONG_ADOPTION_IMAGE = new URL(
+  "../../assets/images/success-lolong-adoption.jpg",
+  import.meta.url
+).href;
+const SUCCESS_WHITY_ADOPTION_IMAGE = new URL(
+  "../../assets/images/success-whity-adoption.jpg",
+  import.meta.url
+).href;
+const SUCCESS_MARCIA_ADOPTION_IMAGE = new URL(
+  "../../assets/images/success-marcia-adoption.jpg",
+  import.meta.url
+).href;
+
 const menuToggle = document.getElementById("menuToggle");
 const navbar = document.getElementById("navbar");
 const body = document.body;
@@ -18,6 +64,35 @@ const openAuthModalBtn =
   document.getElementById("loginNavBtn") ||
   document.getElementById("openAuthModal");
 const closeAuthModalBtn = document.getElementById("closeAuthModal");
+const quizIntroModal = document.getElementById("quiz-match-info");
+const quizIntroTriggers = document.querySelectorAll("[data-quiz-intro-trigger]");
+const quizIntroCloseButtons = document.querySelectorAll("[data-quiz-intro-close]");
+const quizPageModal = document.getElementById("quizPageModal");
+const quizPageFrame = document.getElementById("quizPageFrame");
+const quizPageTriggers = document.querySelectorAll("[data-quiz-page-trigger]");
+const quizPageCloseButtons = document.querySelectorAll("[data-quiz-page-close]");
+let lastQuizIntroTrigger = null;
+const profileModal = document.getElementById("profileModal");
+const profileModalCard = profileModal?.querySelector(".profile-modal-card");
+const profileCloseButtons = document.querySelectorAll("[data-profile-close]");
+const profileForm = document.getElementById("profileForm");
+const profileEditBtn = document.getElementById("profileEditBtn");
+const profileSaveBtn = document.getElementById("profileSaveBtn");
+const profileChangePhotoBtn = document.getElementById("profileChangePhotoBtn");
+const profileAvatarPhotoBtn = document.getElementById("profileAvatarPhotoBtn");
+const profilePhotoInput = document.getElementById("profilePhotoInput");
+const profilePasswordBtn = document.getElementById("profilePasswordBtn");
+const profileNotificationsBtn = document.getElementById("profileNotificationsBtn");
+const PROFILE_PHOTO_MAX_SIDE = 420;
+const PROFILE_PHOTO_MAX_BYTES = 320000;
+const DEFAULT_NOTIFICATION_SETTINGS = {
+  applicationUpdates: true,
+  surrenderRequestUpdates: true,
+  announcementsEvents: true,
+};
+let currentProfileAccount = null;
+let pendingProfilePhotoDataUrl = "";
+let lastProfileTrigger = null;
 
 const loginSection = document.getElementById("login-section");
 const registerSection = document.getElementById("register-section");
@@ -54,13 +129,79 @@ function clearFormErrors() {
 }
 
 function openAuthModal(event) {
+  if (!authModal) return;
   if (event) event.preventDefault();
-  if (authModal) authModal.classList.remove("hidden");
+  authModal.classList.remove("hidden");
   document.body.classList.add("modal-open");
 }
 
 function closeAuthModal() {
   if (authModal) authModal.classList.add("hidden");
+  document.body.classList.remove("modal-open");
+}
+
+function openQuizIntroModal(event) {
+  if (event) {
+    event.preventDefault();
+    lastQuizIntroTrigger = event.currentTarget || event.target?.closest("[data-quiz-intro-trigger]") || null;
+  } else {
+    lastQuizIntroTrigger = document.querySelector("[data-quiz-intro-trigger]") || null;
+  }
+  if (!quizIntroModal) return;
+
+  quizIntroModal.classList.remove("hidden");
+  quizIntroModal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("modal-open");
+  document.body.classList.add("quiz-intro-open");
+  quizIntroModal.querySelector(".quiz-intro-close")?.focus();
+}
+
+function clearQuizIntroUrlState() {
+  const url = new URL(window.location.href);
+  url.searchParams.delete("quizIntro");
+
+  if (url.hash === "#quiz-match-info") {
+    url.hash = "";
+  }
+
+  window.history.replaceState(null, "", url.pathname + url.search + url.hash);
+}
+
+function closeQuizIntroModal(event) {
+  if (event) event.preventDefault();
+  if (!quizIntroModal) return;
+
+  quizIntroModal.classList.add("hidden");
+  quizIntroModal.setAttribute("aria-hidden", "true");
+  if (!quizPageModal || quizPageModal.classList.contains("hidden")) {
+    document.body.classList.remove("modal-open");
+  }
+  document.body.classList.remove("quiz-intro-open");
+
+  clearQuizIntroUrlState();
+  if (lastQuizIntroTrigger && typeof lastQuizIntroTrigger.focus === "function") {
+    lastQuizIntroTrigger.focus();
+  }
+}
+
+function openQuizPageModal(event) {
+  if (event) event.preventDefault();
+  if (!quizPageModal || !quizPageFrame) return;
+
+  closeQuizIntroModal();
+  quizPageFrame.src = "/pages/public/petCompatibility.html";
+  quizPageModal.classList.remove("hidden");
+  quizPageModal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("modal-open");
+}
+
+function closeQuizPageModal(event) {
+  if (event) event.preventDefault();
+  if (!quizPageModal) return;
+
+  quizPageModal.classList.add("hidden");
+  quizPageModal.setAttribute("aria-hidden", "true");
+  if (quizPageFrame) quizPageFrame.src = "";
   document.body.classList.remove("modal-open");
 }
 
@@ -146,30 +287,43 @@ function getInitial(name = "User") {
   return getFirstName(name).charAt(0).toUpperCase() || "U";
 }
 
+function renderUserAvatar(element, fullName = "User", photoDataUrl = "") {
+  if (!element) return;
+
+  element.innerHTML = photoDataUrl
+    ? `<img src="${photoDataUrl}" alt="">`
+    : getInitial(fullName);
+}
+
 function updateAuthUI() {
   const dropdownUserName = document.getElementById("dropdownUserName");
   const loginNavBtn = document.getElementById("loginNavBtn");
   const userLoggedInBox = document.getElementById("userLoggedInBox");
   const loggedUserName = document.getElementById("loggedUserName");
   const userAvatarMini = document.querySelector(".user-avatar-mini");
+  const dropdownUserInitial = document.getElementById("dropdownUserInitial");
   const logoutBtn = document.getElementById("logoutBtn");
 
-  const isLoggedIn = localStorage.getItem("is_logged_in") === "true";
+  const hasToken = Boolean(localStorage.getItem("animua_token"));
+  const isLoggedIn = localStorage.getItem("is_logged_in") === "true" || hasToken;
   const userName = localStorage.getItem("user_name") || "User";
+  const userPhoto = localStorage.getItem("user_profile_photo") || "";
   const displayName = getFirstName(userName);
 
   if (isLoggedIn) {
     if (loginNavBtn) loginNavBtn.classList.add("hidden");
     if (userLoggedInBox) userLoggedInBox.classList.remove("hidden");
     if (loggedUserName) loggedUserName.textContent = displayName;
-    if (dropdownUserName) dropdownUserName.textContent = userName;
-    if (userAvatarMini) userAvatarMini.textContent = getInitial(userName);
+    if (dropdownUserName) dropdownUserName.textContent = displayName;
+    renderUserAvatar(userAvatarMini, userName, userPhoto);
+    renderUserAvatar(dropdownUserInitial?.closest(".user-dropdown-avatar"), userName, userPhoto);
   } else {
     if (loginNavBtn) loginNavBtn.classList.remove("hidden");
     if (userLoggedInBox) userLoggedInBox.classList.add("hidden");
     if (userAvatarMini) {
       userAvatarMini.innerHTML = '<i class="fa-solid fa-user"></i>';
     }
+    renderUserAvatar(dropdownUserInitial?.closest(".user-dropdown-avatar"), "Account", "");
   }
 
   if (logoutBtn && !logoutBtn.dataset.bound) {
@@ -201,6 +355,7 @@ function updateAuthUI() {
       localStorage.removeItem("user_role");
       localStorage.removeItem("user_name");
       localStorage.removeItem("user_email");
+      localStorage.removeItem("user_profile_photo");
       localStorage.removeItem("is_logged_in");
       localStorage.removeItem("show_welcome_toast");
 
@@ -253,9 +408,15 @@ function setupHomeStories() {
   const storyButtons = document.querySelectorAll(".home-highlight-story");
   const storyModal = document.getElementById("storyModal");
   const storyModalCard = storyModal?.querySelector(".story-modal-card");
+  const storyModalProgress = storyModal?.querySelector(".story-modal-progress");
   const storyModalClose = document.getElementById("storyModalClose");
+  const storyModalPrev = document.getElementById("storyModalPrev");
+  const storyModalNext = document.getElementById("storyModalNext");
+  const storyModalAvatar = document.getElementById("storyModalAvatar");
   const storyModalImage = document.getElementById("storyModalImage");
   const storyModalTag = document.getElementById("storyModalTag");
+  const storyModalBrandTag = document.getElementById("storyModalBrandTag");
+  const storyModalDate = document.getElementById("storyModalDate");
   const storyModalTitle = document.getElementById("storyModalTitle");
   const storyModalText = document.getElementById("storyModalText");
   const storyModalContent = document.getElementById("storyModalContent");
@@ -280,6 +441,173 @@ function setupHomeStories() {
   let upcomingEvents = [];
   let adoptedStoriesLoaded = false;
   let adoptedStories = [];
+  let activeHighlightKey = null;
+  let activeStoryIndex = 0;
+  let activeStoryDeck = [];
+  let storyAdvanceTimer = null;
+  const STORY_AUTO_ADVANCE_MS = 7000;
+  const newsAlerts = [
+    {
+      tag: "News & Alerts",
+      title: "Pag-rescue sa stray cats, nagpapatuloy sa Angeles City",
+      titleHtml: 'Pag-rescue sa<br><span>stray cats</span>',
+      date: "July 21, 2026",
+      sortDate: "2026-07-21",
+      image: NEWS_NEPO_STRAY_CATS_STORY_IMAGE,
+      imageAlt: "Stray cat rescue operation in Nepo Mart",
+      source: "CLTV36 News",
+      photoCredit: "Photo from Angeles CIO",
+      href: "https://www.facebook.com/cltv36news",
+      hashtag: "#CentralLuzonNews #CLTV36 #Pampanga #AngelesCity #straycats",
+      paragraphs: [
+        "Ipinagpatuloy ng Angeles City Veterinary Office ang stray cat rescue operation sa Nepo Mart nitong Martes, July 21, bilang bahagi ng kanilang programa na tiyakin ang kapakanan ng mga hayop.",
+        "Layon ng opisina na panatilihin ang kaligtasan at kalinisan ng mga pampublikong lugar, habang sinisigurado ang maayos at makataong pagtrato sa mga ligaw na hayop.",
+        "Ligtas namang dinala ang mga nahuling stray cat sa Angeles City Pound, kung saan oobserbahan sila at bibigyan ng kinakailangang veterinary procedures na nakaayon sa animal welfare protocols.",
+        "Patuloy namang hinihikayat ng City Veterinary Office ang mga Angeleno na maging responsableng pet owners at makibahagi sa mga inisyatibang nagsusulong ng animal welfare sa lungsod. | via Noel Celeste, CLTV36 News"
+      ],
+      storyParagraphs: [
+        "Ipinagpatuloy ng Angeles City Veterinary Office ang stray cat rescue operation sa Nepo Mart.",
+        "Ligtas na dinala ang mga nahuling stray cat sa Angeles City Pound para sa observation at veterinary procedures.",
+        "Hinihikayat ang mga Angeleno na maging responsableng pet owners at makibahagi sa animal welfare initiatives."
+      ]
+    },
+    {
+      tag: "News & Alerts",
+      title: "Stray cat rescue at CCA",
+      titleHtml: 'Stray cat rescue<br><span>at CCA</span>',
+      date: "July 20, 2026",
+      sortDate: "2026-07-20",
+      image: NEWS_CCA_CAT_RESCUE_IMAGE,
+      imageAlt: "Stray cat rescue operation at City College of Angeles",
+      source: "CLTV36 News",
+      photoCredit: "Photo: Angeles City Information Office",
+      href: "https://www.facebook.com/share/p/1Dm62o3wpH/",
+      hashtag: "#CentralLuzonNews #CLTV36 #Pampanga #straycat #rescue",
+      paragraphs: [
+        "Nagsagawa ng stray cat rescue operation ang Angeles City Veterinary Office ngayong Lunes, July 20, sa City College of Angeles (CCA).",
+        "Ayon sa City Veterinary Office, bahagi ito ng kanilang programa para sa animal welfare at responsableng pangangalaga sa mga ligaw na hayop.",
+        "Ligtas na nahuli at dinala sa Angeles City Pound ang mga stray cat upang mabigyan ng kinakailangang pagkalinga at serbisyong beterinaryo.",
+        "Layunin din ng programa na mapanatili ang kaligtasan at kalinisan sa komunidad habang tinutugunan ang isyu ng mga ligaw na hayop sa mga pampublikong lugar.",
+        "Kaugnay nito, hinimok ng City Veterinary Office ang mga Angeleno na isulong ang responsible pet ownership at i-report ang mga hayop na nangangailangan ng tulong upang agad na mabigyan ng kaukulang aksyon. | via Joanna Borbon, CLTV36 News"
+      ],
+      storyParagraphs: [
+        "Nagsagawa ng stray cat rescue operation ang Angeles City Veterinary Office sa City College of Angeles (CCA).",
+        "Ligtas na nahuli at dinala sa Angeles City Pound ang mga stray cat upang mabigyan ng pagkalinga at serbisyong beterinaryo.",
+        "Hinimok din ang mga Angeleno na isulong ang responsible pet ownership at i-report ang hayop na nangangailangan ng tulong."
+      ]
+    },
+    {
+      tag: "News & Alerts",
+      title: "Aso na-rescue sa Balibago",
+      titleHtml: 'Aso na-rescue<br><span>sa Balibago</span>',
+      date: "May 14, 2025",
+      sortDate: "2025-05-14",
+      image: NEWS_BALIBAGO_DOG_RESCUE_IMAGE,
+      imageAlt: "Rescued dog at the Balibago collapsed construction site",
+      source: "Angeles City Information Office",
+      photoCredit: "Photos: Bureau of Fire Protection Central Luzon",
+      href: "https://www.facebook.com/angelescityinfo/posts/pfbid0d7amcF8R4hxvhZB4HeaPTxj4yHwJr4AJCWTwEMQMK55xW1BCmtp8wtVWqGbVhNTgl",
+      hashtag: "#AngelesCity",
+      paragraphs: [
+        "Sa gitna ng search and rescue operations sa gumuhong ginagawang gusali sa Balibago, isang aso ang na-rescue at kasalukuyang nasa pangangalaga ng mga responders.",
+        "Ayon sa ulat sa construction site, ang aso ay biglang nakita na papalabas mula sa rubble habang naagsasagawa ng operasyon. Agad itong inasikaso at inilipat sa ligtas na pangangalaga ng mga rescuers.",
+        "Isasailalim ang aso sa masusing check-up sa pangangalaga ng City Veterinary Office ng Angeles City."
+      ],
+      storyParagraphs: [
+        "Ayon sa ulat sa construction site, ang aso ay biglang nakita na papalabas mula sa rubble habang naagsasagawa ng operasyon.",
+        "Agad itong inasikaso at inilipat sa ligtas na pangangalaga ng mga rescuers.",
+        "Isasailalim ang aso sa masusing check-up ng City Veterinary Office ng Angeles City."
+      ]
+    }
+  ].sort((a, b) => Date.parse(b.sortDate || b.date) - Date.parse(a.sortDate || a.date));
+  const latestNewsAlert = newsAlerts[0];
+  const successStories = [
+    {
+      tag: "Success Stories",
+      title: "Zach starts a new life",
+      titleHtml: 'Zach starts<br><span>a new life</span>',
+      date: "Adoption Story",
+      image: SUCCESS_ZACH_ADOPTION_IMAGE,
+      imageAlt: "Zach with his adopter",
+      intro: "Rescued dog Zach is now starting a new life with his loving fur-parent.",
+      adopter: "Hamara Dela Cruz of Brgy. Ninoy Aquino",
+      petName: "Zach",
+      storyParagraphs: [
+        "Rescued dog Zach is now starting a new life with his loving fur-parent.",
+        "Zach was adopted by Hamara Dela Cruz of Brgy. Ninoy Aquino.",
+        "His adoption supports the Angeles City Government's Adopt, Don't Shop initiative."
+      ]
+    },
+    {
+      tag: "Success Stories",
+      title: "Lolong welcomed home",
+      titleHtml: 'Lolong welcomed<br><span>home</span>',
+      date: "Adoption Story",
+      image: SUCCESS_LOLONG_ADOPTION_IMAGE,
+      imageAlt: "Lolong in a carrier with adopter Analyn Rivera",
+      intro: "Rescued cat Lolong is now starting a new life with a loving fur-parent.",
+      adopter: "Analyn Rivera of Brgy. Anunas",
+      petName: "Lolong",
+      storyParagraphs: [
+        "Rescued cat Lolong is now starting a new life with a loving fur-parent.",
+        "Lolong was welcomed by Analyn Rivera of Brgy. Anunas.",
+        "The Angeles City Dog Pound and Animal Shelter continues to help rescued pets find forever homes."
+      ]
+    },
+    {
+      tag: "Success Stories",
+      title: "Whity finds a family",
+      titleHtml: 'Whity finds<br><span>a family</span>',
+      date: "Adoption Story",
+      image: SUCCESS_WHITY_ADOPTION_IMAGE,
+      imageAlt: "Whity with adopter Noel Agustin",
+      intro: "Rescued cat Whity is now starting a new life with a loving fur-parent.",
+      adopter: "Noel Agustin of Barangay Margot",
+      petName: "Whity",
+      storyParagraphs: [
+        "Rescued cat Whity is now starting a new life with a loving fur-parent.",
+        "Whity was adopted by Noel Agustin of Barangay Margot.",
+        "This adoption is part of the city's continuing effort to promote responsible pet ownership."
+      ]
+    },
+    {
+      tag: "Success Stories",
+      title: "Marcia finds care",
+      titleHtml: 'Marcia finds<br><span>care</span>',
+      date: "Adoption Story",
+      image: SUCCESS_MARCIA_ADOPTION_IMAGE,
+      imageAlt: "Marcia in a carrier with adopter Analyn Rivera",
+      intro: "Rescued cat Marcia is now starting a new life with a loving fur-parent.",
+      adopter: "Analyn Rivera of Brgy. Anunas",
+      petName: "Marcia",
+      storyParagraphs: [
+        "Rescued cat Marcia is now starting a new life with a loving fur-parent.",
+        "Marcia was welcomed by Analyn Rivera of Brgy. Anunas.",
+        "The shelter gives rescued animals not just temporary care, but a chance at a forever home."
+      ]
+    }
+  ];
+
+  const getNewsAlertConfig = (alert = latestNewsAlert) => ({
+    tag: alert.tag,
+    title: alert.title,
+    titleHtml: alert.titleHtml,
+    date: alert.date,
+    image: alert.image,
+    imageAlt: alert.imageAlt,
+    intro: "",
+    primary: { label: "View full update", href: alert.href }
+  });
+
+  const getSuccessStoryConfig = (story = successStories[0]) => ({
+    tag: story.tag,
+    title: story.title,
+    titleHtml: story.titleHtml,
+    date: story.date,
+    image: story.image,
+    imageAlt: story.imageAlt,
+    intro: story.intro
+  });
 
   const highlightContent = {
     "new-furbabies": {
@@ -290,26 +618,23 @@ function setupHomeStories() {
         "Discover the newest animals currently available for adoption at the Angeles City Veterinary Office. View their profiles to learn about their age, temperament, health information, and care needs.",
       primary: { label: "View All Furbabies", href: "find-furbabies.html" }
     },
+    "news-alerts": getNewsAlertConfig(latestNewsAlert),
+    "success-stories": {
+      tag: "Success Stories",
+      title: successStories[0].title,
+      titleHtml: successStories[0].titleHtml,
+      date: successStories[0].date,
+      image: successStories[0].image,
+      imageAlt: successStories[0].imageAlt,
+      intro: successStories[0].intro
+    },
     events: {
       tag: "Events",
       title: "Upcoming Events",
-      image: "../../src/assets/images/about-free-vaccination.jpg",
+      image: HIGHLIGHT_UPCOMING_EVENT_IMAGE,
+      imageAlt: "Angeles City Veterinary Office speaking at a community event",
       intro:
         "Stay informed about the nearest published shelter or community event from the Angeles City Veterinary Office."
-    },
-    "success-stories": {
-      tag: "Success Stories",
-      title: "Adoption Success Stories",
-      image: "../../src/assets/images/about-shelter-house.png",
-      intro:
-        "Read real adoption outcomes recorded in ANIMUA. No testimonial is shown unless it comes from project data."
-    },
-    "adoption-tips": {
-      tag: "Adoption Tips",
-      title: "Before Adoption Day",
-      image: "../../src/assets/images/how-submit-application.jpg",
-      intro:
-        "Review practical adoption reminders aligned with the shelter adoption process and responsible pet ownership."
     }
   };
 
@@ -320,6 +645,69 @@ function setupHomeStories() {
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
+
+  const clearStoryAdvanceTimer = () => {
+    if (!storyAdvanceTimer) return;
+    window.clearTimeout(storyAdvanceTimer);
+    storyAdvanceTimer = null;
+  };
+
+  const renderStoryProgress = (count = 1, activeIndex = 0) => {
+    if (!storyModalProgress) return;
+
+    const safeCount = Math.max(1, count);
+    storyModalProgress.style.setProperty("--story-progress-count", safeCount);
+    storyModalProgress.innerHTML = Array.from({ length: safeCount }, (_, index) => {
+      const className =
+        index < activeIndex ? "is-complete" : index === activeIndex ? "is-active" : "";
+      return `<span${className ? ` class="${className}"` : ""}></span>`;
+    }).join("");
+  };
+
+  const updateStoryNavigation = (count = 1) => {
+    const hasMultipleStories = count > 1;
+
+    [storyModalPrev, storyModalNext].forEach((button) => {
+      if (!button) return;
+      button.hidden = !hasMultipleStories;
+      button.disabled = !hasMultipleStories;
+    });
+  };
+
+  const restartStoryAnimation = () => {
+    storyModalCard.classList.remove("is-story-playing");
+    void storyModalCard.offsetWidth;
+    storyModalCard.classList.add("is-story-playing");
+  };
+
+  const applyStoryConfig = (key, config, progressCount = 1, progressIndex = 0) => {
+    storyModalCard.dataset.storyKey = key;
+    renderStoryProgress(progressCount, progressIndex);
+    updateStoryNavigation(progressCount);
+
+    if (storyModalImage) {
+      storyModalImage.src = config.image || "";
+      storyModalImage.alt = config.imageAlt || config.title || "";
+    }
+    if (storyModalAvatar) {
+      const avatarImage = config.avatarImage || config.image || "";
+      storyModalAvatar.src = avatarImage;
+      storyModalAvatar.closest(".story-modal-avatar")?.classList.toggle("is-empty", !avatarImage);
+    }
+    if (storyModalTag) storyModalTag.textContent = config.tag || "";
+    if (storyModalBrandTag) storyModalBrandTag.textContent = config.tag || "";
+    if (storyModalDate) storyModalDate.textContent = config.date || "";
+    if (storyModalTitle) {
+      if (config.titleHtml) {
+        storyModalTitle.innerHTML = config.titleHtml;
+      } else {
+        storyModalTitle.textContent = config.title || "";
+      }
+    }
+    if (storyModalText) storyModalText.textContent = config.intro || "";
+    if (storyModalContent) storyModalContent.innerHTML = config.contentHtml || "";
+    if (storyModalActions) renderActions(config);
+  };
 
   const petTypeLabel = (pet = {}) => {
     const species = pet.species || pet.type || "";
@@ -482,7 +870,9 @@ function setupHomeStories() {
           ...doc.data()
         }))
       );
-      return upcomingEvents;
+      if (upcomingEvents.length) {
+        return upcomingEvents;
+      }
     } catch (error) {
       console.warn("Homepage Firestore events load skipped:", error);
     }
@@ -562,6 +952,60 @@ function setupHomeStories() {
   const getPetImage = (pet = {}) =>
     pet.photoURL || pet.image || pet.imageUrl || pet.imageURL || pet.photo || fallbackPetImage(pet);
 
+  const getFurbabyStoryConfig = (pet = {}) => {
+    const name = pet.displayLabel || pet.shelterLabel || pet.name || `Animal ${pet.id || ""}`.trim() || "Newest furbaby";
+    const details = [
+      petTypeLabel(pet),
+      pet.ageEstimate || pet.age || "Unknown age",
+      pet.sex || "Unknown sex"
+    ].filter(Boolean);
+    const status = pet.status || "Ready for adoption";
+
+    return {
+      tag: "New Furbabies",
+      title: name,
+      titleHtml: `${escapeHtml(name)}<br><span>ready to meet</span>`,
+      image: getPetImage(pet),
+      imageAlt: `${name} available for adoption`,
+      intro: `${name} is one of the newest furbabies available through ANIMUA.`,
+      primary: { label: "View furbabies", href: "find-furbabies.html" },
+      contentHtml: `
+        <div class="story-news-caption">
+          <p>${escapeHtml(details.join(" / "))}</p>
+          <p>${escapeHtml(status)}</p>
+          <p>Open Find Furbabies to view the full profile and submit an adoption application.</p>
+        </div>
+      `
+    };
+  };
+
+  const getEventStoryConfig = (event = {}) => {
+    const title = event.title || event.name || "Shelter Event";
+    const date = formatEventDate(event);
+    const time = formatEventTime(event);
+    const location = getEventLocation(event);
+    const description = getEventDescription(event);
+    const detailHref = event.url || event.href || event.link || "";
+    const contentRows = [date, time, location].filter(Boolean).join(" / ");
+
+    return {
+      tag: isUpcomingEvent(event) ? "Upcoming Events" : "Event Highlight",
+      title,
+      titleHtml: `${escapeHtml(title)}<br><span>${isUpcomingEvent(event) ? "upcoming" : "highlight"}</span>`,
+      date: date || "Event",
+      image: getEventImage(event),
+      imageAlt: title,
+      intro: description || "Stay informed about Angeles City Veterinary Office events and community activities.",
+      primary: detailHref ? { label: "View event details", href: detailHref } : undefined,
+      contentHtml: `
+        <div class="story-news-caption">
+          ${contentRows ? `<p>${escapeHtml(contentRows)}</p>` : ""}
+          ${description ? `<p>${escapeHtml(description)}</p>` : ""}
+        </div>
+      `
+    };
+  };
+
   const updateHighlightPreview = (key, image, alt) => {
     const button = document.querySelector(`.home-highlight-story[data-highlight-key="${key}"]`);
     const img = button?.querySelector(".highlight-cover img");
@@ -589,9 +1033,9 @@ function setupHomeStories() {
     if (!upcomingEventSection) return;
 
     const events = await loadUpcomingEvents();
-    const event = events[0];
+    const event = events[0] || getDemoUpcomingEvent();
 
-    const image = getEventImage(event);
+    const image = HIGHLIGHT_UPCOMING_EVENT_IMAGE;
     const title = event.title || event.name || "Shelter Event";
     const description = getEventDescription(event);
     const isUpcoming = isUpcomingEvent(event);
@@ -631,7 +1075,8 @@ function setupHomeStories() {
 
   const renderAction = (action, style = "primary") => {
     if (!action) return "";
-    return `<a class="story-modal-action story-modal-action-${style}" href="${escapeHtml(action.href)}">${escapeHtml(action.label)}</a>`;
+    const isExternal = /^https?:\/\//i.test(action.href);
+    return `<a class="story-modal-action story-modal-action-${style}" href="${escapeHtml(action.href)}"${isExternal ? ' target="_blank" rel="noopener noreferrer"' : ""}>${escapeHtml(action.label)}</a>`;
   };
 
   const renderActions = (config) => {
@@ -672,36 +1117,7 @@ function setupHomeStories() {
       return;
     }
 
-    storyModalContent.innerHTML = `
-      <div class="story-pet-list">
-        ${pets
-          .map(
-            (pet) => `
-              <button type="button" class="story-pet-card" data-pet-id="${escapeHtml(pet.id || "")}">
-                <img src="${escapeHtml(pet.photoURL || pet.image || fallbackPetImage(pet))}" alt="${escapeHtml(pet.displayLabel || pet.shelterLabel || pet.name || `Animal ${pet.id}`)}">
-                <span class="story-pet-info">
-                  <strong>${escapeHtml(pet.displayLabel || pet.shelterLabel || pet.name || `Animal ${pet.id}`)}</strong>
-                  <small>${escapeHtml(petTypeLabel(pet))}</small>
-                  <span>${escapeHtml(pet.ageEstimate || pet.age || "Unknown age")} · ${escapeHtml(pet.sex || "Unknown sex")}</span>
-                  <em>${escapeHtml(pet.status || "Ready")}</em>
-                </span>
-              </button>
-            `
-          )
-          .join("")}
-      </div>
-    `;
-
-    storyModalContent.querySelectorAll(".story-pet-card").forEach((card) => {
-      card.addEventListener("click", () => {
-        const petId = card.dataset.petId;
-        if (petId) {
-          localStorage.setItem("animua_selected_pet_id", petId);
-          localStorage.setItem("animua_selected_pet_action", "view");
-        }
-        window.location.href = "find-furbabies.html";
-      });
-    });
+    showStoryDeck("new-furbabies", pets.map(getFurbabyStoryConfig), 0);
   };
 
   const renderEvents = async () => {
@@ -714,104 +1130,66 @@ function setupHomeStories() {
       return;
     }
 
-    storyModalContent.innerHTML = `
-      <div class="story-event-list">
-        ${events
-          .map((event) => {
-            const date = event.date || event.eventDate || event.startDate || event.startsAt || "";
-            const time = event.time || event.eventTime || event.startTime || "";
-            const location = event.location || event.venue || "";
-            const description = event.description || event.summary || "";
-            const image = event.image || event.imageUrl || event.imageURL || event.photoURL || "";
-            const detailHref = event.url || event.href || event.link || "";
-
-            return `
-              <article class="story-event-card">
-                ${image ? `<img src="${escapeHtml(image)}" alt="${escapeHtml(event.title || "Community event")}">` : ""}
-                <div>
-                  <h3>${escapeHtml(event.title || event.name || "Shelter Event")}</h3>
-                  <p class="story-event-meta">${escapeHtml([date, time, location].filter(Boolean).join(" · "))}</p>
-                  ${description ? `<p>${escapeHtml(description)}</p>` : ""}
-                  ${detailHref ? `<a href="${escapeHtml(detailHref)}">View event details</a>` : ""}
-                </div>
-              </article>
-            `;
-          })
-          .join("")}
-      </div>
-    `;
+    showStoryDeck("events", events.map(getEventStoryConfig), 0);
   };
 
   const renderSuccessStories = async () => {
-    storyModalContent.innerHTML = '<p class="story-loading">Loading success stories...</p>';
-    const stories = await loadAdoptedStories();
-
-    if (!stories.length) {
-      storyModalText.textContent =
-        "Approved adoption stories will appear here once recorded in ANIMUA.";
-      storyModalContent.innerHTML =
-        '<p class="story-empty-state">Stories coming soon.</p>';
-      return;
-    }
-
-    const featuredStory = stories[0];
-    const image = getPetImage(featuredStory);
-
-    if (storyModalImage) {
-      storyModalImage.src = image;
-      storyModalImage.alt = featuredStory.name || "Adopted furbaby";
-    }
-
-    storyModalTitle.textContent = `${featuredStory.name || "A furbaby"} found a home`;
-    storyModalText.textContent =
-      "This adoption outcome comes from ANIMUA animal records.";
-
-    storyModalContent.innerHTML = `
-      <div class="story-pet-list">
-        ${stories
-          .map((pet) => {
-            const adoptionDate = pet.adoptionDate || "";
-            return `
-              <article class="story-pet-card story-pet-card-static">
-                <img src="${escapeHtml(getPetImage(pet))}" alt="${escapeHtml(pet.adoptedName || pet.name || pet.displayLabel || "Adopted furbaby")}">
-                <span class="story-pet-info">
-                  <strong>${escapeHtml(pet.adoptedName || pet.name || pet.displayLabel || `Animal ${pet.id}`)}</strong>
-                  <small>${escapeHtml(petTypeLabel(pet))}</small>
-                  <span>${escapeHtml([pet.ageEstimate || pet.age || "", pet.sex || ""].filter(Boolean).join(" - ") || "Adopted animal")}</span>
-                  <em>${escapeHtml(adoptionDate ? `Adopted ${adoptionDate}` : "Adopted")}</em>
-                </span>
-              </article>
-            `;
-          })
-          .join("")}
-      </div>
-    `;
+    showStoryDeck("success-stories", successStories.map(getSuccessStoryConfig), 0);
   };
 
   const renderStaticContent = (key) => {
-    if (key === "adoption-tips") {
+    if (key === "news-alerts") {
+      const alert = newsAlerts[activeStoryIndex] || latestNewsAlert;
+      const storyParagraphs = alert.storyParagraphs || alert.paragraphs.slice(1);
       storyModalContent.innerHTML = `
-        ${renderSteps([
-          {
-            title: "Prepare Your Home",
-            text: "Set up a clean sleeping area, food and water bowls, safe boundaries, and a quiet adjustment space before bringing the pet home."
-          },
-          {
-            title: "Plan the First Week",
-            text: "Keep routines calm and consistent. Introduce family members slowly, observe appetite and behavior, and avoid overwhelming the animal."
-          },
-          {
-            title: "Bring Adoption Requirements",
-            text: "Prepare accurate applicant information, contact details, valid signatures, and any documents requested in the adoption form."
-          },
-          {
-            title: "Commit to Responsible Care",
-            text: "Provide proper food, shelter, veterinary care, vaccination follow-ups, exercise, and lifelong humane treatment."
-          }
-        ])}
-        <p class="story-note"><strong>Important note:</strong> Adoption approval remains subject to shelter evaluation and the animal's welfare needs.</p>
+        <div class="story-news-caption">
+          ${storyParagraphs
+            .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`)
+            .join("")}
+          <p class="story-news-credit"><i class="fa-regular fa-image" aria-hidden="true"></i> ${escapeHtml(alert.photoCredit)}</p>
+          <p class="story-news-source">${escapeHtml(alert.source)} | ${escapeHtml(alert.hashtag)}</p>
+        </div>
+      `;
+    } else if (key === "success-stories") {
+      const story = successStories[activeStoryIndex] || successStories[0];
+      storyModalContent.innerHTML = `
+        <div class="story-news-caption">
+          ${story.storyParagraphs
+            .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`)
+            .join("")}
+          <p class="story-news-credit"><i class="fa-solid fa-heart" aria-hidden="true"></i> Rescued pets now with new homes</p>
+          <p class="story-news-source">Adopt, Don't Shop | Angeles City Dog Pound and Animal Shelter</p>
+        </div>
       `;
     }
+  };
+
+  const showStoryDeck = (key, deck = [], index = 0) => {
+    if (!deck.length) return;
+
+    activeHighlightKey = key;
+    activeStoryDeck = deck;
+    activeStoryIndex = ((index % deck.length) + deck.length) % deck.length;
+
+    applyStoryConfig(key, activeStoryDeck[activeStoryIndex], activeStoryDeck.length, activeStoryIndex);
+    renderStaticContent(key);
+    restartStoryAnimation();
+
+    clearStoryAdvanceTimer();
+    if (activeStoryDeck.length > 1 && !storyModal.classList.contains("hidden")) {
+      storyAdvanceTimer = window.setTimeout(() => {
+        showStoryDeck(key, activeStoryDeck, activeStoryIndex + 1);
+      }, STORY_AUTO_ADVANCE_MS);
+    }
+  };
+
+  const showNewsAlert = (index = 0) => {
+    showStoryDeck("news-alerts", newsAlerts.map(getNewsAlertConfig), index);
+  };
+
+  const goToStory = (direction) => {
+    if (!activeHighlightKey || activeStoryDeck.length <= 1) return;
+    showStoryDeck(activeHighlightKey, activeStoryDeck, activeStoryIndex + direction);
   };
 
   const initializeHighlightPreviews = async () => {
@@ -825,27 +1203,38 @@ function setupHomeStories() {
     }
 
     const events = await loadUpcomingEvents();
-    if (events[0]) {
+    updateHighlightPreview(
+      "events",
+      HIGHLIGHT_UPCOMING_EVENT_IMAGE,
+      events[0]?.title || events[0]?.name || "Upcoming event"
+    );
+
+    if (successStories[0]) {
       updateHighlightPreview(
-        "events",
-        getEventImage(events[0]),
-        events[0].title || events[0].name || "Upcoming event"
+        "success-stories",
+        HIGHLIGHT_SUCCESS_STORY_IMAGE,
+        successStories[0].title
       );
     }
 
-    const stories = await loadAdoptedStories();
-    if (stories[0]) {
+    if (latestNewsAlert) {
       updateHighlightPreview(
-        "success-stories",
-        getPetImage(stories[0]),
-        `${stories[0].name || "Adopted furbaby"} adoption story`
+        "news-alerts",
+        HIGHLIGHT_NEWS_ALERT_IMAGE,
+        latestNewsAlert.title
       );
     }
   };
 
   const closeStoryModal = () => {
+    clearStoryAdvanceTimer();
+    activeHighlightKey = null;
+    activeStoryIndex = 0;
+    activeStoryDeck = [];
+    updateStoryNavigation(1);
     storyModal.classList.add("hidden");
     storyModal.setAttribute("aria-hidden", "true");
+    storyModalCard.classList.remove("is-story-playing");
     document.body.classList.remove("modal-open");
     storyButtons.forEach((button) => {
       button.classList.remove("is-selected");
@@ -855,9 +1244,7 @@ function setupHomeStories() {
   };
 
   storyButtons.forEach((button) => {
-    if (button.dataset.highlightKey === "success-stories" || button.dataset.highlightKey === "adoption-tips") {
-      button.setAttribute("aria-haspopup", "dialog");
-    }
+    button.setAttribute("aria-haspopup", "dialog");
     button.setAttribute("aria-pressed", "false");
 
     button.addEventListener("click", async () => {
@@ -865,41 +1252,27 @@ function setupHomeStories() {
       const config = highlightContent[key];
       if (!config) return;
 
-      if (key === "new-furbabies") {
-        window.location.href = "find-furbabies.html?sort=newest";
-        return;
-      }
-
-      if (key === "events") {
-        await loadUpcomingEvents();
-        if (upcomingEventSection && !upcomingEventSection.classList.contains("hidden")) {
-          upcomingEventSection.scrollIntoView({ behavior: "smooth", block: "start" });
-          return;
-        }
-      }
-
       lastFocusedHighlight = button;
+      activeHighlightKey = key;
+      activeStoryIndex = 0;
+      activeStoryDeck = [];
+      clearStoryAdvanceTimer();
       storyButtons.forEach((item) => {
         item.classList.toggle("is-selected", item === button);
         item.setAttribute("aria-pressed", item === button ? "true" : "false");
       });
 
-      if (storyModalImage) {
-        storyModalImage.src = config.image || "";
-        storyModalImage.alt = config.title || "";
-      }
-      if (storyModalTag) storyModalTag.textContent = config.tag || "";
-      if (storyModalTitle) storyModalTitle.textContent = config.title || "";
-      if (storyModalText) storyModalText.textContent = config.intro || "";
-      if (storyModalContent) storyModalContent.innerHTML = "";
-      if (storyModalActions) renderActions(config);
+      applyStoryConfig(key, config);
 
       storyModal.classList.remove("hidden");
       storyModal.setAttribute("aria-hidden", "false");
       document.body.classList.add("modal-open");
+      restartStoryAnimation();
       storyModalCard.focus();
 
-      if (key === "new-furbabies") {
+      if (key === "news-alerts") {
+        showNewsAlert(0);
+      } else if (key === "new-furbabies") {
         await renderNewFurbabies();
       } else if (key === "events") {
         await renderEvents();
@@ -913,6 +1286,20 @@ function setupHomeStories() {
 
   if (storyModalClose) {
     storyModalClose.addEventListener("click", closeStoryModal);
+  }
+
+  if (storyModalPrev) {
+    storyModalPrev.addEventListener("click", (event) => {
+      event.stopPropagation();
+      goToStory(-1);
+    });
+  }
+
+  if (storyModalNext) {
+    storyModalNext.addEventListener("click", (event) => {
+      event.stopPropagation();
+      goToStory(1);
+    });
   }
 
   renderUpcomingEventSection();
@@ -929,6 +1316,18 @@ function setupHomeStories() {
 
     if (event.key === "Escape") {
       closeStoryModal();
+      return;
+    }
+
+    if (activeStoryDeck.length > 1 && event.key === "ArrowLeft") {
+      event.preventDefault();
+      goToStory(-1);
+      return;
+    }
+
+    if (activeStoryDeck.length > 1 && event.key === "ArrowRight") {
+      event.preventDefault();
+      goToStory(1);
       return;
     }
 
@@ -1262,7 +1661,16 @@ document.querySelectorAll(".navbar a").forEach((link) => {
 });
 
 if (header) {
+  if (document.body.classList.contains("submissions-page")) {
+    header.classList.add("scrolled");
+  }
+
   window.addEventListener("scroll", () => {
+    if (document.body.classList.contains("submissions-page")) {
+      header.classList.add("scrolled");
+      return;
+    }
+
     if (window.scrollY > 20) {
       header.classList.add("scrolled");
     } else {
@@ -1282,12 +1690,15 @@ if (heroLearnMore) {
   });
 }
 
-if (notificationBtn && notificationPopup) {
+if (notificationBtn) {
   notificationBtn.addEventListener("click", (event) => {
     event.stopPropagation();
-    notificationPopup.classList.toggle("show");
+    notificationPopup?.classList.remove("show");
+    showNotificationSettingsDialog();
   });
+}
 
+if (notificationBtn && notificationPopup) {
   document.addEventListener("click", (event) => {
     if (
       !notificationPopup.contains(event.target) &&
@@ -1313,6 +1724,51 @@ if (authModal) {
     }
   });
 }
+
+quizIntroTriggers.forEach((trigger) => {
+  trigger.addEventListener("click", openQuizIntroModal);
+});
+
+quizIntroCloseButtons.forEach((button) => {
+  button.addEventListener("click", closeQuizIntroModal);
+});
+
+quizPageTriggers.forEach((trigger) => {
+  trigger.addEventListener("click", openQuizPageModal);
+});
+
+quizPageCloseButtons.forEach((button) => {
+  button.addEventListener("click", closeQuizPageModal);
+});
+
+if (quizIntroModal) {
+  quizIntroModal.addEventListener("click", (event) => {
+    if (event.target === quizIntroModal) {
+      closeQuizIntroModal();
+    }
+  });
+}
+
+if (quizPageModal) {
+  quizPageModal.addEventListener("click", (event) => {
+    if (event.target === quizPageModal) {
+      closeQuizPageModal();
+    }
+  });
+}
+
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape") return;
+
+  if (quizPageModal && !quizPageModal.classList.contains("hidden")) {
+    closeQuizPageModal();
+    return;
+  }
+
+  if (quizIntroModal && !quizIntroModal.classList.contains("hidden")) {
+    closeQuizIntroModal();
+  }
+});
 
 if (loginForm) {
   loginForm.addEventListener("submit", handleLogin);
@@ -1376,12 +1832,26 @@ function setupPasswordStrengthMeter() {
 function setupUserDropdown() {
   const userMenuBtn = document.getElementById("userMenuBtn");
   const userDropdown = document.getElementById("userDropdown");
+  const viewProfileBtn = document.getElementById("viewProfileBtn");
+  const myApplicationsBtn = document.getElementById("myApplicationsBtn");
 
   if (!userMenuBtn || !userDropdown) return;
 
   userMenuBtn.addEventListener("click", (event) => {
     event.stopPropagation();
     userDropdown.classList.toggle("hidden");
+  });
+
+  viewProfileBtn?.addEventListener("click", (event) => {
+    event.stopPropagation();
+    userDropdown.classList.add("hidden");
+    openProfileModal(viewProfileBtn);
+  });
+
+  myApplicationsBtn?.addEventListener("click", (event) => {
+    event.stopPropagation();
+    userDropdown.classList.add("hidden");
+    window.location.href = "my-submissions.html";
   });
 
   userDropdown.addEventListener("click", (event) => {
@@ -1393,7 +1863,815 @@ function setupUserDropdown() {
   });
 }
 
+async function openProfileModal(trigger = null) {
+  if (!profileModal) return;
+
+  if (!localStorage.getItem("animua_token")) {
+    localStorage.setItem("animua_open_auth_modal", "true");
+    showLoginView();
+    openAuthModal();
+    return;
+  }
+
+  lastProfileTrigger = trigger;
+  profileModal.classList.remove("hidden");
+  profileModal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("modal-open");
+  setProfileEditing(false);
+  setProfileSaveState("idle");
+  setProfileStatus("Loading profile...");
+
+  try {
+    const account = await fetchCurrentAccount();
+    renderProfileModal(account);
+    setProfileStatus("");
+  } catch (error) {
+    setProfileStatus(error.message || "Unable to load your profile.");
+  }
+}
+
+function closeProfileModal() {
+  if (!profileModal) return;
+
+  profileModal.classList.add("hidden");
+  profileModal.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("modal-open");
+  setProfileStatus("");
+  setProfileEditing(false);
+  setProfileSaveState("idle");
+  lastProfileTrigger?.focus?.({ preventScroll: true });
+}
+
+async function fetchCurrentAccount() {
+  const token = localStorage.getItem("animua_token");
+  const response = await fetch(`${API_BASE_URL}/auth/account`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Unable to load account details.");
+  }
+
+  currentProfileAccount = data.account || {};
+  pendingProfilePhotoDataUrl = currentProfileAccount.profilePhotoDataUrl || "";
+  return currentProfileAccount;
+}
+
+function renderProfileModal(account = {}) {
+  const fullName = account.fullName || "";
+  const email = account.email || "";
+  const firstName = getFirstName(fullName);
+  const createdAt = account.createdAt ? new Date(account.createdAt) : null;
+  const memberSince = createdAt && !Number.isNaN(createdAt.getTime())
+    ? createdAt.getFullYear()
+    : new Date().getFullYear();
+
+  setText("profileSummaryName", firstName);
+  setText("profileMemberSince", String(memberSince));
+  setValue("profileFullName", fullName);
+  setValue("profileEmail", email);
+  setValue("profilePhone", account.phone || "");
+  setNotificationSummary(account);
+  renderProfileAvatar(fullName, account.profilePhotoDataUrl || "");
+}
+
+function renderProfileAvatar(fullName, photoDataUrl = "") {
+  const avatar = document.getElementById("profileAvatarPreview");
+  if (!avatar) return;
+
+  if (photoDataUrl) {
+    avatar.innerHTML = `<img src="${photoDataUrl}" alt="">`;
+  } else {
+    avatar.textContent = getInitial(fullName);
+  }
+}
+
+function setProfileEditing(isEditing) {
+  profileForm?.classList.toggle("is-editing", isEditing);
+  profileForm?.classList.remove("is-saving");
+  if (isEditing) setProfileSaveState("idle");
+
+  ["profileFullName", "profilePhone"].forEach((id) => {
+    const field = document.getElementById(id);
+    if (field) field.readOnly = !isEditing;
+  });
+
+  if (profileSaveBtn) profileSaveBtn.disabled = !isEditing;
+  if (profileEditBtn) {
+    const label = profileEditBtn.querySelector("span") || profileEditBtn;
+    label.textContent = isEditing ? "Editing..." : "Edit Profile";
+  }
+}
+
+function setProfileSaveState(state = "idle") {
+  if (!profileSaveBtn) return;
+
+  const icon = profileSaveBtn.querySelector("i");
+  const label = profileSaveBtn.querySelector("span") || profileSaveBtn;
+  profileForm?.classList.toggle("is-saving", state === "saving");
+  profileForm?.classList.toggle("is-saved", state === "saved");
+
+  if (state === "saving") {
+    profileSaveBtn.disabled = true;
+    profileSaveBtn.setAttribute("aria-busy", "true");
+    if (icon) icon.className = "fa-solid fa-spinner";
+    label.textContent = "Saving...";
+    return;
+  }
+
+  profileSaveBtn.removeAttribute("aria-busy");
+  if (icon) {
+    icon.className = state === "saved"
+      ? "fa-solid fa-check"
+      : "fa-regular fa-floppy-disk";
+  }
+  label.textContent = state === "saved" ? "Changes Saved" : "Save Changes";
+}
+
+function setProfileStatus(message, isSuccess = false) {
+  const status = document.getElementById("profileStatusMessage");
+  if (!status) return;
+
+  status.textContent = message;
+  status.classList.toggle("is-success", isSuccess);
+}
+
+function setText(id, value) {
+  const element = document.getElementById(id);
+  if (element) element.textContent = value;
+}
+
+function setValue(id, value) {
+  const element = document.getElementById(id);
+  if (element) element.value = value;
+}
+
+function getValue(id) {
+  return document.getElementById(id)?.value.trim() || "";
+}
+
+function normalizeNotificationSettings(settings = {}) {
+  return {
+    applicationUpdates: settings.applicationUpdates !== false,
+    surrenderRequestUpdates: settings.surrenderRequestUpdates !== false,
+    announcementsEvents: settings.announcementsEvents !== false,
+  };
+}
+
+function getNotificationPreferenceSummary(settings = {}) {
+  const normalized = normalizeNotificationSettings(settings);
+  const enabledCount = Object.values(normalized).filter(Boolean).length;
+
+  if (enabledCount === 3) return "Email and push notifications";
+  if (enabledCount === 0) return "No notifications";
+  if (enabledCount === 1) return "1 notification category enabled";
+  return `${enabledCount} notification categories enabled`;
+}
+
+function setNotificationSummary(account = currentProfileAccount || {}) {
+  setText(
+    "profileNotificationSummary",
+    account.notificationPreference ||
+      getNotificationPreferenceSummary(account.notificationSettings)
+  );
+}
+
+async function ensureCurrentAccount() {
+  if (currentProfileAccount?.email) return currentProfileAccount;
+  return fetchCurrentAccount();
+}
+
+async function showNotificationSettingsDialog({ returnToProfile = false } = {}) {
+  if (!localStorage.getItem("animua_token")) {
+    localStorage.setItem("animua_open_auth_modal", "true");
+    showLoginView();
+    openAuthModal();
+    return;
+  }
+
+  if (returnToProfile) closeProfileModal();
+
+  let account = currentProfileAccount || {};
+  try {
+    account = await ensureCurrentAccount();
+  } catch (error) {
+    Swal.fire({
+      icon: "error",
+      title: "Unable to Load Notifications",
+      text: error.message || "Please try again.",
+      customClass: {
+        popup: "animua-popup",
+        confirmButton: "animua-confirm"
+      },
+      buttonsStyling: false
+    });
+    return;
+  }
+
+  const settings = normalizeNotificationSettings(account.notificationSettings);
+
+  await Swal.fire({
+    html: `
+      <div class="notification-settings-modal">
+        <div class="notification-settings-head">
+          <button type="button" class="notification-settings-back" aria-label="Back">
+            <i class="fa-solid fa-arrow-left"></i>
+          </button>
+          <div>
+            <span class="notification-settings-accent" aria-hidden="true"></span>
+            <h2>Notifications</h2>
+            <p>Manage which ANIMUA updates you receive.</p>
+          </div>
+          <div class="notification-settings-art" aria-hidden="true">
+            <i class="fa-regular fa-bell"></i>
+            <i class="fa-solid fa-paw"></i>
+          </div>
+        </div>
+
+        <div class="notification-settings-card">
+          ${renderNotificationToggleRow({
+            key: "applicationUpdates",
+            icon: "fa-regular fa-clipboard",
+            title: "Application Updates",
+            description: "Adoption status, shelter review, approval, or rejection.",
+            checked: settings.applicationUpdates
+          })}
+          ${renderNotificationToggleRow({
+            key: "surrenderRequestUpdates",
+            icon: "fa-solid fa-box-open",
+            title: "Surrender Request Updates",
+            description: "Updates about your submitted requests.",
+            checked: settings.surrenderRequestUpdates
+          })}
+          ${renderNotificationToggleRow({
+            key: "announcementsEvents",
+            icon: "fa-solid fa-bullhorn",
+            title: "Announcements & Events",
+            description: "Shelter announcements and upcoming veterinary events.",
+            checked: settings.announcementsEvents
+          })}
+        </div>
+        <p class="notification-settings-status" aria-live="polite"></p>
+      </div>
+    `,
+    showCancelButton: true,
+    showCloseButton: true,
+    confirmButtonText: '<i class="fa-regular fa-floppy-disk"></i><span>Save Changes</span>',
+    cancelButtonText: "Cancel",
+    reverseButtons: true,
+    showLoaderOnConfirm: true,
+    allowOutsideClick: () => !Swal.isLoading(),
+    allowEscapeKey: () => !Swal.isLoading(),
+    customClass: {
+      popup: "animua-popup notification-settings-popup",
+      htmlContainer: "notification-settings-html",
+      actions: "notification-settings-actions",
+      confirmButton: "notification-settings-confirm",
+      cancelButton: "notification-settings-cancel",
+      closeButton: "notification-settings-close"
+    },
+    buttonsStyling: false,
+    didOpen: () => bindNotificationSettingsControls({ returnToProfile }),
+    preConfirm: handleNotificationSettingsConfirm
+  });
+}
+
+function renderNotificationToggleRow({ key, icon, title, description, checked }) {
+  return `
+    <label class="notification-settings-row">
+      <span class="notification-settings-icon"><i class="${icon}" aria-hidden="true"></i></span>
+      <span class="notification-settings-copy">
+        <strong>${title}</strong>
+        <small>${description}</small>
+      </span>
+      <span class="notification-settings-switch">
+        <input type="checkbox" data-notification-setting="${key}" ${checked ? "checked" : ""}>
+        <span class="notification-settings-slider" aria-hidden="true"></span>
+        <em>${checked ? "ON" : "OFF"}</em>
+      </span>
+    </label>
+  `;
+}
+
+function returnToProfileFromSwal() {
+  Swal.close();
+  window.setTimeout(() => openProfileModal(profileNotificationsBtn || profilePasswordBtn), 0);
+}
+
+function bindNotificationSettingsControls({ returnToProfile = false } = {}) {
+  document.querySelector(".notification-settings-back")?.addEventListener("click", () => {
+    if (returnToProfile) {
+      returnToProfileFromSwal();
+      return;
+    }
+
+    Swal.close();
+  });
+
+  document.querySelectorAll("[data-notification-setting]").forEach((input) => {
+    input.addEventListener("change", () => {
+      const label = input.closest(".notification-settings-switch")?.querySelector("em");
+      if (label) label.textContent = input.checked ? "ON" : "OFF";
+      setNotificationSettingsSavedState(false);
+    });
+  });
+}
+
+function setNotificationSettingsSavedState(isSaved) {
+  const confirmButton = Swal.getConfirmButton();
+  const status = document.querySelector(".notification-settings-status");
+
+  if (confirmButton) {
+    confirmButton.classList.toggle("is-saved", isSaved);
+    confirmButton.innerHTML = isSaved
+      ? '<i class="fa-solid fa-check"></i><span>Changes Saved</span>'
+      : '<i class="fa-regular fa-floppy-disk"></i><span>Save Changes</span>';
+  }
+
+  if (status) {
+    status.textContent = isSaved ? "Notification settings saved." : "";
+    status.classList.toggle("is-success", isSaved);
+  }
+}
+
+async function handleNotificationSettingsConfirm() {
+  const confirmButton = Swal.getConfirmButton();
+  if (confirmButton) confirmButton.innerHTML = '<i class="fa-solid fa-spinner"></i><span>Saving...</span>';
+
+  const settings = {};
+  document.querySelectorAll("[data-notification-setting]").forEach((input) => {
+    settings[input.dataset.notificationSetting] = input.checked;
+  });
+
+  try {
+    await saveNotificationSettings(settings);
+    Swal.hideLoading();
+    setNotificationSettingsSavedState(true);
+    return false;
+  } catch (error) {
+    if (confirmButton) {
+      confirmButton.innerHTML = '<i class="fa-regular fa-floppy-disk"></i><span>Save Changes</span>';
+    }
+    Swal.showValidationMessage(error.message || "Unable to save notification settings.");
+    return false;
+  }
+}
+
+async function saveNotificationSettings(settings) {
+  const token = localStorage.getItem("animua_token");
+  const account = await ensureCurrentAccount();
+  const notificationSettings = normalizeNotificationSettings(settings);
+  const notificationPreference = getNotificationPreferenceSummary(notificationSettings);
+
+  const response = await fetch(`${API_BASE_URL}/auth/account/profile`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      fullName: account.fullName || localStorage.getItem("user_name") || "User",
+      phone: account.phone || "",
+      profilePhotoDataUrl: account.profilePhotoDataUrl || "",
+      notificationSettings,
+      notificationPreference
+    })
+  });
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Unable to save notification settings.");
+  }
+
+  currentProfileAccount = data.account || {
+    ...account,
+    notificationSettings,
+    notificationPreference
+  };
+  setNotificationSummary(currentProfileAccount);
+  return currentProfileAccount;
+}
+
+async function handleProfileSave(event) {
+  event.preventDefault();
+
+  if (!profileForm?.classList.contains("is-editing")) {
+    setProfileEditing(true);
+    return;
+  }
+
+  const fullName = getValue("profileFullName");
+  if (fullName.length < 2) {
+    setProfileStatus("Full name must be at least 2 characters.");
+    return;
+  }
+
+  setProfileStatus("Saving changes...");
+  setProfileSaveState("saving");
+
+  try {
+    const token = localStorage.getItem("animua_token");
+    const payload = {
+      fullName,
+      phone: getValue("profilePhone"),
+      notificationSettings: normalizeNotificationSettings(
+        currentProfileAccount?.notificationSettings
+      ),
+      notificationPreference:
+        currentProfileAccount?.notificationPreference ||
+        getNotificationPreferenceSummary(currentProfileAccount?.notificationSettings),
+      profilePhotoDataUrl: pendingProfilePhotoDataUrl || "",
+    };
+
+    const response = await fetch(`${API_BASE_URL}/auth/account/profile`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(payload)
+    });
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Unable to save profile changes.");
+    }
+
+    const savedAccount = data.account || { ...currentProfileAccount, ...payload };
+    currentProfileAccount = { ...savedAccount, ...payload };
+    pendingProfilePhotoDataUrl = currentProfileAccount.profilePhotoDataUrl || "";
+
+    try {
+      currentProfileAccount = await fetchCurrentAccount();
+    } catch (refreshError) {
+      console.warn("[Profile refresh after save failed]", refreshError.message);
+    }
+
+    localStorage.setItem("user_name", currentProfileAccount.fullName || fullName);
+    localStorage.setItem("user_email", currentProfileAccount.email || getValue("profileEmail"));
+    if (currentProfileAccount.profilePhotoDataUrl) {
+      localStorage.setItem("user_profile_photo", currentProfileAccount.profilePhotoDataUrl);
+    } else {
+      localStorage.removeItem("user_profile_photo");
+    }
+    updateHeaderProfile(
+      currentProfileAccount.fullName || fullName,
+      currentProfileAccount.profilePhotoDataUrl || ""
+    );
+    updateAuthUI();
+    renderProfileModal(currentProfileAccount);
+    setProfileEditing(false);
+    setProfileSaveState("saved");
+    setProfileStatus("Changes saved successfully.", true);
+  } catch (error) {
+    profileForm?.classList.remove("is-saving");
+    setProfileSaveState("idle");
+    setProfileStatus(error.message || "Unable to save profile changes.");
+    if (profileSaveBtn) profileSaveBtn.disabled = false;
+  }
+}
+
+function updateHeaderProfile(fullName, photoDataUrl = "") {
+  const firstName = getFirstName(fullName);
+  const loggedUserName = document.getElementById("loggedUserName");
+  const dropdownUserName = document.getElementById("dropdownUserName");
+  const userAvatarMini = document.querySelector(".user-avatar-mini");
+  const dropdownUserInitial = document.getElementById("dropdownUserInitial");
+
+  if (loggedUserName) loggedUserName.textContent = firstName;
+  if (dropdownUserName) dropdownUserName.textContent = firstName;
+  renderUserAvatar(userAvatarMini, fullName, photoDataUrl);
+  renderUserAvatar(dropdownUserInitial?.closest(".user-dropdown-avatar"), fullName, photoDataUrl);
+}
+
+async function handleProfilePhotoChange(event) {
+  const file = event.target.files?.[0];
+  event.target.value = "";
+  if (!file) return;
+
+  if (!/^image\/(png|jpeg|webp)$/i.test(file.type)) {
+    setProfileStatus("Choose a PNG, JPG, or WebP image.");
+    return;
+  }
+
+  try {
+    pendingProfilePhotoDataUrl = await compressProfilePhoto(file);
+    renderProfileAvatar(getValue("profileFullName") || "User", pendingProfilePhotoDataUrl);
+    setProfileStatus("Photo ready. Click Save Changes to update your profile.", true);
+  } catch (error) {
+    setProfileStatus(error.message || "Unable to read that image.");
+  }
+}
+
+function compressProfilePhoto(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const image = new Image();
+      image.onload = () => {
+        const scale = Math.min(
+          1,
+          PROFILE_PHOTO_MAX_SIDE / Math.max(image.width, image.height)
+        );
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(image.width * scale));
+        canvas.height = Math.max(1, Math.round(image.height * scale));
+        const context = canvas.getContext("2d");
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        let quality = 0.78;
+        let dataUrl = canvas.toDataURL("image/jpeg", quality);
+
+        while (dataUrl.length > PROFILE_PHOTO_MAX_BYTES && quality > 0.42) {
+          quality -= 0.08;
+          dataUrl = canvas.toDataURL("image/jpeg", quality);
+        }
+
+        if (dataUrl.length <= PROFILE_PHOTO_MAX_BYTES) {
+          resolve(dataUrl);
+          return;
+        }
+
+        const smallCanvas = document.createElement("canvas");
+        const smallScale = Math.min(1, 300 / Math.max(canvas.width, canvas.height));
+        smallCanvas.width = Math.max(1, Math.round(canvas.width * smallScale));
+        smallCanvas.height = Math.max(1, Math.round(canvas.height * smallScale));
+        const smallContext = smallCanvas.getContext("2d");
+        smallContext.drawImage(canvas, 0, 0, smallCanvas.width, smallCanvas.height);
+        dataUrl = smallCanvas.toDataURL("image/jpeg", 0.62);
+
+        if (dataUrl.length <= PROFILE_PHOTO_MAX_BYTES) {
+          resolve(dataUrl);
+          return;
+        }
+
+        reject(new Error("Please choose a smaller profile photo."));
+      };
+      image.onerror = () => reject(new Error("Unable to load that image."));
+      image.src = reader.result;
+    };
+
+    reader.onerror = () => reject(new Error("Unable to read that image."));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function chooseProfilePreference({ title, inputValue, options, onSave }) {
+  const result = await Swal.fire({
+    title,
+    input: "select",
+    inputOptions: options,
+    inputValue,
+    showCancelButton: true,
+    confirmButtonText: "Apply",
+    cancelButtonText: "Cancel",
+    customClass: {
+      popup: "animua-popup",
+      confirmButton: "animua-confirm",
+      cancelButton: "animua-cancel"
+    },
+    buttonsStyling: false
+  });
+
+  if (!result.isConfirmed) return;
+  onSave(result.value);
+  setProfileEditing(true);
+  setProfileStatus("Preference changed. Click Save Changes to update your profile.", true);
+}
+
+async function promptPasswordUpdate() {
+  await showChangePasswordDialog();
+}
+
+async function showChangePasswordDialog({ returnToProfile = false } = {}) {
+  return Swal.fire({
+    html: `
+      <div class="change-password-modal">
+        <div class="change-password-head">
+          <button type="button" class="change-password-back" aria-label="Back">
+            <i class="fa-solid fa-arrow-left"></i>
+          </button>
+          <div>
+            <div class="change-password-icon" aria-hidden="true">
+              <i class="fa-solid fa-lock"></i>
+            </div>
+            <span class="change-password-accent" aria-hidden="true"></span>
+            <h2>Change Password</h2>
+            <p>Update your password to keep your account secure.</p>
+          </div>
+        </div>
+
+        <label class="change-password-field" for="oldPassword">
+          <span>Current Password</span>
+          <div class="change-password-input-wrap">
+            <input id="oldPassword" type="password" placeholder="Enter your current password" autocomplete="current-password">
+            <button type="button" class="change-password-eye" data-password-target="oldPassword" aria-label="Show current password">
+              <i class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+        </label>
+
+        <label class="change-password-field" for="newPassword">
+          <span>New Password</span>
+          <div class="change-password-input-wrap">
+            <input id="newPassword" type="password" placeholder="Enter your new password" autocomplete="new-password">
+            <button type="button" class="change-password-eye" data-password-target="newPassword" aria-label="Show new password">
+              <i class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+          <small>Use at least 8 characters.</small>
+        </label>
+
+        <label class="change-password-field" for="confirmNewPassword">
+          <span>Confirm New Password</span>
+          <div class="change-password-input-wrap">
+            <input id="confirmNewPassword" type="password" placeholder="Re-enter your new password" autocomplete="new-password">
+            <button type="button" class="change-password-eye" data-password-target="confirmNewPassword" aria-label="Show confirmed password">
+              <i class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+          <small>Passwords must match.</small>
+        </label>
+      </div>
+    `,
+    showCancelButton: true,
+    showCloseButton: true,
+    confirmButtonText: "Update Password",
+    cancelButtonText: "Cancel",
+    reverseButtons: true,
+    showLoaderOnConfirm: true,
+    allowOutsideClick: () => !Swal.isLoading(),
+    allowEscapeKey: () => !Swal.isLoading(),
+    customClass: {
+      popup: "animua-popup change-password-popup",
+      htmlContainer: "change-password-html",
+      actions: "change-password-actions",
+      confirmButton: "change-password-confirm",
+      cancelButton: "change-password-cancel",
+      closeButton: "change-password-close"
+    },
+    buttonsStyling: false,
+    didOpen: () => bindChangePasswordControls({ returnToProfile }),
+    preConfirm: handleChangePasswordConfirm
+  });
+}
+
+async function handleChangePasswordConfirm() {
+  const popup = Swal.getPopup();
+
+  if (popup?.dataset.passwordUpdated === "true") {
+    return true;
+  }
+
+  const passwords = validateChangePasswordForm();
+  if (!passwords) return false;
+
+  popup?.classList.add("change-password-popup--loading");
+  const confirmButton = Swal.getConfirmButton();
+  if (confirmButton) confirmButton.textContent = "Updating...";
+
+  try {
+    await changePasswordRequest(passwords.oldPassword, passwords.newPassword);
+    showChangePasswordSuccess();
+  } catch (error) {
+    popup?.classList.remove("change-password-popup--loading");
+    if (confirmButton) confirmButton.textContent = "Update Password";
+    Swal.showValidationMessage(error.message || "Failed to update password.");
+  }
+
+  return false;
+}
+
+function showChangePasswordSuccess() {
+  const popup = Swal.getPopup();
+  Swal.hideLoading();
+
+  if (popup) {
+    popup.dataset.passwordUpdated = "true";
+    popup.classList.remove("change-password-popup--loading");
+    popup.classList.add("change-password-popup--success");
+  }
+
+  Swal.update({
+    html: `
+      <div class="change-password-modal change-password-success">
+        <div class="change-password-icon change-password-success-icon" aria-hidden="true">
+          <i class="fa-solid fa-check"></i>
+        </div>
+        <span class="change-password-accent" aria-hidden="true"></span>
+        <h2>Password Updated</h2>
+        <p>Your password has been changed.</p>
+      </div>
+    `,
+    showCancelButton: false,
+    confirmButtonText: "OK"
+  });
+}
+
+function bindChangePasswordControls({ returnToProfile = false } = {}) {
+  document.querySelector(".change-password-back")?.addEventListener("click", () => {
+    if (returnToProfile) {
+      returnToProfileFromSwal();
+      return;
+    }
+
+    Swal.close();
+  });
+
+  document.querySelectorAll(".change-password-eye").forEach((button) => {
+    button.addEventListener("click", () => {
+      const input = document.getElementById(button.dataset.passwordTarget);
+      if (!input) return;
+
+      const isHidden = input.type === "password";
+      input.type = isHidden ? "text" : "password";
+      button.setAttribute("aria-label", `${isHidden ? "Hide" : "Show"} password`);
+      button.innerHTML = `<i class="fa-regular ${isHidden ? "fa-eye-slash" : "fa-eye"}"></i>`;
+    });
+  });
+}
+
+function validateChangePasswordForm() {
+  const oldPassword = document.getElementById("oldPassword").value;
+  const newPassword = document.getElementById("newPassword").value;
+  const confirmNewPassword = document.getElementById("confirmNewPassword").value;
+
+  if (!oldPassword || !newPassword || !confirmNewPassword) {
+    Swal.showValidationMessage("Please fill in all password fields.");
+    return false;
+  }
+
+  if (oldPassword === newPassword) {
+    Swal.showValidationMessage("New password must be different from your current password.");
+    return false;
+  }
+
+  if (newPassword.length < 8) {
+    Swal.showValidationMessage("New password must be at least 8 characters.");
+    return false;
+  }
+
+  if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(newPassword)) {
+    Swal.showValidationMessage("New password must include uppercase, lowercase, number, and special character.");
+    return false;
+  }
+
+  if (newPassword !== confirmNewPassword) {
+    Swal.showValidationMessage("New password confirmation does not match.");
+    return false;
+  }
+
+  return { oldPassword, newPassword };
+}
+
+function setupProfileModal() {
+  profileCloseButtons.forEach((button) => {
+    button.addEventListener("click", closeProfileModal);
+  });
+
+  profileEditBtn?.addEventListener("click", () => {
+    setProfileEditing(true);
+    setProfileStatus("Edit your details, then click Save Changes.");
+  });
+
+  profileForm?.addEventListener("submit", handleProfileSave);
+  profileChangePhotoBtn?.addEventListener("click", () => {
+    setProfileEditing(true);
+    profilePhotoInput?.click();
+  });
+  profileAvatarPhotoBtn?.addEventListener("click", () => {
+    setProfileEditing(true);
+    profilePhotoInput?.click();
+  });
+  profilePhotoInput?.addEventListener("change", handleProfilePhotoChange);
+
+  profilePasswordBtn?.addEventListener("click", () => {
+    closeProfileModal();
+    showChangePasswordDialog({ returnToProfile: true });
+  });
+
+  profileNotificationsBtn?.addEventListener("click", () => {
+    showNotificationSettingsDialog({ returnToProfile: true });
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (
+      event.key === "Escape" &&
+      profileModal &&
+      !profileModal.classList.contains("hidden")
+    ) {
+      closeProfileModal();
+    }
+  });
+
+  setProfileEditing(false);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
+  setupProfileModal();
   setupAccountActions();
   setupPasswordToggles();
   setupDateInputs();
@@ -1420,13 +2698,23 @@ document.addEventListener("DOMContentLoaded", () => {
     window.history.replaceState(null, "", window.location.pathname + window.location.search);
   }
 
+  const shouldOpenQuizIntro =
+    new URLSearchParams(window.location.search).get("quizIntro") === "open" ||
+    window.location.hash === "#quiz-match-info";
+
+  if (shouldOpenQuizIntro && quizIntroModal) {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    openQuizIntroModal();
+    clearQuizIntroUrlState();
+  }
+
   const shouldOpenAuthModal = localStorage.getItem("animua_open_auth_modal") === "true";
   if (shouldOpenAuthModal) {
     showLoginView();
     openAuthModal();
     localStorage.removeItem("animua_open_auth_modal");
   }
-  
+
 });
 
 function setupAccountActions() {
@@ -1472,42 +2760,7 @@ function setupAccountActions() {
     changePasswordBtn.dataset.bound = "true";
 
     changePasswordBtn.addEventListener("click", async () => {
-      const result = await Swal.fire({
-        title: "Change Password",
-        html: `
-          <input id="oldPassword" type="password" class="swal2-input" placeholder="Current password">
-          <input id="newPassword" type="password" class="swal2-input" placeholder="New password">
-        `,
-        showCancelButton: true,
-        confirmButtonText: "Update Password",
-        cancelButtonText: "Cancel",
-        customClass: {
-          popup: "animua-popup",
-          confirmButton: "animua-confirm",
-          cancelButton: "animua-cancel"
-        },
-        buttonsStyling: false,
-        preConfirm: () => {
-          const oldPassword = document.getElementById("oldPassword").value;
-          const newPassword = document.getElementById("newPassword").value;
-
-          if (!oldPassword || !newPassword) {
-            Swal.showValidationMessage("Please fill in both password fields.");
-            return false;
-          }
-
-          if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(newPassword)) {
-            Swal.showValidationMessage("New password must include uppercase, lowercase, number, and special character.");
-            return false;
-          }
-
-          return { oldPassword, newPassword };
-        }
-      });
-
-      if (!result.isConfirmed) return;
-
-      await updatePassword(result.value.oldPassword, result.value.newPassword);
+      await showChangePasswordDialog();
     });
   }
 }
@@ -1546,10 +2799,13 @@ async function updateUsername(newName) {
   const dropdownUserName = document.getElementById("dropdownUserName");
 
   if (loggedUserName) loggedUserName.textContent = getFirstName(data.fullName || newName);
-  if (dropdownUserName) dropdownUserName.textContent = data.fullName || newName;
+  if (dropdownUserName) dropdownUserName.textContent = getFirstName(data.fullName || newName);
 
   const userAvatarMini = document.querySelector(".user-avatar-mini");
   if (userAvatarMini) userAvatarMini.textContent = getInitial(data.fullName || newName);
+
+  const dropdownUserInitial = document.getElementById("dropdownUserInitial");
+  if (dropdownUserInitial) dropdownUserInitial.textContent = getInitial(data.fullName || newName);
 
   Swal.fire({
     icon: "success",
@@ -1563,8 +2819,12 @@ async function updateUsername(newName) {
   });
 }
 
-async function updatePassword(oldPassword, newPassword) {
+async function changePasswordRequest(oldPassword, newPassword) {
   const token = localStorage.getItem("animua_token");
+
+  if (!token) {
+    throw new Error("Please log in before changing your password.");
+  }
 
   const response = await fetch(`${API_BASE_URL}/auth/change-password`, {
     method: "PUT",
@@ -1578,29 +2838,38 @@ async function updatePassword(oldPassword, newPassword) {
   const data = await response.json();
 
   if (!response.ok) {
+    throw new Error(data.message || "Failed to update password.");
+  }
+
+  return data;
+}
+
+async function updatePassword(oldPassword, newPassword) {
+  try {
+    await changePasswordRequest(oldPassword, newPassword);
+
     Swal.fire({
-      icon: "error",
-      title: "Update Failed",
-      text: data.message || "Failed to update password.",
+      icon: "success",
+      title: "Password Updated",
+      text: "Your password has been changed.",
       customClass: {
         popup: "animua-popup",
         confirmButton: "animua-confirm"
       },
       buttonsStyling: false
     });
-    return;
+  } catch (error) {
+    Swal.fire({
+      icon: "error",
+      title: "Update Failed",
+      text: error.message || "Failed to update password.",
+      customClass: {
+        popup: "animua-popup",
+        confirmButton: "animua-confirm"
+      },
+      buttonsStyling: false
+    });
   }
-
-  Swal.fire({
-    icon: "success",
-    title: "Password Updated",
-    text: "Your password has been changed.",
-    customClass: {
-      popup: "animua-popup",
-      confirmButton: "animua-confirm"
-    },
-    buttonsStyling: false
-  });
 }
 
 initChatbotWidget();
@@ -1613,17 +2882,31 @@ function initChatbotWidget() {
     `
       <section class="animua-chatbot" id="animuaChatbot" aria-live="polite">
         <button type="button" class="animua-chatbot-toggle" id="chatbotToggle" aria-label="Open ANIMUA chat assistant" aria-expanded="false">
-          <i class="fa-regular fa-comments"></i>
+          <i class="fa-solid fa-comments"></i>
         </button>
 
         <div class="chatbot-panel hidden" id="chatbotPanel" role="dialog" aria-modal="false" aria-labelledby="chatbotTitle">
           <div class="chatbot-head">
-            <div class="chatbot-brand-mark" aria-hidden="true">
-              <i class="fa-regular fa-comments"></i>
+            <div class="chatbot-brand-badge" aria-hidden="true">
+              <span><i class="fa-solid fa-paw"></i></span>
             </div>
             <div class="chatbot-head-copy">
-              <p>ANIMUA Assistant</p>
-              <h2 id="chatbotTitle">How can I help?</h2>
+              <div class="chatbot-title-line" id="chatbotTitle">
+                <strong>ANIMUA</strong>
+                <span>Assistant</span>
+              </div>
+              <p id="chatbotSubtitle">Your companion for adoption and shelter services.</p>
+            </div>
+            <div class="chatbot-language-menu">
+              <button type="button" class="chatbot-language-select" id="chatbotLanguageToggle" aria-label="Choose chatbot language" aria-expanded="false">
+                <i class="fa-solid fa-globe" aria-hidden="true"></i>
+                <span id="chatbotLanguageLabel">English</span>
+                <i class="fa-solid fa-caret-down" aria-hidden="true"></i>
+              </button>
+              <div class="chatbot-language-options hidden" id="chatbotLanguageOptions" role="menu">
+                <button type="button" data-chatbot-language-option="english" class="is-active" role="menuitem">English</button>
+                <button type="button" data-chatbot-language-option="tagalog" role="menuitem">Tagalog</button>
+              </div>
             </div>
             <button type="button" class="chatbot-close" id="chatbotClose" aria-label="Close chat assistant">
               <i class="fa-solid fa-xmark"></i>
@@ -1631,12 +2914,18 @@ function initChatbotWidget() {
           </div>
 
           <div class="chatbot-messages" id="chatbotMessages">
-            <div class="chatbot-message bot">
-              <p>Welcome to ANIMUA!
-
-I'm your virtual shelter assistant. I can help you with pet adoption, compatibility matching, surrender requests, upcoming events, your account, and other ANIMUA services.
-
-Choose a topic below or type your question to get started.</p>
+            <div class="chatbot-message-row bot">
+              <div class="chatbot-bot-avatar" aria-hidden="true">
+                <i class="fa-solid fa-dog"></i>
+              </div>
+              <div class="chatbot-message bot">
+                <p id="chatbotGreeting">Hello! I can help with adoption, surrender requests, matching, events, and account support.</p>
+              </div>
+            </div>
+            <div class="chatbot-message user chatbot-suggestions-row">
+                <button type="button" class="chatbot-suggestions-toggle" id="chatbotSuggestionsToggle">
+                  Generate questions
+                </button>
             </div>
           </div>
 
@@ -1650,10 +2939,12 @@ Choose a topic below or type your question to get started.</p>
           </div>
 
           <form class="chatbot-form" id="chatbotForm">
-            <input type="text" id="chatbotInput" placeholder="Type your question..." autocomplete="off" maxlength="700" aria-label="Message ANIMUA Assistant">
-            <button type="submit" id="chatbotSend" aria-label="Send message">
-              <i class="fa-solid fa-paper-plane"></i>
-            </button>
+            <label class="chatbot-search-field" for="chatbotInput">
+              <input type="text" id="chatbotInput" placeholder="Ask about adoption or services..." autocomplete="off" maxlength="700" aria-label="Message ANIMUA Assistant">
+              <button type="submit" class="chatbot-input-send" id="chatbotSend" aria-label="Send message">
+                <i class="fa-solid fa-paper-plane"></i>
+              </button>
+            </label>
           </form>
         </div>
       </section>
@@ -1668,10 +2959,22 @@ Choose a topic below or type your question to get started.</p>
   const input = document.getElementById("chatbotInput");
   const messages = document.getElementById("chatbotMessages");
   const sendButton = document.getElementById("chatbotSend");
+  const languageToggle = document.getElementById("chatbotLanguageToggle");
+  const languageOptions = document.getElementById("chatbotLanguageOptions");
+  const languageLabel = document.getElementById("chatbotLanguageLabel");
+  const greeting = document.getElementById("chatbotGreeting");
+  const subtitle = document.getElementById("chatbotSubtitle");
   const quickActions = document.getElementById("chatbotQuickActions");
+  const suggestionsToggle = document.getElementById("chatbotSuggestionsToggle");
   const history = [];
+  let selectedLanguage = "english";
 
-  renderChatbotQuickActions(quickActions);
+  renderChatbotQuickActions(quickActions, selectedLanguage);
+  if (form && quickActions) {
+    messages?.appendChild(quickActions);
+    quickActions.classList.add("is-hidden");
+  }
+  updateChatbotInputPlaceholder(input, selectedLanguage);
 
   const openChat = () => {
     panel?.classList.remove("hidden");
@@ -1696,15 +2999,67 @@ Choose a topic below or type your question to get started.</p>
   });
 
   close?.addEventListener("click", closeChat);
+  languageToggle?.addEventListener("click", () => {
+    const isOpen = !languageOptions?.classList.contains("hidden");
+    languageOptions?.classList.toggle("hidden", isOpen);
+    languageToggle.setAttribute("aria-expanded", String(!isOpen));
+  });
+
+  languageOptions?.addEventListener("click", (event) => {
+    const option = event.target.closest("[data-chatbot-language-option]");
+    if (!option) return;
+
+    selectedLanguage = option.dataset.chatbotLanguageOption || "english";
+    if (languageLabel) languageLabel.textContent = selectedLanguage === "tagalog" ? "Tagalog" : "English";
+    updateChatbotGreeting(greeting, selectedLanguage);
+    updateChatbotSubtitle(subtitle, selectedLanguage);
+    updateChatbotInputPlaceholder(input, selectedLanguage);
+    updateChatbotSuggestionsToggle(suggestionsToggle, selectedLanguage);
+    renderChatbotQuickActions(quickActions, selectedLanguage);
+    languageOptions.querySelectorAll("[data-chatbot-language-option]").forEach((button) => {
+      button.classList.toggle("is-active", button === option);
+    });
+    languageOptions.classList.add("hidden");
+    languageToggle?.setAttribute("aria-expanded", "false");
+  });
+
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && panel && !panel.classList.contains("hidden")) {
-      closeChat();
+      if (languageOptions && !languageOptions.classList.contains("hidden")) {
+        languageOptions.classList.add("hidden");
+        languageToggle?.setAttribute("aria-expanded", "false");
+      } else {
+        closeChat();
+      }
     }
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!languageOptions || languageOptions.classList.contains("hidden")) return;
+    if (event.target.closest(".chatbot-language-menu")) return;
+    languageOptions.classList.add("hidden");
+    languageToggle?.setAttribute("aria-expanded", "false");
   });
 
   quickActions?.addEventListener("click", (event) => {
     const button = event.target.closest("[data-chatbot-prompt]");
     if (!button || !input || !form) return;
+
+    input.value = button.dataset.chatbotPrompt || button.textContent.trim();
+    quickActions.classList.add("is-hidden");
+    input.focus();
+    form.requestSubmit();
+  });
+
+  suggestionsToggle?.addEventListener("click", () => {
+    quickActions?.classList.remove("is-hidden");
+    suggestionsToggle.hidden = true;
+    if (messages) messages.scrollTop = messages.scrollHeight;
+  });
+
+  form?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-chatbot-prompt]");
+    if (!button || button.closest("#chatbotQuickActions") || !input || !form) return;
 
     input.value = button.dataset.chatbotPrompt || button.textContent.trim();
     input.focus();
@@ -1716,12 +3071,21 @@ Choose a topic below or type your question to get started.</p>
     const message = input?.value.trim() || "";
     if (!message) return;
 
+    if (suggestionsToggle) {
+      suggestionsToggle.hidden = true;
+    }
+    quickActions?.classList.add("is-hidden");
     appendChatMessage(messages, "user", message);
     history.push({ role: "user", content: message });
     input.value = "";
     setChatbotLoading(sendButton, true);
     const typing = appendChatMessage(messages, "bot", "Typing...");
     typing?.classList.add("is-typing");
+    const typingStartedAt = Date.now();
+    const waitForTypingPause = () => new Promise((resolve) => {
+      const elapsed = Date.now() - typingStartedAt;
+      window.setTimeout(resolve, Math.max(0, CHATBOT_MIN_TYPING_MS - elapsed));
+    });
 
     try {
       const response = await fetch(`${API_BASE_URL}/chatbot/message`, {
@@ -1729,6 +3093,7 @@ Choose a topic below or type your question to get started.</p>
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message,
+          language: selectedLanguage,
           history: history.slice(-8)
         })
       });
@@ -1738,13 +3103,18 @@ Choose a topic below or type your question to get started.</p>
         throw new Error(data.message || "Unable to reach ANIMUA Assistant.");
       }
 
+      await waitForTypingPause();
       typing?.remove();
       const reply = data.reply || "I could not answer that yet. Please try asking another way.";
       appendChatMessage(messages, "bot", reply);
       history.push({ role: "assistant", content: reply });
     } catch (error) {
+      await waitForTypingPause();
       typing?.remove();
-      appendChatMessage(messages, "bot", error.message || "Chat is unavailable right now. Please try again later.");
+      const fallbackMessage = error instanceof TypeError && error.message === "Failed to fetch"
+        ? "ANIMUA Assistant cannot connect to the server right now. Please make sure the backend is running, then try again."
+        : error.message || "Chat is unavailable right now. Please try again later.";
+      appendChatMessage(messages, "bot", fallbackMessage);
     } finally {
       setChatbotLoading(sendButton, false);
       trimChatHistory(history);
@@ -1763,22 +3133,47 @@ function appendChatMessage(container, type, text) {
   paragraph.textContent = text;
   item.appendChild(paragraph);
 
-  container.appendChild(item);
+  if (type === "bot") {
+    const row = document.createElement("div");
+    row.className = "chatbot-message-row bot";
+
+    const avatar = document.createElement("div");
+    avatar.className = "chatbot-bot-avatar";
+    avatar.setAttribute("aria-hidden", "true");
+    avatar.innerHTML = '<i class="fa-solid fa-dog"></i>';
+
+    row.append(avatar, item);
+    container.appendChild(row);
+    container.scrollTop = container.scrollHeight;
+    return row;
+  } else {
+    container.appendChild(item);
+  }
+
   container.scrollTop = container.scrollHeight;
   return item;
 }
 
-function renderChatbotQuickActions(container) {
+function renderChatbotQuickActions(container, language = "english") {
   if (!container) return;
 
-  const actions = [
-    { prompt: "Find a Pet", icon: "fa-paw", label: "Find a Pet" },
-    { prompt: "Adoption Guide", icon: "fa-heart", label: "Adoption Guide" },
-    { prompt: "Compatibility Quiz", icon: "fa-puzzle-piece", label: "Compatibility Quiz" },
-    { prompt: "Surrender Request", icon: "fa-file-arrow-up", label: "Surrender Request" },
-    { prompt: "Upcoming Events", icon: "fa-calendar", label: "Upcoming Events", regular: true },
-    { prompt: "Account Help", icon: "fa-user", label: "Account Help" }
-  ];
+  const actions = language === "tagalog"
+    ? [
+        { prompt: "Paano ako mag-aadopt ng pet?", icon: "fa-heart", label: "Adoption" },
+        { prompt: "Ipakita ang furbabies na ready for adoption", icon: "fa-paw", label: "Find Furbabies" },
+        { prompt: "Paano gumagana ang compatibility matching?", icon: "fa-puzzle-piece", label: "Match Quiz" },
+        { prompt: "Paano ako magsusumite ng surrender request?", icon: "fa-hand-holding-heart", label: "Surrender" },
+        { prompt: "May upcoming events ba?", icon: "fa-calendar", label: "Upcoming Events", regular: true },
+        { prompt: "Tulungan ako sa account o email OTP", icon: "fa-circle-question", label: "Account Help" }
+      ]
+    : [
+        { prompt: "How can I adopt a pet?", icon: "fa-heart", label: "Adoption" },
+        { prompt: "Show animals ready for adoption", icon: "fa-paw", label: "Find Furbabies" },
+        { prompt: "How does compatibility matching work?", icon: "fa-puzzle-piece", label: "Match Quiz" },
+        { prompt: "How do I submit a surrender request?", icon: "fa-hand-holding-heart", label: "Surrender" },
+        { prompt: "What upcoming events are available?", icon: "fa-calendar", label: "Upcoming Events", regular: true },
+        { prompt: "Help me with my account or email OTP", icon: "fa-circle-question", label: "Account Help" }
+      ];
 
   container.innerHTML = "";
 
@@ -1796,6 +3191,38 @@ function renderChatbotQuickActions(container) {
     button.append(icon, label);
     container.appendChild(button);
   });
+}
+
+function updateChatbotGreeting(greeting, language) {
+  if (!greeting) return;
+
+  greeting.textContent = language === "tagalog"
+    ? "Magandang araw! Makakatulong ako sa adoption, surrender requests, matching, events, at account support."
+    : "Hello! I can help with adoption, surrender requests, matching, events, and account support.";
+}
+
+function updateChatbotSubtitle(subtitle, language) {
+  if (!subtitle) return;
+  subtitle.textContent = language === "tagalog"
+    ? "Kasama mo sa adoption at shelter services."
+    : "Your companion for adoption and shelter services.";
+}
+
+function updateChatbotInputPlaceholder(input, language) {
+  if (!input) return;
+
+  input.placeholder = language === "tagalog"
+    ? "Magtanong tungkol sa adoption o services..."
+    : "Ask about adoption or services...";
+  input.setAttribute(
+    "aria-label",
+    language === "tagalog" ? "Mensahe sa ANIMUA Assistant" : "Message ANIMUA Assistant"
+  );
+}
+
+function updateChatbotSuggestionsToggle(button, language) {
+  if (!button) return;
+  button.textContent = language === "tagalog" ? "Gumawa ng mga tanong" : "Generate questions";
 }
 
 function setChatbotLoading(button, isLoading) {

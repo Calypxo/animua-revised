@@ -6,6 +6,7 @@ const {
 
 const ADOPTION_COL = "adoptions";
 const ANIMAL_COL = "animals";
+const SHELTER_LOCATION = "Angeles City Veterinary Office, Brgy. Pampang, Angeles City";
 
 exports.createAdoption = async (req, res) => {
   try {
@@ -76,6 +77,7 @@ exports.createAdoption = async (req, res) => {
 
       applicant: {
         full_name: full_name || "",
+        email: req.user?.email || "",
         age: age || "",
         birthdate: birthdate || "",
         address: address || "",
@@ -100,6 +102,14 @@ exports.createAdoption = async (req, res) => {
         issued_year: issued_year || "",
         signature_name: signature_name || "",
       },
+
+      account: req.user?.email
+        ? {
+            email: req.user.email,
+            name: req.user.fullName || full_name || "User",
+            role: req.user.role || "Public",
+          }
+        : null,
 
       status: "Pending",
       rejectedReason: "",
@@ -191,6 +201,8 @@ exports.getAllAdoptions = async (req, res) => {
           approvedAt: data.approvedAt || null,
           approvedBy: data.approvedBy || "",
           adoptionDate: data.adoptionDate || "",
+          pickupSchedule: data.pickupSchedule || null,
+          pickupRescheduleRequest: data.pickupRescheduleRequest || null,
           processedBy: data.processedBy || "",
           submittedAt: data.submittedAt || null,
           updatedAt: data.updatedAt || null,
@@ -221,6 +233,295 @@ exports.getAllAdoptions = async (req, res) => {
     console.error("[getAllAdoptions]", error.message);
     res.status(500).json({
       message: "Failed to fetch adoption requests.",
+    });
+  }
+};
+
+exports.getMyAdoptions = async (req, res) => {
+  try {
+    const email = String(req.user?.email || "").trim().toLowerCase();
+
+    if (!email) {
+      return res.status(401).json({
+        message: "Please sign in to view your adoption applications.",
+      });
+    }
+
+    const snapshot = await db.collection(ADOPTION_COL).get();
+
+    const adoptions = await Promise.all(
+      snapshot.docs
+        .map((doc) => ({ id: doc.id, data: doc.data() || {} }))
+        .filter(({ data }) => {
+          const applicantEmail = String(
+            data.account?.email ||
+            data.applicant?.email ||
+            data.userEmail ||
+            ""
+          )
+            .trim()
+            .toLowerCase();
+
+          return applicantEmail === email;
+        })
+        .map(async ({ id, data }) => {
+          let animal = null;
+
+          if (data.pet_id) {
+            try {
+              const animalDoc = await db.collection(ANIMAL_COL).doc(data.pet_id).get();
+
+              if (animalDoc.exists) {
+                const animalData = animalDoc.data() || {};
+                animal = {
+                  id: animalDoc.id,
+                  name: buildShelterLabel(animalData, animalDoc.id),
+                  species: animalData.species || "",
+                  sex: animalData.sex || animalData.gender || "",
+                  age: animalData.age || "",
+                  imageUrl:
+                    animalData.imageUrl ||
+                    animalData.profileImageUrl ||
+                    animalData.photoUrl ||
+                    "",
+                };
+              }
+            } catch (animalErr) {
+              console.error("[getMyAdoptions animal lookup]", animalErr.message);
+            }
+          }
+
+          return {
+            id,
+            applicationId: data.applicationId || id,
+            pet_id: data.pet_id || "",
+            pet_name: data.pet_label || data.pet_name || animal?.name || "Animal",
+            animal,
+            applicant: data.applicant || {},
+            account: data.account || {},
+            other_information: data.other_information || {},
+            declaration: data.declaration || {},
+            compatibility: data.compatibility || null,
+            status: data.status || "Pending",
+            rejectedReason: data.rejectedReason || "",
+            approvedAt: data.approvedAt || null,
+            adoptionDate: data.adoptionDate || "",
+            pickupSchedule: data.pickupSchedule || null,
+            pickupRescheduleRequest: data.pickupRescheduleRequest || null,
+            submittedAt: data.submittedAt || null,
+            updatedAt: data.updatedAt || null,
+          };
+        })
+    );
+
+    adoptions.sort((x, y) => {
+      const xSec = x.submittedAt?._seconds || x.submittedAt?.seconds || 0;
+      const ySec = y.submittedAt?._seconds || y.submittedAt?.seconds || 0;
+      return ySec - xSec;
+    });
+
+    res.status(200).json({
+      adoptions,
+    });
+  } catch (error) {
+    console.error("[getMyAdoptions]", error.message);
+    res.status(500).json({
+      message: "Failed to load your adoption applications.",
+    });
+  }
+};
+
+exports.scheduleMyAdoptionPickup = async (req, res) => {
+  try {
+    const email = String(req.user?.email || "").trim().toLowerCase();
+    const { id } = req.params;
+    const { date, time } = req.body || {};
+
+    if (!email) {
+      return res.status(401).json({
+        message: "Please sign in to schedule your pickup.",
+      });
+    }
+
+    if (!date || !time) {
+      return res.status(400).json({
+        message: "Pickup date and time are required.",
+      });
+    }
+
+    const adoptionRef = db.collection(ADOPTION_COL).doc(id);
+    const adoptionDoc = await adoptionRef.get();
+
+    if (!adoptionDoc.exists) {
+      return res.status(404).json({
+        message: "Adoption application not found.",
+      });
+    }
+
+    const data = adoptionDoc.data() || {};
+    const applicantEmail = String(
+      data.account?.email ||
+      data.applicant?.email ||
+      data.userEmail ||
+      ""
+    )
+      .trim()
+      .toLowerCase();
+
+    if (applicantEmail !== email) {
+      return res.status(403).json({
+        message: "You can only schedule your own adoption pickup.",
+      });
+    }
+
+    if (!["approved", "finalized"].includes(String(data.status || "").toLowerCase())) {
+      return res.status(400).json({
+        message: "Only approved applications can schedule a pickup.",
+      });
+    }
+
+    const existingSchedule = data.pickupSchedule || null;
+    const alreadyScheduled = Boolean(existingSchedule?.date || existingSchedule?.time);
+    const now = new Date().toISOString();
+
+    if (alreadyScheduled) {
+      const pickupRescheduleRequest = {
+        date,
+        time,
+        location: SHELTER_LOCATION,
+        status: "Pending",
+        requestedAt: now,
+        requestedBy: email,
+        previousSchedule: existingSchedule || {
+          date: data.adoptionDate || "",
+          time: "",
+          location: SHELTER_LOCATION,
+        },
+      };
+
+      await adoptionRef.update({
+        pickupRescheduleRequest,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+
+      return res.status(200).json({
+        message: "Pickup reschedule request sent for admin approval.",
+        requiresApproval: true,
+        pickupRescheduleRequest,
+      });
+    }
+
+    const pickupSchedule = {
+      date,
+      time,
+      location: SHELTER_LOCATION,
+      scheduledAt: now,
+    };
+
+    await adoptionRef.update({
+      pickupSchedule,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    res.status(200).json({
+      message: "Pickup schedule saved.",
+      pickupSchedule,
+    });
+  } catch (error) {
+    console.error("[scheduleMyAdoptionPickup]", error.message);
+    res.status(500).json({
+      message: "Failed to save pickup schedule.",
+    });
+  }
+};
+
+exports.approveAdoptionReschedule = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const adoptionRef = db.collection(ADOPTION_COL).doc(id);
+    const adoptionDoc = await adoptionRef.get();
+
+    if (!adoptionDoc.exists) {
+      return res.status(404).json({
+        message: "Adoption request not found.",
+      });
+    }
+
+    const data = adoptionDoc.data() || {};
+    const request = data.pickupRescheduleRequest || {};
+
+    if (String(request.status || "").toLowerCase() !== "pending") {
+      return res.status(400).json({
+        message: "No pending pickup reschedule request found.",
+      });
+    }
+
+    const now = new Date().toISOString();
+    const pickupSchedule = {
+      date: request.date,
+      time: request.time,
+      location: request.location || SHELTER_LOCATION,
+      scheduledAt: data.pickupSchedule?.scheduledAt || now,
+      rescheduledAt: now,
+      approvedBy: req.user?.email || "Admin",
+    };
+
+    await adoptionRef.update({
+      pickupSchedule,
+      "pickupRescheduleRequest.status": "Approved",
+      "pickupRescheduleRequest.reviewedAt": now,
+      "pickupRescheduleRequest.reviewedBy": req.user?.email || "Admin",
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    res.status(200).json({
+      message: "Pickup reschedule approved.",
+      pickupSchedule,
+    });
+  } catch (error) {
+    console.error("[approveAdoptionReschedule]", error.message);
+    res.status(500).json({
+      message: "Failed to approve pickup reschedule.",
+    });
+  }
+};
+
+exports.rejectAdoptionReschedule = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body || {};
+    const adoptionRef = db.collection(ADOPTION_COL).doc(id);
+    const adoptionDoc = await adoptionRef.get();
+
+    if (!adoptionDoc.exists) {
+      return res.status(404).json({
+        message: "Adoption request not found.",
+      });
+    }
+
+    const request = adoptionDoc.data()?.pickupRescheduleRequest || {};
+
+    if (String(request.status || "").toLowerCase() !== "pending") {
+      return res.status(400).json({
+        message: "No pending pickup reschedule request found.",
+      });
+    }
+
+    await adoptionRef.update({
+      "pickupRescheduleRequest.status": "Rejected",
+      "pickupRescheduleRequest.rejectionReason": cleanText(reason),
+      "pickupRescheduleRequest.reviewedAt": new Date().toISOString(),
+      "pickupRescheduleRequest.reviewedBy": req.user?.email || "Admin",
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    res.status(200).json({
+      message: "Pickup reschedule rejected.",
+    });
+  } catch (error) {
+    console.error("[rejectAdoptionReschedule]", error.message);
+    res.status(500).json({
+      message: "Failed to reject pickup reschedule.",
     });
   }
 };
@@ -260,6 +561,8 @@ exports.getAdoptionById = async (req, res) => {
       approvedAt: data.approvedAt || null,
       approvedBy: data.approvedBy || "",
       adoptionDate: data.adoptionDate || "",
+      pickupSchedule: data.pickupSchedule || null,
+      pickupRescheduleRequest: data.pickupRescheduleRequest || null,
       processedBy: data.processedBy || "",
       submittedAt: data.submittedAt || null,
       updatedAt: data.updatedAt || null,

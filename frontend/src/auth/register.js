@@ -17,7 +17,7 @@ const CAPTCHA_REQUIRED_MESSAGE = "Please complete the CAPTCHA before creating yo
 const CAPTCHA_EXPIRED_MESSAGE = "Verification expired. Please complete the CAPTCHA again.";
 const CONSENT_REQUIRED_MESSAGE = "Please confirm that you have read and agree to ANIMUA's Terms and Privacy Notice.";
 const POLICY_VERSION = "1.0";
-const RESEND_COOLDOWN_SECONDS = 60;
+const RESEND_COOLDOWN_SECONDS = 30;
 
 let registerCaptchaWidgetId = null;
 let registerCaptchaRenderPromise = null;
@@ -388,6 +388,7 @@ function setSubmitLoading(button, isLoading, loadingText = "Please wait...") {
   if (!button) return;
 
   if (isLoading) {
+    button.dataset.originalHtml = button.innerHTML;
     button.dataset.originalText = button.textContent;
     button.textContent = loadingText;
     button.disabled = true;
@@ -395,9 +396,14 @@ function setSubmitLoading(button, isLoading, loadingText = "Please wait...") {
     return;
   }
 
-  button.textContent = button.dataset.originalText || "Create Account";
+  if (button.dataset.originalHtml) {
+    button.innerHTML = button.dataset.originalHtml;
+  } else {
+    button.textContent = button.dataset.originalText || "Create Account";
+  }
   button.disabled = false;
   button.removeAttribute("aria-busy");
+  delete button.dataset.originalHtml;
   delete button.dataset.originalText;
 }
 
@@ -451,16 +457,15 @@ function renderEmailVerificationStep(email) {
   const safeMaskedEmail = escapeHtml(maskEmail(email));
 
   screen.innerHTML = `
-    <div class="email-verification-photo">
-      <img src="../../src/assets/images/cityvet-services-email.jpg" alt="Angeles City Veterinary Office services">
-    </div>
     <div class="email-verification-visual" aria-hidden="true">
-      <span class="email-verification-badge">
-        <span>ANIMUA</span>
+      <span class="email-verification-mail-icon">
+        <i class="fa-regular fa-envelope"></i>
+        <span><i class="fa-solid fa-shield"></i></span>
       </span>
     </div>
     <h2>Verify your email</h2>
-    <p>Enter the six-digit code sent to <strong>${safeMaskedEmail}</strong>.</p>
+    <p class="email-verification-copy">We've sent a 6-digit verification code to</p>
+    <div class="email-verification-email-pill">${safeMaskedEmail}</div>
     <label class="auth-field-label email-verification-label" for="email-verification-code">Email OTP</label>
     <input type="text" id="email-verification-code" class="email-verification-hidden-input" inputmode="numeric" maxlength="6" autocomplete="one-time-code" aria-label="Six-digit email OTP">
     <div class="email-verification-code-grid" id="email-verification-code-grid" aria-hidden="true">
@@ -468,11 +473,23 @@ function renderEmailVerificationStep(email) {
     </div>
     <small class="auth-error email-verification-message" id="email-verification-message"></small>
     <div class="email-verification-resend">
+      <span class="email-verification-resend-line"></span>
+      <span class="email-verification-resend-help">Didn't receive the code?</span>
+      <span class="email-verification-countdown" id="email-verification-countdown" aria-live="polite">Resend in</span>
       <button type="button" class="auth-secondary-action" id="resend-email-verification-btn">Resend Code</button>
-      <span class="email-verification-countdown" id="email-verification-countdown" aria-live="polite"></span>
     </div>
-    <button type="button" class="auth-submit-btn" id="check-email-verification-btn">Verify Code</button>
-    <button type="button" class="auth-link-action" id="change-email-btn">Change Email</button>
+    <button type="button" class="auth-submit-btn" id="check-email-verification-btn">
+      <span>Verify Email</span>
+      <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+    </button>
+    <button type="button" class="auth-link-action" id="change-email-btn">Use a Different Email</button>
+    <div class="email-verification-help-card">
+      <span class="email-verification-help-icon"><i class="fa-regular fa-envelope"></i></span>
+      <span>
+        <strong>Can't find the email?</strong>
+        <small>Please check your Spam or Promotions folder.</small>
+      </span>
+    </div>
   `;
 
   setupEmailOtpInput();
@@ -607,7 +624,11 @@ async function handleResendVerificationClick() {
     startResendCooldown();
   } catch (error) {
     if (message) message.textContent = error.message || "Unable to resend email OTP.";
-    updateResendButton();
+    if (error.status === 429) {
+      startResendCooldown();
+    } else {
+      updateResendButton();
+    }
   }
 }
 
@@ -623,54 +644,86 @@ async function requestEmailVerificationOtp(user) {
 
   const data = await response.json();
   if (!response.ok) {
-    throw new Error(data.message || "Unable to send email OTP.");
+    const error = new Error(data.message || "Unable to send email OTP.");
+    error.status = response.status;
+    throw error;
   }
 
   return data;
 }
 
 async function handleChangeEmailClick() {
-  const user = auth.currentUser;
-  if (user && !user.emailVerified && !user.phoneNumber) {
-    const firebaseIdToken = await user.getIdToken();
-    await fetch(`${API_BASE_URL}/auth/discard-unverified-registration`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ firebaseIdToken })
-    }).catch((error) => {
-      console.warn("[Unverified profile cleanup failed]", error.message);
-    });
-
-    await deleteUser(user).catch((error) => {
-      console.warn("[Unverified Firebase account cleanup failed]", error.message);
-    });
-  } else {
-    await signOut(auth);
+  const changeButton = document.getElementById("change-email-btn");
+  if (changeButton) {
+    changeButton.disabled = true;
+    changeButton.setAttribute("aria-busy", "true");
   }
 
-  stopResendCooldown();
+  try {
+    const user = auth.currentUser;
+    if (user && !user.emailVerified && !user.phoneNumber) {
+      const firebaseIdToken = await user.getIdToken().catch((error) => {
+        console.warn("[Firebase token for cleanup failed]", error.message);
+        return "";
+      });
 
-  const registerSection = document.getElementById("register-section");
-  const title = registerSection?.querySelector(".auth-title");
-  const intro = registerSection?.querySelector(".auth-switch-inline");
-  const form = document.getElementById("register-form");
-  const bottomSwitch = registerSection?.querySelector(".auth-bottom-switch");
-  const screen = document.getElementById("email-verification-screen");
-  const emailInput = document.getElementById("reg-email");
+      if (firebaseIdToken) {
+        await fetch(`${API_BASE_URL}/auth/discard-unverified-registration`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ firebaseIdToken })
+        }).catch((error) => {
+          console.warn("[Unverified profile cleanup failed]", error.message);
+        });
+      }
 
-  if (screen) screen.remove();
-  if (title) title.classList.remove("hidden");
-  if (intro) intro.classList.remove("hidden");
-  if (form) form.classList.remove("hidden");
-  if (bottomSwitch) bottomSwitch.classList.remove("hidden");
-  if (emailInput) {
-    emailInput.value = "";
-    emailInput.focus();
+      await deleteUser(user).catch((error) => {
+        console.warn("[Unverified Firebase account cleanup failed]", error.message);
+      });
+
+      if (auth.currentUser) {
+        await signOut(auth).catch((error) => {
+          console.warn("[Sign out after email change failed]", error.message);
+        });
+      }
+    } else {
+      await signOut(auth).catch((error) => {
+        console.warn("[Sign out before email change failed]", error.message);
+      });
+    }
+
+    stopResendCooldown();
+    pendingVerificationEmail = "";
+    localStorage.removeItem("pending_verify_email");
+    localStorage.removeItem("pending_verify_password");
+
+    const registerSection = document.getElementById("register-section");
+    const title = registerSection?.querySelector(".auth-title");
+    const intro = registerSection?.querySelector(".auth-switch-inline");
+    const form = document.getElementById("register-form");
+    const bottomSwitch = registerSection?.querySelector(".auth-bottom-switch");
+    const screen = document.getElementById("email-verification-screen");
+    const emailInput = document.getElementById("reg-email");
+
+    if (screen) screen.remove();
+    if (title) title.classList.remove("hidden");
+    if (intro) intro.classList.remove("hidden");
+    if (form) form.classList.remove("hidden");
+    if (bottomSwitch) bottomSwitch.classList.remove("hidden");
+    if (emailInput) {
+      emailInput.value = "";
+      emailInput.focus();
+    }
+
+    resetRegisterCaptcha();
+  } finally {
+    if (changeButton) {
+      changeButton.disabled = false;
+      changeButton.removeAttribute("aria-busy");
+    }
   }
-
-  resetRegisterCaptcha();
 }
 
 function startResendCooldown() {
@@ -704,14 +757,20 @@ function updateResendButton() {
 
   if (verificationResendRemaining > 0) {
     button.disabled = true;
-    button.textContent = "Resend Code";
-    if (countdown) countdown.textContent = `Resend available in ${verificationResendRemaining}s`;
+    button.textContent = formatResendTime(verificationResendRemaining);
+    if (countdown) countdown.textContent = "Resend in";
     return;
   }
 
   button.disabled = false;
   button.textContent = "Resend Code";
   if (countdown) countdown.textContent = "";
+}
+
+function formatResendTime(seconds = 0) {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  return `${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
 }
 
 function maskEmail(email = "") {
@@ -757,57 +816,64 @@ function ensurePolicyModals() {
     `
       <div class="auth-policy-modal-overlay hidden" id="auth-policy-modal-terms-privacy" data-policy-modal="terms-privacy" aria-hidden="true">
         <section class="auth-policy-modal" role="dialog" aria-modal="true" aria-labelledby="auth-policy-title-terms-privacy" tabindex="-1">
-          <button type="button" class="auth-policy-modal-close" data-policy-close aria-label="Close ANIMUA Terms and Privacy Notice">&times;</button>
           <header class="auth-policy-modal-head">
+            <button type="button" class="auth-policy-modal-close" data-policy-close aria-label="Close ANIMUA Terms and Privacy Notice">
+              <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
             <div class="auth-policy-brand" aria-hidden="true">
-              <span class="auth-policy-brand-mark"><i class="fa-solid fa-shield-heart"></i></span>
-              <strong>ANIMUA</strong>
+              <span class="auth-policy-brand-mark"><i class="fa-solid fa-paw"></i></span>
+              <span>
+                <strong>ANIMUA</strong>
+                <small>ANGELES CITY ANIMAL WELFARE PORTAL</small>
+              </span>
             </div>
             <h2 id="auth-policy-title-terms-privacy"><span>Terms and Privacy Notice</span></h2>
             <p>Please read these Terms and Privacy Notice before creating your ANIMUA account.</p>
           </header>
           <div class="auth-policy-modal-body">
-            <section class="auth-policy-section">
-              <span class="auth-policy-section-icon" aria-hidden="true"><i class="fa-regular fa-file-lines"></i></span>
-              <div class="auth-policy-section-copy">
-                <h3>Terms of Use</h3>
-                <ul>
-                  <li>Users must provide accurate information.</li>
-                  <li>Users must protect their login credentials.</li>
-                  <li>Users must not impersonate others or misuse the system.</li>
-                  <li>False adoption or surrender information is prohibited.</li>
-                  <li>Adoption applications do not guarantee approval.</li>
-                  <li>Surrender requests do not guarantee acceptance.</li>
-                  <li>Final decisions are made by the Angeles City Veterinary Office.</li>
-                  <li>Accounts may be suspended for misuse or policy violations.</li>
-                </ul>
-              </div>
-            </section>
-            <section class="auth-policy-section">
-              <span class="auth-policy-section-icon" aria-hidden="true"><i class="fa-solid fa-lock"></i></span>
-              <div class="auth-policy-section-copy">
-                <h3>Privacy Notice</h3>
-                <ul>
-                  <li>Information collected may include full name, email, mobile number, compatibility responses, adoption applications, surrender requests, and uploaded documents.</li>
-                  <li>Information is used for account management, compatibility matching, application processing, request updates, and service improvement.</li>
-                  <li>Authentication credentials are handled securely by the existing authentication service.</li>
-                  <li>Personal information is accessible only to authorized personnel.</li>
-                  <li>Information is not sold and is only shared when required by law, necessary for shelter services, or authorized by the user.</li>
-                  <li>Users may request access, correction, or deletion subject to applicable record-retention requirements.</li>
-                </ul>
-              </div>
-            </section>
-            <section class="auth-policy-section">
-              <span class="auth-policy-section-icon" aria-hidden="true"><i class="fa-regular fa-envelope"></i></span>
-              <div class="auth-policy-section-copy">
-                <h3>Contact</h3>
-                <p>For questions regarding your personal information, please contact the Angeles City Veterinary Office.</p>
-                <p>City Hall Building, Pulung Maragul, Angeles City<br><a href="tel:0453220485">(045) 322-0485</a></p>
-              </div>
-            </section>
+            <div class="auth-policy-card-grid">
+              <section class="auth-policy-section">
+                <span class="auth-policy-section-icon" aria-hidden="true"><i class="fa-regular fa-file-lines"></i></span>
+                <div class="auth-policy-section-copy">
+                  <h3>Terms of Use</h3>
+                  <ul>
+                    <li>Users must provide accurate information.</li>
+                    <li>Users must protect their login credentials.</li>
+                    <li>Users must not impersonate others or misuse the system.</li>
+                    <li>False adoption or surrender information is prohibited.</li>
+                    <li>Adoption applications do not guarantee approval.</li>
+                    <li>Surrender requests do not guarantee acceptance.</li>
+                    <li>Final decisions are made by the Angeles City Veterinary Office.</li>
+                    <li>Accounts may be suspended for misuse or policy violations.</li>
+                  </ul>
+                </div>
+              </section>
+              <section class="auth-policy-section">
+                <span class="auth-policy-section-icon" aria-hidden="true"><i class="fa-solid fa-lock"></i></span>
+                <div class="auth-policy-section-copy">
+                  <h3>Privacy Notice</h3>
+                  <ul>
+                    <li>Information collected may include full name, email, mobile number, compatibility responses, adoption applications, surrender requests, and uploaded documents.</li>
+                    <li>Information is used for account management, compatibility matching, application processing, request updates, and service improvement.</li>
+                    <li>Authentication credentials are handled securely by the existing authentication service.</li>
+                    <li>Personal information is accessible only to authorized personnel.</li>
+                    <li>Information is not sold and is only shared when required by law, necessary for shelter services, or authorized by the user.</li>
+                    <li>Users may request access, correction, or deletion subject to applicable record-retention requirements.</li>
+                  </ul>
+                </div>
+              </section>
+            </div>
+            <div class="auth-policy-privacy-note">
+              <span class="auth-policy-ack-icon" aria-hidden="true"><i class="fa-solid fa-paw"></i></span>
+              <p>Your information is used only for ANIMUA services and handled by authorized personnel.</p>
+            </div>
           </div>
           <footer class="auth-policy-modal-actions">
-            <button type="button" class="auth-policy-action auth-policy-action-primary" data-policy-close>Close</button>
+            <label class="auth-policy-consent" for="auth-policy-modal-consent">
+              <input type="checkbox" id="auth-policy-modal-consent">
+              <span class="auth-policy-consent-box" aria-hidden="true"></span>
+              <span>I have read, understood, and agree to the <strong>Terms &amp; Privacy Notice.</strong></span>
+            </label>
           </footer>
         </section>
       </div>
@@ -823,11 +889,32 @@ function ensurePolicyModals() {
       button.addEventListener("click", closePolicyModal);
     });
   });
+
+  const modalConsent = document.getElementById("auth-policy-modal-consent");
+  modalConsent?.addEventListener("change", () => {
+    const termsInput = document.getElementById("reg-terms");
+    const termsError = document.getElementById("reg-terms-error");
+
+    if (termsInput) {
+      termsInput.checked = modalConsent.checked;
+      termsInput.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+
+    if (modalConsent.checked && termsError) {
+      termsError.textContent = "";
+    }
+  });
 }
 
 function openPolicyModal(type, trigger) {
   const modal = document.getElementById("auth-policy-modal-terms-privacy");
   if (!modal) return;
+
+  const modalConsent = document.getElementById("auth-policy-modal-consent");
+  const termsInput = document.getElementById("reg-terms");
+  if (modalConsent && termsInput) {
+    modalConsent.checked = termsInput.checked;
+  }
 
   activePolicyModal = modal;
   activePolicyTrigger = trigger;

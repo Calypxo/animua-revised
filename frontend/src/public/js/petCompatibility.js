@@ -10,34 +10,34 @@ const PHASES = [
     id: 0, key: "filters", label: "Basic Filters",
     icon: "bi-funnel-fill", iconBg: "#fdf0f0", iconColor: "var(--clay)",
     kicker: "Step 1 of 5", title: "Set your filters",
-    desc: "Narrow down the pet pool before matching begins.",
+    desc: "Itakda ang iyong mga filter.",
     questions: [
       {
         key: "preferredSpecies", label: "Preferred Species", isFilter: true,
         text: "What species are you interested in?",
-        hint: "Select any if you have no preference.",
+        hint: "Anong uri ng alagang hayop ang interesado ka?",
         type: "tiles",
         options: [
-          { label:"Any", value:"Any", icon:"🐾" },
-          { label:"Dog", value:"Dog", icon:"🐶" },
-          { label:"Cat", value:"Cat", icon:"🐱" },
+          { label:"Any", value:"Any", icon:"bi-grid-3x3-gap-fill" },
+          { label:"Dog", value:"Dog", icon:"dog" },
+          { label:"Cat", value:"Cat", icon:"cat" },
         ]
       },
       {
         key: "preferredSex", label: "Preferred Sex", isFilter: true,
         text: "Do you have a sex preference?",
-        hint: "This filters the matching pool — choose Any if undecided.",
+        hint: "May gusto ka bang kasarian ng pet?",
         type: "tiles",
         options: [
-          { label:"Any", value:"Any", icon:"🔀" },
-          { label:"Male", value:"Male", icon:"♂" },
-          { label:"Female", value:"Female", icon:"♀" },
+          { label:"Any", value:"Any", icon:"bi-grid-3x3-gap-fill" },
+          { label:"Male", value:"Male", icon:"bi-gender-male" },
+          { label:"Female", value:"Female", icon:"bi-gender-female" },
         ]
       },
       {
         key: "needAllergyFriendly", label: "Allergy-Friendly", isFilter: true,
         text: "Does anyone in your household have pet allergies?",
-        hint: "We'll prioritize hypoallergenic or low-shedding animals.",
+        hint: "May allergy ba sa pet ang sinuman sa inyong bahay?",
         type: "toggle",
         options: [
           { label:"No, no allergies", value:"no", icon:"bi-x-circle" },
@@ -47,7 +47,7 @@ const PHASES = [
       {
         key: "acceptAggressive", label: "Behavioral Challenges", isFilter: true,
         text: "Can you handle a pet with behavioral challenges?",
-        hint: "This includes pets that may require extra patience or training.",
+        hint: "Kaya mo bang alagaan ang pet na may behavioral challenges?",
         type: "toggle",
         options: [
           { label:"No, I prefer easy-going", value:"no", icon:"bi-emoji-smile" },
@@ -57,7 +57,7 @@ const PHASES = [
       {
         key: "acceptSpecialNeeds", label: "Special Needs", isFilter: true,
         text: "Are you open to adopting a special-needs pet?",
-        hint: "Medical, physical, or behavioral care needs.",
+        hint: "Bukas ka ba sa pag-ampon ng special-needs pet?",
         type: "toggle",
         options: [
           { label:"Not at this time", value:"no", icon:"bi-x-circle" },
@@ -70,61 +70,61 @@ const PHASES = [
     id: 1, key: "lifestyle", label: "Lifestyle",
     icon: "bi-lightning-charge-fill", iconBg: "#e6f7f7", iconColor: "var(--teal)",
     kicker: "Step 2 of 5", title: "Lifestyle & activity",
-    desc: "These questions reflect your daily routine, energy, and attention.",
+    desc: "Pamumuhay at aktibidad.",
     questions: [
-      { key:"energyLevel",       label:"Energy Level",       text:"How energetic do you want your pet to be?",            hint:"Think about your own daily activity level at home.", scale:["Very calm","Low energy","Moderate","Active","Very energetic"] },
-      { key:"exerciseNeeds",     label:"Exercise Capacity",  text:"How much daily exercise can you realistically provide?",hint:"Walks, playtime, outdoor runs — be honest about your routine.", scale:["Very little","A little","Moderate","A lot","Very high"] },
-      { key:"independenceLevel", label:"Independence",       text:"How independent should your pet be?",                  hint:"Some pets are fine alone for hours; others need constant company.", scale:["Needs constant companionship","Low independence","Balanced","Quite independent","Very independent"] },
-      { key:"attentionNeeds",    label:"Attention Capacity", text:"How much daily attention can you give your pet?",       hint:"Bonding time, supervision, interaction — not just feeding.", scale:["Very little","A little","Moderate","A lot","Very high"] },
-      { key:"playfulness",       label:"Playfulness",        text:"How playful do you want your pet to be?",              hint:"Do you want a couch companion or an active play partner?", scale:["Very calm","Slightly playful","Balanced","Playful","Very playful"] },
-      { key:"adaptability",      label:"Routine Stability",  text:"How often does your daily routine change?",            hint:"Frequent travel, irregular schedules, or moving affects pet wellbeing.", scale:["Very stable","Slightly changing","Moderate changes","Often changing","Very unpredictable"] },
+      { key:"energyLevel",       label:"Energy Level",       text:"How energetic do you want your pet to be?",             hint:"Gaano ka-energetic ang pet na gusto mo?", scale:["Very calm","Low energy","Moderate","Active","Very energetic"] },
+      { key:"exerciseNeeds",     label:"Exercise Capacity",  text:"How much daily exercise can you realistically provide?",hint:"Gaano karaming daily exercise ang kaya mong ibigay?", scale:["Very little","A little","Moderate","A lot","Very high"] },
+      { key:"independenceLevel", label:"Independence",       text:"How independent should your pet be?",                   hint:"Gaano ka-independent dapat ang pet mo?", scale:["Needs constant companionship","Low independence","Balanced","Quite independent","Very independent"] },
+      { key:"attentionNeeds",    label:"Attention Capacity", text:"How much daily attention can you give your pet?",        hint:"Gaano karaming daily attention ang kaya mong ibigay sa pet?", scale:["Very little","A little","Moderate","A lot","Very high"] },
+      { key:"playfulness",       label:"Playfulness",        text:"How playful do you want your pet to be?",               hint:"Gaano ka-playful ang pet na gusto mo?", scale:["Very calm","Slightly playful","Balanced","Playful","Very playful"] },
+      { key:"adaptability",      label:"Routine Stability",  text:"How often does your daily routine change?",             hint:"Gaano kadalas nagbabago ang daily routine mo?", scale:["Very stable","Slightly changing","Moderate changes","Often changing","Very unpredictable"] },
     ]
   },
   {
     id: 2, key: "social", label: "Social Environment",
     icon: "bi-people-fill", iconBg: "#fff8e6", iconColor: "var(--amber)",
     kicker: "Step 3 of 5", title: "Social environment",
-    desc: "These questions measure how social and busy your home is.",
+    desc: "Social na kapaligiran.",
     questions: [
-      { key:"friendlinessToHumans", label:"Household Sociability",  text:"How social is your household overall?",                     hint:"Think about guests, family gatherings, and daily human activity.", scale:["Very quiet","Slightly social","Moderately social","Social","Very social"] },
-      { key:"goodWithKids",         label:"Kids at Home",           text:"How often will your pet interact with children?",            hint:"Daily kids = high importance; no kids = set this to 1.", scale:["Never","Rarely","Sometimes","Often","Daily — it's a must"] },
-      { key:"goodWithOtherPets",    label:"Other Pets",             text:"Will your pet live with or interact with other pets?",       hint:"Multi-pet households need pets with high compatibility scores.", scale:["No other pets","Rare contact","Sometimes","Often","Yes, definitely"] },
-      { key:"strangerTolerance",    label:"Visitor Comfort",        text:"How comfortable should your pet be around visitors or strangers?", hint:"If guests visit often, a welcoming pet makes life easier.", scale:["Very cautious","Reserved","Balanced","Friendly","Very welcoming"] },
+      { key:"friendlinessToHumans", label:"Household Sociability",  text:"How social is your household overall?",                         hint:"Gaano kasocial ang inyong household?", scale:["Very quiet","Slightly social","Moderately social","Social","Very social"] },
+      { key:"goodWithKids",         label:"Kids at Home",           text:"How often will your pet interact with children?",                hint:"Gaano kadalas makakasalamuha ng pet ang mga bata?", scale:["Never","Rarely","Sometimes","Often","Daily - it's a must"] },
+      { key:"goodWithOtherPets",    label:"Other Pets",             text:"Will your pet live with or interact with other pets?",           hint:"Makakasama ba ng pet ang ibang hayop?", scale:["No other pets","Rare contact","Sometimes","Often","Yes, definitely"] },
+      { key:"strangerTolerance",    label:"Visitor Comfort",        text:"How comfortable should your pet be around visitors or strangers?",hint:"Gaano dapat kakomportable ang pet sa bisita o strangers?", scale:["Very cautious","Reserved","Balanced","Friendly","Very welcoming"] },
     ]
   },
   {
     id: 3, key: "care", label: "Home & Care",
     icon: "bi-house-heart-fill", iconBg: "#e8f7ee", iconColor: "var(--green)",
     kicker: "Step 4 of 5", title: "Home, care & maintenance",
-    desc: "These measure your space, grooming capacity, and care tolerance.",
+    desc: "Bahay, alaga, at maintenance.",
     questions: [
-      { key:"noiseLevel",        label:"Noise Tolerance",      text:"How much noise can you comfortably handle from a pet?",      hint:"Barking, meowing, vocalizing — think about your neighbors too.", scale:["Very little","Low","Moderate","High","Very high"] },
-      { key:"spaceNeeds",        label:"Living Space",         text:"How much living space can you provide?",                     hint:"Studio apartment vs. house with yard — both are valid.", scale:["Very small (studio)","Small","Average","Large","Very large with yard"] },
-      { key:"climateTolerance",  label:"Climate Readiness",    text:"Can you care for a pet in Angeles City's warm climate?",     hint:"Some breeds need more heat management and care in tropical climates.", scale:["Not ready","Slightly ready","Moderately ready","Ready","Fully prepared"] },
-      { key:"groomingNeeds",     label:"Grooming Commitment",  text:"How willing are you to groom your pet regularly?",           hint:"Brushing, bathing, trimming — some breeds need much more.", scale:["Not willing","Slightly willing","Moderate effort","Willing","Very willing"] },
-      { key:"sheddingLevel",     label:"Shedding Tolerance",   text:"How comfortable are you with pet fur around the house?",     hint:"High-shedding pets require regular vacuuming and lint-rolling.", scale:["Not at all","Slightly OK","Neutral","Comfortable","No problem at all"] },
-      { key:"trainingDifficulty",label:"Training Commitment",  text:"How much training difficulty can you handle?",               hint:"Think about your patience, experience, and time for training.", scale:["Very easy only","Low difficulty","Moderate","Can handle difficult","Very experienced trainer"] },
-      { key:"healthRiskLevel",   label:"Vet Budget",           text:"How prepared are you for veterinary costs?",                hint:"Unexpected vet bills are part of pet ownership — be realistic.", scale:["Not prepared","Slightly prepared","Somewhat prepared","Prepared","Fully prepared & insured"] },
+      { key:"noiseLevel",        label:"Noise Tolerance",      text:"How much noise can you comfortably handle from a pet?",      hint:"Gaano karaming ingay mula sa pet ang kaya mong tanggapin?", scale:["Very little","Low","Moderate","High","Very high"] },
+      { key:"spaceNeeds",        label:"Living Space",         text:"How much living space can you provide?",                     hint:"Gaano kalaking living space ang kaya mong ibigay?", scale:["Very small (studio)","Small","Average","Large","Very large with yard"] },
+      { key:"climateTolerance",  label:"Climate Readiness",    text:"Can you care for a pet in Angeles City's warm climate?",     hint:"Kaya mo bang alagaan ang pet sa mainit na klima ng Angeles City?", scale:["Not ready","Slightly ready","Moderately ready","Ready","Fully prepared"] },
+      { key:"groomingNeeds",     label:"Grooming Commitment",  text:"How willing are you to groom your pet regularly?",           hint:"Gaano ka kahandang mag-groom ng pet nang regular?", scale:["Not willing","Slightly willing","Moderate effort","Willing","Very willing"] },
+      { key:"sheddingLevel",     label:"Shedding Tolerance",   text:"How comfortable are you with pet fur around the house?",     hint:"Gaano ka kakomportable sa balahibo ng pet sa bahay?", scale:["Not at all","Slightly OK","Neutral","Comfortable","No problem at all"] },
+      { key:"trainingDifficulty",label:"Training Commitment",  text:"How much training difficulty can you handle?",               hint:"Gaano kahirap na training ang kaya mong hawakan?", scale:["Very easy only","Low difficulty","Moderate","Can handle difficult","Very experienced trainer"] },
+      { key:"healthRiskLevel",   label:"Vet Budget",           text:"How prepared are you for veterinary costs?",                 hint:"Gaano ka kahanda sa gastusing veterinary?", scale:["Not prepared","Slightly prepared","Somewhat prepared","Prepared","Fully prepared"] },
     ]
   },
   {
     id: 4, key: "affection", label: "Affection",
     icon: "bi-heart-fill", iconBg: "#fdf0f0", iconColor: "var(--clay)",
     kicker: "Step 5 of 5", title: "Affection & attachment",
-    desc: "These questions reflect the closeness and bond you want.",
+    desc: "Lambing at attachment.",
     questions: [
-      { key:"affectionLevel",    label:"Affection Preference",  text:"How affectionate do you want your pet to be?",          hint:"Cuddly lap pet vs. independent companion — what fits you?", scale:["Very independent","Not very affectionate","Balanced","Affectionate","Very cuddly"] },
-      { key:"separationAnxiety", label:"Clinginess Tolerance",  text:"How comfortable are you with a clingy pet?",             hint:"Some pets get stressed when left alone — can you manage that?", scale:["Not comfortable","Slightly OK","Neutral","Comfortable","Completely fine with it"] },
+      { key:"affectionLevel",    label:"Affection Preference",  text:"How affectionate do you want your pet to be?", hint:"Gaano kalambing ang pet na gusto mo?", scale:["Very independent","Not very affectionate","Balanced","Affectionate","Very cuddly"] },
+      { key:"separationAnxiety", label:"Clinginess Tolerance",  text:"How comfortable are you with a clingy pet?",    hint:"Gaano ka kakomportable sa clingy na pet?", scale:["Not comfortable","Slightly OK","Neutral","Comfortable","Completely fine with it"] },
     ]
   }
 ];
 
 const PHASE_TIPS = [
-  "These filters narrow down the pet pool — so your quiz answers match the right animals.",
-  "Be honest about your actual daily routine, not your ideal version of it.",
-  "Consider your whole household — kids, roommates, and other pets all matter.",
-  "Think about your current home setup, not a future dream home.",
-  "The bond you want with your pet is just as important as practical needs.",
+  "Sinasala ng filters ang pet pool para mas tumugma ang recommendations.",
+  "Maging tapat sa tunay mong routine, hindi sa ideal version nito.",
+  "Isaalang-alang ang buong household - bata, kasama sa bahay, at ibang pets.",
+  "Isipin ang kasalukuyang bahay at setup mo, hindi future plan lang.",
+  "Mahalaga rin ang bond na gusto mo, hindi lang practical needs.",
 ];
 
 /* ══════════════════════════════════════════════════════
@@ -133,6 +133,49 @@ const PHASE_TIPS = [
 let answers     = {};
 let currentPhase= 0;
 const totalQ    = PHASES.reduce((s,p) => s+p.questions.length, 0);
+let isSubmitting = false;
+
+function isPhaseComplete(phaseIdx = currentPhase) {
+  return PHASES[phaseIdx].questions.every((q) => answers[q.key] !== undefined);
+}
+
+function getUnansweredQuestions(phaseIdx = currentPhase) {
+  return PHASES[phaseIdx].questions.filter((q) => answers[q.key] === undefined);
+}
+
+function getTileIcon(opt) {
+  const key = String(opt.value || opt.label || "").toLowerCase();
+  const animalIcons = {
+    dog: `
+      <svg class="select-tile-animal" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+        <path d="M7.5 16.6c0-5.4 3.5-9.2 8.5-9.2s8.5 3.8 8.5 9.2v6.1"/>
+        <path d="M10.7 18.9v3.5c0 2 1.6 3.6 3.6 3.6h3.4c2 0 3.6-1.6 3.6-3.6v-3.5"/>
+        <circle cx="12.4" cy="15.2" r="1.3"/>
+        <circle cx="19.6" cy="15.2" r="1.3"/>
+        <path d="M14.6 19.1h2.8"/>
+        <path d="M16 19.1v2.1"/>
+        <path d="M10.7 22.3c1.4 2.5 4.4 2.3 5.3-.4"/>
+        <path d="M21.3 22.3c-1.4 2.5-4.4 2.3-5.3-.4"/>
+      </svg>`,
+    cat: `
+      <svg class="select-tile-animal" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+        <path d="M6.6 10.2 11 13.4c1.5-.6 3.2-.9 5-.9s3.5.3 5 .9l4.4-3.2v9.5c0 4.6-3.7 7.7-9.4 7.7s-9.4-3.1-9.4-7.7v-9.5Z"/>
+        <circle cx="12.4" cy="18.2" r="1.3"/>
+        <circle cx="19.6" cy="18.2" r="1.3"/>
+        <path d="M14.9 22h2.2"/>
+      </svg>`,
+  };
+  if (animalIcons[key]) {
+    return animalIcons[key];
+  }
+  const icons = {
+    any: "bi-grid-3x3-gap-fill",
+    male: "bi-gender-male",
+    female: "bi-gender-female",
+  };
+  const icon = icons[key] || "bi-check2-circle";
+  return `<i class="bi ${icon}" aria-hidden="true"></i>`;
+}
 
 /* ══════════════════════════════════════════════════════
    RENDER
@@ -152,7 +195,11 @@ function renderPhase(phaseIdx) {
     if (i === phaseIdx) el.classList.add("active");
     // update dot icon
     const dot = el.querySelector(".phase-step-dot");
-    if (i < phaseIdx) dot.innerHTML = `<i class="bi bi-check2" style="font-size:0.7rem"></i>`;
+    if (dot) {
+      dot.innerHTML = i < phaseIdx
+        ? `<i class="bi bi-check2"></i>`
+        : `<i class="bi ${PHASES[i].icon}"></i>`;
+    }
   });
 
   let html = `
@@ -181,7 +228,7 @@ function renderPhase(phaseIdx) {
             ${q.options.map(opt => `
               <div class="select-tile ${answers[q.key]===opt.value?"selected":""}"
                    data-key="${q.key}" data-value="${opt.value}">
-                <div class="select-tile-icon">${opt.icon}</div>
+                <div class="select-tile-icon">${getTileIcon(opt)}</div>
                 <div class="select-tile-label">${opt.label}</div>
               </div>`).join("")}
           </div>
@@ -222,6 +269,10 @@ function renderPhase(phaseIdx) {
   // Navigation
   const isLast = phaseIdx === PHASES.length - 1;
   html += `
+    <div class="quiz-validation-message" id="quizValidationMessage" role="alert" hidden>
+      <i class="bi bi-exclamation-circle"></i>
+      <span>Please answer all questions in this section before continuing.</span>
+    </div>
     <div class="quiz-nav slide-in" style="animation-delay:${phase.questions.length*40+40}ms">
       <button class="btn-prev" id="btnPrev" ${phaseIdx===0?"disabled":""}>
         <i class="bi bi-arrow-left"></i> Previous
@@ -237,6 +288,7 @@ function renderPhase(phaseIdx) {
     </div>`;
 
   area.innerHTML = html;
+  updateNavState();
 
   // Bind events
   area.querySelectorAll(".option-btn, .select-tile, .toggle-tile").forEach(el => {
@@ -248,6 +300,7 @@ function renderPhase(phaseIdx) {
   });
 
   document.getElementById("btnNext")?.addEventListener("click", () => {
+    if (!validateCurrentPhase()) return;
     if (currentPhase < PHASES.length - 1) {
       currentPhase++;
       renderPhase(currentPhase);
@@ -256,17 +309,11 @@ function renderPhase(phaseIdx) {
     }
   });
 
-  document.getElementById("btnSubmit")?.addEventListener("click", handleSubmit);
-
-  // Set defaults for filter questions if not yet answered
-  PHASES[phaseIdx].questions.forEach(q => {
-    if (q.type === "tiles" && answers[q.key] === undefined) {
-      handleAnswer(q.key, q.options[0].value, true);
-    }
-    if (q.type === "toggle" && answers[q.key] === undefined) {
-      handleAnswer(q.key, q.options[0].value, true);
-    }
+  document.getElementById("btnSubmit")?.addEventListener("click", () => {
+    if (!validateCurrentPhase()) return;
+    handleSubmit();
   });
+
 }
 
 function handleAnswer(key, value, silent = false) {
@@ -277,6 +324,7 @@ function handleAnswer(key, value, silent = false) {
     // Update the clicked element visually
     const card = document.querySelector(`[data-key="${key}"]`)?.closest(".question-card, .filter-section");
     if (card) card.classList.add("answered");
+    if (card) card.classList.remove("needs-answer");
 
     // Deselect siblings
     document.querySelectorAll(`[data-key="${key}"]`).forEach(el => {
@@ -296,18 +344,71 @@ function handleAnswer(key, value, silent = false) {
 
   updateProgress();
   updateAnswerChips();
+  updateNavState();
+  if (isPhaseComplete()) hideValidationMessage();
 }
 
 function updateProgress() {
   const pct = Math.round((Object.keys(answers).length / totalQ) * 100);
   document.getElementById("progressFill").style.width  = pct + "%";
-  document.getElementById("progressPercent").textContent= pct + "%";
 
   // Count answered in all phases
   let done = 0, total = 0;
   PHASES.forEach(p => { p.questions.forEach(() => total++); });
   Object.keys(answers).forEach(() => done++);
-  document.getElementById("progressLabel").textContent = `${done} of ${total} answered`;
+  document.getElementById("progressLabel").textContent = `Question ${Math.min(done, total)} of ${total}`;
+}
+
+function updateNavState() {
+  const isComplete = isPhaseComplete();
+  const nextButton = document.getElementById("btnNext");
+  const submitButton = document.getElementById("btnSubmit");
+  if (nextButton) {
+    nextButton.classList.toggle("needs-completion", !isComplete);
+    nextButton.setAttribute("aria-disabled", String(!isComplete));
+  }
+  if (submitButton) {
+    submitButton.classList.toggle("needs-completion", !isComplete);
+    submitButton.setAttribute("aria-disabled", String(!isComplete));
+  }
+}
+
+function hideValidationMessage() {
+  const message = document.getElementById("quizValidationMessage");
+  if (!message) return;
+  message.hidden = true;
+}
+
+function validateCurrentPhase() {
+  const unanswered = getUnansweredQuestions();
+  const message = document.getElementById("quizValidationMessage");
+
+  document.querySelectorAll(".question-card, .filter-section").forEach((card) => {
+    card.classList.remove("needs-answer");
+  });
+
+  if (!unanswered.length) {
+    hideValidationMessage();
+    return true;
+  }
+
+  unanswered.forEach((q) => {
+    document.querySelector(`[data-key="${q.key}"]`)?.classList.add("needs-answer");
+  });
+
+  if (message) {
+    const label = unanswered.length === 1 ? "question" : "questions";
+    message.querySelector("span").textContent =
+      `Please answer ${unanswered.length} remaining ${label} in this section before continuing.`;
+    message.hidden = false;
+  }
+
+  document.querySelector(`[data-key="${unanswered[0].key}"]`)?.scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+  });
+
+  return false;
 }
 
 function updateAnswerChips() {
@@ -326,6 +427,15 @@ function updateAnswerChips() {
 }
 
 async function handleSubmit() {
+  if (isSubmitting) return;
+  isSubmitting = true;
+
+  const submitButton = document.getElementById("btnSubmit");
+  if (submitButton) {
+    submitButton.disabled = true;
+    submitButton.innerHTML = `<i class="bi bi-arrow-repeat"></i> Finding matches...`;
+  }
+
   const quizData = {
     filters: {
       preferredSpecies:    answers.preferredSpecies    || "Any",
@@ -357,20 +467,6 @@ async function handleSubmit() {
     }
   };
 
-  document.getElementById("quizMain").style.display = "none";
-  document.getElementById("completionScreen").style.display = "flex";
-
-  const summary = document.getElementById("completeSummary");
-  const highlights = [
-    { label: "Species", val: quizData.filters.preferredSpecies },
-    { label: "Energy", val: quizData.preferences.energyLevel + "/5" },
-    { label: "Space", val: quizData.preferences.spaceNeeds + "/5" },
-    { label: "Allergy-safe", val: quizData.filters.needAllergyFriendly === "yes" ? "Yes" : "No" },
-  ];
-  summary.innerHTML = highlights
-    .map(h => `<div class="score-pill">${h.label}: <strong>${h.val}</strong></div>`)
-    .join("");
-
   try {
     const response = await fetch(`${API_BASE_URL}/match`, {
       method: "POST",
@@ -390,26 +486,80 @@ async function handleSubmit() {
     localStorage.setItem("animua_quiz_data", JSON.stringify(quizData));
     localStorage.setItem("animua_match_results", JSON.stringify(matched));
 
-    document.getElementById("viewResultsBtn").onclick = () => {
-      window.location.href = "/pages/public/compatibilityResults.html";
-    };
+    window.location.href = "/pages/public/compatibilityResults.html";
   } catch (err) {
     console.error("Matching failed:", err);
+    localStorage.setItem("animua_quiz_data", JSON.stringify(quizData));
+    localStorage.setItem("animua_match_results", JSON.stringify([]));
+    document.getElementById("quizMain").style.display = "none";
+    document.getElementById("completionScreen").style.display = "flex";
+    document.querySelector(".quiz-phase-nav")?.setAttribute("hidden", "");
     document.getElementById("completionScreen").innerHTML = `
       <div class="complete-card">
-        <span class="complete-icon">😕</span>
-        <h2 class="complete-title">Something went wrong</h2>
-        <p class="complete-sub">We couldn't fetch pet matches right now. Please try again later.</p>
-        <button class="btn-submit" onclick="window.location.href='/pages/public/quizLanding.html'">
-          Back to Quiz
+        <span class="complete-icon"><i class="bi bi-exclamation-circle"></i></span>
+        <h2 class="complete-title">We could not load matches.</h2>
+        <p class="complete-sub">Please check that the backend server is running, then try again.</p>
+        <button class="btn-submit" id="retryMatchBtn" type="button">
+          <i class="bi bi-arrow-clockwise"></i>
+          Try Again
         </button>
       </div>`;
+    document.getElementById("retryMatchBtn")?.addEventListener("click", () => {
+      isSubmitting = false;
+      document.getElementById("completionScreen").style.display = "none";
+      document.getElementById("quizMain").style.display = "";
+      document.querySelector(".quiz-phase-nav")?.removeAttribute("hidden");
+      renderPhase(currentPhase);
+      updateProgress();
+    });
+  } finally {
+    if (submitButton) {
+      submitButton.disabled = false;
+      submitButton.innerHTML = `<i class="bi bi-stars"></i> Find My Matches`;
+    }
+    isSubmitting = false;
   }
 }
-
 
 
 
 /* ── Init ─────────────────────────────────────────── */
 renderPhase(0);
 updateProgress();
+
+function openConfirmModal(id) {
+  const modal = document.getElementById(id);
+  if (!modal) return;
+  modal.classList.remove("hidden");
+  modal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("confirm-open");
+  modal.querySelector("[data-confirm-close], a, button")?.focus();
+}
+
+function closeConfirmModal(modal) {
+  if (!modal) return;
+  modal.classList.add("hidden");
+  modal.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("confirm-open");
+}
+
+document.getElementById("exitQuizLink")?.addEventListener("click", (event) => {
+  event.preventDefault();
+  openConfirmModal("exitQuizModal");
+});
+
+document.querySelectorAll("[data-confirm-close]").forEach((button) => {
+  button.addEventListener("click", () => closeConfirmModal(button.closest(".quiz-confirm-overlay")));
+});
+
+document.querySelectorAll(".quiz-confirm-overlay").forEach((modal) => {
+  modal.addEventListener("click", (event) => {
+    if (event.target === modal) closeConfirmModal(modal);
+  });
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape") return;
+  const openModal = document.querySelector(".quiz-confirm-overlay:not(.hidden)");
+  if (openModal) closeConfirmModal(openModal);
+});

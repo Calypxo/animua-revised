@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
   <title>Animua | Connect. Learn. Adopt.</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -73,32 +74,32 @@
               </button>
 
               <div class="user-dropdown hidden" id="userDropdown">
-                <div class="user-dropdown-head">
+                <button type="button" class="user-dropdown-head" id="viewProfileBtn">
                   <div class="user-dropdown-avatar">
-                    <i class="fa-regular fa-user"></i>
+                    <span id="dropdownUserInitial">A</span>
                   </div>
 
                   <div>
                     <strong id="dropdownUserName">Account</strong>
-                    <small>Manage your Animua profile</small>
+                    <small>View your profile</small>
                   </div>
-                </div>
-
-                <button type="button" id="changeUsernameBtn">
-                  <i class="fa-solid fa-pen"></i>
-                  <span>Change Username</span>
                 </button>
 
-                <button type="button" id="changePasswordBtn">
-                  <i class="fa-solid fa-lock"></i>
-                  <span>Change Password</span>
+                <button type="button" class="user-dropdown-item" id="myApplicationsBtn">
+                  <i class="fa-regular fa-file-lines"></i>
+                  <span>My Applications</span>
                 </button>
+
+                <a href="contact.html" class="user-dropdown-item">
+                  <i class="fa-regular fa-circle-question"></i>
+                  <span>Help Center</span>
+                </a>
 
                 <div class="user-dropdown-divider"></div>
 
-                <button type="button" id="logoutBtn" class="logout-option">
+                <button type="button" id="logoutBtn" class="user-dropdown-item logout-option">
                   <i class="fa-solid fa-right-from-bracket"></i>
-                  <span>Logout</span>
+                  <span>Log out</span>
                 </button>
               </div>
             </div>
@@ -131,7 +132,7 @@
 
         <div class="hero-actions">
           <a href="find-furbabies.html" class="btn primary-btn">Browse Animals</a>
-          <a href="/pages/public/quizLanding.html" class="hero-link-btn">Take Match Quiz</a>
+          <a href="#" class="hero-link-btn" data-quiz-intro-trigger>Take Match Quiz</a>
         </div>
       </div>
     </div>
@@ -157,12 +158,12 @@
       <button
         type="button"
         class="home-highlight-story"
-        data-highlight-key="events"
+        data-highlight-key="news-alerts"
       >
         <span class="highlight-cover">
-          <img src="../../src/assets/images/about-free-vaccination.jpg" alt="Community animal welfare activity">
+          <img src="../../src/assets/images/highlight-news-alert.jpg" alt="Emergency responders assisting a rescued dog">
         </span>
-        <span>Upcoming Events</span>
+        <span>News &amp; Alerts</span>
       </button>
 
       <button
@@ -171,7 +172,7 @@
         data-highlight-key="success-stories"
       >
         <span class="highlight-cover">
-          <img src="../../src/assets/images/about-shelter-house.png" alt="Adopted animal story">
+          <img src="../../src/assets/images/highlight-success-story.jpg" alt="A community member holding an adopted cat">
         </span>
         <span>Success Stories</span>
       </button>
@@ -179,12 +180,12 @@
       <button
         type="button"
         class="home-highlight-story"
-        data-highlight-key="adoption-tips"
+        data-highlight-key="events"
       >
         <span class="highlight-cover">
-          <img src="../../src/assets/images/how-submit-application.jpg" alt="Adoption preparation">
+          <img src="../../src/assets/images/highlight-upcoming-event.jpg" alt="Angeles City Veterinary Office speaking at a community event">
         </span>
-        <span>Adoption Tips</span>
+        <span>Upcoming Events</span>
       </button>
     </div>
   </section>
@@ -192,8 +193,30 @@
 
   <div class="story-modal-overlay hidden" id="storyModal" aria-hidden="true">
     <article class="story-modal-card" role="dialog" aria-modal="true" aria-labelledby="storyModalTitle" tabindex="-1">
+      <div class="story-modal-progress" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <div class="story-modal-brand">
+        <span class="story-modal-avatar" aria-hidden="true">
+          <img src="../../src/assets/images/service-browse-animal.jpg" alt="" id="storyModalAvatar">
+          <i class="fa-solid fa-paw"></i>
+        </span>
+        <span class="story-modal-brand-copy">
+          <strong>ANIMUA</strong>
+          <em id="storyModalBrandTag">Featured Story</em>
+        </span>
+        <time id="storyModalDate"></time>
+      </div>
       <button type="button" class="story-modal-close" id="storyModalClose" aria-label="Close story">
         <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+      </button>
+      <button type="button" class="story-modal-nav story-modal-nav-prev" id="storyModalPrev" aria-label="Previous story" hidden>
+        <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+      </button>
+      <button type="button" class="story-modal-nav story-modal-nav-next" id="storyModalNext" aria-label="Next story" hidden>
+        <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
       </button>
       <div class="story-modal-image">
         <img src="../../src/assets/images/about-shelter-house.png" alt="" id="storyModalImage">
@@ -389,7 +412,7 @@
       </div>
 
       <div class="how-animua-actions reveal">
-        <a href="/pages/public/quizLanding.html" class="how-animua-primary">Start Finding a Match</a>
+        <a href="#" class="how-animua-primary" data-quiz-intro-trigger>Start Finding a Match</a>
         <a href="find-furbabies.html" class="how-animua-secondary">
           <span>Browse All Furbabies</span>
           <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
@@ -419,7 +442,7 @@
         <h4>Explore</h4>
         <a href="home.html">Home</a>
         <a href="find-furbabies.html">Find Furbabies</a>
-        <a href="/pages/public/quizLanding.html">Compatibility Quiz</a>
+        <a href="#" data-quiz-intro-trigger>Compatibility Quiz</a>
         <a href="#home-highlights" data-footer-scroll>Upcoming Events</a>
       </div>
 
@@ -446,6 +469,191 @@
       </div>
     </div>
   </footer>
+
+  <section class="profile-modal-overlay hidden" id="profileModal" aria-hidden="true" aria-labelledby="profileModalTitle">
+    <button type="button" class="profile-modal-backdrop" data-profile-close aria-label="Close profile"></button>
+    <article class="profile-modal-card" role="dialog" aria-modal="true" tabindex="-1">
+      <button type="button" class="profile-modal-close" data-profile-close aria-label="Close profile">
+        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+      </button>
+
+      <div class="profile-modal-shell">
+        <div class="profile-modal-title">
+          <span></span>
+          <h2 id="profileModalTitle">My Profile</h2>
+        </div>
+
+        <section class="profile-summary-card">
+          <div class="profile-summary-main">
+            <div class="profile-avatar-wrap">
+              <div class="profile-summary-avatar" id="profileAvatarPreview">A</div>
+              <button type="button" class="profile-avatar-camera" id="profileAvatarPhotoBtn" aria-label="Change profile photo">
+                <i class="fa-solid fa-camera" aria-hidden="true"></i>
+              </button>
+            </div>
+            <div>
+              <h3 id="profileSummaryName">Account</h3>
+              <small>Member since <span id="profileMemberSince">2026</span> <b aria-hidden="true"></b></small>
+            </div>
+          </div>
+
+          <div class="profile-summary-actions">
+            <input type="file" id="profilePhotoInput" accept="image/png,image/jpeg,image/webp" hidden>
+            <button type="button" class="profile-outline-btn" id="profileChangePhotoBtn">
+              <i class="fa-solid fa-camera" aria-hidden="true"></i>
+              <span>Change Photo</span>
+            </button>
+          </div>
+        </section>
+
+        <form class="profile-form" id="profileForm">
+          <section class="profile-info-card">
+            <div class="profile-section-head">
+              <h3><i class="fa-solid fa-circle-user" aria-hidden="true"></i> Personal Information</h3>
+              <button type="button" class="profile-outline-btn profile-edit-inline" id="profileEditBtn">
+                <i class="fa-solid fa-pen" aria-hidden="true"></i>
+                <span>Edit Profile</span>
+              </button>
+            </div>
+
+            <label class="profile-info-row">
+              <i class="fa-regular fa-user" aria-hidden="true"></i>
+              <span><strong>Full Name</strong><input type="text" id="profileFullName" autocomplete="name" readonly></span>
+            </label>
+
+            <label class="profile-info-row">
+              <i class="fa-regular fa-envelope" aria-hidden="true"></i>
+              <span><strong>Email Address</strong><input type="email" id="profileEmail" autocomplete="email" readonly></span>
+            </label>
+
+            <label class="profile-info-row">
+              <i class="fa-solid fa-phone" aria-hidden="true"></i>
+              <span><strong>Mobile Number</strong><input type="tel" id="profilePhone" autocomplete="tel" readonly placeholder="Not added yet"></span>
+            </label>
+
+          </section>
+
+          <section class="profile-info-card profile-settings-card">
+            <h3><i class="fa-solid fa-gear" aria-hidden="true"></i> Account Settings</h3>
+
+            <button type="button" class="profile-settings-row" id="profilePasswordBtn">
+              <i class="fa-solid fa-lock" aria-hidden="true"></i>
+              <span><strong>Password</strong><small>Update your account password</small></span>
+              <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+            </button>
+
+            <button type="button" class="profile-settings-row" id="profileNotificationsBtn">
+              <i class="fa-regular fa-bell" aria-hidden="true"></i>
+              <span><strong>Notifications</strong><small id="profileNotificationSummary">Manage email and push notifications</small></span>
+              <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+            </button>
+
+          </section>
+
+          <p class="profile-status-message" id="profileStatusMessage" aria-live="polite"></p>
+
+          <div class="profile-modal-actions">
+            <button type="submit" class="profile-save-btn" id="profileSaveBtn">
+              <i class="fa-regular fa-floppy-disk" aria-hidden="true"></i>
+              <span>Save Changes</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </article>
+  </section>
+
+  <section class="quiz-intro-modal hidden" id="quiz-match-info" aria-hidden="true" aria-labelledby="quizIntroTitle">
+    <button type="button" class="quiz-intro-backdrop" data-quiz-intro-close aria-label="Close compatibility quiz information"></button>
+    <article class="quiz-intro-card" role="dialog" aria-modal="true">
+      <button type="button" class="quiz-intro-close" data-quiz-intro-close aria-label="Close">
+        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+      </button>
+
+      <div class="quiz-intro-grid">
+        <div class="quiz-intro-copy">
+          <p class="quiz-intro-label">Compatibility Quiz</p>
+          <h2 id="quizIntroTitle">
+            <span>Find a pet that</span>
+            <strong>fits your everyday life.</strong>
+          </h2>
+          <p>
+            Answer a short set of lifestyle questions so ANIMUA can recommend
+            shelter animals with care needs, energy, and temperament that fit
+            your home.
+          </p>
+
+          <div class="quiz-intro-details" aria-label="Quiz details">
+            <span><i class="fa-regular fa-clock" aria-hidden="true"></i> Takes 3-5 minutes</span>
+            <span><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Shelter-reviewed matches</span>
+            <span><i class="fa-regular fa-heart" aria-hidden="true"></i> Recommendations only</span>
+          </div>
+
+        </div>
+
+        <figure class="quiz-intro-photo">
+          <img src="../../src/assets/images/quiz-adoption-rescue-photo.jpg" alt="A rescued white cat being held during an animal welfare activity">
+        </figure>
+      </div>
+
+      <div class="quiz-intro-how" aria-label="How the compatibility quiz works">
+        <p class="quiz-intro-section-label">How it works</p>
+        <div class="quiz-intro-steps">
+          <article>
+            <span>01</span>
+            <h3>Share Your Routine</h3>
+            <p>Tell us about your home, schedule, activity level, and preferences.</p>
+          </article>
+          <article>
+            <span>02</span>
+            <h3>Compare Profiles</h3>
+            <p>Your answers are compared with each animal's compatibility profile.</p>
+          </article>
+          <article>
+            <span>03</span>
+            <h3>Review Matches</h3>
+            <p>See the animals that best align with your lifestyle and care capacity.</p>
+          </article>
+          <article>
+            <span>04</span>
+            <h3>Visit the Shelter</h3>
+            <p>Meet your recommended match and continue through shelter review.</p>
+          </article>
+        </div>
+      </div>
+
+      <div class="quiz-intro-reminder">
+        <i class="fa-regular fa-heart" aria-hidden="true"></i>
+        <strong>Adoption is a lifelong commitment.</strong>
+        <span>Quiz recommendations remain subject to shelter evaluation and approval.</span>
+      </div>
+
+      <div class="quiz-intro-actions">
+        <a href="/pages/public/petCompatibility.html" class="quiz-intro-primary">Start the Quiz</a>
+      </div>
+    </article>
+  </section>
+
+  <section class="quiz-page-modal hidden" id="quizPageModal" aria-hidden="true" aria-labelledby="quizPageModalTitle">
+    <button type="button" class="quiz-page-backdrop" data-quiz-page-close aria-label="Close compatibility quiz"></button>
+    <article class="quiz-page-card" role="dialog" aria-modal="true">
+      <div class="quiz-page-head">
+        <div>
+          <p>Compatibility Quiz</p>
+          <h2 id="quizPageModalTitle">Find your match</h2>
+        </div>
+        <button type="button" class="quiz-page-close" data-quiz-page-close aria-label="Close quiz">
+          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        </button>
+      </div>
+      <iframe
+        class="quiz-page-frame"
+        id="quizPageFrame"
+        title="ANIMUA compatibility quiz"
+        loading="lazy"
+      ></iframe>
+    </article>
+  </section>
 
  <!-- AUTH MODAL -->
 <div class="auth-modal-overlay hidden" id="authModal">

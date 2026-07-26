@@ -169,8 +169,11 @@ export async function handleLogin(event) {
       });
     }
 
-    const userRole = data.role || "Public";
-    const userFullName = data.fullName || "User";
+    const account = data.account || {};
+    const userRole = account.role || data.role || "Public";
+    const userFullName = account.fullName || data.fullName || "User";
+    const userEmail = account.email || data.email || email;
+    const userProfilePhoto = account.profilePhotoDataUrl || "";
 
     clearFailedLogin(email);
     resetLoginCaptcha();
@@ -179,8 +182,13 @@ export async function handleLogin(event) {
     localStorage.setItem("animua_token", data.token || "");
     localStorage.setItem("user_role", userRole);
     localStorage.setItem("user_name", userFullName);
-    localStorage.setItem("user_email", email);
+    localStorage.setItem("user_email", userEmail);
     localStorage.setItem("is_logged_in", "true");
+    if (userProfilePhoto) {
+      localStorage.setItem("user_profile_photo", userProfilePhoto);
+    } else {
+      localStorage.removeItem("user_profile_photo");
+    }
 
     closeModal(authModal);
 

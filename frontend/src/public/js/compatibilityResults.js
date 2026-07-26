@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px;flex-wrap:wrap">
           <div>
             <h2 style="font-size:1.3rem;font-weight:800;margin-bottom:4px">${displayLabel}</h2>
-            <p style="color:#9ca3af;font-size:0.76rem;margin-bottom:2px">Shelter description · Animal ID: ${pet.id||pet.petId||""}</p>
+            <p style="color:#9ca3af;font-size:0.76rem;margin-bottom:2px">Shelter description</p>
             <p style="color:#6b7280;font-size:0.875rem">${pet.breed || "Mixed Breed"} · ${pet.species || "Pet"}</p>
           </div>
           <div style="background:rgba(87,134,188,0.1);color:#2558a8;border:1px solid rgba(87,134,188,0.2);border-radius:999px;padding:8px 14px;font-weight:700;white-space:nowrap">
