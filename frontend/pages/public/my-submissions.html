@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <title>My Submissions | ANIMUA</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="../../src/css/public/home.css">
+  <link rel="stylesheet" href="../../src/css/global.css">
+  <link rel="stylesheet" href="../../src/css/public/my-submissions.css">
+</head>
+<body class="home-page submissions-page">
+  <header class="header scrolled" id="home">
+    <div class="main-nav-wrap">
+      <div class="container nav-shell">
+        <a href="home.html" class="logo">
+          <img src="../../src/assets/images/animua-logo-transparent.png" alt="ANIMUA" class="navbar-logo-img">
+          <span class="navbar-brand-copy">
+            <span class="navbar-brand-name">ANIMUA</span>
+            <span class="navbar-brand-tagline">Connect. Learn. Adopt.</span>
+          </span>
+        </a>
+
+        <nav class="navbar" id="navbar">
+          <a href="home.html" class="active">Home</a>
+          <a href="find-furbabies.html">Find Furbabies</a>
+          <a href="announcements.html">Announcements</a>
+          <a href="surrender.html">Surrender</a>
+          <a href="contact.html">Contact Us</a>
+        </nav>
+
+        <div class="nav-actions">
+          <div class="user-actions-wrap">
+            <div class="notification-wrap">
+              <button class="notification-btn" id="notificationBtn" aria-label="Notifications">
+                <i class="fa-solid fa-bell"></i>
+                <span class="notification-dot"></span>
+              </button>
+
+              <div class="notification-popup" id="notificationPopup">
+                <div class="notification-popup-head">
+                  <h4>Notifications</h4>
+                </div>
+                <ul class="notification-list">
+                  <li>New animals were recently added for adoption.</li>
+                  <li>Please complete forms carefully before submission.</li>
+                  <li>Shelter announcements will appear here.</li>
+                </ul>
+              </div>
+            </div>
+
+            <a href="home.html#login" id="loginNavBtn" class="login-btn" aria-label="Login">
+              <i class="fa-solid fa-user"></i>
+              <span>Login</span>
+            </a>
+
+            <div id="userLoggedInBox" class="hidden user-pill user-menu">
+              <button type="button" class="user-menu-btn" id="userMenuBtn">
+                <span class="user-avatar-mini">
+                  <i class="fa-regular fa-user"></i>
+                </span>
+                <span id="loggedUserName" class="user-pill-name"></span>
+                <span class="user-menu-chevron">
+                  <i class="fa-solid fa-chevron-down"></i>
+                </span>
+              </button>
+
+              <div class="user-dropdown hidden" id="userDropdown">
+                <div class="user-dropdown-head">
+                  <div class="user-dropdown-avatar">
+                    <span id="dropdownUserInitial">A</span>
+                  </div>
+                  <div>
+                    <strong id="dropdownUserName">Account</strong>
+                  </div>
+                </div>
+
+                <button type="button" class="user-dropdown-item" id="viewProfileBtn">
+                  <i class="fa-regular fa-user"></i>
+                  <span>View Profile</span>
+                </button>
+
+                <button type="button" class="user-dropdown-item" id="myApplicationsBtn">
+                  <i class="fa-regular fa-file-lines"></i>
+                  <span>My Applications</span>
+                </button>
+
+                <div class="user-dropdown-divider"></div>
+
+                <button type="button" id="logoutBtn" class="user-dropdown-item logout-option">
+                  <i class="fa-solid fa-right-from-bracket"></i>
+                  <span>Log out</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <button class="menu-toggle" id="menuToggle" aria-label="Toggle Navigation">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="submissions-main">
+    <section class="submissions-hero container">
+      <div class="submissions-hero-copy">
+        <h1>My Submissions</h1>
+        <p>Track your adoption applications and surrender requests.</p>
+      </div>
+
+      <div class="submissions-hero-art" aria-hidden="true">
+        <div class="submissions-art-board">
+          <span class="submissions-art-clip"></span>
+          <span class="submissions-art-row"><i class="fa-solid fa-check"></i></span>
+          <span class="submissions-art-row"><i class="fa-solid fa-check"></i></span>
+          <span class="submissions-art-row"><i class="fa-solid fa-check"></i></span>
+        </div>
+        <div class="submissions-art-paw">
+          <i class="fa-solid fa-paw"></i>
+        </div>
+      </div>
+
+      <div class="submissions-toolbar">
+        <div class="submission-tabs" role="tablist" aria-label="Submission filters">
+          <button type="button" class="submission-tab active" data-filter="all">All (0)</button>
+          <button type="button" class="submission-tab" data-filter="adoption">Adoption (0)</button>
+          <button type="button" class="submission-tab" data-filter="surrender">Surrender (0)</button>
+        </div>
+
+        <div class="submission-sort-control" id="submissionSortControl">
+          <span class="submission-sort-icon" aria-hidden="true">
+            <i class="fa-solid fa-arrow-down-wide-short"></i>
+          </span>
+          <span>Sort by:</span>
+          <button type="button" class="submission-sort-btn" id="submissionSortBtn" aria-haspopup="listbox" aria-expanded="false">
+            <span id="submissionSortLabel">Newest First</span>
+            <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+          </button>
+          <div class="submission-sort-menu hidden" id="submissionSortMenu" role="listbox" aria-label="Sort submissions">
+            <button type="button" data-sort-value="newest" role="option" aria-selected="false">Newest First</button>
+            <button type="button" data-sort-value="oldest" role="option" aria-selected="false">Oldest First</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="container submissions-list" id="submissionsList" aria-live="polite">
+      <article class="submission-loading">
+        <i class="fa-solid fa-circle-notch fa-spin"></i>
+        <span>Loading your submissions...</span>
+      </article>
+    </section>
+
+    <section class="container submission-next-card">
+      <div class="submission-next-icon" aria-hidden="true">
+        <i class="fa-solid fa-paw"></i>
+      </div>
+      <div>
+        <h2>Need to submit something new?</h2>
+        <p>Browse furbabies to apply for adoption or use the surrender page to request shelter support.</p>
+      </div>
+      <div class="submission-next-actions">
+        <a href="find-furbabies.html" class="submission-primary-link"><i class="fa-solid fa-house-chimney" aria-hidden="true"></i>Browse Furbabies</a>
+        <a href="surrender.html" class="submission-secondary-link"><i class="fa-solid fa-paw" aria-hidden="true"></i>Open Surrender Page</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer" id="contact">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <a href="home.html" class="logo footer-logo">
+          <img src="../../src/assets/images/animua-logo-transparent.png" alt="ANIMUA" class="footer-logo-img">
+          <span class="footer-brand-copy">
+            <span class="footer-brand-name">ANIMUA</span>
+            <span class="footer-brand-tagline">Angeles City Animal Welfare Portal</span>
+          </span>
+        </a>
+        <p>
+          Connecting people with shelter animals through responsible adoption,
+          compatibility matching, and shelter-reviewed services.
+        </p>
+      </div>
+
+      <div class="footer-links">
+        <h4>Explore</h4>
+        <a href="home.html">Home</a>
+        <a href="find-furbabies.html">Find Furbabies</a>
+        <a href="home.html?quizIntro=open">Compatibility Quiz</a>
+        <a href="announcements.html">Upcoming Events</a>
+      </div>
+
+      <div class="footer-links footer-support">
+        <h4>Shelter Services</h4>
+        <a href="home.html#home-highlights">Adoption Guide</a>
+        <a href="surrender.html">Surrender Request</a>
+        <a href="contact.html">Contact the Shelter</a>
+      </div>
+
+      <div class="footer-links footer-contact">
+        <h4>Contact</h4>
+        <p>Angeles City Veterinary Office</p>
+        <p>City Hall Building, Pulung Maragul, Angeles City</p>
+        <a href="tel:0453220485">(045) 322-0485</a>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="container footer-bottom-inner">
+        <p>&copy; 2026 ANIMUA. All rights reserved.</p>
+        <p>Developed for the Angeles City Veterinary Office.</p>
+        <p>Adoption applications and surrender requests are subject to shelter evaluation and approval.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module" src="../../src/public/js/public-ui.js"></script>
+  <script type="module" src="../../src/public/js/my-submissions.js"></script>
+</body>
+</html>

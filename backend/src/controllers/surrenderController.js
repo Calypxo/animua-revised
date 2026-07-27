@@ -1,10 +1,11 @@
 const { db } = require("../config/firebase");
 
 const COLLECTION_NAME = "surrenderRequests";
+const SHELTER_LOCATION = "Angeles City Veterinary Office, Brgy. Pampang, Angeles City";
 
 const PYTHON_SENTIMENT_API_URL =
   process.env.PYTHON_SENTIMENT_API_URL ||
-  "http://127.0.0.1:8001/analyze-surrender-sentiment";
+  "http://127.0.0.1:8002/analyze-surrender-sentiment";
 
 const ANGELES_BARANGAYS = [
   "Agapito del Rosario", "Amsic", "Anunas", "Balibago", "Capaya", "Claro M. Recto",
@@ -186,10 +187,15 @@ async function getMySurrenderRequests(req, res) {
     const snapshot = await db
       .collection(COLLECTION_NAME)
       .where("account.email", "==", req.user.email)
-      .orderBy("createdAt", "desc")
       .get();
 
-    const requests = snapshot.docs.map((doc) => doc.data());
+    const requests = snapshot.docs
+      .map((doc) => doc.data())
+      .sort((a, b) => {
+        const aTime = new Date(a.createdAt || a.submittedAt || 0).getTime();
+        const bTime = new Date(b.createdAt || b.submittedAt || 0).getTime();
+        return (Number.isNaN(bTime) ? 0 : bTime) - (Number.isNaN(aTime) ? 0 : aTime);
+      });
 
     return res.json({
       requests,
@@ -295,9 +301,219 @@ async function updateSurrenderStatus(req, res) {
   }
 }
 
+async function scheduleMySurrenderAppointment(req, res) {
+  try {
+    const email = String(req.user?.email || "").trim().toLowerCase();
+    const { id } = req.params;
+    const { date, time } = req.body || {};
+
+    if (!email) {
+      return res.status(401).json({
+        message: "Please sign in to schedule your surrender appointment.",
+      });
+    }
+
+    if (!date || !time) {
+      return res.status(400).json({
+        message: "Appointment date and time are required.",
+      });
+    }
+
+    const requestRef = db.collection(COLLECTION_NAME).doc(id);
+    const requestDoc = await requestRef.get();
+
+    if (!requestDoc.exists) {
+      return res.status(404).json({
+        message: "Surrender request not found.",
+      });
+    }
+
+    const data = requestDoc.data() || {};
+    const accountEmail = String(data.account?.email || data.owner?.email || "")
+      .trim()
+      .toLowerCase();
+
+    if (accountEmail !== email) {
+      return res.status(403).json({
+        message: "You can only schedule your own surrender appointment.",
+      });
+    }
+
+    if (!["approved", "accepted", "converted"].includes(String(data.status || "").toLowerCase())) {
+      return res.status(400).json({
+        message: "Only accepted surrender requests can schedule an appointment.",
+      });
+    }
+
+    const existingAppointment = data.surrenderAppointment || null;
+    const alreadyScheduled = Boolean(existingAppointment?.date || existingAppointment?.time);
+    const now = new Date().toISOString();
+
+    if (alreadyScheduled) {
+      const surrenderRescheduleRequest = {
+        date,
+        time,
+        location: SHELTER_LOCATION,
+        status: "Pending",
+        requestedAt: now,
+        requestedBy: email,
+        previousSchedule: existingAppointment || {
+          date: data.dropoffDate || "",
+          time: "",
+          location: SHELTER_LOCATION,
+        },
+      };
+
+      await requestRef.update({
+        surrenderRescheduleRequest,
+        updatedAt: now,
+      });
+
+      const updatedDoc = await requestRef.get();
+
+      return res.json({
+        message: "Surrender appointment reschedule request sent for admin approval.",
+        requiresApproval: true,
+        request: updatedDoc.data(),
+        surrenderRescheduleRequest,
+      });
+    }
+
+    const surrenderAppointment = {
+      date,
+      time,
+      location: SHELTER_LOCATION,
+      scheduledAt: now,
+    };
+
+    await requestRef.update({
+      surrenderAppointment,
+      dropoffDate: date,
+      updatedAt: new Date().toISOString(),
+    });
+
+    const updatedDoc = await requestRef.get();
+
+    return res.json({
+      message: "Surrender appointment saved.",
+      request: updatedDoc.data(),
+      surrenderAppointment,
+    });
+  } catch (error) {
+    console.error("Schedule surrender appointment error:", error);
+
+    return res.status(500).json({
+      message: "Failed to save surrender appointment.",
+      error: error.message,
+    });
+  }
+}
+
+async function approveSurrenderReschedule(req, res) {
+  try {
+    const { id } = req.params;
+    const requestRef = db.collection(COLLECTION_NAME).doc(id);
+    const requestDoc = await requestRef.get();
+
+    if (!requestDoc.exists) {
+      return res.status(404).json({
+        message: "Surrender request not found.",
+      });
+    }
+
+    const data = requestDoc.data() || {};
+    const request = data.surrenderRescheduleRequest || {};
+
+    if (String(request.status || "").toLowerCase() !== "pending") {
+      return res.status(400).json({
+        message: "No pending surrender reschedule request found.",
+      });
+    }
+
+    const now = new Date().toISOString();
+    const surrenderAppointment = {
+      date: request.date,
+      time: request.time,
+      location: request.location || SHELTER_LOCATION,
+      scheduledAt: data.surrenderAppointment?.scheduledAt || now,
+      rescheduledAt: now,
+      approvedBy: req.user?.email || "Admin",
+    };
+
+    await requestRef.update({
+      surrenderAppointment,
+      dropoffDate: request.date,
+      "surrenderRescheduleRequest.status": "Approved",
+      "surrenderRescheduleRequest.reviewedAt": now,
+      "surrenderRescheduleRequest.reviewedBy": req.user?.email || "Admin",
+      updatedAt: now,
+    });
+
+    const updatedDoc = await requestRef.get();
+
+    return res.json({
+      message: "Surrender appointment reschedule approved.",
+      request: updatedDoc.data(),
+      surrenderAppointment,
+    });
+  } catch (error) {
+    console.error("Approve surrender reschedule error:", error);
+
+    return res.status(500).json({
+      message: "Failed to approve surrender reschedule.",
+      error: error.message,
+    });
+  }
+}
+
+async function rejectSurrenderReschedule(req, res) {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body || {};
+    const requestRef = db.collection(COLLECTION_NAME).doc(id);
+    const requestDoc = await requestRef.get();
+
+    if (!requestDoc.exists) {
+      return res.status(404).json({
+        message: "Surrender request not found.",
+      });
+    }
+
+    const request = requestDoc.data()?.surrenderRescheduleRequest || {};
+
+    if (String(request.status || "").toLowerCase() !== "pending") {
+      return res.status(400).json({
+        message: "No pending surrender reschedule request found.",
+      });
+    }
+
+    await requestRef.update({
+      "surrenderRescheduleRequest.status": "Rejected",
+      "surrenderRescheduleRequest.rejectionReason": String(reason || "").trim(),
+      "surrenderRescheduleRequest.reviewedAt": new Date().toISOString(),
+      "surrenderRescheduleRequest.reviewedBy": req.user?.email || "Admin",
+      updatedAt: new Date().toISOString(),
+    });
+
+    return res.json({
+      message: "Surrender appointment reschedule rejected.",
+    });
+  } catch (error) {
+    console.error("Reject surrender reschedule error:", error);
+
+    return res.status(500).json({
+      message: "Failed to reject surrender reschedule.",
+      error: error.message,
+    });
+  }
+}
+
 module.exports = {
   createSurrenderRequest,
   getAllSurrenderRequests,
   getMySurrenderRequests,
+  scheduleMySurrenderAppointment,
+  approveSurrenderReschedule,
+  rejectSurrenderReschedule,
   updateSurrenderStatus,
 };

@@ -8,6 +8,9 @@ const {
   createSurrenderRequest,
   getAllSurrenderRequests,
   getMySurrenderRequests,
+  scheduleMySurrenderAppointment,
+  approveSurrenderReschedule,
+  rejectSurrenderReschedule,
   updateSurrenderStatus,
 } = require("../controllers/surrenderController");
 
@@ -26,6 +29,12 @@ router.get(
   getMySurrenderRequests
 );
 
+router.patch(
+  "/my-requests/:id/appointment",
+  authenticateToken,
+  scheduleMySurrenderAppointment
+);
+
 // Admin/Staff gets all surrender requests
 router.get(
   "/",
@@ -35,6 +44,20 @@ router.get(
 );
 
 // Admin/Staff updates request status
+router.patch(
+  "/:id/reschedule/approve",
+  authenticateToken,
+  authorizeRole("Admin", "Staff"),
+  approveSurrenderReschedule
+);
+
+router.patch(
+  "/:id/reschedule/reject",
+  authenticateToken,
+  authorizeRole("Admin", "Staff"),
+  rejectSurrenderReschedule
+);
+
 router.patch(
   "/:id/status",
   authenticateToken,
