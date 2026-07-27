@@ -371,8 +371,15 @@ function render() {
   let results  = [];
   let quizData = {};
 
-  try { results  = JSON.parse(localStorage.getItem("animua_match_results")) || []; } catch(e) { console.error(e); }
-  try { quizData = JSON.parse(localStorage.getItem("animua_quiz_data"))     || {}; } catch(e) { console.error(e); }
+  try {
+    results = JSON.parse(localStorage.getItem("animua_match_results")) || [];
+    if (!results.length) {
+      const saved = JSON.parse(localStorage.getItem("animua_saved_result")) || null;
+      results = (saved?.matches || []).map(item => ({ id: item.animalId, name: item.animalName, matchScore: item.compatibilityScore, matchPercent: item.compatibilityPercent }));
+      if (saved) quizData = { preferences: saved.preferences || {}, filters: saved.filters || {} };
+    }
+  } catch(e) { console.error(e); }
+  try { quizData = Object.keys(quizData).length ? quizData : (JSON.parse(localStorage.getItem("animua_quiz_data")) || {}); } catch(e) { console.error(e); }
 
   const prefs = quizData.preferences || null;
 

@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "/src/utils/api.js";
+import { getToken } from "/src/utils/storage.js";
 
 /* ══════════════════════════════════════════════════════
    QUIZ DEFINITION
@@ -471,20 +472,19 @@ async function handleSubmit() {
     const response = await fetch(`${API_BASE_URL}/match`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getToken()}`
       },
       body: JSON.stringify(quizData)
     });
 
-    if (!response.ok) {
-      throw new Error("Failed to fetch compatibility matches.");
-    }
-
     const result = await response.json();
+    if (!response.ok) throw new Error(result.message || "Failed to fetch compatibility matches.");
     const matched = result.matches || [];
 
     localStorage.setItem("animua_quiz_data", JSON.stringify(quizData));
     localStorage.setItem("animua_match_results", JSON.stringify(matched));
+    localStorage.setItem("animua_match_metadata", JSON.stringify({ resultId: result.resultId, completedAt: result.completedAt, nextRetakeAt: result.nextRetakeAt }));
 
     window.location.href = "/pages/public/compatibilityResults.html";
   } catch (err) {
@@ -498,7 +498,7 @@ async function handleSubmit() {
       <div class="complete-card">
         <span class="complete-icon"><i class="bi bi-exclamation-circle"></i></span>
         <h2 class="complete-title">We could not load matches.</h2>
-        <p class="complete-sub">Please check that the backend server is running, then try again.</p>
+        <p class="complete-sub">${String(err.message || "Please try again.").replaceAll("<", "&lt;").replaceAll(">", "&gt;")}</p>
         <button class="btn-submit" id="retryMatchBtn" type="button">
           <i class="bi bi-arrow-clockwise"></i>
           Try Again
@@ -524,8 +524,43 @@ async function handleSubmit() {
 
 
 /* ── Init ─────────────────────────────────────────── */
-renderPhase(0);
-updateProgress();
+async function initializeQuiz() {
+  const token = getToken();
+  const access = document.getElementById("quizAccessCard");
+  if (!token) {
+    document.getElementById("questionArea").hidden = true;
+    document.querySelector(".quiz-phase-nav")?.setAttribute("hidden", "");
+    access.hidden = false;
+    access.innerHTML = `<i class="bi bi-person-lock"></i><h2>Log in to take the compatibility quiz</h2><p>Your result is securely saved to your ANIMUA account.</p><a href="/pages/public/home.html#login">Log in</a>`;
+    return;
+  }
+  try {
+    const response = await fetch(`${API_BASE_URL}/match/eligibility`, { headers: { Authorization: `Bearer ${token}` } });
+    const info = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(info.message || "Please log in again.");
+    if (!info.canTakeQuiz) {
+      document.getElementById("questionArea").hidden = true;
+      document.querySelector(".quiz-phase-nav")?.setAttribute("hidden", "");
+      access.hidden = false;
+      const top = info.latestResult?.matches?.[0];
+      const date = info.nextRetakeAt ? new Date(info.nextRetakeAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "a later date";
+      access.innerHTML = `<i class="bi bi-shield-check"></i><h2>${info.reason === "QUIZ_DISABLED" ? "Quiz temporarily unavailable" : "Your result is saved"}</h2><p>${info.reason === "QUIZ_DISABLED" ? "Please check back later." : `Your top match is <strong>${top?.animalName || "saved in your account"}</strong>. You can retake on <strong>${date}</strong>.`}</p><a href="/pages/public/compatibilityResults.html">View saved result</a>`;
+      if (info.latestResult) localStorage.setItem("animua_saved_result", JSON.stringify(info.latestResult));
+      return;
+    }
+    if (info.hasPreviousResult) {
+      access.hidden = false;
+      access.innerHTML = `<strong>Retake available</strong><span>Your previous result remains in your account history.</span><button type="button" id="beginRetake">Retake Compatibility Quiz</button>`;
+      document.getElementById("questionArea").hidden = true;
+      document.getElementById("beginRetake").addEventListener("click", () => { access.hidden = true; document.getElementById("questionArea").hidden = false; });
+    }
+    renderPhase(0); updateProgress();
+  } catch (error) {
+    document.getElementById("questionArea").hidden = true; access.hidden = false;
+    access.innerHTML = `<h2>Unable to open the quiz</h2><p>${error.message}</p><a href="/pages/public/home.html#login">Log in again</a>`;
+  }
+}
+initializeQuiz();
 
 function openConfirmModal(id) {
   const modal = document.getElementById(id);

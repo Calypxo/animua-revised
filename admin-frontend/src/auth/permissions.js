@@ -90,9 +90,11 @@ export const ROLE_PERMISSIONS = {
       "delete", 
       "publish"
     ],
+    compatibility: ["view", "manage"],
   },
 
   Staff: {
+    compatibility: ["view"],
     dashboard: [
       "view",
     ],
@@ -158,6 +160,7 @@ export const ROLE_PERMISSIONS = {
   },
 
   Veterinarian: {
+    compatibility: ["view"],
     dashboard: [
       "view",
     ],

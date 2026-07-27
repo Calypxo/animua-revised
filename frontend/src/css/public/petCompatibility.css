@@ -3636,3 +3636,6 @@ body {
 .quiz-nav {
   border-top: 1px solid rgba(107, 79, 63, 0.10) !important;
 }
+
+.quiz-access-card{max-width:720px;margin:48px auto;padding:36px;border:1px solid #ead9d1;border-radius:22px;background:#fff;text-align:center;box-shadow:0 16px 40px rgba(70,32,25,.08)}
+.quiz-access-card>i{font-size:2rem;color:var(--clay)}.quiz-access-card h2{margin:12px 0 8px}.quiz-access-card p{color:var(--stone-2);line-height:1.6}.quiz-access-card a,.quiz-access-card button{display:inline-flex;margin-top:14px;padding:11px 20px;border:0;border-radius:999px;background:var(--clay);color:#fff;text-decoration:none;font-weight:700;cursor:pointer}.quiz-access-card span{display:block;margin-top:6px;color:var(--stone-2)}

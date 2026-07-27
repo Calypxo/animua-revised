@@ -23,6 +23,7 @@ export default defineConfig({
         archivedRecords:        resolve(__dirname, 'pages/archivedRecords.html'),
         announcements:          resolve(__dirname, 'pages/announcements.html'),
         accountSettings:         resolve(__dirname, 'pages/accountSettings.html'),
+        compatibilityQuiz:       resolve(__dirname, 'pages/compatibilityQuiz.html'),
       },
     },
   },

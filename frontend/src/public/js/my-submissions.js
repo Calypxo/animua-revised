@@ -12,6 +12,25 @@ const submissionSortControl = document.getElementById("submissionSortControl");
 const submissionSortBtn = document.getElementById("submissionSortBtn");
 const submissionSortLabel = document.getElementById("submissionSortLabel");
 const submissionSortMenu = document.getElementById("submissionSortMenu");
+const compatibilityAccountBody = document.getElementById("compatibilityAccountBody");
+
+async function loadCompatibilityAccount() {
+  if (!compatibilityAccountBody) return;
+  const token = getToken();
+  if (!token) { compatibilityAccountBody.innerHTML = `<p>Log in to view your saved compatibility result.</p>`; return; }
+  try {
+    const response = await fetch(`${API_BASE_URL}/match/my-results`, { headers: { Authorization: `Bearer ${token}` } });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.message || "Unable to load compatibility results.");
+    const results = data.results || [];
+    if (!results.length) { compatibilityAccountBody.innerHTML = `<p>You have not completed the compatibility quiz yet.</p><a href="petCompatibility.html">Take the quiz</a>`; return; }
+    const latest = results.find((item) => item.isLatest) || results[0];
+    const traits = Object.entries(latest.preferences || {}).map(([key, value]) => `<span><strong>${escapeHtml(key.replace(/([A-Z])/g, " $1"))}</strong>${escapeHtml(value)}/5</span>`).join("");
+    const matches = (latest.matches || []).map((match) => `<li><strong>${escapeHtml(match.animalName || "Shelter animal")}</strong><span>${Number(match.compatibilityPercent || 0).toFixed(1)}%</span></li>`).join("");
+    const history = results.slice(1).map((item) => `<li>${formatDate(item.completedAt)} <small>${escapeHtml(item.resultId)}</small></li>`).join("");
+    compatibilityAccountBody.innerHTML = `<div class="compatibility-dates"><p><small>Completed</small>${formatDate(latest.completedAt)}</p><p><small>Next allowed retake</small>${formatDate(latest.nextRetakeAt)}</p></div><h3>Your trait profile</h3><div class="compatibility-traits">${traits}</div><h3>Top recommended animals</h3><ol class="compatibility-matches">${matches || "<li>No animals matched the selected filters.</li>"}</ol>${history ? `<details><summary>Previous result history (${results.length - 1})</summary><ul>${history}</ul></details>` : ""}`;
+  } catch (error) { compatibilityAccountBody.innerHTML = `<p>${escapeHtml(error.message)}</p>`; }
+}
 
 const DEMO_SUBMISSIONS = [
   {
@@ -1395,4 +1414,5 @@ document.addEventListener("keydown", (event) => {
 });
 
 syncSortMenuState();
+loadCompatibilityAccount();
 loadSubmissions();

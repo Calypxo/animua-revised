@@ -132,6 +132,7 @@ function mainNavigation(role) {
       ${link({ allowed: canAccessModule(role, "dashboard"), href: "/pages/dashboard.html", icon: "bi-grid-1x2", label: "Dashboard" })}
       ${animalGroup}
       ${link({ allowed: canAccessModule(role, "announcements"), href: "/pages/announcements.html", icon: "bi-megaphone", label: "Announcements" })}
+      ${link({ allowed: canAccessModule(role, "compatibility"), href: "/pages/compatibilityQuiz.html", icon: "bi-stars", label: "Compatibility Quiz" })}
       ${operationsGroup}
     </section>`;
 }
