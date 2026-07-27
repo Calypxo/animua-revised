@@ -482,32 +482,14 @@ button {
   display: flex;
   align-items: center;
   gap: 11px;
-  min-height: 76px;
+  min-height: 72px;
   padding: 13px 20px 12px;
   border: 0;
   border-bottom: 1px solid rgba(105, 78, 58, 0.13);
   background: transparent;
   color: var(--animua-charcoal);
-  cursor: pointer;
   font: inherit;
   text-align: left;
-  transition: background var(--transition), color var(--transition);
-}
-
-.user-dropdown-head::after {
-  content: "\f054";
-  margin-left: auto;
-  color: #7b3025;
-  font-family: "Font Awesome 6 Free";
-  font-size: 0.78rem;
-  font-weight: 900;
-  opacity: 0.9;
-}
-
-.user-dropdown-head:hover,
-.user-dropdown-head:focus-visible {
-  background: rgba(123, 48, 37, 0.06);
-  outline: none;
 }
 
 .user-dropdown-avatar {
@@ -532,8 +514,7 @@ button {
   object-fit: cover;
 }
 
-.user-dropdown-head strong,
-.user-dropdown-head small {
+.user-dropdown-head strong {
   display: block;
 }
 
@@ -547,21 +528,6 @@ button {
   line-height: 1.12;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.user-dropdown-head small {
-  margin-top: 4px;
-  color: rgba(123, 48, 37, 0.78);
-  font-size: 0.66rem;
-  font-weight: 650;
-  line-height: 1.25;
-  text-decoration: none;
-}
-
-.user-dropdown-head:hover small,
-.user-dropdown-head:focus-visible small {
-  text-decoration: underline;
-  text-underline-offset: 3px;
 }
 
 .user-dropdown .user-dropdown-item {
