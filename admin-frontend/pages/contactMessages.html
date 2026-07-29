@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+
+  <title>ANIMUA - Contact Messages</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+
+  <script type="module" src="../src/management/contactMessages.js"></script>
+</head>
+
+<body class="loading contact-messages-page">
+  <div class="shell">
+    <div id="sidebar-container"></div>
+
+    <div class="stage">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button id="sidebarToggle" class="icon-btn" type="button" aria-label="Toggle sidebar">
+            <i class="bi bi-list"></i>
+          </button>
+          <nav class="contact-breadcrumb" aria-label="Breadcrumb">
+            <span class="breadcrumb-link">Community</span>
+            <i class="bi bi-chevron-right breadcrumb-sep"></i>
+            <span class="breadcrumb-current">Contact Messages</span>
+          </nav>
+        </div>
+
+        <div class="topbar-right">
+          <button class="icon-btn notif-btn" type="button" aria-label="Notifications">
+            <i class="bi bi-bell-fill"></i>
+            <span class="notif-dot"></span>
+          </button>
+          <div class="user-chip">
+            <div class="user-avatar" id="topbar-initials">AU</div>
+            <div class="user-meta">
+              <span id="display-name">Admin User</span>
+              <small id="display-role">Admin</small>
+            </div>
+            <i class="bi bi-chevron-down caret"></i>
+          </div>
+        </div>
+      </header>
+
+      <main class="main-content contact-message-page-body">
+        <section class="cm-page-header">
+          <div>
+            <span class="cm-eyebrow">Contact inbox</span>
+            <h1>Contact Messages</h1>
+            <p>Review Contact Us inquiries and send official ANIMUA replies using the styled email template.</p>
+          </div>
+
+          <button id="refreshMessagesBtn" class="cm-refresh-btn" type="button">
+            <i class="bi bi-arrow-clockwise"></i>
+            Refresh
+          </button>
+        </section>
+
+        <section class="cm-stats" aria-label="Contact message summary">
+          <article>
+            <span>Total</span>
+            <strong id="totalMessages">0</strong>
+          </article>
+          <article>
+            <span>New</span>
+            <strong id="newMessages">0</strong>
+          </article>
+          <article>
+            <span>Replied</span>
+            <strong id="repliedMessages">0</strong>
+          </article>
+        </section>
+
+        <section class="cm-workspace">
+          <aside class="cm-inbox-panel" aria-label="Contact message list">
+            <div class="cm-filter-row">
+              <label class="cm-search">
+                <i class="bi bi-search"></i>
+                <input id="messageSearch" type="search" placeholder="Search name, email, topic..." />
+              </label>
+
+              <select id="messageStatusFilter" aria-label="Filter by status">
+                <option value="">All</option>
+                <option value="New">New</option>
+                <option value="Replied">Replied</option>
+              </select>
+            </div>
+
+            <div id="messageList" class="cm-message-list">
+              <p class="cm-empty">Loading contact messages...</p>
+            </div>
+          </aside>
+
+          <section class="cm-detail-panel" aria-live="polite">
+            <div id="messageDetailEmpty" class="cm-detail-empty">
+              <i class="bi bi-envelope-open"></i>
+              <h2>Select a message</h2>
+              <p>Choose a contact inquiry from the inbox to review details and send a reply.</p>
+            </div>
+
+            <article id="messageDetail" class="cm-detail hidden">
+              <div class="cm-detail-head">
+                <div>
+                  <span id="detailStatus" class="cm-status-pill">New</span>
+                  <h2 id="detailSubject">Message subject</h2>
+                  <p id="detailMeta">Sender details</p>
+                </div>
+                <a id="detailEmailLink" class="cm-email-link" href="#">
+                  <i class="bi bi-envelope"></i>
+                  Email
+                </a>
+              </div>
+
+              <dl class="cm-info-grid">
+                <div>
+                  <dt>Name</dt>
+                  <dd id="detailName">-</dd>
+                </div>
+                <div>
+                  <dt>Email</dt>
+                  <dd id="detailEmail">-</dd>
+                </div>
+                <div>
+                  <dt>Received</dt>
+                  <dd id="detailDate">-</dd>
+                </div>
+                <div>
+                  <dt>Source</dt>
+                  <dd id="detailSource">-</dd>
+                </div>
+              </dl>
+
+              <section class="cm-user-message">
+                <h3>User's Message</h3>
+                <p id="detailMessage"></p>
+              </section>
+
+              <form id="replyForm" class="cm-reply-form">
+                <div class="cm-reply-head">
+                  <div>
+                    <span>Official response</span>
+                    <h3>Send ANIMUA Reply</h3>
+                  </div>
+                  <small>The user will receive the designed ANIMUA email template.</small>
+                </div>
+
+                <label>
+                  Reply Message
+                  <textarea id="replyMessage" rows="9" placeholder="Write the official ANIMUA response..." required></textarea>
+                </label>
+
+                <div class="cm-reply-actions">
+                  <p id="replyStatus" aria-live="polite"></p>
+                  <button id="sendReplyBtn" class="cm-send-btn" type="submit">
+                    <i class="bi bi-send-fill"></i>
+                    Send Reply
+                  </button>
+                </div>
+              </form>
+            </article>
+          </section>
+        </section>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

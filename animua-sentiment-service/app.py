@@ -7,6 +7,14 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+try:
+    import torch
+    from transformers import AutoModelForSequenceClassification, AutoTokenizer
+except ImportError:
+    torch = None
+    AutoModelForSequenceClassification = None
+    AutoTokenizer = None
+
 
 app = FastAPI(title="ANIMUA Surrender Sentiment Service")
 
@@ -30,8 +38,11 @@ app.add_middleware(
 )
 
 
+TRANSFORMER_MODEL_DIR = Path("models/roberta")
+
 sentiment_model = joblib.load("sentiment_model.pkl")
 category_model = joblib.load("category_model.pkl")
+transformer_models = {}
 
 REQUESTS_FILE = Path("surrender_requests.json")
 
@@ -62,6 +73,36 @@ class SurrenderRequest(BaseModel):
     nlp: dict | None = None
 
 
+def load_transformer_task(task_name):
+    task_dir = TRANSFORMER_MODEL_DIR / task_name
+
+    if not task_dir.exists() or not torch or not AutoTokenizer or not AutoModelForSequenceClassification:
+        return None
+
+    try:
+        tokenizer = AutoTokenizer.from_pretrained(task_dir)
+        model = AutoModelForSequenceClassification.from_pretrained(task_dir)
+        model.eval()
+        return {
+            "tokenizer": tokenizer,
+            "model": model,
+            "id2label": model.config.id2label,
+        }
+    except Exception as error:
+        print(f"Unable to load RoBERTa {task_name} model:", error)
+        return None
+
+
+def load_transformer_models():
+    return {
+        "sentiment": load_transformer_task("sentiment"),
+        "category": load_transformer_task("category"),
+    }
+
+
+transformer_models = load_transformer_models()
+
+
 def load_requests():
     if not REQUESTS_FILE.exists():
         return []
@@ -88,6 +129,53 @@ def get_prediction_with_confidence(model, text):
         confidence = 0.70
 
     return prediction, round(float(confidence), 2)
+
+
+def get_transformer_prediction(task_name, text):
+    task = transformer_models.get(task_name)
+
+    if not task:
+        return None
+
+    tokenizer = task["tokenizer"]
+    model = task["model"]
+
+    inputs = tokenizer(
+        text,
+        truncation=True,
+        max_length=160,
+        return_tensors="pt"
+    )
+
+    with torch.no_grad():
+        outputs = model(**inputs)
+        probabilities = torch.softmax(outputs.logits, dim=-1)[0]
+
+    confidence, predicted_id = torch.max(probabilities, dim=-1)
+    label = task["id2label"][int(predicted_id)]
+
+    return label, round(float(confidence), 2)
+
+
+def predict_sentiment_and_category(reason):
+    sentiment_result = get_transformer_prediction("sentiment", reason)
+    category_result = get_transformer_prediction("category", reason)
+
+    if sentiment_result and category_result:
+        return {
+            "sentiment": sentiment_result,
+            "category": category_result,
+            "source": "RoBERTa Transformer"
+        }
+
+    sentiment_result = get_prediction_with_confidence(sentiment_model, reason)
+    category_result = get_prediction_with_confidence(category_model, reason)
+
+    return {
+        "sentiment": sentiment_result,
+        "category": category_result,
+        "source": "TF-IDF + Logistic Regression"
+    }
 
 
 def apply_category_override(reason, predicted_category):
@@ -197,18 +285,12 @@ def analyze_reason(reason):
             "confidence": 0.0,
             "keywords": [],
             "suggestedPriority": "Normal Priority",
-            "source": "TF-IDF + Logistic Regression"
+            "source": "RoBERTa Transformer" if all(transformer_models.values()) else "TF-IDF + Logistic Regression"
         }
 
-    sentiment, sentiment_confidence = get_prediction_with_confidence(
-        sentiment_model,
-        reason
-    )
-
-    category, category_confidence = get_prediction_with_confidence(
-        category_model,
-        reason
-    )
+    predictions = predict_sentiment_and_category(reason)
+    sentiment, sentiment_confidence = predictions["sentiment"]
+    category, category_confidence = predictions["category"]
 
     category = apply_category_override(reason, category)
 
@@ -228,7 +310,7 @@ def analyze_reason(reason):
         "confidence": confidence,
         "keywords": extract_keywords(reason),
         "suggestedPriority": suggested_priority_from_urgency(urgency_label),
-        "source": "TF-IDF + Logistic Regression"
+        "source": predictions["source"]
     }
 
 

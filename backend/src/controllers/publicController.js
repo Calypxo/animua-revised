@@ -1,10 +1,41 @@
 const { db } = require("../config/firebase");
+const nodemailer = require("nodemailer");
+const path = require("path");
 const {
   buildShelterLabel,
 } = require("../utils/animalIdentity");
 
 const ANIMAL_COL = "animals";
 const EVENT_COL = "events";
+const CONTACT_COL = "contactMessages";
+const CONTACT_RECIPIENT =
+  process.env.CONTACT_EMAIL ||
+  process.env.EMAIL_USER ||
+  "AngelesCityVeterinaryOffice@animua.local";
+
+const contactTransporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+const normalizeContactText = (value = "", maxLength = 1000) =>
+  typeof value === "string"
+    ? value.trim().replace(/\s+/g, " ").slice(0, maxLength)
+    : "";
+
+const escapeEmailHtml = (value = "") =>
+  String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+const isValidEmail = (value = "") =>
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value).trim());
 
 const getEventDateValue = (event = {}) => {
   const value =
@@ -27,6 +58,14 @@ const serializeEventDate = (value) => {
   if (!value) return "";
   if (value?.toDate) return value.toDate().toISOString();
   if (value?._seconds) return new Date(value._seconds * 1000).toISOString();
+  return value;
+};
+
+const serializeContactDate = (value) => {
+  if (!value) return "";
+  if (value?.toDate) return value.toDate().toISOString();
+  if (value?._seconds) return new Date(value._seconds * 1000).toISOString();
+  if (value?.seconds) return new Date(value.seconds * 1000).toISOString();
   return value;
 };
 
@@ -255,6 +294,379 @@ exports.getPublicEvents = async (req, res) => {
     console.error("[getPublicEvents]", error.message);
     res.status(500).json({
       message: "Failed to fetch public events.",
+    });
+  }
+};
+
+/**
+ * GET /api/public/contact/messages
+ * Staff/Admin contact inquiry inbox.
+ */
+exports.getContactMessages = async (req, res) => {
+  try {
+    const snapshot = await db.collection(CONTACT_COL).get();
+
+    const messages = snapshot.docs
+      .map((doc) => {
+        const data = doc.data() || {};
+
+        return {
+          id: doc.id,
+          fullName: data.fullName || "",
+          email: data.email || "",
+          subject: data.subject || "",
+          message: data.message || "",
+          status: data.status || "New",
+          source: data.source || "Contact Us Page",
+          recipient: data.recipient || CONTACT_RECIPIENT,
+          createdAt: serializeContactDate(data.createdAt),
+          repliedAt: serializeContactDate(data.repliedAt),
+          repliedBy: data.repliedBy || "",
+          replyMessage: data.replyMessage || "",
+        };
+      })
+      .sort((a, b) => {
+        const dateA = Date.parse(a.createdAt) || 0;
+        const dateB = Date.parse(b.createdAt) || 0;
+        return dateB - dateA;
+      });
+
+    return res.status(200).json({
+      messages,
+      total: messages.length,
+    });
+  } catch (error) {
+    console.error("[getContactMessages]", error.message);
+    return res.status(500).json({
+      message: "Failed to load contact messages.",
+    });
+  }
+};
+
+/**
+ * POST /api/public/contact
+ * Public contact form submission.
+ */
+exports.submitContactMessage = async (req, res) => {
+  try {
+    const fullName = normalizeContactText(req.body.fullName, 120);
+    const email = normalizeContactText(req.body.email, 160).toLowerCase();
+    const subject = normalizeContactText(req.body.subject, 160);
+    const message = normalizeContactText(req.body.message, 2000);
+
+    if (!fullName || !email || !subject || !message) {
+      return res.status(400).json({
+        message: "Please complete all contact form fields.",
+      });
+    }
+
+    if (!isValidEmail(email)) {
+      return res.status(400).json({
+        message: "Please enter a valid email address.",
+      });
+    }
+
+    const contactMessage = {
+      fullName,
+      email,
+      subject,
+      message,
+      recipient: CONTACT_RECIPIENT,
+      status: "New",
+      source: "Contact Us Page",
+      createdAt: new Date().toISOString(),
+    };
+
+    const saved = await db.collection(CONTACT_COL).add(contactMessage);
+
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      return res.status(503).json({
+        message: "Contact email is not configured. Please call the office instead.",
+      });
+    }
+
+    const receivedAt = new Date(contactMessage.createdAt).toLocaleString("en-PH", {
+      dateStyle: "medium",
+      timeStyle: "short",
+      timeZone: "Asia/Manila",
+    });
+
+    const emailHeaderPath = path.join(__dirname, "../assets/animua-contact-email-header.png");
+    const emailHtml = `
+      <div style="margin:0;padding:0;background:#ffffff;font-family:Arial,'Helvetica Neue',Helvetica,sans-serif;color:#2f2a27;">
+        <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;background:#ffffff;margin:0;padding:0;">
+          <tr>
+            <td align="center" style="padding:28px 14px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" width="760" style="width:760px;max-width:100%;border-collapse:separate;border-spacing:0;background:#ffffff;border:1px solid #eadccc;border-radius:10px;box-shadow:0 12px 34px rgba(68,45,30,0.10);overflow:hidden;">
+                <tr>
+                  <td style="padding:0;margin:0;background:#ffffff;">
+                    <img src="cid:animuaContactHeader" alt="ANIMUA - Angeles City Animal Welfare Portal" width="760" style="display:block;width:100%;max-width:760px;height:auto;border:0;outline:none;text-decoration:none;">
+                  </td>
+                </tr>
+
+                <tr>
+                  <td style="padding:0 46px 28px;background:#ffffff;">
+                    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;background:#ffffff;margin:0;">
+                      <tr>
+                        <td style="padding:28px 0 16px;">
+                          <h1 style="margin:0;color:#7f130f;font-size:28px;line-height:1.12;font-weight:800;">Contact Inquiry</h1>
+                          <div style="width:54px;height:3px;background:#d79a25;border-radius:99px;margin:8px 0 9px;"></div>
+                          <p style="margin:0;color:#2f2a27;font-size:15px;line-height:1.45;">You have received a message from the ANIMUA Contact Us form.</p>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;background:#ffffff;table-layout:fixed;">
+                      <tr>
+                        <td width="170" valign="middle" style="width:170px;padding:13px 0;border-bottom:1px solid #eadcca;color:#7f130f;font-size:15px;font-weight:800;">Name:</td>
+                        <td valign="middle" style="padding:13px 0;border-bottom:1px solid #eadcca;color:#2f2a27;font-size:16px;line-height:1.35;">${escapeEmailHtml(fullName)}</td>
+                      </tr>
+                      <tr>
+                        <td width="170" valign="middle" style="width:170px;padding:13px 0;border-bottom:1px solid #eadcca;color:#7f130f;font-size:15px;font-weight:800;">Email:</td>
+                        <td valign="middle" style="padding:13px 0;border-bottom:1px solid #eadcca;color:#2f2a27;font-size:16px;line-height:1.35;"><a href="mailto:${escapeEmailHtml(email)}" style="color:#0b55cc;text-decoration:underline;">${escapeEmailHtml(email)}</a></td>
+                      </tr>
+                      <tr>
+                        <td width="170" valign="middle" style="width:170px;padding:13px 0;border-bottom:1px solid #eadcca;color:#7f130f;font-size:15px;font-weight:800;">Topic:</td>
+                        <td valign="middle" style="padding:13px 0;border-bottom:1px solid #eadcca;color:#2f2a27;font-size:16px;line-height:1.35;">${escapeEmailHtml(subject)}</td>
+                      </tr>
+                      <tr>
+                        <td width="170" valign="middle" style="width:170px;padding:13px 0;border-bottom:1px solid #eadcca;color:#7f130f;font-size:15px;font-weight:800;">Date Received:</td>
+                        <td valign="middle" style="padding:13px 0;border-bottom:1px solid #eadcca;color:#2f2a27;font-size:16px;line-height:1.35;">${escapeEmailHtml(receivedAt)}</td>
+                      </tr>
+                    </table>
+
+                    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;background:#ffffff;">
+                      <tr>
+                        <td style="padding:18px 0 10px;color:#7f130f;font-size:17px;font-weight:800;">User's Message</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:0 0 26px;">
+                          <div style="background:#ffffff;border:1px solid #ead7bf;border-radius:9px;padding:20px 22px;min-height:42px;color:#2f2a27;font-size:16px;line-height:1.55;">${escapeEmailHtml(message)}</div>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;background:#ffffff;padding:0 0 26px;">
+                      <tr>
+                        <td style="padding:0 0 13px;">
+                          <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;">
+                            <tr>
+                              <td style="border-top:1px dashed #d8c2ac;height:1px;line-height:1px;font-size:1px;">&nbsp;</td>
+                              <td width="70" align="center" style="width:70px;color:#8b100d;font-size:11px;font-weight:800;letter-spacing:0.08em;line-height:1;">ANIMUA</td>
+                              <td style="border-top:1px dashed #d8c2ac;height:1px;line-height:1px;font-size:1px;">&nbsp;</td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td align="center" style="color:#2f2a27;font-size:15px;line-height:1.55;">
+                          <div>Reply directly to this email to respond to the sender.</div>
+                          <div>This message was sent from the ANIMUA Contact Us page.</div>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </div>
+    `;
+
+    await contactTransporter.sendMail({
+      from: `"ANIMUA Contact Form" <${process.env.EMAIL_USER}>`,
+      to: CONTACT_RECIPIENT,
+      replyTo: email,
+      subject: `[ANIMUA Contact] ${subject} inquiry from ${fullName}`,
+      text: [
+        `Name: ${fullName}`,
+        `Email: ${email}`,
+        `Topic: ${subject}`,
+        `Date Received: ${receivedAt}`,
+        "",
+        message,
+      ].join("\n"),
+      html: emailHtml,
+      attachments: [
+        {
+          filename: "animua-contact-email-header.png",
+          path: emailHeaderPath,
+          cid: "animuaContactHeader",
+        },
+      ],
+    });
+
+    return res.status(201).json({
+      message: "Your message has been sent to the ANIMUA team.",
+      id: saved.id,
+    });
+  } catch (error) {
+    console.error("[submitContactMessage]", error.message);
+    return res.status(500).json({
+      message: "Failed to send your message. Please try again later.",
+    });
+  }
+};
+
+/**
+ * POST /api/public/contact/:id/reply
+ * Staff/Admin reply email for a saved Contact Us inquiry.
+ */
+exports.replyToContactMessage = async (req, res) => {
+  try {
+    const contactId = String(req.params.id || "").trim();
+    const replyMessage = normalizeContactText(
+      req.body.replyMessage || req.body.message,
+      3000
+    );
+
+    if (!contactId || !replyMessage) {
+      return res.status(400).json({
+        message: "Contact message ID and reply message are required.",
+      });
+    }
+
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      return res.status(503).json({
+        message: "Reply email is not configured.",
+      });
+    }
+
+    const contactRef = db.collection(CONTACT_COL).doc(contactId);
+    const contactDoc = await contactRef.get();
+
+    if (!contactDoc.exists) {
+      return res.status(404).json({
+        message: "Contact message not found.",
+      });
+    }
+
+    const contact = contactDoc.data() || {};
+    const recipientName = normalizeContactText(contact.fullName, 120) || "there";
+    const recipientEmail = normalizeContactText(contact.email, 160).toLowerCase();
+    const inquiryTopic = normalizeContactText(contact.subject, 160) || "your inquiry";
+
+    if (!isValidEmail(recipientEmail)) {
+      return res.status(400).json({
+        message: "The saved contact email is invalid.",
+      });
+    }
+
+    const firstName = recipientName.split(/\s+/)[0] || recipientName;
+    const emailHeaderPath = path.join(__dirname, "../assets/animua-contact-email-header.png");
+    const replyHtml = `
+      <div style="margin:0;padding:0;background:#ffffff;font-family:Arial,'Helvetica Neue',Helvetica,sans-serif;color:#2f2a27;">
+        <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;background:#ffffff;margin:0;padding:0;">
+          <tr>
+            <td align="center" style="padding:10px 6px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" width="760" style="width:760px;max-width:100%;border-collapse:separate;border-spacing:0;background:#ffffff;border:1px solid #eadccc;overflow:hidden;">
+                <tr>
+                  <td style="padding:0;margin:0;background:#ffffff;">
+                    <img src="cid:animuaReplyHeader" alt="ANIMUA - Angeles City Animal Welfare Portal" width="760" style="display:block;width:100%;max-width:760px;height:auto;border:0;outline:none;text-decoration:none;">
+                  </td>
+                </tr>
+
+                <tr>
+                  <td style="padding:0;background:#ffffff;">
+                    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:separate;border-spacing:0;background:#ffffff;border-radius:18px 18px 0 0;margin-top:-1px;padding:28px 66px 0;">
+                      <tr>
+                        <td valign="top" width="58" style="width:58px;padding:0 18px 20px 0;">
+                          <div style="width:46px;height:46px;border-radius:50%;background:#7f130f;color:#ffffff;text-align:center;line-height:46px;font-size:15px;font-weight:800;letter-spacing:0.02em;">RPL</div>
+                        </td>
+                        <td valign="top" style="padding:0 0 20px;">
+                          <h1 style="margin:0;color:#5b201c;font-size:24px;line-height:1.16;font-weight:800;">We've Received Your Inquiry</h1>
+                          <div style="width:46px;height:3px;background:#d79a25;border-radius:99px;margin:8px 0 17px;"></div>
+                          <p style="margin:0 0 12px;color:#2f2a27;font-size:14px;line-height:1.55;">Hello ${escapeEmailHtml(firstName)},</p>
+                          <p style="margin:0 0 16px;color:#2f2a27;font-size:14px;line-height:1.55;">Thank you for reaching out to ANIMUA. We truly appreciate your interest and your care for animals in our community.</p>
+                          <p style="margin:0;color:#2f2a27;font-size:14px;line-height:1.55;">Here is our response to your inquiry about <strong style="color:#7f130f;">${escapeEmailHtml(inquiryTopic)}</strong>:</p>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;background:#ffffff;padding:0 66px 28px;">
+                      <tr>
+                        <td style="padding:0;">
+                          <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:separate;border-spacing:0;background:#ffffff;border:1px solid #ead7bf;border-radius:9px;">
+                            <tr>
+                              <td style="padding:20px 24px 6px;">
+                                <table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+                                  <tr>
+                                    <td valign="middle" style="padding:0 10px 0 0;">
+                                      <div style="width:28px;height:28px;border-radius:50%;background:#7f130f;color:#ffffff;text-align:center;line-height:28px;font-size:11px;font-weight:800;">MSG</div>
+                                    </td>
+                                    <td valign="middle" style="color:#5b201c;font-size:16px;font-weight:800;">Our Reply</td>
+                                  </tr>
+                                  <tr>
+                                    <td></td>
+                                    <td style="padding-top:7px;"><div style="width:32px;height:2px;background:#d79a25;border-radius:99px;"></div></td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding:8px 48px 25px;color:#2f2a27;font-size:14px;line-height:1.65;white-space:pre-line;">${escapeEmailHtml(replyMessage)}</td>
+                            </tr>
+                            <tr>
+                              <td style="padding:0 48px 25px;color:#2f2a27;font-size:14px;line-height:1.45;">
+                                <div>Warm regards,</div>
+                                <div style="color:#7f130f;font-weight:800;">ANIMUA Team</div>
+                                <div style="font-size:12px;">Angeles City Animal Welfare Portal</div>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </div>
+    `;
+
+    await contactTransporter.sendMail({
+      from: `"ANIMUA Team" <${process.env.EMAIL_USER}>`,
+      to: recipientEmail,
+      replyTo: CONTACT_RECIPIENT,
+      subject: `Re: [ANIMUA Contact] ${inquiryTopic}`,
+      text: [
+        `Hello ${firstName},`,
+        "",
+        "Thank you for reaching out to ANIMUA.",
+        "",
+        replyMessage,
+        "",
+        "Warm regards,",
+        "ANIMUA Team",
+        "Angeles City Animal Welfare Portal",
+      ].join("\n"),
+      html: replyHtml,
+      attachments: [
+        {
+          filename: "animua-contact-email-header.png",
+          path: emailHeaderPath,
+          cid: "animuaReplyHeader",
+        },
+      ],
+    });
+
+    await contactRef.update({
+      status: "Replied",
+      replyMessage,
+      repliedAt: new Date().toISOString(),
+      repliedBy: req.user?.email || req.user?.uid || "ANIMUA Team",
+    });
+
+    return res.status(200).json({
+      message: "Reply email has been sent.",
+    });
+  } catch (error) {
+    console.error("[replyToContactMessage]", error.message);
+    return res.status(500).json({
+      message: "Failed to send reply email. Please try again later.",
     });
   }
 };

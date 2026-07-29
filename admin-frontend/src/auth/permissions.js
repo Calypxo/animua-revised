@@ -91,6 +91,11 @@ export const ROLE_PERMISSIONS = {
       "publish"
     ],
     compatibility: ["view", "manage"],
+
+    contact: [
+      "view",
+      "reply",
+    ],
   },
 
   Staff: {
@@ -156,6 +161,11 @@ export const ROLE_PERMISSIONS = {
       "create", 
       "edit", 
       "publish"
+    ],
+
+    contact: [
+      "view",
+      "reply",
     ],
   },
 

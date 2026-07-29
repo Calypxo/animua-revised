@@ -674,6 +674,16 @@
 .submitted-date { color: #6f625d !important; font: 600 11px/1 'Inter', sans-serif !important; white-space: nowrap; }
 .surrender-requests-page .owner-avatar,
 .surrender-requests-page .pet-mini-thumb { width: 38px; height: 38px; border: 1px solid #f0c8bd; border-radius: 50%; background: #fff0e8 !important; color: var(--brand-red-deep) !important; font: 800 12px/1 'Inter', sans-serif; }
+.surrender-requests-page .pet-mini-thumb {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.surrender-requests-page .pet-mini-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 .surrender-requests-page .owner-name,
 .surrender-requests-page .pet-mini-name { color: #2d2927; font: 700 12px/1.3 'Inter', sans-serif; }
 .surrender-requests-page .owner-barangay,
@@ -768,6 +778,49 @@
 .surrender-requests-page .drawer-info-item { min-height: 68px; padding: 12px 14px; }
 .surrender-requests-page .drawer-info-lbl { font-size: 9px; }
 .surrender-requests-page .drawer-info-val { margin-top: 5px; font-size: 12px; line-height: 1.4; }
+.surrender-requests-page .surrender-pet-photo {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+  padding: 12px;
+  border: 1px solid #eee1d8;
+  border-radius: 14px;
+  background: #fffaf6;
+}
+.surrender-requests-page .surrender-pet-photo img,
+.surrender-requests-page .surrender-pet-photo > i {
+  width: 96px;
+  height: 76px;
+  border-radius: 10px;
+}
+.surrender-requests-page .surrender-pet-photo img {
+  object-fit: cover;
+}
+.surrender-requests-page .surrender-pet-photo > i {
+  display: grid;
+  place-items: center;
+  color: var(--brand-red-deep);
+  background: #fff0e8;
+  font-size: 24px;
+}
+.surrender-requests-page .surrender-pet-photo span,
+.surrender-requests-page .surrender-pet-photo strong {
+  display: block;
+}
+.surrender-requests-page .surrender-pet-photo span {
+  color: #8a7a72;
+  font: 800 9px/1 'Inter', sans-serif;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.surrender-requests-page .surrender-pet-photo strong {
+  margin-top: 6px;
+  overflow-wrap: anywhere;
+  color: var(--brand-ink);
+  font: 800 12px/1.35 'Inter', sans-serif;
+}
 .surrender-requests-page .doc-list { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; }
 .surrender-requests-page .doc-item { min-height: 52px; }
 .surrender-requests-page .drawer-footer {

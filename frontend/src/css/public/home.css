@@ -12259,7 +12259,7 @@ body.home-page .quiz-intro-reminder {
     linear-gradient(90deg, rgba(142, 42, 32, 0.065), rgba(241, 192, 69, 0.08)),
     rgba(255, 255, 255, 0.68) !important;
   color: var(--animua-charcoal) !important;
-  box-shadow: inset 4px 0 0 rgba(142, 42, 32, 0.86) !important;
+  box-shadow: none !important;
 }
 
 body.home-page .quiz-intro-reminder i {

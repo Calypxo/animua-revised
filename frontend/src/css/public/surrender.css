@@ -321,16 +321,6 @@
 .success-next-steps ol { margin: 9px 0 0; padding-left: 19px; color: #6c5c37; font-size: .76rem; line-height: 1.7; }
 .success-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
 
-.surrender-page .notification-wrap { position: relative; }
-.surrender-page .notification-btn { position: relative; width: 46px; height: 46px; display: grid; place-items: center; border-radius: 50%; color: var(--sr-red); background: #fff; box-shadow: 0 8px 20px rgba(75,43,33,.08); }
-.surrender-page .notification-dot { position: absolute; top: 9px; right: 9px; width: 9px; height: 9px; border: 2px solid #fff; border-radius: 50%; background: var(--sr-red); }
-.surrender-page .notification-popup { position: absolute; top: 55px; right: 0; z-index: 1100; width: 300px; display: none; padding: 17px; border: 1px solid var(--sr-line); border-radius: 12px; background: #fff; box-shadow: 0 16px 38px rgba(75,43,33,.14); }
-.surrender-page .notification-popup.show { display: block; }
-.surrender-page .notification-popup h4 { margin: 0 0 9px; color: var(--sr-ink); font-size: .95rem; }
-.surrender-page .notification-list { margin: 0; padding-left: 18px; }
-.surrender-page .notification-list li { margin-bottom: 7px; color: var(--sr-muted); font-size: .72rem; line-height: 1.5; }
-.surrender-page .footer-grid { grid-template-columns: 1.3fr .9fr; }
-
 @media (max-width: 1050px) {
   .surrender-page .surrender-page-hero-grid { grid-template-columns: 1fr 380px; }
   .surrender-page .surrender-page-text { padding: 38px; }
@@ -404,4 +394,2433 @@
 
 @media (prefers-reduced-motion: reduce) {
   .surrender-page *, .surrender-page *::before, .surrender-page *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+}
+
+/* Reference-style surrender page refresh */
+body.surrender-page {
+  --sr-red: #8e2a20;
+  --sr-red-dark: #721b14;
+  --sr-gold: #f1c045;
+  --sr-cream: #f7f3ea;
+  --sr-paper: #fffdf9;
+  --sr-ink: #20303a;
+  --sr-muted: #5e676d;
+  --sr-line: rgba(111, 42, 31, 0.15);
+  background: var(--sr-cream) !important;
+}
+
+body.surrender-page .surrender-page-hero {
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+  margin-top: calc(var(--nav-height, 84px) * -1);
+  padding: calc(var(--nav-height, 84px) + 54px) 0 54px !important;
+  overflow: hidden;
+  background: url("../../assets/images/surrender-hero-bg.png") center top / cover no-repeat;
+}
+
+body.surrender-page .surrender-page-hero-grid {
+  width: min(1160px, 88%);
+  display: block;
+  padding: 0 !important;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+body.surrender-page .surrender-page-text {
+  max-width: 515px;
+  padding: 0;
+  background: transparent;
+}
+
+body.surrender-page .section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  color: var(--sr-gold);
+  font-size: 0.66rem;
+  font-weight: 900;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+body.surrender-page .section-label::before {
+  content: "";
+  width: 28px;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+body.surrender-page .section-label::after {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+body.surrender-page .surrender-page-text h1 {
+  max-width: 510px;
+  margin: 0;
+  color: #fff !important;
+  font-family: "League Spartan", "Inter", sans-serif;
+  font-size: clamp(2.35rem, 4.5vw, 3.85rem) !important;
+  font-weight: 900 !important;
+  line-height: 0.95 !important;
+  letter-spacing: 0 !important;
+}
+
+body.surrender-page .surrender-page-text h1 span {
+  display: block;
+  color: var(--sr-gold);
+}
+
+body.surrender-page .surrender-hero-lead {
+  max-width: 485px;
+  margin: 15px 0 0;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.55;
+}
+
+body.surrender-page .surrender-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 20px;
+}
+
+body.surrender-page .surrender-hero-actions .primary-btn,
+body.surrender-page .surrender-text-link,
+body.surrender-page .status-refresh-btn,
+body.surrender-page .step-actions .primary-btn,
+body.surrender-page .submit-request-btn {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 22px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 850;
+  text-decoration: none;
+}
+
+body.surrender-page .surrender-hero-actions .primary-btn,
+body.surrender-page .status-refresh-btn,
+body.surrender-page .step-actions .primary-btn,
+body.surrender-page .submit-request-btn {
+  border: 0;
+  color: #fff;
+  background: linear-gradient(135deg, #b61f22, var(--sr-red));
+  box-shadow: 0 14px 28px rgba(84, 16, 14, 0.22);
+}
+
+body.surrender-page .surrender-text-link {
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+body.surrender-page .surrender-hero-actions .primary-btn,
+body.surrender-page .surrender-text-link {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+body.surrender-page .surrender-hero-actions .primary-btn:hover,
+body.surrender-page .surrender-text-link:hover {
+  transform: translateY(-2px);
+}
+
+body.surrender-page .surrender-hero-actions .primary-btn:hover {
+  box-shadow: 0 18px 34px rgba(84, 16, 14, 0.3);
+}
+
+body.surrender-page .surrender-text-link:hover {
+  border-color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.11);
+}
+
+body.surrender-page .surrender-notice-section {
+  padding: 46px 0 0 !important;
+  background: var(--sr-cream);
+}
+
+body.surrender-page .surrender-notice-box {
+  padding: 0;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.surrender-page .surrender-notice-heading {
+  max-width: 760px;
+}
+
+body.surrender-page .surrender-notice-heading .section-label {
+  margin-bottom: 12px;
+  color: var(--sr-red);
+}
+
+body.surrender-page .surrender-notice-heading h2 {
+  color: var(--sr-ink);
+  font-size: clamp(2rem, 3.6vw, 3rem) !important;
+  line-height: 1.02;
+}
+
+body.surrender-page .surrender-notice-heading > p,
+body.surrender-page .surrender-gentle-notice {
+  display: none;
+}
+
+body.surrender-page .surrender-notice-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  margin-top: 34px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+body.surrender-page .notice-item {
+  position: relative;
+  min-height: 150px;
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 18px;
+  padding: 0 44px 0 0;
+  background: transparent;
+}
+
+body.surrender-page .notice-item + .notice-item {
+  padding-left: 36px;
+  border-left: 1px solid rgba(111, 42, 31, 0.13);
+}
+
+body.surrender-page .notice-number {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--sr-red);
+  font-size: 1rem;
+  letter-spacing: 0;
+}
+
+body.surrender-page .notice-item strong {
+  margin: 56px 0 8px;
+  color: var(--sr-ink);
+  font-size: 1.2rem;
+}
+
+body.surrender-page .notice-item span:not(.notice-number) {
+  max-width: 250px;
+  color: #2f3c43;
+  font-size: 0.9rem;
+}
+
+body.surrender-page .surrender-form-section {
+  padding: 38px 0 82px !important;
+  background: var(--sr-cream);
+}
+
+body.surrender-page .request-status-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 0.78fr) minmax(420px, 1.22fr);
+  align-items: center;
+  gap: 34px;
+  margin: 0 auto 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+body.surrender-page .request-status-panel::before {
+  content: none;
+}
+
+body.surrender-page .request-status-heading {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  align-items: center;
+  gap: 26px;
+}
+
+body.surrender-page .request-status-icon {
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--sr-red);
+  font-size: 1.45rem;
+  box-shadow: 0 16px 26px rgba(114, 27, 20, 0.18);
+}
+
+body.surrender-page .request-status-heading .section-label {
+  margin-bottom: 10px;
+  color: var(--sr-red);
+}
+
+body.surrender-page .request-status-heading h2 {
+  margin: 0;
+  color: var(--sr-ink);
+  font-size: 1.45rem;
+}
+
+body.surrender-page .request-status-heading p {
+  max-width: 500px;
+  margin: 7px 0 0;
+  color: #2f3c43;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+body.surrender-page .request-status-card {
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 22px;
+  min-height: 126px;
+  padding: 22px 28px;
+  border: 1px solid rgba(111, 42, 31, 0.11);
+  border-radius: 12px;
+  background: rgba(255, 253, 249, 0.78);
+  box-shadow: 0 16px 38px rgba(75, 43, 33, 0.06);
+}
+
+body.surrender-page .request-card-icon {
+  width: 60px;
+  height: 60px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--sr-red);
+  background: rgba(241, 192, 69, 0.2);
+  font-size: 1.5rem;
+}
+
+body.surrender-page .request-status-card h3 {
+  margin: 0;
+  color: var(--sr-ink);
+  font-size: 1.15rem;
+}
+
+body.surrender-page .request-status-card p {
+  margin: 7px 0 0;
+  color: #4b565c;
+  font-size: 0.94rem;
+  line-height: 1.45;
+}
+
+body.surrender-page .request-history-content {
+  display: none;
+}
+
+body.surrender-page .request-history-list {
+  margin-top: 18px;
+}
+
+body.surrender-page .surrender-workspace {
+  width: min(100%, 1040px);
+  display: grid;
+  grid-template-columns: 245px minmax(0, 1fr);
+  gap: 0;
+  margin: 0 auto;
+  overflow: hidden;
+  border: 1px solid rgba(111, 42, 31, 0.11);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 18px 46px rgba(75, 43, 33, 0.08);
+}
+
+body.surrender-page .surrender-progress-rail {
+  position: relative;
+  top: auto;
+  min-height: 100%;
+  padding: 42px 28px;
+  border: 0;
+  border-right: 1px solid rgba(111, 42, 31, 0.13);
+  border-radius: 0;
+  background: rgba(255, 253, 249, 0.72);
+  box-shadow: none;
+}
+
+body.surrender-page .progress-rail-intro,
+body.surrender-page .account-identity-card,
+body.surrender-page .progress-support-note {
+  display: none;
+}
+
+body.surrender-page .surrender-step-nav {
+  position: relative;
+  display: grid;
+  gap: 28px;
+  padding: 0;
+}
+
+body.surrender-page .surrender-step-nav::before {
+  content: "";
+  position: absolute;
+  left: 17px;
+  top: 22px;
+  bottom: 22px;
+  width: 2px;
+  background: #d8d0cb;
+}
+
+body.surrender-page .surrender-step-link {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  gap: 14px;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+body.surrender-page .surrender-step-link:hover,
+body.surrender-page .surrender-step-link.is-active {
+  background: transparent;
+}
+
+body.surrender-page .surrender-step-link > span {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  color: #fff;
+  background: #bdb8b5;
+  font-size: 0.9rem;
+}
+
+body.surrender-page .surrender-step-link.is-active > span,
+body.surrender-page .surrender-step-link.is-complete > span {
+  background: var(--sr-red);
+}
+
+body.surrender-page .surrender-step-link strong {
+  color: #7b7774;
+  font-size: 0.88rem;
+}
+
+body.surrender-page .surrender-step-link.is-active strong {
+  color: var(--sr-red-dark);
+}
+
+body.surrender-page .surrender-step-link small {
+  max-width: 130px;
+  color: #8a8582;
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+
+body.surrender-page .surrender-form-wrap {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+
+body.surrender-page .surrender-form-heading {
+  padding: 42px 42px 10px;
+  border: 0;
+  background: transparent;
+}
+
+body.surrender-page .surrender-form-heading .section-label {
+  margin-bottom: 12px;
+  color: var(--sr-red);
+}
+
+body.surrender-page .surrender-form-heading h2 {
+  color: var(--sr-ink);
+  font-size: clamp(2rem, 3.2vw, 2.65rem) !important;
+}
+
+body.surrender-page .surrender-form-heading p {
+  max-width: 620px;
+  color: #4b565c;
+  font-size: 0.9rem;
+}
+
+body.surrender-page .form-save-note {
+  display: none;
+}
+
+body.surrender-page .surrender-form {
+  padding: 24px 42px 42px;
+}
+
+body.surrender-page .step-section-heading {
+  display: none;
+}
+
+body.surrender-page .identity-explanation,
+body.surrender-page .reason-guidance,
+body.surrender-page .submission-expectation {
+  border-radius: 10px;
+}
+
+body.surrender-page .surrender-form-grid {
+  gap: 18px 26px;
+  margin-top: 0;
+}
+
+body.surrender-page .form-group label,
+body.surrender-page .choice-fieldset legend {
+  color: var(--sr-ink);
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+body.surrender-page .surrender-form :is(input, select, textarea) {
+  min-height: 46px;
+  border-color: #d9d1cb;
+  border-radius: 4px;
+  background: #fff;
+}
+
+body.surrender-page .step-actions {
+  margin-top: 26px;
+  padding-top: 18px;
+  border-top: 0;
+}
+
+body.surrender-page .step-actions .secondary-btn {
+  min-height: 46px;
+  padding: 0 24px;
+  border: 1px solid rgba(142, 42, 32, 0.28);
+  border-radius: 999px;
+  color: var(--sr-red-dark);
+  background: #fff;
+}
+
+body.surrender-page > .footer {
+  width: 100%;
+  margin: 0;
+}
+
+@media (max-width: 1050px) {
+  body.surrender-page .surrender-page-hero {
+    min-height: 470px;
+  }
+
+  body.surrender-page .surrender-workspace {
+    grid-template-columns: 220px minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  body.surrender-page .surrender-page-hero {
+    min-height: 500px;
+    background-position: 64% top;
+  }
+
+  body.surrender-page .surrender-notice-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  body.surrender-page .notice-item,
+  body.surrender-page .notice-item + .notice-item {
+    padding: 0;
+    border-left: 0;
+  }
+
+  body.surrender-page .notice-item strong {
+    margin-top: 0;
+  }
+
+  body.surrender-page .request-status-panel {
+    grid-template-columns: 1fr;
+  }
+
+  body.surrender-page .request-status-card {
+    grid-template-columns: 64px minmax(0, 1fr);
+  }
+
+  body.surrender-page .request-status-card .status-refresh-btn {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+  }
+
+  body.surrender-page .surrender-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  body.surrender-page .surrender-progress-rail {
+    padding: 18px;
+    border-right: 0;
+    border-bottom: 1px solid rgba(111, 42, 31, 0.13);
+  }
+
+  body.surrender-page .surrender-step-nav {
+    grid-template-columns: repeat(4, minmax(132px, 1fr));
+    overflow-x: auto;
+  }
+
+  body.surrender-page .surrender-step-nav::before {
+    display: none;
+  }
+}
+
+@media (max-width: 700px) {
+  body.surrender-page .surrender-page-hero-grid,
+  body.surrender-page .surrender-form-section > .container,
+  body.surrender-page .surrender-notice-section > .container {
+    width: min(100% - 34px, 1160px);
+  }
+
+  body.surrender-page .surrender-page-text h1 {
+    font-size: clamp(2.2rem, 11vw, 3.2rem) !important;
+  }
+
+  body.surrender-page .surrender-hero-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  body.surrender-page .surrender-form-heading,
+  body.surrender-page .surrender-form {
+    padding-inline: 24px;
+  }
+}
+
+/* Reference-style surrender process and tracking CTA */
+body.surrender-page .surrender-notice-section {
+  padding: 62px 0 34px !important;
+  background: var(--sr-cream);
+}
+
+body.surrender-page .surrender-notice-box {
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Visible transparent-red reminder for submitted requests */
+body.surrender-page .request-status-panel {
+  margin: 18px auto 16px !important;
+}
+
+body.surrender-page .request-status-panel > .request-status-card {
+  min-height: 88px !important;
+  grid-template-columns: 48px minmax(0, 1fr) auto !important;
+  gap: 16px !important;
+  padding: 17px 22px !important;
+  border: 1px solid rgba(142, 42, 32, 0.14) !important;
+  border-left: 4px solid rgba(142, 42, 32, 0.58) !important;
+  border-radius: 12px !important;
+  background: rgba(142, 42, 32, 0.085) !important;
+  box-shadow: 0 8px 18px rgba(75, 43, 33, 0.02) !important;
+}
+
+body.surrender-page .request-status-panel > .request-status-card .request-card-icon {
+  width: 42px !important;
+  height: 42px !important;
+  border: 1px solid rgba(142, 42, 32, 0.14) !important;
+  background: rgba(255, 250, 244, 0.68) !important;
+  color: var(--sr-red-dark) !important;
+  box-shadow: none !important;
+}
+
+body.surrender-page .request-status-panel > .request-status-card .request-card-icon i {
+  font-size: 1.05rem !important;
+}
+
+body.surrender-page .request-status-panel > .request-status-card h3 {
+  margin-bottom: 4px !important;
+  font-size: clamp(1.05rem, 1.8vw, 1.35rem) !important;
+  color: var(--sr-red-dark) !important;
+}
+
+body.surrender-page .request-status-panel > .request-status-card p {
+  max-width: 620px !important;
+  font-size: 0.9rem !important;
+  line-height: 1.45 !important;
+}
+
+body.surrender-page .request-status-panel > .request-status-card .status-refresh-btn {
+  min-height: 36px !important;
+  padding: 0 16px !important;
+  border: 1px solid rgba(142, 42, 32, 0.18) !important;
+  background: rgba(255, 250, 244, 0.64) !important;
+  color: var(--sr-red-dark) !important;
+  font-size: 0.78rem !important;
+  box-shadow: none !important;
+}
+
+body.surrender-page .request-status-panel > .request-status-card .status-refresh-btn:hover,
+body.surrender-page .request-status-panel > .request-status-card .status-refresh-btn:focus-visible {
+  border-color: rgba(142, 42, 32, 0.28) !important;
+  background: rgba(255, 250, 244, 0.86) !important;
+}
+
+@media (max-width: 700px) {
+  body.surrender-page .request-status-panel > .request-status-card {
+    grid-template-columns: 42px 1fr !important;
+    padding: 18px !important;
+  }
+
+  body.surrender-page .request-status-panel > .request-status-card .request-card-icon {
+    width: 42px !important;
+    height: 42px !important;
+  }
+
+  body.surrender-page .request-status-panel > .request-status-card .status-refresh-btn {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+  }
+}
+
+/* Final actual EOF: lower Surrender hero text below nav */
+body.surrender-page .surrender-page-hero {
+  height: auto !important;
+  min-height: 660px !important;
+  padding: calc(var(--nav-height, 84px) + 102px) 0 96px !important;
+  overflow: hidden !important;
+}
+
+body.surrender-page .surrender-page-hero-grid,
+body.surrender-page .surrender-page-text {
+  min-height: 450px !important;
+}
+
+body.surrender-page .surrender-page-text {
+  padding-top: 110px !important;
+}
+
+@media (max-width: 1050px) {
+  body.surrender-page .surrender-page-hero {
+    min-height: 600px !important;
+    padding: calc(var(--nav-height, 76px) + 82px) 0 82px !important;
+  }
+
+  body.surrender-page .surrender-page-hero-grid,
+  body.surrender-page .surrender-page-text {
+    min-height: 405px !important;
+  }
+
+  body.surrender-page .surrender-page-text {
+    padding-top: 78px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  body.surrender-page .surrender-page-hero {
+    min-height: 520px !important;
+    padding: calc(var(--nav-height, 72px) + 52px) 0 62px !important;
+  }
+
+  body.surrender-page .surrender-page-hero-grid,
+  body.surrender-page .surrender-page-text {
+    min-height: 340px !important;
+  }
+
+  body.surrender-page .surrender-page-text {
+    padding-top: 42px !important;
+  }
+}
+
+/* True EOF hero correction: keep title below navbar */
+body.surrender-page .surrender-page-hero {
+  height: auto !important;
+  min-height: 650px !important;
+  padding: calc(var(--nav-height, 84px) + 96px) 0 92px !important;
+  overflow: hidden !important;
+}
+
+body.surrender-page .surrender-page-hero-grid,
+body.surrender-page .surrender-page-text {
+  min-height: 440px !important;
+}
+
+body.surrender-page .surrender-page-text {
+  padding-top: 96px !important;
+}
+
+@media (max-width: 1050px) {
+  body.surrender-page .surrender-page-hero {
+    min-height: 590px !important;
+    padding: calc(var(--nav-height, 76px) + 76px) 0 78px !important;
+  }
+
+  body.surrender-page .surrender-page-hero-grid,
+  body.surrender-page .surrender-page-text {
+    min-height: 395px !important;
+  }
+
+  body.surrender-page .surrender-page-text {
+    padding-top: 70px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  body.surrender-page .surrender-page-hero {
+    min-height: 510px !important;
+    padding: calc(var(--nav-height, 72px) + 48px) 0 60px !important;
+  }
+
+  body.surrender-page .surrender-page-hero-grid,
+  body.surrender-page .surrender-page-text {
+    min-height: 330px !important;
+  }
+
+  body.surrender-page .surrender-page-text {
+    padding-top: 36px !important;
+  }
+}
+
+/* EOF Surrender hero height correction */
+body.surrender-page .surrender-page-hero {
+  height: auto !important;
+  min-height: 650px !important;
+  padding: calc(var(--nav-height, 84px) + 86px) 0 90px !important;
+  overflow: hidden;
+}
+
+body.surrender-page .surrender-page-hero-grid,
+body.surrender-page .surrender-page-text {
+  min-height: 440px !important;
+}
+
+body.surrender-page .surrender-page-text {
+  padding-top: 82px !important;
+}
+
+@media (max-width: 1050px) {
+  body.surrender-page .surrender-page-hero {
+    min-height: 590px !important;
+    padding: calc(var(--nav-height, 76px) + 66px) 0 76px !important;
+  }
+
+  body.surrender-page .surrender-page-hero-grid,
+  body.surrender-page .surrender-page-text {
+    min-height: 395px !important;
+  }
+
+  body.surrender-page .surrender-page-text {
+    padding-top: 58px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  body.surrender-page .surrender-page-hero {
+    min-height: 510px !important;
+    padding: calc(var(--nav-height, 72px) + 42px) 0 58px !important;
+  }
+
+  body.surrender-page .surrender-page-hero-grid,
+  body.surrender-page .surrender-page-text {
+    min-height: 330px !important;
+  }
+
+  body.surrender-page .surrender-page-text {
+    padding-top: 30px !important;
+  }
+}
+
+/* Final Surrender hero spacing to match Find Furbabies */
+body.surrender-page .surrender-page-hero {
+  height: auto !important;
+  min-height: 520px !important;
+  padding: calc(var(--nav-height, 84px) + 54px) 0 74px !important;
+}
+
+body.surrender-page .surrender-page-hero-grid,
+body.surrender-page .surrender-page-text {
+  min-height: 365px !important;
+}
+
+body.surrender-page .surrender-page-text {
+  padding-top: 46px !important;
+}
+
+@media (max-width: 1050px) {
+  body.surrender-page .surrender-page-hero {
+    min-height: 500px !important;
+    padding: calc(var(--nav-height, 76px) + 44px) 0 64px !important;
+  }
+
+  body.surrender-page .surrender-page-hero-grid,
+  body.surrender-page .surrender-page-text {
+    min-height: 340px !important;
+  }
+
+  body.surrender-page .surrender-page-text {
+    padding-top: 34px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  body.surrender-page .surrender-page-hero {
+    min-height: 480px !important;
+    padding: calc(var(--nav-height, 72px) + 36px) 0 58px !important;
+  }
+
+  body.surrender-page .surrender-page-hero-grid,
+  body.surrender-page .surrender-page-text {
+    min-height: 320px !important;
+  }
+
+  body.surrender-page .surrender-page-text {
+    padding-top: 24px !important;
+  }
+}
+
+/* Ultimate override: transparent-red submitted request reminder */
+body.surrender-page .request-status-panel {
+  margin: 18px auto 16px !important;
+}
+
+body.surrender-page .request-status-panel > .request-status-card {
+  min-height: 88px !important;
+  grid-template-columns: 48px minmax(0, 1fr) auto !important;
+  gap: 18px !important;
+  padding: 18px 24px !important;
+  border: 1px solid rgba(142, 42, 32, 0.18) !important;
+  border-left: 6px solid rgba(142, 42, 32, 0.68) !important;
+  border-radius: 12px !important;
+  background: rgba(142, 42, 32, 0.16) !important;
+  box-shadow: 0 8px 18px rgba(75, 43, 33, 0.025) !important;
+}
+
+body.surrender-page .request-status-panel > .request-status-card .request-card-icon {
+  width: 46px !important;
+  height: 46px !important;
+  border: 1px solid rgba(142, 42, 32, 0.16) !important;
+  background: rgba(255, 255, 255, 0.42) !important;
+  color: var(--sr-red-dark) !important;
+  box-shadow: none !important;
+}
+
+body.surrender-page .request-status-panel > .request-status-card .request-card-icon i {
+  font-size: 1.18rem !important;
+}
+
+body.surrender-page .request-status-panel > .request-status-card h3 {
+  margin-bottom: 4px !important;
+  font-size: clamp(1.15rem, 2vw, 1.55rem) !important;
+  color: var(--sr-red-dark) !important;
+}
+
+body.surrender-page .request-status-panel > .request-status-card p {
+  max-width: 620px !important;
+  font-size: 0.9rem !important;
+  line-height: 1.45 !important;
+}
+
+body.surrender-page .request-status-panel > .request-status-card .status-refresh-btn {
+  min-height: 38px !important;
+  padding: 0 18px !important;
+  border: 1px solid rgba(142, 42, 32, 0.22) !important;
+  background: rgba(255, 255, 255, 0.48) !important;
+  color: var(--sr-red-dark) !important;
+  box-shadow: none !important;
+}
+
+body.surrender-page .request-status-panel > .request-status-card .status-refresh-btn:hover,
+body.surrender-page .request-status-panel > .request-status-card .status-refresh-btn:focus-visible {
+  background: rgba(255, 255, 255, 0.7) !important;
+}
+
+@media (max-width: 700px) {
+  body.surrender-page .request-status-panel > .request-status-card {
+    grid-template-columns: 42px 1fr !important;
+    padding: 18px !important;
+  }
+
+  body.surrender-page .request-status-panel > .request-status-card .request-card-icon {
+    width: 42px !important;
+    height: 42px !important;
+  }
+
+  body.surrender-page .request-status-panel > .request-status-card .status-refresh-btn {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+  }
+}
+
+/* Final tracker reminder style */
+body.surrender-page .request-status-panel {
+  margin: 18px auto 16px !important;
+}
+
+body.surrender-page .request-status-card {
+  min-height: 88px !important;
+  grid-template-columns: 48px minmax(0, 1fr) auto !important;
+  gap: 18px !important;
+  padding: 18px 24px !important;
+  border: 1px solid rgba(142, 42, 32, 0.18) !important;
+  border-left: 6px solid rgba(142, 42, 32, 0.68) !important;
+  border-radius: 12px !important;
+  background: rgba(142, 42, 32, 0.13) !important;
+  box-shadow: 0 8px 18px rgba(75, 43, 33, 0.025) !important;
+}
+
+body.surrender-page .request-card-icon {
+  width: 46px !important;
+  height: 46px !important;
+  border: 1px solid rgba(142, 42, 32, 0.16) !important;
+  background: rgba(142, 42, 32, 0.12) !important;
+  color: var(--sr-red-dark) !important;
+  box-shadow: none !important;
+}
+
+body.surrender-page .request-card-icon i {
+  font-size: 1.18rem !important;
+}
+
+body.surrender-page .request-status-card h3 {
+  margin-bottom: 4px !important;
+  font-size: clamp(1.15rem, 2vw, 1.55rem) !important;
+  color: var(--sr-red-dark) !important;
+}
+
+body.surrender-page .request-status-card p {
+  max-width: 620px !important;
+  font-size: 0.9rem !important;
+  line-height: 1.45 !important;
+}
+
+body.surrender-page .request-status-card .status-refresh-btn {
+  min-height: 38px !important;
+  padding: 0 18px !important;
+  border: 1px solid rgba(142, 42, 32, 0.2) !important;
+  background: rgba(255, 255, 255, 0.46) !important;
+  color: var(--sr-red-dark) !important;
+  box-shadow: none !important;
+}
+
+body.surrender-page .request-status-card .status-refresh-btn:hover,
+body.surrender-page .request-status-card .status-refresh-btn:focus-visible {
+  background: rgba(255, 255, 255, 0.68) !important;
+}
+
+@media (max-width: 700px) {
+  body.surrender-page .request-status-card {
+    grid-template-columns: 42px 1fr !important;
+    padding: 18px !important;
+  }
+
+  body.surrender-page .request-card-icon {
+    width: 42px !important;
+    height: 42px !important;
+  }
+
+  body.surrender-page .request-status-card .status-refresh-btn {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+  }
+}
+
+/* Reminder-style submitted-request strip */
+body.surrender-page .request-status-panel {
+  margin: 18px auto 16px !important;
+}
+
+body.surrender-page .request-status-card {
+  min-height: 88px !important;
+  grid-template-columns: 48px minmax(0, 1fr) auto !important;
+  gap: 18px !important;
+  padding: 18px 24px !important;
+  border: 1px solid rgba(142, 42, 32, 0.14) !important;
+  border-left: 5px solid rgba(142, 42, 32, 0.58) !important;
+  border-radius: 12px !important;
+  background: rgba(142, 42, 32, 0.055) !important;
+  box-shadow: 0 8px 18px rgba(75, 43, 33, 0.03) !important;
+}
+
+body.surrender-page .request-card-icon {
+  width: 46px !important;
+  height: 46px !important;
+  border: 1px solid rgba(142, 42, 32, 0.12) !important;
+  background: rgba(142, 42, 32, 0.09) !important;
+  color: var(--sr-red) !important;
+  box-shadow: none !important;
+}
+
+body.surrender-page .request-card-icon i {
+  font-size: 1.18rem !important;
+}
+
+body.surrender-page .request-status-card h3 {
+  margin-bottom: 4px !important;
+  font-size: clamp(1.15rem, 2vw, 1.55rem) !important;
+  color: var(--sr-red-dark) !important;
+}
+
+body.surrender-page .request-status-card p {
+  max-width: 620px !important;
+  font-size: 0.9rem !important;
+  line-height: 1.45 !important;
+}
+
+body.surrender-page .request-status-card .status-refresh-btn {
+  min-height: 38px !important;
+  padding: 0 18px !important;
+  border: 1px solid rgba(142, 42, 32, 0.16) !important;
+  background: rgba(255, 255, 255, 0.62) !important;
+  color: var(--sr-red-dark) !important;
+  box-shadow: none !important;
+}
+
+body.surrender-page .request-status-card .status-refresh-btn:hover,
+body.surrender-page .request-status-card .status-refresh-btn:focus-visible {
+  background: rgba(142, 42, 32, 0.1) !important;
+}
+
+@media (max-width: 700px) {
+  body.surrender-page .request-status-card {
+    grid-template-columns: 42px 1fr !important;
+    padding: 18px !important;
+  }
+
+  body.surrender-page .request-card-icon {
+    width: 42px !important;
+    height: 42px !important;
+  }
+
+  body.surrender-page .request-status-card .status-refresh-btn {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+  }
+}
+
+/* Light submitted-request panel */
+body.surrender-page .request-status-panel {
+  margin: 20px auto 18px !important;
+}
+
+body.surrender-page .request-status-card {
+  min-height: 96px !important;
+  padding: 18px 26px !important;
+  border: 1px solid rgba(111, 42, 31, 0.08) !important;
+  background: rgba(255, 254, 251, 0.72) !important;
+  box-shadow: 0 8px 22px rgba(75, 43, 33, 0.035) !important;
+}
+
+body.surrender-page .request-card-icon {
+  width: 56px !important;
+  height: 56px !important;
+  background: #fff7df !important;
+  color: var(--sr-red) !important;
+  box-shadow: 0 8px 18px rgba(75, 43, 33, 0.045) !important;
+}
+
+body.surrender-page .request-status-card h3 {
+  font-size: clamp(1.35rem, 2.4vw, 2rem) !important;
+}
+
+body.surrender-page .request-status-card p {
+  font-size: 0.95rem !important;
+}
+
+body.surrender-page .request-status-card .status-refresh-btn {
+  min-height: 42px !important;
+  padding: 0 20px !important;
+  border: 1px solid rgba(142, 42, 32, 0.18) !important;
+  background: rgba(255, 248, 242, 0.86) !important;
+  color: var(--sr-red-dark) !important;
+  box-shadow: none !important;
+}
+
+@media (max-width: 640px) {
+  body.surrender-page .request-status-card {
+    padding: 20px 18px !important;
+  }
+}
+
+/* Compact surrender form intro and warm guidance notice */
+body.surrender-page .surrender-form-heading {
+  padding-bottom: 0 !important;
+}
+
+body.surrender-page .surrender-form-heading p {
+  margin-top: 8px !important;
+}
+
+body.surrender-page .surrender-form {
+  padding-top: 12px !important;
+}
+
+body.surrender-page .identity-explanation {
+  margin-top: 8px !important;
+  border-left-color: var(--sr-gold) !important;
+  background: #fff8df !important;
+}
+
+body.surrender-page .identity-explanation i {
+  color: #8b6200 !important;
+}
+
+body.surrender-page .identity-explanation p {
+  color: #65543d !important;
+}
+
+/* Keep radio controls from inheriting full text-input boxes */
+body.surrender-page .surrender-form input[type="radio"],
+body.surrender-page .surrender-form input[type="checkbox"] {
+  min-height: auto !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.surrender-page .check-option input[type="radio"] {
+  width: 18px !important;
+  height: 18px !important;
+  min-height: 18px !important;
+  flex: 0 0 18px;
+  margin: 2px 0 0 !important;
+  border: 2px solid var(--sr-red) !important;
+  accent-color: var(--sr-red);
+}
+
+body.surrender-page .check-option input[type="radio"]:focus,
+body.surrender-page .check-option input[type="radio"]:focus-visible {
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+
+body.surrender-page .check-option:focus-within {
+  border-color: var(--sr-red);
+  box-shadow: inset 0 0 0 1px rgba(142, 42, 32, 0.7);
+}
+
+/* Smaller submitted-request tracker card */
+body.surrender-page .request-status-panel {
+  margin: 22px auto 20px !important;
+}
+
+body.surrender-page .request-status-card {
+  min-height: 96px !important;
+  grid-template-columns: 66px minmax(0, 1fr) auto !important;
+  gap: 20px !important;
+  padding: 20px 28px !important;
+}
+
+body.surrender-page .request-card-icon {
+  width: 58px !important;
+  height: 58px !important;
+  font-size: 1.35rem !important;
+}
+
+body.surrender-page .request-status-card h3 {
+  font-size: clamp(1.12rem, 1.55vw, 1.38rem) !important;
+}
+
+body.surrender-page .request-status-card p {
+  max-width: 500px;
+  margin-top: 7px !important;
+  font-size: 0.82rem !important;
+  line-height: 1.38 !important;
+}
+
+body.surrender-page .request-status-card .status-refresh-btn {
+  min-width: 205px !important;
+  min-height: 44px !important;
+  gap: 14px !important;
+  padding: 0 22px !important;
+  font-size: 0.82rem !important;
+}
+
+@media (max-width: 760px) {
+  body.surrender-page .request-status-card {
+    grid-template-columns: 58px minmax(0, 1fr) !important;
+  }
+
+  body.surrender-page .request-status-card .status-refresh-btn {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+}
+
+/* Light tracker card treatment */
+body.surrender-page .request-status-card {
+  border-color: rgba(111, 42, 31, 0.08) !important;
+  background: rgba(255, 253, 249, 0.82) !important;
+  box-shadow: 0 10px 26px rgba(75, 43, 33, 0.045) !important;
+}
+
+body.surrender-page .request-card-icon {
+  background: #fff7e0 !important;
+  color: var(--sr-red) !important;
+  box-shadow: none !important;
+}
+
+body.surrender-page .request-status-card .status-refresh-btn {
+  border: 1px solid rgba(142, 42, 32, 0.18) !important;
+  background: #fff8f2 !important;
+  color: var(--sr-red-dark) !important;
+  box-shadow: none !important;
+}
+
+body.surrender-page .request-status-card .status-refresh-btn i {
+  color: var(--sr-red-dark) !important;
+}
+
+body.surrender-page .request-status-card .status-refresh-btn:hover,
+body.surrender-page .request-status-card .status-refresh-btn:focus-visible {
+  border-color: rgba(142, 42, 32, 0.28) !important;
+  background: #fff0e8 !important;
+  color: var(--sr-red-dark) !important;
+}
+
+/* Agreement language toggle */
+body.surrender-page .waiver-card > header {
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+}
+
+body.surrender-page .waiver-language-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid rgba(142, 42, 32, 0.16);
+  border-radius: 999px;
+  background: #fff;
+}
+
+body.surrender-page .waiver-language-toggle button {
+  min-height: 30px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #756a64;
+  font: 850 0.72rem/1 "Inter", sans-serif;
+  cursor: pointer;
+}
+
+body.surrender-page .waiver-language-toggle button.is-active {
+  background: var(--sr-red);
+  color: #fff;
+}
+
+body.surrender-page .waiver-copy[hidden] {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  body.surrender-page .waiver-card > header {
+    grid-template-columns: 40px 1fr;
+  }
+
+  body.surrender-page .waiver-language-toggle {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+}
+
+/* Align selects with text inputs in the surrender form */
+body.surrender-page .surrender-form :is(input:not([type="radio"]):not([type="checkbox"]), select) {
+  box-sizing: border-box;
+  height: 46px;
+  min-height: 46px !important;
+  display: block;
+}
+
+body.surrender-page .surrender-form select {
+  appearance: none;
+  padding-right: 42px !important;
+  line-height: 1.2 !important;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--sr-ink) 50%),
+    linear-gradient(135deg, var(--sr-ink) 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) 50%,
+    calc(100% - 12px) 50%;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+}
+
+/* Animal photo upload */
+body.surrender-page .animal-photo-field input[type="file"] {
+  position: absolute;
+  width: 1px !important;
+  height: 1px !important;
+  min-height: 1px !important;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+body.surrender-page .animal-photo-upload {
+  display: grid !important;
+  grid-template-columns: 72px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  min-height: 94px;
+  margin: 0;
+  padding: 16px;
+  border: 1px dashed rgba(142, 42, 32, 0.34);
+  border-radius: 10px;
+  background: #fffdfa;
+  cursor: pointer;
+  transition: border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
+}
+
+body.surrender-page .animal-photo-upload:hover,
+body.surrender-page .animal-photo-field:focus-within .animal-photo-upload {
+  border-color: var(--sr-red);
+  background: #fff8f2;
+  box-shadow: 0 0 0 3px rgba(142, 42, 32, 0.08);
+}
+
+body.surrender-page .animal-photo-preview {
+  width: 72px;
+  height: 62px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 8px;
+  color: var(--sr-gold);
+  background: var(--sr-red);
+  font-size: 1.25rem;
+}
+
+body.surrender-page .animal-photo-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+body.surrender-page .animal-photo-copy strong {
+  display: block;
+  color: var(--sr-ink);
+  font-size: 0.82rem;
+}
+
+body.surrender-page .animal-photo-copy small {
+  display: block;
+  margin-top: 4px;
+  color: #81746d;
+  font-size: 0.68rem;
+  line-height: 1.4;
+}
+
+body.surrender-page .animal-photo-action {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  border-radius: 999px;
+  color: #fff;
+  background: var(--sr-red);
+  font-size: 0.72rem;
+  font-weight: 850;
+}
+
+@media (max-width: 640px) {
+  body.surrender-page .animal-photo-upload {
+    grid-template-columns: 64px minmax(0, 1fr);
+  }
+
+  body.surrender-page .animal-photo-preview {
+    width: 64px;
+    height: 58px;
+  }
+
+  body.surrender-page .animal-photo-action {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+}
+
+body.surrender-page .surrender-notice-heading {
+  max-width: 920px;
+  margin-bottom: 36px;
+}
+
+body.surrender-page .surrender-notice-heading .section-label {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--sr-red-dark);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+}
+
+body.surrender-page .surrender-notice-heading .section-label::before {
+  content: "";
+  width: 34px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--sr-gold);
+}
+
+body.surrender-page .surrender-notice-heading h2 {
+  margin-top: 12px !important;
+  color: #26313a;
+  font-size: clamp(2.7rem, 5.5vw, 4.7rem) !important;
+  line-height: 0.92;
+  letter-spacing: 0;
+}
+
+body.surrender-page .surrender-notice-heading > p,
+body.surrender-page .surrender-gentle-notice {
+  display: none;
+}
+
+body.surrender-page .surrender-notice-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(34px, 5vw, 76px);
+  margin-top: 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+body.surrender-page .surrender-notice-grid::before {
+  content: "";
+  position: absolute;
+  top: 112px;
+  left: 23%;
+  right: 23%;
+  height: 4px;
+  border-top: 4px dotted rgba(216, 170, 63, 0.72);
+}
+
+body.surrender-page .notice-item,
+body.surrender-page .notice-item + .notice-item {
+  position: relative;
+  min-height: 220px;
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr);
+  align-items: center;
+  gap: 22px;
+  padding: 50px 34px 34px;
+  border: 1px solid rgba(111, 42, 31, 0.12);
+  border-radius: 12px;
+  background: rgba(255, 253, 249, 0.96);
+  box-shadow: 0 18px 46px rgba(75, 43, 33, 0.08);
+}
+
+body.surrender-page .notice-number {
+  position: absolute;
+  top: -22px;
+  left: -18px;
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border: 3px solid var(--sr-cream);
+  border-radius: 50%;
+  background: var(--sr-red);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  box-shadow: 0 12px 24px rgba(114, 27, 20, 0.18);
+}
+
+body.surrender-page .notice-step-icon {
+  width: 96px;
+  height: 96px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #f7edcf;
+  color: var(--sr-red);
+  font-size: 2.15rem;
+}
+
+body.surrender-page .notice-item strong {
+  margin: 0 0 12px;
+  color: #26313a;
+  font-size: 1.24rem;
+  line-height: 1.12;
+}
+
+body.surrender-page .notice-item span:not(.notice-number):not(.notice-step-icon) {
+  max-width: 290px;
+  color: #4d565d;
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+body.surrender-page .request-status-panel {
+  display: block;
+  margin: 62px auto 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+body.surrender-page .request-status-heading {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+body.surrender-page .request-status-card {
+  width: min(100%, 1180px);
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 28px;
+  min-height: 150px;
+  margin: 0 auto;
+  padding: 34px 48px;
+  border: 1px solid rgba(111, 42, 31, 0.12);
+  border-radius: 12px;
+  background: rgba(255, 253, 249, 0.96);
+  box-shadow: 0 18px 46px rgba(75, 43, 33, 0.08);
+}
+
+body.surrender-page .request-card-icon {
+  width: 92px;
+  height: 92px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #f7edcf;
+  color: var(--sr-red);
+  font-size: 2.25rem;
+}
+
+body.surrender-page .request-status-card h3 {
+  margin: 0;
+  color: #26313a;
+  font-size: clamp(1.55rem, 2.4vw, 2.1rem);
+  line-height: 1.08;
+}
+
+body.surrender-page .request-status-card p {
+  max-width: 520px;
+  margin: 12px 0 0;
+  color: #4d565d;
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
+body.surrender-page .request-status-card .status-refresh-btn {
+  min-width: 270px;
+  min-height: 58px;
+  gap: 18px;
+  padding: 0 30px;
+  border: 1px solid rgba(114, 27, 20, 0.18);
+  border-radius: 999px;
+  background: var(--sr-red);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 850;
+  box-shadow: 0 12px 24px rgba(114, 27, 20, 0.2);
+}
+
+body.surrender-page .request-status-card .status-refresh-btn:hover {
+  border-color: rgba(114, 27, 20, 0.28);
+  background: var(--sr-red-dark);
+  color: #fff;
+}
+
+body.surrender-page .request-status-card .status-refresh-btn i {
+  font-size: 1.25rem;
+}
+
+@media (max-width: 1050px) {
+  body.surrender-page .surrender-notice-grid,
+  body.surrender-page .request-status-card {
+    grid-template-columns: 1fr;
+  }
+
+  body.surrender-page .surrender-notice-grid::before {
+    display: none;
+  }
+
+  body.surrender-page .notice-item,
+  body.surrender-page .notice-item + .notice-item {
+    grid-template-columns: 88px minmax(0, 1fr);
+  }
+
+  body.surrender-page .notice-step-icon,
+  body.surrender-page .request-card-icon {
+    width: 82px;
+    height: 82px;
+    font-size: 1.9rem;
+  }
+
+  body.surrender-page .request-status-card {
+    justify-items: start;
+  }
+}
+
+@media (max-width: 640px) {
+  body.surrender-page .surrender-notice-section {
+    padding-top: 44px !important;
+  }
+
+  body.surrender-page .surrender-notice-heading h2 {
+    font-size: 2.5rem !important;
+  }
+
+  body.surrender-page .notice-item,
+  body.surrender-page .notice-item + .notice-item {
+    grid-template-columns: 1fr;
+    padding: 48px 24px 28px;
+  }
+
+  body.surrender-page .request-status-card {
+    padding: 30px 24px;
+  }
+
+  body.surrender-page .request-status-card .status-refresh-btn {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+/* Final scale correction for surrender process cards */
+body.surrender-page .header .nav-shell {
+  min-height: 68px;
+}
+
+body.surrender-page .surrender-page-hero-grid {
+  min-height: 430px;
+}
+
+body.surrender-page .surrender-page-text {
+  min-height: 430px;
+  padding-block: clamp(62px, 7vw, 92px);
+}
+
+body.surrender-page .surrender-hero-lead {
+  max-width: 455px;
+}
+
+body.surrender-page .surrender-hero-actions {
+  margin-top: 24px;
+}
+
+body.surrender-page .surrender-hero-actions .primary-btn {
+  min-width: 300px;
+  min-height: 54px;
+  gap: 18px;
+  padding-inline: 30px 26px;
+  background: #a94436;
+  box-shadow: 0 16px 34px rgba(62, 12, 10, 0.28);
+}
+
+body.surrender-page .surrender-hero-actions .primary-btn i {
+  color: #fff;
+  font-size: 1.05rem;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+
+body.surrender-page .surrender-hero-actions .primary-btn:hover,
+body.surrender-page .surrender-hero-actions .primary-btn:focus-visible {
+  background: #bd4a3d;
+  transform: translateY(-1px);
+}
+
+body.surrender-page .surrender-hero-actions .primary-btn:hover i,
+body.surrender-page .surrender-hero-actions .primary-btn:focus-visible i {
+  transform: translateX(3px);
+}
+
+body.surrender-page .surrender-notice-section {
+  padding: 58px 0 26px !important;
+}
+
+body.surrender-page .surrender-notice-heading {
+  max-width: 700px;
+  margin-bottom: 28px;
+}
+
+body.surrender-page .surrender-notice-heading h2 {
+  max-width: 720px;
+  font-size: clamp(2rem, 3.35vw, 2.95rem) !important;
+  line-height: 1.02;
+}
+
+body.surrender-page .surrender-notice-heading .section-label::after {
+  display: none;
+}
+
+body.surrender-page .surrender-notice-grid {
+  gap: clamp(24px, 3.7vw, 52px);
+}
+
+body.surrender-page .surrender-notice-grid::before {
+  top: 92px;
+  left: 21%;
+  right: 21%;
+  border-top-width: 3px;
+}
+
+body.surrender-page .notice-item,
+body.surrender-page .notice-item + .notice-item {
+  min-height: 176px;
+  grid-template-columns: 78px minmax(0, 1fr);
+  gap: 18px;
+  padding: 36px 28px 28px;
+}
+
+body.surrender-page .notice-number {
+  top: -17px;
+  left: -14px;
+  width: 46px;
+  height: 46px;
+  border-width: 3px;
+  font-size: 0.82rem;
+}
+
+body.surrender-page .notice-step-icon {
+  width: 74px !important;
+  height: 74px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 50%;
+  background: #f7edcf;
+  color: var(--sr-red);
+  font-size: 1.75rem !important;
+  line-height: 1 !important;
+}
+
+body.surrender-page .notice-step-icon i {
+  width: auto !important;
+  height: auto !important;
+  display: block !important;
+  place-items: initial !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: inherit !important;
+  font-size: inherit !important;
+  line-height: 1 !important;
+  box-shadow: none !important;
+}
+
+body.surrender-page .notice-item strong {
+  margin-bottom: 9px;
+  font-size: 1.04rem;
+}
+
+body.surrender-page .notice-item span:not(.notice-number):not(.notice-step-icon) {
+  max-width: 250px;
+  font-size: 0.88rem;
+  line-height: 1.48;
+}
+
+body.surrender-page .request-status-panel {
+  margin: 46px auto 36px;
+}
+
+body.surrender-page .request-status-card {
+  min-height: 128px;
+  grid-template-columns: 86px minmax(0, 1fr) auto;
+  gap: 24px;
+  padding: 28px 38px;
+}
+
+body.surrender-page .request-card-icon {
+  width: 74px;
+  height: 74px;
+  font-size: 1.85rem;
+}
+
+body.surrender-page .request-card-icon i {
+  color: inherit;
+  font-size: inherit;
+  line-height: 1;
+}
+
+body.surrender-page .request-status-card h3 {
+  font-size: clamp(1.35rem, 2vw, 1.75rem);
+}
+
+body.surrender-page .request-status-card p {
+  font-size: 0.93rem;
+}
+
+body.surrender-page .request-status-card .status-refresh-btn {
+  min-width: 230px;
+  min-height: 52px;
+  padding: 0 26px;
+}
+
+@media (max-width: 1050px) {
+  body.surrender-page .surrender-page-hero-grid,
+  body.surrender-page .surrender-page-text {
+    min-height: 390px;
+  }
+
+  body.surrender-page .notice-item,
+  body.surrender-page .notice-item + .notice-item {
+    grid-template-columns: 76px minmax(0, 1fr);
+  }
+
+  body.surrender-page .notice-step-icon,
+  body.surrender-page .request-card-icon {
+    width: 70px !important;
+    height: 70px !important;
+    font-size: 1.6rem !important;
+  }
+}
+
+@media (max-width: 640px) {
+  body.surrender-page .header .nav-shell {
+    min-height: 62px;
+  }
+
+  body.surrender-page .surrender-page-hero-grid,
+  body.surrender-page .surrender-page-text {
+    min-height: 350px;
+  }
+
+  body.surrender-page .surrender-notice-heading h2 {
+    font-size: 2.25rem !important;
+  }
+
+  body.surrender-page .notice-item,
+  body.surrender-page .notice-item + .notice-item {
+    grid-template-columns: 70px minmax(0, 1fr);
+    padding: 34px 22px 24px;
+  }
+}
+
+/* Elevated process section polish */
+body.surrender-page .surrender-notice-section {
+  padding: 54px 0 18px !important;
+}
+
+body.surrender-page .surrender-notice-box {
+  position: relative;
+  padding: 34px 34px 42px !important;
+  border: 1px solid rgba(111, 42, 31, 0.1) !important;
+  border-radius: 18px !important;
+  background:
+    linear-gradient(180deg, rgba(255, 253, 249, 0.9), rgba(255, 253, 249, 0.7)),
+    rgba(255, 253, 249, 0.82) !important;
+  box-shadow: 0 22px 60px rgba(75, 43, 33, 0.08) !important;
+}
+
+body.surrender-page .surrender-notice-heading {
+  max-width: 620px;
+  margin-bottom: 26px;
+}
+
+body.surrender-page .surrender-notice-heading h2 {
+  max-width: 610px;
+  font-size: clamp(1.85rem, 2.85vw, 2.45rem) !important;
+  line-height: 1.05;
+}
+
+body.surrender-page .surrender-notice-grid {
+  gap: clamp(22px, 3vw, 42px);
+}
+
+body.surrender-page .surrender-notice-grid::before {
+  top: 98px;
+  left: 24%;
+  right: 24%;
+  border-top: 3px dotted rgba(216, 170, 63, 0.62);
+}
+
+body.surrender-page .notice-item,
+body.surrender-page .notice-item + .notice-item {
+  min-height: 190px;
+  grid-template-columns: 82px minmax(0, 1fr);
+  align-items: center;
+  gap: 20px;
+  padding: 38px 30px 30px;
+  border-color: rgba(111, 42, 31, 0.11);
+  background:
+    linear-gradient(145deg, #ffffff 0%, #fffdfa 58%, #fbf4e9 100%);
+  box-shadow:
+    0 24px 54px rgba(75, 43, 33, 0.11),
+    0 2px 0 rgba(255, 255, 255, 0.9) inset;
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+
+body.surrender-page .notice-item:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 30px 68px rgba(75, 43, 33, 0.14),
+    0 2px 0 rgba(255, 255, 255, 0.95) inset;
+}
+
+body.surrender-page .notice-number {
+  top: -18px;
+  left: -16px;
+  width: 48px;
+  height: 48px;
+  border-color: #fffdfa;
+  background: linear-gradient(145deg, #9e3228, #752018);
+  box-shadow: 0 14px 28px rgba(114, 27, 20, 0.24);
+}
+
+body.surrender-page .notice-step-icon,
+body.surrender-page .request-card-icon {
+  position: relative;
+  width: 76px !important;
+  height: 76px !important;
+  overflow: hidden;
+  border: 1px solid rgba(216, 170, 63, 0.34);
+  background:
+    radial-gradient(circle at 30% 24%, rgba(255, 255, 255, 0.9), transparent 34%),
+    linear-gradient(145deg, #fbf1d1, #f3dfaa);
+  color: var(--sr-red-dark);
+  box-shadow:
+    0 14px 28px rgba(118, 84, 32, 0.12),
+    0 1px 0 rgba(255, 255, 255, 0.84) inset;
+  font-size: 1.65rem !important;
+}
+
+body.surrender-page .notice-step-icon::after,
+body.surrender-page .request-card-icon::after {
+  content: "";
+  position: absolute;
+  inset: 10px;
+  border: 1px solid rgba(142, 42, 32, 0.12);
+  border-radius: 50%;
+}
+
+body.surrender-page .notice-step-icon i,
+body.surrender-page .request-card-icon i {
+  position: relative;
+  z-index: 1;
+}
+
+body.surrender-page .notice-item strong {
+  color: #27323a;
+  font-size: 1rem;
+}
+
+body.surrender-page .notice-item span:not(.notice-number):not(.notice-step-icon) {
+  color: #52606a;
+  font-size: 0.86rem;
+}
+
+body.surrender-page .request-status-card {
+  border-color: rgba(111, 42, 31, 0.11);
+  background: linear-gradient(145deg, #ffffff 0%, #fffdfa 60%, #fbf4e9 100%);
+  box-shadow: 0 24px 58px rgba(75, 43, 33, 0.12);
+}
+
+@media (max-width: 1050px) {
+  body.surrender-page .surrender-notice-box {
+    padding: 30px 24px 34px !important;
+  }
+
+  body.surrender-page .surrender-notice-grid::before {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  body.surrender-page .surrender-notice-heading h2 {
+    font-size: 2rem !important;
+  }
+
+  body.surrender-page .notice-item,
+  body.surrender-page .notice-item + .notice-item {
+    grid-template-columns: 72px minmax(0, 1fr);
+  }
+
+  body.surrender-page .notice-step-icon,
+  body.surrender-page .request-card-icon {
+    width: 68px !important;
+    height: 68px !important;
+    font-size: 1.45rem !important;
+  }
+}
+
+/* Final hero framing correction */
+body.surrender-page .surrender-page-hero {
+  height: 560px !important;
+  min-height: 560px !important;
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: calc(var(--nav-height, 84px) + 78px) 0 68px !important;
+  background-position: 70% center;
+}
+
+body.surrender-page .surrender-page-hero-grid,
+body.surrender-page .surrender-page-text {
+  min-height: 360px !important;
+}
+
+body.surrender-page .surrender-page-text {
+  justify-content: flex-start !important;
+  padding-top: 82px !important;
+}
+
+@media (max-width: 1050px) {
+  body.surrender-page .surrender-page-hero {
+    height: 520px !important;
+    min-height: 520px !important;
+    padding: calc(var(--nav-height, 76px) + 68px) 0 58px !important;
+    background-position: 64% center;
+  }
+
+  body.surrender-page .surrender-page-hero-grid,
+  body.surrender-page .surrender-page-text {
+    min-height: 330px !important;
+  }
+
+  body.surrender-page .surrender-page-text {
+    padding-top: 66px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  body.surrender-page .surrender-page-hero {
+    height: 500px !important;
+    min-height: 500px !important;
+    padding: calc(var(--nav-height, 72px) + 54px) 0 48px !important;
+    background-position: 58% center;
+  }
+
+  body.surrender-page .surrender-page-hero-grid,
+  body.surrender-page .surrender-page-text {
+    min-height: 300px !important;
+  }
+
+  body.surrender-page .surrender-page-text {
+    padding-top: 44px !important;
+  }
+}
+
+/* Brand-aligned icon circles */
+body.surrender-page .notice-step-icon,
+body.surrender-page .request-card-icon {
+  width: 72px !important;
+  height: 72px !important;
+  border: 0 !important;
+  background: var(--sr-red) !important;
+  color: var(--sr-gold) !important;
+  box-shadow: 0 16px 32px rgba(114, 27, 20, 0.22) !important;
+}
+
+body.surrender-page .notice-step-icon::after,
+body.surrender-page .request-card-icon::after {
+  display: none !important;
+}
+
+body.surrender-page .notice-step-icon i,
+body.surrender-page .request-card-icon i {
+  color: inherit !important;
+  font-size: 1.65rem !important;
+}
+
+body.surrender-page .surrender-notice-box {
+  padding: 30px 30px 36px !important;
+  box-shadow: 0 18px 42px rgba(75, 43, 33, 0.07) !important;
+}
+
+body.surrender-page .notice-item,
+body.surrender-page .notice-item + .notice-item {
+  box-shadow: 0 18px 42px rgba(75, 43, 33, 0.08) !important;
+}
+
+body.surrender-page .request-status-card {
+  box-shadow: 0 18px 42px rgba(75, 43, 33, 0.09) !important;
+}
+
+@media (max-width: 640px) {
+  body.surrender-page .notice-step-icon,
+  body.surrender-page .request-card-icon {
+    width: 64px !important;
+    height: 64px !important;
+  }
+}
+
+/* Final spacing rhythm for surrender sections */
+body.surrender-page .surrender-notice-section {
+  padding: 46px 0 10px !important;
+}
+
+body.surrender-page .surrender-notice-box {
+  padding: 24px 28px 30px !important;
+  border-radius: 14px !important;
+  box-shadow: 0 14px 34px rgba(75, 43, 33, 0.055) !important;
+}
+
+body.surrender-page .surrender-notice-heading {
+  margin-bottom: 22px;
+}
+
+body.surrender-page .surrender-notice-grid {
+  gap: clamp(18px, 2.4vw, 32px);
+}
+
+body.surrender-page .notice-item,
+body.surrender-page .notice-item + .notice-item {
+  min-height: 168px;
+  padding: 32px 26px 26px;
+  box-shadow: 0 14px 32px rgba(75, 43, 33, 0.065) !important;
+}
+
+body.surrender-page .notice-item:hover {
+  box-shadow: 0 20px 44px rgba(75, 43, 33, 0.1) !important;
+}
+
+body.surrender-page .request-status-panel {
+  margin: 26px auto 24px;
+}
+
+body.surrender-page .request-status-card {
+  min-height: 116px;
+  padding: 24px 34px;
+  box-shadow: 0 14px 34px rgba(75, 43, 33, 0.075) !important;
+}
+
+body.surrender-page .surrender-form-section {
+  padding-bottom: 70px !important;
+}
+
+@media (max-width: 640px) {
+  body.surrender-page .surrender-notice-box {
+    padding: 22px 18px 26px !important;
+  }
+
+  body.surrender-page .request-status-panel {
+    margin: 22px auto;
+  }
+
+  body.surrender-page .request-status-card {
+    padding: 24px 20px;
+  }
+}
+
+/* Remove process outer container while keeping the step cards */
+body.surrender-page .surrender-notice-box {
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* EOF override: transparent-red submitted request reminder */
+body.surrender-page .request-status-panel {
+  width: min(100%, 1040px) !important;
+  margin: 18px auto 54px !important;
+}
+
+body.surrender-page .request-status-panel > .request-status-card {
+  min-height: 88px !important;
+  grid-template-columns: 48px minmax(0, 1fr) auto !important;
+  gap: 16px !important;
+  padding: 17px 22px !important;
+  border: 1px solid rgba(142, 42, 32, 0.14) !important;
+  border-left: 1px solid rgba(142, 42, 32, 0.14) !important;
+  border-radius: 12px !important;
+  background: rgba(142, 42, 32, 0.085) !important;
+  box-shadow: 0 8px 18px rgba(75, 43, 33, 0.02) !important;
+}
+
+body.surrender-page .request-status-panel > .request-status-card .request-card-icon {
+  width: 42px !important;
+  height: 42px !important;
+  border: 1px solid rgba(142, 42, 32, 0.14) !important;
+  background: rgba(255, 250, 244, 0.68) !important;
+  color: var(--sr-red-dark) !important;
+  box-shadow: none !important;
+}
+
+body.surrender-page .request-status-panel > .request-status-card .request-card-icon i {
+  font-size: 1.05rem !important;
+}
+
+body.surrender-page .request-status-panel > .request-status-card h3 {
+  margin-bottom: 4px !important;
+  font-size: clamp(1.05rem, 1.8vw, 1.35rem) !important;
+  color: var(--sr-red-dark) !important;
+}
+
+body.surrender-page .request-status-panel > .request-status-card p {
+  max-width: 620px !important;
+  font-size: 0.9rem !important;
+  line-height: 1.45 !important;
+}
+
+body.surrender-page .request-status-panel > .request-status-card .status-refresh-btn {
+  min-height: 36px !important;
+  padding: 0 16px !important;
+  border: 1px solid rgba(142, 42, 32, 0.18) !important;
+  background: rgba(255, 250, 244, 0.64) !important;
+  color: var(--sr-red-dark) !important;
+  font-size: 0.78rem !important;
+  box-shadow: none !important;
+}
+
+body.surrender-page .request-status-panel > .request-status-card .status-refresh-btn:hover,
+body.surrender-page .request-status-panel > .request-status-card .status-refresh-btn:focus-visible {
+  border-color: rgba(142, 42, 32, 0.28) !important;
+  background: rgba(255, 250, 244, 0.86) !important;
+}
+
+body.surrender-page .surrender-form-heading .section-label::before {
+  display: none !important;
+}
+
+@media (max-width: 700px) {
+  body.surrender-page .request-status-panel > .request-status-card {
+    grid-template-columns: 42px 1fr !important;
+    padding: 18px !important;
+  }
+
+  body.surrender-page .request-status-panel > .request-status-card .request-card-icon {
+    width: 42px !important;
+    height: 42px !important;
+  }
+
+  body.surrender-page .request-status-panel > .request-status-card .status-refresh-btn {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+  }
+}
+/* Absolute EOF hero correction: lower Surrender hero text below nav */
+body.surrender-page .surrender-page-hero {
+  height: 560px !important;
+  min-height: 560px !important;
+  padding: calc(var(--nav-height, 84px) + 78px) 0 68px !important;
+  overflow: hidden !important;
+  background-position: 70% center !important;
+}
+
+body.surrender-page .surrender-page-hero-grid,
+body.surrender-page .surrender-page-text {
+  min-height: 360px !important;
+}
+
+body.surrender-page .surrender-page-text {
+  justify-content: flex-start !important;
+  padding-top: 42px !important;
+}
+
+@media (max-width: 1050px) {
+  body.surrender-page .surrender-page-hero {
+    height: 520px !important;
+    min-height: 520px !important;
+    padding: calc(var(--nav-height, 76px) + 68px) 0 58px !important;
+  }
+
+  body.surrender-page .surrender-page-hero-grid,
+  body.surrender-page .surrender-page-text {
+    min-height: 330px !important;
+  }
+
+  body.surrender-page .surrender-page-text {
+    padding-top: 34px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  body.surrender-page .surrender-page-hero {
+    height: 500px !important;
+    min-height: 500px !important;
+    padding: calc(var(--nav-height, 72px) + 54px) 0 48px !important;
+  }
+
+  body.surrender-page .surrender-page-hero-grid,
+  body.surrender-page .surrender-page-text {
+    min-height: 300px !important;
+  }
+
+  body.surrender-page .surrender-page-text {
+    padding-top: 26px !important;
+  }
+}
+
+/* Final visual nudge: place Surrender hero copy comfortably below the nav */
+body.surrender-page .surrender-page-text {
+  margin-top: 64px !important;
+}
+
+@media (max-width: 1050px) {
+  body.surrender-page .surrender-page-text {
+    margin-top: 48px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  body.surrender-page .surrender-page-text {
+    margin-top: 28px !important;
+  }
+}
+
+/* Final Surrender hero height and headline position */
+body.surrender-page .surrender-page-hero {
+  height: 650px !important;
+  min-height: 650px !important;
+  padding: calc(var(--nav-height, 84px) + 100px) 0 86px !important;
+  background-position: 70% center !important;
+}
+
+body.surrender-page .surrender-page-hero-grid,
+body.surrender-page .surrender-page-text {
+  min-height: 430px !important;
+}
+
+body.surrender-page .surrender-page-text {
+  margin-top: 82px !important;
+  padding-top: 0 !important;
+}
+
+@media (max-width: 1050px) {
+  body.surrender-page .surrender-page-hero {
+    height: 600px !important;
+    min-height: 600px !important;
+    padding: calc(var(--nav-height, 76px) + 84px) 0 72px !important;
+  }
+
+  body.surrender-page .surrender-page-hero-grid,
+  body.surrender-page .surrender-page-text {
+    min-height: 390px !important;
+  }
+
+  body.surrender-page .surrender-page-text {
+    margin-top: 66px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  body.surrender-page .surrender-page-hero {
+    height: 560px !important;
+    min-height: 560px !important;
+    padding: calc(var(--nav-height, 72px) + 68px) 0 58px !important;
+  }
+
+  body.surrender-page .surrender-page-hero-grid,
+  body.surrender-page .surrender-page-text {
+    min-height: 340px !important;
+  }
+
+  body.surrender-page .surrender-page-text {
+    margin-top: 44px !important;
+  }
 }

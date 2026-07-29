@@ -12,34 +12,103 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="../../src/css/public/home.css">
   <link rel="stylesheet" href="../../src/css/global.css">
   <link rel="stylesheet" href="../../src/css/public/announcements.css">
   <link rel="stylesheet" href="../../src/css/public/public-design-system.css">
 </head>
-<body class="announcements-page">
-  <header class="header" id="top">
-    <div class="container nav-shell">
-      <a href="home.html" class="logo" aria-label="ANIMUA home">
-        <img src="../../src/assets/images/animua-logo-transparent.png" alt="ANIMUA" class="navbar-logo-img">
-        <span class="navbar-brand-copy"><span class="navbar-brand-name">ANIMUA</span><span class="navbar-brand-tagline">Connect. Learn. Adopt.</span></span>
-      </a>
-      <nav class="navbar" id="navbar" aria-label="Main navigation">
-        <a href="home.html">Home</a>
-        <a href="find-furbabies.html">Find Furbabies</a>
-        <a href="announcements.html" class="active" aria-current="page">Announcements</a>
-        <a href="surrender.html">Surrender</a>
-        <a href="contact.html">Contact Us</a>
-      </nav>
-      <div class="nav-actions">
-        <div class="user-actions-wrap">
-          <div class="notification-wrap">
-            <button class="notification-btn" id="notificationBtn" type="button" aria-label="Notifications"><i class="fa-regular fa-bell"></i><span class="notification-dot"></span></button>
-            <div class="notification-popup" id="notificationPopup"><div class="notification-popup-head"><h4>Community updates</h4></div><ul class="notification-list"><li>You are viewing the latest announcements from ANIMUA management.</li></ul></div>
+<body class="home-page announcements-page">
+  <!-- Header -->
+  <header class="header" id="home">
+    <div class="main-nav-wrap">
+      <div class="container nav-shell">
+        <a href="home.html" class="logo">
+          <img src="../../src/assets/images/animua-logo-transparent.png" alt="ANIMUA" class="navbar-logo-img">
+          <span class="navbar-brand-copy">
+            <span class="navbar-brand-name">ANIMUA</span>
+            <span class="navbar-brand-tagline">Connect. Learn. Adopt.</span>
+          </span>
+        </a>
+
+        <nav class="navbar" id="navbar">
+          <a href="home.html">Home</a>
+          <a href="find-furbabies.html">Find Furbabies</a>
+          <a href="announcements.html" class="active">Announcements</a>
+          <a href="surrender.html">Surrender</a>
+          <a href="contact.html">Contact Us</a>
+        </nav>
+
+        <div class="nav-actions">
+          <div class="user-actions-wrap">
+            <div class="notification-wrap">
+              <button class="notification-btn" id="notificationBtn" aria-label="Notifications">
+                <i class="fa-solid fa-bell"></i>
+                <span class="notification-dot"></span>
+              </button>
+
+              <div class="notification-popup" id="notificationPopup">
+                <div class="notification-popup-head">
+                  <h4>Notifications</h4>
+                </div>
+                <ul class="notification-list">
+                  <li>New animals were recently added for adoption.</li>
+                  <li>Please complete forms carefully before submission.</li>
+                </ul>
+              </div>
+            </div>
+
+            <a href="#" id="loginNavBtn" class="login-btn" aria-label="Login">
+              <i class="fa-solid fa-user"></i>
+              <span>Login</span>
+            </a>
+
+            <div id="userLoggedInBox" class="hidden user-pill user-menu">
+              <button type="button" class="user-menu-btn" id="userMenuBtn">
+                <span class="user-avatar-mini">
+                  <i class="fa-regular fa-user"></i>
+                </span>
+                <span id="loggedUserName" class="user-pill-name"></span>
+                <span class="user-menu-chevron">
+                  <i class="fa-solid fa-chevron-down"></i>
+                </span>
+              </button>
+
+              <div class="user-dropdown hidden" id="userDropdown">
+                <div class="user-dropdown-head">
+                  <div class="user-dropdown-avatar">
+                    <span id="dropdownUserInitial">A</span>
+                  </div>
+                  <div>
+                    <strong id="dropdownUserName">Account</strong>
+                  </div>
+                </div>
+
+                <button type="button" class="user-dropdown-item" id="viewProfileBtn">
+                  <i class="fa-regular fa-user"></i>
+                  <span>View Profile</span>
+                </button>
+
+                <button type="button" class="user-dropdown-item" id="myApplicationsBtn">
+                  <i class="fa-regular fa-file-lines"></i>
+                  <span>My Applications</span>
+                </button>
+
+                <div class="user-dropdown-divider"></div>
+
+                <button type="button" id="logoutBtn" class="user-dropdown-item logout-option">
+                  <i class="fa-solid fa-right-from-bracket"></i>
+                  <span>Log out</span>
+                </button>
+              </div>
+            </div>
           </div>
-          <a href="home.html#login" class="login-btn" data-login-link aria-label="Go to login"><i class="fa-regular fa-user"></i><span class="sr-only">Login</span></a>
-          <div id="userLoggedInBox" class="hidden user-pill"><span id="loggedUserName" class="user-pill-name"></span><button id="logoutBtn" type="button" class="logout-icon-btn user-pill-logout" aria-label="Logout"><i class="fa-solid fa-right-from-bracket"></i></button></div>
+
+          <button class="menu-toggle" id="menuToggle" aria-label="Toggle Navigation">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
         </div>
-        <button class="menu-toggle" id="menuToggle" type="button" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
       </div>
     </div>
   </header>
@@ -128,17 +197,209 @@
       </div>
     </section>
   </main>
-  <footer class="footer">
+  <!-- Footer -->
+  <footer class="footer" id="contact">
     <div class="container footer-grid">
       <div class="footer-brand">
-        <a href="home.html" class="logo footer-logo"><img src="../../src/assets/images/animua-logo-transparent.png" alt="ANIMUA" class="footer-logo-img"><span class="footer-brand-copy"><span class="footer-brand-name">ANIMUA</span><span class="footer-brand-tagline">Angeles City Animal Welfare Portal</span></span></a>
-        <p>Connecting people with shelter animals through responsible adoption, community updates, and shelter-reviewed services.</p>
+        <a href="home.html" class="logo footer-logo">
+          <img src="../../src/assets/images/animua-logo-transparent.png" alt="ANIMUA" class="footer-logo-img">
+          <span class="footer-brand-copy">
+            <span class="footer-brand-name">ANIMUA</span>
+            <span class="footer-brand-tagline">Angeles City Animal Welfare Portal</span>
+          </span>
+        </a>
+        <p>
+          Connecting people with shelter animals through responsible adoption,
+          compatibility matching, and shelter-reviewed services.
+        </p>
       </div>
-      <div class="footer-links"><h4>Explore</h4><a href="home.html">Home</a><a href="find-furbabies.html">Find Furbabies</a><a href="announcements.html">Announcements</a><a href="contact.html">Contact the Shelter</a></div>
+
+      <div class="footer-links">
+        <h4>Explore</h4>
+        <a href="home.html">Home</a>
+        <a href="find-furbabies.html">Find Furbabies</a>
+        <a href="home.html?quizIntro=open">Compatibility Quiz</a>
+        <a href="surrender.html">Surrender</a>
+        <a href="contact.html">Contact Us</a>
+      </div>
+
+      <div class="footer-links footer-support">
+        <h4>Shelter Services</h4>
+        <a href="home.html#home-highlights">Adoption Guide</a>
+        <a href="surrender.html">Surrender Request</a>
+        <a href="contact.html">Contact the Shelter</a>
+      </div>
+
+      <div class="footer-links footer-contact">
+        <h4>Contact</h4>
+        <p>Angeles City Veterinary Office</p>
+        <p>City Hall Building, Pulung Maragul, Angeles City</p>
+        <a href="tel:0453220485">(045) 322-0485</a>
+      </div>
     </div>
-    <div class="footer-bottom"><div class="container"><p>&copy; 2026 ANIMUA. All rights reserved.</p></div></div>
+
+    <div class="footer-bottom">
+      <div class="container footer-bottom-inner">
+        <p>&copy; 2026 ANIMUA. All rights reserved.</p>
+        <p>Developed for the Angeles City Veterinary Office.</p>
+        <p>Adoption applications and surrender requests are subject to shelter evaluation and approval.</p>
+      </div>
+    </div>
   </footer>
+<!-- AUTH MODAL -->
+<div class="auth-modal-overlay hidden" id="authModal">
+  <div class="auth-modal-card auth-modal-small" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
+
+    <button class="auth-close-btn" type="button" id="closeAuthModal" aria-label="Close">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+
+    <div class="auth-modal-left auth-modal-left-simple">
+      <div class="auth-side-mark" aria-hidden="true">
+        <span>Animua</span>
+      </div>
+      <h1 id="authModalTitle">Welcome back.</h1>
+      <p id="authSideText">
+        Continue managing matches, applications, and rescued animals through Animua.
+      </p>
+      <button type="button" class="auth-side-action" id="authSideAction" onclick="toggleAuthView()">Create account</button>
+    </div>
+
+    <div class="auth-modal-right">
+      <div class="auth-form-brand">
+        <span>Animua</span>
+      </div>
+
+      <div id="login-section">
+        <h2 class="auth-title">Welcome Back</h2>
+        <div class="auth-switch-text auth-switch-inline">
+          Sign in to continue supporting rescued animals through Animua.
+        </div>
+
+        <form id="login-form" novalidate>
+          <label class="auth-field-label" for="login-email">Email</label>
+          <div class="auth-field">
+            <input type="email" id="login-email" placeholder="Email" required>
+            <span><i class="fa-regular fa-envelope"></i></span>
+          </div>
+          <small class="auth-error" id="login-email-error"></small>
+
+          <div class="auth-row-label">
+            <label class="auth-field-label" for="login-password">Password</label>
+          </div>
+          <div class="auth-field">
+            <input type="password" id="login-password" placeholder="Password" required minlength="6">
+            <span class="toggle-password" data-target="login-password">
+              <i class="fa-regular fa-eye-slash"></i>
+            </span>
+          </div>
+          <small class="auth-error" id="login-password-error"></small>
+
+          <div class="auth-recaptcha-row login-captcha-row hidden" id="login-captcha-row">
+            <div id="login-recaptcha" class="auth-recaptcha"></div>
+          </div>
+          <small class="auth-error auth-captcha-error" id="login-captcha-error"></small>
+
+          <div class="auth-extra-row">
+            <label class="auth-check">
+              <input type="checkbox">
+              <span>Remember this device</span>
+            </label>
+            <a href="#" class="auth-muted-link">Forgot password?</a>
+          </div>
+
+          <button type="submit" class="auth-submit-btn">Log In</button>
+        </form>
+
+        <div class="auth-bottom-switch">
+          <span>Don't have an account?</span>
+          <button type="button" class="auth-switch-btn" onclick="toggleAuthView()">Create account</button>
+        </div>
+      </div>
+
+      <div id="register-section" class="hidden">
+        <h2 class="auth-title">Create Account</h2>
+        <div class="auth-switch-text auth-switch-inline">
+          Use your email to create your Animua account.
+        </div>
+
+        <form id="register-form" novalidate>
+          <div class="auth-form-grid">
+            <div>
+              <label class="auth-field-label" for="reg-first-name">First Name</label>
+              <div class="auth-field">
+                <input type="text" id="reg-first-name" placeholder="First Name" required minlength="2">
+                <span><i class="fa-regular fa-user"></i></span>
+              </div>
+              <small class="auth-error" id="reg-first-name-error"></small>
+            </div>
+
+            <div>
+              <label class="auth-field-label" for="reg-last-name">Last Name</label>
+              <div class="auth-field">
+                <input type="text" id="reg-last-name" placeholder="Last Name" required minlength="2">
+                <span><i class="fa-regular fa-user"></i></span>
+              </div>
+              <small class="auth-error" id="reg-last-name-error"></small>
+            </div>
+
+            <div class="auth-grid-span">
+              <label class="auth-field-label" for="reg-email">Email Address</label>
+              <div class="auth-field">
+                <input type="email" id="reg-email" placeholder="Email Address" required>
+                <span><i class="fa-regular fa-envelope"></i></span>
+              </div>
+              <small class="auth-error" id="reg-email-error"></small>
+            </div>
+
+            <div>
+              <label class="auth-field-label" for="reg-password">Password</label>
+              <div class="auth-field">
+                <input type="password" id="reg-password" placeholder="Create Password" required minlength="8">
+                <span class="toggle-password" data-target="reg-password">
+                  <i class="fa-regular fa-eye-slash"></i>
+                </span>
+              </div>
+              <small class="auth-error" id="reg-password-error"></small>
+            </div>
+
+            <div>
+              <label class="auth-field-label" for="reg-confirm-password">Confirm Password</label>
+              <div class="auth-field">
+                <input type="password" id="reg-confirm-password" placeholder="Confirm Password" required minlength="8">
+                <span class="toggle-password" data-target="reg-confirm-password">
+                  <i class="fa-regular fa-eye-slash"></i>
+                </span>
+              </div>
+              <small class="auth-error" id="reg-confirm-password-error"></small>
+            </div>
+          </div>
+
+          <label class="auth-check auth-terms-check">
+            <input type="checkbox" id="reg-terms">
+            <span>I have read and agree to ANIMUA's <a href="#terms-privacy-notice" class="auth-policy-link" data-auth-consent-link="terms-privacy">Terms and Privacy Notice</a>.</span>
+          </label>
+          <small class="auth-error" id="reg-terms-error"></small>
+
+          <div class="auth-recaptcha-row">
+            <div id="register-recaptcha" class="auth-recaptcha"></div>
+          </div>
+          <small class="auth-error auth-captcha-error" id="reg-captcha-error"></small>
+
+          <button type="submit" class="auth-submit-btn">Create Account</button>
+        </form>
+
+        <div class="auth-bottom-switch">
+          <span>Already have an account?</span>
+          <button type="button" class="auth-switch-btn" onclick="toggleAuthView()">Log In</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
   <script type="module" src="../../src/public/js/public-ui.js"></script>
+  <script type="module" src="../../src/auth/authModal.js"></script>
   <script type="module" src="../../src/public/js/announcements.js"></script>
 </body>
 </html>

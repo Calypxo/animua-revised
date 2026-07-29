@@ -67,6 +67,12 @@ async function getPublicSubmittedRequests() {
           breed: request.pet?.breed || "Not specified",
           age: request.pet?.age || "Not specified",
           sex: request.pet?.sex || "Not specified",
+          colorMarkings: request.pet?.colorMarkings || "Not specified",
+          status: Array.isArray(request.pet?.status) ? request.pet.status : [],
+          vaccinationHistory: request.pet?.vaccinationHistory || "Not specified",
+          photoName: request.pet?.photoName || "",
+          photoType: request.pet?.photoType || "",
+          photoDataUrl: request.pet?.photoDataUrl || "",
         },
 
         surrenderReason: request.surrenderReason || "No reason provided.",
@@ -93,10 +99,14 @@ async function getPublicSubmittedRequests() {
             name: "Agreement and consent",
             status: request.agreement?.agreedToTerms ? "submitted" : "missing",
           },
+          {
+            name: "Animal photo",
+            status: request.pet?.photoDataUrl ? "submitted" : "missing",
+          },
         ],
 
-        docsSubmitted: request.agreement?.agreedToTerms ? 2 : 1,
-        totalDocs: 2,
+        docsSubmitted: 1 + (request.agreement?.agreedToTerms ? 1 : 0) + (request.pet?.photoDataUrl ? 1 : 0),
+        totalDocs: 3,
 
         reviewedBy: request.reviewedBy || null,
         reviewedAt: request.reviewedAt || null,
@@ -240,7 +250,7 @@ function renderTable() {
       </td>
       <td data-label="Pet">
         <div class="pet-mini">
-          <div class="pet-mini-thumb ${thumbCls(r.pet.species)}">${emoji(r.pet.species)}</div>
+          <div class="pet-mini-thumb ${thumbCls(r.pet.species)}">${r.pet.photoDataUrl ? `<img src="${r.pet.photoDataUrl}" alt="">` : emoji(r.pet.species)}</div>
           <div>
             <div class="pet-mini-name">${r.pet.name}</div>
             <div class="pet-mini-breed">${r.pet.breed} · ${r.pet.sex}</div>
@@ -407,9 +417,26 @@ function renderDrawer(r) {
     </div>`;
 
   // ── Pet section ───────────────────────────────────────
+  const petPhotoBlock = r.pet.photoDataUrl ? `
+    <div class="surrender-pet-photo">
+      <img src="${r.pet.photoDataUrl}" alt="Submitted photo of ${r.pet.name}">
+      <div>
+        <span>Submitted Animal Photo</span>
+        <strong>${r.pet.photoName || "Uploaded photo"}</strong>
+      </div>
+    </div>` : `
+    <div class="surrender-pet-photo is-empty">
+      <i class="bi bi-image"></i>
+      <div>
+        <span>Submitted Animal Photo</span>
+        <strong>No photo uploaded</strong>
+      </div>
+    </div>`;
+
   const petSection = `
     <div class="drawer-section drawer-section-pet">
       <div class="drawer-section-title"><i class="bi bi-heart-pulse"></i> Pet Information</div>
+      ${petPhotoBlock}
       <div class="drawer-info-grid">
         <div class="drawer-info-item">
           <div class="drawer-info-lbl">Pet Name</div>
@@ -431,6 +458,25 @@ function renderDrawer(r) {
     </div>`;
 
   // ── Documents section ─────────────────────────────────
+  const extraPetDetailsSection = `
+    <div class="drawer-section drawer-section-pet-extra">
+      <div class="drawer-section-title"><i class="bi bi-card-checklist"></i> Additional Animal Details</div>
+      <div class="drawer-info-grid">
+        <div class="drawer-info-item drawer-info-full">
+          <div class="drawer-info-lbl">Color / Markings</div>
+          <div class="drawer-info-val">${r.pet.colorMarkings}</div>
+        </div>
+        <div class="drawer-info-item drawer-info-full">
+          <div class="drawer-info-lbl">Reproductive Status</div>
+          <div class="drawer-info-val">${r.pet.status.length ? r.pet.status.join(", ") : "Not specified"}</div>
+        </div>
+        <div class="drawer-info-item drawer-info-full">
+          <div class="drawer-info-lbl">Vaccination / Health History</div>
+          <div class="drawer-info-val">${r.pet.vaccinationHistory}</div>
+        </div>
+      </div>
+    </div>`;
+
   const docsSection = `
     <div class="drawer-section drawer-section-documents">
       <div class="drawer-section-title"><i class="bi bi-folder-fill"></i> Documents (${r.docsSubmitted}/${r.totalDocs})</div>
@@ -523,6 +569,7 @@ function renderDrawer(r) {
       ${nlpSection}
       ${ownerSection}
       ${petSection}
+      ${extraPetDetailsSection}
       ${docsSection}
       ${statusSection}
     </div>
@@ -613,6 +660,9 @@ async function executeApprove() {
         age: r.pet?.age || "",
         colorMarkings: r.pet?.colorMarkings || "",
         vaccinationHistory: r.pet?.vaccinationHistory || "",
+        photoName: r.pet?.photoName || "",
+        photoType: r.pet?.photoType || "",
+        photoDataUrl: r.pet?.photoDataUrl || "",
         surrenderReason: r.surrenderReason || "",
       })
     );

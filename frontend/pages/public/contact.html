@@ -10,249 +10,469 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="../../src/css/public/home.css">
+  <link rel="stylesheet" href="../../src/css/global.css">
   <link rel="stylesheet" href="../../src/css/public/contact.css">
-<link rel="stylesheet" href="../../src/css/global.css">
-<link rel="stylesheet" href="../../src/css/public/public-design-system.css">
 </head>
-<body>
+<body class="home-page contact-page">
 
   <!-- Header -->
- <header class="header" id="home">
-  <div class="container nav-shell">
-    <a href="#home" class="logo">
-      <img src="../../src/assets/images/animua-logo-transparent.png" alt="ANIMUA" class="navbar-logo-img">
-      <span class="navbar-brand-copy">
-        <span class="navbar-brand-name">ANIMUA</span>
-        <span class="navbar-brand-tagline">Connect. Learn. Adopt.</span>
-      </span>
-    </a>
-
-    <nav class="navbar" id="navbar">
-      <a href="home.html">Home</a>
-      <a href="find-furbabies.html">Find Furbabies</a>
-      <a href="announcements.html">Announcements</a>
-      <a href="surrender.html">Surrender</a>
-      <a href="contact.html" class="active">Contact Us</a>
-    </nav>
-
-    <div class="nav-actions">
-      <div class="user-actions-wrap">
-        <div class="notification-wrap">
-          <button class="notification-btn" id="notificationBtn" aria-label="Notifications">
-            <i class="fa-regular fa-bell"></i>
-            <span class="notification-dot"></span>
-          </button>
-
-          <div class="notification-popup" id="notificationPopup">
-            <div class="notification-popup-head">
-              <h4>Notifications</h4>
-            </div>
-            <ul class="notification-list">
-              <li>New animals were recently added for adoption.</li>
-              <li>Please complete forms carefully before submission.</li>
-              <li>Shelter announcements will appear here.</li>
-            </ul>
-          </div>
-        </div>
-
-        <a href="#" id="loginNavBtn" class="login-btn" aria-label="Login">
-          <i class="fa-regular fa-user"></i>
-          <span>Login</span>
+  <header class="header" id="home">
+    <div class="main-nav-wrap">
+      <div class="container nav-shell">
+        <a href="home.html" class="logo">
+          <img src="../../src/assets/images/animua-logo-transparent.png" alt="ANIMUA" class="navbar-logo-img">
+          <span class="navbar-brand-copy">
+            <span class="navbar-brand-name">ANIMUA</span>
+            <span class="navbar-brand-tagline">Connect. Learn. Adopt.</span>
+          </span>
         </a>
 
-        <div id="userLoggedInBox" class="hidden user-pill">
-          <span id="loggedUserName" class="user-pill-name"></span>
+        <nav class="navbar" id="navbar">
+          <a href="home.html">Home</a>
+          <a href="find-furbabies.html">Find Furbabies</a>
+          <a href="announcements.html">Announcements</a>
+          <a href="surrender.html">Surrender</a>
+          <a href="contact.html" class="active">Contact Us</a>
+        </nav>
 
-          <button id="logoutBtn" type="button" class="logout-icon-btn user-pill-logout" aria-label="Logout">
-            <i class="fa-solid fa-right-from-bracket"></i>
+        <div class="nav-actions">
+          <div class="user-actions-wrap">
+            <div class="notification-wrap">
+              <button class="notification-btn" id="notificationBtn" aria-label="Notifications">
+                <i class="fa-solid fa-bell"></i>
+                <span class="notification-dot"></span>
+              </button>
+
+              <div class="notification-popup" id="notificationPopup">
+                <div class="notification-popup-head">
+                  <h4>Notifications</h4>
+                </div>
+                <ul class="notification-list">
+                  <li>New animals were recently added for adoption.</li>
+                  <li>Please complete forms carefully before submission.</li>
+                </ul>
+              </div>
+            </div>
+
+            <a href="#" id="loginNavBtn" class="login-btn" aria-label="Login">
+              <i class="fa-solid fa-user"></i>
+              <span>Login</span>
+            </a>
+
+            <div id="userLoggedInBox" class="hidden user-pill user-menu">
+              <button type="button" class="user-menu-btn" id="userMenuBtn">
+                <span class="user-avatar-mini">
+                  <i class="fa-regular fa-user"></i>
+                </span>
+
+                <span id="loggedUserName" class="user-pill-name"></span>
+
+                <span class="user-menu-chevron">
+                  <i class="fa-solid fa-chevron-down"></i>
+                </span>
+              </button>
+
+              <div class="user-dropdown hidden" id="userDropdown">
+                <div class="user-dropdown-head">
+                  <div class="user-dropdown-avatar">
+                    <span id="dropdownUserInitial">A</span>
+                  </div>
+
+                  <div>
+                    <strong id="dropdownUserName">Account</strong>
+                  </div>
+                </div>
+
+                <button type="button" class="user-dropdown-item" id="viewProfileBtn">
+                  <i class="fa-regular fa-user"></i>
+                  <span>View Profile</span>
+                </button>
+
+                <button type="button" class="user-dropdown-item" id="myApplicationsBtn">
+                  <i class="fa-regular fa-file-lines"></i>
+                  <span>My Applications</span>
+                </button>
+
+                <div class="user-dropdown-divider"></div>
+
+                <button type="button" id="logoutBtn" class="user-dropdown-item logout-option">
+                  <i class="fa-solid fa-right-from-bracket"></i>
+                  <span>Log out</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <button class="menu-toggle" id="menuToggle" aria-label="Toggle Navigation">
+            <span></span>
+            <span></span>
+            <span></span>
           </button>
         </div>
       </div>
-
-      <button class="menu-toggle" id="menuToggle" aria-label="Toggle Navigation">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
     </div>
-  </div>
-</header>
+  </header>
 
-  <!-- Intro -->
-  <section class="contact-info-hero">
+  <section class="contact-hero" aria-labelledby="contactHeroTitle">
     <div class="container">
-      <div class="contact-info-hero-wrap reveal">
-        <span class="section-label">Contact Us</span>
-        <h1>Get shelter help the easiest way.</h1>
+      <div class="contact-hero-copy reveal">
+        <h1 id="contactHeroTitle">Contact Us</h1>
         <p>
-         Use this page for office contact details, location, and quick answers.
-For direct concerns and further assistance, please contact us through the provided email address or phone number.
-
+          We're here to help you and your furry friends. Reach the Angeles City
+          Veterinary Office through any of the ways below.
         </p>
-
-        <div class="contact-info-hero-tags">
-          <span><i class="fa-solid fa-clock"></i> Mon–Fri, 8:00 AM – 5:00 PM</span>
-        </div>
+        <span class="contact-hero-line" aria-hidden="true"></span>
       </div>
     </div>
   </section>
 
- <!-- Main Contact Layout -->
-<section class="contact-ux-section">
-  <div class="container contact-ux-grid">
+  <main class="contact-main">
+    <div class="container">
+      <section class="contact-method-grid reveal" aria-label="Contact options">
+        <article class="contact-method-card">
+          <span class="contact-method-icon"><i class="fa-solid fa-phone" aria-hidden="true"></i></span>
+          <h2>Call the Office</h2>
+          <p class="contact-method-primary"><a href="tel:0453220485">(045) 322-0485</a></p>
+          <p class="contact-method-copy">For appointments, submission concerns, and urgent assistance.</p>
+          <a class="contact-small-button" href="tel:0453220485">
+            <i class="fa-solid fa-phone" aria-hidden="true"></i>
+            <span>Call Now</span>
+          </a>
+        </article>
 
-    <!-- Left Side - Map -->
-    <div class="contact-map-card reveal">
-      <div class="contact-card-head">
-        <span class="section-label">Office Location</span>
-        <h2>Find the City Veterinary Office</h2>
+        <article class="contact-method-card">
+          <span class="contact-method-icon"><i class="fa-brands fa-facebook-f" aria-hidden="true"></i></span>
+          <h2>Like Us on Facebook</h2>
+          <p class="contact-method-primary"><a href="https://www.facebook.com/ACVeterinaryOffice" target="_blank" rel="noopener noreferrer"><strong>@AngelesCityVeterinaryOffice</strong></a></p>
+          <p class="contact-method-copy">Follow our official page for updates and important reminders.</p>
+          <a class="contact-small-button" href="https://www.facebook.com/ACVeterinaryOffice" target="_blank" rel="noopener noreferrer">
+            <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+            <span>Visit Facebook</span>
+          </a>
+        </article>
+
+        <article class="contact-method-card">
+          <span class="contact-method-icon"><i class="fa-regular fa-clock" aria-hidden="true"></i></span>
+          <h2>Office Hours</h2>
+          <ul class="contact-hours-list" aria-label="Office schedule">
+            <li><span>Mon - Fri</span><strong>8:00 AM - 5:00 PM</strong></li>
+            <li><span>Sat</span><strong>8:00 AM - 12:00 PM</strong></li>
+            <li><span>Sunday &amp; Holidays</span><strong>Closed</strong></li>
+          </ul>
+        </article>
+      </section>
+
+      <section class="contact-content-grid reveal" aria-label="Email form and office map">
+        <article class="contact-form-panel">
+          <div class="contact-panel-head">
+            <i class="fa-regular fa-envelope" aria-hidden="true"></i>
+            <div>
+              <h2>Send an Email</h2>
+              <p>
+                Send your questions, feedback, or non-urgent concerns. Your message
+                will be sent <strong>directly to the ANIMUA / Angeles City Veterinary Office team</strong>
+                and we'll get back to you through your email.
+              </p>
+            </div>
+          </div>
+
+          <form class="contact-form" id="contactForm" novalidate>
+            <div class="contact-field-row">
+              <label class="contact-field">
+                <input type="text" name="fullName" placeholder="Full Name" autocomplete="name" required>
+                <i class="fa-regular fa-user" aria-hidden="true"></i>
+              </label>
+
+              <label class="contact-field">
+                <input type="email" name="email" placeholder="Email Address" autocomplete="email" required>
+                <i class="fa-regular fa-envelope" aria-hidden="true"></i>
+              </label>
+            </div>
+
+            <label class="contact-field">
+              <input type="text" name="subject" placeholder="Subject" required>
+              <i class="fa-solid fa-tag" aria-hidden="true"></i>
+            </label>
+
+            <label class="contact-field">
+              <textarea name="message" placeholder="Message" required></textarea>
+              <i class="fa-regular fa-comment" aria-hidden="true"></i>
+            </label>
+
+            <button class="contact-submit-button" id="contactSubmit" type="submit">
+              <i class="fa-solid fa-paper-plane" aria-hidden="true"></i>
+              <span>Send Email</span>
+            </button>
+
+            <p class="contact-form-note">
+              <i class="fa-solid fa-lock" aria-hidden="true"></i>
+              <span>This site is protected by reCAPTCHA and the Google <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a> and <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer">Terms of Service</a> apply.</span>
+            </p>
+            <p class="contact-status" id="contactStatus" aria-live="polite"></p>
+          </form>
+        </article>
+
+        <article class="contact-map-panel">
+          <div class="contact-map-head">
+            <div>
+              <span>Office Location</span>
+              <h2>Angeles City Veterinary Office</h2>
+            </div>
+          </div>
+          <iframe
+            title="Google Map showing Angeles City Veterinary Office"
+            src="https://www.google.com/maps?q=Angeles%20City%20Veterinary%20Office%20Brgy.%20Pampanga%20Angeles%20City%20Pampanga%202009&z=16&output=embed"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            allowfullscreen>
+          </iframe>
+        </article>
+      </section>
+
+      <aside class="contact-emergency-strip reveal">
+        <span class="contact-emergency-icon"><i class="fa-solid fa-phone-volume" aria-hidden="true"></i></span>
         <p>
-          Use the map below to quickly view the office location and plan your visit.
+          <span class="contact-reminder-label">Reminder</span>
+          <strong>For urgent concerns or animal emergencies, please call the Angeles City Veterinary Office.</strong>
+          Our team is available during office hours to assist you as quickly as possible.
         </p>
-      </div>
-
-      <div class="map-frame-wrap">
-        <iframe
-          title="Google Map showing Angeles City Veterinary Office"
-          src="https://maps.google.com/maps?q=Angeles%20City%20Veterinary%20Office%20City%20Hall%20Building%20Aniceto%20Gueco%20Street%20Pulung%20Maragul%20Angeles%20City&t=&z=16&ie=UTF8&iwloc=&output=embed"
-          loading="lazy"
-          referrerpolicy="no-referrer-when-downgrade"
-          allowfullscreen>
-        </iframe>
-      </div>
+      </aside>
     </div>
-
-    <!-- Right Side - Contact Options -->
-  <div class="contact-methods-card reveal">
-  <div class="contact-card-head">
-    <span class="section-label">Contact Options</span>
-    <h2>Choose how you want to reach us</h2>
-    <p>
-      Pick the option that best matches your concern for a faster and clearer response.
-    </p>
-  </div>
-
-  <div class="contact-method-list">
-    <div class="contact-method-item">
-      <div class="contact-method-icon">
-        <i class="fa-solid fa-location-dot"></i>
-      </div>
-      <div>
-        <strong>Visit in Person</strong>
-        <p>City Hall Building, Pulung Maragul, Angeles City</p>
-      </div>
-      <a href="https://maps.google.com/?q=Angeles%20City%20Veterinary%20Office%20City%20Hall%20Building%20Aniceto%20Gueco%20Street%20Pulung%20Maragul%20Angeles%20City" target="_blank" rel="noopener noreferrer" class="mini-action-btn">Directions</a>
-    </div>
-
-    <div class="contact-method-item">
-      <div class="contact-method-icon">
-        <i class="fa-solid fa-phone"></i>
-      </div>
-      <div>
-        <strong>Call the Office</strong>
-        <p>(045) 322-0485</p>
-      </div>
-      <a href="tel:0453220485" class="mini-action-btn">Call</a>
-    </div>
-
-    <div class="contact-method-item">
-      <div class="contact-method-icon">
-        <i class="fa-regular fa-envelope"></i>
-      </div>
-      <div>
-        <strong>Send an Email</strong>
-        <p>Reach out to us for questions, follow-ups, and other concerns.</p>
-      </div>
-      <a href="mailto:your@email.com" class="mini-action-btn">Email</a>
-    </div>
-  </div>
-</div>
-
-</div>
-</section>
-
-
-  <!-- FAQ -->
- <section class="contact-faq-section">
-  <div class="container">
-    <div class="section-heading center-heading reveal">
-      <span class="section-label">Frequently Asked Questions</span>
-      <br>
-      <h2>Quick answers before you contact us</h2>
-      <p>
-        These common questions may help you find what you need right away.
-      </p>
-    </div>
-
-    <div class="faq-list reveal">
-      <details class="faq-item">
-        <summary>What is the process for adopting a pet through Animua?</summary>
-        <div class="faq-answer">
-          You can start by browsing the available pets on the Find Furbabies page, reviewing their profiles, and selecting a pet you are interested in. After that, you may complete and submit the adoption form for evaluation.
-        </div>
-      </details>
-
-      <details class="faq-item">
-        <summary>What responsibilities should an adopter be prepared for before taking home a pet?</summary>
-        <div class="faq-answer">
-          Adopters should be prepared to provide proper food, shelter, medical care, time, attention, and a safe environment. Pet adoption is a long-term responsibility that requires commitment and patience.
-        </div>
-      </details>
-
-      <details class="faq-item">
-        <summary>What should pet owners know before submitting an animal surrender request?</summary>
-        <div class="faq-answer">
-          Owners should understand that surrendering an animal means permanently giving up ownership to the shelter. Since the shelter may have limited space, owners are encouraged to first explore safe rehoming options with trusted relatives, friends, or other responsible individuals.
-        </div>
-      </details>
-
-      <details class="faq-item">
-        <summary>How does animal surrender differ from temporary pet boarding or care?</summary>
-        <div class="faq-answer">
-          Animal surrender is a permanent transfer of the pet to the shelter, while boarding or temporary care only involves short-term arrangements. The shelter’s surrender service is intended for cases where the owner can no longer keep the animal.
-        </div>
-      </details>
-
-      <details class="faq-item">
-        <summary>How can users contact the office for more information about adoption or surrender?</summary>
-        <div class="faq-answer">
-          Users may contact the office through the provided email address or contact number for questions, clarifications, and further assistance regarding adoption or surrender concerns.
-        </div>
-      </details>
-    </div>
-  </div>
-</section>
-
+  </main>
   <!-- Footer -->
-  <footer class="footer">
+  <footer class="footer" id="contact">
     <div class="container footer-grid">
       <div class="footer-brand">
         <a href="home.html" class="logo footer-logo">
           <img src="../../src/assets/images/animua-logo-transparent.png" alt="ANIMUA" class="footer-logo-img">
           <span class="footer-brand-copy">
             <span class="footer-brand-name">ANIMUA</span>
-            <span class="footer-brand-tagline">Connect. Learn. Adopt.</span>
+            <span class="footer-brand-tagline">Angeles City Animal Welfare Portal</span>
           </span>
         </a>
-       <p>
-          A partnership project dedicated to rehoming rescued animals, promoting
-          responsible adoption, and creating safer futures for shelter pets.
+        <p>
+          Connecting people with shelter animals through responsible adoption,
+          compatibility matching, and shelter-reviewed services.
         </p>
       </div>
 
       <div class="footer-links">
-        <h4>Quick Links</h4>
+        <h4>Explore</h4>
         <a href="home.html">Home</a>
         <a href="find-furbabies.html">Find Furbabies</a>
-        <a href="surrender.html">Surrender</a>
-         <a href="contact.html">Contact</a>
+        <a href="home.html#quiz-match-info">Compatibility Quiz</a>
+        <a href="home.html#home-highlights">Upcoming Events</a>
+      </div>
+
+      <div class="footer-links footer-support">
+        <h4>Shelter Services</h4>
+        <a href="home.html#home-highlights">Adoption Guide</a>
+        <a href="surrender.html">Surrender Request</a>
+        <a href="contact.html">Contact the Shelter</a>
+      </div>
+
+      <div class="footer-links footer-contact">
+        <h4>Contact</h4>
+        <p>Angeles City Veterinary Office</p>
+        <p>City Hall Building, Pulung Maragul, Angeles City</p>
+        <a href="tel:0453220485">(045) 322-0485</a>
       </div>
     </div>
 
     <div class="footer-bottom">
-      <p>© 2026 Animua. All Rights Reserved.</p>
+      <div class="container footer-bottom-inner">
+        <p>&copy; 2026 ANIMUA. All rights reserved.</p>
+        <p>Developed for the Angeles City Veterinary Office.</p>
+        <p>Adoption applications and surrender requests are subject to shelter evaluation and approval.</p>
+      </div>
     </div>
   </footer>
+  <section class="profile-modal-overlay hidden" id="profileModal" aria-hidden="true" aria-labelledby="profileModalTitle">
+    <button type="button" class="profile-modal-backdrop" data-profile-close aria-label="Close profile"></button>
+    <article class="profile-modal-card" role="dialog" aria-modal="true" tabindex="-1">
+      <button type="button" class="profile-modal-close" data-profile-close aria-label="Close profile">
+        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+      </button>
+
+      <div class="profile-modal-shell">
+        <div class="profile-modal-title">
+          <span></span>
+          <h2 id="profileModalTitle">My Profile</h2>
+        </div>
+
+        <section class="profile-summary-card">
+          <div class="profile-summary-main">
+            <div class="profile-avatar-wrap">
+              <div class="profile-summary-avatar" id="profileAvatarPreview">A</div>
+              <button type="button" class="profile-avatar-camera" id="profileAvatarPhotoBtn" aria-label="Change profile photo">
+                <i class="fa-solid fa-camera" aria-hidden="true"></i>
+              </button>
+            </div>
+            <div>
+              <h3 id="profileSummaryName">Account</h3>
+              <small>Member since <span id="profileMemberSince">2026</span> <b aria-hidden="true"></b></small>
+            </div>
+          </div>
+
+          <div class="profile-summary-actions">
+            <input type="file" id="profilePhotoInput" accept="image/png,image/jpeg,image/webp" hidden>
+            <button type="button" class="profile-outline-btn" id="profileChangePhotoBtn">
+              <i class="fa-solid fa-camera" aria-hidden="true"></i>
+              <span>Change Photo</span>
+            </button>
+          </div>
+        </section>
+
+        <form class="profile-form" id="profileForm">
+          <section class="profile-info-card">
+            <div class="profile-section-head">
+              <h3><i class="fa-solid fa-circle-user" aria-hidden="true"></i> Personal Information</h3>
+              <button type="button" class="profile-outline-btn profile-edit-inline" id="profileEditBtn">
+                <i class="fa-solid fa-pen" aria-hidden="true"></i>
+                <span>Edit Profile</span>
+              </button>
+            </div>
+
+            <label class="profile-info-row">
+              <i class="fa-regular fa-user" aria-hidden="true"></i>
+              <span><strong>Full Name</strong><input type="text" id="profileFullName" autocomplete="name" readonly></span>
+            </label>
+
+            <label class="profile-info-row">
+              <i class="fa-regular fa-envelope" aria-hidden="true"></i>
+              <span><strong>Email Address</strong><input type="email" id="profileEmail" autocomplete="email" readonly></span>
+            </label>
+
+            <label class="profile-info-row">
+              <i class="fa-solid fa-phone" aria-hidden="true"></i>
+              <span><strong>Mobile Number</strong><input type="tel" id="profilePhone" autocomplete="tel" readonly placeholder="Not added yet"></span>
+            </label>
+
+          </section>
+
+          <section class="profile-info-card profile-settings-card">
+            <h3><i class="fa-solid fa-gear" aria-hidden="true"></i> Account Settings</h3>
+
+            <button type="button" class="profile-settings-row" id="profilePasswordBtn">
+              <i class="fa-solid fa-lock" aria-hidden="true"></i>
+              <span><strong>Password</strong><small>Update your account password</small></span>
+              <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+            </button>
+
+            <button type="button" class="profile-settings-row" id="profileNotificationsBtn">
+              <i class="fa-regular fa-bell" aria-hidden="true"></i>
+              <span><strong>Notifications</strong><small id="profileNotificationSummary">Manage email and push notifications</small></span>
+              <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+            </button>
+
+          </section>
+
+          <p class="profile-status-message" id="profileStatusMessage" aria-live="polite"></p>
+
+          <div class="profile-modal-actions">
+            <button type="submit" class="profile-save-btn" id="profileSaveBtn">
+              <i class="fa-regular fa-floppy-disk" aria-hidden="true"></i>
+              <span>Save Changes</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </article>
+  </section>
+
+  <section class="quiz-intro-modal hidden" id="quiz-match-info" aria-hidden="true" aria-labelledby="quizIntroTitle">
+    <button type="button" class="quiz-intro-backdrop" data-quiz-intro-close aria-label="Close compatibility quiz information"></button>
+    <article class="quiz-intro-card" role="dialog" aria-modal="true">
+      <button type="button" class="quiz-intro-close" data-quiz-intro-close aria-label="Close">
+        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+      </button>
+
+      <div class="quiz-intro-grid">
+        <div class="quiz-intro-copy">
+          <p class="quiz-intro-label">Compatibility Quiz</p>
+          <h2 id="quizIntroTitle">
+            <span>Find a pet that</span>
+            <strong>fits your everyday life.</strong>
+          </h2>
+          <p>
+            Answer a short set of lifestyle questions so ANIMUA can recommend
+            shelter animals with care needs, energy, and temperament that fit
+            your home.
+          </p>
+
+          <div class="quiz-intro-details" aria-label="Quiz details">
+            <span><i class="fa-regular fa-clock" aria-hidden="true"></i> Takes 3-5 minutes</span>
+            <span><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Shelter-reviewed matches</span>
+            <span><i class="fa-regular fa-heart" aria-hidden="true"></i> Recommendations only</span>
+          </div>
+
+        </div>
+
+        <figure class="quiz-intro-photo">
+          <img src="../../src/assets/images/quiz-adoption-rescue-photo.jpg" alt="A rescued white cat being held during an animal welfare activity">
+        </figure>
+      </div>
+
+      <div class="quiz-intro-how" aria-label="How the compatibility quiz works">
+        <p class="quiz-intro-section-label">How it works</p>
+        <div class="quiz-intro-steps">
+          <article>
+            <span>01</span>
+            <h3>Share Your Routine</h3>
+            <p>Tell us about your home, schedule, activity level, and preferences.</p>
+          </article>
+          <article>
+            <span>02</span>
+            <h3>Compare Profiles</h3>
+            <p>Your answers are compared with each animal's compatibility profile.</p>
+          </article>
+          <article>
+            <span>03</span>
+            <h3>Review Matches</h3>
+            <p>See the animals that best align with your lifestyle and care capacity.</p>
+          </article>
+          <article>
+            <span>04</span>
+            <h3>Visit the Shelter</h3>
+            <p>Meet your recommended match and continue through shelter review.</p>
+          </article>
+        </div>
+      </div>
+
+      <div class="quiz-intro-reminder">
+        <i class="fa-regular fa-heart" aria-hidden="true"></i>
+        <strong>Adoption is a lifelong commitment.</strong>
+        <span>Quiz recommendations remain subject to shelter evaluation and approval.</span>
+      </div>
+
+      <div class="quiz-intro-actions">
+        <a href="/pages/public/petCompatibility.html" class="quiz-intro-primary">Start the Quiz</a>
+      </div>
+    </article>
+  </section>
+
+  <section class="quiz-page-modal hidden" id="quizPageModal" aria-hidden="true" aria-labelledby="quizPageModalTitle">
+    <button type="button" class="quiz-page-backdrop" data-quiz-page-close aria-label="Close compatibility quiz"></button>
+    <article class="quiz-page-card" role="dialog" aria-modal="true">
+      <div class="quiz-page-head">
+        <div>
+          <p>Compatibility Quiz</p>
+          <h2 id="quizPageModalTitle">Find your match</h2>
+        </div>
+        <button type="button" class="quiz-page-close" data-quiz-page-close aria-label="Close quiz">
+          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        </button>
+      </div>
+      <iframe
+        class="quiz-page-frame"
+        id="quizPageFrame"
+        title="ANIMUA compatibility quiz"
+        loading="lazy"
+      ></iframe>
+    </article>
+  </section>
+
 
 <!-- AUTH MODAL -->
 <div class="auth-modal-overlay hidden" id="authModal">
@@ -264,6 +484,7 @@ For direct concerns and further assistance, please contact us through the provid
 
     <div class="auth-modal-left auth-modal-left-simple">
       <div class="auth-side-mark" aria-hidden="true">
+        <i class="fa-solid fa-paw"></i>
         <span>Animua</span>
       </div>
       <h1 id="authModalTitle">Welcome back.</h1>
@@ -275,6 +496,7 @@ For direct concerns and further assistance, please contact us through the provid
 
     <div class="auth-modal-right">
       <div class="auth-form-brand">
+        <span class="auth-brand-mark"><i class="fa-solid fa-paw"></i></span>
         <span>Animua</span>
       </div>
 
@@ -408,6 +630,5 @@ For direct concerns and further assistance, please contact us through the provid
 
 <script type="module" src="../../src/public/js/public-ui.js"></script>
   <script type="module" src="../../src/public/js/contact.js"></script>
-  <script type="module" src="../../src/auth/authModal.js"></script>
 </body>
 </html>

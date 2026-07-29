@@ -8,6 +8,12 @@ node_modules/
 dist/
 build/
 
+# local/generated artifacts
+.tmp-chrome-contact-check/
+__pycache__/
+*.py[cod]
+animua-sentiment-service/models/
+
 # firebase admin key
 service-account-key.json
 

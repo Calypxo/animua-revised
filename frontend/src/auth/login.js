@@ -120,11 +120,18 @@ export async function handleLogin(event) {
       Swal.fire({
         icon: "error",
         title: "Login Failed",
-        text: data.message || "Incorrect email or password.",
+        html: `
+          <p>Invalid email or password.</p>
+          <p>Please check your credentials and try again.</p>
+        `,
+        confirmButtonText: "OK",
         customClass: {
-          popup: "animua-popup",
+          popup: "animua-popup animua-auth-feedback-popup",
+          icon: "animua-auth-feedback-icon",
+          closeButton: "animua-feedback-close",
           confirmButton: "animua-confirm"
         },
+        showCloseButton: true,
         buttonsStyling: false
       });
       return;
@@ -195,13 +202,21 @@ export async function handleLogin(event) {
     await Swal.fire({
       icon: "success",
       title: "Login Successful",
-      text: `Welcome back, ${userFullName}!`,
-      timer: 1800,
-      showConfirmButton: false,
+      html: `
+        <p>Welcome back!</p>
+        <p>You have successfully logged in to ANIMUA.</p>
+      `,
+      timer: 1600,
       timerProgressBar: true,
+      showConfirmButton: false,
+      showCloseButton: false,
       customClass: {
-        popup: "animua-popup"
-      }
+        popup: "animua-popup animua-auth-feedback-popup",
+        icon: "animua-auth-feedback-icon",
+        closeButton: "animua-feedback-close",
+        confirmButton: "animua-confirm"
+      },
+      buttonsStyling: false
     });
 
     if (userRole === "Admin" || userRole === "Staff") {

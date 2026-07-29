@@ -1,7 +1,10 @@
 import { API_BASE_URL } from "../../utils/api.js";
+import dogFallbackImage from "../../assets/images/dog.jpg";
+import catFallbackImage from "../../assets/images/cat.jpg";
 
 const petsGrid = document.getElementById("petsGrid");
 const resultsCount = document.getElementById("resultsCount");
+const heroPetCount = document.getElementById("heroPetCount");
 const emptyState = document.getElementById("emptyState");
 const petSearch = document.getElementById("petSearch");
 const filterTabs = document.querySelectorAll(".filter-tab");
@@ -18,14 +21,33 @@ const profileSex = document.getElementById("profileSex");
 const profileBreed = document.getElementById("profileBreed");
 const profileColor = document.getElementById("profileColor");
 const profileStatus = document.getElementById("profileStatus");
+const profileHealth = document.getElementById("profileHealth");
 const profileTraits = document.getElementById("profileTraits");
 const profileMatch = document.getElementById("profileMatch");
 const profileAdoptBtn = document.getElementById("profileAdoptBtn");
 
 const selectedPetName = document.getElementById("selectedPetName");
+const selectedPetImage = document.getElementById("selectedPetImage");
+const selectedPetMeta = document.getElementById("selectedPetMeta");
+const selectedPetStatus = document.getElementById("selectedPetStatus");
+const selectedPetId = document.getElementById("selectedPetId");
 const petNameField = document.getElementById("petNameField");
 const adoptionForm = document.getElementById("adoptionForm");
 const formMessage = document.getElementById("formMessage");
+const adoptionStepButtons = document.querySelectorAll("[data-adoption-step-target]");
+const adoptionNextBtn = document.getElementById("adoptionNextBtn");
+const adoptionBackBtn = document.getElementById("adoptionBackBtn");
+const adoptionSubmitBtn = document.getElementById("adoptionSubmitBtn");
+const adoptionExitBtn = document.getElementById("adoptionExitBtn");
+const adoptionExitConfirm = document.getElementById("adoptionExitConfirm");
+const adoptionExitCancel = document.getElementById("adoptionExitCancel");
+const adoptionExitConfirmBtn = document.getElementById("adoptionExitConfirmBtn");
+const adoptionReviewSummary = document.getElementById("adoptionReviewSummary");
+const adoptionSectionTitle = document.getElementById("adoptionSectionTitle");
+const idFrontUpload = document.getElementById("idFrontUpload");
+const idBackUpload = document.getElementById("idBackUpload");
+const idFrontPreview = document.getElementById("idFrontPreview");
+const idBackPreview = document.getElementById("idBackPreview");
 
 console.log("API_BASE_URL:", API_BASE_URL);
 console.log("petsGrid:", petsGrid);
@@ -38,6 +60,9 @@ console.log("petNameField:", petNameField);
 
 let currentFilter = "all";
 let currentPetForAdoption = null;
+let currentAdoptionStep = 1;
+let idFrontFileData = null;
+let idBackFileData = null;
 
 function textOr(value, fallback = "Not recorded") {
   const text = String(value ?? "").trim();
@@ -51,6 +76,288 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+const getField = (id) => document.getElementById(id);
+const getValue = (id) => getField(id)?.value?.trim() || "";
+
+const adoptionStepFields = {
+  1: ["fullName", "birthdate", "age", "address", "civilStatus", "gender", "citizenship", "contactNumber", "occupation"],
+  2: ["spouseName", "childrenNames", "hasCurrentPets", "numberOfPets", "currentPetType", "visitVeterinarian", "vetClinicName", "housingType", "residenceAllowsPets", "existingPets"],
+  3: ["whyAdopt", "primaryCaregiver", "petStayLocation", "hoursAlone", "provideVetCare", "provideDailyCare", "cannotCarePlan", "additionalInfo"],
+  4: ["idFrontUpload", "idBackUpload", "confirmTruthful", "agreeDeclaration", "understandNoGuarantee"]
+};
+
+const adoptionStepTitles = {
+  1: ["fa-shield-heart", "Personal Information"],
+  2: ["fa-house-chimney", "Household Information"],
+  3: ["fa-heart-circle-check", "Adoption Readiness"],
+  4: ["fa-clipboard-check", "Review, ID Upload, and Declaration"]
+};
+
+function calculateAgeFromBirthdate(value) {
+  if (!value) return "";
+  const birthdate = new Date(value);
+  if (Number.isNaN(birthdate.getTime())) return "";
+  const today = new Date();
+  let age = today.getFullYear() - birthdate.getFullYear();
+  const monthDiff = today.getMonth() - birthdate.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthdate.getDate())) {
+    age -= 1;
+  }
+  return age >= 0 ? String(age) : "";
+}
+
+function generateLocalApplicationReference() {
+  const now = new Date();
+  const date = now.toISOString().slice(0, 10).replaceAll("-", "");
+  const suffix = Math.random().toString(36).slice(2, 6).toUpperCase();
+  return `APP-${date}-${suffix}`;
+}
+
+function prefillApplicantFromAccount() {
+  const fullName = localStorage.getItem("user_name") || "";
+  if (fullName && !getValue("fullName")) getField("fullName").value = fullName;
+  if (!getValue("applicantAccountId")) {
+    getField("applicantAccountId").value = localStorage.getItem("user_email") || "";
+  }
+}
+
+function syncIssuedDateFields() {
+  const now = new Date();
+  if (getField("issuedDay")) getField("issuedDay").value = String(now.getDate());
+  if (getField("issuedMonth")) getField("issuedMonth").value = now.toLocaleString("en-US", { month: "long" });
+  if (getField("issuedYear")) getField("issuedYear").value = String(now.getFullYear());
+  if (getField("signatureName")) getField("signatureName").value = getValue("fullName");
+  if (getField("submissionTimestamp")) getField("submissionTimestamp").value = now.toISOString();
+  if (getField("applicationReference") && !getValue("applicationReference")) {
+    getField("applicationReference").value = generateLocalApplicationReference();
+  }
+}
+
+function setGroupStep(id, step) {
+  const field = getField(id);
+  const group = field?.closest(".form-group");
+  if (group) {
+    group.dataset.adoptionFieldStep = String(step);
+  }
+}
+
+function initializeAdoptionWizardFields() {
+  Object.entries(adoptionStepFields).forEach(([step, ids]) => {
+    ids.forEach((id) => setGroupStep(id, step));
+  });
+  document.querySelector(".pledge-box")?.setAttribute("data-adoption-field-step", "4");
+  document.querySelector(".adoption-checkboxes")?.setAttribute("data-adoption-field-step", "4");
+  document.querySelector(".adoption-bottom-grid")?.setAttribute("data-adoption-field-step", "4");
+}
+
+function updateConditionalAdoptionFields() {
+  const hasPets = getValue("hasCurrentPets") === "Yes";
+  const visitsVet = getValue("visitVeterinarian") === "Yes";
+
+  [
+    ["numberPetsGroup", "numberOfPets", hasPets],
+    ["currentPetTypeGroup", "currentPetType", hasPets],
+    ["vetClinicGroup", "vetClinicName", visitsVet]
+  ].forEach(([groupId, fieldId, show]) => {
+    const group = getField(groupId);
+    const field = getField(fieldId);
+    if (!group || !field) return;
+    group.hidden = !show;
+    field.required = show;
+    if (!show) field.value = "";
+  });
+
+  const existingPets = getField("existingPets");
+  if (existingPets) {
+    existingPets.value = hasPets
+      ? `${getValue("numberOfPets") || "Not specified"} ${getValue("currentPetType") || "pet(s)"}`
+      : "No current pets";
+  }
+}
+
+function uploadPayload(fileData) {
+  if (!fileData) return null;
+  return {
+    name: fileData.name,
+    type: fileData.type,
+    size: fileData.size
+  };
+}
+
+function setAdoptionStep(step) {
+  currentAdoptionStep = Math.max(1, Math.min(4, Number(step) || 1));
+  document.querySelectorAll("[data-adoption-field-step]").forEach((group) => {
+    const isActive = Number(group.dataset.adoptionFieldStep) === currentAdoptionStep;
+    group.classList.toggle("adoption-step-hidden", !isActive);
+    group.querySelectorAll("input, select, textarea").forEach((field) => {
+      field.disabled = !isActive;
+    });
+  });
+
+  document.getElementById("selectedPetBox")?.classList.toggle("adoption-step-hidden", currentAdoptionStep !== 1);
+  document.querySelector(".adoption-notice-field")?.classList.toggle("adoption-step-hidden", currentAdoptionStep !== 3);
+  document.querySelector(".adoption-upload-card")?.classList.toggle("adoption-step-hidden", currentAdoptionStep !== 4);
+  document.querySelector(".adoption-review-field")?.classList.toggle("adoption-step-hidden", currentAdoptionStep !== 4);
+
+  adoptionStepButtons.forEach((button) => {
+    const itemStep = Number(button.dataset.adoptionStepTarget);
+    button.classList.toggle("active", itemStep === currentAdoptionStep);
+    button.classList.toggle("complete", itemStep < currentAdoptionStep);
+  });
+
+  if (adoptionBackBtn) adoptionBackBtn.hidden = currentAdoptionStep === 1 || currentAdoptionStep === 4;
+  if (adoptionNextBtn) adoptionNextBtn.hidden = currentAdoptionStep === 4;
+  if (adoptionSubmitBtn) adoptionSubmitBtn.hidden = currentAdoptionStep !== 4;
+  if (adoptionSectionTitle) {
+    const [icon, title] = adoptionStepTitles[currentAdoptionStep] || adoptionStepTitles[1];
+    adoptionSectionTitle.innerHTML = `<span><i class="fa-solid ${icon}" aria-hidden="true"></i></span><h3>${escapeHtml(title)}</h3>`;
+  }
+  if (currentAdoptionStep === 4) renderAdoptionReview();
+}
+
+function closeAdoptionModalWithoutPrompt() {
+  if (!adoptModal) return;
+  adoptModal.classList.remove("show");
+  adoptionExitConfirm?.setAttribute("hidden", "");
+  if (!profileModal || !profileModal.classList.contains("show")) {
+    document.body.classList.remove("menu-open");
+  }
+}
+
+function showAdoptionExitConfirm() {
+  if (!adoptModal?.classList.contains("show")) return;
+  adoptionExitConfirm?.removeAttribute("hidden");
+}
+
+function validateAdoptionStep(step = currentAdoptionStep) {
+  updateConditionalAdoptionFields();
+  const fields = adoptionStepFields[step]
+    .map((id) => getField(id))
+    .filter((field) => field && !field.disabled && !field.closest("[hidden]"));
+  const invalid = fields.find((field) => !field.checkValidity());
+  if (invalid) {
+    invalid.reportValidity();
+    return false;
+  }
+  return true;
+}
+
+function renderAdoptionReview() {
+  if (!adoptionReviewSummary) return;
+  const petTypeLabel = currentPetForAdoption?.type === "dog" ? "Dog" : currentPetForAdoption?.type === "cat" ? "Cat" : "Pet";
+  const sections = [
+    ["Selected pet", [
+      ["Name", currentPetForAdoption?.name],
+      ["Animal ID", currentPetForAdoption?.id],
+      ["Details", `${currentPetForAdoption?.age || ""} ${currentPetForAdoption?.sex || ""} ${petTypeLabel}`.trim()],
+      ["Status", currentPetForAdoption?.status || "Ready"]
+    ]],
+    ["Applicant information", [
+      ["Full name", getValue("fullName")],
+      ["Birthdate", getValue("birthdate")],
+      ["Age", getValue("age")],
+      ["Address", getValue("address")],
+      ["Civil status", getValue("civilStatus")],
+      ["Gender", getValue("gender")],
+      ["Citizenship", getValue("citizenship")],
+      ["Contact", getValue("contactNumber")],
+      ["Occupation", getValue("occupation")]
+    ]],
+    ["Household information", [
+      ["Spouse", getValue("spouseName") || "Not provided"],
+      ["Children", getValue("childrenNames") || "Not provided"],
+      ["Current pets", getValue("hasCurrentPets")],
+      ["Number/type", getValue("hasCurrentPets") === "Yes" ? `${getValue("numberOfPets")} ${getValue("currentPetType")}` : "Not applicable"],
+      ["Veterinarian", getValue("visitVeterinarian")],
+      ["Clinic", getValue("vetClinicName") || "Not applicable"],
+      ["Housing", getValue("housingType")],
+      ["Pets allowed", getValue("residenceAllowsPets")]
+    ]],
+    ["Adoption-readiness answers", [
+      ["Reason", getValue("whyAdopt")],
+      ["Caregiver", getValue("primaryCaregiver")],
+      ["Pet stays", getValue("petStayLocation")],
+      ["Hours alone", getValue("hoursAlone")],
+      ["Vet care", getValue("provideVetCare")],
+      ["Daily care", getValue("provideDailyCare")],
+      ["If unable to care", getValue("cannotCarePlan")],
+      ["Additional info", getValue("additionalInfo") || "Not provided"]
+    ]]
+  ];
+
+  adoptionReviewSummary.innerHTML = sections.map(([title, rows]) => `
+    <section>
+      <h4>${escapeHtml(title)}</h4>
+      <dl>
+        ${rows.map(([label, value]) => `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value || "Not provided")}</dd></div>`).join("")}
+      </dl>
+    </section>
+  `).join("");
+}
+
+function readUploadFile(file) {
+  return new Promise((resolve, reject) => {
+    if (!file) {
+      resolve(null);
+      return;
+    }
+    const allowedTypes = ["image/jpeg", "image/png", "application/pdf"];
+    const allowedNames = /\.(jpe?g|png|pdf)$/i;
+    if (!allowedTypes.includes(file.type) && !allowedNames.test(file.name)) {
+      reject(new Error("Please upload a JPG, JPEG, PNG, or PDF file."));
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      reject(new Error("Each ID file must be 5 MB or smaller."));
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => resolve({ name: file.name, type: file.type, size: file.size, dataUrl: reader.result });
+    reader.onerror = () => reject(new Error("Unable to read the selected file."));
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderUploadPreview(target, fileData, input) {
+  if (!target) return;
+  if (!fileData) {
+    target.innerHTML = "";
+    return;
+  }
+  const isPdf = fileData.type === "application/pdf" || /\.pdf$/i.test(fileData.name);
+  target.innerHTML = `
+    <div class="upload-preview-card">
+      ${isPdf ? '<span class="upload-pdf-icon"><i class="fa-regular fa-file-pdf"></i></span>' : `<img src="${fileData.dataUrl}" alt="${escapeHtml(fileData.name)} preview">`}
+      <div><strong>${escapeHtml(fileData.name)}</strong><small>${Math.ceil(fileData.size / 1024)} KB</small></div>
+      <button type="button" data-upload-replace>Replace File</button>
+      <button type="button" data-upload-remove>Remove</button>
+    </div>
+  `;
+  target.querySelector("[data-upload-replace]")?.addEventListener("click", () => input?.click());
+  target.querySelector("[data-upload-remove]")?.addEventListener("click", () => {
+    if (input) input.value = "";
+    if (input === idFrontUpload) idFrontFileData = null;
+    if (input === idBackUpload) idBackFileData = null;
+    renderUploadPreview(target, null, input);
+  });
+}
+
+async function handleUploadChange(input, preview, side) {
+  try {
+    const data = await readUploadFile(input.files?.[0]);
+    if (side === "front") idFrontFileData = data;
+    if (side === "back") idBackFileData = data;
+    renderUploadPreview(preview, data, input);
+  } catch (error) {
+    input.value = "";
+    if (side === "front") idFrontFileData = null;
+    if (side === "back") idBackFileData = null;
+    renderUploadPreview(preview, null, input);
+    formMessage.textContent = error.message;
+    formMessage.style.color = "red";
+  }
 }
 
 function formatAlteredStatus(status, sex) {
@@ -86,6 +393,10 @@ function behaviorLabels(assessment) {
   if (Number(assessment.energyLevel) >= 4) labels.push("High energy");
   else if (Number(assessment.energyLevel) > 0 && Number(assessment.energyLevel) <= 2) labels.push("Calm");
   return labels;
+}
+
+function fallbackImageForPet(type) {
+  return type === "cat" ? catFallbackImage : dogFallbackImage;
 }
 
 function mapPetFromBackend(pet) {
@@ -175,25 +486,28 @@ function renderPets(list) {
   if (!list.length) {
     emptyState.classList.add("show");
     resultsCount.textContent = "0 pets found";
+    if (heroPetCount) heroPetCount.textContent = "0";
     return;
   }
 
   emptyState.classList.remove("show");
   resultsCount.textContent = `${list.length} pet${list.length > 1 ? "s" : ""} found`;
+  if (heroPetCount) heroPetCount.textContent = String(list.length);
 
   list.forEach((pet, index) => {
     const card = document.createElement("div");
     card.className = "pet-card reveal";
     const petType = pet.type === "dog" ? "Dog" : pet.type === "cat" ? "Cat" : "Pet";
+    const temperamentText = pet.traits && pet.traits.length
+      ? pet.traits.slice(0, 3).join(", ")
+      : "Ready for a loving home";
     const facts = [
-      ["fa-venus-mars", "Sex", pet.sex],
-      ["fa-cake-candles", "Estimated age", pet.age],
       ["fa-paw", "Breed", pet.breed],
-      ["fa-palette", "Color / markings", pet.color],
+      ["fa-palette", "Color / Markings", pet.color],
     ];
     card.innerHTML = `
       <div class="pet-card-image">
-        <img src="${escapeHtml(pet.image)}" alt="${escapeHtml(pet.name)}">
+        <img src="${escapeHtml(pet.image)}" alt="${escapeHtml(pet.name)}" data-fallback-src="${escapeHtml(fallbackImageForPet(pet.type))}">
         <span class="pet-badge">
           ${petType}
         </span>
@@ -203,7 +517,7 @@ function renderPets(list) {
         <div class="pet-card-top">
           <div>
             <h3>${escapeHtml(pet.name)}</h3>
-            <p class="pet-reference">Animal ID: ${escapeHtml(pet.id)}</p>
+            <p class="pet-meta">${escapeHtml(pet.age)} <span>•</span> ${escapeHtml(pet.sex)}</p>
           </div>
         </div>
         <div class="pet-facts">
@@ -214,9 +528,9 @@ function renderPets(list) {
             </div>
           `).join("")}
         </div>
-        <p class="pet-description">${escapeHtml(pet.description)}</p>
-        <div class="pet-traits">
-          ${pet.traits.slice(0, 5).map((trait) => `<span class="trait-chip">${escapeHtml(trait)}</span>`).join("")}
+        <div class="pet-temperament">
+          <span class="pet-temperament-icon"><i class="fa-solid fa-heart" aria-hidden="true"></i></span>
+          <span><small>Temperament</small><strong>${escapeHtml(temperamentText)}</strong></span>
         </div>
         <div class="pet-actions">
           <button class="btn secondary-btn view-profile-btn" data-id="${escapeHtml(pet.id)}">View Pet Profile</button>
@@ -228,6 +542,11 @@ function renderPets(list) {
     petsGrid.appendChild(card);
 
     const img = card.querySelector('.pet-card-image img');
+    img.addEventListener('error', function() {
+      if (this.src !== this.dataset.fallbackSrc) {
+        this.src = this.dataset.fallbackSrc;
+      }
+    });
     img.addEventListener('load', function() {
       this.style.objectPosition = this.naturalHeight > this.naturalWidth
         ? 'center top'
@@ -315,13 +634,17 @@ function openProfileModal(pet) {
   pet.type === "dog" ? "Dog" :
   pet.type === "cat" ? "Cat" :
   "Pet";
-  profileName.textContent = pet.name;
+  const petTypeLabel = pet.type === "dog" ? "Dog" : pet.type === "cat" ? "Cat" : "Pet";
+  profileName.textContent = `${pet.name} - ${pet.age} ${pet.sex} ${petTypeLabel}`;
   profileDescription.textContent = pet.description;
   profileAge.textContent = pet.age;
   profileSex.textContent = pet.sex;
   profileBreed.textContent = pet.breed;
   profileColor.textContent = pet.color;
-  profileStatus.textContent = pet.status;
+  profileStatus.textContent = "Ready";
+  if (profileHealth) {
+    profileHealth.textContent = "Good";
+  }
   profileMatch.textContent = pet.match;
 
   const traitList = pet.traits && pet.traits.length
@@ -366,8 +689,25 @@ function showAdoptModalForPet(pet) {
   if (!adoptModal) return;
 
   currentPetForAdoption = pet;
-  selectedPetName.textContent = `${pet.name} (${pet.type === "dog" ? "Dog" : pet.type === "cat" ? "Cat" : "Pet"})`;
+  const petTypeLabel = pet.type === "dog" ? "Dog" : pet.type === "cat" ? "Cat" : "Pet";
+  selectedPetName.textContent = pet.name;
+  if (selectedPetMeta) {
+    selectedPetMeta.textContent = `${pet.age} • ${pet.sex} ${petTypeLabel}`;
+  }
+  if (selectedPetStatus) {
+    selectedPetStatus.textContent = pet.status || "Ready for Adoption";
+  }
+  if (selectedPetId) {
+    selectedPetId.textContent = `Animal ID: ${pet.id}`;
+  }
+  if (selectedPetImage) {
+    selectedPetImage.src = pet.image;
+    selectedPetImage.alt = pet.name;
+  }
   petNameField.value = pet.name;
+  prefillApplicantFromAccount();
+  syncIssuedDateFields();
+  setAdoptionStep(1);
   formMessage.textContent = "";
 
   adoptModal.classList.add("show");
@@ -422,6 +762,10 @@ document.querySelectorAll("[data-close]").forEach((button) => {
 
   modal.addEventListener("click", (event) => {
     if (event.target === modal) {
+      if (modal === adoptModal) {
+        showAdoptionExitConfirm();
+        return;
+      }
       modal.classList.remove("show");
 
       if (
@@ -434,6 +778,64 @@ document.querySelectorAll("[data-close]").forEach((button) => {
   });
 });
 
+adoptionExitBtn?.addEventListener("click", showAdoptionExitConfirm);
+adoptionExitCancel?.addEventListener("click", () => {
+  adoptionExitConfirm?.setAttribute("hidden", "");
+});
+adoptionExitConfirmBtn?.addEventListener("click", closeAdoptionModalWithoutPrompt);
+adoptionExitConfirm?.addEventListener("click", (event) => {
+  if (event.target === adoptionExitConfirm) {
+    adoptionExitConfirm.setAttribute("hidden", "");
+  }
+});
+
+if (adoptionForm) {
+  initializeAdoptionWizardFields();
+  setAdoptionStep(1);
+
+  adoptionStepButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const requestedStep = Number(button.dataset.adoptionStepTarget);
+      if (requestedStep <= currentAdoptionStep || validateAdoptionStep(currentAdoptionStep)) {
+        setAdoptionStep(requestedStep);
+      }
+    });
+  });
+
+  adoptionNextBtn?.addEventListener("click", () => {
+    if (!validateAdoptionStep(currentAdoptionStep)) return;
+    setAdoptionStep(currentAdoptionStep + 1);
+  });
+
+  adoptionBackBtn?.addEventListener("click", () => {
+    setAdoptionStep(currentAdoptionStep - 1);
+  });
+
+  getField("birthdate")?.addEventListener("change", (event) => {
+    const age = calculateAgeFromBirthdate(event.target.value);
+    if (getField("age")) getField("age").value = age;
+  });
+
+  ["hasCurrentPets", "numberOfPets", "currentPetType", "visitVeterinarian"].forEach((id) => {
+    getField(id)?.addEventListener("change", updateConditionalAdoptionFields);
+    getField(id)?.addEventListener("input", updateConditionalAdoptionFields);
+  });
+
+  idFrontUpload?.addEventListener("change", () => handleUploadChange(idFrontUpload, idFrontPreview, "front"));
+  idBackUpload?.addEventListener("change", () => handleUploadChange(idBackUpload, idBackPreview, "back"));
+
+  document.querySelectorAll(".adoption-checkboxes label").forEach((label) => {
+    label.addEventListener("click", (event) => {
+      const checkbox = label.querySelector('input[type="checkbox"]');
+      if (!checkbox || checkbox.disabled) return;
+      event.preventDefault();
+      checkbox.checked = !checkbox.checked;
+      checkbox.setAttribute("aria-checked", String(checkbox.checked));
+      checkbox.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+  });
+}
+
 if (adoptionForm) {
   adoptionForm.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -444,7 +846,18 @@ if (adoptionForm) {
       return;
     }
 
+    if (currentAdoptionStep !== 4) {
+      setAdoptionStep(4);
+      return;
+    }
+
+    if (!validateAdoptionStep(4)) {
+      return;
+    }
+
     try {
+      updateConditionalAdoptionFields();
+      syncIssuedDateFields();
       const quizData = JSON.parse(localStorage.getItem("animua_quiz_data") || "{}");
       const matchResults = JSON.parse(localStorage.getItem("animua_match_results") || "[]");
       const selectedPetId = currentPetForAdoption?.id;
@@ -466,26 +879,51 @@ if (adoptionForm) {
       const formData = {
         pet_id: currentPetForAdoption?.id,
         pet_name: currentPetForAdoption?.name,
+        pet_age: currentPetForAdoption?.age || "",
+        pet_sex: currentPetForAdoption?.sex || "",
+        pet_type: currentPetForAdoption?.type || "",
+        pet_status: currentPetForAdoption?.status || "",
+        application_reference: getValue("applicationReference"),
+        submission_timestamp: getValue("submissionTimestamp"),
+        applicant_account_id: getValue("applicantAccountId"),
         compatibility: compatibilityData,
 
-        full_name: document.getElementById("fullName").value,
-        age: document.getElementById("age").value,
-        birthdate: document.getElementById("birthdate").value,
-        address: document.getElementById("address").value,
-        civil_status: document.getElementById("civilStatus").value,
-        gender: document.getElementById("gender").value,
-        citizenship: document.getElementById("citizenship").value,
-        contact_number: document.getElementById("contactNumber").value,
-        occupation: document.getElementById("occupation").value,
-        spouse_name: document.getElementById("spouseName").value,
-        children_names: document.getElementById("childrenNames").value,
-        why_adopt: document.getElementById("whyAdopt").value,
-        visit_veterinarian: document.getElementById("visitVeterinarian").value,
-        existing_pets: document.getElementById("existingPets").value,
-        issued_day: document.getElementById("issuedDay").value,
-        issued_month: document.getElementById("issuedMonth").value,
-        issued_year: document.getElementById("issuedYear").value,
-        signature_name: document.getElementById("signatureName").value,
+        full_name: getValue("fullName"),
+        age: getValue("age"),
+        birthdate: getValue("birthdate"),
+        address: getValue("address"),
+        civil_status: getValue("civilStatus"),
+        gender: getValue("gender"),
+        citizenship: getValue("citizenship"),
+        contact_number: getValue("contactNumber"),
+        occupation: getValue("occupation"),
+        spouse_name: getValue("spouseName"),
+        children_names: getValue("childrenNames"),
+        has_current_pets: getValue("hasCurrentPets"),
+        number_of_pets: getValue("numberOfPets"),
+        current_pet_type: getValue("currentPetType"),
+        housing_type: getValue("housingType"),
+        residence_allows_pets: getValue("residenceAllowsPets"),
+        why_adopt: getValue("whyAdopt"),
+        visit_veterinarian: getValue("visitVeterinarian"),
+        vet_clinic_name: getValue("vetClinicName"),
+        existing_pets: getValue("existingPets"),
+        primary_caregiver: getValue("primaryCaregiver"),
+        pet_stay_location: getValue("petStayLocation"),
+        hours_alone: getValue("hoursAlone"),
+        provide_vet_care: getValue("provideVetCare"),
+        provide_daily_care: getValue("provideDailyCare"),
+        cannot_care_plan: getValue("cannotCarePlan"),
+        additional_info: getValue("additionalInfo"),
+        id_front_upload: uploadPayload(idFrontFileData),
+        id_back_upload: uploadPayload(idBackFileData),
+        confirm_truthful: getField("confirmTruthful")?.checked || false,
+        agree_declaration: getField("agreeDeclaration")?.checked || false,
+        understand_no_guarantee: getField("understandNoGuarantee")?.checked || false,
+        issued_day: getValue("issuedDay"),
+        issued_month: getValue("issuedMonth"),
+        issued_year: getValue("issuedYear"),
+        signature_name: getValue("signatureName"),
       };
 
       const token = localStorage.getItem("animua_token");
@@ -509,13 +947,22 @@ if (adoptionForm) {
 
       const result = await res.json();
 
-      formMessage.textContent = "Adoption request submitted successfully!";
+      const referenceNumber = result.applicationId || formData.application_reference;
+      formMessage.textContent = `Adoption request submitted successfully! Reference: ${referenceNumber}`;
       formMessage.style.color = "green";
 
       adoptionForm.reset();
       currentPetForAdoption = null;
       selectedPetName.textContent = "";
+      if (selectedPetMeta) selectedPetMeta.textContent = "";
+      if (selectedPetStatus) selectedPetStatus.textContent = "";
+      if (selectedPetId) selectedPetId.textContent = "";
       petNameField.value = "";
+      idFrontFileData = null;
+      idBackFileData = null;
+      renderUploadPreview(idFrontPreview, null, idFrontUpload);
+      renderUploadPreview(idBackPreview, null, idBackUpload);
+      setAdoptionStep(1);
 
       setTimeout(() => {
         adoptModal.classList.remove("show");

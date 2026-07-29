@@ -177,6 +177,13 @@ function renderCommunitySection(role) {
       icon: "bi-megaphone",
       label: "Announcements",
     }),
+
+    renderNavItem({
+      allowed: canAccessModule(role, "contact"),
+      href: "/pages/contactMessages.html",
+      icon: "bi-envelope-paper",
+      label: "Contact Messages",
+    }),
   ].join("");
 
   return renderSection("Community", links);

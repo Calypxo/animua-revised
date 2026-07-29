@@ -12,6 +12,13 @@ exports.createAdoption = async (req, res) => {
   try {
     const {
       pet_id,
+      pet_age,
+      pet_sex,
+      pet_type,
+      pet_status,
+      application_reference,
+      submission_timestamp,
+      applicant_account_id,
       compatibility,
       full_name,
       age,
@@ -24,9 +31,27 @@ exports.createAdoption = async (req, res) => {
       occupation,
       spouse_name,
       children_names,
+      has_current_pets,
+      number_of_pets,
+      current_pet_type,
+      housing_type,
+      residence_allows_pets,
       why_adopt,
       visit_veterinarian,
+      vet_clinic_name,
       existing_pets,
+      primary_caregiver,
+      pet_stay_location,
+      hours_alone,
+      provide_vet_care,
+      provide_daily_care,
+      cannot_care_plan,
+      additional_info,
+      id_front_upload,
+      id_back_upload,
+      confirm_truthful,
+      agree_declaration,
+      understand_no_guarantee,
       issued_day,
       issued_month,
       issued_year,
@@ -65,6 +90,15 @@ exports.createAdoption = async (req, res) => {
       pet_id,
       pet_name: petLabel,
       pet_label: petLabel,
+      selected_pet: {
+        id: pet_id,
+        name: petLabel,
+        requestedName: req.body.pet_name || "",
+        age: pet_age || "",
+        sex: pet_sex || "",
+        type: pet_type || "",
+        status: pet_status || animalData.status || "",
+      },
       compatibility: compatibility
         ? {
             source: "quiz", // optional but recommended
@@ -96,11 +130,52 @@ exports.createAdoption = async (req, res) => {
         existing_pets: existing_pets || "",
       },
 
+      household_information: {
+        spouse_name: spouse_name || "",
+        children_names: children_names || "",
+        has_current_pets: has_current_pets || "",
+        number_of_pets: number_of_pets || "",
+        current_pet_type: current_pet_type || "",
+        visit_veterinarian: visit_veterinarian || "",
+        vet_clinic_name: vet_clinic_name || "",
+        housing_type: housing_type || "",
+        residence_allows_pets: residence_allows_pets || "",
+      },
+
+      adoption_readiness: {
+        why_adopt: why_adopt || "",
+        primary_caregiver: primary_caregiver || "",
+        pet_stay_location: pet_stay_location || "",
+        hours_alone: hours_alone || "",
+        provide_vet_care: provide_vet_care || "",
+        provide_daily_care: provide_daily_care || "",
+        cannot_care_plan: cannot_care_plan || "",
+        additional_info: additional_info || "",
+      },
+
       declaration: {
         issued_day: issued_day || "",
         issued_month: issued_month || "",
         issued_year: issued_year || "",
         signature_name: signature_name || "",
+        confirm_truthful: Boolean(confirm_truthful),
+        agree_declaration: Boolean(agree_declaration),
+        understand_no_guarantee: Boolean(understand_no_guarantee),
+        declaration_text:
+          "I solemnly declare that I will take proper care of the animal I am applying to adopt. I will provide appropriate food, shelter, veterinary care, regular checkups, and vaccinations. I will not allow the animal to roam unattended or be neglected.",
+      },
+
+      identity_verification: {
+        front: id_front_upload || null,
+        back: id_back_upload || null,
+        privacy_notice:
+          "Your ID will be used only to verify your identity and support the shelter's adoption review. It will not be displayed publicly.",
+      },
+
+      submission_metadata: {
+        client_reference: application_reference || "",
+        client_submitted_at: submission_timestamp || "",
+        applicant_account_id: applicant_account_id || req.user?.uid || req.user?.email || "",
       },
 
       account: req.user?.email
