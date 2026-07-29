@@ -22,6 +22,7 @@ export default defineConfig({
         auditTrail:             resolve(__dirname, 'pages/auditTrail.html'),
         archivedRecords:        resolve(__dirname, 'pages/archivedRecords.html'),
         announcements:          resolve(__dirname, 'pages/announcements.html'),
+        contactMessages:        resolve(__dirname, 'pages/contactMessages.html'),
         accountSettings:         resolve(__dirname, 'pages/accountSettings.html'),
         compatibilityQuiz:       resolve(__dirname, 'pages/compatibilityQuiz.html'),
       },

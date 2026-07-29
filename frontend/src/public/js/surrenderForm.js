@@ -30,6 +30,9 @@ const FIELD_ERRORS = {
 let currentStep = 1;
 let highestVisitedStep = 1;
 let isSubmitting = false;
+let animalPhotoData = null;
+
+const MAX_ANIMAL_PHOTO_SIZE = 650 * 1024;
 
 function getFormValue(id) {
   return document.getElementById(id)?.value.trim() || "";
@@ -113,6 +116,65 @@ function setFieldError(field, message = "") {
   field.classList.toggle("is-invalid", Boolean(message));
   field.setAttribute("aria-invalid", String(Boolean(message)));
   if (error) error.textContent = message;
+}
+
+function setAnimalPhotoError(message = "") {
+  const error = document.getElementById("animalPhotoError");
+  const input = document.getElementById("animalPhoto");
+  if (error) error.textContent = message;
+  input?.classList.toggle("is-invalid", Boolean(message));
+  input?.setAttribute("aria-invalid", String(Boolean(message)));
+}
+
+function clearAnimalPhotoPreview() {
+  animalPhotoData = null;
+  const preview = document.getElementById("animalPhotoPreview");
+  const label = document.getElementById("animalPhotoLabel");
+  if (preview) preview.innerHTML = '<i class="fa-regular fa-image" aria-hidden="true"></i>';
+  if (label) label.textContent = "Add a clear photo of the animal";
+}
+
+function bindAnimalPhotoUpload() {
+  const input = document.getElementById("animalPhoto");
+  if (!input) return;
+
+  input.addEventListener("change", () => {
+    const file = input.files?.[0];
+    setAnimalPhotoError("");
+    clearAnimalPhotoPreview();
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      input.value = "";
+      setAnimalPhotoError("Upload a JPG, PNG, or WebP image.");
+      return;
+    }
+
+    if (file.size > MAX_ANIMAL_PHOTO_SIZE) {
+      input.value = "";
+      setAnimalPhotoError("Photo must be 650 KB or smaller.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = typeof reader.result === "string" ? reader.result : "";
+      if (!dataUrl) {
+        setAnimalPhotoError("We could not preview this photo. Please choose another image.");
+        return;
+      }
+      animalPhotoData = { name: file.name, type: file.type, size: file.size, dataUrl };
+      const preview = document.getElementById("animalPhotoPreview");
+      const label = document.getElementById("animalPhotoLabel");
+      if (preview) preview.innerHTML = `<img src="${dataUrl}" alt="">`;
+      if (label) label.textContent = file.name;
+    };
+    reader.onerror = () => {
+      input.value = "";
+      setAnimalPhotoError("We could not read this photo. Please choose another image.");
+    };
+    reader.readAsDataURL(file);
+  });
 }
 
 function validationMessage(field) {
@@ -270,6 +332,9 @@ function buildRequestPayload(loggedInUser) {
       colorMarkings: getFormValue("colorMarkings"),
       status: getCheckedValues("status"),
       vaccinationHistory: getFormValue("vaccinationHistory"),
+      photoName: animalPhotoData?.name || "",
+      photoType: animalPhotoData?.type || "",
+      photoDataUrl: animalPhotoData?.dataUrl || "",
     },
     surrenderReason: getFormValue("reasons"),
     agreement: {
@@ -405,6 +470,7 @@ function resetForAnotherRequest() {
   highestVisitedStep = 1;
   fillOwnerInfoFromAccount();
   updateReasonCount();
+  clearAnimalPhotoPreview();
   showStep(1);
 }
 
@@ -429,10 +495,38 @@ function bindStepNavigation() {
   }));
 }
 
+function bindWaiverLanguageToggle() {
+  const title = document.getElementById("agreementTitle");
+  const consent = document.getElementById("agreementConsentText");
+  const buttons = document.querySelectorAll("[data-waiver-language]");
+  const copies = document.querySelectorAll("[data-waiver-copy]");
+  if (!buttons.length || !copies.length) return;
+
+  buttons.forEach(button => {
+    button.addEventListener("click", () => {
+      const language = button.dataset.waiverLanguage || "tl";
+      buttons.forEach(item => {
+        const isActive = item === button;
+        item.classList.toggle("is-active", isActive);
+        item.setAttribute("aria-pressed", String(isActive));
+      });
+      copies.forEach(copy => {
+        const isActive = copy.dataset.waiverCopy === language;
+        copy.hidden = !isActive;
+        copy.classList.toggle("is-active", isActive);
+      });
+      if (title) title.textContent = title.dataset[`waiverTitle${language === "en" ? "En" : "Tl"}`] || title.textContent;
+      if (consent) consent.textContent = consent.dataset[`consent${language === "en" ? "En" : "Tl"}`] || consent.textContent;
+    });
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("surrenderForm");
   fillOwnerInfoFromAccount();
   bindStepNavigation();
+  bindWaiverLanguageToggle();
+  bindAnimalPhotoUpload();
   showStep(1, { scroll: false, focus: false });
   loadMySurrenderRequests();
   form?.addEventListener("submit", handleSurrenderSubmit);

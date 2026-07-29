@@ -1,14 +1,32 @@
 const express = require("express");
 const router = express.Router();
+const authenticateToken = require("../middleware/authMiddleware");
+const authorizeRole = require("../middleware/roleMiddleware");
 const {
   getPublicPets,
   getPublicPetById,
   getPublicEvents,
+  getContactMessages,
+  submitContactMessage,
+  replyToContactMessage,
 } = require("../controllers/publicController");
 
 // Public pet browsing
 router.get("/pets", getPublicPets);
 router.get("/pets/:id", getPublicPetById);
 router.get("/events", getPublicEvents);
+router.get(
+  "/contact/messages",
+  authenticateToken,
+  authorizeRole("Admin", "Staff"),
+  getContactMessages
+);
+router.post("/contact", submitContactMessage);
+router.post(
+  "/contact/:id/reply",
+  authenticateToken,
+  authorizeRole("Admin", "Staff"),
+  replyToContactMessage
+);
 
 module.exports = router;

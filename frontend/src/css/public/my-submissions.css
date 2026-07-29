@@ -1,4 +1,7 @@
-﻿.submissions-page {
+.submissions-page {
+  --submission-gold: var(--animua-gold, #F1C045);
+  --submission-gold-dark: #9a6f12;
+  --submission-gold-soft: #fff7df;
   background:
     radial-gradient(circle at 82% 16%, rgba(226, 218, 205, 0.44), transparent 19rem),
     radial-gradient(circle at 18% 10%, rgba(207, 166, 58, 0.08), transparent 24rem),
@@ -628,8 +631,8 @@
 
 .submission-status.review,
 .submission-status.pending {
-  background: #fff2cc;
-  color: #9a6a18;
+  background: var(--submission-gold-soft);
+  color: var(--submission-gold-dark);
 }
 
 .submission-status.approved,
@@ -798,7 +801,7 @@ body.submissions-page > .footer {
 
 .application-detail-modal {
   overflow: hidden;
-  border: 1px solid rgba(226, 218, 210, 0.9);
+  border: 0;
   border-radius: 12px;
   background: #fffefb;
   color: #1f2933;
@@ -812,7 +815,7 @@ body.submissions-page > .footer {
   align-items: center;
   gap: 8px 12px;
   padding: 16px 18px 12px;
-  background: #f4ddd8;
+  background: #7b261d;
 }
 
 .application-detail-accent {
@@ -823,13 +826,13 @@ body.submissions-page > .footer {
   margin: 0;
   font-family: "League Spartan", "Inter", sans-serif;
   font-size: 1.34rem;
-  color: #17212b;
+  color: #fffdf8;
 }
 
 .application-detail-x {
   border: 0;
   background: transparent;
-  color: #17212b;
+  color: #fffdf8;
   font-size: 1.12rem;
   cursor: pointer;
 }
@@ -883,11 +886,12 @@ body.submissions-page > .footer {
 }
 
 .surrender-detail-modal .application-detail-header {
-  background: #f3e3bd;
+  background: var(--submission-gold);
 }
 
 .surrender-type-badge {
-  background: #a87318;
+  background: var(--submission-gold);
+  color: #322512;
 }
 
 .application-detail-line,
@@ -911,7 +915,7 @@ body.submissions-page > .footer {
 
 .application-modal-status {
   margin-top: 24px;
-  border: 1px solid rgba(202, 166, 66, 0.28);
+  border: 1px solid rgba(241, 192, 69, 0.38);
 }
 
 .application-timeline {
@@ -937,11 +941,11 @@ body.submissions-page > .footer {
 }
 
 .surrender-timeline::before {
-  background: linear-gradient(90deg, #a87318 0 50%, rgba(220, 216, 211, 0.78) 50% 100%);
+  background: linear-gradient(90deg, var(--submission-gold) 0 50%, rgba(220, 216, 211, 0.78) 50% 100%);
 }
 
 .surrender-timeline.complete::before {
-  background: #a87318;
+  background: var(--submission-gold);
 }
 
 .application-step {
@@ -975,7 +979,8 @@ body.submissions-page > .footer {
 
 .surrender-timeline .application-step.done > span,
 .surrender-timeline .application-step.active > span {
-  background: #a87318;
+  background: var(--submission-gold);
+  color: #322512;
 }
 
 .application-step strong {
@@ -988,7 +993,7 @@ body.submissions-page > .footer {
 }
 
 .surrender-timeline .application-step.active strong {
-  color: #9d6d15;
+  color: var(--submission-gold-dark);
 }
 
 .application-step small {
@@ -1003,9 +1008,9 @@ body.submissions-page > .footer {
   align-items: start;
   margin: 0 18px 16px;
   padding: 10px 12px;
-  border: 1px solid rgba(202, 166, 66, 0.32);
+  border: 1px solid rgba(241, 192, 69, 0.38);
   border-radius: 8px;
-  background: #fffaf0;
+  background: var(--submission-gold-soft);
 }
 
 .application-detail-note i {
@@ -1013,9 +1018,9 @@ body.submissions-page > .footer {
   height: 21px;
   display: grid;
   place-items: center;
-  border: 2px solid #b78221;
+  border: 2px solid var(--submission-gold);
   border-radius: 999px;
-  color: #9a6a18;
+  color: var(--submission-gold-dark);
   font-size: 0.62rem;
 }
 
@@ -1028,8 +1033,8 @@ body.submissions-page > .footer {
 }
 
 .surrender-detail-note {
-  border-color: rgba(202, 166, 66, 0.32);
-  background: #fffaf0;
+  border-color: rgba(241, 192, 69, 0.38);
+  background: var(--submission-gold-soft);
 }
 
 .application-summary {
@@ -1149,7 +1154,7 @@ body.submissions-page > .footer {
 }
 
 .surrender-answers-toggle i {
-  color: #9d6d15;
+  color: var(--submission-gold-dark);
 }
 
 .approved-next-steps {
@@ -1166,13 +1171,13 @@ body.submissions-page > .footer {
   gap: 12px;
   align-items: start;
   padding: 10px 12px;
-  border: 1px solid rgba(202, 166, 66, 0.26);
+  border: 1px solid rgba(241, 192, 69, 0.38);
   border-radius: 8px;
-  background: #fffaf0;
+  background: var(--submission-gold-soft);
 }
 
 .approved-message i {
-  color: #9d6d15;
+  color: var(--submission-gold-dark);
   font-size: 1rem;
 }
 
@@ -1217,7 +1222,8 @@ body.submissions-page > .footer {
 }
 
 .surrender-schedule-card header > span {
-  background: linear-gradient(135deg, #b27a18, #8f6113);
+  background: var(--submission-gold);
+  color: #322512;
 }
 
 .schedule-card h3 {
@@ -1251,7 +1257,8 @@ body.submissions-page > .footer {
 }
 
 .surrender-schedule-card button {
-  background: linear-gradient(135deg, #b27a18, #8f6113);
+  background: var(--submission-gold);
+  color: #322512;
 }
 
 .schedule-info-grid {
@@ -1278,7 +1285,7 @@ body.submissions-page > .footer {
 }
 
 .surrender-next-steps .schedule-info-grid i {
-  color: #9d6d15;
+  color: var(--submission-gold-dark);
 }
 
 .schedule-info-grid strong {
@@ -1308,14 +1315,14 @@ body.submissions-page > .footer {
   gap: 9px;
   align-items: center;
   padding: 8px 10px;
-  border: 1px solid rgba(202, 166, 66, 0.28);
+  border: 1px solid rgba(241, 192, 69, 0.38);
   border-radius: 8px;
-  background: #fffaf0;
+  background: var(--submission-gold-soft);
   color: #4f5358;
 }
 
 .reschedule-request-note i {
-  color: #9d6d15;
+  color: var(--submission-gold-dark);
   font-size: 0.82rem;
 }
 
@@ -1345,8 +1352,8 @@ body.submissions-page > .footer {
 }
 
 .schedule-feedback.pending {
-  border-color: rgba(202, 166, 66, 0.3);
-  background: #fffaf0;
+  border-color: rgba(241, 192, 69, 0.38);
+  background: var(--submission-gold-soft);
 }
 
 .schedule-feedback i {
@@ -1361,7 +1368,8 @@ body.submissions-page > .footer {
 }
 
 .schedule-feedback.pending i {
-  background: #9d6d15;
+  background: var(--submission-gold);
+  color: #322512;
 }
 
 .schedule-feedback p {
@@ -1394,7 +1402,7 @@ body.submissions-page > .footer {
 
 .schedule-picker {
   position: relative;
-  padding: 18px 16px 10px;
+  padding: 18px 16px 0;
   text-align: left;
 }
 
@@ -1404,7 +1412,7 @@ body.submissions-page > .footer {
   right: 14px;
   border: 0;
   background: transparent;
-  color: #7b3025;
+  color: #17212b;
   font-size: 1rem;
   cursor: pointer;
 }
@@ -1436,7 +1444,7 @@ body.submissions-page > .footer {
 }
 
 .schedule-picker-section + .schedule-picker-section {
-  margin-top: 9px;
+  margin-top: 8px;
 }
 
 .schedule-section-title {
@@ -1452,8 +1460,8 @@ body.submissions-page > .footer {
   display: grid;
   place-items: center;
   border-radius: 5px;
-  background: linear-gradient(135deg, #b27a18, #8f6113);
-  color: #fff;
+  background: var(--submission-gold);
+  color: #322512;
 }
 
 .schedule-section-title strong {
@@ -1525,19 +1533,24 @@ body.submissions-page > .footer {
 }
 
 .schedule-day.selected {
-  background: linear-gradient(135deg, #b27a18, #8f6113);
-  color: #fff;
-  box-shadow: 0 8px 14px rgba(157, 109, 21, 0.18);
+  background: var(--submission-gold);
+  color: #322512;
+  box-shadow: 0 8px 14px rgba(241, 192, 69, 0.24);
 }
 
 .schedule-picker.red .schedule-section-title span,
 .schedule-picker.red .schedule-day.selected,
 .schedule-picker.red .schedule-time-options button.selected {
   background: linear-gradient(135deg, #9d2b24, #7b3025);
+  color: #fffdf8;
 }
 
 .schedule-picker.red .schedule-day.selected {
   box-shadow: 0 8px 14px rgba(123, 48, 37, 0.18);
+}
+
+.schedule-picker.red .schedule-time-options button {
+  border-color: rgba(157, 43, 36, 0.42);
 }
 
 .schedule-time-options {
@@ -1550,7 +1563,7 @@ body.submissions-page > .footer {
 .schedule-time-options button {
   min-width: 74px;
   height: 30px;
-  border: 1.5px solid rgba(157, 109, 21, 0.45);
+  border: 1.5px solid rgba(241, 192, 69, 0.62);
   border-radius: 8px;
   background: #fff;
   color: #3f454c;
@@ -1560,8 +1573,8 @@ body.submissions-page > .footer {
 
 .schedule-time-options button.selected {
   border-color: transparent;
-  background: linear-gradient(135deg, #b27a18, #8f6113);
-  color: #fff;
+  background: var(--submission-gold);
+  color: #322512;
 }
 
 .schedule-time-options button:disabled {
@@ -1605,7 +1618,25 @@ body.submissions-page > .footer {
 .schedule-picker-save {
   min-width: 150px !important;
   height: 40px !important;
-  margin: 10px auto 14px !important;
+  margin: 4px auto 10px !important;
+}
+
+.schedule-picker-popup:has(.schedule-picker.gold) .schedule-picker-save {
+  border: 1px solid var(--submission-gold) !important;
+  background: var(--submission-gold) !important;
+  color: #322512 !important;
+  box-shadow: 0 12px 22px rgba(241, 192, 69, 0.24) !important;
+}
+
+.schedule-picker-popup:has(.schedule-picker.red) .schedule-picker-save {
+  border: 1px solid #9d3d33 !important;
+  background: #9d3d33 !important;
+  color: #fffdf8 !important;
+  box-shadow: 0 12px 22px rgba(157, 61, 51, 0.22) !important;
+}
+
+.schedule-picker-popup .swal2-actions {
+  margin: 12px 0 8px !important;
 }
 
 .application-answers-toggle {

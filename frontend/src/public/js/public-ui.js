@@ -23,11 +23,11 @@ const NEWS_NEPO_STRAY_CATS_STORY_IMAGE = new URL(
   import.meta.url
 ).href;
 const HIGHLIGHT_NEWS_ALERT_IMAGE = new URL(
-  "../../assets/images/highlight-news-alert.jpg",
+  "../../assets/images/highlight-news-alert-palit-an.png",
   import.meta.url
 ).href;
 const HIGHLIGHT_SUCCESS_STORY_IMAGE = new URL(
-  "../../assets/images/highlight-success-story.jpg",
+  "../../assets/images/highlight-success-story-main.jpg",
   import.meta.url
 ).href;
 const HIGHLIGHT_UPCOMING_EVENT_IMAGE = new URL(
@@ -88,11 +88,11 @@ const PROFILE_PHOTO_MAX_BYTES = 320000;
 const DEFAULT_NOTIFICATION_SETTINGS = {
   applicationUpdates: true,
   surrenderRequestUpdates: true,
-  announcementsEvents: true,
 };
 let currentProfileAccount = null;
 let pendingProfilePhotoDataUrl = "";
 let lastProfileTrigger = null;
+let hasPendingProfileChanges = false;
 
 const loginSection = document.getElementById("login-section");
 const registerSection = document.getElementById("register-section");
@@ -295,6 +295,44 @@ function renderUserAvatar(element, fullName = "User", photoDataUrl = "") {
     : getInitial(fullName);
 }
 
+function clearPublicSession() {
+  localStorage.removeItem("animua_token");
+  localStorage.removeItem("user_role");
+  localStorage.removeItem("user_name");
+  localStorage.removeItem("user_email");
+  localStorage.removeItem("user_profile_photo");
+  localStorage.removeItem("is_logged_in");
+  localStorage.removeItem("show_welcome_toast");
+  currentProfileAccount = null;
+  pendingProfilePhotoDataUrl = "";
+  hasPendingProfileChanges = false;
+}
+
+function isSessionExpiredError(errorOrMessage = "") {
+  const message = String(errorOrMessage?.message || errorOrMessage || "").toLowerCase();
+  return message.includes("token has expired") || message.includes("jwt expired");
+}
+
+function promptLoginAfterSessionExpired() {
+  clearPublicSession();
+  updateAuthUI();
+  closeProfileModal();
+  Swal.fire({
+    icon: "info",
+    title: "Please Log In Again",
+    text: "Your session expired. Sign in again to view your notifications.",
+    customClass: {
+      popup: "animua-popup",
+      confirmButton: "animua-confirm"
+    },
+    buttonsStyling: false
+  }).then(() => {
+    localStorage.setItem("animua_open_auth_modal", "true");
+    showLoginView();
+    openAuthModal();
+  });
+}
+
 function updateAuthUI() {
   const dropdownUserName = document.getElementById("dropdownUserName");
   const loginNavBtn = document.getElementById("loginNavBtn");
@@ -305,10 +343,11 @@ function updateAuthUI() {
   const logoutBtn = document.getElementById("logoutBtn");
 
   const hasToken = Boolean(localStorage.getItem("animua_token"));
-  const isLoggedIn = localStorage.getItem("is_logged_in") === "true" || hasToken;
+  const isLoggedIn = hasToken;
   const userName = localStorage.getItem("user_name") || "User";
   const userPhoto = localStorage.getItem("user_profile_photo") || "";
   const displayName = getFirstName(userName);
+  const dropdownAvatar = document.querySelector(".user-dropdown-avatar");
 
   if (isLoggedIn) {
     if (loginNavBtn) loginNavBtn.classList.add("hidden");
@@ -316,28 +355,28 @@ function updateAuthUI() {
     if (loggedUserName) loggedUserName.textContent = displayName;
     if (dropdownUserName) dropdownUserName.textContent = displayName;
     renderUserAvatar(userAvatarMini, userName, userPhoto);
-    renderUserAvatar(dropdownUserInitial?.closest(".user-dropdown-avatar"), userName, userPhoto);
+    renderUserAvatar(dropdownAvatar, userName, userPhoto);
   } else {
     if (loginNavBtn) loginNavBtn.classList.remove("hidden");
     if (userLoggedInBox) userLoggedInBox.classList.add("hidden");
     if (userAvatarMini) {
       userAvatarMini.innerHTML = '<i class="fa-solid fa-user"></i>';
     }
-    renderUserAvatar(dropdownUserInitial?.closest(".user-dropdown-avatar"), "Account", "");
+    renderUserAvatar(dropdownAvatar, "Account", "");
   }
 
   if (logoutBtn && !logoutBtn.dataset.bound) {
     logoutBtn.dataset.bound = "true";
     logoutBtn.addEventListener("click", async () => {
       const result = await Swal.fire({
-        title: "Log out of ANIMUA?",
+        title: "Log Out?",
         html: `
-          <p class="animua-logout-copy">You will need to sign in again to access your account and continue your activities.</p>
+          <p class="animua-logout-copy">You will need to sign in again to access your account.</p>
         `,
         iconHtml: '<span class="animua-logout-mark"><i class="fa-solid fa-right-from-bracket"></i></span>',
         showCancelButton: true,
-        showCloseButton: true,
-        confirmButtonText: '<i class="fa-solid fa-right-from-bracket"></i><span>Log Out</span>',
+        showCloseButton: false,
+        confirmButtonText: '<span>Log Out</span>',
         cancelButtonText: "Cancel",
         customClass: {
           popup: "animua-popup animua-logout-popup",
@@ -351,13 +390,7 @@ function updateAuthUI() {
 
       if (!result.isConfirmed) return;
 
-      localStorage.removeItem("animua_token");
-      localStorage.removeItem("user_role");
-      localStorage.removeItem("user_name");
-      localStorage.removeItem("user_email");
-      localStorage.removeItem("user_profile_photo");
-      localStorage.removeItem("is_logged_in");
-      localStorage.removeItem("show_welcome_toast");
+      clearPublicSession();
 
       window.location.href = "/pages/public/home.html";
     });
@@ -453,8 +486,8 @@ function setupHomeStories() {
       titleHtml: 'Pag-rescue sa<br><span>stray cats</span>',
       date: "July 21, 2026",
       sortDate: "2026-07-21",
-      image: NEWS_NEPO_STRAY_CATS_STORY_IMAGE,
-      imageAlt: "Stray cat rescue operation in Nepo Mart",
+      image: HIGHLIGHT_NEWS_ALERT_IMAGE,
+      imageAlt: "Rescued cats inside a pet carrier",
       source: "CLTV36 News",
       photoCredit: "Photo from Angeles CIO",
       href: "https://www.facebook.com/cltv36news",
@@ -1126,7 +1159,7 @@ function setupHomeStories() {
 
     if (!events.length) {
       storyModalContent.innerHTML =
-        '<p class="story-empty-state">There are no upcoming events at the moment. Please check again for future announcements.</p>';
+        '<p class="story-empty-state">There are no upcoming events at the moment. Please check again soon.</p>';
       return;
     }
 
@@ -1878,6 +1911,7 @@ async function openProfileModal(trigger = null) {
   profileModal.setAttribute("aria-hidden", "false");
   document.body.classList.add("modal-open");
   setProfileEditing(false);
+  setProfilePendingChanges(false);
   setProfileSaveState("idle");
   setProfileStatus("Loading profile...");
 
@@ -1886,6 +1920,11 @@ async function openProfileModal(trigger = null) {
     renderProfileModal(account);
     setProfileStatus("");
   } catch (error) {
+    if (isSessionExpiredError(error)) {
+      promptLoginAfterSessionExpired();
+      return;
+    }
+
     setProfileStatus(error.message || "Unable to load your profile.");
   }
 }
@@ -1898,6 +1937,7 @@ function closeProfileModal() {
   document.body.classList.remove("modal-open");
   setProfileStatus("");
   setProfileEditing(false);
+  setProfilePendingChanges(false);
   setProfileSaveState("idle");
   lastProfileTrigger?.focus?.({ preventScroll: true });
 }
@@ -1959,10 +1999,18 @@ function setProfileEditing(isEditing) {
     if (field) field.readOnly = !isEditing;
   });
 
-  if (profileSaveBtn) profileSaveBtn.disabled = !isEditing;
+  if (profileSaveBtn) profileSaveBtn.disabled = !isEditing && !hasPendingProfileChanges;
   if (profileEditBtn) {
     const label = profileEditBtn.querySelector("span") || profileEditBtn;
     label.textContent = isEditing ? "Editing..." : "Edit Profile";
+  }
+}
+
+function setProfilePendingChanges(hasChanges) {
+  hasPendingProfileChanges = Boolean(hasChanges);
+  if (profileSaveBtn) {
+    profileSaveBtn.disabled =
+      !hasPendingProfileChanges && !profileForm?.classList.contains("is-editing");
   }
 }
 
@@ -2017,7 +2065,6 @@ function normalizeNotificationSettings(settings = {}) {
   return {
     applicationUpdates: settings.applicationUpdates !== false,
     surrenderRequestUpdates: settings.surrenderRequestUpdates !== false,
-    announcementsEvents: settings.announcementsEvents !== false,
   };
 }
 
@@ -2025,7 +2072,7 @@ function getNotificationPreferenceSummary(settings = {}) {
   const normalized = normalizeNotificationSettings(settings);
   const enabledCount = Object.values(normalized).filter(Boolean).length;
 
-  if (enabledCount === 3) return "Email and push notifications";
+  if (enabledCount === 2) return "Email and push notifications";
   if (enabledCount === 0) return "No notifications";
   if (enabledCount === 1) return "1 notification category enabled";
   return `${enabledCount} notification categories enabled`;
@@ -2058,6 +2105,11 @@ async function showNotificationSettingsDialog({ returnToProfile = false } = {}) 
   try {
     account = await ensureCurrentAccount();
   } catch (error) {
+    if (isSessionExpiredError(error)) {
+      promptLoginAfterSessionExpired();
+      return;
+    }
+
     Swal.fire({
       icon: "error",
       title: "Unable to Load Notifications",
@@ -2105,13 +2157,6 @@ async function showNotificationSettingsDialog({ returnToProfile = false } = {}) 
             title: "Surrender Request Updates",
             description: "Updates about your submitted requests.",
             checked: settings.surrenderRequestUpdates
-          })}
-          ${renderNotificationToggleRow({
-            key: "announcementsEvents",
-            icon: "fa-solid fa-bullhorn",
-            title: "Announcements & Events",
-            description: "Shelter announcements and upcoming veterinary events.",
-            checked: settings.announcementsEvents
           })}
         </div>
         <p class="notification-settings-status" aria-live="polite"></p>
@@ -2258,7 +2303,7 @@ async function saveNotificationSettings(settings) {
 async function handleProfileSave(event) {
   event.preventDefault();
 
-  if (!profileForm?.classList.contains("is-editing")) {
+  if (!profileForm?.classList.contains("is-editing") && !hasPendingProfileChanges) {
     setProfileEditing(true);
     return;
   }
@@ -2324,6 +2369,7 @@ async function handleProfileSave(event) {
     updateAuthUI();
     renderProfileModal(currentProfileAccount);
     setProfileEditing(false);
+    setProfilePendingChanges(false);
     setProfileSaveState("saved");
     setProfileStatus("Changes saved successfully.", true);
   } catch (error) {
@@ -2339,12 +2385,12 @@ function updateHeaderProfile(fullName, photoDataUrl = "") {
   const loggedUserName = document.getElementById("loggedUserName");
   const dropdownUserName = document.getElementById("dropdownUserName");
   const userAvatarMini = document.querySelector(".user-avatar-mini");
-  const dropdownUserInitial = document.getElementById("dropdownUserInitial");
+  const dropdownAvatar = document.querySelector(".user-dropdown-avatar");
 
   if (loggedUserName) loggedUserName.textContent = firstName;
   if (dropdownUserName) dropdownUserName.textContent = firstName;
   renderUserAvatar(userAvatarMini, fullName, photoDataUrl);
-  renderUserAvatar(dropdownUserInitial?.closest(".user-dropdown-avatar"), fullName, photoDataUrl);
+  renderUserAvatar(dropdownAvatar, fullName, photoDataUrl);
 }
 
 async function handleProfilePhotoChange(event) {
@@ -2359,8 +2405,12 @@ async function handleProfilePhotoChange(event) {
 
   try {
     pendingProfilePhotoDataUrl = await compressProfilePhoto(file);
-    renderProfileAvatar(getValue("profileFullName") || "User", pendingProfilePhotoDataUrl);
-    setProfileStatus("Photo ready. Click Save Changes to update your profile.", true);
+    const fullName = getValue("profileFullName") || currentProfileAccount?.fullName || "User";
+    setProfilePendingChanges(true);
+    setProfileSaveState("idle");
+    renderProfileAvatar(fullName, pendingProfilePhotoDataUrl);
+    updateHeaderProfile(fullName, pendingProfilePhotoDataUrl);
+    setProfileStatus("Photo preview updated. Click Save Changes to keep it.", true);
   } catch (error) {
     setProfileStatus(error.message || "Unable to read that image.");
   }
@@ -2639,11 +2689,9 @@ function setupProfileModal() {
 
   profileForm?.addEventListener("submit", handleProfileSave);
   profileChangePhotoBtn?.addEventListener("click", () => {
-    setProfileEditing(true);
     profilePhotoInput?.click();
   });
   profileAvatarPhotoBtn?.addEventListener("click", () => {
-    setProfileEditing(true);
     profilePhotoInput?.click();
   });
   profilePhotoInput?.addEventListener("change", handleProfilePhotoChange);
@@ -2804,8 +2852,11 @@ async function updateUsername(newName) {
   const userAvatarMini = document.querySelector(".user-avatar-mini");
   if (userAvatarMini) userAvatarMini.textContent = getInitial(data.fullName || newName);
 
-  const dropdownUserInitial = document.getElementById("dropdownUserInitial");
-  if (dropdownUserInitial) dropdownUserInitial.textContent = getInitial(data.fullName || newName);
+  renderUserAvatar(
+    document.querySelector(".user-dropdown-avatar"),
+    data.fullName || newName,
+    localStorage.getItem("user_profile_photo") || ""
+  );
 
   Swal.fire({
     icon: "success",

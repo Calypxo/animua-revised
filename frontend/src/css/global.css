@@ -667,15 +667,22 @@ button {
   padding: 0;
 }
 
+.profile-modal-title {
+  display: flex;
+  flex-direction: column;
+}
+
 .profile-modal-title span {
   display: block;
+  order: 2;
   width: 29px;
   height: 2px;
-  margin-bottom: 5px;
+  margin-top: 5px;
   background: #d5ad3d;
 }
 
 .profile-modal-title h2 {
+  order: 1;
   margin: 0;
   color: #16212b;
   font-family: "League Spartan", "Inter", sans-serif;
@@ -1599,21 +1606,7 @@ button {
 }
 
 .animua-popup .swal2-icon::after {
-  content: "" !important;
-  position: absolute !important;
-  inset: 15px !important;
-  z-index: 1 !important;
-  border: 3px solid currentColor !important;
-  clip-path: polygon(
-    30% 0,
-    70% 0,
-    100% 30%,
-    100% 70%,
-    70% 100%,
-    30% 100%,
-    0 70%,
-    0 30%
-  ) !important;
+  display: none !important;
 }
 
 .animua-popup .swal2-icon .swal2-icon-content,
@@ -1636,6 +1629,8 @@ button {
 
 .animua-popup .swal2-icon.swal2-warning::before {
   content: "!";
+  font-size: 2rem !important;
+  font-weight: 900 !important;
 }
 
 .animua-popup .swal2-icon.swal2-question::before {
@@ -1674,10 +1669,10 @@ button {
 }
 
 .animua-popup .swal2-html-container {
-  margin: 12px 0 0 !important;
+  margin: 8px 0 0 !important;
   color: rgba(32, 48, 58, 0.74) !important;
   font-size: 0.93rem !important;
-  line-height: 1.5 !important;
+  line-height: 1.38 !important;
 }
 
 .animua-captcha-check {
@@ -1825,6 +1820,89 @@ button {
   margin: 24px 0 0 !important;
   gap: 12px !important;
   flex-wrap: nowrap !important;
+}
+
+.animua-auth-feedback-popup,
+.animua-logout-popup {
+  width: min(390px, calc(100% - 28px)) !important;
+  min-height: 0 !important;
+  padding: 24px 30px 24px !important;
+  border-radius: 16px !important;
+  background: #fffdf9 !important;
+  text-align: center !important;
+}
+
+.animua-auth-feedback-popup .swal2-icon {
+  width: 70px !important;
+  height: 70px !important;
+  margin: 0 auto 14px !important;
+}
+
+.animua-auth-feedback-popup .swal2-icon::after {
+  display: none !important;
+}
+
+.animua-auth-feedback-popup .swal2-icon::before {
+  font-size: 1.9rem !important;
+  font-weight: 700 !important;
+}
+
+.animua-auth-feedback-popup .swal2-title,
+.animua-logout-popup .swal2-title {
+  color: var(--animua-red-dark) !important;
+  font-family: "League Spartan", "Inter", sans-serif !important;
+  font-size: 1.62rem !important;
+  font-weight: 750 !important;
+  line-height: 1.05 !important;
+  letter-spacing: 0 !important;
+}
+
+.animua-auth-feedback-popup .swal2-html-container,
+.animua-logout-popup .swal2-html-container {
+  margin: 10px 0 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  color: rgba(32, 48, 58, 0.72) !important;
+  font-size: 0.92rem !important;
+  font-weight: 500 !important;
+  line-height: 1.34 !important;
+}
+
+.animua-auth-feedback-popup .swal2-html-container p {
+  margin: 0 !important;
+}
+
+.animua-auth-feedback-popup .swal2-actions {
+  margin: 18px 0 0 !important;
+  justify-content: center !important;
+}
+
+.animua-auth-feedback-popup .animua-confirm {
+  min-width: 150px !important;
+  min-height: 42px !important;
+  border-radius: 8px !important;
+  font-size: 0.9rem !important;
+  font-weight: 750 !important;
+}
+
+.animua-feedback-close,
+.animua-logout-close {
+  top: 16px !important;
+  right: 16px !important;
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 50% !important;
+  background: #F1E9DD !important;
+  color: var(--animua-red-dark) !important;
+  font-size: 1.32rem !important;
+  line-height: 1 !important;
+  transition: filter 0.2s ease, transform 0.2s ease !important;
+}
+
+.animua-feedback-close:hover,
+.animua-logout-close:hover {
+  filter: brightness(0.97) !important;
+  transform: translateY(-1px) !important;
 }
 
 .change-password-popup {
@@ -2426,16 +2504,13 @@ button {
 }
 
 .animua-logout-popup {
-  width: min(430px, calc(100% - 28px)) !important;
-  padding: 26px clamp(22px, 4vw, 34px) 28px !important;
-  border-radius: 16px !important;
-  background: #fffdf9 !important;
+  padding: 24px 30px 26px !important;
 }
 
 .animua-logout-popup .animua-logout-icon {
-  width: 70px !important;
-  height: 70px !important;
-  margin: 6px auto 18px !important;
+  width: 64px !important;
+  height: 64px !important;
+  margin: 2px auto 16px !important;
   border: 0 !important;
   border-radius: 50% !important;
   background: #F2E1DD !important;
@@ -2462,65 +2537,44 @@ button {
   height: 100% !important;
   color: var(--animua-red-dark) !important;
   font-family: "Inter", Arial, sans-serif !important;
-  font-size: 1.75rem !important;
-  font-weight: 850 !important;
+  font-size: 1.42rem !important;
+  font-weight: 700 !important;
   line-height: 1 !important;
 }
 
 .animua-logout-popup .swal2-title {
-  color: var(--animua-red-dark) !important;
-  font-size: clamp(1.55rem, 4vw, 2rem) !important;
-  line-height: 1.08 !important;
-  letter-spacing: 0 !important;
+  font-size: 1.55rem !important;
+  font-weight: 750 !important;
 }
 
 .animua-logout-popup .swal2-html-container {
-  margin: 14px 0 0 !important;
-  padding: 0 !important;
-  overflow: visible !important;
-  color: rgba(32, 48, 58, 0.72) !important;
-  font-size: 0.92rem !important;
+  margin: 16px 0 0 !important;
 }
 
 .animua-logout-copy {
-  max-width: 330px;
+  max-width: 300px;
   margin: 0 auto !important;
   color: rgba(32, 48, 58, 0.72) !important;
-  font-size: clamp(0.92rem, 2.2vw, 1rem) !important;
-  line-height: 1.55 !important;
+  font-size: 0.88rem !important;
+  font-weight: 500 !important;
+  line-height: 1.42 !important;
 }
 
 .animua-logout-popup .swal2-actions {
   width: 100% !important;
-  margin-top: 24px !important;
-  gap: 14px !important;
-}
-
-.animua-logout-close {
-  top: 16px !important;
-  right: 16px !important;
-  width: 38px !important;
-  height: 38px !important;
-  border-radius: 50% !important;
-  background: #F1E9DD !important;
-  color: var(--animua-red-dark) !important;
-  font-size: 1.55rem !important;
-  line-height: 1 !important;
-  transition: filter 0.2s ease, transform 0.2s ease !important;
-}
-
-.animua-logout-close:hover {
-  filter: brightness(0.97) !important;
-  transform: translateY(-1px) !important;
+  margin-top: 22px !important;
+  gap: 12px !important;
 }
 
 .animua-logout-popup .animua-confirm,
 .animua-logout-popup .animua-cancel {
   flex: 1 1 0 !important;
+  max-width: 150px !important;
   min-width: 0 !important;
-  min-height: 50px !important;
-  border-radius: 10px !important;
-  font-size: 0.95rem !important;
+  min-height: 42px !important;
+  border-radius: 8px !important;
+  font-size: 0.86rem !important;
+  font-weight: 750 !important;
 }
 
 .animua-logout-popup .animua-confirm {
@@ -2536,31 +2590,24 @@ button {
 }
 
 .animua-logout-popup .animua-cancel {
-  border: 2px solid var(--animua-red-dark) !important;
+  border: 1px solid var(--animua-red-dark) !important;
   background: transparent !important;
   color: var(--animua-red-dark) !important;
 }
 
 @media (max-width: 520px) {
   .animua-logout-popup {
-    padding: 28px 18px 24px !important;
+    padding: 24px 18px 22px !important;
   }
 
   .animua-logout-popup .animua-logout-icon {
-    width: 62px !important;
-    height: 62px !important;
-    margin-top: 14px !important;
+    width: 60px !important;
+    height: 60px !important;
+    margin-top: 8px !important;
   }
 
   .animua-logout-mark {
-    font-size: 1.55rem !important;
-  }
-
-  .animua-logout-close {
-    top: 14px !important;
-    right: 14px !important;
-    width: 42px !important;
-    height: 42px !important;
+    font-size: 1.34rem !important;
   }
 
   .animua-logout-popup .swal2-actions {

@@ -10,81 +10,116 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="../../src/css/public/home.css">
+  <link rel="stylesheet" href="../../src/css/global.css">
   <link rel="stylesheet" href="../../src/css/public/furbabies.css">
-<link rel="stylesheet" href="../../src/css/global.css">
-<link rel="stylesheet" href="../../src/css/public/public-design-system.css">
 </head>
-<body class="furbabies-page">
+<body class="home-page furbabies-page">
 
   <!-- Header -->
- <header class="header" id="home">
-  <div class="container nav-shell">
-    <a href="#home" class="logo">
-      <img src="../../src/assets/images/animua-logo-transparent.png" alt="ANIMUA" class="navbar-logo-img">
-      <span class="navbar-brand-copy">
-        <span class="navbar-brand-name">ANIMUA</span>
-        <span class="navbar-brand-tagline">Connect. Learn. Adopt.</span>
-      </span>
-    </a>
-
-    <nav class="navbar" id="navbar">
-      <a href="home.html">Home</a>
-      <a href="find-furbabies.html" class="active">Find Furbabies</a>
-      <a href="announcements.html">Announcements</a>
-      <a href="surrender.html">Surrender</a>
-      <a href="contact.html">Contact Us</a>
-    </nav>
-
-    <div class="nav-actions">
-      <div class="user-actions-wrap">
-        <div class="notification-wrap">
-          <button class="notification-btn" id="notificationBtn" aria-label="Notifications">
-            <i class="fa-regular fa-bell"></i>
-            <span class="notification-dot"></span>
-          </button>
-
-          <div class="notification-popup" id="notificationPopup">
-            <div class="notification-popup-head">
-              <h4>Notifications</h4>
-            </div>
-            <ul class="notification-list">
-              <li>New animals were recently added for adoption.</li>
-              <li>Please complete forms carefully before submission.</li>
-              <li>Shelter announcements will appear here.</li>
-            </ul>
-          </div>
-        </div>
-
-        <a href="#" id="loginNavBtn" class="login-btn" aria-label="Login">
-          <i class="fa-regular fa-user"></i>
-          <span>Login</span>
+  <header class="header" id="home">
+    <div class="main-nav-wrap">
+      <div class="container nav-shell">
+        <a href="home.html" class="logo">
+          <img src="../../src/assets/images/animua-logo-transparent.png" alt="ANIMUA" class="navbar-logo-img">
+          <span class="navbar-brand-copy">
+            <span class="navbar-brand-name">ANIMUA</span>
+            <span class="navbar-brand-tagline">Connect. Learn. Adopt.</span>
+          </span>
         </a>
 
-        <div id="userLoggedInBox" class="hidden user-pill">
-          <span id="loggedUserName" class="user-pill-name"></span>
+        <nav class="navbar" id="navbar">
+          <a href="home.html">Home</a>
+          <a href="find-furbabies.html" class="active">Find Furbabies</a>
+          <a href="announcements.html">Announcements</a>
+          <a href="surrender.html">Surrender</a>
+          <a href="contact.html">Contact Us</a>
+        </nav>
 
-          <button id="logoutBtn" type="button" class="logout-icon-btn user-pill-logout" aria-label="Logout">
-            <i class="fa-solid fa-right-from-bracket"></i>
+        <div class="nav-actions">
+          <div class="user-actions-wrap">
+            <div class="notification-wrap">
+              <button class="notification-btn" id="notificationBtn" aria-label="Notifications">
+                <i class="fa-solid fa-bell"></i>
+                <span class="notification-dot"></span>
+              </button>
+
+              <div class="notification-popup" id="notificationPopup">
+                <div class="notification-popup-head">
+                  <h4>Notifications</h4>
+                </div>
+                <ul class="notification-list">
+                  <li>New animals were recently added for adoption.</li>
+                  <li>Please complete forms carefully before submission.</li>
+                </ul>
+              </div>
+            </div>
+
+            <a href="#" id="loginNavBtn" class="login-btn" aria-label="Login">
+              <i class="fa-solid fa-user"></i>
+              <span>Login</span>
+            </a>
+
+            <div id="userLoggedInBox" class="hidden user-pill user-menu">
+              <button type="button" class="user-menu-btn" id="userMenuBtn">
+                <span class="user-avatar-mini">
+                  <i class="fa-regular fa-user"></i>
+                </span>
+
+                <span id="loggedUserName" class="user-pill-name"></span>
+
+                <span class="user-menu-chevron">
+                  <i class="fa-solid fa-chevron-down"></i>
+                </span>
+              </button>
+
+              <div class="user-dropdown hidden" id="userDropdown">
+                <div class="user-dropdown-head">
+                  <div class="user-dropdown-avatar">
+                    <span id="dropdownUserInitial">A</span>
+                  </div>
+
+                  <div>
+                    <strong id="dropdownUserName">Account</strong>
+                  </div>
+                </div>
+
+                <button type="button" class="user-dropdown-item" id="viewProfileBtn">
+                  <i class="fa-regular fa-user"></i>
+                  <span>View Profile</span>
+                </button>
+
+                <button type="button" class="user-dropdown-item" id="myApplicationsBtn">
+                  <i class="fa-regular fa-file-lines"></i>
+                  <span>My Applications</span>
+                </button>
+
+                <div class="user-dropdown-divider"></div>
+
+                <button type="button" id="logoutBtn" class="user-dropdown-item logout-option">
+                  <i class="fa-solid fa-right-from-bracket"></i>
+                  <span>Log out</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <button class="menu-toggle" id="menuToggle" aria-label="Toggle Navigation">
+            <span></span>
+            <span></span>
+            <span></span>
           </button>
         </div>
       </div>
-
-      <button class="menu-toggle" id="menuToggle" aria-label="Toggle Navigation">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
     </div>
-  </div>
-</header>
+  </header>
 
   <!-- MAIN BANNER -->
 <section class="furbabies-hero">
   <div class="container">
     <div class="finder-shell reveal">
       <div class="finder-left">
-        <span class="finder-kicker">Find Furbabies</span>
-        <h1>Meet adoptable pets ready for a fresh start.</h1>
+        <h1>Meet adoptable pets ready for a <span>fresh start.</span></h1>
         <p>
           Browse adoptable dogs and cats, search by name, filter by type,
           and discover a companion that matches your lifestyle.
@@ -101,40 +136,7 @@
         </div>
       </div>
 
-      <div class="finder-right">
-        <div class="pet-showcase">
-          <div class="showcase-main">
-            <img src="../../src/assets/images/dog.jpg" alt="Adoptable dog">
-            <div class="showcase-label">Featured Rescue</div>
-          </div>
-
-          <div class="showcase-side">
-            <div class="showcase-small-card">
-              <img src="../../src/assets/images/cat.jpg" alt="Adoptable cat">
-            </div>
-
-            <div class="showcase-stats-card">
-              <div class="showcase-stat">
-                <strong>40</strong>
-                <span>Available Pets</span>
-              </div>
-              <div class="showcase-divider"></div>
-              <div class="showcase-stat">
-                <strong>Dog & Cat</strong>
-                <span>Ready to meet you</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="showcase-floating">
-            <i class="fa-solid fa-circle-info"></i>
-            <div>
-              <strong>Adopt with care</strong>
-              <p>Browse, match, and start your journey.</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <span class="hero-pet-count-hidden" id="heroPetCount" aria-hidden="true">40</span>
     </div>
   </div>
 </section>
@@ -144,20 +146,25 @@
     <div class="container">
       <div class="browser-toolbar reveal">
         <div class="browser-toolbar-left">
-          <h2>Available Companions</h2>
-          <p id="resultsCount">40 pets found</p>
+          <span class="browser-title-icon"><i class="fa-solid fa-paw" aria-hidden="true"></i></span>
+          <div>
+            <h2>Available Companions</h2>
+            <p id="resultsCount">40 pets found</p>
+          </div>
         </div>
+      </div>
 
-        <div class="browser-toolbar-right">
-          <div class="filter-tabs">
-            <button class="filter-tab active" data-filter="all">All</button>
-            <button class="filter-tab" data-filter="dog">Dog</button>
-            <button class="filter-tab" data-filter="cat">Cat</button>
+      <div class="browser-surface reveal">
+        <div class="browser-filter-panel">
+          <div class="search-box">
+            <span class="browser-control-icon"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></span>
+            <input type="text" id="petSearch" placeholder="Search by name, breed, or description...">
           </div>
 
-          <div class="search-box">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="petSearch" placeholder="Search description, breed, or color...">
+          <div class="filter-tabs">
+            <button class="filter-tab active" data-filter="all"><i class="fa-solid fa-paw" aria-hidden="true"></i> All</button>
+            <button class="filter-tab" data-filter="dog"><i class="fa-solid fa-dog" aria-hidden="true"></i> Dog</button>
+            <button class="filter-tab" data-filter="cat"><i class="fa-solid fa-cat" aria-hidden="true"></i> Cat</button>
           </div>
         </div>
       </div>
@@ -168,6 +175,15 @@
         <i class="fa-solid fa-face-sad-tear"></i>
         <h3>No pets matched your search.</h3>
         <p>Try another description, breed, or color, or switch the species filter.</p>
+      </div>
+
+      <div class="adoption-reminder reveal">
+        <span><i class="fa-solid fa-heart-circle-check" aria-hidden="true"></i></span>
+        <div>
+          <h3>Every adoption saves a life.</h3>
+          <p>All animals are vaccinated, dewormed, and given proper vet care before adoption.</p>
+        </div>
+        <a class="btn secondary-btn" href="home.html#home-highlights">Learn About Adoption</a>
       </div>
     </div>
   </section>
@@ -180,26 +196,43 @@
         <img src="../../src/assets/images/animua-logo-transparent.png" alt="ANIMUA" class="footer-logo-img">
         <span class="footer-brand-copy">
           <span class="footer-brand-name">ANIMUA</span>
-          <span class="footer-brand-tagline">Connect. Learn. Adopt.</span>
+          <span class="footer-brand-tagline">Angeles City Animal Welfare Portal</span>
         </span>
       </a>
       <p>
-          A partnership project dedicated to rehoming rescued animals, promoting
-          responsible adoption, and creating safer futures for shelter pets.
+          Connecting people with shelter animals through responsible adoption,
+          compatibility matching, and shelter-reviewed services.
         </p>
     </div>
 
-     <div class="footer-links">
-        <h4>Quick Links</h4>
+      <div class="footer-links">
+        <h4>Explore</h4>
         <a href="home.html">Home</a>
         <a href="find-furbabies.html">Find Furbabies</a>
-        <a href="surrender.html">Surrender</a>
-         <a href="contact.html">Contact</a>
+        <a href="home.html?quizIntro=open">Compatibility Quiz</a>
+        <a href="home.html#home-highlights">Upcoming Events</a>
+      </div>
+
+      <div class="footer-links footer-support">
+        <h4>Shelter Services</h4>
+        <a href="home.html#home-highlights">Adoption Guide</a>
+        <a href="surrender.html">Surrender Request</a>
+        <a href="contact.html">Contact the Shelter</a>
+      </div>
+
+      <div class="footer-links footer-contact">
+        <h4>Contact</h4>
+        <p>Angeles City Veterinary Office</p>
+        <p>City Hall Building, Pulung Maragul, Angeles City</p>
+        <a href="tel:0453220485">(045) 322-0485</a>
       </div>
     </div>
 
   <div class="footer-bottom">
-    <p>© 2026 Animua. All Rights Reserved.</p>
+    <div class="container footer-bottom-inner">
+      <p>Developed for the Angeles City Veterinary Office.</p>
+      <p>Adoption applications and surrender requests are subject to shelter evaluation and approval.</p>
+    </div>
   </div>
 </footer>
 
@@ -207,46 +240,57 @@
   <!-- Pet Profile Modal -->
 <div class="modal-overlay" id="profileModal">
   <div class="redesigned-profile-modal">
+    <span class="profile-type-badge" id="profileType">Dog</span>
+    <span class="profile-status-pill" id="profileStatus">Ready for Adoption</span>
     <button class="modal-close profile-close-btn" data-close="profileModal">
       <i class="fa-solid fa-xmark"></i>
     </button>
 
     <div class="profile-hero">
-      <div class="profile-hero-image-wrap">
-         <img src="" alt="" id="profileImage" class="profile-hero-image">
-         <span class="profile-type-badge" id="profileType">Dog</span>
-         <span class="profile-status-pill" id="profileStatus">Ready for Adoption</span>
+      <div class="profile-visual-column">
+        <div class="profile-hero-image-wrap">
+          <img src="" alt="" id="profileImage" class="profile-hero-image">
+        </div>
 
+        <div class="profile-about-card">
+          <div class="profile-section-head">
+            <i class="fa-solid fa-circle-info"></i>
+            <h4>About this pet</h4>
+          </div>
+          <p class="profile-short-description" id="profileDescription">
+            This rescued pet is looking for a loving home.
+          </p>
+        </div>
       </div>
 
       <div class="profile-hero-content">
         <div class="profile-title-wrap">
           <h2 id="profileName">Buddy</h2>
-          
+          <p class="profile-health-line">Health Condition: <strong id="profileHealth">Good</strong></p>
         </div>
-
-        <p class="profile-short-description" id="profileDescription">
-          This rescued pet is looking for a loving home.
-        </p>
 
         <div class="profile-meta-grid">
           <div class="profile-meta-card">
+            <span class="profile-meta-icon"><i class="fa-regular fa-calendar-days"></i></span>
             <span class="meta-label">Age</span>
             <strong id="profileAge">Unknown</strong>
           </div>
 
           <div class="profile-meta-card">
+            <span class="profile-meta-icon"><i class="fa-solid fa-venus"></i></span>
             <span class="meta-label">Sex</span>
             <strong id="profileSex">Unknown</strong>
           </div>
 
           <div class="profile-meta-card">
+            <span class="profile-meta-icon"><i class="fa-solid fa-paw"></i></span>
             <span class="meta-label">Breed</span>
             <strong id="profileBreed">Not recorded</strong>
           </div>
 
           <div class="profile-meta-card">
-            <span class="meta-label">Color / markings</span>
+            <span class="profile-meta-icon"><i class="fa-solid fa-droplet"></i></span>
+            <span class="meta-label">Color / Markings</span>
             <strong id="profileColor">Not recorded</strong>
           </div>
         </div>
@@ -254,32 +298,29 @@
         <div class="profile-highlight-box">
           <div class="profile-highlight-head">
             <i class="fa-solid fa-circle-check"></i>
-            <h4>Best Match</h4>
+            <h4>Suitable Home</h4>
           </div>
           <p id="profileMatch">
             Best for adopters ready to provide a safe, caring, and responsible home.
           </p>
         </div>
-      </div>
-    </div>
 
-    <div class="profile-body-sections">
-      <div class="profile-section-card">
-        <div class="profile-section-head">
-          <i class="fa-solid fa-circle-info"></i>
-          <h4>Personality Traits</h4>
+        <div class="profile-body-sections">
+          <div class="profile-section-card">
+            <div class="profile-section-head">
+              <i class="fa-solid fa-user"></i>
+              <h4>Personality Traits</h4>
+            </div>
+            <div class="profile-traits modern-traits" id="profileTraits"></div>
+          </div>
         </div>
-        <div class="profile-traits modern-traits" id="profileTraits"></div>
       </div>
     </div>
 
     <div class="profile-actions redesigned-profile-actions">
       <button class="btn primary-btn" id="profileAdoptBtn">
-        Adopt This Pet
-      </button>
-      <button class="btn secondary-btn" data-close="profileModal">
-        <i class="fa-solid fa-xmark"></i>
-        Close
+        <i class="fa-solid fa-heart"></i>
+        Apply to Adopt
       </button>
     </div>
   </div>
@@ -287,72 +328,105 @@
 
   <!-- Adopt Form Modal -->
   <div class="modal-overlay" id="adoptModal">
-    <div class="modal-panel adopt-form-panel">
-      <button class="modal-close" data-close="adoptModal">
+    <div class="modal-panel adopt-form-panel adoption-wizard-modal">
+      <button class="modal-close adoption-wizard-close" id="adoptionExitBtn" type="button" aria-label="Close adoption application">
         <i class="fa-solid fa-xmark"></i>
       </button>
 
       <div class="adoption-form-header">
-        <p>Republic of the Philippines</p>
-        <h2>Angeles City Government</h2>
+        <span class="adoption-form-logo"><i class="fa-solid fa-paw" aria-hidden="true"></i></span>
+        <div class="adoption-form-title">
+          <h2>Animal Adoption Application</h2>
+          <p>Please fill out the form honestly. All information will be kept confidential.</p>
         <h3>City Veterinarian – Animal Adoption Form</h3>
+        </div>
       </div>
 
-      <div class="selected-pet-box">
-        <i class="fa-solid fa-circle-info"></i>
-        <div>
-          <strong>Selected Pet:</strong>
-          <span id="selectedPetName">Buddy</span>
+      <div class="adoption-stepper" aria-label="Adoption application steps">
+        <button type="button" class="adoption-stepper-item active" data-adoption-step-target="1"><span>1</span><strong>Applicant Information</strong><small>Tell us about yourself.</small></button>
+        <button type="button" class="adoption-stepper-item" data-adoption-step-target="2"><span>2</span><strong>Household Information</strong><small>Your family and pets.</small></button>
+        <button type="button" class="adoption-stepper-item" data-adoption-step-target="3"><span>3</span><strong>Adoption Readiness</strong><small>A few questions about your readiness.</small></button>
+        <button type="button" class="adoption-stepper-item" data-adoption-step-target="4"><span>4</span><strong>Review & Declaration</strong><small>Review your answers and submit.</small></button>
+      </div>
+
+      <div class="selected-pet-box" id="selectedPetBox">
+        <h3>Selected Pet</h3>
+        <div class="selected-pet-preview">
+          <img src="" alt="" id="selectedPetImage" class="selected-pet-image">
+          <div>
+            <strong id="selectedPetName">Buddy</strong>
+            <span id="selectedPetMeta">2 Years &bull; Female Cat</span>
+            <em id="selectedPetStatus">Ready for Adoption</em>
+            <small id="selectedPetId">Animal ID: Not recorded</small>
+          </div>
         </div>
       </div>
 
       <form id="adoptionForm" class="adoption-form">
         <input type="hidden" id="petNameField" name="pet_name">
+        <input type="hidden" id="applicationReference" name="application_reference">
+        <input type="hidden" id="submissionTimestamp" name="submission_timestamp">
+        <input type="hidden" id="applicantAccountId" name="applicant_account_id">
+        <div class="adoption-section-title" id="adoptionSectionTitle">
+          <span><i class="fa-solid fa-shield-heart" aria-hidden="true"></i></span>
+          <h3>Personal Information</h3>
+        </div>
 
         <div class="adoption-grid">
           <div class="form-group">
-            <label for="fullName">Name</label>
-            <input type="text" id="fullName" name="full_name" required>
+            <label for="fullName">Full Name *</label>
+            <input type="text" id="fullName" name="full_name" placeholder="Enter your full name" required>
+          </div>
+
+          <div class="form-group">
+            <label for="birthdate">Birthdate *</label>
+            <input type="date" id="birthdate" name="birthdate" required>
           </div>
 
           <div class="form-group">
             <label for="age">Age</label>
-            <input type="text" id="age" name="age" required>
+            <input type="text" id="age" name="age" placeholder="Auto-calculated" readonly required>
           </div>
 
           <div class="form-group">
-            <label for="birthdate">Birthdate</label>
-            <input type="date" id="birthdate" name="birthdate">
+            <label for="address">Residential Address *</label>
+            <input type="text" id="address" name="address" placeholder="House no., Street, Barangay, City, Province" required>
           </div>
 
           <div class="form-group">
-            <label for="address">Residential Address</label>
-            <input type="text" id="address" name="address" required>
+            <label for="civilStatus">Civil Status *</label>
+            <select id="civilStatus" name="civil_status" required>
+              <option value="">Select civil status</option>
+              <option>Single</option>
+              <option>Married</option>
+              <option>Widowed</option>
+              <option>Separated</option>
+            </select>
           </div>
 
           <div class="form-group">
-            <label for="civilStatus">Civil Status</label>
-            <input type="text" id="civilStatus" name="civil_status">
+            <label for="gender">Gender *</label>
+            <select id="gender" name="gender" required>
+              <option value="">Select gender</option>
+              <option>Female</option>
+              <option>Male</option>
+              <option>Prefer not to say</option>
+            </select>
           </div>
 
           <div class="form-group">
-            <label for="gender">Gender</label>
-            <input type="text" id="gender" name="gender">
+            <label for="citizenship">Citizenship *</label>
+            <input type="text" id="citizenship" name="citizenship" placeholder="Enter your citizenship" required>
           </div>
 
           <div class="form-group">
-            <label for="citizenship">Citizenship</label>
-            <input type="text" id="citizenship" name="citizenship">
+            <label for="contactNumber">Contact Number(s) *</label>
+            <input type="text" id="contactNumber" name="contact_number" placeholder="09XXXXXXXXX" required>
           </div>
 
           <div class="form-group">
-            <label for="contactNumber">Contact Number(s)</label>
-            <input type="text" id="contactNumber" name="contact_number" required>
-          </div>
-
-          <div class="form-group">
-            <label for="occupation">Occupation</label>
-            <input type="text" id="occupation" name="occupation">
+            <label for="occupation">Occupation *</label>
+            <input type="text" id="occupation" name="occupation" placeholder="Enter your occupation" required>
           </div>
 
           <div class="form-group full">
@@ -370,26 +444,156 @@
             <textarea id="whyAdopt" name="why_adopt" rows="4" required></textarea>
           </div>
 
-          <div class="form-group full">
-            <label for="visitVeterinarian">Do you visit a Veterinarian?</label>
-            <textarea id="visitVeterinarian" name="visit_veterinarian" rows="3"></textarea>
+          <div class="form-group">
+            <label for="visitVeterinarian">Do you regularly visit a veterinarian? *</label>
+            <select id="visitVeterinarian" name="visit_veterinarian" required>
+              <option value="">Select answer</option>
+              <option>Yes</option>
+              <option>No</option>
+            </select>
+          </div>
+
+          <div class="form-group full" hidden>
+            <label for="existingPets">Do you have any pet(s) in your house? How many?</label>
+            <textarea id="existingPets" name="existing_pets" rows="3"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="hasCurrentPets">Do you currently have pets? *</label>
+            <select id="hasCurrentPets" name="has_current_pets" required>
+              <option value="">Select answer</option>
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+          </div>
+
+          <div class="form-group conditional-field" id="numberPetsGroup" hidden>
+            <label for="numberOfPets">Number of pets *</label>
+            <input type="number" min="0" id="numberOfPets" name="number_of_pets" placeholder="0">
+          </div>
+
+          <div class="form-group conditional-field" id="currentPetTypeGroup" hidden>
+            <label for="currentPetType">Type of current pets *</label>
+            <select id="currentPetType" name="current_pet_type">
+              <option value="">Select type</option>
+              <option>Dog</option>
+              <option>Cat</option>
+              <option>Other</option>
+            </select>
+          </div>
+
+          <div class="form-group conditional-field" id="vetClinicGroup" hidden>
+            <label for="vetClinicName">Veterinarian or clinic name *</label>
+            <input type="text" id="vetClinicName" name="vet_clinic_name" placeholder="Enter clinic or veterinarian name">
+          </div>
+
+          <div class="form-group">
+            <label for="housingType">Housing Type *</label>
+            <select id="housingType" name="housing_type" required>
+              <option value="">Select housing type</option>
+              <option>Owned house</option>
+              <option>Rented house</option>
+              <option>Apartment / condominium</option>
+              <option>Shared residence</option>
+              <option>Other</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="residenceAllowsPets">Does the residence allow pets? *</label>
+            <select id="residenceAllowsPets" name="residence_allows_pets" required>
+              <option value="">Select answer</option>
+              <option>Yes</option>
+              <option>No</option>
+              <option>Not Applicable</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="primaryCaregiver">Who will be primarily responsible for the animal? *</label>
+            <input type="text" id="primaryCaregiver" name="primary_caregiver" required>
+          </div>
+
+          <div class="form-group">
+            <label for="petStayLocation">Where will the animal stay most of the time? *</label>
+            <input type="text" id="petStayLocation" name="pet_stay_location" required>
+          </div>
+
+          <div class="form-group">
+            <label for="hoursAlone">How many hours may the animal be left alone each day? *</label>
+            <input type="number" min="0" max="24" id="hoursAlone" name="hours_alone" required>
+          </div>
+
+          <div class="form-group">
+            <label for="provideVetCare">Will you provide regular veterinary checkups and vaccinations? *</label>
+            <select id="provideVetCare" name="provide_vet_care" required>
+              <option value="">Select answer</option>
+              <option>Yes</option>
+              <option>No</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="provideDailyCare">Can you provide food, shelter, grooming, and daily care? *</label>
+            <select id="provideDailyCare" name="provide_daily_care" required>
+              <option value="">Select answer</option>
+              <option>Yes</option>
+              <option>No</option>
+            </select>
           </div>
 
           <div class="form-group full">
-            <label for="existingPets">Do you have any pet(s) in your house? How many?</label>
-            <textarea id="existingPets" name="existing_pets" rows="3"></textarea>
+            <label for="cannotCarePlan">What will you do if you can no longer care for the animal? *</label>
+            <textarea id="cannotCarePlan" name="cannot_care_plan" rows="3" required></textarea>
+          </div>
+
+          <div class="form-group full">
+            <label for="additionalInfo">Additional information</label>
+            <textarea id="additionalInfo" name="additional_info" rows="2" placeholder="Optional"></textarea>
+          </div>
+
+          <div class="form-group full adoption-notice-field">
+            <p class="adoption-notice">Adoption applications are reviewed by shelter staff. Submission does not guarantee approval.</p>
+          </div>
+
+          <div class="form-group full adoption-review-field">
+            <div class="adoption-review-summary" id="adoptionReviewSummary"></div>
+          </div>
+
+          <div class="form-group full adoption-upload-card">
+            <h3>Upload a Valid Government-Issued ID</h3>
+            <p>Front side required. Back side optional unless required by the selected ID. Accepted files: JPG, JPEG, PNG, and PDF. Maximum size: 5 MB per file.</p>
+            <div class="adoption-upload-grid">
+              <div>
+                <label for="idFrontUpload">Front side *</label>
+                <input type="file" id="idFrontUpload" name="id_front_upload" accept=".jpg,.jpeg,.png,.pdf" required>
+                <div class="upload-preview" id="idFrontPreview"></div>
+              </div>
+              <div>
+                <label for="idBackUpload">Back side</label>
+                <input type="file" id="idBackUpload" name="id_back_upload" accept=".jpg,.jpeg,.png,.pdf">
+                <div class="upload-preview" id="idBackPreview"></div>
+              </div>
+            </div>
+            <p class="adoption-privacy-notice">Your ID will be used only to verify your identity and support the shelter's adoption review. It will not be displayed publicly.</p>
           </div>
         </div>
 
         <div class="pledge-box">
           <p>
-            I solemnly swear that I will take good care of my adopted pet, that he/she will not
-            stray in the street, and that I will take him/her to a Veterinarian for regular
-            check-up and/or vaccination.
+            I solemnly declare that I will take proper care of the animal I am applying to adopt.
+            I will provide appropriate food, shelter, veterinary care, regular checkups, and
+            vaccinations. I will not allow the animal to roam unattended or be neglected.
           </p>
         </div>
 
-        <div class="adoption-grid adoption-bottom-grid">
+        <div class="adoption-checkboxes">
+          <label><input type="checkbox" id="confirmTruthful" name="confirm_truthful" required><span class="adoption-checkmark" aria-hidden="true"></span><span>I confirm that the information I provided is complete and truthful.</span></label>
+          <label><input type="checkbox" id="agreeDeclaration" name="agree_declaration" required><span class="adoption-checkmark" aria-hidden="true"></span><span>I agree to the adoption declaration above.</span></label>
+          <label><input type="checkbox" id="understandNoGuarantee" name="understand_no_guarantee" required><span class="adoption-checkmark" aria-hidden="true"></span><span>I understand that submitting this application does not guarantee approval.</span></label>
+        </div>
+
+        <div class="adoption-grid adoption-bottom-grid" hidden>
           <div class="form-group">
             <label for="issuedDay">Issued this day of</label>
             <input type="text" id="issuedDay" name="issued_day" placeholder="Day">
@@ -407,17 +611,31 @@
 
           <div class="form-group full">
             <label for="signatureName">Signature / Printed Name</label>
-            <input type="text" id="signatureName" name="signature_name" required>
+            <input type="text" id="signatureName" name="signature_name">
           </div>
         </div>
 
-        <div class="form-actions">
-          <button type="submit" class="btn primary-btn">Submit Adoption Form</button>
-          <button type="button" class="btn secondary-btn" data-close="adoptModal">Cancel</button>
+        <div class="form-actions adoption-wizard-actions">
+          <button type="button" class="btn secondary-btn" id="adoptionBackBtn" hidden>Back</button>
+          <button type="button" class="btn primary-btn" id="adoptionNextBtn">Continue <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
+          <button type="submit" class="btn primary-btn" id="adoptionSubmitBtn" hidden>Submit Adoption Application</button>
         </div>
 
         <p class="form-message" id="formMessage"></p>
       </form>
+      <footer class="adoption-security-note"><i class="fa-solid fa-shield-heart" aria-hidden="true"></i><span>Your information is secure and will only be used for adoption purposes.</span></footer>
+    </div>
+  </div>
+
+  <div class="adoption-confirm-overlay" id="adoptionExitConfirm" hidden>
+    <div class="adoption-confirm-card" role="alertdialog" aria-modal="true" aria-labelledby="adoptionExitTitle" aria-describedby="adoptionExitText">
+      <span class="adoption-confirm-icon"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i></span>
+      <h2 id="adoptionExitTitle">Exit application?</h2>
+      <p id="adoptionExitText">Are you sure you want to exit this application? Your unsaved answers will be lost.</p>
+      <div class="adoption-confirm-actions">
+        <button type="button" class="adoption-confirm-secondary" id="adoptionExitCancel">Keep Editing</button>
+        <button type="button" class="adoption-confirm-primary" id="adoptionExitConfirmBtn">Yes, Exit</button>
+      </div>
     </div>
   </div>
 

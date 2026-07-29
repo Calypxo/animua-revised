@@ -6,6 +6,7 @@ const SHELTER_LOCATION = "Angeles City Veterinary Office, Brgy. Pampang, Angeles
 const PYTHON_SENTIMENT_API_URL =
   process.env.PYTHON_SENTIMENT_API_URL ||
   "http://127.0.0.1:8002/analyze-surrender-sentiment";
+const MAX_SURRENDER_PHOTO_DATA_URL_LENGTH = 900000;
 
 const ANGELES_BARANGAYS = [
   "Agapito del Rosario", "Amsic", "Anunas", "Balibago", "Capaya", "Claro M. Recto",
@@ -79,6 +80,19 @@ async function createSurrenderRequest(req, res) {
       });
     }
 
+    const photoDataUrl = typeof pet.photoDataUrl === "string" ? pet.photoDataUrl.trim() : "";
+    if (
+      photoDataUrl &&
+      (
+        photoDataUrl.length > MAX_SURRENDER_PHOTO_DATA_URL_LENGTH ||
+        !/^data:image\/(png|jpe?g|webp);base64,[A-Za-z0-9+/=]+$/i.test(photoDataUrl)
+      )
+    ) {
+      return res.status(400).json({
+        message: "Animal photo must be a JPG, PNG, or WebP image under 650 KB.",
+      });
+    }
+
     const nlpResult = await analyzeSurrenderReason(surrenderReason);
 
     const requestId = body.id || generateRequestId();
@@ -111,6 +125,9 @@ async function createSurrenderRequest(req, res) {
         colorMarkings: pet.colorMarkings || "",
         status: Array.isArray(pet.status) ? pet.status : [],
         vaccinationHistory: pet.vaccinationHistory || "",
+        photoName: photoDataUrl ? String(pet.photoName || "").trim().slice(0, 160) : "",
+        photoType: photoDataUrl ? String(pet.photoType || "").trim().slice(0, 80) : "",
+        photoDataUrl,
       },
 
       surrenderReason,

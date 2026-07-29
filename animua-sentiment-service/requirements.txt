@@ -3,3 +3,8 @@ uvicorn
 scikit-learn
 pandas
 joblib
+torch
+transformers
+datasets
+evaluate
+accelerate

@@ -10,102 +10,124 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="../../src/css/public/home.css">
   <link rel="stylesheet" href="../../src/css/global.css">
-  <link rel="stylesheet" href="../../src/css/public/public-design-system.css">
   <link rel="stylesheet" href="../../src/css/public/surrender.css">
 </head>
-<body class="surrender-page">
+<body class="home-page surrender-page">
 
   <!-- Header -->
-<header class="header" id="home">
-  <div class="container nav-shell">
-    <a href="#home" class="logo">
-      <img src="../../src/assets/images/animua-logo-transparent.png" alt="ANIMUA" class="navbar-logo-img">
-      <span class="navbar-brand-copy">
-        <span class="navbar-brand-name">ANIMUA</span>
-        <span class="navbar-brand-tagline">Connect. Learn. Adopt.</span>
-      </span>
-    </a>
-
-    <nav class="navbar" id="navbar">
-      <a href="home.html">Home</a>
-      <a href="find-furbabies.html">Find Furbabies</a>
-      <a href="announcements.html">Announcements</a>
-      <a href="surrender.html" class="active">Surrender</a>
-      <a href="contact.html">Contact Us</a>
-    </nav>
-
-    <div class="nav-actions">
-      <div class="user-actions-wrap">
-        <div class="notification-wrap">
-          <button class="notification-btn" id="notificationBtn" aria-label="Notifications">
-            <i class="fa-regular fa-bell"></i>
-            <span class="notification-dot"></span>
-          </button>
-
-          <div class="notification-popup" id="notificationPopup">
-            <div class="notification-popup-head">
-              <h4>Notifications</h4>
-            </div>
-            <ul class="notification-list">
-              <li>New animals were recently added for adoption.</li>
-              <li>Please complete forms carefully before submission.</li>
-              <li>Shelter announcements will appear here.</li>
-            </ul>
-          </div>
-        </div>
-
-        <a href="#" id="loginNavBtn" class="login-btn" aria-label="Login">
-          <i class="fa-regular fa-user"></i>
-          <span>Login</span>
+  <header class="header" id="home">
+    <div class="main-nav-wrap">
+      <div class="container nav-shell">
+        <a href="home.html" class="logo">
+          <img src="../../src/assets/images/animua-logo-transparent.png" alt="ANIMUA" class="navbar-logo-img">
+          <span class="navbar-brand-copy">
+            <span class="navbar-brand-name">ANIMUA</span>
+            <span class="navbar-brand-tagline">Connect. Learn. Adopt.</span>
+          </span>
         </a>
 
-        <div id="userLoggedInBox" class="hidden user-pill">
-          <span id="loggedUserName" class="user-pill-name"></span>
+        <nav class="navbar" id="navbar">
+          <a href="home.html">Home</a>
+          <a href="find-furbabies.html">Find Furbabies</a>
+          <a href="announcements.html">Announcements</a>
+          <a href="surrender.html" class="active">Surrender</a>
+          <a href="contact.html">Contact Us</a>
+        </nav>
 
-          <button id="logoutBtn" type="button" class="logout-icon-btn user-pill-logout" aria-label="Logout">
-            <i class="fa-solid fa-right-from-bracket"></i>
+        <div class="nav-actions">
+          <div class="user-actions-wrap">
+            <div class="notification-wrap">
+              <button class="notification-btn" id="notificationBtn" aria-label="Notifications">
+                <i class="fa-solid fa-bell"></i>
+                <span class="notification-dot"></span>
+              </button>
+
+              <div class="notification-popup" id="notificationPopup">
+                <div class="notification-popup-head">
+                  <h4>Notifications</h4>
+                </div>
+                <ul class="notification-list">
+                  <li>New animals were recently added for adoption.</li>
+                  <li>Please complete forms carefully before submission.</li>
+                </ul>
+              </div>
+            </div>
+
+            <a href="#" id="loginNavBtn" class="login-btn" aria-label="Login">
+              <i class="fa-solid fa-user"></i>
+              <span>Login</span>
+            </a>
+
+            <div id="userLoggedInBox" class="hidden user-pill user-menu">
+              <button type="button" class="user-menu-btn" id="userMenuBtn">
+                <span class="user-avatar-mini">
+                  <i class="fa-regular fa-user"></i>
+                </span>
+                <span id="loggedUserName" class="user-pill-name"></span>
+                <span class="user-menu-chevron">
+                  <i class="fa-solid fa-chevron-down"></i>
+                </span>
+              </button>
+
+              <div class="user-dropdown hidden" id="userDropdown">
+                <div class="user-dropdown-head">
+                  <div class="user-dropdown-avatar">
+                    <span id="dropdownUserInitial">A</span>
+                  </div>
+                  <div>
+                    <strong id="dropdownUserName">Account</strong>
+                  </div>
+                </div>
+
+                <button type="button" class="user-dropdown-item" id="viewProfileBtn">
+                  <i class="fa-regular fa-user"></i>
+                  <span>View Profile</span>
+                </button>
+
+                <button type="button" class="user-dropdown-item" id="myApplicationsBtn">
+                  <i class="fa-regular fa-file-lines"></i>
+                  <span>My Applications</span>
+                </button>
+
+                <div class="user-dropdown-divider"></div>
+
+                <button type="button" id="logoutBtn" class="user-dropdown-item logout-option">
+                  <i class="fa-solid fa-right-from-bracket"></i>
+                  <span>Log out</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <button class="menu-toggle" id="menuToggle" aria-label="Toggle Navigation">
+            <span></span>
+            <span></span>
+            <span></span>
           </button>
         </div>
       </div>
-
-      <button class="menu-toggle" id="menuToggle" aria-label="Toggle Navigation">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
     </div>
-  </div>
-</header>
+  </header>
 
   <!-- Surrender Hero -->
   <section class="surrender-page-hero" aria-labelledby="surrenderPageTitle">
     <div class="container surrender-page-hero-grid">
       <div class="surrender-page-text reveal">
-        <span class="section-label">Animal surrender support</span>
-        <h1 id="surrenderPageTitle">A careful next step for you and your animal.</h1>
+        <h1 id="surrenderPageTitle">Surrender with <span>care and compassion.</span></h1>
         <p class="surrender-hero-lead">
-          Tell us about your situation so the Angeles City shelter team can review the safest available option.
-          You can write in English, Tagalog, or Taglish.
+          We're here to help when things feel uncertain. All surrender requests
+          are carefully reviewed by our shelter team to ensure the best possible
+          outcome for every animal.
         </p>
-        <div class="surrender-hero-assurances" aria-label="What to expect">
-          <span><i class="fa-solid fa-shield-heart" aria-hidden="true"></i> Respectful review</span>
-          <span><i class="fa-solid fa-location-dot" aria-hidden="true"></i> Angeles City residents</span>
-          <span><i class="fa-solid fa-clock" aria-hidden="true"></i> Status updates available</span>
-        </div>
         <div class="surrender-hero-actions">
-          <a class="btn primary-btn" href="#surrenderRequestWorkspace">Start your request</a>
-          <a class="surrender-text-link" href="#mySurrenderRequests">Track a submitted request <i class="fa-solid fa-arrow-down" aria-hidden="true"></i></a>
+          <a class="btn primary-btn" href="#surrenderRequestWorkspace">
+            <span>Start a Surrender Request</span>
+            <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+          </a>
         </div>
       </div>
-
-      <figure class="surrender-page-image reveal">
-        <img src="../../src/assets/images/surrender.jpg" alt="A dog receiving calm care and support">
-        <figcaption>
-          <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
-          <span><strong>Submitting is a request for review.</strong> It does not automatically confirm shelter acceptance.</span>
-        </figcaption>
-      </figure>
     </div>
   </section>
 
@@ -121,14 +143,17 @@
         <div class="surrender-notice-grid">
           <div class="notice-item">
             <span class="notice-number">01</span>
+            <span class="notice-step-icon"><i class="fa-solid fa-clipboard-check" aria-hidden="true"></i></span>
             <div><strong>Submit for review</strong><span>Complete the form with honest owner, animal, and situation details.</span></div>
           </div>
           <div class="notice-item">
             <span class="notice-number">02</span>
+            <span class="notice-step-icon"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></span>
             <div><strong>Shelter assessment</strong><span>Staff reviews the request, available space, and the animal's needs.</span></div>
           </div>
           <div class="notice-item">
             <span class="notice-number">03</span>
+            <span class="notice-step-icon"><i class="fa-solid fa-circle-check" aria-hidden="true"></i></span>
             <div><strong>Decision and next step</strong><span>You can return here to see whether the request is pending, approved, rejected, or converted to intake.</span></div>
           </div>
         </div>
@@ -145,8 +170,23 @@
     <div class="container">
       <section class="request-status-panel reveal" id="mySurrenderRequests" aria-labelledby="requestStatusTitle">
         <div class="request-status-heading">
-          <div><span class="section-label">Your request history</span><h2 id="requestStatusTitle">Track submitted requests</h2><p>Sign in with the same account used to submit. Statuses here match the shelter's review and intake workflow.</p></div>
-          <button type="button" class="status-refresh-btn" id="refreshRequestStatus" aria-label="Refresh surrender request statuses"><i class="fa-solid fa-rotate" aria-hidden="true"></i><span>Refresh</span></button>
+          <span class="request-status-icon"><i class="fa-solid fa-file-lines" aria-hidden="true"></i></span>
+          <div>
+            <span class="section-label">Your request history</span>
+            <h2 id="requestStatusTitle">Track submitted requests</h2>
+            <p>View the status, shelter updates, and appointment details of your surrender requests.</p>
+          </div>
+        </div>
+        <div class="request-status-card">
+          <span class="request-card-icon"><i class="fa-regular fa-clipboard" aria-hidden="true"></i></span>
+          <div>
+            <h3>Already submitted a request?</h3>
+            <p>View your current status, shelter updates, and appointment details in My Applications.</p>
+          </div>
+          <a class="status-refresh-btn" href="my-submissions.html" aria-label="View Applications">
+            <span>View Applications</span>
+            <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+          </a>
         </div>
         <div class="request-history-content" id="requestHistoryContent" aria-live="polite"><div class="surrender-state surrender-state-loading"><i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i><p>Checking your request history…</p></div></div>
       </section>
@@ -227,6 +267,20 @@
               <div class="form-group"><label for="petAge">Age or estimate</label><input type="text" id="petAge" name="petAge" placeholder="Example: 2 years or Unknown"></div>
               <div class="form-group"><label for="petSex">Sex</label><select id="petSex" name="petSex"><option value="">Select sex</option><option value="Male">Male</option><option value="Female">Female</option><option value="Unknown">Unknown</option></select></div>
               <div class="form-group"><label for="colorMarkings">Color and identifying markings</label><input type="text" id="colorMarkings" name="colorMarkings" placeholder="Example: white coat, brown patch"></div>
+              <div class="form-group full animal-photo-field">
+                <label for="animalPhoto">Animal photo</label>
+                <label class="animal-photo-upload" for="animalPhoto">
+                  <span class="animal-photo-preview" id="animalPhotoPreview"><i class="fa-regular fa-image" aria-hidden="true"></i></span>
+                  <span class="animal-photo-copy">
+                    <strong id="animalPhotoLabel">Add a clear photo of the animal</strong>
+                    <small>Optional. Upload JPG, PNG, or WebP up to 650 KB.</small>
+                  </span>
+                  <span class="animal-photo-action">Choose photo</span>
+                </label>
+                <input type="file" id="animalPhoto" name="animalPhoto" accept="image/png,image/jpeg,image/webp" aria-describedby="animalPhotoHelp animalPhotoError">
+                <small class="field-help" id="animalPhotoHelp">A photo helps shelter staff identify and assess the animal.</small>
+                <small class="field-error" id="animalPhotoError"></small>
+              </div>
               <fieldset class="form-group full choice-fieldset">
                 <legend>Reproductive status</legend><p class="field-help">Choose the closest known answer.</p>
                 <div class="surrender-check-row">
@@ -264,14 +318,32 @@
             </div>
 
             <article class="waiver-card" aria-labelledby="agreementTitle">
-              <header><span><i class="fa-solid fa-file-signature" aria-hidden="true"></i></span><div><h4 id="agreementTitle">Kasunduan at pahintulot</h4><p>Please read all statements before agreeing.</p></div></header>
+              <header>
+                <span><i class="fa-solid fa-file-signature" aria-hidden="true"></i></span>
+                <div>
+                  <h4 id="agreementTitle" data-waiver-title-tl="Kasunduan at pahintulot" data-waiver-title-en="Agreement and consent">Kasunduan at pahintulot</h4>
+                  <p>Please read all statements before agreeing.</p>
+                </div>
+                <div class="waiver-language-toggle" aria-label="Agreement language">
+                  <button type="button" class="is-active" data-waiver-language="tl" aria-pressed="true">Tagalog</button>
+                  <button type="button" data-waiver-language="en" aria-pressed="false">English</button>
+                </div>
+              </header>
               <div class="waiver-box">
-                <p>Sa pamamagitan ng pagsusumite ng form na ito, aking pinatutunayan na ang lahat ng impormasyong ibinigay ko ay totoo, tama, at kumpleto ayon sa aking kaalaman.</p>
-                <p>Nauunawaan ko na ang pagsusumite ng surrender request ay hindi nangangahulugan ng awtomatikong pagtanggap ng aking alaga sa shelter. Ang bawat request ay dadaan muna sa pagsusuri ng shelter staff.</p>
-                <p>Nauunawaan ko rin na ang pagtanggap ng alaga ay nakadepende sa beripikasyon ng impormasyon, kalagayan ng alaga, at availability ng shelter space.</p>
-                <p>Kung maaprubahan ang aking request, kusang-loob kong isusuko ang aking alaga sa Angeles City Veterinary Office / shelter at nauunawaan kong ito ay maaaring magresulta sa permanenteng paglipat ng responsibilidad at pag-aalaga sa nasabing hayop.</p>
+                <div class="waiver-copy is-active" data-waiver-copy="tl">
+                  <p>Sa pamamagitan ng pagsusumite ng form na ito, aking pinatutunayan na ang lahat ng impormasyong ibinigay ko ay totoo, tama, at kumpleto ayon sa aking kaalaman.</p>
+                  <p>Nauunawaan ko na ang pagsusumite ng surrender request ay hindi nangangahulugan ng awtomatikong pagtanggap ng aking alaga sa shelter. Ang bawat request ay dadaan muna sa pagsusuri ng shelter staff.</p>
+                  <p>Nauunawaan ko rin na ang pagtanggap ng alaga ay nakadepende sa beripikasyon ng impormasyon, kalagayan ng alaga, at availability ng shelter space.</p>
+                  <p>Kung maaprubahan ang aking request, kusang-loob kong isusuko ang aking alaga sa Angeles City Veterinary Office / shelter at nauunawaan kong ito ay maaaring magresulta sa permanenteng paglipat ng responsibilidad at pag-aalaga sa nasabing hayop.</p>
+                </div>
+                <div class="waiver-copy" data-waiver-copy="en" hidden>
+                  <p>By submitting this form, I certify that all information I provided is true, correct, and complete to the best of my knowledge.</p>
+                  <p>I understand that submitting a surrender request does not mean my animal will be automatically accepted by the shelter. Each request must first be reviewed by shelter staff.</p>
+                  <p>I also understand that acceptance depends on information verification, the animal's condition, and available shelter space.</p>
+                  <p>If my request is approved, I voluntarily surrender my animal to the Angeles City Veterinary Office / shelter and understand that this may result in the permanent transfer of responsibility and care for the animal.</p>
+                </div>
               </div>
-              <label class="agreement-option" for="agreeAllTerms"><input type="checkbox" id="agreeAllTerms" required aria-describedby="agreementHelp agreementError"><span><strong>Nabasa ko at sumasang-ayon ako.</strong><small id="agreementHelp">I confirm all information is accurate and understand this request may be approved or rejected after review.</small></span></label>
+              <label class="agreement-option" for="agreeAllTerms"><input type="checkbox" id="agreeAllTerms" required aria-describedby="agreementHelp agreementError"><span><strong id="agreementConsentText" data-consent-tl="Nabasa ko at sumasang-ayon ako." data-consent-en="I have read and agree.">Nabasa ko at sumasang-ayon ako.</strong><small id="agreementHelp">I confirm all information is accurate and understand this request may be approved or rejected after review.</small></span></label>
               <small class="field-error agreement-error" id="agreementError"></small>
             </article>
 
@@ -300,29 +372,47 @@
           <img src="../../src/assets/images/animua-logo-transparent.png" alt="ANIMUA" class="footer-logo-img">
           <span class="footer-brand-copy">
             <span class="footer-brand-name">ANIMUA</span>
-            <span class="footer-brand-tagline">Connect. Learn. Adopt.</span>
+            <span class="footer-brand-tagline">Angeles City Animal Welfare Portal</span>
           </span>
         </a>
         <p>
-          A partnership project dedicated to rehoming rescued animals, promoting
-          responsible adoption, and creating safer futures for shelter pets.
+          Connecting people with shelter animals through responsible adoption,
+          compatibility matching, and shelter-reviewed services.
         </p>
       </div>
 
-       <div class="footer-links">
-        <h4>Quick Links</h4>
+      <div class="footer-links">
+        <h4>Explore</h4>
         <a href="home.html">Home</a>
         <a href="find-furbabies.html">Find Furbabies</a>
+        <a href="home.html?quizIntro=open">Compatibility Quiz</a>
         <a href="surrender.html">Surrender</a>
-         <a href="contact.html">Contact</a>
+        <a href="contact.html">Contact Us</a>
+      </div>
+
+      <div class="footer-links footer-support">
+        <h4>Shelter Services</h4>
+        <a href="home.html#home-highlights">Adoption Guide</a>
+        <a href="surrender.html">Surrender Request</a>
+        <a href="contact.html">Contact the Shelter</a>
+      </div>
+
+      <div class="footer-links footer-contact">
+        <h4>Contact</h4>
+        <p>Angeles City Veterinary Office</p>
+        <p>City Hall Building, Pulung Maragul, Angeles City</p>
+        <a href="tel:0453220485">(045) 322-0485</a>
       </div>
     </div>
 
     <div class="footer-bottom">
-      <p>© 2026 Animua. All Rights Reserved.</p>
+      <div class="container footer-bottom-inner">
+        <p>&copy; 2026 ANIMUA. All rights reserved.</p>
+        <p>Developed for the Angeles City Veterinary Office.</p>
+        <p>Adoption applications and surrender requests are subject to shelter evaluation and approval.</p>
+      </div>
     </div>
   </footer>
-
 <!-- AUTH MODAL -->
 <div class="auth-modal-overlay hidden" id="authModal">
   <div class="auth-modal-card auth-modal-small" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
