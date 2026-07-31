@@ -12,9 +12,11 @@ const submissionSortControl = document.getElementById("submissionSortControl");
 const submissionSortBtn = document.getElementById("submissionSortBtn");
 const submissionSortLabel = document.getElementById("submissionSortLabel");
 const submissionSortMenu = document.getElementById("submissionSortMenu");
+const compatibilityAccount = document.getElementById("compatibilityAccount");
 const compatibilityAccountBody = document.getElementById("compatibilityAccountBody");
 
 async function loadCompatibilityAccount() {
+  if (compatibilityAccount?.classList.contains("hidden")) return;
   if (!compatibilityAccountBody) return;
   const token = getToken();
   if (!token) { compatibilityAccountBody.innerHTML = `<p>Log in to view your saved compatibility result.</p>`; return; }

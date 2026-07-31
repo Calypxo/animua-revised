@@ -4,25 +4,22 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/png" href="/favicon.png" />
-  <meta name="description" content="Read the latest public announcements, events, and advisories from ANIMUA Angeles City." />
-  <title>ANIMUA | Announcements</title>
   <meta name="description" content="Follow ANIMUA news and articles, success stories, and upcoming animal-welfare events in Angeles City." />
   <title>ANIMUA | Community Stories & Events</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="stylesheet" href="../../src/css/public/home.css">
   <link rel="stylesheet" href="../../src/css/global.css">
   <link rel="stylesheet" href="../../src/css/public/announcements.css">
-  <link rel="stylesheet" href="../../src/css/public/public-design-system.css">
 </head>
 <body class="home-page announcements-page">
   <!-- Header -->
   <header class="header" id="home">
     <div class="main-nav-wrap">
       <div class="container nav-shell">
-        <a href="home.html" class="logo">
+        <a href="#home" class="logo">
           <img src="../../src/assets/images/animua-logo-transparent.png" alt="ANIMUA" class="navbar-logo-img">
           <span class="navbar-brand-copy">
             <span class="navbar-brand-name">ANIMUA</span>
@@ -93,6 +90,11 @@
                   <span>My Applications</span>
                 </button>
 
+                <button type="button" class="user-dropdown-item" id="compatibilityResultsBtn">
+                  <i class="fa-solid fa-chart-simple"></i>
+                  <span>Compatibility Result</span>
+                </button>
+
                 <div class="user-dropdown-divider"></div>
 
                 <button type="button" id="logoutBtn" class="user-dropdown-item logout-option">
@@ -116,52 +118,14 @@
     <section class="community-cover" aria-labelledby="communityTitle">
       <div class="container community-cover-inner">
         <div class="community-cover-copy">
-          <span class="community-eyebrow"><i class="fa-solid fa-circle-check"></i> Official ANIMUA channel</span>
-          <h1 id="communityTitle">Stories, updates, and moments that move our community.</h1>
+          <span class="community-eyebrow">Official ANIMUA channel</span>
+          <h1 id="communityTitle">
+            <span>Stories, updates,</span>
+            <span>and moments</span>
+            <span class="community-title-accent">that move our</span>
+            <span class="community-title-accent">community.</span>
+          </h1>
           <p>Follow shelter news, celebrate animals finding their people, and discover meaningful ways to join upcoming events.</p>
-        </div>
-        <div class="cover-orbit" aria-hidden="true"><i class="fa-solid fa-heart-pulse"></i></div>
-      </div>
-    </section>
-
-    <section class="community-profile-wrap">
-      <div class="container community-profile">
-        <div class="community-avatar"><i class="fa-solid fa-heart-pulse"></i></div>
-        <div class="community-profile-copy">
-          <span>Angeles City Animal Welfare Portal</span>
-          <h2>ANIMUA Community</h2>
-          <p>Connect. Learn. Adopt.</p>
-        </div>
-        <div class="community-stats" aria-label="Community channel statistics">
-          <span><strong id="publicPostCount">0</strong>Posts</span>
-          <span><strong id="publicStoryCount">0</strong>Success stories</span>
-          <span><strong id="publicEventCount">0</strong>Upcoming events</span>
-        </div>
-      </div>
-    </section>
-
-    <section class="community-categories" aria-labelledby="categoryHeading">
-      <div class="container">
-        <div class="category-heading-row">
-          <div><span class="section-label">Explore the channel</span><h2 id="categoryHeading">Choose what matters to you</h2></div>
-          <button id="showAllAnnouncements" class="show-all-posts" type="button">View all posts <i class="fa-solid fa-arrow-right"></i></button>
-        </div>
-        <div class="public-category-rail">
-          <button class="public-category-card" type="button" data-public-type="News & Article">
-            <span class="public-category-visual is-news"><i class="fa-regular fa-newspaper"></i></span>
-            <span><strong>News &amp; Article</strong><small>Shelter updates, public advisories, and useful animal-care information.</small></span>
-            <i class="fa-solid fa-arrow-right category-arrow"></i>
-          </button>
-          <button class="public-category-card" type="button" data-public-type="Success Stories">
-            <span class="public-category-visual is-success"><i class="fa-solid fa-house-circle-check"></i></span>
-            <span><strong>Success Stories</strong><small>Heartwarming adoptions, recoveries, reunions, and community milestones.</small></span>
-            <i class="fa-solid fa-arrow-right category-arrow"></i>
-          </button>
-          <button class="public-category-card" type="button" data-public-type="Upcoming Events">
-            <span class="public-category-visual is-event"><i class="fa-regular fa-calendar-check"></i></span>
-            <span><strong>Upcoming Events</strong><small>Adoption days, volunteer activities, clinics, and local outreach.</small></span>
-            <i class="fa-solid fa-arrow-right category-arrow"></i>
-          </button>
         </div>
       </div>
     </section>
@@ -181,17 +145,39 @@
           <div id="featuredAnnouncement" class="featured-announcement" aria-live="polite"></div>
           <div class="feed-section-heading"><h3>Recent posts</h3><span id="feedResultLabel">All community content</span></div>
           <div id="announcementFeed" class="public-announcement-feed" aria-live="polite"></div>
+          <button id="showAllAnnouncements" class="show-all-posts" type="button">View all posts <i class="fa-solid fa-arrow-right"></i></button>
         </div>
 
         <aside class="public-feed-sidebar" aria-label="Community highlights">
+          <section class="public-side-card announcement-calendar-card">
+            <div class="side-card-heading"><span>Upcoming near you</span><i class="fa-regular fa-calendar"></i></div>
+            <div class="calendar-divider" aria-hidden="true"></div>
+            <div class="announcement-calendar">
+              <div class="calendar-head">
+                <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+                <strong>July 2026</strong>
+                <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+              </div>
+              <div class="calendar-grid" aria-label="July 2026 calendar">
+                <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+                <em>29</em><em>30</em><b>1</b><b>2</b><b class="is-event">3</b><b>4</b><b>5</b>
+                <b>6</b><b>7</b><b>8</b><b>9</b><b>10</b><b>11</b><b>12</b>
+                <b>13</b><b class="is-activity">14</b><b>15</b><b>16</b><b>17</b><b class="has-dot">18</b><b>19</b>
+                <b>20</b><b>21</b><b>22</b><b class="is-activity">23</b><b class="is-activity">24</b><b class="is-activity">25</b><b class="has-dot">26</b>
+                <b class="is-activity">27</b><b class="is-activity">28</b><b class="is-activity">29</b><b>30</b><b class="is-activity">31</b><em>1</em><em>2</em>
+              </div>
+              <div class="calendar-legend">
+                <span><i class="legend-event"></i> Events</span>
+                <span><i class="legend-activity"></i> Activities</span>
+              </div>
+              <button type="button" class="calendar-link">View full calendar <i class="fa-solid fa-arrow-right"></i></button>
+            </div>
+            <div id="upcomingEventList" class="upcoming-event-list" hidden></div>
+          </section>
           <section class="public-side-card channel-about-card">
-            <div class="side-card-heading"><span>About this channel</span><i class="fa-solid fa-circle-info"></i></div>
+            <div class="side-card-heading"><span>About this channel</span><i class="fa-solid fa-shield-heart"></i></div>
             <p>Every post is reviewed and published by ANIMUA management for the Angeles City animal-welfare community.</p>
             <div class="channel-trust-row"><i class="fa-solid fa-shield-heart"></i><span><strong>Official source</strong>Verified shelter information</span></div>
-          </section>
-          <section class="public-side-card">
-            <div class="side-card-heading"><span>Upcoming near you</span><i class="fa-regular fa-calendar"></i></div>
-            <div id="upcomingEventList" class="upcoming-event-list"></div>
           </section>
         </aside>
       </div>
@@ -201,8 +187,7 @@
   <footer class="footer" id="contact">
     <div class="container footer-grid">
       <div class="footer-brand">
-        <a href="home.html" class="logo footer-logo">
-          <img src="../../src/assets/images/animua-logo-transparent.png" alt="ANIMUA" class="footer-logo-img">
+        <a href="#home" class="logo footer-logo">
           <span class="footer-brand-copy">
             <span class="footer-brand-name">ANIMUA</span>
             <span class="footer-brand-tagline">Angeles City Animal Welfare Portal</span>
@@ -212,29 +197,44 @@
           Connecting people with shelter animals through responsible adoption,
           compatibility matching, and shelter-reviewed services.
         </p>
+        <div class="footer-social" aria-label="ANIMUA social links">
+          <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f" aria-hidden="true"></i></a>
+          <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram" aria-hidden="true"></i></a>
+          <a href="#" aria-label="YouTube"><i class="fa-brands fa-youtube" aria-hidden="true"></i></a>
+          <a href="mailto:acveterinary@angelescity.gov.ph" aria-label="Email"><i class="fa-regular fa-envelope" aria-hidden="true"></i></a>
+        </div>
       </div>
 
       <div class="footer-links">
         <h4>Explore</h4>
         <a href="home.html">Home</a>
         <a href="find-furbabies.html">Find Furbabies</a>
-        <a href="home.html?quizIntro=open">Compatibility Quiz</a>
-        <a href="surrender.html">Surrender</a>
-        <a href="contact.html">Contact Us</a>
+        <a href="#" data-quiz-intro-trigger>Compatibility Quiz</a>
+        <a href="#home-highlights" data-footer-scroll>Upcoming Events</a>
       </div>
 
       <div class="footer-links footer-support">
-        <h4>Shelter Services</h4>
-        <a href="home.html#home-highlights">Adoption Guide</a>
+        <h4>Services</h4>
+        <a href="#home-highlights" data-footer-scroll>Adoption Guide</a>
         <a href="surrender.html">Surrender Request</a>
         <a href="contact.html">Contact the Shelter</a>
+        <a href="#" data-quiz-intro-trigger>Match Quiz</a>
+      </div>
+
+      <div class="footer-links footer-about">
+        <h4>About</h4>
+        <a href="#about-animua" data-footer-scroll>About ANIMUA</a>
+        <a href="#how-animua-works" data-footer-scroll>How It Works</a>
+        <a href="#terms-privacy-notice">Privacy Policy</a>
+        <a href="#terms-privacy-notice">Terms of Service</a>
       </div>
 
       <div class="footer-links footer-contact">
         <h4>Contact</h4>
-        <p>Angeles City Veterinary Office</p>
-        <p>City Hall Building, Pulung Maragul, Angeles City</p>
-        <a href="tel:0453220485">(045) 322-0485</a>
+        <p><i class="fa-regular fa-circle-user" aria-hidden="true"></i> Angeles City Veterinary Office</p>
+        <p><i class="fa-solid fa-location-dot" aria-hidden="true"></i> City Hall Building, Pulung Maragul, Angeles City</p>
+        <a href="tel:0453220485"><i class="fa-solid fa-phone" aria-hidden="true"></i> (045) 322-0485</a>
+        <a href="mailto:acveterinary@angelescity.gov.ph"><i class="fa-regular fa-envelope" aria-hidden="true"></i> acveterinary@angelescity.gov.ph</a>
       </div>
     </div>
 
@@ -243,6 +243,7 @@
         <p>&copy; 2026 ANIMUA. All rights reserved.</p>
         <p>Developed for the Angeles City Veterinary Office.</p>
         <p>Adoption applications and surrender requests are subject to shelter evaluation and approval.</p>
+        <i class="fa-solid fa-paw footer-paw" aria-hidden="true"></i>
       </div>
     </div>
   </footer>

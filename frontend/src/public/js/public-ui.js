@@ -6,6 +6,7 @@ import { API_BASE_URL } from "../../utils/api.js";
 import { db } from "../../utils/firebase.js";
 
 const CHATBOT_MIN_TYPING_MS = 1000;
+const PASSWORD_OTP_RESEND_SECONDS = 60;
 const NEWS_CCA_CAT_RESCUE_IMAGE = new URL(
   "../../assets/images/news-cca-cat-rescue.png",
   import.meta.url
@@ -93,6 +94,9 @@ let currentProfileAccount = null;
 let pendingProfilePhotoDataUrl = "";
 let lastProfileTrigger = null;
 let hasPendingProfileChanges = false;
+let pendingPasswordChange = null;
+let passwordOtpResendTimer = null;
+let passwordOtpResendRemaining = 0;
 
 const loginSection = document.getElementById("login-section");
 const registerSection = document.getElementById("register-section");
@@ -131,13 +135,22 @@ function clearFormErrors() {
 function openAuthModal(event) {
   if (!authModal) return;
   if (event) event.preventDefault();
+
+  if (localStorage.getItem("animua_token")) {
+    closeAuthModal();
+    updateAuthUI();
+    return;
+  }
+
   authModal.classList.remove("hidden");
   document.body.classList.add("modal-open");
+  document.body.classList.add("auth-open");
 }
 
 function closeAuthModal() {
   if (authModal) authModal.classList.add("hidden");
   document.body.classList.remove("modal-open");
+  document.body.classList.remove("auth-open");
 }
 
 function openQuizIntroModal(event) {
@@ -1401,6 +1414,20 @@ function setupFeaturedFurbabies() {
     return details.join(" / ") || "Furbaby";
   };
 
+  const getFeaturedName = (pet = {}) => {
+    const directName = String(pet.name || pet.animalName || pet.adoptedName || "").trim();
+    if (directName) return directName;
+
+    const label = String(pet.displayLabel || pet.shelterLabel || pet.identifyingDescription || "").trim();
+    const [primaryLabel] = label.split(/\s+(?:-|•|\|)\s+/);
+    const cleanedLabel = primaryLabel
+      .replace(/\b(?:male|female|cat|dog)\b.*$/i, "")
+      .replace(/\b\d+(?:\s*(?:year|years|month|months|yr|yrs|mo|mos))?.*$/i, "")
+      .trim();
+
+    return cleanedLabel || primaryLabel || `Animal ${pet.id || ""}`.trim() || "This furbaby";
+  };
+
   const getPetDateValue = (pet = {}) => {
     const value = pet.createdAt || pet.updatedAt || pet.intakeDate || "";
     if (value?._seconds) return value._seconds * 1000;
@@ -1409,16 +1436,9 @@ function setupFeaturedFurbabies() {
     return Number.isNaN(parsed) ? 0 : parsed;
   };
 
-  const getTemperamentLabel = (pet = {}) => {
-    const traits = pet.behavioralAssessment || {};
-
-    if (traits.specialNeeds >= 4) return "Needs attentive care";
-    if (traits.friendlinessToHumans >= 4 || traits.affectionLevel >= 4) return "People-friendly";
-    if (traits.energyLevel >= 4 || traits.playfulness >= 4) return "Active";
-    if (traits.independenceLevel >= 4) return "Independent";
-    if (traits.adaptability >= 4) return "Adaptable";
-
-    return pet.initialCondition ? "Under shelter care" : "Ready to meet";
+  const getFeaturedFacts = (pet = {}) => {
+    const details = [pet.sex, pet.ageEstimate, pet.species].filter(Boolean);
+    return details.length ? details : [petTypeLabel(pet)];
   };
 
   const fallbackPetImage = (pet = {}) => {
@@ -1443,76 +1463,63 @@ function setupFeaturedFurbabies() {
       return;
     }
 
-    grid.innerHTML = pets
-      .map(
-        (pet) => `
-          <article
-            class="featured-furbaby-card"
-            tabindex="0"
-            role="button"
-            aria-expanded="false"
-            aria-label="Show details for ${escapeHtml(pet.displayLabel || pet.shelterLabel || pet.name || `Animal ${pet.id}`)}"
-          >
-            <img src="${escapeHtml(pet.photoURL || fallbackPetImage(pet))}" alt="${escapeHtml(pet.displayLabel || pet.shelterLabel || pet.name || `Animal ${pet.id}`)}">
-            <div class="featured-furbaby-overlay">
-              <h3>${escapeHtml(pet.displayLabel || pet.shelterLabel || pet.name || `Animal ${pet.id}`)}</h3>
-              <button type="button" class="featured-furbaby-profile" data-pet-id="${escapeHtml(pet.id || "")}">
-                View Profile
-              </button>
-            </div>
-            <div class="featured-furbaby-details" aria-hidden="true">
-              <p>${escapeHtml(petTypeLabel(pet))}</p>
-              <span>${escapeHtml(pet.status || "Ready")}</span>
-              <dl class="featured-furbaby-facts">
-                <div>
-                  <dt>Age</dt>
-                  <dd>${escapeHtml(pet.ageEstimate || "Unknown")}</dd>
-                </div>
-                <div>
-                  <dt>Sex</dt>
-                  <dd>${escapeHtml(pet.sex || "Unknown")}</dd>
-                </div>
-                <div>
-                  <dt>Temperament</dt>
-                  <dd>${escapeHtml(getTemperamentLabel(pet))}</dd>
-                </div>
-              </dl>
-            </div>
-          </article>
-        `
-      )
-      .join("");
+    const cards = pets.slice(0, 3).map((pet, index) => {
+      const name = getFeaturedName(pet);
+      const facts = getFeaturedFacts(pet)
+        .map((fact) => `<span>${escapeHtml(fact)}</span>`)
+        .join("");
+      return `
+        <button type="button" class="featured-furbaby-card ${index === 0 ? "is-featured" : ""}" data-pet-id="${escapeHtml(pet.id || "")}" aria-label="View profile for ${escapeHtml(name)}">
+          <img src="${escapeHtml(pet.photoURL || fallbackPetImage(pet))}" alt="${escapeHtml(name)} available for adoption">
+          <span class="featured-furbaby-favorite" aria-hidden="true"><i class="fa-regular fa-heart"></i></span>
+          <span class="featured-furbaby-card-copy">
+            <strong><i class="fa-solid fa-paw" aria-hidden="true"></i>${escapeHtml(name)}</strong>
+            <em>${facts}</em>
+          </span>
+        </button>
+      `;
+    }).join("");
 
-    grid.querySelectorAll(".featured-furbaby-card").forEach((card) => {
-      const cardImage = card.querySelector("img");
-      const details = card.querySelector(".featured-furbaby-details");
-      if (cardImage) {
-        cardImage.addEventListener("error", () => {
-          cardImage.classList.add("is-missing");
-          cardImage.removeAttribute("src");
-        });
-      }
+    const dots = pets.slice(0, 3).map((_, index) =>
+      `<span class="${index === 0 ? "is-active" : ""}"></span>`
+    ).join("");
 
-      const toggleCard = () => {
-        const isExpanded = card.classList.toggle("is-expanded");
-        card.setAttribute("aria-expanded", String(isExpanded));
-        if (details) details.setAttribute("aria-hidden", String(!isExpanded));
-      };
+    grid.innerHTML = `
+      <article class="featured-furbabies-showcase">
+        <div class="featured-furbabies-copy">
+          <span class="section-label"><i class="fa-solid fa-paw" aria-hidden="true"></i> Featured Furbabies <i class="fa-solid fa-paw" aria-hidden="true"></i></span>
+          <h2>Meet Our Adoptable<br>Furbabies</h2>
+          <p>Looking for a friend? Explore a few of our featured animals who are waiting for a home.</p>
 
-      card.addEventListener("click", (event) => {
-        if (event.target.closest(".featured-furbaby-profile")) return;
-        toggleCard();
-      });
+          <div class="featured-furbabies-filter-pills" aria-label="Featured animal types">
+            <span class="is-active"><i class="fa-solid fa-border-all" aria-hidden="true"></i>All</span>
+            <span><i class="fa-solid fa-cat" aria-hidden="true"></i>Cats</span>
+            <span><i class="fa-solid fa-dog" aria-hidden="true"></i>Dogs</span>
+          </div>
 
-      card.addEventListener("keydown", (event) => {
-        if (event.key !== "Enter" && event.key !== " ") return;
-        if (event.target.closest(".featured-furbaby-profile")) return;
-        event.preventDefault();
-        toggleCard();
-      });
+          <div class="featured-furbabies-actions">
+            <a class="featured-furbabies-view-all" href="find-furbabies.html">View All Animals</a>
+            <a class="featured-furbabies-quiz-link" href="/pages/public/petCompatibility.html">
+              Take Match Quiz <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+            </a>
+          </div>
+        </div>
+
+        <div class="featured-furbabies-card-wrap">
+          ${cards}
+          <div class="featured-furbabies-dots" aria-hidden="true">${dots}</div>
+        </div>
+      </article>
+    `;
+
+    grid.querySelectorAll(".featured-furbaby-card img").forEach((image, index) => {
+      const pet = pets[index];
+      image.addEventListener("error", () => {
+        image.src = fallbackPetImage(pet);
+      }, { once: true });
     });
 
-    grid.querySelectorAll(".featured-furbaby-profile").forEach((button) => {
+    grid.querySelectorAll(".featured-furbaby-card").forEach((button) => {
       button.addEventListener("click", (event) => {
         event.stopPropagation();
         openPetProfile(button.dataset.petId);
@@ -1533,7 +1540,7 @@ function setupFeaturedFurbabies() {
           return pet.id && (!status || status === "ready" || status.includes("adoption"));
         })
         .sort((a, b) => getPetDateValue(b) - getPetDateValue(a))
-        .slice(0, 4);
+        .slice(0, 3);
 
       renderPets(pets);
     })
@@ -1867,6 +1874,7 @@ function setupUserDropdown() {
   const userDropdown = document.getElementById("userDropdown");
   const viewProfileBtn = document.getElementById("viewProfileBtn");
   const myApplicationsBtn = document.getElementById("myApplicationsBtn");
+  const compatibilityResultsBtn = document.getElementById("compatibilityResultsBtn");
 
   if (!userMenuBtn || !userDropdown) return;
 
@@ -1885,6 +1893,12 @@ function setupUserDropdown() {
     event.stopPropagation();
     userDropdown.classList.add("hidden");
     window.location.href = "my-submissions.html";
+  });
+
+  compatibilityResultsBtn?.addEventListener("click", (event) => {
+    event.stopPropagation();
+    userDropdown.classList.add("hidden");
+    window.location.href = "compatibilityResults.html";
   });
 
   userDropdown.addEventListener("click", (event) => {
@@ -1925,6 +1939,14 @@ async function openProfileModal(trigger = null) {
       return;
     }
 
+    const fallbackAccount = mergeAccountFallbacks(currentProfileAccount || {});
+    if (fallbackAccount.fullName || fallbackAccount.email) {
+      currentProfileAccount = fallbackAccount;
+      renderProfileModal(fallbackAccount);
+      setProfileStatus("Some profile details could not refresh, but your account identity is shown.");
+      return;
+    }
+
     setProfileStatus(error.message || "Unable to load your profile.");
   }
 }
@@ -1955,16 +1977,35 @@ async function fetchCurrentAccount() {
     throw new Error(data.message || "Unable to load account details.");
   }
 
-  currentProfileAccount = data.account || {};
+  currentProfileAccount = mergeAccountFallbacks(data.account || {});
   pendingProfilePhotoDataUrl = currentProfileAccount.profilePhotoDataUrl || "";
   return currentProfileAccount;
 }
 
+function getStoredProfileFallbacks() {
+  return {
+    fullName: localStorage.getItem("user_name") || "",
+    email: localStorage.getItem("user_email") || "",
+    profilePhotoDataUrl: localStorage.getItem("user_profile_photo") || "",
+  };
+}
+
+function mergeAccountFallbacks(account = {}) {
+  const fallback = getStoredProfileFallbacks();
+  return {
+    ...account,
+    fullName: account.fullName || fallback.fullName,
+    email: account.email || fallback.email,
+    profilePhotoDataUrl: account.profilePhotoDataUrl || fallback.profilePhotoDataUrl,
+  };
+}
+
 function renderProfileModal(account = {}) {
-  const fullName = account.fullName || "";
-  const email = account.email || "";
+  const mergedAccount = mergeAccountFallbacks(account);
+  const fullName = mergedAccount.fullName || "User";
+  const email = mergedAccount.email || "";
   const firstName = getFirstName(fullName);
-  const createdAt = account.createdAt ? new Date(account.createdAt) : null;
+  const createdAt = mergedAccount.createdAt ? new Date(mergedAccount.createdAt) : null;
   const memberSince = createdAt && !Number.isNaN(createdAt.getTime())
     ? createdAt.getFullYear()
     : new Date().getFullYear();
@@ -1973,9 +2014,9 @@ function renderProfileModal(account = {}) {
   setText("profileMemberSince", String(memberSince));
   setValue("profileFullName", fullName);
   setValue("profileEmail", email);
-  setValue("profilePhone", account.phone || "");
-  setNotificationSummary(account);
-  renderProfileAvatar(fullName, account.profilePhotoDataUrl || "");
+  setValue("profilePhone", mergedAccount.phone || "");
+  setNotificationSummary(mergedAccount);
+  renderProfileAvatar(fullName, mergedAccount.profilePhotoDataUrl || "");
 }
 
 function renderProfileAvatar(fullName, photoDataUrl = "") {
@@ -1994,10 +2035,12 @@ function setProfileEditing(isEditing) {
   profileForm?.classList.remove("is-saving");
   if (isEditing) setProfileSaveState("idle");
 
-  ["profileFullName", "profilePhone"].forEach((id) => {
-    const field = document.getElementById(id);
-    if (field) field.readOnly = !isEditing;
-  });
+  const fullNameField = document.getElementById("profileFullName");
+  const emailField = document.getElementById("profileEmail");
+  const phoneField = document.getElementById("profilePhone");
+  if (fullNameField) fullNameField.readOnly = true;
+  if (emailField) emailField.readOnly = true;
+  if (phoneField) phoneField.readOnly = !isEditing;
 
   if (profileSaveBtn) profileSaveBtn.disabled = !isEditing && !hasPendingProfileChanges;
   if (profileEditBtn) {
@@ -2065,6 +2108,7 @@ function normalizeNotificationSettings(settings = {}) {
   return {
     applicationUpdates: settings.applicationUpdates !== false,
     surrenderRequestUpdates: settings.surrenderRequestUpdates !== false,
+    announcementsEvents: settings.announcementsEvents !== false,
   };
 }
 
@@ -2072,7 +2116,7 @@ function getNotificationPreferenceSummary(settings = {}) {
   const normalized = normalizeNotificationSettings(settings);
   const enabledCount = Object.values(normalized).filter(Boolean).length;
 
-  if (enabledCount === 2) return "Email and push notifications";
+  if (enabledCount === 3) return "Email and push notifications";
   if (enabledCount === 0) return "No notifications";
   if (enabledCount === 1) return "1 notification category enabled";
   return `${enabledCount} notification categories enabled`;
@@ -2129,34 +2173,34 @@ async function showNotificationSettingsDialog({ returnToProfile = false } = {}) 
     html: `
       <div class="notification-settings-modal">
         <div class="notification-settings-head">
-          <button type="button" class="notification-settings-back" aria-label="Back">
-            <i class="fa-solid fa-arrow-left"></i>
-          </button>
-          <div>
-            <span class="notification-settings-accent" aria-hidden="true"></span>
+          <div class="notification-settings-title-icon" aria-hidden="true">
+            <i class="fa-solid fa-bell"></i>
+          </div>
+          <div class="notification-settings-title-copy">
             <h2>Notifications</h2>
             <p>Manage which ANIMUA updates you receive.</p>
           </div>
-          <div class="notification-settings-art" aria-hidden="true">
-            <i class="fa-regular fa-bell"></i>
-            <i class="fa-solid fa-paw"></i>
-          </div>
+        </div>
+
+        <div class="notification-settings-reminder">
+          <span aria-hidden="true"><i class="fa-solid fa-bell"></i></span>
+          <p><strong>Reminder:</strong> You can turn notifications on or off anytime.</p>
         </div>
 
         <div class="notification-settings-card">
           ${renderNotificationToggleRow({
             key: "applicationUpdates",
-            icon: "fa-regular fa-clipboard",
+            icon: "fa-solid fa-file-circle-check",
             title: "Application Updates",
             description: "Adoption status, shelter review, approval, or rejection.",
             checked: settings.applicationUpdates
           })}
           ${renderNotificationToggleRow({
-            key: "surrenderRequestUpdates",
-            icon: "fa-solid fa-box-open",
-            title: "Surrender Request Updates",
-            description: "Updates about your submitted requests.",
-            checked: settings.surrenderRequestUpdates
+            key: "announcementsEvents",
+            icon: "fa-solid fa-bullhorn",
+            title: "Announcement Notifications",
+            description: "Updates about announcements, alerts, and important notices.",
+            checked: settings.announcementsEvents
           })}
         </div>
         <p class="notification-settings-status" aria-live="polite"></p>
@@ -2207,15 +2251,6 @@ function returnToProfileFromSwal() {
 }
 
 function bindNotificationSettingsControls({ returnToProfile = false } = {}) {
-  document.querySelector(".notification-settings-back")?.addEventListener("click", () => {
-    if (returnToProfile) {
-      returnToProfileFromSwal();
-      return;
-    }
-
-    Swal.close();
-  });
-
   document.querySelectorAll("[data-notification-setting]").forEach((input) => {
     input.addEventListener("change", () => {
       const label = input.closest(".notification-settings-switch")?.querySelector("em");
@@ -2308,11 +2343,8 @@ async function handleProfileSave(event) {
     return;
   }
 
-  const fullName = getValue("profileFullName");
-  if (fullName.length < 2) {
-    setProfileStatus("Full name must be at least 2 characters.");
-    return;
-  }
+  const identity = mergeAccountFallbacks(currentProfileAccount || {});
+  const fullName = identity.fullName || getValue("profileFullName") || "User";
 
   setProfileStatus("Saving changes...");
   setProfileSaveState("saving");
@@ -2346,7 +2378,7 @@ async function handleProfileSave(event) {
     }
 
     const savedAccount = data.account || { ...currentProfileAccount, ...payload };
-    currentProfileAccount = { ...savedAccount, ...payload };
+    currentProfileAccount = mergeAccountFallbacks({ ...savedAccount, ...payload });
     pendingProfilePhotoDataUrl = currentProfileAccount.profilePhotoDataUrl || "";
 
     try {
@@ -2496,7 +2528,28 @@ async function promptPasswordUpdate() {
   await showChangePasswordDialog();
 }
 
+function escapeHtmlText(value = "") {
+  return String(value).replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "\"": "&quot;",
+    "'": "&#039;"
+  }[character]));
+}
+
+function maskProfileEmail(email = "") {
+  const [name = "", domain = ""] = email.split("@");
+  if (!domain) return email;
+
+  const visible = name.slice(0, Math.min(2, name.length));
+  return `${visible}${"*".repeat(Math.max(name.length - visible.length, 3))}@${domain}`;
+}
+
 async function showChangePasswordDialog({ returnToProfile = false } = {}) {
+  pendingPasswordChange = null;
+  stopPasswordOtpCooldown();
+
   return Swal.fire({
     html: `
       <div class="change-password-modal">
@@ -2504,52 +2557,67 @@ async function showChangePasswordDialog({ returnToProfile = false } = {}) {
           <button type="button" class="change-password-back" aria-label="Back">
             <i class="fa-solid fa-arrow-left"></i>
           </button>
-          <div>
+          <div class="change-password-title-row">
             <div class="change-password-icon" aria-hidden="true">
               <i class="fa-solid fa-lock"></i>
             </div>
-            <span class="change-password-accent" aria-hidden="true"></span>
-            <h2>Change Password</h2>
-            <p>Update your password to keep your account secure.</p>
+            <div>
+              <h2>Change Password</h2>
+              <p>Update your password to keep your account secure.</p>
+            </div>
           </div>
         </div>
 
+        <div class="change-password-reminder">
+          <span aria-hidden="true"><i class="fa-solid fa-shield"></i></span>
+          <p><strong>Reminder:</strong> You need to verify your account with a one-time password (OTP) before you can change your password.</p>
+        </div>
+
         <label class="change-password-field" for="oldPassword">
-          <span>Current Password</span>
-          <div class="change-password-input-wrap">
-            <input id="oldPassword" type="password" placeholder="Enter your current password" autocomplete="current-password">
-            <button type="button" class="change-password-eye" data-password-target="oldPassword" aria-label="Show current password">
-              <i class="fa-regular fa-eye"></i>
-            </button>
+          <span class="change-password-field-icon" aria-hidden="true"><i class="fa-solid fa-lock"></i></span>
+          <div class="change-password-field-body">
+            <span>Current Password</span>
+            <div class="change-password-input-wrap">
+              <input id="oldPassword" type="password" placeholder="Enter your current password" autocomplete="current-password">
+              <button type="button" class="change-password-eye" data-password-target="oldPassword" aria-label="Show current password">
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
           </div>
         </label>
 
         <label class="change-password-field" for="newPassword">
-          <span>New Password</span>
-          <div class="change-password-input-wrap">
-            <input id="newPassword" type="password" placeholder="Enter your new password" autocomplete="new-password">
-            <button type="button" class="change-password-eye" data-password-target="newPassword" aria-label="Show new password">
-              <i class="fa-regular fa-eye"></i>
-            </button>
+          <span class="change-password-field-icon" aria-hidden="true"><i class="fa-solid fa-lock"></i></span>
+          <div class="change-password-field-body">
+            <span>New Password</span>
+            <div class="change-password-input-wrap">
+              <input id="newPassword" type="password" placeholder="Enter your new password" autocomplete="new-password">
+              <button type="button" class="change-password-eye" data-password-target="newPassword" aria-label="Show new password">
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
+            <small>At least 8 characters with a number and special character.</small>
           </div>
-          <small>Use at least 8 characters.</small>
         </label>
 
         <label class="change-password-field" for="confirmNewPassword">
-          <span>Confirm New Password</span>
-          <div class="change-password-input-wrap">
-            <input id="confirmNewPassword" type="password" placeholder="Re-enter your new password" autocomplete="new-password">
-            <button type="button" class="change-password-eye" data-password-target="confirmNewPassword" aria-label="Show confirmed password">
-              <i class="fa-regular fa-eye"></i>
-            </button>
+          <span class="change-password-field-icon" aria-hidden="true"><i class="fa-solid fa-lock"></i></span>
+          <div class="change-password-field-body">
+            <span>Confirm New Password</span>
+            <div class="change-password-input-wrap">
+              <input id="confirmNewPassword" type="password" placeholder="Re-enter your new password" autocomplete="new-password">
+              <button type="button" class="change-password-eye" data-password-target="confirmNewPassword" aria-label="Show confirmed password">
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
+            <small>Passwords must match.</small>
           </div>
-          <small>Passwords must match.</small>
         </label>
       </div>
     `,
     showCancelButton: true,
     showCloseButton: true,
-    confirmButtonText: "Update Password",
+    confirmButtonText: "Send OTP",
     cancelButtonText: "Cancel",
     reverseButtons: true,
     showLoaderOnConfirm: true,
@@ -2564,7 +2632,12 @@ async function showChangePasswordDialog({ returnToProfile = false } = {}) {
       closeButton: "change-password-close"
     },
     buttonsStyling: false,
-    didOpen: () => bindChangePasswordControls({ returnToProfile }),
+    didOpen: () => {
+      const popup = Swal.getPopup();
+      if (popup) popup.dataset.returnToProfile = String(returnToProfile);
+      bindChangePasswordControls({ returnToProfile });
+    },
+    willClose: stopPasswordOtpCooldown,
     preConfirm: handleChangePasswordConfirm
   });
 }
@@ -2581,18 +2654,252 @@ async function handleChangePasswordConfirm() {
 
   popup?.classList.add("change-password-popup--loading");
   const confirmButton = Swal.getConfirmButton();
-  if (confirmButton) confirmButton.textContent = "Updating...";
+  if (confirmButton) confirmButton.textContent = "Sending OTP...";
 
   try {
-    await changePasswordRequest(passwords.oldPassword, passwords.newPassword);
-    showChangePasswordSuccess();
+    await requestPasswordChangeOtp(passwords.oldPassword, passwords.newPassword);
+    pendingPasswordChange = {
+      ...passwords,
+      returnToProfile: popup?.dataset.returnToProfile === "true"
+    };
+    showPasswordOtpStep();
   } catch (error) {
     popup?.classList.remove("change-password-popup--loading");
-    if (confirmButton) confirmButton.textContent = "Update Password";
-    Swal.showValidationMessage(error.message || "Failed to update password.");
+    if (confirmButton) confirmButton.textContent = "Send OTP";
+    Swal.showValidationMessage(error.message || "Failed to send password OTP.");
   }
 
   return false;
+}
+
+function showPasswordOtpStep() {
+  const popup = Swal.getPopup();
+  const email = localStorage.getItem("user_email") || currentProfileAccount?.email || "";
+  const safeMaskedEmail = escapeHtmlText(maskProfileEmail(email));
+
+  Swal.hideLoading();
+
+  if (popup) {
+    popup.dataset.passwordOtpStep = "true";
+    popup.classList.add("change-password-popup--otp");
+    popup.classList.remove("change-password-popup--loading");
+  }
+
+  Swal.update({
+    html: `
+      <div class="change-password-modal password-otp-modal">
+        <button type="button" class="change-password-back password-change-otp-back" aria-label="Back">
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <div class="email-verification-screen password-change-otp-screen">
+          <h2>Verify Your Account</h2>
+          <p class="email-verification-copy">Enter the 6-digit code we sent to your email<br><strong>${safeMaskedEmail || "your email"}</strong></p>
+          <input type="text" id="password-change-otp-code" class="email-verification-hidden-input" inputmode="numeric" maxlength="6" autocomplete="one-time-code" aria-label="Six-digit email OTP">
+          <div class="email-verification-code-grid" id="password-change-otp-grid" aria-hidden="true">
+            ${Array.from({ length: 6 }, (_, index) => `<span class="email-verification-code-box" data-otp-index="${index}"></span>`).join("")}
+          </div>
+          <small class="auth-error email-verification-message" id="password-change-otp-message"></small>
+          <div class="email-verification-resend">
+            <span class="email-verification-resend-help">Didn't receive the code?</span>
+            <button type="button" class="auth-secondary-action" id="resend-password-change-otp-btn">Resend Code</button>
+          </div>
+          <div class="password-otp-actions">
+            <button type="button" class="password-otp-cancel">Cancel</button>
+            <button type="button" class="auth-submit-btn" id="confirm-password-change-otp-btn">
+              <i class="fa-solid fa-shield" aria-hidden="true"></i>
+              <span>Verify OTP</span>
+            </button>
+          </div>
+          <div class="password-otp-note">
+            <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+            <span>You must verify your account with OTP before changing your password.</span>
+          </div>
+        </div>
+      </div>
+    `,
+    showConfirmButton: false,
+    showCancelButton: false
+  });
+
+  setupPasswordOtpInput();
+  startPasswordOtpCooldown();
+  document.getElementById("confirm-password-change-otp-btn")?.addEventListener("click", handlePasswordOtpConfirm);
+  document.getElementById("resend-password-change-otp-btn")?.addEventListener("click", handlePasswordOtpResend);
+  document.querySelector(".password-otp-cancel")?.addEventListener("click", () => Swal.close());
+  document.querySelector(".password-change-otp-back")?.addEventListener("click", () => {
+    const returnToProfile = Boolean(pendingPasswordChange?.returnToProfile);
+    Swal.close();
+    window.setTimeout(() => showChangePasswordDialog({ returnToProfile }), 0);
+  });
+}
+
+function setupPasswordOtpInput() {
+  const input = document.getElementById("password-change-otp-code");
+  const boxes = Array.from(document.querySelectorAll(".password-change-otp-screen .email-verification-code-box"));
+  if (!input || !boxes.length) return;
+
+  const syncBoxes = () => {
+    const digits = input.value.replace(/\D/g, "").slice(0, 6);
+    if (input.value !== digits) input.value = digits;
+
+    boxes.forEach((box, index) => {
+      box.textContent = digits[index] || "";
+      box.classList.toggle("filled", index < digits.length);
+      box.classList.toggle("active", index === digits.length && digits.length < boxes.length);
+    });
+
+    if (digits.length === boxes.length) {
+      boxes[boxes.length - 1].classList.add("active");
+    }
+  };
+
+  boxes.forEach((box) => {
+    box.addEventListener("click", () => input.focus());
+  });
+
+  input.addEventListener("input", syncBoxes);
+  input.addEventListener("paste", () => window.setTimeout(syncBoxes, 0));
+  input.addEventListener("focus", syncBoxes);
+  input.addEventListener("blur", () => boxes.forEach((box) => box.classList.remove("active")));
+
+  input.focus();
+  syncBoxes();
+}
+
+async function handlePasswordOtpConfirm() {
+  const message = document.getElementById("password-change-otp-message");
+  const button = document.getElementById("confirm-password-change-otp-btn");
+  const otp = document.getElementById("password-change-otp-code")?.value.trim() || "";
+
+  message?.classList.remove("is-success");
+
+  if (!pendingPasswordChange) {
+    if (message) message.textContent = "Please enter your password details again.";
+    return;
+  }
+
+  if (!/^\d{6}$/.test(otp)) {
+    if (message) message.textContent = "Please enter the six-digit email OTP.";
+    return;
+  }
+
+  setPasswordOtpButtonLoading(button, true, "Verifying...");
+
+  try {
+    await confirmPasswordChangeOtp(
+      pendingPasswordChange.oldPassword,
+      pendingPasswordChange.newPassword,
+      otp
+    );
+    pendingPasswordChange = null;
+    stopPasswordOtpCooldown();
+    showChangePasswordSuccess();
+  } catch (error) {
+    if (message) message.textContent = error.message || "Incorrect email OTP. Please try again.";
+  } finally {
+    setPasswordOtpButtonLoading(button, false);
+  }
+}
+
+function setPasswordOtpButtonLoading(button, isLoading, loadingText = "Please wait...") {
+  if (!button) return;
+
+  if (isLoading) {
+    button.dataset.originalHtml = button.innerHTML;
+    button.disabled = true;
+    button.setAttribute("aria-busy", "true");
+    button.innerHTML = `<span>${loadingText}</span>`;
+    return;
+  }
+
+  button.disabled = false;
+  button.removeAttribute("aria-busy");
+  if (button.dataset.originalHtml) {
+    button.innerHTML = button.dataset.originalHtml;
+    delete button.dataset.originalHtml;
+  }
+}
+
+async function handlePasswordOtpResend() {
+  const message = document.getElementById("password-change-otp-message");
+  const button = document.getElementById("resend-password-change-otp-btn");
+
+  message?.classList.remove("is-success");
+
+  if (!pendingPasswordChange) {
+    if (message) message.textContent = "Please enter your password details again.";
+    return;
+  }
+
+  if (passwordOtpResendRemaining > 0) return;
+
+  button.disabled = true;
+
+  try {
+    await requestPasswordChangeOtp(
+      pendingPasswordChange.oldPassword,
+      pendingPasswordChange.newPassword
+    );
+    if (message) {
+      message.textContent = "We sent a new email OTP. Please check your inbox.";
+      message.classList.add("is-success");
+    }
+    startPasswordOtpCooldown();
+  } catch (error) {
+    if (message) message.textContent = error.message || "Unable to resend email OTP.";
+    if (error.status === 429) {
+      startPasswordOtpCooldown();
+    } else {
+      updatePasswordOtpResendButton();
+    }
+  }
+}
+
+function startPasswordOtpCooldown() {
+  stopPasswordOtpCooldown();
+  passwordOtpResendRemaining = PASSWORD_OTP_RESEND_SECONDS;
+  updatePasswordOtpResendButton();
+  passwordOtpResendTimer = window.setInterval(() => {
+    passwordOtpResendRemaining -= 1;
+    updatePasswordOtpResendButton();
+
+    if (passwordOtpResendRemaining <= 0) {
+      stopPasswordOtpCooldown();
+      updatePasswordOtpResendButton();
+    }
+  }, 1000);
+}
+
+function stopPasswordOtpCooldown() {
+  if (passwordOtpResendTimer) {
+    window.clearInterval(passwordOtpResendTimer);
+  }
+
+  passwordOtpResendTimer = null;
+  passwordOtpResendRemaining = 0;
+}
+
+function updatePasswordOtpResendButton() {
+  const button = document.getElementById("resend-password-change-otp-btn");
+  const countdown = document.getElementById("password-change-otp-countdown");
+  if (!button) return;
+
+  if (passwordOtpResendRemaining > 0) {
+    button.disabled = true;
+    button.textContent = `Resend OTP (${passwordOtpResendRemaining})`;
+    if (countdown) countdown.textContent = "Resend in";
+    return;
+  }
+
+  button.disabled = false;
+  button.textContent = "Resend OTP";
+  if (countdown) countdown.textContent = "";
+}
+
+function formatPasswordOtpResendTime(seconds = 0) {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  return `${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
 }
 
 function showChangePasswordSuccess() {
@@ -2617,6 +2924,7 @@ function showChangePasswordSuccess() {
       </div>
     `,
     showCancelButton: false,
+    showConfirmButton: true,
     confirmButtonText: "OK"
   });
 }
@@ -2688,6 +2996,12 @@ function setupProfileModal() {
   });
 
   profileForm?.addEventListener("submit", handleProfileSave);
+  document.getElementById("profilePhone")?.addEventListener("input", () => {
+    if (!profileForm?.classList.contains("is-editing")) return;
+    setProfilePendingChanges(true);
+    setProfileSaveState("idle");
+    setProfileStatus("");
+  });
   profileChangePhotoBtn?.addEventListener("click", () => {
     profilePhotoInput?.click();
   });
@@ -2718,8 +3032,56 @@ function setupProfileModal() {
   setProfileEditing(false);
 }
 
+function setupProcessLucideIcons() {
+  const iconPaths = {
+    search: `
+      <circle cx="11" cy="11" r="8"></circle>
+      <path d="m21 21-4.3-4.3"></path>
+    `,
+    "paw-print": `
+      <circle cx="11" cy="4" r="2"></circle>
+      <circle cx="18" cy="8" r="2"></circle>
+      <circle cx="20" cy="16" r="2"></circle>
+      <path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.05 3.5 3.5 0 0 0-2.32-2.1A3.5 3.5 0 0 1 2 14.03V14a4 4 0 0 1 4-4Z"></path>
+    `,
+    "clipboard-check": `
+      <rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect>
+      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+      <path d="m9 14 2 2 4-4"></path>
+    `,
+    "file-pen-line": `
+      <path d="m18 5-2.414-2.414A2 2 0 0 0 14.172 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2"></path>
+      <path d="M21.378 12.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"></path>
+      <path d="M8 18h1"></path>
+    `,
+    "shield-check": `
+      <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.68 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1Z"></path>
+      <path d="m9 12 2 2 4-4"></path>
+    `
+  };
+
+  document.querySelectorAll(".how-animua-process [data-lucide]").forEach((icon) => {
+    const iconName = icon.dataset.lucide;
+    const paths = iconPaths[iconName];
+    if (!paths) return;
+
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("fill", "none");
+    svg.setAttribute("stroke", "currentColor");
+    svg.setAttribute("stroke-linecap", "round");
+    svg.setAttribute("stroke-linejoin", "round");
+    svg.setAttribute("aria-hidden", "true");
+    svg.setAttribute("data-lucide", iconName);
+    svg.className.baseVal = icon.className;
+    svg.innerHTML = paths;
+    icon.replaceWith(svg);
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   setupProfileModal();
+  setupProcessLucideIcons();
   setupAccountActions();
   setupPasswordToggles();
   setupDateInputs();
@@ -2736,13 +3098,15 @@ document.addEventListener("DOMContentLoaded", () => {
     showLoginView();
   }
 
-  if (window.location.pathname.includes("login.html") && authModal) {
-    authModal.classList.remove("hidden");
+  if (window.location.pathname.includes("login.html") && authModal && !localStorage.getItem("animua_token")) {
+    openAuthModal();
   }
 
-  if (window.location.hash === "#login" && authModal) {
+  if (window.location.hash === "#login" && authModal && !localStorage.getItem("animua_token")) {
     showLoginView();
     openAuthModal();
+    window.history.replaceState(null, "", window.location.pathname + window.location.search);
+  } else if (window.location.hash === "#login") {
     window.history.replaceState(null, "", window.location.pathname + window.location.search);
   }
 
@@ -2757,9 +3121,11 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const shouldOpenAuthModal = localStorage.getItem("animua_open_auth_modal") === "true";
-  if (shouldOpenAuthModal) {
+  if (shouldOpenAuthModal && !localStorage.getItem("animua_token")) {
     showLoginView();
     openAuthModal();
+    localStorage.removeItem("animua_open_auth_modal");
+  } else if (shouldOpenAuthModal) {
     localStorage.removeItem("animua_open_auth_modal");
   }
 
@@ -2890,6 +3256,60 @@ async function changePasswordRequest(oldPassword, newPassword) {
 
   if (!response.ok) {
     throw new Error(data.message || "Failed to update password.");
+  }
+
+  return data;
+}
+
+async function requestPasswordChangeOtp(oldPassword, newPassword) {
+  const token = localStorage.getItem("animua_token");
+
+  if (!token) {
+    throw new Error("Please log in before changing your password.");
+  }
+
+  const response = await fetch(`${API_BASE_URL}/auth/request-password-change-otp`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ oldPassword, newPassword })
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    const error = new Error(data.message || "Unable to send password OTP.");
+    error.status = response.status;
+    throw error;
+  }
+
+  return data;
+}
+
+async function confirmPasswordChangeOtp(oldPassword, newPassword, otp) {
+  const token = localStorage.getItem("animua_token");
+
+  if (!token) {
+    throw new Error("Please log in before changing your password.");
+  }
+
+  const response = await fetch(`${API_BASE_URL}/auth/confirm-password-change-otp`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ oldPassword, newPassword, otp })
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    const error = new Error(data.message || "Failed to update password.");
+    error.status = response.status;
+    throw error;
   }
 
   return data;

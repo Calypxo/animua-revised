@@ -382,6 +382,7 @@ function getRegistrationErrorMessage(error) {
 function closeModal(authModal) {
   if (authModal) authModal.classList.add("hidden");
   document.body.classList.remove("modal-open");
+  document.body.classList.remove("auth-open");
 }
 
 function setSubmitLoading(button, isLoading, loadingText = "Please wait...") {
