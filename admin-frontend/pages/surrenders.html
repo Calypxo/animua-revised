@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="/src/css/adminDashboard.css" />
   <link rel="stylesheet" href="/src/css/sidebar.css" />
   <link rel="stylesheet" href="/src/css/surrenderRequests.css" />
+  <link rel="stylesheet" href="/src/css/managementModal.css" />
 </head>
 <body class="loading surrender-requests-page">
 <div class="shell">
@@ -147,7 +148,7 @@
         <button class="sr-drawer-backdrop" id="srDrawerBackdrop" type="button" aria-label="Close surrender request details"></button>
 
         <!-- Detail drawer -->
-        <div class="sr-drawer" id="srDrawer">
+        <div class="sr-drawer management-side-modal intake-modal" id="srDrawer" role="dialog" aria-modal="true" aria-label="Surrender request details" aria-hidden="true">
           <div class="sr-drawer-inner" id="srDrawerInner"></div>
         </div>
 

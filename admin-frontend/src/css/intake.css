@@ -469,6 +469,66 @@ select.form-inp { cursor: pointer; }
   padding: 14px 16px; margin-bottom: 20px;
 }
 
+.management-side-modal.intake-view-modal .intake-id-header {
+  margin: 0;
+  padding: 16px;
+  border: 1px solid #eee1d8;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.management-side-modal.intake-view-modal .view-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 16px !important;
+}
+
+.management-side-modal.intake-view-modal .view-field {
+  min-width: 0;
+  min-height: 0 !important;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+.management-side-modal.intake-view-modal .view-field-lbl {
+  margin: 0 !important;
+  color: #504845 !important;
+  font-family: "Outfit", sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+}
+
+.management-side-modal.intake-view-modal .view-field-val {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  margin: 0 !important;
+  padding: 11px 13px;
+  border: 1px solid #dfd3cb;
+  border-radius: 10px;
+  color: var(--management-modal-ink, #1f2329) !important;
+  background: #fff;
+  font-family: "Outfit", sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  line-height: 1.45 !important;
+  overflow-wrap: anywhere;
+}
+
+.management-side-modal.intake-view-modal .view-field-val :is(.source-badge,.cond-badge,.status-badge) {
+  margin: 0;
+}
+
+.management-side-modal.intake-view-modal .um-modal-footer .btn-ghost-clay:first-child {
+  margin-right: auto;
+}
+
 .intake-id-badge {
   font-family: var(--mono); font-size: 0.82rem; font-weight: 700;
   background: var(--clay); color: #fff; padding: 5px 12px;
@@ -529,6 +589,7 @@ select.form-inp { cursor: pointer; }
   .form-full    { grid-column: 1; }
   .source-selector { grid-template-columns: 1fr; }
   .view-grid    { grid-template-columns: 1fr; }
+  .management-side-modal.intake-view-modal .view-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 600px) {

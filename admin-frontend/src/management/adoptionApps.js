@@ -559,11 +559,9 @@ if (app.status === "Approved") {
   inner.innerHTML = `
     <div class="drawer-header">
       <div class="drawer-header-left">
-        <span class="drawer-eyebrow">Application details</span>
-        <h3>${app.applicationId}</h3>
-        <p>Submitted ${formatDate(app.submitted)} · ${app.type}</p>
+        <h3>Adoption Application Details</h3>
+        <p>${app.applicationId} · Submitted ${formatDate(app.submitted)} · ${app.type}</p>
       </div>
-      <div class="drawer-header-status">${statusBadge(app.status)}</div>
       <button class="drawer-close-btn" id="drawerCloseX"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="drawer-body">
@@ -576,6 +574,10 @@ if (app.status === "Approved") {
         <div class="journey-animal">
           <span class="journey-avatar journey-pet">${emoji(app.animal.species)}</span>
           <span><small>Animal</small><strong>${app.animal.name}</strong></span>
+        </div>
+        <div class="journey-status">
+          <small>Application Status</small>
+          <strong>${statusBadge(app.status)}</strong>
         </div>
       </section>
       ${compatSection}

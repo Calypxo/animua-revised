@@ -4,6 +4,8 @@ import { canAccessModule, normalizeRole } from "../../auth/permissions.js";
 import { apiFetch } from "../../utils/api.js";
 
 const ATTENTION_SEEN_KEY = "animua_attention_seen";
+const ATTENTION_CACHE_KEY = "animua_attention_summary";
+const ATTENTION_CLIENT_CACHE_TTL_MS = 15 * 60_000;
 
 const escapeHtml = (value) => String(value ?? "")
   .replaceAll("&", "&amp;")
@@ -55,25 +57,23 @@ function attentionItems(data, role) {
   }
 
   if (canAccessModule(role, "inventory")) {
-    const lowStock = Array.isArray(data.lowStockItems) ? data.lowStockItems : [];
-    const critical = lowStock.filter((item) => item.level === "Critical").length;
+    const lowStockCount = Number(data.lowStockCount || 0);
+    const critical = Number(data.criticalStockCount || 0);
     add({
       id: "inventory",
-      count: lowStock.length,
+      count: lowStockCount,
       tone: critical ? "red" : "amber",
       icon: "bi-box-seam-fill",
       title: critical ? "Critical inventory attention" : "Low-stock inventory",
       detail: critical
-        ? `${critical} critical and ${Math.max(0, lowStock.length - critical)} low-stock item(s).`
-        : `${lowStock.length} item(s) should be restocked soon.`,
+        ? `${critical} critical and ${Math.max(0, lowStockCount - critical)} low-stock item(s).`
+        : `${lowStockCount} item(s) should be restocked soon.`,
       href: "/pages/inventory.html",
     });
   }
 
   if (canAccessModule(role, "animals")) {
-    const longStayAlert = (Array.isArray(data.alerts) ? data.alerts : [])
-      .find((alert) => String(alert.title || "").includes("over 60 days"));
-    const longStayCount = Number(String(longStayAlert?.title || "").match(/^\d+/)?.[0] || 0);
+    const longStayCount = Number(data.longStayCount || 0);
     add({
       id: "long-stay",
       count: longStayCount,
@@ -98,6 +98,28 @@ function attentionItems(data, role) {
   }
 
   return items;
+}
+
+function readCachedAttentionSummary() {
+  try {
+    const cached = JSON.parse(localStorage.getItem(ATTENTION_CACHE_KEY) || "null");
+    if (
+      !cached?.data ||
+      Date.now() - Number(cached.savedAt || 0) > ATTENTION_CLIENT_CACHE_TTL_MS
+    ) {
+      return null;
+    }
+    return cached.data;
+  } catch (_) {
+    return null;
+  }
+}
+
+function cacheAttentionSummary(data) {
+  localStorage.setItem(ATTENTION_CACHE_KEY, JSON.stringify({
+    savedAt: Date.now(),
+    data,
+  }));
 }
 
 function ensureAttentionPanel() {
@@ -178,12 +200,16 @@ function renderAttentionCenter(panel, button, data, role) {
       </div>`;
 }
 
-async function loadAttentionCenter(panel, button, role, showLoading = false) {
+async function loadAttentionCenter(panel, button, role, options = {}) {
+  const { forceRefresh = false, showLoading = false } = options;
   const refresh = panel.querySelector("#attentionRefresh");
   if (showLoading) panel.classList.add("is-refreshing");
   refresh?.setAttribute("aria-busy", "true");
   try {
-    const data = await apiFetch("/dashboard/stats");
+    const data = await apiFetch(
+      `/dashboard/attention${forceRefresh ? "?refresh=1" : ""}`
+    );
+    cacheAttentionSummary(data);
     renderAttentionCenter(panel, button, data, role);
   } catch (error) {
     const summary = panel.querySelector("#attentionSummary");
@@ -212,14 +238,20 @@ function bindAttentionCenter(button, role) {
     panel.hidden = true;
     button.setAttribute("aria-expanded", "false");
   };
-  const toggle = () => {
-    panel.hidden = !panel.hidden;
-    button.setAttribute("aria-expanded", String(!panel.hidden));
+  const toggle = async () => {
+    const opening = panel.hidden;
+    panel.hidden = !opening;
+    button.setAttribute("aria-expanded", String(opening));
+    if (opening) {
+      await loadAttentionCenter(panel, button, role, {
+        showLoading: !readCachedAttentionSummary(),
+      });
+    }
   };
 
   button.addEventListener("click", (event) => {
     event.stopPropagation();
-    toggle();
+    void toggle();
   });
   panel.addEventListener("click", (event) => event.stopPropagation());
   document.addEventListener("click", close);
@@ -227,7 +259,10 @@ function bindAttentionCenter(button, role) {
     if (event.key === "Escape") close();
   });
   panel.querySelector("#attentionRefresh")?.addEventListener("click", () => {
-    loadAttentionCenter(panel, button, role, true);
+    void loadAttentionCenter(panel, button, role, {
+      forceRefresh: true,
+      showLoading: true,
+    });
   });
   panel.querySelector("#attentionMarkSeen")?.addEventListener("click", () => {
     localStorage.setItem(ATTENTION_SEEN_KEY, panel.dataset.signature || "");
@@ -237,8 +272,8 @@ function bindAttentionCenter(button, role) {
     panel.querySelector("#attentionMarkSeen").disabled = true;
   });
 
-  loadAttentionCenter(panel, button, role);
-  window.setInterval(() => loadAttentionCenter(panel, button, role), 60000);
+  const cached = readCachedAttentionSummary();
+  if (cached) renderAttentionCenter(panel, button, cached, role);
 }
 
 export function renderTopbarUser() {

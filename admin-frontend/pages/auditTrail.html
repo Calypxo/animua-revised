@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="/src/css/adminDashboard.css" />
   <link rel="stylesheet" href="/src/css/sidebar.css" />
   <link rel="stylesheet" href="/src/css/auditTrail.css" />
+  <link rel="stylesheet" href="/src/css/managementModal.css" />
 </head>
 <body class="loading">
   <div class="shell">
@@ -166,7 +167,7 @@
   </div>
 
   <div class="um-modal-backdrop" id="viewAuditModalBackdrop">
-    <div class="um-modal audit-modal" role="dialog" aria-modal="true">
+    <div class="um-modal audit-modal intake-modal management-side-modal" role="dialog" aria-modal="true">
       <div class="um-modal-header">
         <div>
           <h2>Audit Log Details</h2>
@@ -177,7 +178,7 @@
         </button>
       </div>
 
-      <div class="um-modal-body">
+      <div class="um-modal-body audit-modal-body">
         <div id="viewAuditContent"></div>
       </div>
 

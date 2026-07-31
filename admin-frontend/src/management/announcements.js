@@ -365,7 +365,7 @@ function openCreateModal(defaultType = "News & Article") {
   resetForm();
   getEl("fType").value = normalizePostType(defaultType);
   syncEventFields();
-  getEl("announcementModalTitle").textContent = "Create Post";
+  getEl("announcementModalTitle").textContent = "Create Community Post";
   getEl("announcementModalBackdrop").classList.add("open");
 }
 
@@ -380,7 +380,7 @@ function openEditModal(id) {
 
   state.editingId = id;
 
-  getEl("announcementModalTitle").textContent = "Edit Post";
+  getEl("announcementModalTitle").textContent = "Edit Community Post";
   getEl("fTitle").value = item.title || "";
   getEl("fType").value = normalizePostType(item.type);
   getEl("fCaption").value = item.caption || "";

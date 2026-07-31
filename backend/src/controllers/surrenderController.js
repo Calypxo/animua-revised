@@ -1,11 +1,9 @@
 const { db } = require("../config/firebase");
+const { analyzeSurrenderReason } = require("../services/surrenderNlpService");
 
 const COLLECTION_NAME = "surrenderRequests";
 const SHELTER_LOCATION = "Angeles City Veterinary Office, Brgy. Pampang, Angeles City";
 
-const PYTHON_SENTIMENT_API_URL =
-  process.env.PYTHON_SENTIMENT_API_URL ||
-  "http://127.0.0.1:8002/analyze-surrender-sentiment";
 const MAX_SURRENDER_PHOTO_DATA_URL_LENGTH = 900000;
 
 const ANGELES_BARANGAYS = [
@@ -26,24 +24,6 @@ function generateRequestId() {
   const year = new Date().getFullYear();
   const timestamp = Date.now().toString().slice(-6);
   return `SR-${year}-${timestamp}`;
-}
-
-async function analyzeSurrenderReason(reason) {
-  const response = await fetch(PYTHON_SENTIMENT_API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      reason,
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error("Python sentiment service failed.");
-  }
-
-  return await response.json();
 }
 
 async function createSurrenderRequest(req, res) {

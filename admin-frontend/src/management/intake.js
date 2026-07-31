@@ -773,8 +773,9 @@ function openViewModal(id) {
   const r = intakeRecords.find(x => x.id === id);
   if (!r) return;
 
-  document.getElementById("viewModalTitle").textContent    = r.id;
-  document.getElementById("viewModalSubtitle").textContent = `${r.species} · ${r.source} · ${formatDate(r.intakeDate)}`;
+  document.getElementById("viewModalTitle").textContent = "Intake Record Details";
+  document.getElementById("viewModalSubtitle").textContent =
+    `${r.id} · ${r.species} · ${r.source} · ${formatDate(r.intakeDate)}`;
 
   const sc = sourceCfg[r.source] || sourceCfg["Rescue"];
   const cc = condCfg[r.condition] || condCfg["Fair"];
@@ -784,7 +785,7 @@ function openViewModal(id) {
     const b = r.barangayDetails;
     dynamicHtml = `
       <div class="view-section">
-        <div class="view-section-title">Barangay Turnover Details</div>
+        <div class="view-section-title"><i class="bi bi-building"></i> Barangay Turnover Details</div>
         <div class="view-grid">
           <div class="view-field"><div class="view-field-lbl">Barangay</div><div class="view-field-val">${b.barangayName||"—"}</div></div>
           <div class="view-field"><div class="view-field-lbl">Officer</div><div class="view-field-val">${b.officerName||"—"}</div></div>
@@ -796,7 +797,7 @@ function openViewModal(id) {
   } else if (r.source === "Approved Surrender") {
     dynamicHtml = `
       <div class="view-section">
-        <div class="view-section-title">Surrender Reference</div>
+        <div class="view-section-title"><i class="bi bi-file-earmark-check"></i> Surrender Reference</div>
         <div class="view-grid">
           <div class="view-field"><div class="view-field-lbl">Surrender ID</div><div class="view-field-val" style="font-family:var(--mono)">${r.surrenderRefId||"—"}</div></div>
           <div class="view-field"><div class="view-field-lbl">Owner</div><div class="view-field-val">${r.ownerName||"—"}</div></div>
@@ -810,7 +811,7 @@ function openViewModal(id) {
   if (r.approvedBy) {
     reviewHtml = `
       <div class="view-section">
-        <div class="view-section-title">Review</div>
+        <div class="view-section-title"><i class="bi bi-clipboard2-check"></i> Review</div>
         <div class="view-grid">
           <div class="view-field"><div class="view-field-lbl">Approved By</div><div class="view-field-val">${r.approvedBy}</div></div>
           <div class="view-field"><div class="view-field-lbl">Approved On</div><div class="view-field-val">${formatDate(r.approvedAt)}</div></div>
@@ -820,25 +821,28 @@ function openViewModal(id) {
   if (r.rejectedReason) {
     reviewHtml = `
       <div class="view-section">
-        <div class="view-section-title">Rejection Reason</div>
+        <div class="view-section-title"><i class="bi bi-x-circle"></i> Rejection Reason</div>
         <div class="view-field view-full"><div class="view-field-val" style="color:var(--clay)">${r.rejectedReason}</div></div>
       </div>`;
   }
 
   document.getElementById("viewModalBody").innerHTML = `
-    <div class="intake-id-header">
-      <span class="intake-id-badge">${r.id}</span>
-      <div>
-        <div class="intake-animal-name">${intakeLabel(r)}</div>
-        <div class="intake-animal-meta">${r.species}${r.breed ? " · " + r.breed : ""} · ${r.sex}</div>
-      </div>
-      <div class="ms-auto d-flex gap-2 flex-wrap">
-        ${sourceBadge(r.source)} ${statusBadge(r.status)}
+    <div class="view-section intake-summary-section">
+      <div class="view-section-title"><i class="bi bi-card-checklist"></i> Record Summary</div>
+      <div class="intake-id-header">
+        <span class="intake-id-badge">${r.id}</span>
+        <div>
+          <div class="intake-animal-name">${intakeLabel(r)}</div>
+          <div class="intake-animal-meta">${r.species}${r.breed ? " · " + r.breed : ""} · ${r.sex}</div>
+        </div>
+        <div class="ms-auto d-flex gap-2 flex-wrap">
+          ${sourceBadge(r.source)} ${statusBadge(r.status)}
+        </div>
       </div>
     </div>
 
     <div class="view-section">
-      <div class="view-section-title">Animal Information</div>
+      <div class="view-section-title"><i class="bi bi-heart-pulse"></i> Animal Information</div>
       <div class="view-grid">
         <div class="view-field"><div class="view-field-lbl">Age</div><div class="view-field-val">${r.ageEstimate||"Unknown"}</div></div>
         <div class="view-field"><div class="view-field-lbl">Color</div><div class="view-field-val">${r.color||"Unknown"}</div></div>
@@ -854,7 +858,7 @@ function openViewModal(id) {
     </div>
 
     <div class="view-section">
-      <div class="view-section-title">Intake Details</div>
+      <div class="view-section-title"><i class="bi bi-box-arrow-in-right"></i> Intake Details</div>
       <div class="view-grid">
         <div class="view-field"><div class="view-field-lbl">Intake Date</div><div class="view-field-val">${formatDate(r.intakeDate)}</div></div>
         <div class="view-field"><div class="view-field-lbl">Encoded By</div><div class="view-field-val">${r.encodedBy}</div></div>

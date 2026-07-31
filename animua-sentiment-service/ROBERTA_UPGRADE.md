@@ -1,6 +1,8 @@
-# RoBERTa Surrender Classifier
+# Tagalog RoBERTa Surrender Classifier
 
-This service now supports a Hugging Face RoBERTa transformer for surrender text analysis.
+This service fine-tunes
+[`jcblaise/roberta-tagalog-base`](https://huggingface.co/jcblaise/roberta-tagalog-base)
+for Tagalog and mixed Tagalog-English surrender text analysis.
 
 It trains two classifiers from `surrender_sentiment_dataset.csv`:
 
@@ -10,18 +12,25 @@ It trains two classifiers from `surrender_sentiment_dataset.csv`:
 ## Install Dependencies
 
 ```bash
-pip install -r requirements.txt
+uv venv --python 3.12
+uv pip install torch --index-url https://download.pytorch.org/whl/cpu
+uv pip install -r requirements.txt
 ```
+
+On Windows PowerShell, use `.venv\Scripts\python.exe` for the remaining
+commands. The separate PyTorch command installs the smaller CPU-only build used
+on machines without an NVIDIA GPU.
 
 ## Train RoBERTa
 
 Run this from the `animua-sentiment-service` folder:
 
 ```bash
-python train_roberta_model.py
+.venv\Scripts\python.exe train_roberta_model.py
 ```
 
-The first run downloads `roberta-base` from Hugging Face, then saves trained models to:
+The first run downloads `jcblaise/roberta-tagalog-base` from Hugging Face, then
+saves the fine-tuned models to:
 
 ```text
 models/roberta/sentiment
@@ -37,14 +46,28 @@ models/roberta/category/labels.json
 ```
 
 The metrics include accuracy, weighted precision, weighted recall, weighted F1, and macro F1.
+Only the best final task models are retained; temporary optimizer checkpoints
+are removed after each task to save disk space.
 
 ## Run the API
 
 ```bash
-uvicorn app:app --reload
+.venv\Scripts\python.exe -m uvicorn app:app --reload --port 8002
 ```
 
-The API automatically uses the RoBERTa models when the `models/roberta` folders exist. If they are missing, it falls back to the existing TF-IDF + Logistic Regression models.
+The API uses Tagalog RoBERTa only when both task folders exist, their label sets
+match the surrender API contract, and `labels.json` confirms they were trained
+from the configured Tagalog checkpoint. Missing, incomplete, or stale English
+artifacts safely fall back to the existing TF-IDF + Logistic Regression models.
+
+The service resolves model and data files relative to its own folder, so it can
+be started either from this directory or from the repository root.
+
+From the repository root, use:
+
+```bash
+animua-sentiment-service\.venv\Scripts\python.exe -m uvicorn --app-dir animua-sentiment-service app:app --port 8002
+```
 
 ## Endpoint
 
@@ -71,10 +94,27 @@ Example response:
   "confidence": 0.94,
   "keywords": ["sick", "immediately"],
   "suggestedPriority": "High Priority",
-  "source": "RoBERTa Transformer"
+  "source": "Tagalog RoBERTa Transformer"
 }
 ```
 
-## Model Note
+## Verify the surrender integration
 
-`roberta-base` is an English model. If you want stronger Tagalog or mixed Tagalog-English predictions, use `xlm-roberta-base` in `train_roberta_model.py`.
+After training, start the service and check its status:
+
+```bash
+.venv\Scripts\python.exe -m uvicorn app:app --port 8002
+curl http://127.0.0.1:8002/
+```
+
+`transformerReady` must be `true`, both entries in `loadedTasks` must be
+`true`, and `activeSource` must be `Tagalog RoBERTa Transformer`. The Node
+backend sends surrender reasons to:
+
+```text
+http://127.0.0.1:8002/analyze-surrender-sentiment
+```
+
+To intentionally use a different compatible checkpoint for both training and
+runtime validation, set `ANIMUA_ROBERTA_MODEL` before training and starting the
+service.

@@ -45,12 +45,17 @@ async function getPublicSubmittedRequests() {
         id: request.id || `SR-PUBLIC-${String(index + 1).padStart(3, "0")}`,
         status: request.status || "Pending",
         submittedAt: request.submittedAt || new Date().toISOString().split("T")[0],
+        createdAt: request.createdAt || request.submittedAt || null,
+        updatedAt: request.updatedAt || null,
 
         owner: {
           name: ownerName,
+          email: request.owner?.email || request.account?.email || "—",
           contact: request.owner?.contact || "—",
           address: request.owner?.address || "—",
           barangay: request.owner?.barangay || "Not specified",
+          city: request.owner?.city || "Angeles City",
+          isAngelesResident: request.owner?.isAngelesResident === true,
           idType: "Online Account",
           color: "#6f191c",
           initials: ownerName
@@ -79,13 +84,18 @@ async function getPublicSubmittedRequests() {
 
         agreement: request.agreement || null,
 
+        account: {
+          email: request.account?.email || request.owner?.email || "—",
+          role: request.account?.role || "Public",
+        },
+
         nlp: {
           sentiment: request.nlp?.sentiment || "Neutral",
           category: request.nlp?.category || "Other",
           urgencyLabel: request.nlp?.urgencyLabel || "Low",
-          urgencyScore: request.nlp?.urgencyScore || 20,
-          confidence: request.nlp?.confidence || 0.5,
-          keywords: request.nlp?.keywords || [],
+          urgencyScore: request.nlp?.urgencyScore ?? 20,
+          confidence: request.nlp?.confidence ?? 0.5,
+          keywords: Array.isArray(request.nlp?.keywords) ? request.nlp.keywords : [],
           suggestedPriority: request.nlp?.suggestedPriority || "Normal Priority",
           source: request.nlp?.source || "TF-IDF + Logistic Regression",
         },
@@ -142,10 +152,25 @@ let currentRole = "";
 ══════════════════════════════════════════════════════ */
 const emoji = s => ({Dog:"D",Cat:"C",Rabbit:"R",Bird:"B"}[s]||"A");
 const thumbCls = s => ({Dog:"thumb-dog",Cat:"thumb-cat"}[s]||"thumb-other");
+const escapeHtml = value => String(value ?? "")
+  .replaceAll("&", "&amp;")
+  .replaceAll("<", "&lt;")
+  .replaceAll(">", "&gt;")
+  .replaceAll('"', "&quot;")
+  .replaceAll("'", "&#039;");
+const displayValue = (value, fallback = "—") => escapeHtml(value || fallback);
+const safePhotoUrl = value => /^data:image\/(png|jpe?g|webp);base64,[A-Za-z0-9+/=]+$/i.test(value || "") ? value : "";
+
+function can(action) {
+  return hasPermission(currentRole, "surrender", action);
+}
 
 function formatDate(d) {
   if (!d) return "—";
-  return new Date(d+"T00:00:00").toLocaleDateString("en-PH",{month:"short",day:"numeric",year:"numeric"});
+  const value = /^\d{4}-\d{2}-\d{2}$/.test(String(d)) ? `${d}T00:00:00` : d;
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "—";
+  return parsed.toLocaleDateString("en-PH",{month:"short",day:"numeric",year:"numeric"});
 }
 
 function urgencyCls(u) {
@@ -154,7 +179,7 @@ function urgencyCls(u) {
 
 function statusBadge(s) {
   const m = { Pending:{cls:"badge-pending"}, Approved:{cls:"badge-approved"}, Converted:{cls:"badge-converted"}, Rejected:{cls:"badge-rejected"} }[s] || {cls:"badge-pending"};
-  return `<span class="status-badge ${m.cls}">${s}</span>`;
+  return `<span class="status-badge ${m.cls}">${escapeHtml(s || "Pending")}</span>`;
 }
 
 const CAT_CSS = {
@@ -170,7 +195,7 @@ const CAT_ICONS = {
 
 function catBadge(cat) {
   const cls = CAT_CSS[cat]||"cat-other", icon = CAT_ICONS[cat]||"bi-three-dots";
-  return `<span class="nlp-cat-badge ${cls}"><i class="bi ${icon}"></i>${cat}</span>`;
+  return `<span class="nlp-cat-badge ${cls}"><i class="bi ${icon}"></i>${escapeHtml(cat || "Other")}</span>`;
 }
 
 const URGENCY_FILL = { Critical:"fill-critical", High:"fill-high", Medium:"fill-medium", Low:"fill-low" };
@@ -302,6 +327,7 @@ function openDrawer(id) {
   activeId = id;
   document.querySelectorAll("tr[data-id]").forEach(row => row.classList.toggle("row-active", row.dataset.id === id));
   document.getElementById("srLayout")?.classList.add("drawer-open");
+  document.getElementById("srDrawer")?.setAttribute("aria-hidden", "false");
   document.body.classList.add("management-drawer-open");
   renderDrawer(r);
 }
@@ -309,6 +335,7 @@ function openDrawer(id) {
 function closeDrawer() {
   activeId = null;
   document.getElementById("srLayout")?.classList.remove("drawer-open");
+  document.getElementById("srDrawer")?.setAttribute("aria-hidden", "true");
   document.body.classList.remove("management-drawer-open");
   document.querySelectorAll("tr[data-id]").forEach(r => r.classList.remove("row-active"));
 }
@@ -316,6 +343,9 @@ function closeDrawer() {
 function renderDrawer(r) {
   const inner = document.getElementById("srDrawerInner");
   if (!inner) return;
+
+  const owner = r.owner || {};
+  const agreement = r.agreement || {};
 
   const pct  = URGENCY_PCT[r.nlp.urgencyLabel] || 25;
   const fill = URGENCY_FILL[r.nlp.urgencyLabel] || "fill-low";
@@ -393,6 +423,10 @@ function renderDrawer(r) {
           <div class="drawer-info-lbl">Full Name</div>
           <div class="drawer-info-val">${r.owner.name}</div>
         </div>
+        <div class="drawer-info-item drawer-info-full">
+          <div class="drawer-info-lbl">Email</div>
+          <div class="drawer-info-val">${displayValue(owner.email || r.account?.email)}</div>
+        </div>
         <div class="drawer-info-item">
           <div class="drawer-info-lbl">Contact</div>
           <div class="drawer-info-val">${r.owner.contact}</div>
@@ -417,9 +451,10 @@ function renderDrawer(r) {
     </div>`;
 
   // ── Pet section ───────────────────────────────────────
-  const petPhotoBlock = r.pet.photoDataUrl ? `
+  const submittedPhoto = safePhotoUrl(r.pet.photoDataUrl);
+  const petPhotoBlock = submittedPhoto ? `
     <div class="surrender-pet-photo">
-      <img src="${r.pet.photoDataUrl}" alt="Submitted photo of ${r.pet.name}">
+      <img src="${submittedPhoto}" alt="Submitted photo of ${displayValue(r.pet.name, "the animal")}">
       <div>
         <span>Submitted Animal Photo</span>
         <strong>${r.pet.photoName || "Uploaded photo"}</strong>
@@ -504,7 +539,10 @@ function renderDrawer(r) {
     statusSection = `
       <div class="drawer-section">
         <div class="drawer-section-title" style="color:var(--clay)"><i class="bi bi-x-circle-fill"></i> Rejection</div>
-        <div class="info-banner banner-rejected">${r.rejectedReason}</div>
+        <div class="info-banner banner-rejected">
+          <strong>${displayValue(r.rejectedReason, "No rejection reason provided.")}</strong>
+          <div class="mt-1" style="font-size:0.82rem">Reviewed by ${displayValue(r.reviewedBy, "Staff")} on ${formatDate(r.reviewedAt)}</div>
+        </div>
       </div>`;
   }
   if (r.status === "Approved") {
@@ -529,6 +567,34 @@ function renderDrawer(r) {
   }
 
   // ── Footer buttons ────────────────────────────────────
+  const submissionSection = `
+    <div class="drawer-section drawer-section-submission">
+      <div class="drawer-section-title"><i class="bi bi-shield-check"></i> Consent and Submission</div>
+      <div class="drawer-info-grid">
+        <div class="drawer-info-item">
+          <div class="drawer-info-lbl">Submitted</div>
+          <div class="drawer-info-val">${formatDate(r.submittedAt || r.createdAt)}</div>
+        </div>
+        <div class="drawer-info-item">
+          <div class="drawer-info-lbl">Source</div>
+          <div class="drawer-info-val">${displayValue(r.source, "Public Form")}</div>
+        </div>
+        <div class="drawer-info-item">
+          <div class="drawer-info-lbl">Terms Accepted</div>
+          <div class="drawer-info-val">${agreement.agreedToTerms ? "Yes" : "No"}</div>
+        </div>
+        <div class="drawer-info-item">
+          <div class="drawer-info-lbl">Accepted On</div>
+          <div class="drawer-info-val">${formatDate(agreement.agreedAt)}</div>
+        </div>
+        ${agreement.agreementText ? `
+          <div class="drawer-info-item drawer-info-full">
+            <div class="drawer-info-lbl">Consent Statement</div>
+            <div class="drawer-info-val">${escapeHtml(agreement.agreementText)}</div>
+          </div>` : ""}
+      </div>
+    </div>`;
+
   let footerBtns = `<button class="btn-ghost-clay" id="drawerCloseBtn"><i class="bi bi-x"></i> Close</button>`;
   if (r.status === "Pending") {
   footerBtns += `
@@ -557,20 +623,33 @@ function renderDrawer(r) {
   inner.innerHTML = `
     <div class="drawer-header">
       <div class="drawer-header-left">
-        <h3>${r.id}</h3>
-        <p>
-        ${r.owner.name} · ${emoji(r.pet.species)} ${r.pet.name} · ${statusBadge(r.status)}
-        ${r.source ? ` · <span style="color:var(--stone);font-size:0.78rem">${r.source}</span>` : ""}
-      </p>
+        <h3>Surrender Request Details</h3>
+        <p>${displayValue(r.id, "Surrender request")} · Submitted ${formatDate(r.submittedAt || r.createdAt)} · ${displayValue(r.source, "Public Form")}</p>
       </div>
       <button class="drawer-close-btn" id="drawerCloseX" aria-label="Close request details"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="drawer-body">
+      <section class="surrender-overview" aria-label="Owner and animal summary">
+        <div class="overview-person">
+          <span class="overview-avatar">${displayValue(owner.initials, "OW")}</span>
+          <span><small>Owner</small><strong>${displayValue(owner.name, "Unknown owner")}</strong></span>
+        </div>
+        <span class="overview-link"><i class="bi bi-arrow-right"></i><small>is surrendering</small></span>
+        <div class="overview-animal">
+          <span class="overview-avatar overview-pet">${emoji(r.pet.species)}</span>
+          <span><small>Animal</small><strong>${displayValue(r.pet.name, "Unnamed animal")}</strong></span>
+        </div>
+        <div class="overview-date">
+          <small>Request Status</small>
+          <strong>${statusBadge(r.status)}</strong>
+        </div>
+      </section>
       ${nlpSection}
       ${ownerSection}
       ${petSection}
       ${extraPetDetailsSection}
       ${docsSection}
+      ${submissionSection}
       ${statusSection}
     </div>
     <div class="drawer-footer">${footerBtns}</div>`;

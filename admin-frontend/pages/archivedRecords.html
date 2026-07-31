@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="/src/css/adminDashboard.css" />
   <link rel="stylesheet" href="/src/css/sidebar.css" />
   <link rel="stylesheet" href="/src/css/archivedRecords.css" />
+  <link rel="stylesheet" href="/src/css/managementModal.css" />
 </head>
 <body class="loading">
   <div class="shell">
@@ -157,7 +158,7 @@
   </div>
 
   <div class="um-modal-backdrop" id="viewArchiveModalBackdrop">
-    <div class="um-modal archive-modal" role="dialog" aria-modal="true">
+    <div class="um-modal archive-modal intake-modal management-side-modal" role="dialog" aria-modal="true">
       <div class="um-modal-header">
         <div>
           <h2>Archived Record Details</h2>
@@ -168,7 +169,7 @@
         </button>
       </div>
 
-      <div class="um-modal-body">
+      <div class="um-modal-body archive-modal-body">
         <div id="viewArchiveContent"></div>
       </div>
 

@@ -1,9 +1,19 @@
 const express = require("express");
 const router = express.Router();
 
-const { getDashboardStats } = require("../controllers/dashboardController");
+const {
+  getAttentionSummary,
+  getDashboardStats,
+} = require("../controllers/dashboardController");
 const authenticateToken = require("../middleware/authMiddleware");
 const authorizeRole = require("../middleware/roleMiddleware");
+
+router.get(
+  "/attention",
+  authenticateToken,
+  authorizeRole("Admin", "Staff", "Veterinarian"),
+  getAttentionSummary
+);
 
 router.get(
   "/stats",

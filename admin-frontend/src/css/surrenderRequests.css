@@ -918,3 +918,307 @@
   .surrender-requests-page .doc-list { grid-template-columns: 1fr; }
   .surrender-requests-page .drawer-footer { min-height: 70px; padding: 12px 14px; }
 }
+
+/* Match the shared management detail-drawer pattern used by Adoption Applications. */
+.surrender-requests-page .drawer-eyebrow {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--management-modal-red, #ef1725);
+  font: 800 .65rem/1 "Outfit", sans-serif;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.surrender-requests-page .drawer-header-status {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.surrender-requests-page .surrender-overview {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto minmax(0,1fr) auto;
+  align-items: center;
+  gap: 18px;
+  margin: 0;
+  padding: 18px 20px;
+  border: 1px solid var(--management-modal-line, #eadfd6);
+  border-radius: 15px;
+  background: linear-gradient(135deg,#fff6ef 0%,#fffdfb 76%);
+}
+
+.surrender-requests-page :is(.overview-person,.overview-animal) {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.surrender-requests-page .overview-avatar {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--management-modal-red, #ef1725);
+  font: 800 .76rem/1 "Outfit", sans-serif;
+}
+
+.surrender-requests-page .overview-avatar.overview-pet {
+  color: #3a2a24;
+  background: #fff0cc;
+}
+
+.surrender-requests-page .surrender-overview :is(small,strong) {
+  display: block;
+  overflow-wrap: anywhere;
+  font-family: "Outfit", sans-serif;
+}
+
+.surrender-requests-page .surrender-overview small {
+  color: #897a73;
+  font-size: .61rem;
+  font-weight: 800;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.surrender-requests-page .surrender-overview strong {
+  margin-top: 4px;
+  color: #332b2a;
+  font-size: .84rem;
+}
+
+.surrender-requests-page .overview-link {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  color: var(--management-modal-red, #ef1725);
+}
+
+.surrender-requests-page .overview-link small {
+  font-size: .55rem;
+  white-space: nowrap;
+}
+
+.surrender-requests-page .overview-date {
+  padding-left: 18px;
+  border-left: 1px solid #eadfd6;
+}
+
+.surrender-requests-page .drawer-section-submission {
+  grid-column: 1 / -1;
+}
+
+.surrender-requests-page .sr-drawer .drawer-body {
+  display: block !important;
+}
+
+.surrender-requests-page .sr-drawer {
+  display: flex !important;
+  height: 100dvh !important;
+  flex-direction: column !important;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translate3d(104%, 0, 0);
+  transform-origin: right center;
+  transition:
+    transform 280ms cubic-bezier(.22, .8, .24, 1),
+    visibility 280ms ease;
+}
+
+.surrender-requests-page .sr-layout.drawer-open .sr-drawer {
+  visibility: visible;
+  pointer-events: auto;
+  transform: translate3d(0, 0, 0);
+}
+
+.surrender-requests-page .surrender-overview {
+  margin-bottom: 20px;
+}
+
+.surrender-requests-page .drawer-section-analysis {
+  display: block !important;
+}
+
+.surrender-requests-page .drawer-section-analysis .drawer-section-title {
+  margin-bottom: 18px !important;
+}
+
+.surrender-requests-page .nlp-analysis-card {
+  margin-bottom: 16px !important;
+}
+
+.surrender-requests-page .drawer-footer .btn-ghost-clay:first-child {
+  margin-right: auto;
+}
+
+@media (max-width: 720px) {
+  .surrender-requests-page .surrender-overview {
+    grid-template-columns: 1fr;
+    gap: 13px;
+  }
+
+  .surrender-requests-page .overview-link {
+    grid-template-columns: auto auto;
+    justify-content: start;
+    align-items: center;
+    padding-left: 13px;
+  }
+
+  .surrender-requests-page .overview-link i {
+    transform: rotate(90deg);
+  }
+
+  .surrender-requests-page .overview-date {
+    padding: 12px 0 0;
+    border-top: 1px solid #eadfd6;
+    border-left: 0;
+  }
+}
+
+/* Persistent-navigation fallback: the page-local drawer is the Intake modal. */
+.surrender-requests-page .sr-drawer {
+  inset: 0 0 0 auto !important;
+  width: var(--management-modal-width, 56vw) !important;
+  min-width: 50vw !important;
+  height: 100dvh !important;
+  max-width: none !important;
+  max-height: 100dvh !important;
+  border: 1px solid rgba(255,255,255,.72) !important;
+  border-right: 0 !important;
+  border-radius: var(--management-modal-radius, 30px) 0 0 var(--management-modal-radius, 30px) !important;
+  color: var(--management-modal-ink, #1f2329) !important;
+  background: #fffdfb !important;
+  box-shadow: var(--management-modal-shadow, -24px 0 70px rgba(43,22,19,.24)) !important;
+  font-family: "Outfit", sans-serif !important;
+}
+
+.surrender-requests-page .sr-drawer .drawer-header {
+  min-height: 108px !important;
+  align-items: center !important;
+  gap: 14px !important;
+  padding: 25px 34px 22px !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--management-modal-line, #eadfd4) !important;
+  background: var(--management-modal-cream, #fff9f4) !important;
+}
+
+.surrender-requests-page .sr-drawer .drawer-header h3 {
+  margin: 0 !important;
+  color: var(--management-modal-ink, #1f2329) !important;
+  font: 800 1.34rem/1.18 "Outfit", sans-serif !important;
+}
+
+.surrender-requests-page .sr-drawer .drawer-header p {
+  margin: 5px 0 0 !important;
+  color: var(--management-modal-muted, #756b67) !important;
+  font: 400 .76rem/1.45 "Outfit", sans-serif !important;
+}
+
+.surrender-requests-page .sr-drawer .drawer-close-btn {
+  width: 40px !important;
+  height: 40px !important;
+  flex: 0 0 40px !important;
+  border: 1px solid #e5d8cf !important;
+  border-radius: 50% !important;
+  color: #786a65 !important;
+  background: #fff !important;
+}
+
+.surrender-requests-page .sr-drawer .drawer-body {
+  padding: 28px 34px 34px !important;
+  background: #fffdfb !important;
+}
+
+.surrender-requests-page .sr-drawer .drawer-section {
+  margin: 0 0 20px !important;
+  padding: 21px !important;
+  border: 1px solid var(--management-modal-line, #eadfd4) !important;
+  border-radius: 15px !important;
+  background: var(--management-modal-section, #fffcf9) !important;
+}
+
+.surrender-requests-page .sr-drawer .drawer-section-title {
+  min-height: 32px !important;
+  gap: 10px !important;
+  margin: 0 0 18px !important;
+  padding: 0 0 13px !important;
+  border-bottom: 1px solid #eee1d7 !important;
+  color: #2b2528 !important;
+  font: 800 .82rem/1.2 "Outfit", sans-serif !important;
+}
+
+.surrender-requests-page .sr-drawer .drawer-info-grid {
+  grid-template-columns: repeat(2, minmax(0,1fr)) !important;
+  gap: 14px 16px !important;
+}
+
+.surrender-requests-page .sr-drawer .drawer-info-item {
+  min-width: 0 !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 5px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+.surrender-requests-page .sr-drawer .drawer-info-lbl {
+  margin: 0 !important;
+  color: #504845 !important;
+  font: 700 11px/1.35 "Outfit", sans-serif !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+}
+
+.surrender-requests-page .sr-drawer .drawer-info-val {
+  min-height: 44px !important;
+  display: flex !important;
+  align-items: center !important;
+  margin: 0 !important;
+  padding: 11px 13px !important;
+  border: 1px solid #dfd3cb !important;
+  border-radius: 10px !important;
+  color: var(--management-modal-ink, #1f2329) !important;
+  background: #fff !important;
+  font: 500 12px/1.45 "Outfit", sans-serif !important;
+  overflow-wrap: anywhere !important;
+}
+
+.surrender-requests-page .sr-drawer .drawer-footer {
+  min-height: 76px !important;
+  gap: 10px !important;
+  padding: 15px 26px !important;
+  border-top: 1px solid var(--management-modal-line, #eadfd4) !important;
+  background: var(--management-modal-cream, #fff9f4) !important;
+}
+
+.surrender-requests-page .sr-drawer .drawer-footer button {
+  min-height: 46px !important;
+  padding: 0 20px !important;
+  border-radius: 999px !important;
+  font: 800 .78rem/1 "Outfit", sans-serif !important;
+}
+
+@media (max-width: 800px) {
+  .surrender-requests-page .sr-drawer {
+    width: 100vw !important;
+    min-width: 100vw !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  .surrender-requests-page .sr-drawer .drawer-body {
+    padding: 20px 18px 28px !important;
+  }
+
+  .surrender-requests-page .sr-drawer .drawer-info-grid {
+    grid-template-columns: 1fr !important;
+  }
+}

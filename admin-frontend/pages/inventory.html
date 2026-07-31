@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="/src/css/adminDashboard.css" />
   <link rel="stylesheet" href="/src/css/sidebar.css" />
   <link rel="stylesheet" href="/src/css/inventory.css" />
+  <link rel="stylesheet" href="/src/css/managementModal.css" />
 </head>
 <body class="loading inventory-page">
 <div class="shell">
@@ -210,7 +211,7 @@
 
 <!-- STOCK IN MODAL -->
 <div class="um-modal-backdrop" id="stockInModalBackdrop">
-  <div class="um-modal inv-modal" role="dialog" aria-modal="true">
+  <div class="um-modal inv-modal intake-modal management-side-modal" role="dialog" aria-modal="true">
     <div class="um-modal-header">
       <div>
         <h2 id="stockInTitle">Stock In</h2>
@@ -312,14 +313,14 @@
 
 <!-- VIEW ITEM POPUP MODAL -->
 <div class="um-modal-backdrop" id="viewItemModalBackdrop">
-  <div class="um-modal inv-modal view-item-modal" role="dialog" aria-modal="true">
+  <div class="um-modal inv-modal intake-modal view-item-modal management-side-modal" role="dialog" aria-modal="true">
     <div id="viewItemModalInner"></div>
   </div>
 </div>
 
 <!-- STOCK OUT / USE MODAL -->
 <div class="um-modal-backdrop" id="stockOutModalBackdrop">
-  <div class="um-modal inv-modal" role="dialog" aria-modal="true">
+  <div class="um-modal inv-modal intake-modal management-side-modal" role="dialog" aria-modal="true">
     <div class="um-modal-header">
       <div><h2>Record Usage</h2><p class="modal-subtitle" id="stockOutSubtitle">Deduct stock used on an animal.</p></div>
       <button class="modal-close-btn" id="stockOutClose"><i class="bi bi-x-lg"></i></button>
@@ -406,7 +407,7 @@
 
 <!-- ADD / EDIT ITEM MODAL -->
 <div class="um-modal-backdrop" id="itemModalBackdrop">
-  <div class="um-modal inv-modal" role="dialog" aria-modal="true">
+  <div class="um-modal inv-modal intake-modal management-side-modal" role="dialog" aria-modal="true">
     <div class="um-modal-header">
       <h2 id="itemModalTitle">Add New Item</h2>
       <button class="modal-close-btn" id="itemModalClose"><i class="bi bi-x-lg"></i></button>

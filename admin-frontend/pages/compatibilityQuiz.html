@@ -3,7 +3,7 @@
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="icon" type="image/png" href="/favicon.png"><title>ANIMUA — Compatibility Quiz Management</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"><link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/src/css/adminDashboard.css"><link rel="stylesheet" href="/src/css/sidebar.css"><link rel="stylesheet" href="/src/css/compatibilityQuiz.css">
+  <link rel="stylesheet" href="/src/css/adminDashboard.css"><link rel="stylesheet" href="/src/css/sidebar.css"><link rel="stylesheet" href="/src/css/compatibilityQuiz.css"><link rel="stylesheet" href="/src/css/managementModal.css">
 </head><body class="loading ap-list-page compatibility-management-page"><div class="shell"><div id="sidebar-container"></div><div class="stage">
 <header class="topbar"><div class="topbar-left"><button id="sidebarToggle" class="icon-btn" type="button"><i class="bi bi-list"></i></button><nav class="d-flex align-items-center"><span class="breadcrumb-link">Adoption Management</span><i class="bi bi-chevron-right breadcrumb-sep"></i><span class="breadcrumb-current">Compatibility Quiz</span></nav></div><div class="topbar-right"><button class="icon-btn notif-btn" type="button"><i class="bi bi-bell-fill"></i><span class="notif-dot"></span></button><div class="user-chip"><div class="user-avatar" id="topbar-initials">AU</div><div class="user-meta"><span id="display-name">Management User</span><small id="display-role">Role</small></div><i class="bi bi-chevron-down caret"></i></div></div></header>
 <main class="page-body"><div id="pageHeaderMount"></div>
@@ -15,4 +15,19 @@
 <aside class="cq-health"><small>Matching health</small><h2>Protected recommendation flow</h2><div><span><i class="bi bi-person-check"></i></span><p><strong>Authenticated</strong><small>Public account required</small></p><i class="bi bi-check-circle-fill"></i></div><div><span><i class="bi bi-ui-checks-grid"></i></span><p><strong>Validated</strong><small>Ten scored traits</small></p><i class="bi bi-check-circle-fill"></i></div><div><span><i class="bi bi-database-check"></i></span><p><strong>Saved</strong><small>Account history retained</small></p><i class="bi bi-check-circle-fill"></i></div><div><span><i class="bi bi-clock-history"></i></span><p><strong>Protected</strong><small>Server-enforced retakes</small></p><i class="bi bi-check-circle-fill"></i></div></aside></section>
 <section class="cq-card cq-records"><div class="cq-record-head"><div class="cq-card-head"><span class="cq-card-icon"><i class="bi bi-stars"></i></span><div><small>Saved recommendations</small><h2>User quiz results</h2><p id="resultCount">Loading result history…</p></div></div><span class="cq-legend"><i class="bi bi-info-circle"></i>Historical animal names remain available</span></div><div class="cq-toolbar"><label class="cq-search"><i class="bi bi-search"></i><input id="resultSearch" type="search" placeholder="Search user, email, or result ID"></label><select id="attemptFilter"><option value="">All attempts</option><option value="latest">Latest only</option><option value="history">History only</option></select><button id="clearFilters" type="button"><i class="bi bi-arrow-counterclockwise"></i>Clear</button></div><div class="cq-table-wrap"><table><thead><tr><th>User account</th><th>Completed</th><th>Next retake</th><th>Top recommendation</th><th>Match</th><th>Version</th><th>Action</th></tr></thead><tbody id="resultsBody"><tr><td colspan="7">Loading results…</td></tr></tbody></table></div></section>
 </main></div></div>
-<div class="um-modal-backdrop" id="resultDialog" aria-hidden="true"><div class="um-modal cq-result-modal" role="dialog" aria-modal="true" aria-labelledby="resultDialogTitle"><div class="um-modal-header"><div><span class="cq-modal-kicker">Compatibility record</span><h2 id="resultDialogTitle">Result details</h2></div><button class="modal-close-btn" type="button" data-close aria-label="Close result details"><i class="bi bi-x-lg"></i></button></div><div class="um-modal-body" id="resultDetails"></div><div class="um-modal-footer"><button class="cq-modal-done" type="button" data-close>Close</button></div></div></div><div id="cqToast" role="status"><i class="bi bi-check-circle-fill"></i><span></span></div><script type="module" src="/src/management/compatibilityQuiz.js"></script></body></html>
+<div class="um-modal-backdrop" id="resultDialog" aria-hidden="true">
+  <div class="um-modal intake-modal cq-result-modal management-side-modal" role="dialog" aria-modal="true" aria-labelledby="resultDialogTitle">
+    <div class="um-modal-header">
+      <div>
+        <h2 id="resultDialogTitle">Result Details</h2>
+        <p class="modal-subtitle" id="resultDialogSubtitle">Compatibility record and saved recommendations.</p>
+      </div>
+      <button class="modal-close-btn" type="button" data-close aria-label="Close result details"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="um-modal-body cq-result-body" id="resultDetails"></div>
+    <div class="um-modal-footer">
+      <button class="cq-modal-done btn-ghost-clay" type="button" data-close>Close</button>
+    </div>
+  </div>
+</div>
+<div id="cqToast" role="status"><i class="bi bi-check-circle-fill"></i><span></span></div><script type="module" src="/src/management/compatibilityQuiz.js"></script></body></html>

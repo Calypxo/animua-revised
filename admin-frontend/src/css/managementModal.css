@@ -261,7 +261,7 @@ body.management-drawer-open {
   font-weight: 800 !important;
 }
 
-.management-side-modal :is(.form-section-title,.drawer-section-title) > i,
+.management-side-modal :is(.form-section-title,.view-section-title,.drawer-section-title) > i,
 .aa-drawer .drawer-section-title > i,
 .surrender-requests-page .drawer-section-title > i {
   width: 30px !important;
@@ -287,11 +287,11 @@ body.management-drawer-open {
 .management-side-modal :is(input,select):not([type="radio"]):not([type="checkbox"]) { min-height: 44px !important; }
 .management-side-modal :is(input,select,textarea):focus { border-color: var(--management-modal-red) !important; box-shadow: 0 0 0 4px rgba(239,23,37,.09) !important; outline: 0 !important; }
 
-.management-side-modal :is(.audit-detail-grid,.archive-detail-grid,.drawer-info-grid,.view-details-grid),
+.management-side-modal :is(.audit-detail-grid,.archive-detail-grid,.drawer-info-grid,.view-details-grid,.view-grid),
 .aa-drawer .drawer-info-grid,
 .surrender-requests-page .drawer-info-grid { gap: 12px !important; }
 
-.management-side-modal :is(.audit-detail-item,.archive-detail-item,.drawer-info-item,.view-detail-item),
+.management-side-modal :is(.audit-detail-item,.archive-detail-item,.drawer-info-item,.view-detail-item,.view-field),
 .aa-drawer .drawer-info-item,
 .surrender-requests-page .drawer-info-item {
   min-height: 74px !important;
@@ -301,7 +301,7 @@ body.management-drawer-open {
   background: #fff !important;
 }
 
-.management-side-modal :is(.audit-detail-label,.archive-detail-label,.drawer-info-lbl,.view-detail-lbl),
+.management-side-modal :is(.audit-detail-label,.archive-detail-label,.drawer-info-lbl,.view-detail-lbl,.view-field-lbl),
 .aa-drawer .drawer-info-lbl,
 .surrender-requests-page .drawer-info-lbl {
   color: #887a73 !important;
@@ -311,7 +311,7 @@ body.management-drawer-open {
   text-transform: uppercase !important;
 }
 
-.management-side-modal :is(.audit-detail-value,.archive-detail-value,.drawer-info-val,.view-detail-val),
+.management-side-modal :is(.audit-detail-value,.archive-detail-value,.drawer-info-val,.view-detail-val,.view-field-val),
 .aa-drawer .drawer-info-val,
 .surrender-requests-page .drawer-info-val {
   margin-top: 5px !important;
@@ -565,4 +565,713 @@ body.management-drawer-open {
 .aa-drawer .btn-danger-outline {
   border-color: #f0bdb7 !important;
   color: var(--management-modal-red) !important;
+}
+
+/* Surrender and adoption details use the New Intake Record form measurements. */
+:is(.aa-drawer,.surrender-requests-page .sr-drawer) .drawer-info-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 14px 16px !important;
+}
+
+:is(.aa-drawer,.surrender-requests-page .sr-drawer) .drawer-info-item {
+  min-width: 0 !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 5px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+:is(.aa-drawer,.surrender-requests-page .sr-drawer) .drawer-info-lbl {
+  margin: 0 !important;
+  color: #504845 !important;
+  font-family: "Outfit", sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+}
+
+:is(.aa-drawer,.surrender-requests-page .sr-drawer) .drawer-info-val {
+  min-height: 44px !important;
+  display: flex !important;
+  align-items: center !important;
+  margin: 0 !important;
+  padding: 11px 13px !important;
+  border: 1px solid #dfd3cb !important;
+  border-radius: 10px !important;
+  color: var(--management-modal-ink) !important;
+  background: #fff !important;
+  font-family: "Outfit", sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  line-height: 1.45 !important;
+  overflow-wrap: anywhere !important;
+}
+
+:is(.aa-drawer,.surrender-requests-page .sr-drawer) .drawer-info-full {
+  grid-column: 1 / -1 !important;
+}
+
+.aa-drawer .application-journey {
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto !important;
+  border-radius: 15px !important;
+}
+
+.aa-drawer .journey-status {
+  padding-left: 18px;
+  border-left: 1px solid var(--management-modal-line);
+}
+
+.aa-drawer .journey-status :is(small,strong) {
+  display: block;
+  font-family: "Outfit", sans-serif;
+}
+
+.aa-drawer .journey-status small {
+  color: #887a73;
+  font-size: .61rem;
+  font-weight: 800;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.aa-drawer .journey-status strong {
+  margin-top: 5px;
+}
+
+@media (max-width: 800px) {
+  :is(.aa-drawer,.surrender-requests-page .sr-drawer) .drawer-info-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .aa-drawer .application-journey {
+    grid-template-columns: 1fr !important;
+  }
+
+  .aa-drawer .journey-status {
+    padding: 12px 0 0;
+    border-top: 1px solid var(--management-modal-line);
+    border-left: 0;
+  }
+}
+
+/* Inventory, audit and archive records use the Intake modal without relying
+   on sidebar stylesheet order. */
+:is(
+  #stockInModalBackdrop,
+  #viewItemModalBackdrop,
+  #stockOutModalBackdrop,
+  #itemModalBackdrop,
+  #viewAuditModalBackdrop,
+  #viewArchiveModalBackdrop
+) {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2500 !important;
+  display: flex !important;
+  align-items: stretch !important;
+  justify-content: flex-end !important;
+  padding: 0 !important;
+  background: rgba(30, 20, 18, .5) !important;
+  -webkit-backdrop-filter: blur(11px) saturate(.88) !important;
+  backdrop-filter: blur(11px) saturate(.88) !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transition: opacity 220ms ease, visibility 220ms ease !important;
+}
+
+:is(
+  #stockInModalBackdrop,
+  #viewItemModalBackdrop,
+  #stockOutModalBackdrop,
+  #itemModalBackdrop,
+  #viewAuditModalBackdrop,
+  #viewArchiveModalBackdrop
+).open {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+:is(
+  #stockInModalBackdrop,
+  #viewItemModalBackdrop,
+  #stockOutModalBackdrop,
+  #itemModalBackdrop,
+  #viewAuditModalBackdrop,
+  #viewArchiveModalBackdrop
+) > .management-side-modal {
+  width: var(--management-modal-width, 56vw) !important;
+  min-width: 50vw !important;
+  max-width: none !important;
+  height: 100dvh !important;
+  max-height: 100dvh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(255, 255, 255, .72) !important;
+  border-right: 0 !important;
+  border-radius: var(--management-modal-radius, 30px) 0 0 var(--management-modal-radius, 30px) !important;
+  color: var(--management-modal-ink, #1f2329) !important;
+  background: #fffdfb !important;
+  box-shadow: var(--management-modal-shadow, -24px 0 70px rgba(43, 22, 19, .24)) !important;
+  font-family: "Outfit", sans-serif !important;
+  transform: translate3d(104%, 0, 0) !important;
+  transform-origin: right center !important;
+  transition: transform 280ms cubic-bezier(.22, .8, .24, 1) !important;
+}
+
+:is(
+  #stockInModalBackdrop,
+  #viewItemModalBackdrop,
+  #stockOutModalBackdrop,
+  #itemModalBackdrop,
+  #viewAuditModalBackdrop,
+  #viewArchiveModalBackdrop
+).open > .management-side-modal {
+  transform: translate3d(0, 0, 0) !important;
+}
+
+:is(
+  #stockInModalBackdrop,
+  #stockOutModalBackdrop,
+  #itemModalBackdrop,
+  #viewAuditModalBackdrop,
+  #viewArchiveModalBackdrop
+) .um-modal-header,
+#viewItemModalBackdrop #viewItemModalInner .drawer-header {
+  min-height: 108px !important;
+  flex: 0 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 14px !important;
+  padding: 25px 34px 22px !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--management-modal-line, #eadfd4) !important;
+  background: var(--management-modal-cream, #fff9f4) !important;
+}
+
+:is(
+  #stockInModalBackdrop,
+  #stockOutModalBackdrop,
+  #itemModalBackdrop,
+  #viewAuditModalBackdrop,
+  #viewArchiveModalBackdrop
+) .um-modal-header > :first-child,
+#viewItemModalBackdrop #viewItemModalInner .drawer-header > :first-child {
+  min-width: 0 !important;
+  flex: 1 !important;
+}
+
+:is(
+  #stockInModalBackdrop,
+  #stockOutModalBackdrop,
+  #itemModalBackdrop,
+  #viewAuditModalBackdrop,
+  #viewArchiveModalBackdrop
+) .um-modal-header h2,
+#viewItemModalBackdrop #viewItemModalInner .drawer-header h3 {
+  margin: 0 !important;
+  color: var(--management-modal-ink, #1f2329) !important;
+  font: 800 1.34rem/1.18 "Outfit", sans-serif !important;
+}
+
+:is(
+  #stockInModalBackdrop,
+  #stockOutModalBackdrop,
+  #itemModalBackdrop,
+  #viewAuditModalBackdrop,
+  #viewArchiveModalBackdrop
+) .modal-subtitle,
+#viewItemModalBackdrop #viewItemModalInner .drawer-header p {
+  margin: 5px 0 0 !important;
+  color: var(--management-modal-muted, #756b67) !important;
+  font: 500 .76rem/1.45 "Outfit", sans-serif !important;
+}
+
+:is(
+  #stockInModalBackdrop,
+  #stockOutModalBackdrop,
+  #itemModalBackdrop,
+  #viewAuditModalBackdrop,
+  #viewArchiveModalBackdrop
+) .modal-close-btn,
+#viewItemModalBackdrop #viewItemModalInner .drawer-close-btn {
+  width: 40px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  flex: 0 0 40px !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  border: 1px solid #e5d8cf !important;
+  border-radius: 50% !important;
+  color: #786a65 !important;
+  background: #fff !important;
+  font-size: .9rem !important;
+}
+
+:is(
+  #stockInModalBackdrop,
+  #stockOutModalBackdrop,
+  #itemModalBackdrop,
+  #viewAuditModalBackdrop,
+  #viewArchiveModalBackdrop
+) .modal-close-btn:hover,
+#viewItemModalBackdrop #viewItemModalInner .drawer-close-btn:hover {
+  border-color: #f0bdb7 !important;
+  color: var(--management-modal-red, #ef1725) !important;
+  background: #fff0ed !important;
+}
+
+:is(
+  #stockInModalBackdrop,
+  #stockOutModalBackdrop,
+  #itemModalBackdrop,
+  #viewAuditModalBackdrop,
+  #viewArchiveModalBackdrop
+) .um-modal-body,
+#viewItemModalBackdrop #viewItemModalInner .drawer-body {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  padding: 28px 34px 34px !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  background: #fffdfb !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: #d9c8bc transparent !important;
+}
+
+:is(
+  #stockInModalBackdrop,
+  #stockOutModalBackdrop,
+  #itemModalBackdrop,
+  #viewAuditModalBackdrop,
+  #viewArchiveModalBackdrop
+) .um-modal-footer,
+#viewItemModalBackdrop #viewItemModalInner .drawer-footer {
+  min-height: 76px !important;
+  flex: 0 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+  margin: 0 !important;
+  padding: 15px 26px !important;
+  border: 0 !important;
+  border-top: 1px solid var(--management-modal-line, #eadfd4) !important;
+  background: var(--management-modal-cream, #fff9f4) !important;
+}
+
+:is(
+  #stockInModalBackdrop,
+  #stockOutModalBackdrop,
+  #itemModalBackdrop,
+  #viewAuditModalBackdrop,
+  #viewArchiveModalBackdrop
+) .um-modal-footer button,
+#viewItemModalBackdrop #viewItemModalInner .drawer-footer button {
+  min-width: 0 !important;
+  min-height: 46px !important;
+  flex: 0 0 auto !important;
+  padding: 0 20px !important;
+  border-radius: 999px !important;
+  font: 800 .78rem/1 "Outfit", sans-serif !important;
+}
+
+#viewItemModalBackdrop #viewItemModalInner {
+  width: 100% !important;
+  height: 100% !important;
+  max-height: none !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+/* Inventory create and transaction forms become Intake section cards. */
+:is(#stockInModalBackdrop, #stockOutModalBackdrop, #itemModalBackdrop) .um-modal-body form {
+  margin: 0 !important;
+  padding: 21px !important;
+  border: 1px solid var(--management-modal-line, #eadfd4) !important;
+  border-radius: 15px !important;
+  background: var(--management-modal-section, #fffcf9) !important;
+}
+
+:is(#stockInModalBackdrop, #stockOutModalBackdrop, #itemModalBackdrop) .um-modal-body form::before {
+  min-height: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+  margin: 0 0 18px !important;
+  padding: 0 0 13px !important;
+  border-bottom: 1px solid #eee1d7 !important;
+  color: #2b2528 !important;
+  font: 800 .82rem/1.2 "Outfit", sans-serif !important;
+}
+
+#stockInModalBackdrop .um-modal-body form::before {
+  content: "Stock Information" !important;
+}
+
+#stockOutModalBackdrop .um-modal-body form::before {
+  content: "Usage Information" !important;
+}
+
+#itemModalBackdrop .um-modal-body form::before {
+  content: "Item Information" !important;
+}
+
+:is(#stockInModalBackdrop, #stockOutModalBackdrop, #itemModalBackdrop) .form-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 14px 16px !important;
+}
+
+:is(#stockInModalBackdrop, #stockOutModalBackdrop, #itemModalBackdrop) .form-full {
+  grid-column: 1 / -1 !important;
+}
+
+:is(#stockInModalBackdrop, #stockOutModalBackdrop, #itemModalBackdrop) .form-group {
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 5px !important;
+}
+
+:is(#stockInModalBackdrop, #stockOutModalBackdrop, #itemModalBackdrop) .form-lbl {
+  margin: 0 !important;
+  color: #504845 !important;
+  font: 700 11px/1.35 "Outfit", sans-serif !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+}
+
+:is(#stockInModalBackdrop, #stockOutModalBackdrop, #itemModalBackdrop) :is(.form-inp, .disabled-inp) {
+  width: 100% !important;
+  min-height: 44px !important;
+  padding: 11px 13px !important;
+  border: 1px solid #dfd3cb !important;
+  border-radius: 10px !important;
+  color: var(--management-modal-ink, #1f2329) !important;
+  background: #fff !important;
+  font: 500 12px/1.45 "Outfit", sans-serif !important;
+  text-align: left !important;
+  outline: 0 !important;
+}
+
+:is(#stockInModalBackdrop, #stockOutModalBackdrop, #itemModalBackdrop) textarea.form-inp {
+  min-height: 82px !important;
+  resize: vertical !important;
+}
+
+:is(#stockInModalBackdrop, #stockOutModalBackdrop, #itemModalBackdrop) .form-inp:focus {
+  border-color: var(--management-modal-red, #ef1725) !important;
+  box-shadow: 0 0 0 4px rgba(239, 23, 37, .09) !important;
+}
+
+/* Inventory details retain stock insight and history in Intake sections. */
+#viewItemModalBackdrop #viewItemModalInner .drawer-section {
+  margin: 0 0 20px !important;
+  padding: 21px !important;
+  border: 1px solid var(--management-modal-line, #eadfd4) !important;
+  border-radius: 15px !important;
+  background: var(--management-modal-section, #fffcf9) !important;
+}
+
+#viewItemModalBackdrop #viewItemModalInner .drawer-section:last-child {
+  margin-bottom: 0 !important;
+}
+
+#viewItemModalBackdrop #viewItemModalInner .drawer-section-title {
+  min-height: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin: 0 0 18px !important;
+  padding: 0 0 13px !important;
+  border-bottom: 1px solid #eee1d7 !important;
+  color: #2b2528 !important;
+  font: 800 .82rem/1.2 "Outfit", sans-serif !important;
+}
+
+#viewItemModalBackdrop #viewItemModalInner .drawer-section-title > i {
+  width: 30px !important;
+  height: 30px !important;
+  display: grid !important;
+  place-items: center !important;
+  margin: -4px 0 !important;
+  border-radius: 50% !important;
+  color: var(--management-modal-red, #ef1725) !important;
+  background: #fff0e8 !important;
+}
+
+#viewItemModalBackdrop #viewItemModalInner .drawer-info-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 14px 16px !important;
+}
+
+#viewItemModalBackdrop #viewItemModalInner .drawer-info-item {
+  min-width: 0 !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 5px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+#viewItemModalBackdrop #viewItemModalInner .drawer-info-lbl {
+  margin: 0 !important;
+  color: #504845 !important;
+  font: 700 11px/1.35 "Outfit", sans-serif !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+}
+
+#viewItemModalBackdrop #viewItemModalInner .drawer-info-val {
+  min-height: 44px !important;
+  display: flex !important;
+  align-items: center !important;
+  margin: 0 !important;
+  padding: 11px 13px !important;
+  border: 1px solid #dfd3cb !important;
+  border-radius: 10px !important;
+  color: var(--management-modal-ink, #1f2329) !important;
+  background: #fff !important;
+  font-family: "Outfit", sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  line-height: 1.45 !important;
+  overflow-wrap: anywhere !important;
+}
+
+#viewItemModalBackdrop #viewItemModalInner :is(.rf-pred-card, .rf-metric, .txn-item) {
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+
+/* Audit and archived details use read-only Intake fields. */
+:is(#viewAuditModalBackdrop, #viewArchiveModalBackdrop) :is(.audit-detail-hero, .archive-detail-hero) {
+  min-height: 96px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 13px !important;
+  margin: 0 0 20px !important;
+  padding: 21px !important;
+  border: 1px solid var(--management-modal-line, #eadfd4) !important;
+  border-radius: 15px !important;
+  background: var(--management-modal-section, #fffcf9) !important;
+  box-shadow: none !important;
+}
+
+:is(#viewAuditModalBackdrop, #viewArchiveModalBackdrop) .detail-hero-icon {
+  width: 44px !important;
+  height: 44px !important;
+  flex: 0 0 44px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 50% !important;
+  color: var(--management-modal-red, #ef1725) !important;
+  background: #fff0e8 !important;
+}
+
+:is(#viewAuditModalBackdrop, #viewArchiveModalBackdrop) :is(.audit-detail-hero, .archive-detail-hero) > div {
+  min-width: 0 !important;
+  flex: 1 !important;
+}
+
+:is(#viewAuditModalBackdrop, #viewArchiveModalBackdrop) :is(.audit-detail-hero, .archive-detail-hero) > div > span {
+  color: var(--management-modal-red-dark, #c90f1d) !important;
+  font: 800 10px/1.25 "Outfit", sans-serif !important;
+  letter-spacing: .06em !important;
+  text-transform: uppercase !important;
+}
+
+:is(#viewAuditModalBackdrop, #viewArchiveModalBackdrop) :is(.audit-detail-hero, .archive-detail-hero) h3 {
+  margin: 4px 0 3px !important;
+  color: #312b29 !important;
+  font: 800 14px/1.25 "Outfit", sans-serif !important;
+}
+
+:is(#viewAuditModalBackdrop, #viewArchiveModalBackdrop) :is(.audit-detail-hero, .archive-detail-hero) p {
+  margin: 0 !important;
+  color: #817670 !important;
+  font: 500 11px/1.45 "Outfit", sans-serif !important;
+}
+
+#viewAuditModalBackdrop .audit-detail-grid,
+#viewArchiveModalBackdrop .archive-detail-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 14px 16px !important;
+  margin: 0 !important;
+  padding: 21px !important;
+  border: 1px solid var(--management-modal-line, #eadfd4) !important;
+  border-radius: 15px !important;
+  background: var(--management-modal-section, #fffcf9) !important;
+}
+
+#viewAuditModalBackdrop .audit-detail-grid::before,
+#viewArchiveModalBackdrop .archive-detail-grid::before {
+  grid-column: 1 / -1 !important;
+  min-height: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+  padding: 0 0 13px !important;
+  border-bottom: 1px solid #eee1d7 !important;
+  color: #2b2528 !important;
+  font: 800 .82rem/1.2 "Outfit", sans-serif !important;
+}
+
+#viewAuditModalBackdrop .audit-detail-grid::before {
+  content: "Activity Information" !important;
+}
+
+#viewArchiveModalBackdrop .archive-detail-grid::before {
+  content: "Archived Information" !important;
+}
+
+:is(#viewAuditModalBackdrop, #viewArchiveModalBackdrop) :is(.audit-detail-item, .archive-detail-item) {
+  min-width: 0 !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 5px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+:is(#viewAuditModalBackdrop, #viewArchiveModalBackdrop) :is(.audit-detail-label, .archive-detail-label) {
+  margin: 0 !important;
+  color: #504845 !important;
+  font: 700 11px/1.35 "Outfit", sans-serif !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+}
+
+:is(#viewAuditModalBackdrop, #viewArchiveModalBackdrop) :is(.audit-detail-value, .archive-detail-value) {
+  min-height: 44px !important;
+  display: flex !important;
+  align-items: center !important;
+  margin: 0 !important;
+  padding: 11px 13px !important;
+  border: 1px solid #dfd3cb !important;
+  border-radius: 10px !important;
+  color: var(--management-modal-ink, #1f2329) !important;
+  background: #fff !important;
+  font: 500 12px/1.45 "Outfit", sans-serif !important;
+  overflow-wrap: anywhere !important;
+}
+
+:is(#viewAuditModalBackdrop, #viewArchiveModalBackdrop) :is(.audit-detail-item.full, .archive-detail-item.full) {
+  grid-column: 1 / -1 !important;
+}
+
+@media (max-width: 800px) {
+  :is(
+    #stockInModalBackdrop,
+    #viewItemModalBackdrop,
+    #stockOutModalBackdrop,
+    #itemModalBackdrop,
+    #viewAuditModalBackdrop,
+    #viewArchiveModalBackdrop
+  ) > .management-side-modal {
+    width: 100vw !important;
+    min-width: 100vw !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  :is(
+    #stockInModalBackdrop,
+    #stockOutModalBackdrop,
+    #itemModalBackdrop,
+    #viewAuditModalBackdrop,
+    #viewArchiveModalBackdrop
+  ) .um-modal-header,
+  #viewItemModalBackdrop #viewItemModalInner .drawer-header {
+    padding: 20px 18px 17px !important;
+  }
+
+  :is(
+    #stockInModalBackdrop,
+    #stockOutModalBackdrop,
+    #itemModalBackdrop,
+    #viewAuditModalBackdrop,
+    #viewArchiveModalBackdrop
+  ) .um-modal-body,
+  #viewItemModalBackdrop #viewItemModalInner .drawer-body {
+    padding: 20px 18px 28px !important;
+  }
+
+  :is(
+    #stockInModalBackdrop,
+    #stockOutModalBackdrop,
+    #itemModalBackdrop,
+    #viewAuditModalBackdrop,
+    #viewArchiveModalBackdrop
+  ) .um-modal-footer,
+  #viewItemModalBackdrop #viewItemModalInner .drawer-footer {
+    padding: 14px 18px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  :is(#stockInModalBackdrop, #stockOutModalBackdrop, #itemModalBackdrop) .form-grid,
+  #viewItemModalBackdrop #viewItemModalInner .drawer-info-grid,
+  #viewAuditModalBackdrop .audit-detail-grid,
+  #viewArchiveModalBackdrop .archive-detail-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  :is(#stockInModalBackdrop, #stockOutModalBackdrop, #itemModalBackdrop) .um-modal-body form,
+  #viewItemModalBackdrop #viewItemModalInner .drawer-section,
+  #viewAuditModalBackdrop .audit-detail-grid,
+  #viewArchiveModalBackdrop .archive-detail-grid {
+    padding: 15px !important;
+  }
+
+  :is(#viewAuditModalBackdrop, #viewArchiveModalBackdrop) :is(.audit-detail-hero, .archive-detail-hero) {
+    align-items: flex-start !important;
+    flex-wrap: wrap !important;
+    padding: 15px !important;
+  }
+
+  #viewItemModalBackdrop #viewItemModalInner .drawer-footer {
+    flex-wrap: wrap !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(
+    #stockInModalBackdrop,
+    #viewItemModalBackdrop,
+    #stockOutModalBackdrop,
+    #itemModalBackdrop,
+    #viewAuditModalBackdrop,
+    #viewArchiveModalBackdrop
+  ),
+  :is(
+    #stockInModalBackdrop,
+    #viewItemModalBackdrop,
+    #stockOutModalBackdrop,
+    #itemModalBackdrop,
+    #viewAuditModalBackdrop,
+    #viewArchiveModalBackdrop
+  ) > .management-side-modal {
+    transition-duration: 1ms !important;
+  }
 }
