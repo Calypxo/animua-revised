@@ -7,9 +7,9 @@ button,input{font:inherit}
 .page{position:relative;isolation:isolate;min-height:100svh;display:grid;place-items:center;overflow:hidden;padding:clamp(20px,4vw,48px)}
 .page::before,.page::after{content:"";position:fixed;inset:-24px;z-index:-2;pointer-events:none}
 .page::before{background:url("/images/policy-dog-banner.jpg") center 46%/cover no-repeat;filter:blur(10px);transform:scale(1.05)}
-.page::after{z-index:-1;background:linear-gradient(115deg,rgba(255,253,250,.8),rgba(255,255,255,.68)),rgba(255,255,255,.66)}
+.page::after{z-index:-1;background:linear-gradient(115deg,rgba(0,0,0,.52),rgba(0,0,0,.34))}
 
-.login-card{width:min(86vw,960px);height:min(82vh,600px);min-height:540px;display:grid;grid-template-columns:1fr 1fr;overflow:hidden;border:1px solid rgba(255,255,255,.42);border-radius:20px;background:var(--cream);box-shadow:0 28px 80px rgba(26,5,6,.36);animation:card-in .55s cubic-bezier(.22,1,.36,1) both}
+.login-card{width:min(86vw,960px);height:min(82vh,600px);min-height:540px;display:grid;grid-template-columns:1fr 1fr;overflow:hidden;border:0;border-radius:20px;background:var(--cream);box-shadow:0 28px 80px rgba(26,5,6,.36);animation:card-in .55s cubic-bezier(.22,1,.36,1) both}
 .visual-panel{position:relative;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;padding:62px clamp(34px,3.4vw,48px) 70px;color:#fffaf4;background:radial-gradient(circle at 78% 86%,rgba(224,60,49,.17) 0 8%,transparent 9%),radial-gradient(circle at 86% 76%,rgba(224,60,49,.14) 0 5%,transparent 6%),radial-gradient(circle at 73% 77%,rgba(224,60,49,.13) 0 4.5%,transparent 5.5%),linear-gradient(165deg,#c61a1f 0%,#8e211a 68%,#7d1716)}
 .visual-panel::after{content:"";position:absolute;left:-23%;bottom:-28%;width:114%;height:40%;border-radius:50% 50% 0 0;background:rgba(255,104,88,.17)}
 .brand{position:absolute;top:34px;left:clamp(34px,3.4vw,48px);z-index:2;display:inline-flex;align-items:center;gap:11px;color:#fffaf4}
