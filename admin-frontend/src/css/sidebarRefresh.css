@@ -178,6 +178,23 @@
   white-space: nowrap;
 }
 
+.nav-item-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border: 1px solid rgba(120, 1, 22, 0.14);
+  border-radius: 999px;
+  color: var(--sb-red);
+  background: rgba(120, 1, 22, 0.09);
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.nav-item-badge[hidden] { display: none !important; }
+
 .nav-item:hover,
 .nav-group-toggle:hover {
   border-color: rgba(120, 1, 22, 0.08);
@@ -348,7 +365,7 @@ html.animua-embedded-page .shell > .stage { width: 100%; border-left: 0; }
 }
 
 .sidebar.collapsed { width: var(--sb-rail-w); }
-.sidebar.collapsed :is(.brand-copy, .nav-label, .nav-text, .nav-group-indicator) { display: none; }
+.sidebar.collapsed :is(.brand-copy, .nav-label, .nav-text, .nav-group-indicator, .nav-item-badge) { display: none; }
 .sidebar.collapsed .sidebar-header { justify-content: center; padding-inline: 10px; }
 .sidebar.collapsed .sidebar-brand { flex: 0 0 auto; justify-content: center; }
 .sidebar.collapsed .brand-mark { width: 38px; height: 38px; flex-basis: 38px; }
@@ -359,7 +376,7 @@ html.animua-embedded-page .shell > .stage { width: 100%; border-left: 0; }
 @media (max-width: 1100px) and (min-width: 769px) {
   #sidebar-container { width: var(--sb-rail-w); min-width: var(--sb-rail-w); }
   .sidebar { width: var(--sb-rail-w); }
-  .sidebar :is(.brand-copy, .nav-label, .nav-text, .nav-group-indicator) { display: none; }
+  .sidebar :is(.brand-copy, .nav-label, .nav-text, .nav-group-indicator, .nav-item-badge) { display: none; }
   .sidebar .sidebar-header { justify-content: center; padding-inline: 10px; }
   .sidebar .sidebar-brand { flex: 0 0 auto; justify-content: center; }
   .sidebar .sidebar-nav { padding-inline: 9px; }
@@ -381,8 +398,8 @@ html.animua-embedded-page .shell > .stage { width: 100%; border-left: 0; }
     box-shadow: 18px 0 48px rgba(43, 23, 25, 0.2);
   }
   .sidebar.mobile-show { transform: translateX(0); }
-  .sidebar :is(.brand-copy, .nav-label, .nav-text, .nav-group-indicator),
-  .sidebar.collapsed :is(.brand-copy, .nav-label, .nav-text, .nav-group-indicator) { display: grid; }
+  .sidebar :is(.brand-copy, .nav-label, .nav-text, .nav-group-indicator, .nav-item-badge),
+  .sidebar.collapsed :is(.brand-copy, .nav-label, .nav-text, .nav-group-indicator, .nav-item-badge) { display: grid; }
   .sidebar .sidebar-header,
   .sidebar.collapsed .sidebar-header { justify-content: flex-start; padding: 10px 16px; }
   .sidebar .sidebar-brand,

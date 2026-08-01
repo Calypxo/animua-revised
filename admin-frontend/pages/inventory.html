@@ -52,6 +52,17 @@
       <!-- Layout -->
       <div class="inv-layout" id="invLayout">
         <div class="panel inv-table-panel">
+          <div class="inventory-records-heading">
+            <div class="reference-records-heading">
+              <span class="reference-records-icon"><i class="bi bi-box-seam-fill"></i></span>
+              <div>
+                <span class="inventory-records-kicker">Stock register</span>
+                <h2>Inventory records</h2>
+                <p>Review availability, movement, forecast, and stock health from one workspace.</p>
+              </div>
+            </div>
+            <span class="inventory-records-tip"><i class="bi bi-info-circle"></i> Select an item to review details</span>
+          </div>
           <div class="panel-head flex-column gap-3">
 
             <!-- Category tabs -->
@@ -71,33 +82,32 @@
 
             <div class="inventory-filter-toolbar">
               <div class="inventory-filter-controls">
-                <div class="search-pill-sm inventory-search">
+                <label class="inventory-reference-field inventory-reference-search">
+                  <span>Search inventory</span>
+                  <div class="search-pill-sm inventory-search">
                   <i class="bi bi-search"></i>
                   <input type="text" id="searchInventory" placeholder="Search item, ID, category…" autocomplete="off" />
-                </div>
-                <select class="filter-select" id="filterMovement" aria-label="Filter by movement">
+                  </div>
+                </label>
+                <label class="inventory-reference-field"><span>Movement</span><select class="filter-select" id="filterMovement" aria-label="Filter by movement">
                   <option value="">All movement</option>
                   <option value="Fast">Fast Moving</option>
                   <option value="Slow">Slow Moving</option>
-                </select>
-                <select class="filter-select" id="filterRisk" aria-label="Filter by reorder risk">
+                </select></label>
+                <label class="inventory-reference-field"><span>Reorder risk</span><select class="filter-select" id="filterRisk" aria-label="Filter by reorder risk">
                   <option value="">All risk</option>
                   <option value="Review">Needs Review</option>
                   <option value="OK">OK</option>
-                </select>
-                <select class="filter-select" id="filterStockStatus" aria-label="Filter by stock status">
+                </select></label>
+                <label class="inventory-reference-field"><span>Stock status</span><select class="filter-select" id="filterStockStatus" aria-label="Filter by stock status">
                   <option value="">All status</option>
                   <option value="Critical">Critical</option>
                   <option value="Low">Low</option>
                   <option value="OK">OK</option>
-                </select>
+                </select></label>
                 <button class="inventory-clear-filters" id="clearInventoryFilters" type="button" disabled>
                   <i class="bi bi-arrow-counterclockwise"></i><span>Clear</span>
                 </button>
-              </div>
-              <div class="inventory-view-tools" role="group" aria-label="Inventory view">
-                <button class="view-btn active" id="btnTableView" title="Table view" aria-label="Table view"><i class="bi bi-table"></i></button>
-                <button class="view-btn" id="btnCardView" title="Card view" aria-label="Card view"><i class="bi bi-grid-3x3-gap-fill"></i></button>
               </div>
             </div>
             <div class="inventory-filter-summary" aria-live="polite">
@@ -106,8 +116,11 @@
             </div>
           </div>
 
-          <!-- TABLE VIEW -->
-<!-- TABLE VIEW -->
+          <div class="reference-table-section-head">
+            <div><span>Inventory directory</span><h3>Current stock records</h3></div>
+            <strong id="inventoryResultLabel">0 records</strong>
+          </div>
+
 <div id="tableView">
   <div class="table-responsive inventory-table-wrap">
     <table class="shelter-table inventory-smart-table">
@@ -186,11 +199,6 @@
     </table>
   </div>
 </div>
-
-          <!-- CARD VIEW -->
-          <div id="cardView" style="display:none">
-            <div class="inv-card-grid" id="inventoryCardGrid"></div>
-          </div>
 
           <div class="um-pagination" id="paginationBar"></div>
         </div>

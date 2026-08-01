@@ -1,6 +1,7 @@
 // admin-frontend/src/management/userManagement.js
 import "../css/userManagement.css";
 import "../css/managementTables.css";
+import "../css/recordsPanelReference.css";
 import { renderPageHeader } from "../components/management/pageHeader.js";
 import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.js";
 
@@ -80,6 +81,18 @@ const ALL_PERMISSIONS = [
   {
     key: "archive",
     label: "Archive",
+  },
+  {
+    key: "announcements",
+    label: "Announcements",
+  },
+  {
+    key: "compatibility",
+    label: "Compatibility Quiz",
+  },
+  {
+    key: "contact",
+    label: "Contact Messages",
   },
 ];
 
@@ -359,7 +372,7 @@ function applyFilters() {
   const resultCount = document.getElementById("userResultCount");
   if (resultCount) {
     const accountLabel = filteredUsers.length === 1 ? "account" : "accounts";
-    resultCount.textContent = `${filteredUsers.length} ${accountLabel} shown · ${allUsers.length} total`;
+    resultCount.textContent = `${filteredUsers.length} ${accountLabel}`;
   }
 
   currentPage = 1;

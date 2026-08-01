@@ -4,6 +4,9 @@ const path = require("path");
 const {
   buildShelterLabel,
 } = require("../utils/animalIdentity");
+const {
+  invalidateAttentionCache,
+} = require("./dashboardController");
 
 const ANIMAL_COL = "animals";
 const EVENT_COL = "events";
@@ -20,6 +23,17 @@ const contactTransporter = nodemailer.createTransport({
     pass: process.env.EMAIL_PASS,
   },
 });
+
+async function updateContactNotification(reference, updates) {
+  try {
+    await reference.update({
+      ...updates,
+      notificationUpdatedAt: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error("[contactNotificationStatus]", error.message);
+  }
+}
 
 const normalizeContactText = (value = "", maxLength = 1000) =>
   typeof value === "string"
@@ -374,16 +388,15 @@ exports.submitContactMessage = async (req, res) => {
       recipient: CONTACT_RECIPIENT,
       status: "New",
       source: "Contact Us Page",
+      notificationStatus: "Pending",
       createdAt: new Date().toISOString(),
     };
 
     const saved = await db.collection(CONTACT_COL).add(contactMessage);
-
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-      return res.status(503).json({
-        message: "Contact email is not configured. Please call the office instead.",
-      });
-    }
+    invalidateAttentionCache();
+    const emailConfigured = Boolean(
+      process.env.EMAIL_USER && process.env.EMAIL_PASS
+    );
 
     const receivedAt = new Date(contactMessage.createdAt).toLocaleString("en-PH", {
       dateStyle: "medium",
@@ -474,37 +487,57 @@ exports.submitContactMessage = async (req, res) => {
       </div>
     `;
 
-    await contactTransporter.sendMail({
-      from: `"ANIMUA Contact Form" <${process.env.EMAIL_USER}>`,
-      to: CONTACT_RECIPIENT,
-      replyTo: email,
-      subject: `[ANIMUA Contact] ${subject} inquiry from ${fullName}`,
-      text: [
-        `Name: ${fullName}`,
-        `Email: ${email}`,
-        `Topic: ${subject}`,
-        `Date Received: ${receivedAt}`,
-        "",
-        message,
-      ].join("\n"),
-      html: emailHtml,
-      attachments: [
-        {
-          filename: "animua-contact-email-header.png",
-          path: emailHeaderPath,
-          cid: "animuaContactHeader",
-        },
-      ],
-    });
+    let notificationSent = false;
+    if (emailConfigured) {
+      try {
+        await contactTransporter.sendMail({
+          from: `"ANIMUA Contact Form" <${process.env.EMAIL_USER}>`,
+          to: CONTACT_RECIPIENT,
+          replyTo: email,
+          subject: `[ANIMUA Contact] ${subject} inquiry from ${fullName}`,
+          text: [
+            `Name: ${fullName}`,
+            `Email: ${email}`,
+            `Topic: ${subject}`,
+            `Date Received: ${receivedAt}`,
+            "",
+            message,
+          ].join("\n"),
+          html: emailHtml,
+          attachments: [
+            {
+              filename: "animua-contact-email-header.png",
+              path: emailHeaderPath,
+              cid: "animuaContactHeader",
+            },
+          ],
+        });
+        notificationSent = true;
+        await updateContactNotification(saved, {
+          notificationStatus: "Sent",
+          notifiedAt: new Date().toISOString(),
+        });
+      } catch (notificationError) {
+        console.error("[contactNotificationEmail]", notificationError.message);
+        await updateContactNotification(saved, {
+          notificationStatus: "Failed",
+        });
+      }
+    } else {
+      await updateContactNotification(saved, {
+        notificationStatus: "Not configured",
+      });
+    }
 
     return res.status(201).json({
-      message: "Your message has been sent to the ANIMUA team.",
+      message: "Your message has been received by the ANIMUA team.",
       id: saved.id,
+      notificationSent,
     });
   } catch (error) {
     console.error("[submitContactMessage]", error.message);
     return res.status(500).json({
-      message: "Failed to send your message. Please try again later.",
+      message: "We could not receive your message. Please try again later.",
     });
   }
 };
@@ -659,6 +692,7 @@ exports.replyToContactMessage = async (req, res) => {
       repliedAt: new Date().toISOString(),
       repliedBy: req.user?.email || req.user?.uid || "ANIMUA Team",
     });
+    invalidateAttentionCache();
 
     return res.status(200).json({
       message: "Reply email has been sent.",

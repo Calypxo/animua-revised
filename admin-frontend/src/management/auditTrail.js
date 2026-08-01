@@ -1,6 +1,7 @@
 import "../css/auditTrail.css";
 import "../css/recordsWorkspace.css";
 import "../css/managementTables.css";
+import "../css/recordsPanelReference.css";
 
 import { protectPageByModule } from "../auth/authGuard.js";
 import { renderTopbarUser } from "../components/management/topbarUser.js";
@@ -595,6 +596,7 @@ function bindFilters() {
 function bindButtons() {
   getEl("btnExportAudit")?.addEventListener("click", exportLogs);
   getEl("btnResetFilters")?.addEventListener("click", resetFilters);
+  getEl("clearAuditFilters")?.addEventListener("click", resetFilters);
 
   getEl("viewAuditClose")?.addEventListener("click", closeViewModal);
   getEl("viewAuditCloseFooter")?.addEventListener("click", closeViewModal);

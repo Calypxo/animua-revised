@@ -1078,3 +1078,136 @@ body.announcements-page .community-profile-wrap,
 body.announcements-page .announcements-section {
   background: #FFF8EE !important;
 }
+
+/* Live event calendar shared with management announcement dates. */
+.announcement-calendar-card .calendar-head button {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(120, 1, 22, .14);
+  border-radius: 8px;
+  color: var(--burgundy);
+  background: var(--white);
+  transition: color .18s ease, background .18s ease, border-color .18s ease;
+}
+
+.announcement-calendar-card .calendar-head button:hover,
+.announcement-calendar-card .calendar-head button:focus-visible {
+  border-color: var(--burgundy);
+  color: var(--white);
+  background: var(--burgundy);
+  outline: none;
+}
+
+.announcement-calendar-card .calendar-grid button,
+.announcement-calendar-card .calendar-grid em {
+  width: 100%;
+  min-height: 25px;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  color: var(--dark-text);
+  background: transparent;
+  font: 500 .66rem/1 "Poppins", sans-serif;
+  transition: color .18s ease, background .18s ease, border-color .18s ease;
+}
+
+.announcement-calendar-card .calendar-grid em {
+  pointer-events: none;
+}
+
+.announcement-calendar-card .calendar-grid button:hover,
+.announcement-calendar-card .calendar-grid button:focus-visible {
+  border-color: rgba(120, 1, 22, .24);
+  color: var(--burgundy);
+  background: rgba(120, 1, 22, .055);
+  outline: none;
+}
+
+.announcement-calendar-card .calendar-grid button.is-event {
+  color: var(--white);
+  background: var(--burgundy);
+  font-weight: 700;
+}
+
+.announcement-calendar-card .calendar-grid button.is-today {
+  border-color: var(--xanthous);
+}
+
+.announcement-calendar-card .calendar-grid button.is-activity {
+  box-shadow: 0 0 0 2px var(--xanthous);
+}
+
+.announcement-calendar-card .upcoming-event-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 15px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(120, 1, 22, .12);
+}
+
+.announcement-calendar-card .upcoming-event-row {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 9px;
+  border: 1px solid rgba(120, 1, 22, .1);
+  border-radius: 10px;
+  background: var(--white);
+}
+
+.announcement-calendar-card .upcoming-event-row time {
+  min-height: 40px;
+  display: grid;
+  place-items: center;
+  padding: 5px;
+  border-radius: 9px;
+  color: var(--white);
+  background: var(--burgundy);
+  font-size: .57rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.announcement-calendar-card .upcoming-event-row > span {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.announcement-calendar-card .upcoming-event-row strong,
+.announcement-calendar-card .upcoming-event-row small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.announcement-calendar-card .upcoming-event-row strong {
+  color: var(--dark-text);
+  font-size: .68rem;
+  font-weight: 700;
+}
+
+.announcement-calendar-card .upcoming-event-row small {
+  color: rgba(43, 23, 25, .64);
+  font-size: .58rem;
+}
+
+.announcement-calendar-card .no-upcoming-events {
+  margin: 0;
+  padding: 12px;
+  border: 1px dashed rgba(120, 1, 22, .18);
+  border-radius: 10px;
+  color: rgba(43, 23, 25, .66);
+  background: var(--cream);
+  font-size: .62rem;
+  line-height: 1.5;
+  text-align: center;
+}

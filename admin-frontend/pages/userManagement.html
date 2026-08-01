@@ -54,10 +54,13 @@
 
       <section class="um-directory-panel ap-records-panel" aria-labelledby="directoryTitle">
         <div class="um-directory-heading ap-records-heading">
-          <div>
-            <span class="um-section-label ap-section-kicker">Account directory</span>
-            <h2 id="directoryTitle">User records</h2>
-            <p id="userResultCount">Loading directory…</p>
+          <div class="reference-records-heading">
+            <span class="reference-records-icon"><i class="bi bi-people-fill"></i></span>
+            <div>
+              <span class="um-section-label ap-section-kicker">Account directory</span>
+              <h2 id="directoryTitle">User records</h2>
+              <p>Search and review management and public accounts.</p>
+            </div>
           </div>
           <span class="um-directory-legend ap-records-legend"><i class="bi bi-info-circle"></i> Select a record to review account details</span>
         </div>
@@ -73,9 +76,8 @@
           </div>
           <div class="um-filter-bar ap-filter-toolbar" aria-label="Directory filters">
           <label class="um-search-field ap-filter-field ap-search-filter" for="searchUsers">
-            <i class="bi bi-search"></i>
-            <span class="visually-hidden">Search users</span>
-            <input type="search" id="searchUsers" placeholder="Search by name or email" autocomplete="off" />
+            <span>Search users</span>
+            <div class="ap-control"><i class="bi bi-search"></i><input type="search" id="searchUsers" placeholder="Name or email address" autocomplete="off" /></div>
           </label>
           <label class="um-select-field ap-filter-field">
             <span>Role</span>
@@ -95,7 +97,7 @@
               <option value="Inactive">Inactive</option>
             </select>
           </label>
-          <label class="um-select-field um-page-size-field">
+          <label class="um-select-field um-page-size-field ap-filter-field">
             <span>Per page</span>
             <select id="pageSize" aria-label="Users per page">
               <option value="5">5 users</option>
@@ -105,6 +107,11 @@
           </label>
           <button class="um-clear-filters ap-clear-btn" id="clearUserFilters" type="button"><i class="bi bi-arrow-counterclockwise"></i> Clear</button>
           </div>
+        </div>
+
+        <div class="reference-table-section-head">
+          <div><span>Account directory</span><h3>Registered system users</h3></div>
+          <strong id="userResultCount">0 accounts</strong>
         </div>
 
         <div class="animal-record-list user-record-list" id="userTableBody" role="list" aria-live="polite">

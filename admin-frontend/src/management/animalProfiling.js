@@ -1,6 +1,7 @@
 // admin-frontend/src/management/animalProfiling.js
 import "../css/animalProfiling.css";
 import "../css/managementTables.css";
+import "../css/recordsPanelReference.css";
 import { renderPageHeader } from "../components/management/pageHeader.js";
 import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.js";
 
@@ -175,6 +176,9 @@ function applyFilters() {
 
     return true;
   });
+
+  const resultLabel = document.getElementById("animalResultLabel");
+  if (resultLabel) resultLabel.textContent = `${filtered.length} record${filtered.length === 1 ? "" : "s"}`;
 
   console.log("FILTERED:", filtered);
 

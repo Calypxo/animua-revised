@@ -1,6 +1,8 @@
 // admin-frontend/src/management/surrenderRequests.js
 import "../css/surrenderRequests.css";
 import "../css/managementTables.css";
+import "../css/recordsWorkspace.css";
+import "../css/recordsPanelReference.css";
 import { renderPageHeader } from "../components/management/pageHeader.js";
 import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.js";
 
@@ -242,9 +244,28 @@ function applyFilters() {
     return new Date(b.submittedAt) - new Date(a.submittedAt);
   });
 
+  const resultLabel = document.getElementById("surrenderResultLabel");
+  if (resultLabel) resultLabel.textContent = `${filtered.length} record${filtered.length === 1 ? "" : "s"}`;
+
   currentPage = 1;
   renderTable();
   renderPagination();
+}
+
+function clearSurrenderFilters() {
+  activeTab = "all";
+  const search = document.getElementById("searchSR");
+  const urgency = document.getElementById("filterUrgency");
+  const category = document.getElementById("filterCategory");
+  if (search) search.value = "";
+  if (urgency) urgency.value = "";
+  if (category) category.value = "";
+  document.querySelectorAll(".sr-tab").forEach((tab) => {
+    const selected = tab.dataset.tab === "all";
+    tab.classList.toggle("active", selected);
+    tab.setAttribute("aria-selected", String(selected));
+  });
+  applyFilters();
 }
 
 /* ══════════════════════════════════════════════════════
@@ -257,7 +278,7 @@ function renderTable() {
   const page  = filtered.slice(start, start+PAGE_SIZE);
 
   if (!page.length) {
-    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-muted">No surrender requests found.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7"><div class="reference-records-empty"><span><i class="bi bi-inbox"></i></span><strong>No surrender requests match</strong><small>Change the status, urgency, category, or search term to broaden this view.</small></div></td></tr>`;
     return;
   }
 
@@ -911,6 +932,7 @@ async function init() {
     document.getElementById("searchSR")?.addEventListener("input",      applyFilters);
     document.getElementById("filterUrgency")?.addEventListener("change", applyFilters);
     document.getElementById("filterCategory")?.addEventListener("change",applyFilters);
+    document.getElementById("clearSurrenderFilters")?.addEventListener("click", clearSurrenderFilters);
     document.getElementById("srDrawerBackdrop")?.addEventListener("click", closeDrawer);
 
     // Reject modal

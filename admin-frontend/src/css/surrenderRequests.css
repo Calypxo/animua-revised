@@ -1083,10 +1083,10 @@
 /* Persistent-navigation fallback: the page-local drawer is the Intake modal. */
 .surrender-requests-page .sr-drawer {
   inset: 0 0 0 auto !important;
-  width: var(--management-modal-width, 56vw) !important;
-  min-width: 50vw !important;
+  width: var(--management-modal-width, min(860px, calc(100vw - 32px))) !important;
+  min-width: 0 !important;
   height: 100dvh !important;
-  max-width: none !important;
+  max-width: 860px !important;
   max-height: 100dvh !important;
   border: 1px solid rgba(255,255,255,.72) !important;
   border-right: 0 !important;

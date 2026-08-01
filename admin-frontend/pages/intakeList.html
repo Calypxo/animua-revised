@@ -60,10 +60,13 @@
       <!-- Table panel -->
       <section class="panel records-panel" aria-labelledby="recordsTitle">
         <div class="records-heading">
-          <div>
-            <span class="section-kicker">Records</span>
-            <h2 id="recordsTitle">Intake queue</h2>
-            <p>Review records and continue the next available action.</p>
+          <div class="reference-records-heading">
+            <span class="reference-records-icon"><i class="bi bi-inbox-fill"></i></span>
+            <div>
+              <span class="section-kicker">Records</span>
+              <h2 id="recordsTitle">Intake queue</h2>
+              <p>Review records and continue the next available action.</p>
+            </div>
           </div>
           <div class="records-legend" aria-label="Status guidance">
             <span><i class="bi bi-circle-fill legend-pending"></i> Needs review</span>
@@ -110,6 +113,11 @@
             <label class="filter-field date-filter"><span>To</span><input class="filter-select" type="date" id="filterDateTo" aria-label="Filter to date" /></label>
             <button class="clear-filters-btn" type="button" id="clearIntakeFilters"><i class="bi bi-arrow-counterclockwise"></i> Clear</button>
           </div>
+        </div>
+
+        <div class="reference-table-section-head">
+          <div><span>Intake register</span><h3>Incoming animal records</h3></div>
+          <strong id="intakeResultLabel">0 records</strong>
         </div>
 
         <div class="table-responsive">

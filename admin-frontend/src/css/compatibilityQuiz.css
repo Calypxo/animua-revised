@@ -26,9 +26,9 @@
 }
 
 .compatibility-management-page #resultDialog .cq-result-modal {
-  width: var(--management-modal-width, 56vw) !important;
-  min-width: 50vw !important;
-  max-width: none !important;
+  width: var(--management-modal-width, min(860px, calc(100vw - 32px))) !important;
+  min-width: 0 !important;
+  max-width: 860px !important;
   height: 100dvh !important;
   max-height: 100dvh !important;
   display: flex !important;

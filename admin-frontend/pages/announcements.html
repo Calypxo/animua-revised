@@ -122,6 +122,42 @@
             </section>
 
             <aside class="feed-insights" aria-label="Publishing insights">
+              <section class="insight-card event-calendar-card" aria-labelledby="eventCalendarTitle">
+                <div class="event-calendar-heading">
+                  <h3 id="eventCalendarTitle">Upcoming near you</h3>
+                  <span class="event-calendar-icon"><i class="bi bi-calendar" aria-hidden="true"></i></span>
+                </div>
+                <div class="event-calendar-divider" aria-hidden="true"></div>
+
+                <div class="event-calendar-nav">
+                  <button id="eventCalendarPrev" type="button" aria-label="Previous month">
+                    <i class="bi bi-chevron-left" aria-hidden="true"></i>
+                  </button>
+                  <strong id="eventCalendarMonth" aria-live="polite">Month</strong>
+                  <button id="eventCalendarNext" type="button" aria-label="Next month">
+                    <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                  </button>
+                </div>
+
+                <div class="event-calendar-weekdays" aria-hidden="true">
+                  <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span>
+                  <span>Thu</span><span>Fri</span><span>Sat</span>
+                </div>
+                <div id="eventCalendarGrid" class="event-calendar-grid" role="grid" aria-label="Important event dates"></div>
+
+                <div class="event-calendar-legend">
+                  <span><i class="event-legend-dot"></i> Events</span>
+                  <span><i class="selected-legend-dot"></i> Selected date</span>
+                </div>
+                <button id="showManagementCalendarEvents" type="button" class="event-calendar-link">
+                  View all events <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                </button>
+
+                <div class="event-calendar-agenda">
+                  <div id="eventCalendarAgenda" class="event-calendar-agenda-list" aria-live="polite"></div>
+                </div>
+              </section>
+
               <section class="insight-card">
                 <div class="insight-card-head"><span>Publishing pulse</span><i class="bi bi-activity"></i></div>
                 <div class="insight-stat"><span>Published posts</span><strong id="insightPublished">0</strong></div>
@@ -236,6 +272,7 @@
                 <label class="composer-control form-group">
                   <span class="form-lbl">Event Date</span>
                   <input class="form-inp" id="fEventDate" type="date" />
+                  <small class="event-date-help">This date will appear on the event calendar.</small>
                 </label>
 
                 <label class="composer-control form-group">

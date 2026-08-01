@@ -3,6 +3,7 @@ import Swal from "sweetalert2";
 import { clearUserSession, getUserName, getUserRole } from "../../utils/storage.js";
 import { canAccessModule, normalizeRole } from "../../auth/permissions.js";
 import { apiFetch } from "../../utils/api.js";
+import { cacheContactMessageCount } from "./contactMessageBadge.js";
 
 const ATTENTION_SEEN_KEY = "animua_attention_seen";
 const ATTENTION_CACHE_KEY = "animua_attention_summary";
@@ -114,6 +115,18 @@ function readCachedAttentionSummary() {
   } catch (_) {
     return null;
   }
+
+  if (canAccessModule(role, "contact")) {
+    add({
+      id: "contact",
+      count: data.newContactMessages,
+      tone: "blue",
+      icon: "bi-envelope-paper-fill",
+      title: "New contact messages",
+      detail: `${Number(data.newContactMessages || 0)} public ${Number(data.newContactMessages || 0) === 1 ? "inquiry awaits" : "inquiries await"} a reply.`,
+      href: "/pages/contactMessages.html",
+    });
+  }
 }
 
 function cacheAttentionSummary(data) {
@@ -121,6 +134,7 @@ function cacheAttentionSummary(data) {
     savedAt: Date.now(),
     data,
   }));
+  cacheContactMessageCount(data.newContactMessages);
 }
 
 function ensureAttentionPanel() {

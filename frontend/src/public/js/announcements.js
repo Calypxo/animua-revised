@@ -6,11 +6,21 @@ const TYPES = {
   "Upcoming Events": { icon: "fa-regular fa-calendar-check", slug: "event" },
 };
 
-const state = { announcements: [], search: "", type: "" };
+const today = new Date();
+const state = {
+  announcements: [],
+  search: "",
+  type: "",
+  calendarMonth: new Date(today.getFullYear(), today.getMonth(), 1),
+  selectedEventDate: "",
+  calendarInitialized: false,
+};
 const feed = document.getElementById("announcementFeed");
 const featured = document.getElementById("featuredAnnouncement");
 const status = document.getElementById("announcementStatus");
 const eventList = document.getElementById("upcomingEventList");
+const calendarGrid = document.getElementById("publicCalendarGrid");
+const calendarMonth = document.getElementById("publicCalendarMonth");
 
 document.querySelector("[data-login-link]")?.classList.toggle("hidden", localStorage.getItem("is_logged_in") === "true");
 
@@ -38,14 +48,51 @@ function publishedDate(value) {
     : "Recently published";
 }
 
-function eventDate(value, compact = false) {
+function parseEventDate(value) {
   if (!value) return "";
   const parts = String(value).split("-").map(Number);
   const date = parts.length === 3 ? new Date(parts[0], parts[1] - 1, parts[2]) : new Date(value);
-  if (Number.isNaN(date.getTime())) return String(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function eventDateKey(date) {
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) return "";
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function eventDate(value, compact = false) {
+  const date = value instanceof Date ? value : parseEventDate(value);
+  if (!date) return value ? String(value) : "";
   return date.toLocaleDateString("en-PH", compact
     ? { month: "short", day: "numeric" }
     : { weekday: "short", year: "numeric", month: "long", day: "numeric" });
+}
+
+function calendarEvents() {
+  return state.announcements
+    .filter((item) => normalizeType(item.type) === "Upcoming Events")
+    .map((item) => ({ ...item, calendarDate: parseEventDate(item.eventDate) }))
+    .filter((item) => item.calendarDate)
+    .sort((left, right) => left.calendarDate - right.calendarDate);
+}
+
+function initializeCalendar(events) {
+  if (state.calendarInitialized) return;
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const nextEvent = events.find((item) => item.calendarDate >= todayStart) || events[0];
+
+  if (nextEvent) {
+    state.calendarMonth = new Date(
+      nextEvent.calendarDate.getFullYear(),
+      nextEvent.calendarDate.getMonth(),
+      1
+    );
+    state.selectedEventDate = eventDateKey(nextEvent.calendarDate);
+  } else {
+    state.selectedEventDate = eventDateKey(todayStart);
+  }
+  state.calendarInitialized = true;
 }
 
 function setText(id, value) {
@@ -180,21 +227,86 @@ function emptyState() {
 }
 
 function renderEvents() {
-  if (!eventList) return;
+  if (!eventList || !calendarGrid || !calendarMonth) return;
   eventList.replaceChildren();
-  const events = state.announcements
-    .filter((item) => normalizeType(item.type) === "Upcoming Events")
-    .slice(0, 3);
+  const events = calendarEvents();
+  initializeCalendar(events);
 
-  if (!events.length) {
+  const month = state.calendarMonth;
+  const year = month.getFullYear();
+  const monthIndex = month.getMonth();
+  const monthEvents = events.filter(
+    (item) =>
+      item.calendarDate.getFullYear() === year &&
+      item.calendarDate.getMonth() === monthIndex
+  );
+  const byDate = new Map();
+  monthEvents.forEach((item) => {
+    const key = eventDateKey(item.calendarDate);
+    if (!byDate.has(key)) byDate.set(key, []);
+    byDate.get(key).push(item);
+  });
+
+  calendarMonth.textContent = month.toLocaleDateString("en-PH", {
+    month: "long",
+    year: "numeric",
+  });
+  calendarGrid.setAttribute("aria-label", `${calendarMonth.textContent} important event calendar`);
+  calendarGrid.replaceChildren();
+
+  ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].forEach((weekday) => {
+    const label = document.createElement("span");
+    label.textContent = weekday;
+    label.setAttribute("aria-hidden", "true");
+    calendarGrid.appendChild(label);
+  });
+
+  const firstWeekday = new Date(year, monthIndex, 1).getDay();
+  const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+  const todayKey = eventDateKey(new Date());
+
+  for (let index = 0; index < 42; index += 1) {
+    const dayNumber = index - firstWeekday + 1;
+    if (dayNumber < 1 || dayNumber > daysInMonth) {
+      const empty = document.createElement("em");
+      empty.setAttribute("aria-hidden", "true");
+      calendarGrid.appendChild(empty);
+      continue;
+    }
+
+    const date = new Date(year, monthIndex, dayNumber);
+    const key = eventDateKey(date);
+    const dayEvents = byDate.get(key) || [];
+    const day = document.createElement("button");
+    day.type = "button";
+    day.dataset.calendarDate = key;
+    day.textContent = dayNumber;
+    day.classList.toggle("is-event", dayEvents.length > 0);
+    day.classList.toggle("is-activity", key === state.selectedEventDate);
+    day.classList.toggle("is-today", key === todayKey);
+    day.setAttribute("aria-pressed", String(key === state.selectedEventDate));
+    day.setAttribute(
+      "aria-label",
+      `${eventDate(date)}${dayEvents.length ? `, ${dayEvents.length} important event${dayEvents.length === 1 ? "" : "s"}` : ""}`
+    );
+    calendarGrid.appendChild(day);
+  }
+
+  const selectedEvents = state.selectedEventDate
+    ? byDate.get(state.selectedEventDate) || []
+    : monthEvents;
+
+  if (!selectedEvents.length) {
     const message = document.createElement("p");
     message.className = "no-upcoming-events";
-    message.textContent = "New community events will be posted here soon.";
+    message.textContent = monthEvents.length
+      ? "Select a highlighted date to see its important events."
+      : "No important events are scheduled for this month.";
     eventList.appendChild(message);
     return;
   }
 
-  events.forEach((item) => {
+  selectedEvents.slice(0, 4).forEach((item) => {
     const row = document.createElement("article");
     row.className = "upcoming-event-row";
     const date = document.createElement("time");
@@ -208,6 +320,21 @@ function renderEvents() {
     row.append(date, copy);
     eventList.appendChild(row);
   });
+}
+
+function moveCalendar(offset) {
+  state.calendarMonth = new Date(
+    state.calendarMonth.getFullYear(),
+    state.calendarMonth.getMonth() + offset,
+    1
+  );
+  const firstEvent = calendarEvents().find(
+    (item) =>
+      item.calendarDate.getFullYear() === state.calendarMonth.getFullYear() &&
+      item.calendarDate.getMonth() === state.calendarMonth.getMonth()
+  );
+  state.selectedEventDate = firstEvent ? eventDateKey(firstEvent.calendarDate) : "";
+  renderEvents();
 }
 
 function updateStats() {
@@ -288,6 +415,25 @@ document.getElementById("showAllAnnouncements")?.addEventListener("click", () =>
   const type = document.getElementById("announcementType");
   if (search) search.value = "";
   if (type) type.value = "";
+  document.getElementById("announcementsHeading")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  render();
+});
+
+document.getElementById("publicCalendarPrev")?.addEventListener("click", () => moveCalendar(-1));
+document.getElementById("publicCalendarNext")?.addEventListener("click", () => moveCalendar(1));
+calendarGrid?.addEventListener("click", (event) => {
+  const day = event.target.closest("[data-calendar-date]");
+  if (!day) return;
+  state.selectedEventDate = day.dataset.calendarDate || "";
+  renderEvents();
+});
+document.getElementById("showCalendarEvents")?.addEventListener("click", () => {
+  state.type = "Upcoming Events";
+  state.search = "";
+  const search = document.getElementById("announcementSearch");
+  const type = document.getElementById("announcementType");
+  if (search) search.value = "";
+  if (type) type.value = state.type;
   document.getElementById("announcementsHeading")?.scrollIntoView({ behavior: "smooth", block: "start" });
   render();
 });

@@ -9,6 +9,10 @@ const ATTENTION_CACHE_TTL_MS = Math.max(
 let attentionCache = null;
 let attentionRefreshPromise = null;
 
+exports.invalidateAttentionCache = function invalidateAttentionCache() {
+  attentionCache = null;
+};
+
 function toDate(value) {
   if (!value) return null;
   if (typeof value.toDate === "function") return value.toDate();
@@ -51,6 +55,7 @@ async function buildAttentionSummary() {
   const intake = db.collection("intakeRecords");
   const animals = db.collection("animals");
   const inventory = db.collection("inventoryItems");
+  const contactMessages = db.collection("contactMessages");
 
   const [
     totalIntakes,
@@ -62,6 +67,7 @@ async function buildAttentionSummary() {
     quarantine,
     animalSnapshot,
     inventorySnapshot,
+    newContactMessages,
   ] = await Promise.all([
     countDocuments(intake),
     countDocuments(intake.where("status", "==", "Converted")),
@@ -83,6 +89,7 @@ async function buildAttentionSummary() {
         "criticalPoint"
       )
       .get(),
+    countDocuments(contactMessages.where("status", "==", "New")),
   ]);
 
   const longStayCount = animalSnapshot.docs.reduce((count, document) => {
@@ -117,6 +124,7 @@ async function buildAttentionSummary() {
     lowStockCount,
     criticalStockCount,
     longStayCount,
+    newContactMessages,
     generatedAt: generatedAt.toISOString(),
     expiresAt: new Date(generatedAt.getTime() + ATTENTION_CACHE_TTL_MS).toISOString(),
   };

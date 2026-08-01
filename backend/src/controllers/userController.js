@@ -19,7 +19,10 @@ const ROLE_PERMISSIONS = {
     adoption: ["view", "review", "approve", "reject", "finalize"],
     reports: ["view"],
     archive: ["view", "restore"],
-    audit: ["view"]
+    audit: ["view"],
+    announcements: ["view", "create", "edit", "delete", "publish"],
+    compatibility: ["view", "manage"],
+    contact: ["view", "reply"]
   },
   Staff: {
     dashboard: ["view"],
@@ -30,7 +33,10 @@ const ROLE_PERMISSIONS = {
     inventory: ["view", "consume"],
     adoption: ["view", "review", "approve", "reject", "finalize"],
     reports: ["view"],
-    archive: ["view"]
+    archive: ["view"],
+    announcements: ["view", "create", "edit", "publish"],
+    compatibility: ["view"],
+    contact: ["view", "reply"]
   },
   Veterinarian: {
     dashboard: ["view"],
@@ -38,7 +44,9 @@ const ROLE_PERMISSIONS = {
     quarantine: ["view"],
     inventory: ["view", "consume"],
     reports: ["view"],
-    archive: ["view"]
+    archive: ["view"],
+    announcements: ["view", "create", "edit", "publish"],
+    compatibility: ["view"]
   },
   Public: {}
 };

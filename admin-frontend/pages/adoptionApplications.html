@@ -45,8 +45,9 @@
           <div class="panel-head flex-column gap-3">
             <div class="aa-panel-intro">
               <div class="aa-panel-heading">
-                <span class="aa-panel-icon"><i class="bi bi-file-earmark-heart-fill"></i></span>
+                <span class="aa-panel-icon"><i class="bi bi-house-heart-fill" aria-hidden="true"></i></span>
                 <span>
+                  <em>Adoption records</em>
                   <strong>Application review queue</strong>
                   <small>Compare applicant information, animal needs, and compatibility before making a decision.</small>
                 </span>
@@ -64,17 +65,23 @@
               </div>
               <!-- Filters -->
               <div class="aa-filter-toolbar">
-                <div class="search-pill-sm">
+                <label class="aa-reference-field aa-reference-search"><span>Search applications</span><div class="search-pill-sm">
                   <i class="bi bi-search"></i>
                   <input type="text" id="searchApps" placeholder="Search applicant, animal…" autocomplete="off" />
-                </div>
-                <select class="filter-select" id="filterType">
+                </div></label>
+                <label class="aa-reference-field"><span>Application type</span><select class="filter-select" id="filterType">
                   <option value="">All types</option>
                   <option value="Direct Browse">Direct Browse</option>
                   <option value="Quiz Match">AI Quiz Match</option>
-                </select>
+                </select></label>
+                <button class="aa-clear-filters" id="clearAdoptionFilters" type="button"><i class="bi bi-arrow-counterclockwise"></i> Clear</button>
               </div>
             </div>
+          </div>
+
+          <div class="reference-table-section-head">
+            <div><span>Application register</span><h3>Submitted adoption applications</h3></div>
+            <strong id="adoptionResultLabel">0 records</strong>
           </div>
 
           <div class="table-responsive">
@@ -88,7 +95,7 @@
                   <th>Match</th>
                   <th>Submitted</th>
                   <th>Status</th>
-                  <th></th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody id="appsTableBody">

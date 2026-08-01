@@ -1,0 +1,1190 @@
+/*
+ * Archived Records panel reference
+ * Shared by management record directories while preserving each workflow.
+ */
+:is(.ap-list-page .ap-records-panel, .surrender-requests-page .sr-table-panel) {
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: 1px solid #EADFD4 !important;
+  border-radius: 24px !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 18px 44px rgba(72, 36, 29, .08) !important;
+}
+
+.ap-list-page .ap-records-panel::before {
+  display: none !important;
+}
+
+:is(.ap-list-page .ap-records-heading, .surrender-requests-page .records-heading) {
+  min-height: 82px;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 18px !important;
+  padding: 22px 24px 16px !important;
+  border: 0 !important;
+  background: linear-gradient(135deg, #FFF8EE, #FFFFFF 70%) !important;
+}
+
+.reference-records-heading {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.reference-records-heading > div {
+  min-width: 0;
+}
+
+.reference-records-icon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 44px;
+  border-radius: 14px;
+  color: #FFFFFF;
+  background: #780116;
+  box-shadow: 0 10px 22px rgba(120, 1, 22, .20);
+}
+
+:is(.ap-list-page .ap-records-heading, .surrender-requests-page .records-heading) :is(.ap-section-kicker, .section-kicker) {
+  color: #780116 !important;
+  font: 800 .625rem/1 "Poppins", sans-serif !important;
+  letter-spacing: .10em !important;
+  text-transform: uppercase !important;
+}
+
+:is(.ap-list-page .ap-records-heading, .surrender-requests-page .records-heading) h2 {
+  margin: 4px 0 2px !important;
+  color: #2D2322 !important;
+  font: 800 1rem/1.2 "Poppins", sans-serif !important;
+  letter-spacing: 0 !important;
+}
+
+:is(.ap-list-page .ap-records-heading, .surrender-requests-page .records-heading) p {
+  margin: 0 !important;
+  color: #81746D !important;
+  font: 500 .72rem/1.45 "Poppins", sans-serif !important;
+}
+
+:is(.ap-list-page .ap-records-legend, .surrender-requests-page .records-legend) {
+  color: #81746D !important;
+  font: 600 .67rem/1.35 "Poppins", sans-serif !important;
+}
+
+/* Tabs sit inside the same quiet header area as the archive tabs. */
+.ap-list-page .ap-toolbar {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: #FFFFFF !important;
+}
+
+:is(.ap-list-page .ap-tabs-wrap, .surrender-requests-page .surrender-toolbar .toolbar-tabs) {
+  margin: 0 !important;
+  padding: 0 24px 18px !important;
+  overflow-x: auto !important;
+  border: 0 !important;
+  border-bottom: 1px solid #EEE3D9 !important;
+  background: linear-gradient(135deg, #FFF8EE, #FFFFFF 70%) !important;
+  scrollbar-width: none;
+}
+
+:is(.ap-list-page .ap-tabs-wrap, .surrender-requests-page .surrender-toolbar .toolbar-tabs)::-webkit-scrollbar {
+  display: none;
+}
+
+.ap-list-page .ap-filter-label,
+.surrender-requests-page .surrender-toolbar .toolbar-tabs::before {
+  display: none !important;
+}
+
+:is(.ap-list-page .ap-tabs, .surrender-requests-page .sr-tabs) {
+  width: max-content !important;
+  max-width: 100% !important;
+  min-height: 48px;
+  display: flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  padding: 5px !important;
+  border: 1px solid #EADFD4 !important;
+  border-radius: 14px !important;
+  background: #EFE5D2 !important;
+  box-shadow: none !important;
+}
+
+:is(.ap-list-page .ap-tab, .surrender-requests-page .sr-tab) {
+  min-height: 36px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 13px !important;
+  border: 0 !important;
+  border-radius: 10px !important;
+  color: #362822 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font: 700 .7rem/1 "Poppins", sans-serif !important;
+  white-space: nowrap !important;
+}
+
+:is(.ap-list-page .ap-tab, .surrender-requests-page .sr-tab)::after {
+  display: none !important;
+}
+
+:is(.ap-list-page .ap-tab, .surrender-requests-page .sr-tab):hover {
+  color: #780116 !important;
+  background: #FFFFFF !important;
+}
+
+:is(.ap-list-page .ap-tab, .surrender-requests-page .sr-tab).active {
+  color: #780116 !important;
+  background: rgba(120, 1, 22, .10) !important;
+  box-shadow: none !important;
+}
+
+/* Full-width filter band, matching the archive panel. */
+.surrender-requests-page .surrender-toolbar {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: #FFFFFF !important;
+}
+
+:is(.ap-list-page .ap-filter-toolbar, .surrender-requests-page .filter-toolbar) {
+  display: grid !important;
+  align-items: end !important;
+  gap: 12px !important;
+  margin: 0 !important;
+  padding: 18px 24px !important;
+  border: 0 !important;
+  border-bottom: 1px solid #F0E6DD !important;
+  background: #FFF8EE !important;
+}
+
+.ap-list-page .ap-filter-toolbar {
+  grid-template-columns: minmax(280px, 1.5fr) minmax(170px, .65fr) minmax(170px, .65fr) auto !important;
+}
+
+.surrender-requests-page .filter-toolbar {
+  grid-template-columns: minmax(300px, 1.5fr) minmax(180px, .65fr) minmax(200px, .75fr) !important;
+}
+
+:is(.ap-list-page .ap-filter-field, .surrender-requests-page .filter-field) {
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 7px !important;
+}
+
+:is(.ap-list-page .ap-filter-field, .surrender-requests-page .filter-field) > span {
+  margin: 0 !important;
+  padding: 0 !important;
+  color: #362822 !important;
+  font: 800 .65rem/1 "Poppins", sans-serif !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+:is(
+  .ap-list-page .ap-control,
+  .surrender-requests-page .search-pill-sm,
+  .ap-list-page .ap-filter-field select,
+  .surrender-requests-page .filter-select
+) {
+  height: 42px !important;
+  border: 1px solid #E4D7CC !important;
+  border-radius: 12px !important;
+  color: #2D2322 !important;
+  background: #FFFFFF !important;
+  box-shadow: none !important;
+}
+
+.ap-list-page .ap-control input {
+  height: 100% !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.ap-list-page .ap-control:focus-within,
+.surrender-requests-page .search-pill-sm:focus-within,
+.ap-list-page .ap-filter-field select:focus,
+.surrender-requests-page .filter-select:focus {
+  border-color: #780116 !important;
+  box-shadow: 0 0 0 4px rgba(120, 1, 22, .09) !important;
+}
+
+.ap-list-page .ap-clear-btn {
+  height: 42px !important;
+  border: 1px solid #E4D7CC !important;
+  border-radius: 12px !important;
+  color: #780116 !important;
+  background: #FFFFFF !important;
+  font: 700 .7rem/1 "Poppins", sans-serif !important;
+}
+
+.ap-list-page .ap-clear-btn:hover {
+  border-color: #780116 !important;
+  color: #FFFFFF !important;
+  background: #780116 !important;
+}
+
+.reference-table-section-head {
+  min-height: 72px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 19px 24px 14px;
+  background: #FFFFFF;
+}
+
+.reference-table-section-head span {
+  display: block;
+  color: #780116;
+  font: 800 .625rem/1 "Poppins", sans-serif;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+}
+
+.reference-table-section-head h3 {
+  margin: 4px 0 0;
+  color: #2D2322;
+  font: 800 .95rem/1.25 "Poppins", sans-serif;
+}
+
+.reference-table-section-head > strong {
+  padding: 7px 11px;
+  border-radius: 999px;
+  color: #780116;
+  background: #EFE5D2;
+  font: 800 .68rem/1 "Poppins", sans-serif;
+  white-space: nowrap;
+}
+
+/* Surrender's real table now uses the archive table treatment. */
+.management-consistent-ui.surrender-requests-page .sr-table-panel .table-responsive {
+  margin: 0 !important;
+  overflow-x: auto !important;
+  background: #FFFFFF !important;
+}
+
+.management-consistent-ui.surrender-requests-page .sr-table-panel .shelter-table {
+  background: #FFFFFF !important;
+  font-size: .78rem !important;
+}
+
+.management-consistent-ui.surrender-requests-page .sr-table-panel .shelter-table thead {
+  background: #EFE5D2 !important;
+}
+
+.management-consistent-ui.surrender-requests-page .sr-table-panel .shelter-table thead th {
+  padding: 13px 15px !important;
+  border-block: 1px solid #EADFD4 !important;
+  color: #780116 !important;
+  background: #EFE5D2 !important;
+  font: 800 .65rem/1.35 "Poppins", sans-serif !important;
+  letter-spacing: .07em !important;
+}
+
+.management-consistent-ui.surrender-requests-page .sr-table-panel .shelter-table tbody td {
+  padding: 14px 15px !important;
+  border-bottom: 1px solid #F0E7DF !important;
+  color: #2D2322 !important;
+  background: #FFFFFF !important;
+  vertical-align: middle !important;
+}
+
+.management-consistent-ui.surrender-requests-page .sr-table-panel .shelter-table tbody tr:hover td {
+  background: rgba(120, 1, 22, .035) !important;
+}
+
+.management-consistent-ui.surrender-requests-page .sr-table-panel .shelter-table tbody tr.row-active td {
+  background: rgba(120, 1, 22, .07) !important;
+}
+
+.reference-records-empty {
+  min-height: 250px;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  padding: 44px 20px;
+  text-align: center;
+}
+
+.reference-records-empty > span {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 12px;
+  border-radius: 16px;
+  color: #780116;
+  background: rgba(120, 1, 22, .07);
+  font-size: 1.1rem;
+}
+
+.reference-records-empty strong,
+.reference-records-empty small {
+  display: block;
+}
+
+.reference-records-empty strong {
+  color: #2D2322;
+  font: 800 .88rem/1.35 "Poppins", sans-serif;
+}
+
+.reference-records-empty small {
+  max-width: 480px;
+  margin-top: 5px;
+  color: #81746D;
+  font: 500 .7rem/1.5 "Poppins", sans-serif;
+}
+
+/* Animal records keep their card layout inside the archive-style shell. */
+.ap-list-page .animal-record-list {
+  margin: 0 24px 20px !important;
+}
+
+.ap-list-page .animal-record-list > .ap-empty-state {
+  min-height: 250px !important;
+  margin: 0 !important;
+}
+
+:is(.ap-list-page .ap-records-panel, .surrender-requests-page .sr-table-panel) .um-pagination {
+  min-height: 68px !important;
+  margin: 0 !important;
+  padding: 16px 24px 20px !important;
+  border: 0 !important;
+  border-top: 1px solid #EEE3D9 !important;
+  color: #362822 !important;
+  background: #FFF8EE !important;
+}
+
+@media (max-width: 900px) {
+  .ap-list-page .ap-filter-toolbar,
+  .surrender-requests-page .filter-toolbar {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .ap-list-page .ap-search-filter,
+  .surrender-requests-page .search-filter {
+    grid-column: 1 / -1 !important;
+  }
+}
+
+@media (max-width: 700px) {
+  :is(.ap-list-page .ap-records-panel, .surrender-requests-page .sr-table-panel) {
+    border-radius: 19px !important;
+  }
+
+  :is(.ap-list-page .ap-records-heading, .surrender-requests-page .records-heading) {
+    align-items: flex-start !important;
+    padding: 18px 17px 14px !important;
+  }
+
+  :is(.ap-list-page .ap-records-legend, .surrender-requests-page .records-legend) {
+    display: none !important;
+  }
+
+  :is(.ap-list-page .ap-tabs-wrap, .surrender-requests-page .surrender-toolbar .toolbar-tabs),
+  :is(.ap-list-page .ap-filter-toolbar, .surrender-requests-page .filter-toolbar),
+  .reference-table-section-head {
+    padding-inline: 17px !important;
+  }
+
+  .ap-list-page .ap-filter-toolbar,
+  .surrender-requests-page .filter-toolbar {
+    grid-template-columns: 1fr !important;
+  }
+
+  .ap-list-page .ap-search-filter,
+  .surrender-requests-page .search-filter {
+    grid-column: auto !important;
+  }
+
+  .reference-table-section-head {
+    align-items: flex-start;
+  }
+
+  .ap-list-page .animal-record-list {
+    margin: 0 12px 16px !important;
+  }
+
+  .management-consistent-ui.surrender-requests-page .sr-table-panel .table-responsive {
+    overflow-x: hidden !important;
+  }
+
+  .management-consistent-ui.surrender-requests-page .sr-table-panel .shelter-table tbody tr[data-id] td {
+    display: grid !important;
+    padding: 10px 13px !important;
+    background: #FFFFFF !important;
+  }
+
+  :is(.ap-list-page .ap-records-panel, .surrender-requests-page .sr-table-panel) .um-pagination {
+    padding-inline: 17px !important;
+  }
+}
+
+/* The remaining record workspaces follow the same Archived Records hierarchy. */
+:is(
+  .records-panel,
+  .adoption-applications-page .aa-table-panel,
+  .inventory-page .inv-table-panel,
+  .compatibility-management-page .cq-records
+) {
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: 1px solid #EADFD4 !important;
+  border-radius: 24px !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 18px 44px rgba(72, 36, 29, .08) !important;
+}
+
+:is(.records-panel .records-heading, .adoption-applications-page .aa-panel-intro, .inventory-records-heading) {
+  min-height: 82px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 18px !important;
+  margin: 0 !important;
+  padding: 22px 24px 16px !important;
+  border: 0 !important;
+  border-bottom: 1px solid #EEE3D9 !important;
+  background: linear-gradient(135deg, #FFF8EE, #FFFFFF 70%) !important;
+}
+
+.adoption-applications-page .aa-panel-heading {
+  display: flex !important;
+  align-items: center !important;
+  gap: 13px !important;
+}
+
+.adoption-applications-page .aa-panel-icon {
+  width: 44px !important;
+  height: 44px !important;
+  flex: 0 0 44px !important;
+  border-radius: 14px !important;
+  color: #FFFFFF !important;
+  background: #780116 !important;
+  box-shadow: 0 10px 22px rgba(120, 1, 22, .20) !important;
+}
+
+.adoption-applications-page .aa-panel-heading em,
+.inventory-records-kicker {
+  display: block !important;
+  color: #780116 !important;
+  font: 800 .625rem/1 "Poppins", sans-serif !important;
+  font-style: normal !important;
+  letter-spacing: .10em !important;
+  text-transform: uppercase !important;
+}
+
+.adoption-applications-page .aa-panel-heading strong,
+.inventory-records-heading h2 {
+  display: block !important;
+  margin: 4px 0 2px !important;
+  color: #2D2322 !important;
+  font: 800 1rem/1.2 "Poppins", sans-serif !important;
+}
+
+.adoption-applications-page .aa-panel-heading small,
+.inventory-records-heading p {
+  display: block !important;
+  margin: 0 !important;
+  color: #81746D !important;
+  font: 500 .72rem/1.45 "Poppins", sans-serif !important;
+}
+
+:is(.adoption-applications-page .aa-panel-tip, .inventory-records-tip) {
+  color: #81746D !important;
+  font: 600 .67rem/1.35 "Poppins", sans-serif !important;
+}
+
+.adoption-applications-page .aa-table-panel > .panel-head,
+.inventory-page .inv-table-panel > .panel-head {
+  margin: 0 !important;
+  padding: 0 !important;
+  gap: 0 !important;
+  border: 0 !important;
+  background: #FFFFFF !important;
+}
+
+/* Tabs remain compact and scan as one status control, not separate buttons. */
+:is(
+  .records-panel .toolbar-tabs,
+  .adoption-applications-page .aa-tabs,
+  .inventory-page .inv-category-strip
+) {
+  margin: 0 !important;
+  padding: 16px 24px !important;
+  border: 0 !important;
+  border-bottom: 1px solid #EEE3D9 !important;
+  background: linear-gradient(135deg, #FFF8EE, #FFFFFF 70%) !important;
+}
+
+:is(.records-panel .intake-tabs, .adoption-applications-page .aa-tabs, .inventory-page .inv-tabs) {
+  width: max-content !important;
+  max-width: 100% !important;
+  min-height: 48px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  padding: 5px !important;
+  overflow-x: auto !important;
+  border: 1px solid #EADFD4 !important;
+  border-radius: 14px !important;
+  background: #EFE5D2 !important;
+  scrollbar-width: none;
+}
+
+:is(.records-panel .intake-tabs, .adoption-applications-page .aa-tabs, .inventory-page .inv-tabs)::-webkit-scrollbar {
+  display: none;
+}
+
+:is(.records-panel .intake-tab, .adoption-applications-page .aa-tab, .inventory-page .inv-tab) {
+  min-height: 36px !important;
+  padding: 0 13px !important;
+  border: 0 !important;
+  border-radius: 10px !important;
+  color: #362822 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font: 700 .7rem/1 "Poppins", sans-serif !important;
+  white-space: nowrap !important;
+}
+
+:is(.records-panel .intake-tab, .adoption-applications-page .aa-tab, .inventory-page .inv-tab):hover {
+  color: #780116 !important;
+  background: #FFFFFF !important;
+}
+
+:is(.records-panel .intake-tab, .adoption-applications-page .aa-tab, .inventory-page .inv-tab).active {
+  color: #780116 !important;
+  background: rgba(120, 1, 22, .10) !important;
+  box-shadow: none !important;
+}
+
+.records-panel .intake-toolbar,
+.adoption-applications-page .aa-toolbar-layout {
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: #FFFFFF !important;
+}
+
+.adoption-applications-page .aa-tabs {
+  width: max-content !important;
+  margin: 16px 24px !important;
+  border-radius: 14px !important;
+}
+
+:is(.records-panel .filter-toolbar, .adoption-applications-page .aa-filter-toolbar, .inventory-page .inventory-filter-controls) {
+  display: grid !important;
+  align-items: end !important;
+  gap: 12px !important;
+  margin: 0 !important;
+  padding: 18px 24px !important;
+  border: 0 !important;
+  border-bottom: 1px solid #F0E6DD !important;
+  background: #FFF8EE !important;
+}
+
+.records-panel .filter-toolbar {
+  grid-template-columns: minmax(270px, 1.4fr) repeat(4, minmax(135px, .65fr)) auto !important;
+}
+
+.adoption-applications-page .aa-filter-toolbar {
+  grid-template-columns: minmax(300px, 1.5fr) minmax(190px, .55fr) auto !important;
+}
+
+.inventory-page .inventory-filter-toolbar {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  gap: 12px !important;
+  padding: 0 !important;
+  background: #FFF8EE !important;
+}
+
+.inventory-page .inventory-filter-controls {
+  grid-template-columns: minmax(260px, 1.3fr) repeat(3, minmax(145px, .7fr)) auto !important;
+}
+
+:is(.aa-reference-field, .inventory-reference-field) {
+  min-width: 0;
+  display: grid;
+  gap: 7px;
+}
+
+:is(.aa-reference-field, .inventory-reference-field) > span {
+  color: #362822;
+  font: 800 .65rem/1 "Poppins", sans-serif;
+}
+
+:is(
+  .records-panel .search-pill-sm,
+  .records-panel .filter-select,
+  .adoption-applications-page .search-pill-sm,
+  .adoption-applications-page .filter-select,
+  .inventory-page .search-pill-sm,
+  .inventory-page .filter-select
+) {
+  width: 100% !important;
+  height: 42px !important;
+  border: 1px solid #E4D7CC !important;
+  border-radius: 12px !important;
+  color: #2D2322 !important;
+  background: #FFFFFF !important;
+  box-shadow: none !important;
+}
+
+:is(.records-panel .search-pill-sm, .adoption-applications-page .search-pill-sm, .inventory-page .search-pill-sm):focus-within,
+:is(.records-panel .filter-select, .adoption-applications-page .filter-select, .inventory-page .filter-select):focus {
+  border-color: #780116 !important;
+  box-shadow: 0 0 0 4px rgba(120, 1, 22, .09) !important;
+}
+
+:is(.records-panel .clear-filters-btn, .aa-clear-filters, .inventory-clear-filters) {
+  height: 42px !important;
+  padding: 0 14px !important;
+  border: 1px solid #E4D7CC !important;
+  border-radius: 12px !important;
+  color: #780116 !important;
+  background: #FFFFFF !important;
+  font: 700 .7rem/1 "Poppins", sans-serif !important;
+}
+
+:is(.records-panel .clear-filters-btn, .aa-clear-filters, .inventory-clear-filters):not(:disabled):hover {
+  border-color: #780116 !important;
+  color: #FFFFFF !important;
+  background: #780116 !important;
+}
+
+.inventory-page .inventory-view-tools {
+  margin: 24px 24px 0 0 !important;
+}
+
+.inventory-page .inventory-filter-summary {
+  margin: 0 !important;
+  padding: 0 24px 16px !important;
+  border-bottom: 1px solid #F0E6DD !important;
+  background: #FFF8EE !important;
+}
+
+/* Tables share the archive header, row rhythm, empty state and integrated footer. */
+:is(
+  .records-panel,
+  .adoption-applications-page .aa-table-panel,
+  .inventory-page .inv-table-panel
+) .table-responsive {
+  margin: 0 !important;
+  background: #FFFFFF !important;
+}
+
+:is(
+  .records-panel,
+  .adoption-applications-page .aa-table-panel,
+  .inventory-page .inv-table-panel
+) .shelter-table thead th,
+.compatibility-management-page .cq-table-wrap th {
+  padding: 13px 15px !important;
+  border-block: 1px solid #EADFD4 !important;
+  color: #780116 !important;
+  background: #EFE5D2 !important;
+  font: 800 .65rem/1.35 "Poppins", sans-serif !important;
+  letter-spacing: .07em !important;
+  text-align: left !important;
+}
+
+:is(
+  .records-panel,
+  .adoption-applications-page .aa-table-panel,
+  .inventory-page .inv-table-panel
+) .shelter-table tbody td,
+.compatibility-management-page .cq-table-wrap td {
+  padding: 14px 15px !important;
+  border-bottom: 1px solid #F0E7DF !important;
+  color: #2D2322 !important;
+  background: #FFFFFF !important;
+  vertical-align: middle !important;
+}
+
+.inventory-page .inventory-smart-table {
+  width: 100% !important;
+  min-width: 980px !important;
+}
+
+.inventory-page .inventory-smart-table .table-heading > i {
+  display: none !important;
+}
+
+:is(
+  .records-panel,
+  .adoption-applications-page .aa-table-panel,
+  .inventory-page .inv-table-panel
+) .shelter-table tbody tr:hover td,
+.compatibility-management-page .cq-table-wrap tr:hover td {
+  background: rgba(120, 1, 22, .035) !important;
+}
+
+:is(
+  .records-panel,
+  .adoption-applications-page .aa-table-panel,
+  .inventory-page .inv-table-panel
+) .um-pagination {
+  min-height: 68px !important;
+  margin: 0 !important;
+  padding: 16px 24px 20px !important;
+  border: 0 !important;
+  border-top: 1px solid #EEE3D9 !important;
+  background: #FFF8EE !important;
+}
+
+/* Contact keeps its useful two-pane inbox, but the list now belongs to the same panel system. */
+.contact-messages-page .cm-filter-toolbar {
+  grid-template-columns: minmax(280px, 1.5fr) minmax(180px, .55fr) auto !important;
+}
+
+.contact-messages-page .cm-workspace {
+  margin: 0 !important;
+  gap: 0 !important;
+  border-top: 0 !important;
+}
+
+.contact-messages-page .cm-inbox-panel {
+  min-height: 520px !important;
+  border-radius: 0 !important;
+}
+
+.contact-messages-page .cm-message-list {
+  min-height: 410px !important;
+}
+
+/* Compatibility results use the same quiet toolbar and substantial empty state. */
+.compatibility-management-page .cq-record-head {
+  min-height: 82px !important;
+  padding: 22px 24px 16px !important;
+}
+
+.compatibility-management-page .cq-toolbar {
+  grid-template-columns: minmax(280px, 1.5fr) minmax(180px, .55fr) auto !important;
+  align-items: end !important;
+  padding: 18px 24px !important;
+  background: #FFF8EE !important;
+}
+
+.compatibility-management-page .cq-filter-field {
+  min-width: 0;
+  display: grid;
+  gap: 7px;
+}
+
+.compatibility-management-page .cq-filter-field > span {
+  color: #362822;
+  font: 800 .65rem/1 "Poppins", sans-serif;
+}
+
+.compatibility-management-page .cq-filter-field .cq-search,
+.compatibility-management-page .cq-filter-field select {
+  width: 100% !important;
+  height: 42px !important;
+}
+
+/* Surrender now uses the Archived Records markup directly. */
+body.management-consistent-ui.surrender-requests-page .sr-table-panel {
+  padding: 0 !important;
+  border-radius: 24px !important;
+}
+
+.surrender-requests-page .surrender-records-toolbar {
+  align-items: stretch !important;
+  padding: 22px 24px 18px !important;
+  background: linear-gradient(135deg, #FFF8EE, #FFFFFF 70%) !important;
+}
+
+.surrender-requests-page .surrender-heading-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.surrender-requests-page .surrender-records-toolbar .archive-tabs {
+  margin-top: 2px;
+  background: #EFE5D2 !important;
+}
+
+body.management-consistent-ui.surrender-requests-page .surrender-filter-grid {
+  grid-template-columns: minmax(300px, 1.5fr) minmax(180px, .65fr) minmax(200px, .75fr) auto !important;
+  gap: 12px !important;
+  padding: 18px 24px !important;
+  border-bottom: 1px solid #F0E6DD !important;
+  background: #FFF8EE !important;
+}
+
+.reference-clear-filters {
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 14px;
+  border: 1px solid #E4D7CC;
+  border-radius: 12px;
+  color: #780116;
+  background: #FFFFFF;
+  font: 700 .7rem/1 "Poppins", sans-serif;
+}
+
+.reference-clear-filters:hover {
+  border-color: #780116;
+  color: #FFFFFF;
+  background: #780116;
+}
+
+/* User Management uses the same visible labels and control rhythm. */
+body.management-consistent-ui.user-management-page .um-filter-bar {
+  grid-template-columns: minmax(260px, 1.4fr) minmax(145px, .65fr) minmax(145px, .65fr) minmax(100px, .42fr) auto !important;
+  align-items: end !important;
+  gap: 12px !important;
+  padding: 18px 24px !important;
+  border-bottom: 1px solid #F0E6DD !important;
+  background: #FFF8EE !important;
+}
+
+body.management-consistent-ui.user-management-page .um-search-field {
+  height: auto !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+body.management-consistent-ui.user-management-page .um-page-size-field {
+  height: auto !important;
+}
+
+body.management-consistent-ui.user-management-page .um-select-field {
+  height: auto !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+/* Final component contract: White filter surface, Champagne track/header, Burgundy interaction. */
+body.management-consistent-ui :is(
+  .records-panel,
+  .aa-table-panel,
+  .sr-table-panel,
+  .inv-table-panel,
+  .ap-records-panel,
+  .um-directory-panel,
+  .cq-records
+) :is(
+  .filter-toolbar,
+  .aa-filter-toolbar,
+  .ap-filter-toolbar,
+  .um-filter-bar,
+  .inventory-filter-toolbar,
+  .inventory-filter-controls,
+  .inventory-filter-summary,
+  .cq-toolbar
+) {
+  background: #FFFFFF !important;
+}
+
+/* Contact: persistent sender directory on the left, selected message on the right. */
+body.management-consistent-ui.contact-messages-page .cm-workspace {
+  display: grid !important;
+  grid-template-columns: minmax(320px, .78fr) minmax(0, 1.35fr) !important;
+  align-items: stretch !important;
+  gap: 16px !important;
+  margin: 0 24px 24px !important;
+}
+
+body.management-consistent-ui.contact-messages-page :is(.cm-inbox-panel, .cm-detail-panel) {
+  min-height: 600px !important;
+  border: 1px solid #EADFD4 !important;
+  border-radius: 16px !important;
+  background: #FFFFFF !important;
+}
+
+.contact-messages-page .cm-detail-column-heading {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin: -22px -22px 20px;
+  padding: 17px 20px;
+  border-bottom: 1px solid #EADFD4;
+  background: #FFFFFF;
+}
+
+.contact-messages-page .cm-detail-column-heading > span {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 38px;
+  border-radius: 12px;
+  color: #FFFFFF;
+  background: #780116;
+}
+
+.contact-messages-page .cm-detail-column-heading small,
+.contact-messages-page .cm-detail-column-heading h3,
+.contact-messages-page .cm-detail-column-heading p {
+  display: block;
+  margin: 0;
+}
+
+.contact-messages-page .cm-detail-column-heading small {
+  color: #780116;
+  font: 800 .6rem/1 "Poppins", sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.contact-messages-page .cm-detail-column-heading h3 {
+  margin-top: 3px;
+  color: #2B1719;
+  font: 800 .9rem/1.2 "Poppins", sans-serif;
+}
+
+.contact-messages-page .cm-detail-column-heading p {
+  margin-top: 2px;
+  color: #70635D;
+  font: 500 .66rem/1.4 "Poppins", sans-serif;
+}
+
+body.management-consistent-ui.contact-messages-page .cm-detail-empty {
+  min-height: 460px !important;
+}
+
+/* Compatibility filters match the fields users can actually act on. */
+.compatibility-management-page .cq-toolbar {
+  grid-template-columns: minmax(260px, 1.35fr) minmax(170px, .62fr) minmax(190px, .72fr) auto !important;
+}
+
+/* Inventory has one canonical presentation: its data table. */
+body.management-consistent-ui.inventory-page .inventory-filter-toolbar {
+  grid-template-columns: 1fr !important;
+}
+
+/* Reports: one bordered control, never a second White pill inside it. */
+body.management-consistent-ui .report-filter-grid .report-input {
+  height: 42px !important;
+  border: 1px solid #E4D7CC !important;
+  border-radius: 12px !important;
+  background: #FFFFFF !important;
+}
+
+body.management-consistent-ui .report-filter-grid .report-input input {
+  height: 100% !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* User directory: explicit borders, balanced sizing, and one control per field. */
+body.management-consistent-ui.user-management-page .um-filter-bar :is(.ap-control, select, .um-clear-filters) {
+  width: 100% !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  border: 1px solid #E4D7CC !important;
+  border-radius: 12px !important;
+  color: #2B1719 !important;
+  background: #FFFFFF !important;
+  box-shadow: none !important;
+}
+
+body.management-consistent-ui.user-management-page .um-filter-bar .ap-control input {
+  height: 100% !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.management-consistent-ui.user-management-page .um-filter-bar :is(.ap-control, select):focus-within,
+body.management-consistent-ui.user-management-page .um-filter-bar select:focus {
+  border-color: #780116 !important;
+  box-shadow: 0 0 0 4px rgba(120, 1, 22, .09) !important;
+}
+
+/* Audit Trail now uses the same five-part search/filter/reset row. */
+body.management-consistent-ui .audit-panel .audit-filter-grid {
+  grid-template-columns: minmax(260px, 1.4fr) repeat(3, minmax(145px, .65fr)) auto !important;
+  align-items: end !important;
+  gap: 12px !important;
+  padding: 18px 24px !important;
+  border-bottom: 1px solid #F0E6DD !important;
+  background: #FFFFFF !important;
+}
+
+body.management-consistent-ui .audit-panel .audit-filter-grid :is(.search-pill-sm, .filter-select, .reference-clear-filters) {
+  height: 42px !important;
+  border: 1px solid #E4D7CC !important;
+  border-radius: 12px !important;
+  background: #FFFFFF !important;
+}
+
+@media (max-width: 1100px) {
+  body.management-consistent-ui .audit-panel .audit-filter-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .audit-panel .filter-field-search {
+    grid-column: 1 / -1 !important;
+  }
+}
+
+@media (max-width: 1000px) {
+  body.management-consistent-ui.contact-messages-page .cm-workspace {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 760px) {
+  body.management-consistent-ui.contact-messages-page .cm-workspace {
+    margin: 0 12px 16px !important;
+  }
+
+  body.management-consistent-ui .audit-panel .audit-filter-grid {
+    grid-template-columns: 1fr !important;
+    padding-inline: 17px !important;
+  }
+
+  .audit-panel .filter-field-search {
+    grid-column: auto !important;
+  }
+}
+
+body.management-consistent-ui :is(
+  .records-panel .records-heading,
+  .aa-table-panel .aa-panel-intro,
+  .sr-table-panel .records-toolbar,
+  .inv-table-panel .inventory-records-heading,
+  .ap-records-panel .ap-records-heading,
+  .cq-records .cq-record-head
+) {
+  background: #FFFFFF !important;
+}
+
+body.management-consistent-ui :is(
+  .records-panel .toolbar-tabs,
+  .ap-records-panel .ap-tabs-wrap,
+  .inv-table-panel .inv-category-strip
+) {
+  background: #FFFFFF !important;
+}
+
+.compatibility-management-page .cq-search,
+.compatibility-management-page .cq-toolbar select,
+.compatibility-management-page .cq-toolbar button {
+  background: #FFFFFF !important;
+}
+
+.compatibility-management-page .cq-empty {
+  min-height: 250px !important;
+  place-content: center !important;
+  padding: 44px 20px !important;
+  text-align: center !important;
+}
+
+.compatibility-management-page .cq-empty > i {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 7px;
+  border-radius: 16px;
+  background: rgba(120, 1, 22, .07);
+}
+
+@media (max-width: 1100px) {
+  .records-panel .filter-toolbar,
+  .inventory-page .inventory-filter-controls {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .records-panel .search-filter,
+  .inventory-reference-search {
+    grid-column: 1 / -1 !important;
+  }
+
+  body.management-consistent-ui.surrender-requests-page .surrender-filter-grid,
+  body.management-consistent-ui.user-management-page .um-filter-bar {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .surrender-requests-page .surrender-filter-grid .search-filter,
+  .user-management-page .um-search-field {
+    grid-column: 1 / -1 !important;
+  }
+}
+
+@media (max-width: 760px) {
+  :is(.records-panel, .adoption-applications-page .aa-table-panel, .inventory-page .inv-table-panel, .compatibility-management-page .cq-records) {
+    border-radius: 19px !important;
+  }
+
+  :is(.records-panel .records-heading, .adoption-applications-page .aa-panel-intro, .inventory-records-heading) {
+    align-items: flex-start !important;
+    padding: 18px 17px 14px !important;
+  }
+
+  :is(.records-panel .records-legend, .adoption-applications-page .aa-panel-tip, .inventory-records-tip) {
+    display: none !important;
+  }
+
+  :is(.records-panel .toolbar-tabs, .adoption-applications-page .aa-tabs, .inventory-page .inv-category-strip),
+  :is(.records-panel .filter-toolbar, .adoption-applications-page .aa-filter-toolbar, .inventory-page .inventory-filter-controls) {
+    padding-inline: 17px !important;
+  }
+
+  .records-panel .filter-toolbar,
+  .adoption-applications-page .aa-filter-toolbar,
+  .inventory-page .inventory-filter-controls,
+  .contact-messages-page .cm-filter-toolbar {
+    grid-template-columns: 1fr !important;
+  }
+
+  .records-panel .search-filter,
+  .inventory-reference-search {
+    grid-column: auto !important;
+  }
+
+  .inventory-page .inventory-filter-toolbar {
+    grid-template-columns: 1fr !important;
+  }
+
+  .inventory-page .inventory-view-tools {
+    margin: 0 17px 16px !important;
+    justify-self: end !important;
+  }
+
+  .surrender-requests-page .surrender-heading-row {
+    align-items: flex-start;
+  }
+
+  .surrender-requests-page .surrender-heading-row .records-legend {
+    display: none;
+  }
+
+  body.management-consistent-ui.surrender-requests-page .surrender-filter-grid,
+  body.management-consistent-ui.user-management-page .um-filter-bar,
+  .compatibility-management-page .cq-toolbar {
+    grid-template-columns: 1fr !important;
+    padding-inline: 17px !important;
+  }
+
+  .surrender-requests-page .surrender-filter-grid .search-filter,
+  .user-management-page .um-search-field {
+    grid-column: auto !important;
+  }
+}

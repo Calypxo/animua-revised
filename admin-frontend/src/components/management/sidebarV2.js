@@ -7,6 +7,10 @@ import { initializeManagementConsistency } from "./managementConsistency.js";
 import { clearUserSession, getUserRole } from "../../utils/storage.js";
 import { canAccessModule, normalizeRole } from "../../auth/permissions.js";
 import { workspaceSkeletonMarkup } from "./pageSkeleton.js";
+import {
+  isContactMessageCountStorageEvent,
+  readContactMessageCount,
+} from "./contactMessageBadge.js";
 
 const escapeHtml = (value) => String(value ?? "")
   .replaceAll("&", "&amp;")
@@ -67,13 +71,41 @@ export function navigateManagementPage(target) {
   window.location.assign(cleanLocation(url));
 }
 
-function link({ allowed = true, href, icon, label }) {
+function link({ allowed = true, href, icon, label, badge = "" }) {
   if (!allowed) return "";
   return `
     <a class="nav-item" href="${href}" title="${escapeHtml(label)}">
       <span class="nav-icon"><i class="bi ${icon}" aria-hidden="true"></i></span>
       <span class="nav-text">${escapeHtml(label)}</span>
+      ${badge ? `<span class="nav-item-badge" data-nav-badge="${escapeHtml(badge)}" hidden>0</span>` : ""}
     </a>`;
+}
+
+function updateContactMessageBadge(sidebar, value = readContactMessageCount()) {
+  const badge = sidebar?.querySelector('[data-nav-badge="contact"]');
+  if (!badge) return;
+  const count = Math.max(0, Number(value || 0));
+  badge.textContent = count > 99 ? "99+" : String(count);
+  badge.hidden = value == null || count === 0;
+  badge.setAttribute(
+    "aria-label",
+    `${count} new contact message${count === 1 ? "" : "s"}`
+  );
+}
+
+function bindContactMessageBadge(container, sidebar) {
+  updateContactMessageBadge(sidebar);
+  if (container.dataset.contactBadgeBound === "true") return;
+  container.dataset.contactBadgeBound = "true";
+
+  window.addEventListener("animua:contact-count", (event) => {
+    updateContactMessageBadge(sidebar, event.detail?.count);
+  });
+  window.addEventListener("storage", (event) => {
+    if (isContactMessageCountStorageEvent(event)) {
+      updateContactMessageBadge(sidebar);
+    }
+  });
 }
 
 function group({ id, icon, label, items }) {
@@ -124,6 +156,7 @@ function mainNavigation(role) {
       ${link({ allowed: canAccessModule(role, "dashboard"), href: "/pages/dashboard.html", icon: "bi-grid-1x2", label: "Dashboard" })}
       ${animalGroup}
       ${link({ allowed: canAccessModule(role, "announcements"), href: "/pages/announcements.html", icon: "bi-megaphone", label: "Announcements" })}
+      ${link({ allowed: canAccessModule(role, "contact"), href: "/pages/contactMessages.html", icon: "bi-envelope-paper", label: "Contact Messages", badge: "contact" })}
       ${link({ allowed: canAccessModule(role, "compatibility"), href: "/pages/compatibilityQuiz.html", icon: "bi-stars", label: "Compatibility Quiz" })}
       ${operationsGroup}
     </section>`;
@@ -350,6 +383,9 @@ function setupPersistentNavigation(container, sidebar) {
     if (event.data?.type === "animua:navigate") state.navigate(event.data.href);
     if (event.data?.type === "animua:toggle-sidebar") state.container.__animuaSidebarController?.toggle();
     if (event.data?.type === "animua:page-ready") markReady();
+    if (event.data?.type === "animua:contact-count") {
+      updateContactMessageBadge(state.sidebar, event.data.count);
+    }
   });
 
   window.__animuaPersistentNavigation = state;
@@ -392,6 +428,9 @@ export function loadSidebar() {
   const sidebar = container.querySelector("#sidebar");
   const overlay = container.querySelector("#sidebar-overlay");
   setActiveNavigation(sidebar);
+  bindContactMessageBadge(container, sidebar);
   bindSidebar(container, sidebar, overlay);
-  setupPersistentNavigation(container, sidebar);
+  // Keep every management page in the same top-level viewport. Using an
+  // embedded workspace here caused responsive breakpoints and vw-based modal
+  // measurements to differ between sidebar navigation and a hard refresh.
 }

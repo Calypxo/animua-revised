@@ -3,6 +3,10 @@ const router = express.Router();
 const authenticateToken = require("../middleware/authMiddleware");
 const authorizeRole = require("../middleware/roleMiddleware");
 const {
+  contactRateLimiter,
+  rejectContactHoneypot,
+} = require("../middleware/contactProtection");
+const {
   getPublicPets,
   getPublicPetById,
   getPublicEvents,
@@ -21,7 +25,12 @@ router.get(
   authorizeRole("Admin", "Staff"),
   getContactMessages
 );
-router.post("/contact", submitContactMessage);
+router.post(
+  "/contact",
+  rejectContactHoneypot,
+  contactRateLimiter,
+  submitContactMessage
+);
 router.post(
   "/contact/:id/reply",
   authenticateToken,

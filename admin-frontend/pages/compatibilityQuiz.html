@@ -12,7 +12,23 @@
 <label class="cq-setting-row"><span class="cq-setting-icon blue"><i class="bi bi-diagram-3"></i></span><span><strong>Quiz version</strong><small>Version attached to new results</small></span><span class="cq-input-unit"><b>v</b><input id="quizVersion" type="number" min="1" required></span></label>
 <div class="cq-form-foot"><p><i class="bi bi-shield-check"></i>All changes are written to the audit trail.</p><button type="submit"><i class="bi bi-check2-circle"></i>Save settings</button></div></form></article>
 <aside class="cq-health"><small>Matching health</small><h2>Protected recommendation flow</h2><div><span><i class="bi bi-person-check"></i></span><p><strong>Authenticated</strong><small>Public account required</small></p><i class="bi bi-check-circle-fill"></i></div><div><span><i class="bi bi-ui-checks-grid"></i></span><p><strong>Validated</strong><small>Ten scored traits</small></p><i class="bi bi-check-circle-fill"></i></div><div><span><i class="bi bi-database-check"></i></span><p><strong>Saved</strong><small>Account history retained</small></p><i class="bi bi-check-circle-fill"></i></div><div><span><i class="bi bi-clock-history"></i></span><p><strong>Protected</strong><small>Server-enforced retakes</small></p><i class="bi bi-check-circle-fill"></i></div></aside></section>
-<section class="cq-card cq-records"><div class="cq-record-head"><div class="cq-card-head"><span class="cq-card-icon"><i class="bi bi-stars"></i></span><div><small>Saved recommendations</small><h2>User quiz results</h2><p id="resultCount">Loading result history…</p></div></div><span class="cq-legend"><i class="bi bi-info-circle"></i>Historical animal names remain available</span></div><div class="cq-toolbar"><label class="cq-search"><i class="bi bi-search"></i><input id="resultSearch" type="search" placeholder="Search user, email, or result ID"></label><select id="attemptFilter"><option value="">All attempts</option><option value="latest">Latest only</option><option value="history">History only</option></select><button id="clearFilters" type="button"><i class="bi bi-arrow-counterclockwise"></i>Clear</button></div><div class="cq-table-wrap"><table><thead><tr><th>User account</th><th>Completed</th><th>Next retake</th><th>Top recommendation</th><th>Match</th><th>Version</th><th>Action</th></tr></thead><tbody id="resultsBody"><tr><td colspan="7">Loading results…</td></tr></tbody></table></div></section>
+<section class="cq-card cq-records">
+  <div class="cq-record-head">
+    <div class="cq-card-head"><span class="cq-card-icon"><i class="bi bi-stars"></i></span><div><small>Saved recommendations</small><h2>User quiz results</h2><p>Search and review saved compatibility attempts.</p></div></div>
+    <span class="cq-legend"><i class="bi bi-info-circle"></i>Historical animal names remain available</span>
+  </div>
+  <div class="cq-toolbar">
+    <label class="cq-filter-field cq-filter-search"><span>Search results</span><div class="cq-search"><i class="bi bi-search"></i><input id="resultSearch" type="search" placeholder="User, email, or result ID"></div></label>
+    <label class="cq-filter-field"><span>Attempt status</span><select id="attemptFilter"><option value="">All attempts</option><option value="latest">Current results</option><option value="history">Previous attempts</option></select></label>
+    <label class="cq-filter-field"><span>Match strength</span><select id="matchFilter"><option value="">All match levels</option><option value="excellent">Excellent (80%+)</option><option value="strong">Strong (65-79%)</option><option value="developing">Developing (below 65%)</option></select></label>
+    <button id="clearFilters" type="button"><i class="bi bi-arrow-counterclockwise"></i> Clear</button>
+  </div>
+  <div class="reference-table-section-head">
+    <div><span>Result history</span><h3>Saved compatibility attempts</h3></div>
+    <strong id="resultCount">Loading results…</strong>
+  </div>
+  <div class="cq-table-wrap"><table><thead><tr><th>User account</th><th>Completed</th><th>Next retake</th><th>Top recommendation</th><th>Match</th><th>Version</th><th>Action</th></tr></thead><tbody id="resultsBody"><tr><td colspan="7">Loading results…</td></tr></tbody></table></div>
+</section>
 </main></div></div>
 <div class="um-modal-backdrop" id="resultDialog" aria-hidden="true">
   <div class="um-modal intake-modal cq-result-modal management-side-modal" role="dialog" aria-modal="true" aria-labelledby="resultDialogTitle">

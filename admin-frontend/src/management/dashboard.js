@@ -25,6 +25,7 @@ const MANAGEMENT_SEARCH_TARGETS = [
   { module: "archive", label: "Archived Records", detail: "Open inactive and archived records", href: "/pages/archivedRecords.html", icon: "bi-archive", keywords: "archive archived records history" },
   { module: "audit", label: "Audit Trail", detail: "Review management activity history", href: "/pages/auditTrail.html", icon: "bi-journal-check", keywords: "audit activity log history records" },
   { module: "reports", label: "Reports", detail: "Open shelter reports and analytics", href: "/pages/reports.html", icon: "bi-bar-chart", keywords: "reports analytics statistics" },
+  { module: "contact", label: "Contact Messages", detail: "Review and reply to public Contact Us inquiries", href: "/pages/contactMessages.html", icon: "bi-envelope-paper", keywords: "contact messages inbox inquiries email replies public" },
 ];
 
 const escapeHtml = (value) =>

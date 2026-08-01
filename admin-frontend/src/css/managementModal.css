@@ -1,5 +1,5 @@
 :root {
-  --management-modal-width: 56vw;
+  --management-modal-width: min(860px, calc(100vw - 32px));
   --management-modal-radius: 30px;
   --management-modal-shadow: -24px 0 70px rgba(43, 22, 19, 0.24);
   --management-modal-red: #780116;
@@ -47,8 +47,8 @@ body.management-drawer-open {
 
 .management-modal-layer > .management-side-modal {
   width: var(--management-modal-width) !important;
-  min-width: 50vw !important;
-  max-width: none !important;
+  min-width: 0 !important;
+  max-width: 860px !important;
   height: 100dvh !important;
   max-height: 100dvh !important;
   margin: 0 !important;
@@ -359,8 +359,8 @@ body.management-drawer-open {
   inset: 0 0 0 auto !important;
   z-index: 2500 !important;
   width: var(--management-modal-width) !important;
-  min-width: 50vw !important;
-  max-width: none !important;
+  min-width: 0 !important;
+  max-width: 860px !important;
   max-height: 100dvh !important;
   overflow: hidden !important;
   border: 1px solid rgba(255,255,255,.72) !important;
@@ -712,9 +712,9 @@ body.management-drawer-open {
   #viewAuditModalBackdrop,
   #viewArchiveModalBackdrop
 ) > .management-side-modal {
-  width: var(--management-modal-width, 56vw) !important;
-  min-width: 50vw !important;
-  max-width: none !important;
+  width: var(--management-modal-width, min(860px, calc(100vw - 32px))) !important;
+  min-width: 0 !important;
+  max-width: 860px !important;
   height: 100dvh !important;
   max-height: 100dvh !important;
   display: flex !important;

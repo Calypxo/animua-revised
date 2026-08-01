@@ -1,6 +1,7 @@
 // admin-frontend/src/management/adoptionApps.js
 import "../css/adoptionApps.css";
 import "../css/managementTables.css";
+import "../css/recordsPanelReference.css";
 import { renderPageHeader } from "../components/management/pageHeader.js";
 import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.js";
 
@@ -233,6 +234,8 @@ function applyFilters() {
   });
 
   currentPage = 1;
+  const resultLabel = document.getElementById("adoptionResultLabel");
+  if (resultLabel) resultLabel.textContent = `${filtered.length} ${filtered.length === 1 ? "record" : "records"}`;
   renderTable();
   renderPagination();
 }
@@ -247,7 +250,7 @@ function renderTable() {
   const page  = filtered.slice(start, start+PAGE_SIZE);
 
   if (!page.length) {
-    tbody.innerHTML = `<tr><td colspan="8" class="text-center py-5 text-muted">No applications found.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8"><div class="reference-records-empty"><span><i class="bi bi-file-earmark-heart"></i></span><strong>No adoption applications found</strong><small>Adjust the status, search, or application type filters to broaden this view.</small></div></td></tr>`;
     return;
   }
 
@@ -763,6 +766,15 @@ async function init() {
 
     document.getElementById("searchApps")?.addEventListener("input",  applyFilters);
     document.getElementById("filterType")?.addEventListener("change", applyFilters);
+    document.getElementById("clearAdoptionFilters")?.addEventListener("click", () => {
+      activeTab = "all";
+      const search = document.getElementById("searchApps");
+      const type = document.getElementById("filterType");
+      if (search) search.value = "";
+      if (type) type.value = "";
+      document.querySelectorAll(".aa-tab").forEach((tab) => tab.classList.toggle("active", tab.dataset.tab === "all"));
+      applyFilters();
+    });
     document.getElementById("aaDrawerBackdrop")?.addEventListener("click", closeDrawer);
 
     // Reject modal

@@ -1,6 +1,7 @@
 // admin-frontend/src/management/intake.js
 import "../css/intake.css";
 import "../css/managementTables.css";
+import "../css/recordsPanelReference.css";
 import { renderPageHeader } from "../components/management/pageHeader.js";
 import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.js";
 
@@ -158,6 +159,8 @@ function applyFilters() {
   });
 
   currentPage = 1;
+  const resultLabel = document.getElementById("intakeResultLabel");
+  if (resultLabel) resultLabel.textContent = `${filtered.length} ${filtered.length === 1 ? "record" : "records"}`;
   renderTable();
   renderPagination();
 }

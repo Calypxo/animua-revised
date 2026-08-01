@@ -104,6 +104,10 @@ body.management-consistent-ui {
     var(--animua-cream) !important;
 }
 
+.management-consistent-ui :is(.page-body, .main-content, .contact-message-page-body) {
+  scrollbar-gutter: stable;
+}
+
 .management-consistent-ui #sidebar-container {
   --sb-red: var(--animua-burgundy);
   --sb-red-dark: var(--animua-burgundy);
@@ -360,10 +364,17 @@ body.management-consistent-ui {
 
 .management-consistent-ui .system-page-hero {
   border: 1px solid rgba(255, 255, 255, 0.13) !important;
-  background:
-    linear-gradient(90deg, rgba(120, 1, 22, 0.97) 0%, rgba(120, 1, 22, 0.91) 46%, rgba(120, 1, 22, 0.82) 100%),
-    var(--header-photo, url(/images/policy-dog-banner.jpg))
-      var(--header-photo-position, center 44%) / cover no-repeat !important;
+  background-color: var(--animua-burgundy) !important;
+  background-image:
+    var(--header-gradient-primary),
+    var(--header-gradient-depth),
+    var(--header-photo, url(/images/policy-dog-banner.jpg)) !important;
+  background-position:
+    center,
+    center,
+    var(--header-photo-position, center 44%) !important;
+  background-size: cover, cover, cover !important;
+  background-repeat: no-repeat !important;
   box-shadow: 0 24px 54px rgba(120, 1, 22, 0.24) !important;
 }
 
@@ -397,19 +408,27 @@ body.management-consistent-ui {
 }
 
 .management-consistent-ui .system-hero-operations {
-  color: var(--animua-text) !important;
-  border-color: rgba(247, 181, 56, 0.58) !important;
-  background: var(--animua-cream) !important;
-  box-shadow: 0 18px 42px rgba(120, 1, 22, 0.2) !important;
-  backdrop-filter: blur(12px);
+  color: var(--animua-white) !important;
+  border-color: rgba(255, 255, 255, 0.42) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(13, 13, 13, 0.58) 0%,
+    rgba(13, 13, 13, 0.36) 52%,
+    rgba(13, 13, 13, 0.24) 100%
+  ) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 20px 46px rgba(43, 0, 8, 0.28) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  backdrop-filter: blur(20px) saturate(140%);
 }
 
 .management-consistent-ui :is(.system-hero-live, .system-hero-queue) {
-  border-color: var(--animua-line) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
 }
 
 .management-consistent-ui .system-hero-live {
-  color: var(--animua-burgundy) !important;
+  color: var(--animua-white) !important;
 }
 
 .management-consistent-ui .system-hero-live > span {
@@ -418,11 +437,11 @@ body.management-consistent-ui {
 }
 
 .management-consistent-ui .system-hero-queue small {
-  color: var(--animua-muted) !important;
+  color: rgba(255, 255, 255, 0.66) !important;
 }
 
 .management-consistent-ui .system-hero-queue > div:first-child strong {
-  color: var(--animua-burgundy) !important;
+  color: var(--animua-white) !important;
 }
 
 .management-consistent-ui .system-queue-badge {
@@ -653,7 +672,7 @@ body.management-consistent-ui :is(.page-body, .main-content, .contact-message-pa
 
 @media (max-width: 900px) {
   .management-consistent-ui .system-page-hero {
-    background-position: center, var(--header-photo-position, 62% center) !important;
+    background-position: center, center, var(--header-photo-position, 62% center) !important;
   }
 }
 

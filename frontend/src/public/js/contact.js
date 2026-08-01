@@ -17,7 +17,7 @@ function setLoading(isLoading) {
   contactSubmit.setAttribute("aria-busy", String(isLoading));
   contactSubmit.innerHTML = isLoading
     ? '<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i><span>Sending...</span>'
-    : '<i class="fa-solid fa-paper-plane" aria-hidden="true"></i><span>Send Email</span>';
+    : '<i class="fa-solid fa-paper-plane" aria-hidden="true"></i><span>Send Message</span>';
 }
 
 function escapeHtml(value = "") {
@@ -36,6 +36,7 @@ function getFormPayload() {
     email: String(data.get("email") || "").trim(),
     subject: String(data.get("subject") || "").trim(),
     message: String(data.get("message") || "").trim(),
+    website: String(data.get("website") || "").trim(),
   };
 }
 
@@ -68,12 +69,12 @@ contactForm?.addEventListener("submit", async (event) => {
     }
 
     contactForm.reset();
-    setStatus(data.message || "Your message has been sent.", "success");
+    setStatus(data.message || "Your message has been received.", "success");
 
     Swal.fire({
       icon: "success",
-      title: "Email Sent",
-      html: "<p>The ANIMUA team has received your message.</p>",
+      title: "Message Received",
+      html: "<p>Your inquiry is now available to the ANIMUA team.</p>",
       timer: 1600,
       timerProgressBar: true,
       showConfirmButton: false,
