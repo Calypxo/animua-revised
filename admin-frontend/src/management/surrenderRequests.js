@@ -867,8 +867,19 @@ async function runSurrenderDeadlineAction(id, action) {
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       body: JSON.stringify(payload),
     });
-    const result = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(result.message || "Unable to update the attendance workflow.");
+    const responseText = await response.text();
+    let result = {};
+    try {
+      result = responseText ? JSON.parse(responseText) : {};
+    } catch {
+      result = {};
+    }
+    if (!response.ok) {
+      const message = response.status === 404
+        ? "The running backend is outdated and does not have this attendance action. Restart the backend and try again."
+        : result.message || "Unable to update the attendance workflow.";
+      throw new Error(message);
+    }
     publicRequests = await getPublicSubmittedRequests();
     allRequests = [...publicRequests];
     renderStats();
