@@ -326,6 +326,7 @@ exports.getContactMessages = async (req, res) => {
 
         return {
           id: doc.id,
+          userId: data.userId || data.accountId || "",
           fullName: data.fullName || "",
           email: data.email || "",
           subject: data.subject || "",
@@ -363,14 +364,16 @@ exports.getContactMessages = async (req, res) => {
  */
 exports.submitContactMessage = async (req, res) => {
   try {
-    const fullName = normalizeContactText(req.body.fullName, 120);
-    const email = normalizeContactText(req.body.email, 160).toLowerCase();
+    const email = normalizeContactText(req.user?.email, 160).toLowerCase();
+    const fullName =
+      normalizeContactText(req.user?.fullName, 120) ||
+      normalizeContactText(email.split("@")[0], 120);
     const subject = normalizeContactText(req.body.subject, 160);
     const message = normalizeContactText(req.body.message, 2000);
 
-    if (!fullName || !email || !subject || !message) {
+    if (!subject || !message) {
       return res.status(400).json({
-        message: "Please complete all contact form fields.",
+        message: "Please enter a subject and message.",
       });
     }
 
@@ -381,6 +384,7 @@ exports.submitContactMessage = async (req, res) => {
     }
 
     const contactMessage = {
+      userId: req.user?.id || email,
       fullName,
       email,
       subject,

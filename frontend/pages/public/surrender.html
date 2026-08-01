@@ -210,6 +210,16 @@
         </aside>
 
         <div class="surrender-form-wrap">
+          <section class="surrender-availability-panel" id="surrenderAvailabilityPanel" role="status" aria-live="polite" tabindex="-1" hidden>
+            <span class="availability-panel-icon"><i class="fa-solid fa-house-circle-xmark" aria-hidden="true"></i></span>
+            <span class="section-label">Requests temporarily paused</span>
+            <h2>The shelter is not accepting surrender requests right now.</h2>
+            <p id="surrenderAvailabilityMessage">Shelter space or cages may be unavailable. Please check again later or contact the shelter for urgent concerns.</p>
+            <div class="availability-panel-actions">
+              <button type="button" class="btn primary-btn" id="checkSurrenderAvailability"><i class="fa-solid fa-rotate" aria-hidden="true"></i> Check again</button>
+              <a class="btn secondary-btn" href="contact.html">Contact the shelter</a>
+            </div>
+          </section>
           <header class="surrender-form-heading">
             <div><span class="section-label">Surrender request</span><h2>Tell us what your animal needs</h2><p>Fields marked <span class="req" aria-hidden="true">*</span> are required. Unknown animal details can be entered as “Unknown.”</p></div>
             <span class="form-save-note"><i class="fa-solid fa-lock" aria-hidden="true"></i> Account verified on submit</span>

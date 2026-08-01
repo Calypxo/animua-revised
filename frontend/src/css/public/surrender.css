@@ -435,6 +435,94 @@ body.surrender-page .surrender-page-text {
   background: transparent;
 }
 
+/* Shelter capacity pause state */
+body.surrender-page .surrender-workspace.is-not-accepting {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+body.surrender-page .surrender-workspace.is-not-accepting .surrender-progress-rail,
+body.surrender-page .surrender-workspace.is-not-accepting .surrender-form-heading,
+body.surrender-page .surrender-workspace.is-not-accepting .mobile-form-progress,
+body.surrender-page .surrender-workspace.is-not-accepting .form-feedback,
+body.surrender-page .surrender-workspace.is-not-accepting .surrender-form,
+body.surrender-page .surrender-workspace.is-not-accepting .surrender-success-panel {
+  display: none !important;
+}
+
+body.surrender-page .surrender-availability-panel {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: clamp(30px, 5vw, 52px);
+  border: 1px solid rgba(120, 1, 22, .2);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top right, rgba(120, 1, 22, .08), transparent 36%),
+    #fffaf6;
+  box-shadow: 0 22px 54px rgba(64, 34, 27, .1);
+  text-align: center;
+}
+
+body.surrender-page .surrender-availability-panel[hidden] {
+  display: none !important;
+}
+
+body.surrender-page .availability-panel-icon {
+  width: 72px;
+  height: 72px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 19px;
+  border-radius: 22px;
+  color: #ffffff;
+  background: linear-gradient(135deg, #780116, #a12838);
+  box-shadow: 0 14px 28px rgba(120, 1, 22, .2);
+  font-size: 1.8rem;
+}
+
+body.surrender-page .surrender-availability-panel h2 {
+  max-width: 650px;
+  margin: 9px auto 12px;
+  color: #2d2322;
+  font-size: clamp(1.45rem, 3vw, 2rem);
+  font-weight: 800;
+  line-height: 1.22;
+}
+
+body.surrender-page .surrender-availability-panel > p {
+  max-width: 640px;
+  margin: 0 auto;
+  color: #71635d;
+  font-size: .95rem;
+  line-height: 1.7;
+}
+
+body.surrender-page .availability-panel-actions {
+  display: flex;
+  justify-content: center;
+  gap: 11px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+body.surrender-page .availability-panel-actions .btn {
+  min-height: 46px;
+}
+
+@media (max-width: 560px) {
+  body.surrender-page .surrender-availability-panel {
+    padding: 28px 20px;
+    border-radius: 22px;
+  }
+
+  body.surrender-page .availability-panel-actions {
+    flex-direction: column;
+  }
+
+  body.surrender-page .availability-panel-actions .btn {
+    width: 100%;
+  }
+}
+
 body.surrender-page .section-label {
   display: inline-flex;
   align-items: center;

@@ -230,16 +230,18 @@ function renderTable() {
       <td><span class="archiver-cell"><i class="bi bi-person-check"></i>${escapeHtml(item.archivedBy)}</span></td>
 
       <td>
-        <div class="action-group">
-          <button class="detail-btn" data-view-id="${escapeHtml(item.id)}">Review <i class="bi bi-arrow-right"></i></button>
+        <div class="action-group table-actions">
+          <button class="tbl-action-btn" data-view-id="${escapeHtml(item.id)}" title="View details" aria-label="View archived record details"><i class="bi bi-eye"></i></button>
           ${
               can("restore") && item.sourceType === "animal"
           ? `
             <button
-              class="restore-btn"
+              class="tbl-action-btn restore"
               data-restore-id="${escapeHtml(item.id)}"
+              title="Restore record"
+              aria-label="Restore archived record"
             >
-              <i class="bi bi-arrow-clockwise"></i> Restore
+              <i class="bi bi-arrow-clockwise"></i>
             </button>
           `
           : ""
@@ -263,7 +265,13 @@ function renderPagination() {
   if (!bar) return;
 
   const total = state.filteredRecords.length;
+  if (!total) {
+    bar.innerHTML = "";
+    return;
+  }
   const totalPages = Math.max(1, Math.ceil(total / state.pageSize));
+  const start = (state.currentPage - 1) * state.pageSize + 1;
+  const end = Math.min(state.currentPage * state.pageSize, total);
 
   const pageButtons = [];
   for (let i = 1; i <= totalPages; i += 1) {
@@ -275,7 +283,7 @@ function renderPagination() {
   }
 
   bar.innerHTML = `
-    <span class="page-info">${total} result${total !== 1 ? "s" : ""}</span>
+    <span class="page-info">Showing ${start}&ndash;${end} of ${total}</span>
     <button class="page-btn" data-page="prev" ${state.currentPage === 1 ? "disabled" : ""}>
       <i class="bi bi-chevron-left"></i>
     </button>

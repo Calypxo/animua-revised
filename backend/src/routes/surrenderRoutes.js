@@ -5,6 +5,8 @@ const authenticateToken = require("../middleware/authMiddleware");
 const authorizeRole = require("../middleware/roleMiddleware");
 
 const {
+  getSurrenderAvailability,
+  updateSurrenderAvailability,
   createSurrenderRequest,
   getAllSurrenderRequests,
   getMySurrenderRequests,
@@ -13,6 +15,15 @@ const {
   rejectSurrenderReschedule,
   updateSurrenderStatus,
 } = require("../controllers/surrenderController");
+
+router.get("/availability", getSurrenderAvailability);
+
+router.patch(
+  "/availability",
+  authenticateToken,
+  authorizeRole("Admin", "Staff"),
+  updateSurrenderAvailability
+);
 
 // Public logged-in user submits surrender request
 router.post(

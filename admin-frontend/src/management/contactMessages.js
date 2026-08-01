@@ -1,7 +1,7 @@
 import "../css/animalProfiling.css";
 import "../css/managementTables.css";
-import "../css/contactMessages.css";
 import "../css/recordsPanelReference.css";
+import "../css/contactMessages.css";
 
 import Swal from "sweetalert2";
 
@@ -17,15 +17,15 @@ import { apiFetch } from "../utils/api.js";
 window.Swal = Swal;
 renderPageHeader(PAGE_HEADER_CONFIGS.contactMessages);
 
-const PAGE_SIZE = 8;
 const state = {
   messages: [],
+  users: [],
   filtered: [],
+  selectedUserKey: "",
   selectedId: "",
   search: "",
   status: "",
   sort: "newest",
-  page: 1,
 };
 
 let currentRole = "";
@@ -53,6 +53,39 @@ function normalize(value = "") {
 
 function messageStatus(message = {}) {
   return message.status === "Replied" ? "Replied" : "New";
+}
+
+function messageUserKey(message = {}) {
+  return normalize(message.userId || message.email || `legacy:${message.fullName}`);
+}
+
+function buildUsers(messages = []) {
+  const users = new Map();
+
+  messages.forEach((message) => {
+    const key = messageUserKey(message);
+    if (!users.has(key)) {
+      users.set(key, {
+        key,
+        fullName: message.fullName || "Unknown user",
+        email: message.email || "",
+        messages: [],
+      });
+    }
+
+    const user = users.get(key);
+    user.messages.push(message);
+    user.fullName = message.fullName || user.fullName;
+    user.email = message.email || user.email;
+  });
+
+  return Array.from(users.values()).map((user) => {
+    user.messages.sort((left, right) => dateValue(right.createdAt) - dateValue(left.createdAt));
+    user.latestAt = user.messages[0]?.createdAt || "";
+    user.newCount = user.messages.filter((message) => messageStatus(message) === "New").length;
+    user.repliedCount = user.messages.length - user.newCount;
+    return user;
+  });
 }
 
 function dateValue(value) {
@@ -109,55 +142,52 @@ function updateStats() {
     (message) => messageStatus(message) === "Replied"
   ).length;
   const fresh = total - replied;
+  const usersWithNew = state.users.filter((user) => user.newCount > 0).length;
+  const usersWithReplies = state.users.filter((user) => user.repliedCount > 0).length;
 
   [
     ["totalMessages", total],
     ["newMessages", fresh],
     ["heroNewMessages", fresh],
     ["repliedMessages", replied],
-    ["tabAllCount", total],
-    ["tabNewCount", fresh],
-    ["tabRepliedCount", replied],
+    ["tabAllCount", state.users.length],
+    ["tabNewCount", usersWithNew],
+    ["tabRepliedCount", usersWithReplies],
   ].forEach(([id, value]) => setText(id, value));
 }
 
-function visibleMessages() {
-  const start = (state.page - 1) * PAGE_SIZE;
-  return state.filtered.slice(start, start + PAGE_SIZE);
+function visibleUsers() {
+  return state.filtered;
 }
 
-function applyFilters({ resetPage = true } = {}) {
+function applyFilters() {
   const term = normalize(state.search);
 
-  state.filtered = state.messages
-    .filter((message) => {
+  state.filtered = state.users
+    .filter((user) => {
       const haystack = normalize(
-        `${message.fullName} ${message.email} ${message.subject} ${message.message}`
+        `${user.fullName} ${user.email} ${user.messages.map((message) => `${message.subject} ${message.message}`).join(" ")}`
       );
       const matchesSearch = !term || haystack.includes(term);
       const matchesStatus =
-        !state.status || messageStatus(message) === state.status;
+        !state.status || user.messages.some((message) => messageStatus(message) === state.status);
       return matchesSearch && matchesStatus;
     })
     .sort((left, right) => {
       const difference =
-        dateValue(right.createdAt) - dateValue(left.createdAt);
+        dateValue(right.latestAt) - dateValue(left.latestAt);
       return state.sort === "oldest" ? -difference : difference;
     });
 
-  setText("contactResultLabel", `${state.filtered.length} ${state.filtered.length === 1 ? "record" : "records"}`);
+  setText("contactResultLabel", `${state.filtered.length} ${state.filtered.length === 1 ? "user" : "users"}`);
 
-  if (resetPage) state.page = 1;
-  const totalPages = Math.max(1, Math.ceil(state.filtered.length / PAGE_SIZE));
-  state.page = Math.min(state.page, totalPages);
-
-  const page = visibleMessages();
-  if (!page.some((message) => message.id === state.selectedId)) {
-    state.selectedId = page[0]?.id || "";
+  const page = visibleUsers();
+  if (!page.some((user) => user.key === state.selectedUserKey)) {
+    state.selectedUserKey = "";
+    state.selectedId = "";
   }
 
   renderMessageList();
-  renderPagination();
   renderDetail();
 }
 
@@ -180,14 +210,14 @@ function clearMessageFilters() {
 function renderMessageList() {
   const list = el("messageList");
   if (!list) return;
-  const page = visibleMessages();
+  const page = visibleUsers();
 
   if (!page.length) {
     list.innerHTML = `
       <div class="ap-empty-state">
         <span><i class="bi bi-search" aria-hidden="true"></i></span>
-        <strong>No matching contact messages</strong>
-        <p>Adjust the status or search filters to view more inquiries.</p>
+        <strong>No matching users</strong>
+        <p>Adjust the status or search filters to view more contact accounts.</p>
         <button type="button" id="emptyClearMessageFilters">Clear all filters</button>
       </div>`;
     el("emptyClearMessageFilters")?.addEventListener(
@@ -198,70 +228,38 @@ function renderMessageList() {
   }
 
   list.innerHTML = page
-    .map((message) => {
-      const active = message.id === state.selectedId;
-      const status = messageStatus(message);
-      const statusClass = status === "Replied" ? "is-replied" : "is-new";
-      const icon = status === "Replied" ? "bi-envelope-check" : "bi-envelope-paper";
+    .map((user) => {
+      const active = user.key === state.selectedUserKey;
+      const status = user.newCount ? `${user.newCount} New` : "Replied";
+      const statusClass = user.newCount ? "is-new" : "is-replied";
+      const latest = user.messages[0] || {};
+      const initial = String(user.fullName || user.email || "A").trim().charAt(0).toUpperCase();
 
       return `
         <button
           class="cm-message-item${active ? " active" : ""}"
           type="button"
           role="listitem"
-          data-id="${escapeHtml(message.id)}"
+          data-user-key="${escapeHtml(user.key)}"
           aria-pressed="${String(active)}"
-          aria-label="Open ${escapeHtml(message.subject || "contact inquiry")} from ${escapeHtml(message.fullName || "unknown sender")}"
+          aria-label="Open all contact messages from ${escapeHtml(user.fullName || "unknown user")}"
         >
-          <span class="cm-message-avatar"><i class="bi ${icon}" aria-hidden="true"></i></span>
+          <span class="cm-message-avatar">${escapeHtml(initial || "A")}</span>
           <span class="cm-message-copy">
             <span class="cm-message-meta">
-              <span class="cm-message-status ${statusClass}">${escapeHtml(status)}</span>
-              <time datetime="${escapeHtml(message.createdAt || "")}">${escapeHtml(formatListDate(message.createdAt))}</time>
+              <strong>${escapeHtml(user.fullName || "Unknown user")}</strong>
+              <time datetime="${escapeHtml(user.latestAt || "")}">${escapeHtml(formatListDate(user.latestAt))}</time>
             </span>
-            <strong>${escapeHtml(message.subject || "Contact inquiry")}</strong>
+            <small>${escapeHtml(messagePreview(latest.message) || latest.subject || "Contact inquiry")}</small>
             <span class="cm-message-sender">
-              <b>${escapeHtml(message.fullName || "Unknown sender")}</b>
-              <span>${escapeHtml(message.email || "No email recorded")}</span>
+              <span>${escapeHtml(user.email || "No email recorded")}</span>
+              <span class="cm-message-status ${statusClass}">${escapeHtml(status)}</span>
             </span>
-            <small>${escapeHtml(messagePreview(message.message) || "No message preview available.")}</small>
           </span>
           <i class="bi bi-chevron-right cm-message-arrow" aria-hidden="true"></i>
         </button>`;
     })
     .join("");
-}
-
-function renderPagination() {
-  const bar = el("paginationBar");
-  if (!bar) return;
-
-  const total = state.filtered.length;
-  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const start = Math.min((state.page - 1) * PAGE_SIZE + 1, total);
-  const end = Math.min(state.page * PAGE_SIZE, total);
-
-  let html = `<span class="page-info">Showing ${total ? start : 0}&ndash;${end} of ${total}</span>`;
-  html += `<button class="page-btn" id="pagePrev" type="button" aria-label="Previous page" ${state.page === 1 ? "disabled" : ""}><i class="bi bi-chevron-left" aria-hidden="true"></i></button>`;
-  for (let page = 1; page <= pages; page += 1) {
-    html += `<button class="page-btn${page === state.page ? " active" : ""}" type="button" data-page="${page}" aria-label="Page ${page}">${page}</button>`;
-  }
-  html += `<button class="page-btn" id="pageNext" type="button" aria-label="Next page" ${state.page === pages ? "disabled" : ""}><i class="bi bi-chevron-right" aria-hidden="true"></i></button>`;
-  bar.innerHTML = html;
-
-  const goToPage = (page) => {
-    state.page = Math.max(1, Math.min(pages, page));
-    state.selectedId = visibleMessages()[0]?.id || "";
-    renderMessageList();
-    renderPagination();
-    renderDetail();
-  };
-
-  el("pagePrev")?.addEventListener("click", () => goToPage(state.page - 1));
-  el("pageNext")?.addEventListener("click", () => goToPage(state.page + 1));
-  bar.querySelectorAll("[data-page]").forEach((button) => {
-    button.addEventListener("click", () => goToPage(Number(button.dataset.page)));
-  });
 }
 
 function getSelectedMessage() {
@@ -270,36 +268,82 @@ function getSelectedMessage() {
   );
 }
 
+function getSelectedUser() {
+  return state.users.find((user) => user.key === state.selectedUserKey) || null;
+}
+
 function renderDetail() {
   const detail = el("messageDetail");
   const empty = el("messageDetailEmpty");
+  const user = getSelectedUser();
   const selected = getSelectedMessage();
   if (!detail || !empty) return;
 
-  if (!selected) {
+  if (!user || !selected) {
     detail.classList.add("hidden");
     empty.classList.remove("hidden");
+    document.querySelector(".cm-workspace")?.classList.remove("conversation-open");
     return;
   }
 
   empty.classList.add("hidden");
   detail.classList.remove("hidden");
+  document.querySelector(".cm-workspace")?.classList.add("conversation-open");
+
+  setText("detailUserName", user.fullName || "Unknown user");
+
+  const history = el("userMessageHistory");
+  if (history) {
+    const initial = String(user.fullName || user.email || "A").trim().charAt(0).toUpperCase() || "A";
+    const conversationEvents = user.messages
+      .flatMap((message) => [
+        { type: "incoming", at: message.createdAt, message },
+        ...(message.replyMessage
+          ? [{ type: "outgoing", at: message.repliedAt || message.createdAt, message }]
+          : []),
+      ])
+      .sort((left, right) => dateValue(left.at) - dateValue(right.at));
+
+    history.innerHTML = conversationEvents
+      .map(({ type, message }) => {
+        if (type === "incoming") {
+          const itemStatus = messageStatus(message);
+          const active = message.id === state.selectedId;
+          return `
+          <div class="cm-chat-row is-incoming">
+            <span class="cm-chat-avatar" aria-hidden="true">${escapeHtml(initial)}</span>
+            <button class="cm-chat-bubble${active ? " active" : ""}" type="button" data-message-id="${escapeHtml(message.id)}" aria-pressed="${String(active)}">
+              <span class="cm-chat-subject">${escapeHtml(message.subject || "Contact inquiry")}</span>
+              <span class="cm-chat-message">${escapeHtml(message.message || "No message content recorded.")}</span>
+              <span class="cm-chat-meta">
+                <time datetime="${escapeHtml(message.createdAt || "")}">${escapeHtml(formatDate(message.createdAt))}</time>
+                <span>${itemStatus === "Replied" ? "Replied" : "Needs reply"}</span>
+              </span>
+            </button>
+          </div>`;
+        }
+
+        return `
+          <div class="cm-chat-row is-outgoing">
+            <div class="cm-chat-bubble">
+              <span class="cm-chat-subject">ANIMUA reply · ${escapeHtml(message.subject || "Contact inquiry")}</span>
+              <span class="cm-chat-message">${escapeHtml(message.replyMessage)}</span>
+              <span class="cm-chat-meta">
+                <time datetime="${escapeHtml(message.repliedAt || "")}">${escapeHtml(formatDate(message.repliedAt))}</time>
+                <span><i class="bi bi-check2-all" aria-hidden="true"></i> Sent</span>
+              </span>
+            </div>
+            <span class="cm-chat-avatar is-animua" aria-hidden="true"><i class="bi bi-shield-check"></i></span>
+          </div>`;
+      })
+      .join("");
+  }
 
   const status = messageStatus(selected);
-  const statusElement = el("detailStatus");
-  statusElement.textContent = status;
-  statusElement.className = `cm-status-pill ${status === "Replied" ? "is-replied" : "is-new"}`;
-  setText("detailSubject", selected.subject || "Contact inquiry");
-  setText("detailMeta", `Received ${formatDate(selected.createdAt)}`);
-  setText("detailName", selected.fullName || "--");
-  setText("detailEmail", selected.email || "--");
-  setText("detailDate", formatDate(selected.createdAt));
-  setText("detailSource", selected.source || "Contact Us Page");
-  setText("detailMessage", selected.message || "");
-
-  const emailLink = el("detailEmailLink");
-  emailLink.href = selected.email ? `mailto:${selected.email}` : "#";
-  emailLink.toggleAttribute("aria-disabled", !selected.email);
+  setText(
+    "replyContext",
+    `Replying to "${selected.subject || "Contact inquiry"}" sent ${formatDate(selected.createdAt)}.`
+  );
 
   const replyBox = el("replyMessage");
   if (replyBox) replyBox.value = selected.replyMessage || "";
@@ -317,6 +361,27 @@ function renderDetail() {
 
 function selectMessage(id) {
   state.selectedId = id;
+  renderDetail();
+}
+
+function selectUser(key) {
+  const user = state.users.find((item) => item.key === key);
+  state.selectedUserKey = user?.key || "";
+  state.selectedId =
+    user?.messages.find((message) => messageStatus(message) === "New")?.id ||
+    user?.messages[0]?.id ||
+    "";
+  renderMessageList();
+  renderDetail();
+  requestAnimationFrame(() => {
+    const thread = el("userMessageHistory");
+    if (thread) thread.scrollTop = thread.scrollHeight;
+  });
+}
+
+function closeConversation() {
+  state.selectedUserKey = "";
+  state.selectedId = "";
   renderMessageList();
   renderDetail();
 }
@@ -328,16 +393,18 @@ async function loadMessages() {
   try {
     const data = await apiFetch("/public/contact/messages");
     state.messages = data.messages || [];
+    state.users = buildUsers(state.messages);
     cacheContactMessageCount(
       state.messages.filter(
         (message) => messageStatus(message) === "New"
       ).length
     );
     updateStats();
-    applyFilters({ resetPage: false });
+    applyFilters();
   } catch (error) {
     console.error("[contact messages]", error);
     state.messages = [];
+    state.users = [];
     updateStats();
     applyFilters();
     await Swal.fire({
@@ -438,8 +505,13 @@ function bindEvents() {
 
   el("messageList")?.addEventListener("click", (event) => {
     const item = event.target.closest(".cm-message-item");
-    if (item) selectMessage(item.dataset.id);
+    if (item) selectUser(item.dataset.userKey);
   });
+  el("userMessageHistory")?.addEventListener("click", (event) => {
+    const item = event.target.closest("[data-message-id]");
+    if (item) selectMessage(item.dataset.messageId);
+  });
+  el("backToUsersBtn")?.addEventListener("click", closeConversation);
   el("replyForm")?.addEventListener("submit", sendReply);
 }
 

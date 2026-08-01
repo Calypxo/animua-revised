@@ -214,7 +214,7 @@ function renderTable() {
     can("edit");
 
     return `
-    <tr style="cursor:pointer" data-id="${r.id}">
+    <tr data-id="${r.id}">
       <td data-label="Intake ID" class="intake-code">${r.id}</td>
       <td data-label="Animal">
         <div class="animal-cell">

@@ -187,16 +187,14 @@
               Leave this field blank
               <input type="text" name="website" tabindex="-1" autocomplete="off">
             </label>
-            <div class="contact-field-row">
-              <label class="contact-field">
-                <input type="text" name="fullName" placeholder="Full Name" autocomplete="name" required>
-                <i class="fa-regular fa-user" aria-hidden="true"></i>
-              </label>
-
-              <label class="contact-field">
-                <input type="email" name="email" placeholder="Email Address" autocomplete="email" required>
-                <i class="fa-regular fa-envelope" aria-hidden="true"></i>
-              </label>
+            <div class="contact-account-card" id="contactAccountCard" aria-live="polite">
+              <span class="contact-account-avatar" id="contactAccountInitial">A</span>
+              <span class="contact-account-copy">
+                <small>Sending as your ANIMUA account</small>
+                <strong id="contactAccountName">Loading account...</strong>
+                <span id="contactAccountEmail"></span>
+              </span>
+              <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
             </div>
 
             <label class="contact-field">
@@ -216,7 +214,7 @@
 
             <p class="contact-form-note">
               <i class="fa-solid fa-lock" aria-hidden="true"></i>
-              <span>This form uses automated abuse protection. Please avoid sending the same inquiry repeatedly.</span>
+              <span>Your account name and email are included automatically. This form uses automated abuse protection.</span>
             </p>
             <p class="contact-status" id="contactStatus" aria-live="polite"></p>
           </form>

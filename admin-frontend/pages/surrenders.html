@@ -40,6 +40,20 @@
 
       <div id="pageHeaderMount"></div>
 
+      <section class="surrender-intake-control" aria-labelledby="surrenderIntakeControlTitle">
+        <div class="surrender-intake-control-icon"><i class="bi bi-building-gear" aria-hidden="true"></i></div>
+        <div class="surrender-intake-control-copy">
+          <span>Public request control</span>
+          <h2 id="surrenderIntakeControlTitle">Incoming surrender requests</h2>
+          <p id="surrenderAvailabilityDescription">Checking whether the public surrender form is open...</p>
+        </div>
+        <label class="surrender-availability-switch" for="surrenderAvailabilityToggle">
+          <input type="checkbox" id="surrenderAvailabilityToggle" role="switch" disabled />
+          <span class="surrender-switch-track" aria-hidden="true"><span></span></span>
+          <strong id="surrenderAvailabilityLabel">Checking</strong>
+        </label>
+      </section>
+
       <!-- NLP note banner -->
       <aside class="nlp-banner" aria-label="Classification status">
         <div class="nlp-banner-icon"><i class="bi bi-cpu-fill"></i></div>
@@ -120,7 +134,7 @@
           </div>
 
           <div class="table-responsive records-table-wrap">
-            <table class="shelter-table">
+            <table class="shelter-table management-data-table">
               <colgroup>
                 <col class="col-owner" />
                 <col class="col-pet" />

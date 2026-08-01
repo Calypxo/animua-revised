@@ -29,6 +29,7 @@ router.post(
   "/contact",
   rejectContactHoneypot,
   contactRateLimiter,
+  authenticateToken,
   submitContactMessage
 );
 router.post(

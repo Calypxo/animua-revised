@@ -16,6 +16,8 @@ renderPageHeader(PAGE_HEADER_CONFIGS.surrenders);
 
 const SURRENDER_REQUESTS_API_URL =
   "http://localhost:5000/api/surrenders";
+const SURRENDER_AVAILABILITY_API_URL =
+  `${SURRENDER_REQUESTS_API_URL}/availability`;
 
 
 async function getPublicSubmittedRequests() {
@@ -147,6 +149,7 @@ let activeTab   = "all";
 let activeId    = null;
 let confirmMode = null;
 let currentRole = "";
+let surrenderAvailability = null;
 
 /* ══════════════════════════════════════════════════════
    HELPERS
@@ -164,6 +167,92 @@ const safePhotoUrl = value => /^data:image\/(png|jpe?g|webp);base64,[A-Za-z0-9+/
 
 function can(action) {
   return hasPermission(currentRole, "surrender", action);
+}
+
+function renderSurrenderAvailability({ busy = false, error = "" } = {}) {
+  const control = document.querySelector(".surrender-intake-control");
+  const toggle = document.getElementById("surrenderAvailabilityToggle");
+  const label = document.getElementById("surrenderAvailabilityLabel");
+  const description = document.getElementById("surrenderAvailabilityDescription");
+  const accepting = surrenderAvailability?.acceptingRequests !== false;
+
+  if (toggle) {
+    toggle.checked = accepting;
+    toggle.disabled = busy || !can("approve") || surrenderAvailability === null;
+  }
+  control?.classList.toggle("is-paused", surrenderAvailability !== null && !accepting);
+  control?.classList.toggle("is-busy", busy);
+  control?.classList.toggle("has-error", Boolean(error));
+
+  if (label) {
+    label.textContent = error
+      ? "Unavailable"
+      : surrenderAvailability === null
+        ? "Checking"
+        : accepting
+          ? "Accepting"
+          : "Paused";
+  }
+  if (description) {
+    description.textContent = error
+      || (accepting
+        ? "The public surrender form is open and can receive new requests."
+        : "The public form is closed because shelter space or cages may be unavailable.");
+  }
+}
+
+async function loadSurrenderAvailability() {
+  renderSurrenderAvailability({ busy: true });
+  try {
+    const response = await fetch(SURRENDER_AVAILABILITY_API_URL, {
+      headers: { Accept: "application/json" },
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(data.message || "Unable to load the public request setting.");
+    }
+    surrenderAvailability = data.availability || { acceptingRequests: true };
+    renderSurrenderAvailability();
+  } catch (error) {
+    surrenderAvailability = null;
+    renderSurrenderAvailability({
+      error: error.message || "Unable to load the public request setting.",
+    });
+  }
+}
+
+async function updateSurrenderAvailability(acceptingRequests) {
+  const previous = surrenderAvailability;
+  surrenderAvailability = { ...(previous || {}), acceptingRequests };
+  renderSurrenderAvailability({ busy: true });
+
+  try {
+    const token = localStorage.getItem("animua_token");
+    const response = await fetch(SURRENDER_AVAILABILITY_API_URL, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ acceptingRequests }),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(data.message || "Unable to update incoming surrender requests.");
+    }
+    surrenderAvailability = data.availability;
+    renderSurrenderAvailability();
+    showToast(
+      "success",
+      acceptingRequests
+        ? "The public surrender form is now accepting requests."
+        : "New public surrender requests have been paused."
+    );
+  } catch (error) {
+    surrenderAvailability = previous;
+    renderSurrenderAvailability();
+    showToast("error", error.message || "Unable to update incoming surrender requests.");
+  }
 }
 
 function formatDate(d) {
@@ -286,7 +375,7 @@ function renderTable() {
     <tr data-id="${r.id}" class="${r.id===activeId?"row-active":""}">
       <td data-label="Owner">
         <div class="owner-cell">
-          <div class="owner-avatar" style="background:${r.owner.color}">${r.owner.initials}</div>
+          <div class="owner-avatar">${r.owner.initials}</div>
           <div>
             <div class="owner-name">${r.owner.name}</div>
             <div class="owner-barangay"><i class="bi bi-geo-alt-fill" style="color:var(--clay);font-size:0.65rem"></i> Brgy. ${r.owner.barangay}</div>
@@ -307,8 +396,8 @@ function renderTable() {
       <td data-label="Submitted" class="submitted-date">${formatDate(r.submittedAt)}</td>
       <td data-label="Status">${statusBadge(r.status)}</td>
       <td data-label="Actions">
-        <button class="tbl-action-btn" data-action="view" data-id="${r.id}" title="View">
-          <i class="bi bi-chevron-right"></i>
+        <button class="tbl-action-btn" data-action="view" data-id="${r.id}" title="View details" aria-label="View surrender request details">
+          <i class="bi bi-eye"></i>
         </button>
       </td>
     </tr>`).join("");
@@ -902,6 +991,8 @@ async function init() {
     renderTopbarUser();
     loadSidebar(); 
 
+    await loadSurrenderAvailability();
+
     publicRequests = await getPublicSubmittedRequests();
 
     if (!Array.isArray(publicRequests)) {
@@ -934,6 +1025,9 @@ async function init() {
     document.getElementById("filterCategory")?.addEventListener("change",applyFilters);
     document.getElementById("clearSurrenderFilters")?.addEventListener("click", clearSurrenderFilters);
     document.getElementById("srDrawerBackdrop")?.addEventListener("click", closeDrawer);
+    document.getElementById("surrenderAvailabilityToggle")?.addEventListener("change", event => {
+      updateSurrenderAvailability(event.currentTarget.checked);
+    });
 
     // Reject modal
     document.getElementById("rejectModalClose")?.addEventListener("click",  ()=>closeModal("rejectModalBackdrop"));

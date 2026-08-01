@@ -430,7 +430,5 @@ export function loadSidebar() {
   setActiveNavigation(sidebar);
   bindContactMessageBadge(container, sidebar);
   bindSidebar(container, sidebar, overlay);
-  // Keep every management page in the same top-level viewport. Using an
-  // embedded workspace here caused responsive breakpoints and vw-based modal
-  // measurements to differ between sidebar navigation and a hard refresh.
+  setupPersistentNavigation(container, sidebar);
 }

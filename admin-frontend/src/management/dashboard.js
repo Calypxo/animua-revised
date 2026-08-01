@@ -130,7 +130,7 @@ function renderActivities(filter = "all") {
     ? activities
     : activities.filter((item) => item.action.toLowerCase().includes(filter));
   document.getElementById("activityTableBody").innerHTML = rows.length
-    ? rows.map((item) => "<tr><td><strong>" + escapeHtml(item.name) + '</strong><div class="animal-id-text">' + escapeHtml(item.id) + "</div></td><td>" + escapeHtml(item.module) + "</td><td>" + escapeHtml(item.action.replaceAll(".", " ")) + "</td><td>" + escapeHtml(item.staff) + '</td><td style="font-family:var(--mono);font-size:.76rem">' + dateText(item.date) + "</td><td>" + statusBadge(item.status) + "</td></tr>").join("")
+    ? rows.map((item) => "<tr><td><strong>" + escapeHtml(item.name) + '</strong><div class="animal-id-text">' + escapeHtml(item.id) + "</div></td><td>" + escapeHtml(item.module) + "</td><td>" + escapeHtml(item.action.replaceAll(".", " ")) + "</td><td>" + escapeHtml(item.staff) + '</td><td class="table-date-cell">' + dateText(item.date) + "</td><td>" + statusBadge(item.status) + "</td></tr>").join("")
     : '<tr><td colspan="6" class="text-center py-4 text-muted">No recorded activity.</td></tr>';
 }
 
@@ -141,7 +141,7 @@ function renderAnimals(query = "") {
       .some((value) => String(value || "").toLowerCase().includes(search))
   );
   document.getElementById("recentAnimalsBody").innerHTML = rows.length
-    ? rows.map((item) => '<tr><td style="font-family:var(--mono)">' + escapeHtml(item.id) + '</td><td><div class="animal-name-cell"><div class="animal-thumb">' + speciesEmoji(item.species) + '</div><div class="animal-name-text">' + escapeHtml(item.label) + "</div></div></td><td>" + escapeHtml(item.species) + "</td><td>" + escapeHtml(item.breed) + "</td><td>" + escapeHtml(item.age) + "</td><td>" + statusBadge(item.status) + '</td><td><span class="days-badge">' + item.days + "d</span></td><td>" + (item.assessmentComplete ? "✓ Complete" : "Pending") + '</td><td><a class="tbl-action-btn" href="/pages/animalProfile.html?id=' + encodeURIComponent(item.id) + '"><i class="bi bi-arrow-right-short"></i></a></td></tr>').join("")
+    ? rows.map((item) => '<tr><td class="table-id-cell">' + escapeHtml(item.id) + '</td><td><div class="animal-name-cell"><div class="animal-thumb">' + speciesEmoji(item.species) + '</div><div class="animal-name-text">' + escapeHtml(item.label) + "</div></div></td><td>" + escapeHtml(item.species) + "</td><td>" + escapeHtml(item.breed) + "</td><td>" + escapeHtml(item.age) + "</td><td>" + statusBadge(item.status) + '</td><td><span class="days-badge">' + item.days + "d</span></td><td>" + (item.assessmentComplete ? "✓ Complete" : "Pending") + '</td><td><a class="tbl-action-btn" title="View details" aria-label="View animal profile" href="/pages/animalProfile.html?id=' + encodeURIComponent(item.id) + '"><i class="bi bi-eye"></i></a></td></tr>').join("")
     : '<tr><td colspan="9" class="text-center py-4 text-muted">No animals found.</td></tr>';
 }
 

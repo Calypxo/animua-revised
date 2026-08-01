@@ -676,6 +676,12 @@ body.management-consistent-ui :is(.page-body, .main-content, .contact-message-pa
   }
 }
 
+@container management-workspace (max-width: 900px) {
+  .management-consistent-ui .system-page-hero {
+    background-position: center, center, var(--header-photo-position, 62% center) !important;
+  }
+}
+
 @media (max-width: 768px) {
   .management-consistent-ui .topbar .search-pill { width: min(270px, 42vw); }
   .management-consistent-ui .system-page-hero { border-radius: 20px !important; }

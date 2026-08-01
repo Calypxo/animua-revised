@@ -43,55 +43,25 @@
       <main class="page-body">
         <div id="pageHeaderMount"></div>
 
-        <section class="ap-workflow cm-workflow" aria-labelledby="contactWorkflowTitle">
-          <div class="ap-workflow-intro">
-            <span class="ap-section-kicker">Response workflow</span>
-            <h2 id="contactWorkflowTitle">A clear path from inquiry to response</h2>
-            <p>Every message stays organized from initial receipt through the official ANIMUA reply.</p>
-          </div>
-          <div class="ap-workflow-steps" aria-label="Contact message workflow">
-            <div class="ap-workflow-step is-active">
-              <span><i class="bi bi-envelope-paper" aria-hidden="true"></i></span>
-              <small>01</small>
-              <strong>Received</strong>
-            </div>
-            <div class="ap-workflow-step">
-              <span><i class="bi bi-search" aria-hidden="true"></i></span>
-              <small>02</small>
-              <strong>Review</strong>
-            </div>
-            <div class="ap-workflow-step">
-              <span><i class="bi bi-send-check" aria-hidden="true"></i></span>
-              <small>03</small>
-              <strong>Reply</strong>
-            </div>
-            <div class="ap-workflow-step">
-              <span><i class="bi bi-check2-circle" aria-hidden="true"></i></span>
-              <small>04</small>
-              <strong>Complete</strong>
-            </div>
-          </div>
-        </section>
-
         <section class="panel ap-records-panel cm-records-panel" aria-labelledby="messagesTitle">
           <div class="ap-records-heading">
             <div class="reference-records-heading">
               <span class="reference-records-icon"><i class="bi bi-envelope-paper-fill"></i></span>
               <div>
-                <span class="ap-section-kicker">Community inbox</span>
-                <h2 id="messagesTitle">Contact message records</h2>
-                <p>Search, review, and respond to inquiries submitted through the public Contact Us page.</p>
+                <span class="ap-section-kicker">Account conversations</span>
+                <h2 id="messagesTitle">Chat</h2>
+                <p>Messages from ANIMUA users</p>
               </div>
             </div>
             <span class="ap-records-legend">
-              <i class="bi bi-info-circle" aria-hidden="true"></i>
-              Select a message to review its complete details
+              <i class="bi bi-people" aria-hidden="true"></i>
+              Messages are grouped by account
             </span>
           </div>
 
           <div class="ap-toolbar">
             <div class="ap-tabs-wrap">
-              <span class="ap-filter-label">Message status</span>
+              <span class="ap-filter-label">Show accounts with</span>
               <div class="ap-tabs" role="tablist" aria-label="Contact message status">
                 <button class="ap-tab active" type="button" role="tab" aria-selected="true" data-status="">
                   All <span id="tabAllCount">0</span>
@@ -107,10 +77,10 @@
 
             <div class="ap-filter-toolbar cm-filter-toolbar">
               <label class="ap-filter-field ap-search-filter">
-                <span>Search messages</span>
+                <span>Find a user or message</span>
                 <div class="ap-control">
                   <i class="bi bi-search" aria-hidden="true"></i>
-                  <input id="messageSearch" type="search" placeholder="Name, email, subject, or message" autocomplete="off" />
+                  <input id="messageSearch" type="search" placeholder="User, email, subject, or message" autocomplete="off" />
                 </div>
               </label>
               <label class="ap-filter-field">
@@ -128,92 +98,51 @@
           </div>
 
           <div class="cm-workspace">
-            <section class="cm-inbox-panel" aria-label="Contact message list">
+            <section class="cm-inbox-panel" aria-label="Contact message users">
               <div class="reference-table-section-head">
-                <div><span>Community inbox</span><h3>Public contact inquiries</h3></div>
-                <strong id="contactResultLabel">0 records</strong>
+                <div><span>User directory</span><h3>Conversations</h3></div>
+                <strong id="contactResultLabel">0 users</strong>
               </div>
               <div id="messageList" class="cm-message-list" role="list" aria-live="polite">
                 <div class="ap-record-loading">
                   <div class="um-spinner"></div>
-                  <span>Loading contact messages...</span>
+                  <span>Loading contact users...</span>
                 </div>
               </div>
-              <div class="um-pagination" id="paginationBar"></div>
             </section>
 
-            <section class="cm-detail-panel" aria-live="polite" aria-label="Selected contact message">
-              <div class="cm-detail-column-heading">
-                <span><i class="bi bi-chat-square-text-fill" aria-hidden="true"></i></span>
-                <div><small>Selected conversation</small><h3>Message box</h3><p>Read the full inquiry and send the official response here.</p></div>
-              </div>
+            <section class="cm-detail-panel" aria-live="polite" aria-label="Selected user's contact messages">
               <div id="messageDetailEmpty" class="cm-detail-empty">
-                <span><i class="bi bi-envelope-open" aria-hidden="true"></i></span>
-                <strong>Select a contact message</strong>
-                <p>Choose a record from the inbox to review the inquiry and prepare an official response.</p>
+                <span><i class="bi bi-chat-square-text" aria-hidden="true"></i></span>
+                <small>No conversation selected</small>
+                <strong>Select a conversation</strong>
+                <p>Choose a user from the directory to open their complete ANIMUA message history.</p>
               </div>
 
               <article id="messageDetail" class="cm-detail hidden">
-                <header class="cm-detail-head">
+                <header class="cm-user-summary">
+                  <button id="backToUsersBtn" class="cm-back-button" type="button" aria-label="Back to conversations">
+                    <i class="bi bi-arrow-left" aria-hidden="true"></i>
+                  </button>
                   <div>
-                    <span id="detailStatus" class="cm-status-pill">New</span>
-                    <h2 id="detailSubject">Message subject</h2>
-                    <p id="detailMeta">Sender details</p>
+                    <h2 id="detailUserName">User name</h2>
                   </div>
-                  <a id="detailEmailLink" class="cm-email-link" href="#">
-                    <i class="bi bi-envelope" aria-hidden="true"></i>
-                    Email sender
-                  </a>
                 </header>
 
-                <div class="cm-info-grid" aria-label="Contact message information">
-                  <div>
-                    <span class="cm-info-icon"><i class="bi bi-person" aria-hidden="true"></i></span>
-                    <span class="cm-info-copy"><small>Name</small><strong id="detailName">--</strong></span>
-                  </div>
-                  <div>
-                    <span class="cm-info-icon"><i class="bi bi-envelope-at" aria-hidden="true"></i></span>
-                    <span class="cm-info-copy"><small>Email</small><strong id="detailEmail">--</strong></span>
-                  </div>
-                  <div>
-                    <span class="cm-info-icon"><i class="bi bi-calendar3" aria-hidden="true"></i></span>
-                    <span class="cm-info-copy"><small>Received</small><strong id="detailDate">--</strong></span>
-                  </div>
-                  <div>
-                    <span class="cm-info-icon"><i class="bi bi-globe2" aria-hidden="true"></i></span>
-                    <span class="cm-info-copy"><small>Source</small><strong id="detailSource">--</strong></span>
-                  </div>
-                </div>
-
-                <section class="cm-user-message" aria-labelledby="inquiryMessageTitle">
-                  <div class="cm-section-heading">
-                    <span class="cm-section-icon"><i class="bi bi-chat-left-text" aria-hidden="true"></i></span>
-                    <div>
-                      <small>Original inquiry</small>
-                      <h3 id="inquiryMessageTitle">User's message</h3>
-                    </div>
-                  </div>
-                  <p id="detailMessage"></p>
+                <section class="cm-conversation-history" aria-label="Conversation history">
+                  <div id="userMessageHistory" class="cm-chat-thread" role="log" aria-live="polite"></div>
                 </section>
 
-                <form id="replyForm" class="cm-reply-form">
-                  <div class="cm-section-heading">
-                    <span class="cm-section-icon"><i class="bi bi-reply" aria-hidden="true"></i></span>
-                    <div>
-                      <small>Official response</small>
-                      <h3>Send ANIMUA reply</h3>
-                    </div>
-                  </div>
-                  <p class="cm-reply-help">The sender will receive the approved ANIMUA email template at the address shown above.</p>
-                  <label for="replyMessage">Reply message</label>
-                  <textarea id="replyMessage" rows="8" placeholder="Write the official ANIMUA response..." required></textarea>
-                  <div class="cm-reply-actions">
-                    <p id="replyStatus" aria-live="polite"></p>
-                    <button id="sendReplyBtn" class="cm-send-btn" type="submit">
-                      <i class="bi bi-send-fill" aria-hidden="true"></i>
-                      Send reply
+                <form id="replyForm" class="cm-chat-composer">
+                  <p class="visually-hidden" id="replyContext">Select a user message in the conversation to reply.</p>
+                  <label class="visually-hidden" for="replyMessage">Reply message</label>
+                  <textarea id="replyMessage" rows="1" placeholder="Type a message" required></textarea>
+                  <div class="cm-compose-tools" aria-label="Message actions">
+                    <button id="sendReplyBtn" class="cm-compose-send" type="submit" aria-label="Send reply" title="Send reply">
+                      <i class="bi bi-send" aria-hidden="true"></i>
                     </button>
                   </div>
+                  <p id="replyStatus" class="visually-hidden" aria-live="polite"></p>
                 </form>
               </article>
             </section>

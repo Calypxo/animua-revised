@@ -281,11 +281,11 @@ function renderTable() {
         </span>
       </td>
       <td>${compatPill(a.compatScore, a.type)}</td>
-      <td style="font-family:var(--mono);font-size:0.76rem;color:var(--stone)">${formatDate(a.submitted)}</td>
+      <td class="table-date-cell">${formatDate(a.submitted)}</td>
       <td>${statusBadge(a.status)}</td>
       <td>
-        <button class="tbl-action-btn" data-action="view" data-id="${a.id}" title="View">
-          <i class="bi bi-chevron-right"></i>
+        <button class="tbl-action-btn" data-action="view" data-id="${a.id}" title="View details" aria-label="View adoption application details">
+          <i class="bi bi-eye"></i>
         </button>
       </td>
     </tr>`).join("");

@@ -113,6 +113,7 @@ body.loading > .shell { visibility: hidden; }
   height: 100%;
   overflow: hidden;
   background: var(--sk-canvas);
+  container: management-skeleton / inline-size;
 }
 
 .animua-sk-topbar {
@@ -313,6 +314,53 @@ body.loading > .shell { visibility: hidden; }
 }
 
 @media (max-width: 420px) {
+  .animua-sk-hero { padding-inline: 16px; }
+  .animua-sk-metrics { margin-inline: 7px; }
+  .animua-sk-metric-icon { width: 38px; height: 38px; }
+}
+
+/* Match the loader to the content viewport in direct and in-shell views. */
+@container management-skeleton (max-width: 1280px) {
+  .animua-sk-hero {
+    grid-template-columns: minmax(0, 1fr) 330px;
+    padding-inline: 46px;
+  }
+  .animua-sk-metrics { padding-inline: 12px; }
+  .animua-sk-metric { gap: 9px; padding-inline: 11px; }
+  .animua-sk-metric-icon { width: 40px; height: 40px; }
+}
+
+@container management-skeleton (max-width: 900px) {
+  .animua-sk-hero {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding: 42px 32px 104px;
+  }
+  .animua-sk-hero-card { width: 100%; max-width: 520px; }
+  .animua-sk-metrics {
+    grid-template-columns: repeat(5, minmax(148px, 1fr));
+    margin-inline: 15px;
+    overflow: hidden;
+  }
+}
+
+@container management-skeleton (max-width: 680px) {
+  .animua-sk-hero {
+    min-height: 0;
+    padding: 34px 22px 92px;
+    border-radius: 18px;
+  }
+  .animua-sk-hero-title { width: 90%; height: 27px; }
+  .animua-sk-hero-title-short { width: 68%; }
+  .animua-sk-hero-text { width: 94%; }
+  .animua-sk-chips { display: grid; margin-top: 22px; }
+  .animua-sk-chip { width: 118px; }
+  .animua-sk-hero-card { padding: 18px; }
+  .animua-sk-metrics { margin-top: -52px; padding-inline: 8px; }
+  .animua-sk-metric { min-height: 82px; padding: 10px 12px; }
+}
+
+@container management-skeleton (max-width: 420px) {
   .animua-sk-hero { padding-inline: 16px; }
   .animua-sk-metrics { margin-inline: 7px; }
   .animua-sk-metric-icon { width: 38px; height: 38px; }

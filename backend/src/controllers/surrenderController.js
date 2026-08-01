@@ -2,7 +2,11 @@ const { db } = require("../config/firebase");
 const { analyzeSurrenderReason } = require("../services/surrenderNlpService");
 
 const COLLECTION_NAME = "surrenderRequests";
+const SETTINGS_COLLECTION_NAME = "surrenderSettings";
+const AVAILABILITY_SETTINGS_ID = "requestAvailability";
 const SHELTER_LOCATION = "Angeles City Veterinary Office, Brgy. Pampang, Angeles City";
+const CLOSED_CAPACITY_MESSAGE =
+  "The shelter is not accepting surrender requests right now because space or cages may be unavailable. Please check again later or contact the shelter for urgent concerns.";
 
 const MAX_SURRENDER_PHOTO_DATA_URL_LENGTH = 900000;
 
@@ -26,8 +30,87 @@ function generateRequestId() {
   return `SR-${year}-${timestamp}`;
 }
 
+function getAvailabilitySettingsRef() {
+  return db.collection(SETTINGS_COLLECTION_NAME).doc(AVAILABILITY_SETTINGS_ID);
+}
+
+async function readSurrenderAvailability() {
+  const snapshot = await getAvailabilitySettingsRef().get();
+  const data = snapshot.exists ? snapshot.data() || {} : {};
+  return {
+    acceptingRequests: data.acceptingRequests !== false,
+    closedMessage: CLOSED_CAPACITY_MESSAGE,
+    updatedAt: data.updatedAt || null,
+  };
+}
+
+async function getSurrenderAvailability(_req, res) {
+  try {
+    return res.json({ availability: await readSurrenderAvailability() });
+  } catch (error) {
+    console.error("Get surrender availability error:", error);
+    return res.status(500).json({
+      message: "Failed to check whether surrender requests are available.",
+      error: error.message,
+    });
+  }
+}
+
+async function updateSurrenderAvailability(req, res) {
+  try {
+    if (!isAdminOrStaff(req.user)) {
+      return res.status(403).json({
+        message: "Only Admin or Staff can manage surrender request availability.",
+      });
+    }
+    const { acceptingRequests } = req.body || {};
+    if (typeof acceptingRequests !== "boolean") {
+      return res.status(400).json({
+        message: "acceptingRequests must be true or false.",
+      });
+    }
+    const updatedAt = new Date().toISOString();
+    await getAvailabilitySettingsRef().set({
+      acceptingRequests,
+      updatedAt,
+      updatedBy: {
+        id: req.user.id || null,
+        email: req.user.email || null,
+        name: req.user.fullName || req.user.email || "Management user",
+        role: req.user.role,
+      },
+    }, { merge: true });
+
+    return res.json({
+      message: acceptingRequests
+        ? "Incoming surrender requests are now open."
+        : "Incoming surrender requests are now paused.",
+      availability: {
+        acceptingRequests,
+        closedMessage: CLOSED_CAPACITY_MESSAGE,
+        updatedAt,
+      },
+    });
+  } catch (error) {
+    console.error("Update surrender availability error:", error);
+    return res.status(500).json({
+      message: "Failed to update surrender request availability.",
+      error: error.message,
+    });
+  }
+}
+
 async function createSurrenderRequest(req, res) {
   try {
+    const availability = await readSurrenderAvailability();
+    if (!availability.acceptingRequests) {
+      return res.status(503).json({
+        code: "SURRENDER_REQUESTS_CLOSED",
+        message: availability.closedMessage,
+        availability,
+      });
+    }
+
     const user = req.user;
     const body = req.body;
 
@@ -506,6 +589,8 @@ async function rejectSurrenderReschedule(req, res) {
 }
 
 module.exports = {
+  getSurrenderAvailability,
+  updateSurrenderAvailability,
   createSurrenderRequest,
   getAllSurrenderRequests,
   getMySurrenderRequests,
