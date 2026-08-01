@@ -124,8 +124,8 @@ function localizedReply(language, english, tagalog) {
 function getVerifiedFallback(language = "english") {
   return localizedReply(
     language,
-    "I can only help with ANIMUA and Angeles City Veterinary Office services, such as adoption, Find Furbabies, the Match Quiz, surrender requests, events, account help, donations, stray concerns, and contact information. Please ask about one of those services.",
-    "Makakatulong lang ako sa ANIMUA at Angeles City Veterinary Office services, tulad ng adoption, Find Furbabies, Match Quiz, surrender requests, events, account help, donations, stray concerns, at contact information. Magtanong tungkol sa isa sa mga services na iyon."
+    "I get you, but I am mainly here for ANIMUA and Angeles City Veterinary Office services. I can help with adoption, Find Furbabies, the Match Quiz, surrender requests, events, account help, donations, stray concerns, and contact details.",
+    "Gets ko, pero pang-ANIMUA at Angeles City Veterinary Office services talaga ako. Matutulungan kita sa adoption, Find Furbabies, Match Quiz, surrender requests, events, account help, donations, stray concerns, at contact details."
   );
 }
 
@@ -403,13 +403,46 @@ function hasFeeIntent(text = "") {
     ((text.includes("adopt") || text.includes("adoption")) && includesAnyWord(text, ["free", "libre"]));
 }
 
-function hasAdoptionFeeIntent(text = "") {
-  const mentionsAdoption =
-    text.includes("adopt") ||
-    includesAnyWord(text, ["adoption", "iadopt", "ampon", "umampon"]) ||
-    includesAnyPhrase(text, ["pag adopt", "mag adopt", "pa adopt", "pag ampon"]);
+function hasAdoptionMentionIntent(text = "") {
+  return text.includes("adopt") ||
+    includesAnyWord(text, ["adoption", "adopter", "iadopt", "aadopt", "ampon", "umampon"]) ||
+    includesAnyPhrase(text, [
+      "pag adopt",
+      "mag adopt",
+      "mag aadopt",
+      "mag aadop",
+      "pa adopt",
+      "pag ampon"
+    ]);
+}
 
-  return hasFeeIntent(text) && (mentionsAdoption || hasAnimalMentionIntent(text));
+function hasAdoptionFeeIntent(text = "") {
+  return hasFeeIntent(text) && (hasAdoptionMentionIntent(text) || hasAnimalMentionIntent(text));
+}
+
+function hasAdoptionMotivationIntent(text = "") {
+  if (!hasAdoptionMentionIntent(text)) return false;
+
+  return includesAnyWord(text, [
+    "why",
+    "bakit",
+    "reason",
+    "reasons",
+    "benefit",
+    "benefits",
+    "advantage",
+    "advantages",
+    "should"
+  ]) ||
+    includesAnyPhrase(text, [
+      "why adopt",
+      "why should i adopt",
+      "why do i adopt",
+      "bakit ako mag adopt",
+      "bakit ako mag aadopt",
+      "bakit kailangan mag adopt",
+      "bakit maganda mag adopt"
+    ]);
 }
 
 function hasDonationIntent(text = "") {
@@ -852,13 +885,22 @@ function hasTermsPrivacyIntent(text = "") {
 }
 
 function hasPetCareIntent(text = "") {
-  return includesAnyWord(text, [
-    "food",
-    "water",
-    "health",
-    "shelter",
-    "exercise",
-    "hygiene",
+  const hasAnimalContext =
+    hasAnimalMentionIntent(text) ||
+    hasAdoptionMentionIntent(text) ||
+    includesAnyPhrase(text, [
+      "pet care",
+      "care for a pet",
+      "care for my pet",
+      "care for my dog",
+      "care for my cat",
+      "before adoption",
+      "after adoption",
+      "responsible pet",
+      "first week"
+    ]);
+
+  const hasVeterinaryCareTopic = includesAnyWord(text, [
     "vaccination",
     "vaccinations",
     "vaccine",
@@ -869,6 +911,16 @@ function hasPetCareIntent(text = "") {
     "neuter",
     "neutering",
     "quarantine",
+    "rabies"
+  ]);
+
+  const hasGeneralCareTopic = includesAnyWord(text, [
+    "food",
+    "water",
+    "health",
+    "shelter",
+    "exercise",
+    "hygiene",
     "temperament",
     "behavior",
     "behaviour",
@@ -876,7 +928,9 @@ function hasPetCareIntent(text = "") {
     "adjustment",
     "prepare",
     "home"
-  ]) || includesAnyPhrase(text, ["pet care", "first week", "before adoption", "responsible pet", "care for a pet"]);
+  ]);
+
+  return hasVeterinaryCareTopic || (hasAnimalContext && hasGeneralCareTopic);
 }
 
 function hasQuizIntent(text = "") {
@@ -1020,6 +1074,7 @@ function isOnTopic(message = "") {
     "adopt",
     "adoption",
     "iadopt",
+    "aadopt",
     "adopter",
     "ampon",
     "umampon",
@@ -1123,6 +1178,7 @@ function isOnTopic(message = "") {
     hasNavigationIntent(message) ||
     hasGeneralAnimuaIntent(message) ||
     hasAssistantHelpIntent(message) ||
+    hasAdoptionMotivationIntent(message) ||
     includesAnyPhrase(message, ["log in", "sign in", "find furbabies", "match quiz", "contact us", "may sakit", "live chat"]);
 }
 
@@ -1158,6 +1214,7 @@ function shouldUseLocalReply(message = "") {
     hasDonationIntent(lower) ||
     hasGeneralAnimuaIntent(lower) ||
     hasApplicationIntent(lower) ||
+    hasAdoptionMotivationIntent(lower) ||
     hasAdoptionFeeIntent(lower) ||
     hasOfflineAdoptionIntent(lower) ||
     hasPostAdoptionIntent(lower) ||
@@ -1195,6 +1252,7 @@ function needsPublicContext(message = "") {
     hasUrgentMedicalIntent(lower) ||
     hasSurrenderIntent(lower) ||
     hasAdoptionProcessIntent(lower) ||
+    hasAdoptionMotivationIntent(lower) ||
     hasOfflineAdoptionIntent(lower) ||
     hasPostAdoptionIntent(lower) ||
     hasAdoptionEligibilityIntent(lower) ||
@@ -1374,6 +1432,14 @@ function getLocalReply(message, context = {}, language = "english") {
       language,
       "For surrender requests, open the Surrender page and complete the form with accurate owner, contact, barangay, animal, vaccination, and reason details. Only qualified Angeles City residents may submit through ANIMUA. Each request is reviewed individually, and submission does not guarantee acceptance. Do not bring the animal to the shelter unless the office confirms the next step.",
       "Para sa surrender request, buksan ang Surrender page at kumpletuhin ang owner, contact, barangay, animal, vaccination, at reason details. Qualified Angeles City residents lang ang maaaring magsumite sa ANIMUA. Bawat request ay hiwalay na nire-review, at hindi garantiya ng acceptance ang submission. Huwag dalhin agad ang animal sa shelter hangga't walang confirmation mula sa office."
+    );
+  }
+
+  if (hasAdoptionMotivationIntent(lower)) {
+    return localizedReply(
+      language,
+      "Adopting is worth considering because you give a shelter animal a safer home, free up space so the office can care for more animals, and gain a companion whose needs match your lifestyle. Through ANIMUA, you can check Find Furbabies, use the Match Quiz, and submit an application with no adoption fee. The best reason to adopt is not just that it feels kind, but that you are ready to give steady care, time, patience, and a long-term home.",
+      "Maganda mag-adopt kung ready ka na, kasi nabibigyan mo ng mas ligtas na tahanan ang shelter animal, nakakatulong ka rin na magkaroon ng space para maalagaan pa ang ibang animals, at maaari kang makahanap ng companion na tugma sa lifestyle mo. Sa ANIMUA, puwede mong tingnan ang Find Furbabies, gamitin ang Match Quiz, at mag-submit ng application nang walang adoption fee. Pinakamahalaga: mag-adopt kapag kaya mong magbigay ng consistent na care, oras, pasensya, at long-term home."
     );
   }
 

@@ -185,12 +185,8 @@
 }
 
 .submissions-hero-copy::before {
-  content: "";
-  display: block;
-  width: 30px;
-  height: 2px;
-  margin-bottom: 8px;
-  background: #d0a63a;
+  content: none;
+  display: none;
 }
 
 .submissions-hero h1 {
@@ -759,10 +755,6 @@
   border: 1.5px solid rgba(123, 48, 37, 0.54);
   color: #873227;
   background: transparent;
-}
-
-body.submissions-page > .footer {
-  margin-top: 26px;
 }
 
 .submission-detail-popup {

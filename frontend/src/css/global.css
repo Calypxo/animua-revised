@@ -13800,3 +13800,1939 @@ button#chatbotSend.chatbot-input-send i {
   z-index: 1;
   background: #fffdf8;
 }
+
+/* Keep the floating chatbot launcher fully circular over every section. */
+.animua-chatbot {
+  position: fixed !important;
+  right: max(22px, env(safe-area-inset-right)) !important;
+  bottom: max(22px, env(safe-area-inset-bottom)) !important;
+  width: 86px !important;
+  height: 86px !important;
+  display: grid !important;
+  place-items: center !important;
+  overflow: visible !important;
+  isolation: isolate !important;
+  z-index: 2147482000 !important;
+  pointer-events: none !important;
+}
+
+.animua-chatbot-toggle {
+  position: relative !important;
+  width: 62px !important;
+  height: 62px !important;
+  min-width: 62px !important;
+  min-height: 62px !important;
+  flex: 0 0 62px !important;
+  display: grid !important;
+  place-items: center !important;
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  clip-path: none !important;
+  pointer-events: auto !important;
+  transform-origin: center !important;
+}
+
+.animua-chatbot-toggle i {
+  display: block !important;
+  color: currentColor !important;
+  font-size: 1.45rem !important;
+  line-height: 1 !important;
+}
+
+.animua-chatbot.is-open {
+  width: auto !important;
+  height: auto !important;
+  align-items: end !important;
+  justify-items: end !important;
+  pointer-events: auto !important;
+}
+
+.animua-chatbot.is-open .animua-chatbot-toggle {
+  display: none !important;
+}
+
+/* Profile modal hierarchy refresh. */
+#profileModal .profile-modal-card {
+  padding: 28px 34px 30px;
+}
+
+#profileModal .profile-modal-shell {
+  display: grid;
+  gap: 18px;
+}
+
+#profileModal .profile-modal-title {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 13px;
+  padding-right: 46px;
+}
+
+#profileModal .profile-modal-title .profile-title-icon {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  order: 0;
+  margin: 0;
+  border: 1.5px solid rgba(123, 48, 37, 0.18);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.82);
+  color: #7b3025;
+  box-shadow: 0 8px 18px rgba(45, 31, 23, 0.06);
+}
+
+#profileModal .profile-modal-title .profile-title-icon i {
+  font-size: 1.28rem;
+  line-height: 1;
+}
+
+#profileModal .profile-modal-title h2 {
+  order: 1;
+  margin: 0;
+  color: #16212b;
+  font-family: "Poppins", "Inter", sans-serif;
+  font-size: clamp(2rem, 4vw, 2.65rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: 0;
+}
+
+#profileModal .profile-summary-card {
+  margin: 0;
+  padding: 16px 18px;
+}
+
+#profileModal .profile-summary-main {
+  gap: 16px;
+}
+
+#profileModal .profile-summary-main h3 {
+  margin-bottom: 3px;
+  color: #202832;
+  font-family: "Poppins", "Inter", sans-serif;
+  font-size: 1.24rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+#profileModal .profile-summary-main small {
+  color: rgba(32, 40, 50, 0.76);
+  font-family: "Poppins", "Inter", sans-serif;
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+#profileModal .profile-info-card {
+  margin-top: 0;
+}
+
+@media (max-width: 560px) {
+  #profileModal .profile-modal-card {
+    padding: 24px 20px 26px;
+  }
+
+  #profileModal .profile-modal-title {
+    gap: 10px;
+    padding-right: 42px;
+  }
+
+  #profileModal .profile-modal-title .profile-title-icon {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* Profile modal title scale refinement. */
+#profileModal .profile-modal-title {
+  gap: 10px;
+}
+
+#profileModal .profile-modal-title .profile-title-icon {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #7b3025;
+}
+
+#profileModal .profile-modal-title .profile-title-icon i {
+  font-size: 1.75rem;
+}
+
+#profileModal .profile-modal-title h2 {
+  font-size: clamp(1.85rem, 3vw, 2.15rem);
+  font-weight: 800;
+  line-height: 1.08;
+}
+
+#profileModal .profile-summary-card {
+  margin-top: 2px;
+}
+
+@media (max-width: 560px) {
+  #profileModal .profile-modal-title .profile-title-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  #profileModal .profile-modal-title .profile-title-icon i {
+    font-size: 1.55rem;
+  }
+
+  #profileModal .profile-modal-title h2 {
+    font-size: clamp(1.65rem, 8vw, 1.9rem);
+  }
+}
+
+/* Change password + OTP modal refresh. */
+.change-password-popup {
+  --burgundy: #780116;
+  --xanthous: #F7B538;
+  --cream: #FFF8EE;
+  --white: #FFFFFF;
+  --dark-text: #2B1719;
+  width: min(460px, calc(100% - 24px)) !important;
+  padding: 22px 26px 24px !important;
+  border: 1px solid rgba(120, 1, 22, 0.08) !important;
+  border-radius: 14px !important;
+  background: var(--white) !important;
+  color: var(--dark-text) !important;
+  font-family: "Poppins", sans-serif !important;
+}
+
+.change-password-popup .change-password-close {
+  top: 22px !important;
+  right: 22px !important;
+  width: 34px !important;
+  height: 34px !important;
+  border: 1.5px solid rgba(120, 1, 22, 0.18) !important;
+  background: var(--white) !important;
+  color: var(--burgundy) !important;
+  font-size: 1.12rem !important;
+  box-shadow: none !important;
+}
+
+.change-password-popup .change-password-back:not(.password-change-otp-back) {
+  display: none;
+}
+
+.change-password-modal {
+  color: var(--dark-text);
+  font-family: "Poppins", sans-serif;
+}
+
+.change-password-head {
+  display: block;
+  margin-bottom: 18px;
+}
+
+.change-password-title-row {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  gap: 16px;
+  align-items: center;
+  padding-right: 46px;
+}
+
+.change-password-icon {
+  width: 58px;
+  height: 58px;
+  margin: 0;
+  border-radius: 50%;
+  background: rgba(120, 1, 22, 0.07);
+  color: var(--burgundy);
+  font-size: 1.26rem;
+}
+
+.change-password-accent {
+  display: none;
+}
+
+.change-password-modal h2 {
+  margin: 0 0 5px;
+  color: var(--burgundy);
+  font-family: "Poppins", sans-serif;
+  font-size: 1.42rem;
+  font-weight: 700;
+  line-height: 1.1;
+  text-align: left;
+}
+
+.change-password-modal p {
+  margin: 0;
+  color: rgba(43, 23, 25, 0.66);
+  font-family: "Poppins", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1.45;
+  text-align: left;
+}
+
+.change-password-reminder {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  margin: 0 0 18px;
+  padding: 15px 16px;
+  border: 1px solid rgba(247, 181, 56, 0.34);
+  border-radius: 12px;
+  background: var(--cream);
+}
+
+.change-password-reminder > span {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--xanthous);
+  color: var(--white);
+  font-size: 0.92rem;
+}
+
+.change-password-reminder p {
+  color: var(--dark-text);
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.change-password-reminder strong {
+  display: block;
+  color: var(--burgundy);
+  font-weight: 700;
+}
+
+.change-password-field {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  margin: 0 0 13px;
+  color: var(--dark-text);
+  font-family: "Poppins", sans-serif;
+}
+
+.change-password-field-icon {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--cream);
+  color: var(--burgundy);
+  font-size: 0.95rem;
+}
+
+.change-password-field-body > span {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--dark-text);
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.change-password-input-wrap input {
+  min-height: 38px;
+  padding: 0 40px 0 12px;
+  border: 1.5px solid rgba(43, 23, 25, 0.16);
+  border-radius: 6px;
+  background: var(--white);
+  color: var(--dark-text);
+  font: 500 0.86rem/1.2 "Poppins", sans-serif;
+}
+
+.change-password-input-wrap input:focus {
+  border-color: rgba(120, 1, 22, 0.55);
+  box-shadow: 0 0 0 3px rgba(120, 1, 22, 0.08);
+}
+
+.change-password-eye {
+  color: var(--burgundy);
+}
+
+.change-password-field small {
+  margin-top: 5px;
+  color: rgba(120, 1, 22, 0.82);
+  font-family: "Poppins", sans-serif;
+  font-size: 0.68rem;
+  font-weight: 500;
+}
+
+.change-password-actions {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px !important;
+  margin: 18px 0 0 !important;
+  padding: 0 !important;
+  border-top: 0 !important;
+}
+
+.change-password-cancel,
+.change-password-confirm {
+  min-height: 40px !important;
+  border-radius: 6px !important;
+  font: 600 0.88rem/1 "Poppins", sans-serif !important;
+}
+
+.change-password-cancel {
+  border: 1.5px solid rgba(120, 1, 22, 0.72) !important;
+  background: transparent !important;
+  color: var(--burgundy) !important;
+}
+
+.change-password-confirm {
+  border: 1.5px solid var(--burgundy) !important;
+  background: var(--burgundy) !important;
+  color: var(--white) !important;
+}
+
+.change-password-confirm::before {
+  content: "\f1d8";
+  margin-right: 9px;
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+}
+
+.change-password-popup .swal2-validation-message {
+  background: var(--cream) !important;
+  color: var(--burgundy) !important;
+  font-family: "Poppins", sans-serif !important;
+}
+
+.password-otp-modal {
+  min-height: 0;
+  padding: 0;
+}
+
+.change-password-popup:has(.password-otp-modal) {
+  width: min(430px, calc(100% - 24px)) !important;
+  padding: 20px 26px 24px !important;
+  border-radius: 12px !important;
+}
+
+.change-password-popup:has(.password-otp-modal) .change-password-actions,
+.change-password-popup:has(.password-otp-modal) .swal2-actions {
+  display: none !important;
+}
+
+.change-password-popup.change-password-popup--otp .change-password-actions,
+.change-password-popup.change-password-popup--otp .swal2-actions {
+  display: none !important;
+}
+
+.password-change-otp-back {
+  position: absolute;
+  top: 13px;
+  left: 12px;
+  width: 24px;
+  height: 24px;
+  border: 1px solid rgba(120, 1, 22, 0.28);
+  border-radius: 4px;
+  background: var(--white);
+  color: var(--burgundy);
+  font-size: 0.82rem;
+}
+
+.change-password-popup:has(.password-otp-modal) .change-password-close {
+  top: 13px !important;
+  right: 12px !important;
+  width: 22px !important;
+  height: 22px !important;
+  font-size: 0.72rem !important;
+}
+
+.password-change-otp-screen.email-verification-screen {
+  width: 100%;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.password-change-otp-screen h2 {
+  margin: 8px 36px 8px;
+  color: var(--burgundy);
+  font-family: "Poppins", sans-serif;
+  font-size: 1.7rem;
+  font-weight: 700;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.password-change-otp-screen .email-verification-copy {
+  margin: 0 0 18px;
+  color: rgba(43, 23, 25, 0.68);
+  font-family: "Poppins", sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.password-change-otp-screen .email-verification-copy strong {
+  color: var(--burgundy);
+  font-weight: 700;
+}
+
+.password-change-otp-screen .email-verification-code-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+  margin: 0 0 12px;
+}
+
+.password-change-otp-screen .email-verification-code-box {
+  width: 100%;
+  height: 48px;
+  border: 1px solid rgba(43, 23, 25, 0.18);
+  border-radius: 7px;
+  background: var(--white);
+  color: var(--burgundy);
+  font-family: "Poppins", sans-serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.password-change-otp-screen .email-verification-code-box.active,
+.password-change-otp-screen .email-verification-code-box.filled {
+  border-color: var(--burgundy);
+  box-shadow: 0 0 0 2px rgba(120, 1, 22, 0.08);
+}
+
+.password-change-otp-screen .email-verification-message {
+  min-height: 16px;
+  margin: 0 0 5px;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+.password-change-otp-screen .email-verification-resend {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin: 0 0 18px;
+  color: rgba(43, 23, 25, 0.7);
+  font-family: "Poppins", sans-serif;
+  font-size: 0.74rem;
+}
+
+.password-change-otp-screen .email-verification-resend-help {
+  color: inherit;
+  font-weight: 500;
+}
+
+.password-change-otp-screen .auth-secondary-action {
+  width: auto;
+  min-height: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--burgundy);
+  font-family: "Poppins", sans-serif;
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.password-change-otp-screen .auth-secondary-action:disabled {
+  color: var(--burgundy);
+  opacity: 1;
+}
+
+.password-otp-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.password-otp-cancel,
+.password-change-otp-screen .auth-submit-btn {
+  min-height: 44px;
+  border-radius: 7px;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.password-otp-cancel {
+  border: 1px solid rgba(120, 1, 22, 0.45);
+  background: transparent;
+  color: var(--burgundy);
+}
+
+.password-change-otp-screen .auth-submit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 0;
+  border: 1px solid var(--burgundy);
+  background: var(--burgundy);
+  color: var(--white);
+  box-shadow: none;
+}
+
+.password-otp-note {
+  display: grid;
+  grid-template-columns: 14px 1fr;
+  gap: 8px;
+  align-items: center;
+  padding: 9px 11px;
+  border-radius: 6px;
+  background: var(--cream);
+  color: rgba(43, 23, 25, 0.68);
+  font-family: "Poppins", sans-serif;
+  font-size: 0.68rem;
+  font-weight: 500;
+  line-height: 1.35;
+  text-align: left;
+}
+
+.password-otp-note i {
+  color: var(--xanthous);
+  font-size: 0.72rem;
+}
+
+.password-change-otp-screen .password-otp-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.password-change-otp-screen .password-otp-cancel,
+.password-change-otp-screen #confirm-password-change-otp-btn.auth-submit-btn {
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0 18px;
+  border-radius: 999px;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.password-change-otp-screen .password-otp-cancel {
+  border: 1.5px solid rgba(120, 1, 22, 0.45);
+  background: transparent;
+  color: var(--burgundy);
+}
+
+.password-change-otp-screen #confirm-password-change-otp-btn.auth-submit-btn {
+  border: 1.5px solid var(--burgundy);
+  background: var(--burgundy);
+  color: var(--white);
+  box-shadow: none;
+}
+
+.password-change-otp-screen #confirm-password-change-otp-btn.auth-submit-btn i {
+  position: static !important;
+  right: auto !important;
+  flex: 0 0 auto;
+  font-size: 0.95rem !important;
+  line-height: 1 !important;
+}
+
+.password-change-otp-screen #confirm-password-change-otp-btn.auth-submit-btn span {
+  min-width: 0;
+  white-space: nowrap;
+}
+
+@media (max-width: 560px) {
+  .change-password-popup {
+    padding: 20px 18px 22px !important;
+  }
+
+  .change-password-actions,
+  .password-otp-actions {
+    gap: 10px !important;
+  }
+
+  .change-password-title-row {
+    grid-template-columns: 52px minmax(0, 1fr);
+  }
+
+  .change-password-icon {
+    width: 52px;
+    height: 52px;
+  }
+}
+
+/* Tighten change-password modal to match the compact reference. */
+.change-password-popup {
+  width: min(462px, calc(100% - 24px)) !important;
+  padding: 24px 26px 28px !important;
+}
+
+.change-password-title-row {
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 16px;
+  padding-right: 42px;
+}
+
+.change-password-icon {
+  width: 52px;
+  height: 52px;
+  font-size: 1.12rem;
+}
+
+.change-password-modal h2 {
+  font-size: 1.35rem;
+}
+
+.change-password-modal p {
+  max-width: 300px;
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.change-password-reminder {
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 13px 14px;
+  border-radius: 10px;
+}
+
+.change-password-reminder > span {
+  width: 32px;
+  height: 32px;
+  font-size: 0.82rem;
+}
+
+.change-password-reminder p {
+  max-width: none;
+  font-size: 0.76rem;
+  line-height: 1.42;
+}
+
+.change-password-field {
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 12px;
+  margin-bottom: 11px;
+}
+
+.change-password-field-icon,
+.change-password-field > .change-password-field-icon {
+  width: 34px !important;
+  height: 34px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 19px 0 0 !important;
+  padding: 0 !important;
+  border-radius: 8px !important;
+  background: var(--cream) !important;
+  color: var(--burgundy) !important;
+  line-height: 1 !important;
+}
+
+.change-password-field-icon i {
+  display: block;
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1;
+}
+
+.change-password-field-body > span {
+  margin-bottom: 4px;
+  font-size: 0.72rem;
+}
+
+.change-password-input-wrap input {
+  min-height: 36px;
+  padding-left: 12px;
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.change-password-input-wrap input::placeholder {
+  color: rgba(43, 23, 25, 0.42);
+  font-family: "Poppins", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.change-password-field small {
+  max-width: 290px;
+  font-size: 0.66rem;
+  line-height: 1.35;
+}
+
+.change-password-actions {
+  gap: 14px !important;
+  margin-top: 20px !important;
+}
+
+.change-password-cancel,
+.change-password-confirm {
+  min-height: 40px !important;
+  font-size: 0.86rem !important;
+}
+
+@media (max-width: 560px) {
+  .change-password-popup {
+    padding: 22px 18px 24px !important;
+  }
+
+  .change-password-title-row {
+    grid-template-columns: 46px minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .change-password-icon {
+    width: 46px;
+    height: 46px;
+  }
+
+  .change-password-modal h2 {
+    font-size: 1.18rem;
+  }
+}
+
+/* Wider, shorter password modal and stable loading actions. */
+.change-password-popup {
+  width: min(560px, calc(100% - 24px)) !important;
+  padding: 22px 28px 24px !important;
+}
+
+.change-password-title-row {
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 14px;
+  margin-bottom: 0;
+}
+
+.change-password-icon {
+  width: 48px;
+  height: 48px;
+}
+
+.change-password-modal h2 {
+  font-size: 1.28rem;
+}
+
+.change-password-modal p {
+  max-width: 360px;
+  font-size: 0.74rem;
+}
+
+.change-password-reminder {
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 10px;
+  margin-bottom: 13px;
+  padding: 11px 13px;
+}
+
+.change-password-reminder > span {
+  width: 30px;
+  height: 30px;
+}
+
+.change-password-reminder p {
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.change-password-field {
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 10px;
+  margin-bottom: 9px;
+}
+
+.change-password-field-icon,
+.change-password-field > .change-password-field-icon {
+  width: 32px !important;
+  height: 32px !important;
+  margin-top: 18px !important;
+}
+
+.change-password-input-wrap input {
+  min-height: 34px;
+}
+
+.change-password-field small {
+  margin-top: 4px;
+}
+
+.change-password-actions,
+.change-password-popup .change-password-actions.swal2-actions {
+  width: 100% !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+  align-items: stretch !important;
+  justify-content: stretch !important;
+  gap: 14px !important;
+  margin-top: 15px !important;
+}
+
+.change-password-cancel,
+.change-password-confirm,
+.change-password-popup .swal2-actions .change-password-cancel,
+.change-password-popup .swal2-actions .change-password-confirm {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 38px !important;
+  margin: 0 !important;
+}
+
+.change-password-popup.swal2-loading .change-password-actions,
+.change-password-popup.swal2-loading .swal2-actions {
+  display: grid !important;
+  grid-template-columns: minmax(220px, 0.48fr) !important;
+  justify-content: end !important;
+}
+
+.change-password-popup.swal2-loading .change-password-confirm {
+  grid-column: 1;
+}
+
+.change-password-popup.swal2-loading .change-password-cancel {
+  display: none !important;
+}
+
+@media (max-width: 560px) {
+  .change-password-popup {
+    width: calc(100% - 18px) !important;
+    padding: 20px 18px 22px !important;
+  }
+}
+
+/* Reference-style notification settings modal. */
+.notification-settings-popup {
+  --burgundy: #780116;
+  --xanthous: #F7B538;
+  --cream: #FFF8EE;
+  --white: #FFFFFF;
+  --dark-text: #2B1719;
+  width: min(760px, calc(100% - 28px)) !important;
+  padding: 44px 46px 48px !important;
+  border: 1px solid rgba(120, 1, 22, 0.08) !important;
+  border-radius: 12px !important;
+  background: var(--white) !important;
+  color: var(--dark-text) !important;
+  font-family: "Poppins", sans-serif !important;
+}
+
+.notification-settings-popup .notification-settings-close {
+  top: 36px !important;
+  right: 36px !important;
+  width: 52px !important;
+  height: 52px !important;
+  border: 1.5px solid rgba(120, 1, 22, 0.28) !important;
+  border-radius: 50% !important;
+  background: var(--white) !important;
+  color: var(--burgundy) !important;
+  font-size: 1.38rem !important;
+  box-shadow: none !important;
+}
+
+.notification-settings-html {
+  margin: 0 !important;
+}
+
+.notification-settings-modal {
+  color: var(--dark-text);
+  font-family: "Poppins", sans-serif;
+}
+
+.notification-settings-head {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr);
+  gap: 24px;
+  align-items: center;
+  padding: 0 72px 0 0;
+  margin-bottom: 34px;
+  overflow: visible;
+}
+
+.notification-settings-back,
+.notification-settings-accent,
+.notification-settings-art {
+  display: none !important;
+}
+
+.notification-settings-title-icon {
+  width: 78px;
+  height: 78px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--cream);
+  color: var(--burgundy);
+  font-size: 2rem;
+}
+
+.notification-settings-modal h2 {
+  margin: 0 0 8px;
+  color: var(--burgundy);
+  font-family: "Poppins", sans-serif;
+  font-size: clamp(2.2rem, 4vw, 3rem);
+  font-weight: 700;
+  line-height: 1;
+  white-space: normal;
+}
+
+.notification-settings-modal p {
+  max-width: none;
+  margin: 0;
+  color: rgba(43, 23, 25, 0.72);
+  font-family: "Poppins", sans-serif;
+  font-size: 1.15rem;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.notification-settings-reminder {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: 22px;
+  align-items: center;
+  min-height: 100px;
+  margin-bottom: 28px;
+  padding: 22px 28px;
+  border: 1.5px solid rgba(247, 181, 56, 0.45);
+  border-radius: 10px;
+  background: var(--cream);
+}
+
+.notification-settings-reminder > span {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--xanthous);
+  color: var(--white);
+  font-size: 1.35rem;
+}
+
+.notification-settings-reminder p {
+  color: var(--dark-text);
+  font-size: 1.05rem;
+  font-weight: 500;
+}
+
+.notification-settings-reminder strong {
+  color: var(--burgundy);
+  font-weight: 700;
+}
+
+.notification-settings-card {
+  padding: 28px 28px;
+  border: 1px solid rgba(43, 23, 25, 0.12);
+  border-radius: 10px;
+  background: var(--white);
+  box-shadow: 0 8px 28px rgba(43, 23, 25, 0.08);
+}
+
+.notification-settings-row {
+  grid-template-columns: 82px minmax(0, 1fr) 86px;
+  gap: 26px;
+  min-height: 130px;
+  padding: 0;
+  border-bottom: 1px solid rgba(43, 23, 25, 0.14);
+}
+
+.notification-settings-row + .notification-settings-row {
+  padding-top: 28px;
+}
+
+.notification-settings-row:last-child {
+  border-bottom: 0;
+}
+
+.notification-settings-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--cream);
+  color: var(--burgundy);
+  font-size: 1.65rem;
+}
+
+.notification-settings-copy strong {
+  margin-bottom: 8px;
+  color: var(--burgundy);
+  font-family: "Poppins", sans-serif;
+  font-size: 1.28rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.notification-settings-copy small {
+  max-width: 380px;
+  color: rgba(43, 23, 25, 0.72);
+  font-family: "Poppins", sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.notification-settings-switch {
+  justify-items: end;
+}
+
+.notification-settings-slider {
+  width: 78px;
+  height: 42px;
+  background: rgba(43, 23, 25, 0.24);
+}
+
+.notification-settings-slider::after {
+  top: 4px;
+  left: 4px;
+  width: 34px;
+  height: 34px;
+}
+
+.notification-settings-switch input:checked + .notification-settings-slider {
+  background: var(--burgundy);
+}
+
+.notification-settings-switch input:checked + .notification-settings-slider::after {
+  transform: translateX(36px);
+}
+
+.notification-settings-switch em {
+  display: none;
+}
+
+.notification-settings-status {
+  min-height: 16px;
+  margin: 10px 0 0 !important;
+  color: #2f6d42 !important;
+  font-family: "Poppins", sans-serif !important;
+  font-size: 0.82rem !important;
+  font-weight: 600 !important;
+}
+
+.notification-settings-actions {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 26px !important;
+  margin: 24px 0 0 !important;
+}
+
+.notification-settings-cancel,
+.notification-settings-confirm {
+  width: 100% !important;
+  min-height: 58px !important;
+  margin: 0 !important;
+  border-radius: 7px !important;
+  font-family: "Poppins", sans-serif !important;
+  font-size: 1.12rem !important;
+  font-weight: 600 !important;
+}
+
+.notification-settings-cancel {
+  border: 1.5px solid var(--burgundy) !important;
+  background: transparent !important;
+  color: var(--burgundy) !important;
+}
+
+.notification-settings-confirm {
+  border: 1.5px solid var(--burgundy) !important;
+  background: var(--burgundy) !important;
+  color: var(--white) !important;
+  box-shadow: none !important;
+}
+
+.notification-settings-confirm.is-saved {
+  background: #2f6d42 !important;
+  border-color: #2f6d42 !important;
+}
+
+@media (max-width: 720px) {
+  .notification-settings-popup {
+    padding: 30px 22px 28px !important;
+  }
+
+  .notification-settings-head {
+    grid-template-columns: 58px minmax(0, 1fr);
+    gap: 16px;
+    padding-right: 54px;
+  }
+
+  .notification-settings-title-icon {
+    width: 58px;
+    height: 58px;
+    font-size: 1.45rem;
+  }
+
+  .notification-settings-modal h2 {
+    font-size: 2rem;
+  }
+
+  .notification-settings-modal p,
+  .notification-settings-reminder p {
+    font-size: 0.92rem;
+  }
+
+  .notification-settings-row {
+    grid-template-columns: 56px minmax(0, 1fr);
+    row-gap: 16px;
+  }
+
+  .notification-settings-switch {
+    grid-column: 1 / -1;
+    justify-items: start;
+  }
+
+  .notification-settings-actions {
+    gap: 12px !important;
+  }
+}
+
+/* Reference-style profile modal, preserving modal size. */
+#profileModal .profile-modal-card {
+  width: min(528px, calc(100vw - 64px));
+  padding: 18px 18px 20px;
+  border-radius: 14px;
+  background: #fffdf8;
+  color: #2B1719;
+}
+
+#profileModal .profile-modal-close {
+  top: 16px;
+  right: 16px;
+  width: 34px;
+  height: 34px;
+  border: 1.5px solid rgba(120, 1, 22, 0.28);
+  background: #fffdf8;
+  color: #780116;
+  font-size: 1rem;
+}
+
+#profileModal .profile-modal-shell {
+  gap: 14px;
+}
+
+#profileModal .profile-modal-title {
+  gap: 10px;
+  padding: 0 46px 0 0;
+}
+
+#profileModal .profile-modal-title .profile-title-icon {
+  width: 30px;
+  height: 30px;
+  color: #780116;
+}
+
+#profileModal .profile-modal-title .profile-title-icon i {
+  font-size: 1.56rem;
+}
+
+#profileModal .profile-modal-title h2 {
+  color: #780116;
+  font-family: "Poppins", sans-serif;
+  font-size: 1.18rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+#profileModal .profile-summary-card,
+#profileModal .profile-info-card {
+  border: 1px solid rgba(120, 1, 22, 0.12);
+  border-radius: 7px;
+  background: #FFFFFF;
+  box-shadow: 0 8px 24px rgba(43, 23, 25, 0.06);
+}
+
+#profileModal .profile-summary-card {
+  min-height: 104px;
+  padding: 18px 20px;
+  margin: 0;
+}
+
+#profileModal .profile-summary-main {
+  gap: 18px;
+}
+
+#profileModal .profile-summary-avatar {
+  width: 66px;
+  height: 66px;
+}
+
+#profileModal .profile-avatar-camera {
+  right: -5px;
+  bottom: 2px;
+  width: 25px;
+  height: 25px;
+  color: #780116;
+  font-size: 0.64rem;
+}
+
+#profileModal .profile-summary-main h3 {
+  color: #780116;
+  font-family: "Poppins", sans-serif;
+  font-size: 1.22rem;
+  font-weight: 700;
+}
+
+#profileModal .profile-summary-main small {
+  color: rgba(43, 23, 25, 0.72);
+  font-family: "Poppins", sans-serif;
+  font-size: 0.76rem;
+  font-weight: 500;
+}
+
+#profileModal .profile-summary-main small b {
+  background: #F7B538;
+}
+
+#profileModal .profile-outline-btn {
+  min-height: 36px;
+  padding: 0 16px;
+  border: 1.5px solid rgba(120, 1, 22, 0.62);
+  border-radius: 5px;
+  background: transparent;
+  color: #780116;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+#profileModal .profile-form {
+  gap: 12px;
+}
+
+#profileModal .profile-info-card {
+  padding: 18px 20px;
+}
+
+#profileModal .profile-section-head {
+  margin-bottom: 13px;
+}
+
+#profileModal .profile-info-card h3 {
+  gap: 8px;
+  color: #780116;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+#profileModal .profile-info-card h3 > i {
+  width: 25px;
+  height: 25px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #780116;
+  color: #FFFFFF;
+  font-size: 0.78rem;
+}
+
+#profileModal .profile-info-row {
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 14px;
+  min-height: 65px;
+  padding: 10px 0;
+  border-bottom-color: rgba(43, 23, 25, 0.12);
+}
+
+#profileModal .profile-info-row > i,
+#profileModal .profile-settings-row > i:first-child {
+  width: 42px;
+  height: 42px;
+  background: #FFF8EE;
+  color: #780116;
+  font-size: 0.94rem;
+}
+
+#profileModal .profile-info-row strong,
+#profileModal .profile-settings-row strong {
+  color: #2B1719;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+#profileModal .profile-info-row input,
+#profileModal .profile-info-row input::placeholder,
+#profileModal .profile-settings-row small {
+  color: rgba(43, 23, 25, 0.72);
+  font-family: "Poppins", sans-serif;
+  font-size: 0.74rem;
+  font-weight: 500;
+}
+
+#profileModal .profile-settings-card h3 {
+  margin-bottom: 12px;
+}
+
+#profileModal .profile-settings-row {
+  grid-template-columns: 44px minmax(0, 1fr) 16px;
+  gap: 14px;
+  min-height: 58px;
+  padding: 9px 0;
+}
+
+#profileModal .profile-settings-row > i:last-child {
+  color: rgba(43, 23, 25, 0.72);
+  font-size: 0.98rem;
+}
+
+#profileModal .profile-status-message {
+  min-height: 0;
+  margin: -6px 0;
+}
+
+#profileModal .profile-save-btn {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  border-radius: 7px;
+  background: #780116;
+  color: #FFFFFF;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  box-shadow: 0 10px 22px rgba(120, 1, 22, 0.16);
+}
+
+@media (max-width: 560px) {
+  #profileModal .profile-modal-card {
+    width: calc(100vw - 28px);
+    padding: 16px 14px 18px;
+  }
+
+  #profileModal .profile-summary-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #profileModal .profile-summary-actions {
+    justify-content: stretch;
+  }
+
+  #profileModal .profile-outline-btn {
+    width: 100%;
+  }
+}
+
+/* Compact profile modal to avoid scrolling, with cleaner row icons. */
+#profileModal .profile-modal-card {
+  max-height: min(92vh, 720px);
+  padding: 14px 16px 16px;
+}
+
+#profileModal .profile-modal-shell {
+  gap: 10px;
+}
+
+#profileModal .profile-modal-title .profile-title-icon {
+  width: 26px;
+  height: 26px;
+}
+
+#profileModal .profile-modal-title .profile-title-icon i {
+  font-size: 1.35rem;
+}
+
+#profileModal .profile-modal-title h2 {
+  font-size: 1.04rem;
+}
+
+#profileModal .profile-summary-card {
+  min-height: 80px;
+  padding: 12px 16px;
+}
+
+#profileModal .profile-summary-avatar {
+  width: 52px;
+  height: 52px;
+}
+
+#profileModal .profile-avatar-camera {
+  width: 22px;
+  height: 22px;
+}
+
+#profileModal .profile-summary-main {
+  gap: 13px;
+}
+
+#profileModal .profile-summary-main h3 {
+  font-size: 1.02rem;
+}
+
+#profileModal .profile-summary-main small {
+  font-size: 0.68rem;
+}
+
+#profileModal .profile-outline-btn {
+  min-height: 32px;
+  padding: 0 13px;
+  font-size: 0.66rem;
+}
+
+#profileModal .profile-form {
+  gap: 8px;
+}
+
+#profileModal .profile-info-card {
+  padding: 12px 16px;
+}
+
+#profileModal .profile-section-head {
+  margin-bottom: 7px;
+}
+
+#profileModal .profile-info-card h3 {
+  font-size: 0.78rem;
+}
+
+#profileModal .profile-info-card h3 > i {
+  width: 22px;
+  height: 22px;
+  font-size: 0.7rem;
+}
+
+#profileModal .profile-info-row {
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 11px;
+  min-height: 48px;
+  padding: 7px 0;
+}
+
+#profileModal .profile-settings-row {
+  grid-template-columns: 34px minmax(0, 1fr) 14px;
+  gap: 11px;
+  min-height: 46px;
+  padding: 7px 0;
+}
+
+#profileModal .profile-info-row > i,
+#profileModal .profile-settings-row > i:first-child {
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(120, 1, 22, 0.08);
+  background: #FFF8EE;
+  color: #780116;
+  font-size: 0.78rem;
+}
+
+#profileModal .profile-info-row strong,
+#profileModal .profile-settings-row strong {
+  margin-bottom: 1px;
+  font-size: 0.72rem;
+}
+
+#profileModal .profile-info-row input,
+#profileModal .profile-info-row input::placeholder,
+#profileModal .profile-settings-row small {
+  font-size: 0.66rem;
+}
+
+#profileModal .profile-settings-card h3 {
+  margin-bottom: 6px;
+}
+
+#profileModal .profile-save-btn {
+  min-height: 38px;
+  font-size: 0.78rem;
+}
+
+@media (max-height: 760px) {
+  #profileModal .profile-modal-card {
+    max-height: 94vh;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  #profileModal .profile-summary-card {
+    min-height: 72px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  #profileModal .profile-info-card {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  #profileModal .profile-info-row,
+  #profileModal .profile-settings-row {
+    min-height: 42px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
+}
+
+/* Keep only the custom password visibility control in auth fields. */
+.auth-field input[type="password"]::-ms-reveal,
+.auth-field input[type="password"]::-ms-clear {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.auth-field input[type="password"]::-webkit-credentials-auto-fill-button,
+.auth-field input[type="password"]::-webkit-contacts-auto-fill-button {
+  visibility: hidden;
+  display: none !important;
+  pointer-events: none;
+}
+
+/* Remove the unused login remember-device option while keeping forgot password. */
+.auth-extra-row > .auth-check:not(.auth-terms-check) {
+  display: none !important;
+}
+
+.auth-extra-row {
+  justify-content: flex-end;
+}
+
+.auth-extra-row .auth-muted-link {
+  color: #676d73 !important;
+  font-family: "Poppins", "Inter", Arial, sans-serif !important;
+  font-size: 0.94rem !important;
+  font-weight: 600 !important;
+  line-height: 1.2 !important;
+  text-decoration: none !important;
+}
+
+.auth-extra-row .auth-muted-link:hover,
+.auth-extra-row .auth-muted-link:focus-visible {
+  color: #780116 !important;
+  text-decoration: none !important;
+  transform: translateY(-1px);
+}
+
+/* Compact notification settings modal to match the change-password scale. */
+.notification-settings-popup {
+  width: min(560px, calc(100% - 24px)) !important;
+  padding: 22px 28px 24px !important;
+  border-radius: 12px !important;
+}
+
+.notification-settings-popup .notification-settings-close {
+  top: 18px !important;
+  right: 18px !important;
+  width: 34px !important;
+  height: 34px !important;
+}
+
+.notification-settings-head {
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 14px;
+  padding-right: 44px;
+  margin-bottom: 18px;
+}
+
+.notification-settings-title-icon {
+  width: 48px;
+  height: 48px;
+  font-size: 1.12rem;
+}
+
+.notification-settings-modal h2 {
+  margin-bottom: 4px;
+  font-size: 1.28rem;
+  line-height: 1.12;
+}
+
+.notification-settings-modal p {
+  font-size: 0.74rem;
+  line-height: 1.35;
+}
+
+.notification-settings-reminder {
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 10px;
+  min-height: 0;
+  margin-bottom: 14px;
+  padding: 11px 13px;
+  border-radius: 10px;
+}
+
+.notification-settings-reminder > span {
+  width: 30px;
+  height: 30px;
+  font-size: 0.76rem;
+}
+
+.notification-settings-reminder p {
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.notification-settings-card {
+  padding: 14px 16px;
+  border-radius: 9px;
+}
+
+.notification-settings-row {
+  grid-template-columns: 44px minmax(0, 1fr) 58px;
+  gap: 14px;
+  min-height: 72px;
+  align-items: center;
+}
+
+.notification-settings-row + .notification-settings-row {
+  padding-top: 14px;
+}
+
+.notification-settings-icon {
+  width: 42px;
+  height: 42px;
+  font-size: 0.98rem;
+}
+
+.notification-settings-copy strong {
+  margin-bottom: 3px;
+  font-size: 0.86rem;
+  line-height: 1.2;
+}
+
+.notification-settings-copy small {
+  max-width: 320px;
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.notification-settings-slider {
+  width: 50px;
+  height: 28px;
+}
+
+.notification-settings-slider::after {
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+}
+
+.notification-settings-switch input:checked + .notification-settings-slider::after {
+  transform: translateX(22px);
+}
+
+.notification-settings-status {
+  min-height: 13px;
+  margin-top: 6px !important;
+  font-size: 0.68rem !important;
+}
+
+.notification-settings-actions {
+  gap: 14px !important;
+  margin-top: 15px !important;
+}
+
+.notification-settings-cancel,
+.notification-settings-confirm {
+  min-height: 38px !important;
+  border-radius: 7px !important;
+  font-size: 0.86rem !important;
+}
+
+@media (max-width: 560px) {
+  .notification-settings-popup {
+    width: calc(100% - 18px) !important;
+    padding: 20px 18px 22px !important;
+  }
+}
+
+/* Slightly roomier profile modal while keeping it within the viewport. */
+#profileModal .profile-modal-card {
+  width: min(560px, calc(100vw - 54px));
+  max-height: min(92vh, 748px);
+  padding: 16px 18px 18px;
+}
+
+#profileModal .profile-modal-shell {
+  gap: 11px;
+}
+
+#profileModal .profile-summary-card {
+  min-height: 88px;
+  padding: 14px 18px;
+}
+
+#profileModal .profile-summary-avatar {
+  width: 56px;
+  height: 56px;
+}
+
+#profileModal .profile-summary-main h3 {
+  font-size: 1.08rem;
+}
+
+#profileModal .profile-summary-main small {
+  font-size: 0.7rem;
+}
+
+#profileModal .profile-info-card {
+  padding: 14px 18px;
+}
+
+#profileModal .profile-info-row {
+  min-height: 52px;
+  padding: 8px 0;
+}
+
+#profileModal .profile-settings-row {
+  min-height: 50px;
+  padding: 8px 0;
+}
+
+#profileModal .profile-info-row > i,
+#profileModal .profile-settings-row > i:first-child {
+  width: 36px;
+  height: 36px;
+  font-size: 0.82rem;
+}
+
+#profileModal .profile-info-row strong,
+#profileModal .profile-settings-row strong {
+  font-size: 0.75rem;
+}
+
+#profileModal .profile-info-row input,
+#profileModal .profile-info-row input::placeholder,
+#profileModal .profile-settings-row small {
+  font-size: 0.68rem;
+}
+
+#profileModal .profile-save-btn {
+  min-height: 40px;
+  font-size: 0.8rem;
+}
+
+#profileModal .profile-modal-title {
+  gap: 12px;
+}
+
+#profileModal .profile-modal-title .profile-title-icon {
+  width: 32px;
+  height: 32px;
+}
+
+#profileModal .profile-modal-title .profile-title-icon i {
+  font-size: 1.58rem;
+}
+
+#profileModal .profile-modal-title h2 {
+  font-size: 1.2rem;
+}
+
+@media (max-height: 760px) {
+  #profileModal .profile-modal-card {
+    max-height: 94vh;
+    padding: 13px 16px 14px;
+  }
+
+  #profileModal .profile-summary-card {
+    min-height: 78px;
+    padding-top: 11px;
+    padding-bottom: 11px;
+  }
+
+  #profileModal .profile-info-card {
+    padding-top: 11px;
+    padding-bottom: 11px;
+  }
+
+  #profileModal .profile-info-row,
+  #profileModal .profile-settings-row {
+    min-height: 44px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
+}
+
+/* Make notification settings narrower and a little taller. */
+.notification-settings-popup {
+  width: min(500px, calc(100% - 24px)) !important;
+  padding: 28px 30px 30px !important;
+}
+
+.notification-settings-head {
+  grid-template-columns: 54px minmax(0, 1fr);
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.notification-settings-title-icon {
+  width: 54px;
+  height: 54px;
+}
+
+.notification-settings-reminder {
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 13px;
+  margin-bottom: 20px;
+  padding: 15px 16px;
+}
+
+.notification-settings-reminder > span {
+  width: 34px;
+  height: 34px;
+}
+
+.notification-settings-card {
+  padding: 18px 18px;
+}
+
+.notification-settings-row {
+  grid-template-columns: 44px minmax(0, 1fr) 54px;
+  gap: 13px;
+  min-height: 86px;
+}
+
+.notification-settings-row + .notification-settings-row {
+  padding-top: 18px;
+}
+
+.notification-settings-copy small {
+  max-width: 280px;
+}
+
+.notification-settings-actions {
+  gap: 12px !important;
+  margin-top: 24px !important;
+}
+
+.notification-settings-cancel,
+.notification-settings-confirm {
+  min-height: 42px !important;
+}
+
+/* Keep the login forgot-password link aligned with the old remember-device text. */
+.auth-modal-card #login-section .auth-extra-row .auth-muted-link,
+.auth-modal-overlay #login-section .auth-extra-row .auth-muted-link {
+  display: inline-flex !important;
+  align-items: center !important;
+  min-height: 20px !important;
+  margin-left: auto !important;
+  color: rgba(32, 48, 58, 0.58) !important;
+  font-family: inherit !important;
+  font-size: 0.78rem !important;
+  font-weight: 500 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0 !important;
+  text-decoration: none !important;
+}
+
+.auth-modal-card #login-section .auth-extra-row .auth-muted-link:hover,
+.auth-modal-card #login-section .auth-extra-row .auth-muted-link:focus-visible,
+.auth-modal-overlay #login-section .auth-extra-row .auth-muted-link:hover,
+.auth-modal-overlay #login-section .auth-extra-row .auth-muted-link:focus-visible {
+  color: #780116 !important;
+  text-decoration: underline !important;
+  text-underline-offset: 3px !important;
+}

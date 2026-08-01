@@ -93,8 +93,14 @@ function openAuthModal() {
   const authModal = document.getElementById("authModal");
   if (!authModal) return;
 
+  if (localStorage.getItem("animua_token")) {
+    closeAuthModal();
+    return;
+  }
+
   authModal.classList.remove("hidden");
   document.body.classList.add("auth-open");
+  document.body.classList.add("modal-open");
   updateAuthPanel();
 }
 
@@ -104,6 +110,7 @@ function closeAuthModal() {
 
   authModal.classList.add("hidden");
   document.body.classList.remove("auth-open");
+  document.body.classList.remove("modal-open");
   clearAuthErrors();
 }
 

@@ -5,6 +5,8 @@ const {
   login,
   requestEmailVerificationOtp,
   confirmEmailVerificationOtp,
+  requestPasswordChangeOtp,
+  confirmPasswordChangeOtp,
   confirmPhoneVerification,
   discardUnverifiedRegistration,
   getCurrentAccount,
@@ -23,6 +25,8 @@ router.post("/discard-unverified-registration", discardUnverifiedRegistration);
 
 router.put("/update-username", verifyToken, updateUsername);
 router.put("/change-password", verifyToken, changePassword);
+router.post("/request-password-change-otp", verifyToken, requestPasswordChangeOtp);
+router.post("/confirm-password-change-otp", verifyToken, confirmPasswordChangeOtp);
 
 router.get("/account", verifyToken, getCurrentAccount);
 router.patch("/account/profile", verifyToken, updateUsername);
