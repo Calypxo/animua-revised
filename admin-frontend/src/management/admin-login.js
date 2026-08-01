@@ -140,6 +140,9 @@ async function handleAdminLogin(e) {
     const show = field.type === "password";
     field.type = show ? "text" : "password";
     icon.innerHTML = show ? eyeClosed : eyeOpen;
+    btn.setAttribute("aria-pressed", String(show));
+    btn.setAttribute("aria-label", show ? "Hide password" : "Show password");
+    btn.title = show ? "Hide password" : "Show password";
   });
 })();
  
