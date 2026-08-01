@@ -30,7 +30,7 @@ const OFFICE_INFO = {
 };
 
 function getClientKey(req) {
-  return req.ip || req.headers["x-forwarded-for"] || "unknown";
+  return req?.ip || req?.headers?.["x-forwarded-for"] || "unknown";
 }
 
 function isRateLimited(req) {
@@ -1623,8 +1623,8 @@ function getLocalReply(message, context = {}, language = "english") {
     if (!events.length) {
       return localizedReply(
         language,
-        "Events are shown on the Home page event section. No published event is currently available in the chatbot context, so please check the Home page or contact the Angeles City Veterinary Office for official confirmation about dates, time, location, requirements, and whether a service is free.",
-        "Makikita ang events sa Home page event section. Walang published event na available sa chatbot context ngayon, kaya pakitingnan ang Home page o kontakin ang Angeles City Veterinary Office para sa official confirmation tungkol sa date, time, location, requirements, at kung libre ang service."
+        "Events are shown in the Home page event section. There are no published upcoming events available right now, so please check the Home page again later or contact the Angeles City Veterinary Office for official confirmation about dates, time, location, requirements, and whether a service is free.",
+        "Makikita ang events sa Home page event section. Wala pang published upcoming events na available ngayon, kaya pakitingnan muli ang Home page mamaya o kontakin ang Angeles City Veterinary Office para sa official confirmation tungkol sa date, time, location, requirements, at kung libre ang service."
       );
     }
 
@@ -1908,9 +1908,9 @@ exports.sendChatbotMessage = async (req, res) => {
       return res.status(429).json({ message: "Please wait a moment before sending another message." });
     }
 
-    const message = cleanMessage(req.body.message || "");
-    const history = cleanHistory(req.body.history || []);
-    const language = resolveReplyLanguage(req.body.language || "", message);
+    const message = cleanMessage(req.body?.message || "");
+    const history = cleanHistory(req.body?.history || []);
+    const language = resolveReplyLanguage(req.body?.language || "", message);
 
     if (!message) {
       return res.status(400).json({ message: "Message is required." });
@@ -1957,8 +1957,11 @@ exports.sendChatbotMessage = async (req, res) => {
     });
   } catch (error) {
     console.error("[Chatbot Error]", error.message);
-    return res.status(500).json({
-      message: "Unable to answer right now. Please try again later."
+    const language = resolveReplyLanguage(req.body?.language || "", req.body?.message || "");
+
+    return res.status(200).json({
+      reply: getVerifiedFallback(language),
+      mode: "fallback"
     });
   }
 };
