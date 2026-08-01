@@ -34,6 +34,40 @@ function getAvailabilitySettingsRef() {
   return db.collection(SETTINGS_COLLECTION_NAME).doc(AVAILABILITY_SETTINGS_ID);
 }
 
+function parseScheduleDate(value) {
+  if (!value) return null;
+  const text = String(value).trim();
+  if (!text) return null;
+  const date = /^\d{4}-\d{2}-\d{2}$/.test(text)
+    ? new Date(`${text}T00:00:00`)
+    : new Date(text);
+  date.setHours(0, 0, 0, 0);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function addOneMonth(date) {
+  const maxDate = new Date(date);
+  const originalDay = maxDate.getDate();
+  maxDate.setMonth(maxDate.getMonth() + 1);
+  if (maxDate.getDate() !== originalDay) {
+    maxDate.setDate(0);
+  }
+  return maxDate;
+}
+
+function isScheduleWithinDecisionWindow(dateValue, decisionValue) {
+  const scheduleDate = parseScheduleDate(dateValue);
+  const decisionDate = parseScheduleDate(decisionValue);
+  if (!scheduleDate || !decisionDate) return false;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const minDate = decisionDate > today ? decisionDate : today;
+  const maxDate = addOneMonth(decisionDate);
+
+  return scheduleDate >= minDate && scheduleDate <= maxDate;
+}
+
 async function readSurrenderAvailability() {
   const snapshot = await getAvailabilitySettingsRef().get();
   const data = snapshot.exists ? snapshot.data() || {} : {};
@@ -425,18 +459,33 @@ async function scheduleMySurrenderAppointment(req, res) {
       });
     }
 
+    const acceptedDate = data.acceptedDate || data.acceptedAt || data.approvedDate || data.approvedAt || data.reviewedAt || data.updatedAt;
+    if (!isScheduleWithinDecisionWindow(date, acceptedDate)) {
+      return res.status(400).json({
+        message: "Surrender appointment date must be within one month from the request acceptance date.",
+      });
+    }
+
     const existingAppointment = data.surrenderAppointment || null;
     const alreadyScheduled = Boolean(existingAppointment?.date || existingAppointment?.time);
     const now = new Date().toISOString();
 
     if (alreadyScheduled) {
-      const surrenderRescheduleRequest = {
+      const rescheduleCount = Number(existingAppointment?.rescheduleCount || 0);
+      if (rescheduleCount >= 1 || existingAppointment?.rescheduledAt) {
+        return res.status(400).json({
+          message: "Surrender appointment can only be rescheduled once.",
+        });
+      }
+
+      const surrenderAppointment = {
         date,
         time,
         location: SHELTER_LOCATION,
-        status: "Pending",
-        requestedAt: now,
-        requestedBy: email,
+        scheduledAt: existingAppointment.scheduledAt || now,
+        rescheduledAt: now,
+        rescheduledBy: email,
+        rescheduleCount: rescheduleCount + 1,
         previousSchedule: existingAppointment || {
           date: data.dropoffDate || "",
           time: "",
@@ -445,17 +494,18 @@ async function scheduleMySurrenderAppointment(req, res) {
       };
 
       await requestRef.update({
-        surrenderRescheduleRequest,
+        surrenderAppointment,
+        surrenderRescheduleRequest: null,
+        dropoffDate: date,
         updatedAt: now,
       });
 
       const updatedDoc = await requestRef.get();
 
       return res.json({
-        message: "Surrender appointment reschedule request sent for admin approval.",
-        requiresApproval: true,
+        message: "Surrender appointment updated.",
         request: updatedDoc.data(),
-        surrenderRescheduleRequest,
+        surrenderAppointment,
       });
     }
 

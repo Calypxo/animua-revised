@@ -115,15 +115,34 @@
   </header>
 
   <main class="compatibility-results-main">
-    <section class="compatibility-results-hero container">
-      <div>
-        <h1>Compatibility Results</h1>
+    <section class="compatibility-results-hero container" aria-labelledby="compatibilityResultsTitle">
+      <div class="compatibility-hero-copy">
+        <h1 id="compatibilityResultsTitle">Compatibility Results</h1>
         <p>Review your latest quiz result and your saved recommendations.</p>
       </div>
-      <a href="petCompatibility.html" class="compatibility-retake-btn">
-        <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
-        <span>Retake Quiz</span>
-      </a>
+
+      <div class="compatibility-hero-art" aria-hidden="true">
+        <i class="fa-solid fa-paw compatibility-art-paw"></i>
+        <i class="fa-solid fa-check compatibility-art-check"></i>
+        <i class="fa-solid fa-sparkles compatibility-art-sparkle"></i>
+      </div>
+
+      <div class="compatibility-hero-actions">
+        <div class="compatibility-hero-dates" aria-label="Compatibility quiz dates">
+          <article>
+            <span><i class="fa-regular fa-calendar-days" aria-hidden="true"></i></span>
+            <div><small>Quiz completed</small><strong id="compatibilityCompletedDate">Loading...</strong></div>
+          </article>
+          <article>
+            <span><i class="fa-regular fa-calendar" aria-hidden="true"></i></span>
+            <div><small>Next allowed retake</small><strong id="compatibilityRetakeDate">Loading...</strong></div>
+          </article>
+        </div>
+        <a href="petCompatibility.html" class="compatibility-retake-btn" data-retake-quiz>
+          <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
+          <span>Retake Quiz</span>
+        </a>
+      </div>
     </section>
 
     <section class="container compatibility-account" id="compatibilityAccount" aria-live="polite">
@@ -136,7 +155,7 @@
             <p>Your latest lifestyle match and quiz history.</p>
           </div>
         </div>
-        <a href="petCompatibility.html"><i class="fa-solid fa-paw"></i>Open Compatibility Quiz</a>
+        <button type="button" data-review-answers><i class="fa-regular fa-pen-to-square"></i>Review Quiz Answers</button>
       </div>
       <div id="compatibilityAccountBody" class="compatibility-account-body">
         <div class="compatibility-loading">
@@ -147,7 +166,7 @@
     </section>
 
     <section class="container compatibility-info-card">
-      <span class="compatibility-info-icon"><i class="fa-solid fa-circle-info"></i></span>
+      <span class="compatibility-info-icon"><i class="fa-solid fa-info"></i></span>
       <div>
         <h2>About your results</h2>
         <p>Your compatibility scores are based on your quiz answers and our matching algorithm. These results are a guide to help you find the best match, but shelter approval is still required before any adoption can proceed.</p>
@@ -176,11 +195,10 @@
       </div>
     </section>
   </main>
-
   <footer class="footer" id="contact">
     <div class="container footer-grid">
       <div class="footer-brand">
-        <a href="#home" class="logo footer-logo">
+        <a href="home.html" class="logo footer-logo">
           <span class="footer-brand-copy">
             <span class="footer-brand-name">ANIMUA</span>
             <span class="footer-brand-tagline">Angeles City Animal Welfare Portal</span>
@@ -191,10 +209,15 @@
           compatibility matching, and shelter-reviewed services.
         </p>
         <div class="footer-social" aria-label="ANIMUA social links">
-          <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f" aria-hidden="true"></i></a>
-          <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram" aria-hidden="true"></i></a>
-          <a href="#" aria-label="YouTube"><i class="fa-brands fa-youtube" aria-hidden="true"></i></a>
-          <a href="mailto:acveterinary@angelescity.gov.ph" aria-label="Email"><i class="fa-regular fa-envelope" aria-hidden="true"></i></a>
+          <a href="https://www.facebook.com/ACVeterinaryOffice" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+            <i class="fa-brands fa-facebook-f" aria-hidden="true"></i>
+          </a>
+          <a href="https://youtu.be/k770yCuEL0I?si=ybv8NXjhfzr4UbzI" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+            <i class="fa-brands fa-youtube" aria-hidden="true"></i>
+          </a>
+          <a href="mailto:acveterinary@angelescity.gov.ph" aria-label="Email Angeles City Veterinary Office">
+            <i class="fa-regular fa-envelope" aria-hidden="true"></i>
+          </a>
         </div>
       </div>
 
@@ -202,24 +225,24 @@
         <h4>Explore</h4>
         <a href="home.html">Home</a>
         <a href="find-furbabies.html">Find Furbabies</a>
-        <a href="#" data-quiz-intro-trigger>Compatibility Quiz</a>
-        <a href="#home-highlights" data-footer-scroll>Upcoming Events</a>
+        <a href="home.html?quizIntro=open">Compatibility Quiz</a>
+        <a href="home.html#home-highlights">Upcoming Events</a>
       </div>
 
       <div class="footer-links footer-support">
         <h4>Services</h4>
-        <a href="#home-highlights" data-footer-scroll>Adoption Guide</a>
+        <a href="home.html#home-highlights">Adoption Guide</a>
         <a href="surrender.html">Surrender Request</a>
         <a href="contact.html">Contact the Shelter</a>
-        <a href="#" data-quiz-intro-trigger>Match Quiz</a>
+        <a href="home.html?quizIntro=open">Match Quiz</a>
       </div>
 
       <div class="footer-links footer-about">
         <h4>About</h4>
-        <a href="#about-animua" data-footer-scroll>About ANIMUA</a>
-        <a href="#how-animua-works" data-footer-scroll>How It Works</a>
-        <a href="#terms-privacy-notice">Privacy Policy</a>
-        <a href="#terms-privacy-notice">Terms of Service</a>
+        <a href="home.html#about-animua">About ANIMUA</a>
+        <a href="home.html#how-animua-works">How It Works</a>
+        <a href="home.html#terms-privacy-notice">Privacy Policy</a>
+        <a href="home.html#terms-privacy-notice">Terms of Service</a>
       </div>
 
       <div class="footer-links footer-contact">
@@ -240,6 +263,101 @@
       </div>
     </div>
   </footer>
+
+<section class="profile-modal-overlay hidden" id="profileModal" aria-hidden="true" aria-labelledby="profileModalTitle">
+    <button type="button" class="profile-modal-backdrop" data-profile-close aria-label="Close profile"></button>
+    <article class="profile-modal-card" role="dialog" aria-modal="true" tabindex="-1">
+      <button type="button" class="profile-modal-close" data-profile-close aria-label="Close profile">
+        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+      </button>
+
+      <div class="profile-modal-shell">
+        <div class="profile-modal-title">
+          <span class="profile-title-icon" aria-hidden="true">
+            <i class="fa-regular fa-circle-user"></i>
+          </span>
+          <h2 id="profileModalTitle">My Profile</h2>
+        </div>
+
+        <section class="profile-summary-card">
+          <div class="profile-summary-main">
+            <div class="profile-avatar-wrap">
+              <div class="profile-summary-avatar" id="profileAvatarPreview">A</div>
+              <button type="button" class="profile-avatar-camera" id="profileAvatarPhotoBtn" aria-label="Change profile photo">
+                <i class="fa-solid fa-camera" aria-hidden="true"></i>
+              </button>
+            </div>
+            <div>
+              <h3 id="profileSummaryName">Account</h3>
+              <small>Member since <span id="profileMemberSince">2026</span> <b aria-hidden="true"></b></small>
+            </div>
+          </div>
+
+          <div class="profile-summary-actions">
+            <input type="file" id="profilePhotoInput" accept="image/png,image/jpeg,image/webp" hidden>
+            <button type="button" class="profile-outline-btn" id="profileChangePhotoBtn">
+              <i class="fa-solid fa-camera" aria-hidden="true"></i>
+              <span>Change Photo</span>
+            </button>
+          </div>
+        </section>
+
+        <form class="profile-form" id="profileForm">
+          <section class="profile-info-card">
+            <div class="profile-section-head">
+              <h3><i class="fa-solid fa-circle-user" aria-hidden="true"></i> Personal Information</h3>
+              <button type="button" class="profile-outline-btn profile-edit-inline" id="profileEditBtn">
+                <i class="fa-solid fa-pen" aria-hidden="true"></i>
+                <span>Edit Profile</span>
+              </button>
+            </div>
+
+            <label class="profile-info-row">
+              <i class="fa-regular fa-user" aria-hidden="true"></i>
+              <span><strong>Full Name</strong><input type="text" id="profileFullName" autocomplete="name" readonly></span>
+            </label>
+
+            <label class="profile-info-row">
+              <i class="fa-regular fa-envelope" aria-hidden="true"></i>
+              <span><strong>Email Address</strong><input type="email" id="profileEmail" autocomplete="email" readonly></span>
+            </label>
+
+            <label class="profile-info-row">
+              <i class="fa-solid fa-phone" aria-hidden="true"></i>
+              <span><strong>Mobile Number</strong><input type="tel" id="profilePhone" autocomplete="tel" readonly placeholder="Not added yet"></span>
+            </label>
+
+          </section>
+
+          <section class="profile-info-card profile-settings-card">
+            <h3><i class="fa-solid fa-gear" aria-hidden="true"></i> Account Settings</h3>
+
+            <button type="button" class="profile-settings-row" id="profilePasswordBtn">
+              <i class="fa-solid fa-lock" aria-hidden="true"></i>
+              <span><strong>Password</strong><small>Update your account password</small></span>
+              <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+            </button>
+
+            <button type="button" class="profile-settings-row" id="profileNotificationsBtn">
+              <i class="fa-regular fa-bell" aria-hidden="true"></i>
+              <span><strong>Notifications</strong><small id="profileNotificationSummary">Manage email and push notifications</small></span>
+              <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+            </button>
+
+          </section>
+
+          <p class="profile-status-message" id="profileStatusMessage" aria-live="polite"></p>
+
+          <div class="profile-modal-actions">
+            <button type="submit" class="profile-save-btn" id="profileSaveBtn">
+              <i class="fa-regular fa-floppy-disk" aria-hidden="true"></i>
+              <span>Save Changes</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </article>
+  </section>
 
   <script type="module" src="../../src/public/js/public-ui.js"></script>
   <script type="module" src="../../src/public/js/compatibility-results-account.js"></script>

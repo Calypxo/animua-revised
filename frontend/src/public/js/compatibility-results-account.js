@@ -5,6 +5,12 @@ const DOG_IMAGE = new URL("../../assets/images/dog.jpg", import.meta.url).href;
 const CAT_IMAGE = new URL("../../assets/images/cat.jpg", import.meta.url).href;
 
 const compatibilityAccountBody = document.getElementById("compatibilityAccountBody");
+const compatibilityAccountTitle = document.querySelector(".compatibility-account-title");
+const compatibilityAccountAction = document.querySelector("[data-review-answers]");
+const compatibilityCompletedDate = document.getElementById("compatibilityCompletedDate");
+const compatibilityRetakeDate = document.getElementById("compatibilityRetakeDate");
+let nextAllowedRetakeDate = null;
+let loadedResults = [];
 
 const traitLabels = {
   energyLevel: "Energy level",
@@ -18,6 +24,54 @@ const traitLabels = {
   strangerTolerance: "Stranger tolerance",
   noiseLevel: "Noise tolerance",
 };
+
+const matchDetailTraits = [
+  { key: "energyLevel", icon: "fa-bolt" },
+  { key: "exerciseNeeds", icon: "fa-person-running" },
+  { key: "independenceLevel", icon: "fa-user-group" },
+  { key: "attentionNeeds", icon: "fa-bell" },
+  { key: "playfulness", icon: "fa-face-smile" },
+  { key: "friendlinessToHumans", icon: "fa-heart" },
+  { key: "goodWithKids", icon: "fa-child-reaching" },
+  { key: "goodWithOtherPets", icon: "fa-paw" },
+];
+
+const answerSections = [
+  {
+    title: "Lifestyle & Activity",
+    icon: "fa-paw",
+    items: [
+      { source: "preferences", key: "energyLevel", label: "Energy preference", scale: ["Very calm", "Low energy", "Moderate", "Active", "Very energetic"] },
+      { source: "preferences", key: "exerciseNeeds", label: "Exercise needs", scale: ["Very little", "A little", "Moderate", "A lot", "Very high"] },
+      { source: "preferences", key: "adaptability", label: "Routine stability", scale: ["Very stable", "Slightly changing", "Moderate changes", "Often changing", "Very unpredictable"] },
+      { source: "preferences", key: "playfulness", label: "Playfulness", scale: ["Very calm", "Slightly playful", "Balanced", "Playful", "Very playful"] },
+    ],
+  },
+  {
+    title: "Home Environment",
+    icon: "fa-house",
+    items: [
+      { source: "filters", key: "preferredSpecies", label: "Preferred species" },
+      { source: "filters", key: "preferredSex", label: "Preferred sex" },
+      { source: "preferences", key: "spaceNeeds", label: "Living space", scale: ["Very small (studio)", "Small", "Average", "Large", "Very large with yard"] },
+      { source: "preferences", key: "goodWithKids", label: "Kids at home", scale: ["Never", "Rarely", "Sometimes", "Often", "Daily - it's a must"] },
+      { source: "preferences", key: "goodWithOtherPets", label: "Other pets", scale: ["No other pets", "Rare contact", "Sometimes", "Often", "Yes, definitely"] },
+      { source: "preferences", key: "strangerTolerance", label: "Visitor comfort", scale: ["Very cautious", "Reserved", "Balanced", "Friendly", "Very welcoming"] },
+    ],
+  },
+  {
+    title: "Care Preferences",
+    icon: "fa-heart",
+    items: [
+      { source: "preferences", key: "attentionNeeds", label: "Daily attention", scale: ["Very little", "A little", "Moderate", "A lot", "Very high"] },
+      { source: "preferences", key: "groomingNeeds", label: "Grooming commitment", scale: ["Not willing", "Slightly willing", "Moderate effort", "Willing", "Very willing"] },
+      { source: "preferences", key: "healthRiskLevel", label: "Vet budget", scale: ["Not prepared", "Slightly prepared", "Somewhat prepared", "Prepared", "Fully prepared"] },
+      { source: "preferences", key: "affectionLevel", label: "Affection preference", scale: ["Very independent", "Not very affectionate", "Balanced", "Affectionate", "Very cuddly"] },
+      { source: "preferences", key: "noiseLevel", label: "Noise tolerance", scale: ["Very little", "Low", "Moderate", "High", "Very high"] },
+      { source: "filters", key: "acceptSpecialNeeds", label: "Special-needs pets", options: { yes: "Open to special-needs pets", no: "Not at this time" } },
+    ],
+  },
+];
 
 function getToken() {
   return localStorage.getItem("animua_token") || "";
@@ -51,8 +105,124 @@ function formatDate(value) {
   });
 }
 
+function toDate(value) {
+  if (!value) return null;
+  if (typeof value === "object" && value.seconds) return new Date(value.seconds * 1000);
+  if (typeof value === "object" && value._seconds) return new Date(value._seconds * 1000);
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function startOfDay(date) {
+  if (!date) return null;
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function updateRetakeState(nextRetakeAt) {
+  nextAllowedRetakeDate = startOfDay(toDate(nextRetakeAt));
+  const today = startOfDay(new Date());
+  const isBlocked = Boolean(nextAllowedRetakeDate && today < nextAllowedRetakeDate);
+
+  document.querySelectorAll("[data-retake-quiz]").forEach((link) => {
+    link.classList.toggle("is-disabled", isBlocked);
+    link.setAttribute("aria-disabled", String(isBlocked));
+    link.setAttribute(
+      "title",
+      isBlocked ? `You can retake the quiz on ${formatDate(nextAllowedRetakeDate)}.` : "Open the compatibility quiz"
+    );
+  });
+}
+
+function setAccountHeader(mode = "results") {
+  if (!compatibilityAccountTitle || !compatibilityAccountAction) return;
+  if (mode === "answers") {
+    compatibilityAccountTitle.innerHTML = `
+      <span class="compatibility-account-icon"><i class="fa-regular fa-pen-to-square"></i></span>
+      <div>
+        <span>Saved quiz response</span>
+        <h2>Latest Quiz Answers</h2>
+        <p>These are the answers you submitted in your most recent quiz.</p>
+      </div>
+    `;
+    compatibilityAccountAction.innerHTML = `<i class="fa-solid fa-paw"></i>View Compatibility Results`;
+    compatibilityAccountAction.dataset.viewResults = "true";
+    delete compatibilityAccountAction.dataset.reviewAnswers;
+    return;
+  }
+
+  compatibilityAccountTitle.innerHTML = `
+    <span class="compatibility-account-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+    <div>
+      <span>Saved recommendation</span>
+      <h2>My Compatibility Result</h2>
+      <p>Your latest lifestyle match and quiz history.</p>
+    </div>
+  `;
+  compatibilityAccountAction.innerHTML = `<i class="fa-regular fa-pen-to-square"></i>Review Quiz Answers`;
+  compatibilityAccountAction.dataset.reviewAnswers = "true";
+  delete compatibilityAccountAction.dataset.viewResults;
+}
+
+function formatQuizAnswer(item, latest) {
+  const source = item.source === "filters" ? latest.filters || {} : latest.preferences || {};
+  const raw = source[item.key];
+  if (raw === undefined || raw === null || raw === "") return "Not answered";
+  if (item.options) return item.options[String(raw).toLowerCase()] || String(raw);
+  if (item.scale) {
+    const index = Number(raw) - 1;
+    return item.scale[index] || String(raw);
+  }
+  return String(raw);
+}
+
+function renderQuizAnswers(results) {
+  const latest = results.find((item) => item.isLatest) || results[0];
+  if (!latest || !compatibilityAccountBody) return;
+  setAccountHeader("answers");
+
+  const sections = answerSections
+    .map((section, index) => {
+      const answers = section.items
+        .map(
+          (item) => `
+            <article class="quiz-answer-card">
+              <span>${escapeHtml(item.label)}</span>
+              <strong>${escapeHtml(formatQuizAnswer(item, latest))}</strong>
+            </article>
+          `
+        )
+        .join("");
+
+      return `
+        <section class="quiz-answer-section">
+          <div class="quiz-answer-section-head">
+            <span><i class="fa-solid ${section.icon}"></i></span>
+            <h3>${index + 1}. ${escapeHtml(section.title)}</h3>
+          </div>
+          <div class="quiz-answer-grid">${answers}</div>
+        </section>
+      `;
+    })
+    .join("");
+
+  compatibilityAccountBody.innerHTML = `
+    <div class="quiz-answers-box">
+      ${sections}
+    </div>
+    <div class="quiz-answers-footer">
+      <span class="quiz-answers-info"><i class="fa-solid fa-info"></i></span>
+      <p>These are the answers used to generate your latest compatibility result. You may retake the quiz when the retake date becomes available.</p>
+      <button type="button" data-view-results><i class="fa-solid fa-paw"></i>View Compatibility Results</button>
+    </div>
+  `;
+  updateRetakeState(latest.nextRetakeAt);
+}
+
 function renderEmpty(message, actionText = "Take the quiz") {
   if (!compatibilityAccountBody) return;
+  if (compatibilityCompletedDate) compatibilityCompletedDate.textContent = "Not available";
+  if (compatibilityRetakeDate) compatibilityRetakeDate.textContent = "Not available";
+  updateRetakeState(null);
   compatibilityAccountBody.innerHTML = `
     <div class="compatibility-empty">
       <i class="fa-solid fa-paw"></i>
@@ -63,7 +233,12 @@ function renderEmpty(message, actionText = "Take the quiz") {
 }
 
 function renderResults(results) {
+  loadedResults = results;
+  setAccountHeader("results");
   const latest = results.find((item) => item.isLatest) || results[0];
+  if (compatibilityCompletedDate) compatibilityCompletedDate.textContent = formatDate(latest.completedAt);
+  if (compatibilityRetakeDate) compatibilityRetakeDate.textContent = formatDate(latest.nextRetakeAt);
+  updateRetakeState(latest.nextRetakeAt);
   const traits = Object.entries(latest.preferences || {})
     .map(([key, value]) => {
       const amount = Math.max(0, Math.min(100, Number(value) * 20));
@@ -107,16 +282,6 @@ function renderResults(results) {
     .join("");
 
   compatibilityAccountBody.innerHTML = `
-    <div class="compatibility-dates">
-      <article>
-        <span><i class="fa-regular fa-circle-check"></i></span>
-        <div><small>Quiz completed</small><strong>${formatDate(latest.completedAt)}</strong></div>
-      </article>
-      <article>
-        <span><i class="fa-regular fa-calendar"></i></span>
-        <div><small>Next allowed retake</small><strong>${formatDate(latest.nextRetakeAt)}</strong></div>
-      </article>
-    </div>
     <div class="compatibility-result-grid">
       <section>
         <div class="compatibility-section-title">
@@ -141,6 +306,7 @@ async function showSavedAnimalDetails(button) {
   const animalId = button.dataset.savedAnimalId || "";
   const savedName = button.dataset.savedAnimalName || "Shelter animal";
   const savedScore = button.dataset.savedAnimalScore || "0.0";
+  const latest = loadedResults.find((item) => item.isLatest) || loadedResults[0] || {};
   let pet = null;
 
   if (animalId) {
@@ -153,38 +319,59 @@ async function showSavedAnimalDetails(button) {
   }
 
   const name = pet?.displayLabel || pet?.shelterLabel || pet?.identifyingDescription || savedName;
-  const meta = pet ? [pet.species, pet.breed, pet.sex, pet.ageEstimate].filter(Boolean).join(" - ") : "Historical recommendation";
-  const notes = pet?.conditionNotes || pet?.initialCondition || (pet ? "Ready to meet adopters and find a safe, caring home." : "This animal is no longer publicly available, but the saved recommendation remains part of your quiz history.");
+  const meta = pet ? [pet.sex, pet.species, pet.ageEstimate].filter(Boolean).join(" • ") : "Historical recommendation";
   const image = pet?.photoURL || (String(pet?.species || "").toLowerCase() === "cat" ? CAT_IMAGE : DOG_IMAGE);
+  const traitSource = pet?.behavioralAssessment && typeof pet.behavioralAssessment === "object" ? pet.behavioralAssessment : latest.preferences || {};
+  const traitRows = matchDetailTraits
+    .map(({ key, icon }) => {
+      const numericValue = Number(traitSource[key] ?? latest.preferences?.[key] ?? 0);
+      const value = Number.isFinite(numericValue) ? Math.max(0, Math.min(5, numericValue)) : 0;
+      const amount = value * 20;
+      return `
+        <article class="match-detail-trait">
+          <span class="match-detail-trait-icon"><i class="fa-solid ${icon}"></i></span>
+          <strong>${escapeHtml(traitLabels[key] || key)}</strong>
+          <div class="match-detail-track"><i style="width:${amount}%"></i></div>
+          <b>${escapeHtml(value || "N/A")}${value ? "<small>/5</small>" : ""}</b>
+        </article>
+      `;
+    })
+    .join("");
 
   await Swal.fire({
     html: `
-      <section class="saved-animal-modal">
-        <header>
-          <span>Saved recommendation</span>
+      <section class="match-detail-modal">
+        <header class="match-detail-head">
+          <div>
+            <h2>Match Details</h2>
+            <p>Here's why this pet is a great match for you.</p>
+          </div>
           <button type="button" data-close-saved-animal aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
         </header>
-        <div class="saved-animal-hero">
+        <div class="match-detail-hero">
           <img src="${escapeHtml(image)}" alt="${escapeHtml(name)}">
           <div>
-            <span class="saved-animal-score">${escapeHtml(savedScore)}% match</span>
             <h2>${escapeHtml(name)}</h2>
             <p>${escapeHtml(meta)}</p>
-            ${pet ? `<span class="saved-animal-status"><i class="fa-solid fa-circle-check"></i>${escapeHtml(pet.status || "Ready")}</span>` : `<span class="saved-animal-status unavailable"><i class="fa-solid fa-clock-rotate-left"></i>Historical record</span>`}
+            <span class="match-detail-score">${escapeHtml(savedScore)}% Match</span>
+            <small>${pet ? "Best match for your profile" : "Saved historical recommendation"}</small>
           </div>
         </div>
-        <div class="saved-animal-copy">
-          <h3>About this recommendation</h3>
-          <p>${escapeHtml(notes)}</p>
-        </div>
-        <footer>
-          <button type="button" data-close-saved-animal>Close</button>
-          ${pet ? `<a href="find-furbabies.html" data-open-saved-animal>View in Find Furbabies</a>` : ""}
+        <section class="match-detail-traits">
+          <h3>Why ${escapeHtml(name)} matches you</h3>
+          <div>${traitRows}</div>
+        </section>
+        <aside class="match-detail-note">
+          <i class="fa-solid fa-info"></i>
+          <p>This match is based on your quiz answers and the pet's recorded traits. It is a guide to help you find the best companion.</p>
+        </aside>
+        <footer class="match-detail-actions">
+          ${pet ? `<a href="find-furbabies.html" data-open-saved-animal>View Full Profile <i class="fa-solid fa-arrow-right"></i></a>` : ""}
         </footer>
       </section>
     `,
     showConfirmButton: false,
-    width: "min(560px, calc(100vw - 28px))",
+    width: "min(620px, calc(100vw - 28px))",
     padding: 0,
     background: "transparent",
     customClass: { popup: "saved-animal-popup" },
@@ -218,6 +405,7 @@ async function loadCompatibilityAccount() {
       return;
     }
 
+    loadedResults = results;
     renderResults(results);
   } catch (error) {
     renderEmpty(error.message || "Unable to load compatibility results.", "Try the quiz");
@@ -227,6 +415,40 @@ async function loadCompatibilityAccount() {
 compatibilityAccountBody?.addEventListener("click", (event) => {
   const button = event.target.closest("[data-saved-animal-id]");
   if (button) showSavedAnimalDetails(button);
+
+  if (event.target.closest("[data-view-results]")) {
+    renderResults(loadedResults);
+  }
+});
+
+compatibilityAccountAction?.addEventListener("click", (event) => {
+  event.preventDefault();
+  if (event.currentTarget.dataset.viewResults) {
+    renderResults(loadedResults);
+    return;
+  }
+  renderQuizAnswers(loadedResults);
+});
+
+document.addEventListener("click", async (event) => {
+  const retakeLink = event.target.closest("[data-retake-quiz]");
+  if (!retakeLink) return;
+
+  const today = startOfDay(new Date());
+  if (!nextAllowedRetakeDate || today >= nextAllowedRetakeDate) return;
+
+  event.preventDefault();
+  await Swal.fire({
+    icon: "warning",
+    title: "Retake Not Available Yet",
+    text: `You can retake the compatibility quiz on ${formatDate(nextAllowedRetakeDate)}.`,
+    confirmButtonText: "OK",
+    customClass: {
+      popup: "animua-popup",
+      confirmButton: "animua-confirm",
+    },
+    buttonsStyling: false,
+  });
 });
 
 loadCompatibilityAccount();

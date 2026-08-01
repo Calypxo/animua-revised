@@ -13826,11 +13826,41 @@ button#chatbotSend.chatbot-input-send i {
   display: grid !important;
   place-items: center !important;
   overflow: visible !important;
-  border: 0 !important;
+  border: 1.5px solid rgba(255, 248, 238, 0.68) !important;
   border-radius: 50% !important;
   clip-path: none !important;
+  background:
+    radial-gradient(circle at 34% 24%, rgba(255, 255, 255, 0.08), transparent 38%),
+    linear-gradient(145deg, #851124 0%, #780116 58%, #650012 100%) !important;
+  color: #fff8ee !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 -5px 12px rgba(43, 0, 8, 0.14),
+    0 14px 30px rgba(34, 10, 10, 0.34),
+    0 0 0 6px rgba(255, 248, 238, 0.08),
+    0 0 0 1px rgba(120, 1, 22, 0.14) !important;
   pointer-events: auto !important;
   transform-origin: center !important;
+}
+
+.animua-chatbot-toggle::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: -6px !important;
+  border: 1px solid rgba(255, 248, 238, 0.2) !important;
+  border-radius: 50% !important;
+  pointer-events: none !important;
+}
+
+.animua-chatbot-toggle:hover,
+.animua-chatbot-toggle:focus-visible {
+  transform: translateY(-2px) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    inset 0 -5px 12px rgba(43, 0, 8, 0.12),
+    0 18px 34px rgba(34, 10, 10, 0.38),
+    0 0 0 6px rgba(255, 248, 238, 0.1),
+    0 0 0 1px rgba(120, 1, 22, 0.16) !important;
 }
 
 .animua-chatbot-toggle i {
@@ -15735,4 +15765,107 @@ button#chatbotSend.chatbot-input-send i {
   color: #780116 !important;
   text-decoration: underline !important;
   text-underline-offset: 3px !important;
+}
+
+/* Final chatbot palette: match the updated burgundy and yellow system colors. */
+.chatbot-head {
+  background:
+    radial-gradient(circle at 66% 24%, rgba(247, 181, 56, 0.12) 0 13px, transparent 14px),
+    radial-gradient(circle at 73% 62%, rgba(247, 181, 56, 0.1) 0 20px, transparent 21px),
+    linear-gradient(135deg, #780116 0%, #6b0014 62%, #57000f 100%) !important;
+  color: #fff8ee !important;
+  box-shadow: inset 0 -1px 0 rgba(247, 181, 56, 0.22) !important;
+}
+
+.chatbot-head::before {
+  color: rgba(247, 181, 56, 0.08) !important;
+}
+
+.chatbot-brand-badge {
+  border-color: #F7B538 !important;
+  background: #FFF8EE !important;
+  color: #780116 !important;
+  box-shadow:
+    0 0 0 4px rgba(247, 181, 56, 0.2),
+    0 10px 22px rgba(43, 0, 8, 0.2) !important;
+}
+
+.chatbot-brand-badge::after {
+  background: #F7B538 !important;
+  box-shadow: 9px 8px 0 -2px #F7B538 !important;
+}
+
+.chatbot-head-copy strong,
+.chatbot-language-select,
+.chatbot-close {
+  color: #FFF8EE !important;
+}
+
+.chatbot-head-copy span {
+  border-color: rgba(247, 181, 56, 0.42) !important;
+  background: linear-gradient(180deg, #F9CE67 0%, #F7B538 100%) !important;
+  color: #780116 !important;
+}
+
+.chatbot-head-copy p {
+  color: rgba(255, 248, 238, 0.92) !important;
+}
+
+.chatbot-language-select,
+.chatbot-close {
+  border-color: rgba(255, 248, 238, 0.32) !important;
+  background: rgba(87, 0, 15, 0.34) !important;
+}
+
+.chatbot-language-select:hover,
+.chatbot-language-select:focus-visible,
+.chatbot-close:hover,
+.chatbot-close:focus-visible {
+  border-color: rgba(247, 181, 56, 0.68) !important;
+  background: rgba(247, 181, 56, 0.14) !important;
+  color: #FFF8EE !important;
+}
+
+.chatbot-bot-avatar {
+  background: linear-gradient(145deg, #780116 0%, #5f0012 100%) !important;
+  color: #F7B538 !important;
+}
+
+.chatbot-message.user p,
+.chatbot-search-field .chatbot-input-send,
+.chatbot-form .chatbot-input-send,
+button#chatbotSend.chatbot-input-send {
+  background: linear-gradient(135deg, #780116 0%, #5f0012 100%) !important;
+  color: #FFF8EE !important;
+}
+
+.chatbot-search-field .chatbot-input-send:hover,
+.chatbot-search-field .chatbot-input-send:focus-visible,
+.chatbot-form .chatbot-input-send:hover,
+.chatbot-form .chatbot-input-send:focus-visible {
+  background: linear-gradient(135deg, #8b0a20 0%, #780116 100%) !important;
+}
+
+.chatbot-language-options button:hover,
+.chatbot-language-options button:focus-visible {
+  background: #F7B538 !important;
+  color: #780116 !important;
+}
+
+.animua-chatbot-toggle {
+  border-color: rgba(255, 248, 238, 0.68) !important;
+  background:
+    radial-gradient(circle at 34% 24%, rgba(247, 181, 56, 0.1), transparent 38%),
+    linear-gradient(145deg, #8b0a20 0%, #780116 58%, #5f0012 100%) !important;
+  color: #FFF8EE !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 248, 238, 0.14),
+    inset 0 -5px 12px rgba(43, 0, 8, 0.14),
+    0 14px 30px rgba(43, 0, 8, 0.34),
+    0 0 0 6px rgba(247, 181, 56, 0.08),
+    0 0 0 1px rgba(120, 1, 22, 0.14) !important;
+}
+
+.animua-chatbot-toggle::after {
+  border-color: rgba(247, 181, 56, 0.22) !important;
 }
