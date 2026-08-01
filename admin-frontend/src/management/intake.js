@@ -8,7 +8,7 @@ import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.
 import { protectPageByModule }         from "../auth/authGuard.js";
 import { hasPermission }               from "../auth/permissions.js";
 import { renderTopbarUser }            from "../components/management/topbarUser.js";
-import { loadSidebar }                 from "../components/management/sidebarLoader.js";
+import { loadSidebar, navigateManagementPage } from "../components/management/sidebarLoader.js";
 import { getUserName }                 from "../utils/storage.js";
 import { BARANGAYS }                   from "../utils/barangays.js";
 
@@ -18,7 +18,6 @@ import {
   getIntakeById,
   createIntake,
   updateIntake,
-  approveIntake,
   rejectIntake,
   convertToProfile
 } from "../services/intake.service.js";
@@ -197,17 +196,16 @@ function renderTable() {
   }
 
   tbody.innerHTML = page.map(r => {
-    const canApprove =
-    r.status === "Pending" &&
-    can("approve");
-
   const canReject =
     r.status === "Pending" &&
     can("reject");
 
   const canConvert =
-    r.status === "Approved" &&
-    can("convert");
+    can("convert") &&
+    (
+      r.status === "Approved" ||
+      (r.status === "Pending" && can("approve"))
+    );
 
   const canEdit =
     (r.status === "Pending" || r.status === "Draft") &&
@@ -235,9 +233,8 @@ function renderTable() {
           <i class="bi bi-eye"></i>
         </button>
         ${canEdit    ? `<button class="tbl-action-btn" title="Edit" aria-label="Edit ${r.id}" data-action="edit" data-id="${r.id}"><i class="bi bi-pencil"></i></button>` : ""}
-        ${canApprove ? `<button class="tbl-action-btn approve" title="Approve" aria-label="Approve ${r.id}" data-action="approve" data-id="${r.id}"><i class="bi bi-check-lg"></i></button>` : ""}
         ${canReject  ? `<button class="tbl-action-btn reject" title="Reject" aria-label="Reject ${r.id}" data-action="reject" data-id="${r.id}"><i class="bi bi-x-lg"></i></button>` : ""}
-        ${canConvert ? `<button class="tbl-action-btn convert" title="Convert to Profile" aria-label="Convert ${r.id} to profile" data-action="convert" data-id="${r.id}"><i class="bi bi-arrow-right-circle"></i></button>` : ""}
+        ${canConvert ? `<button class="tbl-action-btn convert" title="${r.status === "Pending" ? "Approve and start profiling" : "Start profiling"}" aria-label="${r.status === "Pending" ? "Approve and start profiling for" : "Start profiling for"} ${r.id}" data-action="convert" data-id="${r.id}"><i class="bi bi-arrow-right-circle"></i></button>` : ""}
       </td>
     </tr>`;
   }).join("");
@@ -256,7 +253,6 @@ function renderTable() {
       const { action, id } = btn.dataset;
       if (action === "view")    openViewModal(id);
       if (action === "edit")    openEditModal(id);
-      if (action === "approve") openConfirmModal("approve", id);
       if (action === "reject")  openConfirmModal("reject",  id);
       if (action === "convert") openConfirmModal("convert", id);
     });
@@ -425,8 +421,12 @@ function openAddModal() {
   document.getElementById("fIntakeId").value = "";
   document.getElementById("fIntakeDate").value = today();
   document.querySelectorAll(".source-opt").forEach(o => o.classList.remove("selected"));
+  document.getElementById("sourceSelector").classList.remove("is-locked");
   document.getElementById("fSource").value = "";
   document.getElementById("dynamicSection").innerHTML = "";
+  document.getElementById("btnSaveDraft").hidden = false;
+  document.getElementById("btnSubmitIntake").innerHTML =
+    '<i class="bi bi-send-fill"></i> Submit for Review';
   clearFormErrors();
   openModal("intakeModalBackdrop");
 }
@@ -443,11 +443,15 @@ function openApprovedSurrenderIntakeModal() {
 
   document.getElementById("intakeModalTitle").textContent = "New Intake from Approved Surrender";
   document.getElementById("intakeModalSubtitle").textContent =
-    "Review and complete the intake details before submitting.";
+    "Review the arrival details once. Saving will create the profile immediately.";
+  document.getElementById("btnSaveDraft").hidden = true;
+  document.getElementById("btnSubmitIntake").innerHTML =
+    '<i class="bi bi-person-vcard-fill"></i> Complete Intake & Start Profiling';
 
   document.getElementById("intakeForm").reset();
   document.getElementById("fIntakeId").value = "";
   document.getElementById("fIntakeDate").value = today();
+  document.getElementById("sourceSelector").classList.add("is-locked");
 
   document.getElementById("fIdentifyingDescription").value =
     surrender.colorMarkings ||
@@ -517,6 +521,10 @@ function openEditModal(id) {
   const r = intakeRecords.find(x => x.id === id);
   if (!r) return;
   editingId = id;
+  document.getElementById("sourceSelector").classList.remove("is-locked");
+  document.getElementById("btnSaveDraft").hidden = false;
+  document.getElementById("btnSubmitIntake").innerHTML =
+    '<i class="bi bi-check-lg"></i> Save Changes';
 
   document.getElementById("intakeModalTitle").textContent    = `Edit Intake — ${r.id}`;
   document.getElementById("intakeModalSubtitle").textContent = "Update the intake details below.";
@@ -623,6 +631,7 @@ function collectFormData(asDraft = false) {
     record.ownerName       = document.getElementById("fOwnerName")?.value.trim()              || "";
     record.ownerContact    = document.getElementById("fOwnerContact")?.value.trim()           || "";
     record.surrenderApprovedDate = document.getElementById("fSurrenderApprovedDate")?.value   || "";
+    record.advanceToProfiling = !asDraft;
   }
 
   return record;
@@ -692,12 +701,20 @@ async function saveIntake(asDraft = false) {
     });
     if (activeButton) activeButton.innerHTML = `<span class="button-spinner" aria-hidden="true"></span>${asDraft ? "Saving draft…" : "Submitting…"}`;
 
+    let result = null;
     if (editingId) {
       await updateIntake(editingId, payload);
       showToast("success", "Intake record updated.");
     } else {
-      await createIntake(payload);
-      showToast("success", asDraft ? "Draft saved." : "Intake submitted for review.");
+      result = await createIntake(payload);
+      showToast(
+        "success",
+        result.animalProfileId
+          ? "Intake completed. The animal is now in profiling."
+          : asDraft
+          ? "Draft saved."
+          : "Intake submitted for review."
+      );
     }
 
     const isFromApprovedSurrender =
@@ -709,15 +726,18 @@ async function saveIntake(asDraft = false) {
       sessionStorage.removeItem("approved_surrender_for_intake");
       approvedSurrenderContext = null;
 
-      showToast(
-        "success",
-        asDraft
-          ? "Intake draft created and surrender request converted."
-          : "Intake created and surrender request converted."
-      );
+      if (!result?.animalProfileId) {
+        showToast("success", "Intake created and surrender request converted.");
+      }
     }
 
     closeModal("intakeModalBackdrop");
+    if (result?.animalProfileId) {
+      navigateManagementPage(
+        `/pages/animalProfile.html?id=${encodeURIComponent(result.animalProfileId)}`
+      );
+      return;
+    }
     await loadIntakeRecords();
   } catch (err) {
     console.error("[saveIntake]", err);
@@ -847,9 +867,9 @@ function openViewModal(id) {
         : ""
     }
     ${
-      can("approve")
-        ? `<button type="button" class="btn-approve" id="vBtnApprove">
-            <i class="bi bi-check-lg"></i> Approve
+      can("approve") && can("convert")
+        ? `<button type="button" class="btn-convert" id="vBtnConvert">
+            <i class="bi bi-arrow-right-circle"></i> Approve &amp; Start Profiling
           </button>`
         : ""
     }`;
@@ -864,7 +884,6 @@ function openViewModal(id) {
   footer.innerHTML = footerBtns;
 
   document.getElementById("viewClose2")?.addEventListener("click", () => closeModal("viewModalBackdrop"));
-  document.getElementById("vBtnApprove")?.addEventListener("click", () => { closeModal("viewModalBackdrop"); openConfirmModal("approve", id); });
   document.getElementById("vBtnReject")?.addEventListener("click",  () => { closeModal("viewModalBackdrop"); openConfirmModal("reject",  id); });
   document.getElementById("vBtnConvert")?.addEventListener("click", () => { closeModal("viewModalBackdrop"); openConfirmModal("convert", id); });
 
@@ -882,14 +901,6 @@ function openConfirmModal(action, id) {
   confirmTargetId = id;
 
   const cfg = {
-    approve: {
-      title:    "Approve Intake",
-      msg:      `Approve intake record ${id} for ${intakeLabel(r)}? This will allow the record to be converted to an Animal Profile.`,
-      iconCls:  "approve",
-      iconIcon: "bi-check-circle-fill",
-      btnCls:   "btn-approve",
-      btnLabel: "Approve",
-    },
     reject: {
       title:    "Reject Intake",
       msg:      `Reject intake record ${id} for ${intakeLabel(r)}? Please provide a reason below.`,
@@ -899,12 +910,14 @@ function openConfirmModal(action, id) {
       btnLabel: "Reject",
     },
     convert: {
-      title:    "Convert to Animal Profile",
-      msg:      `Convert ${intakeLabel(r)} (${id}) to a full Animal Profile? This will move the animal into the profiling stage.`,
+      title:    r.status === "Pending" ? "Approve & Start Profiling" : "Start Profiling",
+      msg:      r.status === "Pending"
+        ? `Approve intake ${id} for ${intakeLabel(r)} and create its Animal Profile now?`
+        : `Create the Animal Profile for ${intakeLabel(r)} (${id}) and start profiling now?`,
       iconCls:  "convert",
       iconIcon: "bi-arrow-right-circle-fill",
       btnCls:   "btn-convert",
-      btnLabel: "Convert",
+      btnLabel: r.status === "Pending" ? "Approve & Start Profiling" : "Start Profiling",
     },
   };
 
@@ -951,11 +964,6 @@ async function executeConfirmAction() {
       actionButton.disabled = true;
       actionButton.innerHTML = `<span class="button-spinner" aria-hidden="true"></span>Working…`;
     }
-    if (confirmAction === "approve") {
-      await approveIntake(confirmTargetId);
-      showToast("success", "Intake approved.");
-    }
-
     if (confirmAction === "reject") {
       const reason = document.getElementById("rejectReason")?.value.trim();
       if (!reason) {
@@ -967,8 +975,15 @@ async function executeConfirmAction() {
     }
 
     if (confirmAction === "convert") {
-      await convertToProfile(confirmTargetId);
-      showToast("success", "Converted to Animal Profile.");
+      const result = await convertToProfile(confirmTargetId);
+      showToast("success", "Animal Profile created. Profiling has started.");
+      closeModal("confirmModalBackdrop");
+      if (result?.animalProfileId) {
+        navigateManagementPage(
+          `/pages/animalProfile.html?id=${encodeURIComponent(result.animalProfileId)}`
+        );
+        return;
+      }
     }
 
     closeModal("confirmModalBackdrop");
@@ -1120,6 +1135,7 @@ if (params.get("source") === "surrender") {
     // Source selector (inside modal — needs to re-bind on each open)
     // Done via event delegation instead
     document.getElementById("sourceSelector")?.addEventListener("click", e => {
+      if (e.currentTarget.classList.contains("is-locked")) return;
       const opt = e.target.closest(".source-opt");
       if (!opt) return;
       document.querySelectorAll(".source-opt").forEach(o => o.classList.remove("selected"));

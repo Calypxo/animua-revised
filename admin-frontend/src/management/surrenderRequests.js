@@ -158,6 +158,7 @@ const PAGE_SIZE = 8;
 let activeTab   = "all";
 let activeId    = null;
 let confirmMode = null;
+let attendanceWorkflow = null;
 let currentRole = "";
 let surrenderAvailability = null;
 
@@ -761,7 +762,7 @@ function renderDrawer(r) {
 }
   if (r.status === "Approved") {
     footerBtns += r.arrivalConfirmedAt
-      ? `<button class="btn-convert-confirm" id="drawerConvertBtn"><i class="bi bi-arrow-right-circle-fill"></i> Convert to Intake</button>`
+      ? `<button class="btn-convert-confirm" id="drawerConvertBtn"><i class="bi bi-person-vcard-fill"></i> Complete Intake &amp; Start Profiling</button>`
       : `
         <button class="btn-ghost-clay" id="drawerExtendDeadlineBtn"><i class="bi bi-calendar-plus"></i> Extend</button>
         <button class="btn-approve-confirm" id="drawerArrivalBtn"><i class="bi bi-person-check"></i> Confirm Arrival</button>
@@ -778,6 +779,10 @@ function renderDrawer(r) {
         <p>${displayValue(r.id, "Surrender request")} · Submitted ${formatDate(r.submittedAt || r.createdAt)} · ${displayValue(r.source, "Public Form")}</p>
       </div>
       <button class="drawer-close-btn" id="drawerCloseX" aria-label="Close request details"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="action-alert drawer-action-alert" id="drawerActionAlert" role="status" aria-live="polite" hidden>
+      <i class="bi" aria-hidden="true"></i>
+      <div><strong></strong><span></span></div>
     </div>
     <div class="drawer-body">
       <section class="surrender-overview" aria-label="Owner and animal summary">
@@ -810,13 +815,13 @@ function renderDrawer(r) {
   document.getElementById("drawerCloseBtn")?.addEventListener("click",  closeDrawer);
   document.getElementById("drawerApproveBtn")?.addEventListener("click",()=> openApproveModal(r.id));
   document.getElementById("drawerRejectBtn")?.addEventListener("click", ()=> openRejectModal(r.id));
-  document.getElementById("drawerExtendDeadlineBtn")?.addEventListener("click", () => runSurrenderDeadlineAction(r.id, "deadline/extend"));
-  document.getElementById("drawerArrivalBtn")?.addEventListener("click", () => runSurrenderDeadlineAction(r.id, "arrival"));
-  document.getElementById("drawerNoShowBtn")?.addEventListener("click", () => runSurrenderDeadlineAction(r.id, "no-show"));
-  document.getElementById("drawerRestoreBtn")?.addEventListener("click", () => runSurrenderDeadlineAction(r.id, "deadline/restore"));
-  document.getElementById("drawerApproveRescheduleBtn")?.addEventListener("click", () => runSurrenderRescheduleAction(r.id, "approve"));
-  document.getElementById("drawerRejectRescheduleBtn")?.addEventListener("click", () => runSurrenderRescheduleAction(r.id, "reject"));
-  document.getElementById("drawerConvertBtn")?.addEventListener("click", () => openConvertModal(r.id));
+  document.getElementById("drawerExtendDeadlineBtn")?.addEventListener("click", () => openAttendanceWorkflow(r.id, "deadline/extend"));
+  document.getElementById("drawerArrivalBtn")?.addEventListener("click", () => openAttendanceWorkflow(r.id, "arrival"));
+  document.getElementById("drawerNoShowBtn")?.addEventListener("click", () => openAttendanceWorkflow(r.id, "no-show"));
+  document.getElementById("drawerRestoreBtn")?.addEventListener("click", () => openAttendanceWorkflow(r.id, "deadline/restore"));
+  document.getElementById("drawerApproveRescheduleBtn")?.addEventListener("click", () => openAttendanceWorkflow(r.id, "reschedule/approve"));
+  document.getElementById("drawerRejectRescheduleBtn")?.addEventListener("click", () => openAttendanceWorkflow(r.id, "reschedule/reject"));
+  document.getElementById("drawerConvertBtn")?.addEventListener("click", () => beginSurrenderIntake(r.id));
 }
 
 async function updateSurrenderStatusInBackend(id, payload) {
@@ -840,33 +845,140 @@ async function updateSurrenderStatusInBackend(id, payload) {
   return data.request;
 }
 
-async function runSurrenderDeadlineAction(id, action) {
-  let payload = {};
-  if (action === "deadline/extend") {
-    const extensionDays = Number(window.prompt("How many additional days? Enter 1 to 30.", "7"));
-    if (!extensionDays) return;
-    const reason = window.prompt("Reason for extending the deadline:");
-    if (!reason) return;
-    payload = { extensionDays, reason };
-  } else if (action === "no-show") {
-    const reason = window.prompt("Reason for marking this request as a no-show:", "Missed shelter appointment.");
-    if (!reason) return;
-    payload = { reason };
-  } else if (action === "deadline/restore") {
-    const reason = window.prompt("Reason for restoring this expired request:");
-    if (!reason) return;
-    payload = { reason };
-  } else if (!window.confirm("Confirm that the owner and animal arrived at the shelter?")) {
+const attendanceWorkflowConfig = {
+  arrival: {
+    title: "Confirm Shelter Arrival",
+    heading: "Owner and animal are physically at the shelter",
+    message: "This completes attendance and unlocks the final Intake review.",
+    icon: "bi-person-check-fill",
+    button: "Confirm Arrival",
+  },
+  "deadline/extend": {
+    title: "Extend Attendance Deadline",
+    heading: "Give the sender additional time",
+    message: "Choose 1 to 30 additional days and record why the extension is needed.",
+    icon: "bi-calendar-plus-fill",
+    button: "Extend Deadline",
+    needsDays: true,
+    needsReason: true,
+  },
+  "no-show": {
+    title: "Mark as No Show",
+    heading: "Close this request for non-attendance",
+    message: "The request will expire and the reason will be kept in its audit history.",
+    icon: "bi-calendar-x-fill",
+    button: "Mark No Show",
+    danger: true,
+    needsReason: true,
+    defaultReason: "Missed shelter appointment.",
+  },
+  "deadline/restore": {
+    title: "Restore Expired Request",
+    heading: "Reopen the attendance window",
+    message: "A new 14-day deadline will be created after you confirm.",
+    icon: "bi-arrow-counterclockwise",
+    button: "Restore Request",
+    needsReason: true,
+  },
+  "reschedule/approve": {
+    title: "Approve New Drop-off Date",
+    heading: "Accept the requested appointment change",
+    message: "The approved date must still fall inside the active attendance deadline.",
+    icon: "bi-calendar2-check-fill",
+    button: "Approve New Date",
+  },
+  "reschedule/reject": {
+    title: "Reject Date Change",
+    heading: "Keep the current drop-off schedule",
+    message: "Explain why the requested appointment change cannot be accepted.",
+    icon: "bi-calendar2-x-fill",
+    button: "Reject Change",
+    danger: true,
+    needsReason: true,
+  },
+};
+
+function setActionAlert(id, type = "error", title = "", message = "") {
+  const alert = document.getElementById(id);
+  if (!alert) return;
+  if (!message) {
+    alert.hidden = true;
+    return;
+  }
+  alert.className = `action-alert is-${type}${id === "drawerActionAlert" ? " drawer-action-alert" : ""}`;
+  alert.querySelector("i").className = `bi ${type === "success" ? "bi-check-circle-fill" : type === "warning" ? "bi-exclamation-triangle-fill" : "bi-exclamation-circle-fill"}`;
+  alert.querySelector("strong").textContent = title;
+  alert.querySelector("span").textContent = message;
+  alert.hidden = false;
+}
+
+function openAttendanceWorkflow(id, action) {
+  const request = allRequests.find(item => item.id === id);
+  const config = attendanceWorkflowConfig[action];
+  if (!request || !config) return;
+  attendanceWorkflow = { id, action };
+  document.getElementById("workflowModalTitle").textContent = config.title;
+  document.getElementById("workflowModalHeading").textContent = config.heading;
+  document.getElementById("workflowModalMessage").textContent = config.message;
+  document.querySelector("#workflowModalIcon i").className = `bi ${config.icon}`;
+  document.getElementById("workflowDaysGroup").hidden = !config.needsDays;
+  document.getElementById("workflowReasonGroup").hidden = !config.needsReason;
+  document.getElementById("workflowDays").value = config.needsDays ? "7" : "";
+  document.getElementById("workflowReason").value = config.defaultReason || "";
+  document.getElementById("errWorkflowDays").textContent = "";
+  document.getElementById("errWorkflowReason").textContent = "";
+  document.getElementById("workflowDays").removeAttribute("aria-invalid");
+  document.getElementById("workflowReason").removeAttribute("aria-invalid");
+  setActionAlert("workflowActionAlert");
+  const button = document.getElementById("workflowConfirmBtn");
+  button.className = config.danger ? "btn-reject-confirm" : "btn-approve-confirm";
+  button.innerHTML = `<i class="bi ${config.icon}"></i> ${config.button}`;
+  openModal("workflowModalBackdrop");
+}
+
+async function executeAttendanceWorkflow() {
+  if (!attendanceWorkflow) return;
+  const { id, action } = attendanceWorkflow;
+  const config = attendanceWorkflowConfig[action];
+  const daysInput = document.getElementById("workflowDays");
+  const reasonInput = document.getElementById("workflowReason");
+  const extensionDays = Number(daysInput.value);
+  const reason = reasonInput.value.trim();
+  let valid = true;
+
+  if (config.needsDays && (!Number.isInteger(extensionDays) || extensionDays < 1 || extensionDays > 30)) {
+    document.getElementById("errWorkflowDays").textContent = "Enter a whole number from 1 to 30.";
+    daysInput.setAttribute("aria-invalid", "true");
+    valid = false;
+  }
+  if (config.needsReason && reason.length < 5) {
+    document.getElementById("errWorkflowReason").textContent = "Enter a clear reason using at least 5 characters.";
+    reasonInput.setAttribute("aria-invalid", "true");
+    valid = false;
+  }
+  if (!valid) {
+    setActionAlert("workflowActionAlert", "warning", "Check the highlighted fields", "Complete the required information before confirming.");
     return;
   }
 
+  const payload = {};
+  if (config.needsDays) payload.extensionDays = extensionDays;
+  if (config.needsReason) payload.reason = reason;
+  const button = document.getElementById("workflowConfirmBtn");
+  const original = button.innerHTML;
+
   try {
+    button.disabled = true;
+    button.innerHTML = '<span class="button-spinner" aria-hidden="true"></span> Updating…';
     const token = localStorage.getItem("animua_token");
-    const response = await fetch(`${SURRENDER_REQUESTS_API_URL}/${encodeURIComponent(id)}/${action}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify(payload),
-    });
+    const response = await fetch(
+      `${SURRENDER_REQUESTS_API_URL}/${encodeURIComponent(id)}/${action}`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(payload),
+      }
+    );
     const responseText = await response.text();
     let result = {};
     try {
@@ -876,50 +988,27 @@ async function runSurrenderDeadlineAction(id, action) {
     }
     if (!response.ok) {
       const message = response.status === 404
-        ? "The running backend is outdated and does not have this attendance action. Restart the backend and try again."
+        ? "This attendance action is unavailable. Restart the management backend and try again."
         : result.message || "Unable to update the attendance workflow.";
       throw new Error(message);
     }
+
+    closeModal("workflowModalBackdrop");
     publicRequests = await getPublicSubmittedRequests();
     allRequests = [...publicRequests];
     renderStats();
     applyFilters();
     const request = allRequests.find(item => item.id === id);
-    if (request) renderDrawer(request);
+    if (request) {
+      renderDrawer(request);
+      setActionAlert("drawerActionAlert", "success", "Attendance updated", result.message || "The request workflow was updated successfully.");
+    }
     showToast("success", result.message || "Attendance workflow updated.");
   } catch (error) {
-    showToast("error", error.message || "Unable to update the attendance workflow.");
-  }
-}
-
-async function runSurrenderRescheduleAction(id, decision) {
-  const payload = {};
-  if (decision === "reject") {
-    const reason = window.prompt("Reason for rejecting this drop-off date change:");
-    if (!reason) return;
-    payload.reason = reason;
-  } else if (!window.confirm("Approve the requested drop-off date and time?")) {
-    return;
-  }
-
-  try {
-    const token = localStorage.getItem("animua_token");
-    const response = await fetch(`${SURRENDER_REQUESTS_API_URL}/${encodeURIComponent(id)}/reschedule/${decision}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify(payload),
-    });
-    const result = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(result.message || "Unable to review the drop-off reschedule.");
-    publicRequests = await getPublicSubmittedRequests();
-    allRequests = [...publicRequests];
-    renderStats();
-    applyFilters();
-    const request = allRequests.find(item => item.id === id);
-    if (request) renderDrawer(request);
-    showToast("success", result.message || "Drop-off reschedule reviewed.");
-  } catch (error) {
-    showToast("error", error.message || "Unable to review the drop-off reschedule.");
+    setActionAlert("workflowActionAlert", "error", "Could not update the request", error.message || "Please try again.");
+  } finally {
+    button.disabled = false;
+    button.innerHTML = original;
   }
 }
 
@@ -941,6 +1030,7 @@ function openApproveModal(id) {
   document.getElementById("approveConfirmMsg").textContent =
     `Approve surrender request ${id} from ${r.owner.name} for ${r.pet.name}?`;
   document.getElementById("approveNotes").value = "";
+  setActionAlert("approveActionAlert");
   openModal("approveModalBackdrop");
 }
 async function executeApprove() {
@@ -955,7 +1045,13 @@ async function executeApprove() {
 
   if (!r) return;
 
+  const button = document.getElementById("approveConfirmBtn");
+  const original = button?.innerHTML;
   try {
+    if (button) {
+      button.disabled = true;
+      button.innerHTML = '<span class="button-spinner" aria-hidden="true"></span> Approving…';
+    }
     const reviewNotes = document.getElementById("approveNotes").value.trim() || null;
 
     const updatedRequest = await updateSurrenderStatusInBackend(r.id, {
@@ -976,7 +1072,12 @@ async function executeApprove() {
 
   } catch (error) {
     console.error("Approve surrender request error:", error);
-    showToast("error", error.message || "Failed to approve request.");
+    setActionAlert("approveActionAlert", "error", "Approval was not saved", error.message || "Please try again.");
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.innerHTML = original;
+    }
   }
 }
 
@@ -995,7 +1096,9 @@ function openRejectModal(id) {
   document.getElementById("rejectConfirmMsg").textContent =
     `Reject surrender request ${id} from ${r.owner.name}?`;
   document.getElementById("rejectReason").value = "";
+  document.getElementById("rejectReason").removeAttribute("aria-invalid");
   document.getElementById("errRejectReason").textContent = "";
+  setActionAlert("rejectActionAlert");
   openModal("rejectModalBackdrop");
 }
 async function executeReject() {
@@ -1008,8 +1111,10 @@ async function executeReject() {
 }
   const reason = document.getElementById("rejectReason")?.value.trim();
 
-  if (!reason) {
-    document.getElementById("errRejectReason").textContent = "A reason is required.";
+  if (!reason || reason.length < 5) {
+    document.getElementById("errRejectReason").textContent = "Enter a clear reason using at least 5 characters.";
+    document.getElementById("rejectReason").setAttribute("aria-invalid", "true");
+    setActionAlert("rejectActionAlert", "warning", "Reason required", "Add enough detail for staff and the sender to understand this decision.");
     return;
   }
 
@@ -1017,7 +1122,13 @@ async function executeReject() {
 
   if (!r) return;
 
+  const button = document.getElementById("rejectConfirmBtn");
+  const original = button?.innerHTML;
   try {
+    if (button) {
+      button.disabled = true;
+      button.innerHTML = '<span class="button-spinner" aria-hidden="true"></span> Rejecting…';
+    }
     const updatedRequest = await updateSurrenderStatusInBackend(r.id, {
       status: "Rejected",
       rejectedReason: reason,
@@ -1033,26 +1144,18 @@ async function executeReject() {
     showToast("info", `Request ${r.id} rejected.`);
   } catch (error) {
     console.error("Reject surrender request error:", error);
-    showToast("error", error.message || "Failed to reject request.");
+    setActionAlert("rejectActionAlert", "error", "Rejection was not saved", error.message || "Please try again.");
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.innerHTML = original;
+    }
   }
 }
 
-// Convert to intake
-function openConvertModal(id) {
+// Arrival is already confirmed, so open the one final intake review directly.
+function beginSurrenderIntake(id) {
   const r = allRequests.find(x=>x.id===id);
-  if (!r) return;
-  if (r.status !== "Approved" || !r.arrivalConfirmedAt) {
-    showToast("error", "Confirm the owner and animal's arrival before starting Intake.");
-    return;
-  }
-  confirmMode = { type:"convert", id };
-  document.getElementById("convertConfirmMsg").textContent =
-    `Convert ${r.id} (${r.pet.name} from ${r.owner.name}) to a formal Intake record?`;
-  openModal("convertModalBackdrop");
-}
-async function executeConvert() {
-  const r = allRequests.find(x => x.id === confirmMode.id);
-
   if (!r) return;
   if (r.status !== "Approved" || !r.arrivalConfirmedAt) {
     showToast("error", "Confirm the owner and animal's arrival before starting Intake.");
@@ -1081,8 +1184,7 @@ async function executeConvert() {
     })
   );
 
-  closeModal("convertModalBackdrop");
-  showToast("success", "Arrival verified. Opening the Intake form...");
+  showToast("success", "Opening the final Intake review...");
   setTimeout(() => {
     navigateManagementPage("/pages/intakeList.html?source=surrender");
   }, 500);
@@ -1094,7 +1196,7 @@ async function executeConvert() {
 function openModal(id)  { document.getElementById(id)?.classList.add("open"); }
 function closeModal(id) { document.getElementById(id)?.classList.remove("open"); }
 function closeAllModals() {
-  ["rejectModalBackdrop","approveModalBackdrop","convertModalBackdrop"].forEach(closeModal);
+  ["rejectModalBackdrop","approveModalBackdrop","workflowModalBackdrop"].forEach(closeModal);
 }
 
 let toastT;
@@ -1164,13 +1266,28 @@ async function init() {
     document.getElementById("approveModalCancel")?.addEventListener("click", ()=>closeModal("approveModalBackdrop"));
     document.getElementById("approveConfirmBtn")?.addEventListener("click",  executeApprove);
 
-    // Convert modal
-    document.getElementById("convertModalClose")?.addEventListener("click",  ()=>closeModal("convertModalBackdrop"));
-    document.getElementById("convertModalCancel")?.addEventListener("click", ()=>closeModal("convertModalBackdrop"));
-    document.getElementById("convertConfirmBtn")?.addEventListener("click",  executeConvert);
+    // Attendance workflow modal
+    document.getElementById("workflowModalClose")?.addEventListener("click",  ()=>closeModal("workflowModalBackdrop"));
+    document.getElementById("workflowModalCancel")?.addEventListener("click", ()=>closeModal("workflowModalBackdrop"));
+    document.getElementById("workflowConfirmBtn")?.addEventListener("click", executeAttendanceWorkflow);
+    document.getElementById("workflowDays")?.addEventListener("input", event => {
+      event.currentTarget.removeAttribute("aria-invalid");
+      document.getElementById("errWorkflowDays").textContent = "";
+      setActionAlert("workflowActionAlert");
+    });
+    document.getElementById("workflowReason")?.addEventListener("input", event => {
+      event.currentTarget.removeAttribute("aria-invalid");
+      document.getElementById("errWorkflowReason").textContent = "";
+      setActionAlert("workflowActionAlert");
+    });
+    document.getElementById("rejectReason")?.addEventListener("input", event => {
+      event.currentTarget.removeAttribute("aria-invalid");
+      document.getElementById("errRejectReason").textContent = "";
+      setActionAlert("rejectActionAlert");
+    });
 
     // Backdrop click
-    ["rejectModalBackdrop","approveModalBackdrop","convertModalBackdrop"].forEach(id=>{
+    ["rejectModalBackdrop","approveModalBackdrop","workflowModalBackdrop"].forEach(id=>{
       document.getElementById(id)?.addEventListener("click",e=>{if(e.target.id===id)closeModal(id);});
     });
 

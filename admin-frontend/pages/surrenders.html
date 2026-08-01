@@ -197,6 +197,10 @@
           placeholder="Explain why this surrender request is being rejected…"></textarea>
         <span class="form-err" id="errRejectReason"></span>
       </div>
+      <div class="action-alert" id="rejectActionAlert" role="alert" hidden>
+        <i class="bi" aria-hidden="true"></i>
+        <div><strong></strong><span></span></div>
+      </div>
     </div>
     <div class="um-modal-footer">
       <button class="btn-ghost-clay" id="rejectModalCancel">Cancel</button>
@@ -229,6 +233,10 @@
         <textarea class="form-inp form-textarea mt-1" id="approveNotes" rows="2"
           placeholder="Any conditions or notes for the intake staff…"></textarea>
       </div>
+      <div class="action-alert" id="approveActionAlert" role="alert" hidden>
+        <i class="bi" aria-hidden="true"></i>
+        <div><strong></strong><span></span></div>
+      </div>
     </div>
     <div class="um-modal-footer">
       <button class="btn-ghost-clay" id="approveModalCancel">Cancel</button>
@@ -239,35 +247,47 @@
   </div>
 </div>
 
-<!-- CONVERT TO INTAKE MODAL -->
-<div class="um-modal-backdrop" id="convertModalBackdrop">
-  <div class="um-modal um-modal-xs" role="dialog" aria-modal="true">
+<!-- ATTENDANCE WORKFLOW MODAL -->
+<div class="um-modal-backdrop" id="workflowModalBackdrop">
+  <div class="um-modal um-modal-xs" role="dialog" aria-modal="true" aria-labelledby="workflowModalTitle">
     <div class="um-modal-header">
-      <h2>Convert to Intake</h2>
-      <button class="modal-close-btn" id="convertModalClose"><i class="bi bi-x-lg"></i></button>
+      <h2 id="workflowModalTitle">Update Attendance</h2>
+      <button class="modal-close-btn" id="workflowModalClose" type="button" aria-label="Close attendance action"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="um-modal-body">
-      <div class="confirm-body">
-        <div class="confirm-icon-wrap" style="background:var(--green-soft);color:var(--green)">
-          <i class="bi bi-arrow-right-circle-fill"></i>
+      <div class="workflow-guidance">
+        <div class="confirm-icon-wrap" id="workflowModalIcon">
+          <i class="bi bi-calendar2-check-fill"></i>
         </div>
-        <p id="convertConfirmMsg"></p>
-        <p class="mt-2" style="font-size:0.82rem;color:var(--stone)">
-          The Intake form will open with the surrender details pre-filled. The request will be marked Converted only after the Intake record is saved.
-        </p>
+        <div><strong id="workflowModalHeading"></strong><p id="workflowModalMessage"></p></div>
+      </div>
+      <div class="form-group mt-3" id="workflowDaysGroup" hidden>
+        <label class="form-lbl" for="workflowDays">Additional Days <span class="req">*</span></label>
+        <input class="form-inp mt-1" id="workflowDays" type="number" min="1" max="30" inputmode="numeric" />
+        <span class="form-err" id="errWorkflowDays"></span>
+      </div>
+      <div class="form-group mt-3" id="workflowReasonGroup" hidden>
+        <label class="form-lbl" for="workflowReason">Reason <span class="req">*</span></label>
+        <textarea class="form-inp form-textarea mt-1" id="workflowReason" rows="3" maxlength="500"></textarea>
+        <div class="field-help">Enter at least 5 characters so the decision is clear in the audit history.</div>
+        <span class="form-err" id="errWorkflowReason"></span>
+      </div>
+      <div class="action-alert" id="workflowActionAlert" role="alert" hidden>
+        <i class="bi" aria-hidden="true"></i>
+        <div><strong></strong><span></span></div>
       </div>
     </div>
     <div class="um-modal-footer">
-      <button class="btn-ghost-clay" id="convertModalCancel">Cancel</button>
-      <button class="btn-convert-confirm" id="convertConfirmBtn">
-        <i class="bi bi-arrow-right-circle-fill"></i> Continue to Intake
+      <button class="btn-ghost-clay" id="workflowModalCancel" type="button">Cancel</button>
+      <button class="btn-approve-confirm" id="workflowConfirmBtn" type="button">
+        <i class="bi bi-check-lg"></i> Confirm
       </button>
     </div>
   </div>
 </div>
 
 <!-- Toast -->
-<div class="um-toast" id="umToast"><i class="bi" id="toastIcon"></i><span id="toastMsg"></span></div>
+<div class="um-toast" id="umToast" role="status" aria-live="polite"><i class="bi" id="toastIcon"></i><span id="toastMsg"></span></div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script type="module" src="/src/management/surrenderRequests.js"></script>
