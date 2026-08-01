@@ -1,6 +1,4 @@
 import { API_BASE_URL } from "../utils/api.js";
-import "../css/adminDashboard.css";
-import "../css/sidebar.css";
 import "../css/animalProfiling.css";
 
 import { protectPageByModule } from "../auth/authGuard.js";
@@ -50,7 +48,7 @@ const TRAITS = [
 ];
 
 const TRAIT_COLORS = [
-  "#186534", "#2558a8", "#0d6e6e", "#b86a00", "#6f191c", "#9b2c4e", "#97262b",
+  "#186534", "#2558a8", "#0d6e6e", "#b86a00", "#780116", "#780116", "#780116",
   "#2f855a", "#3182ce", "#2c7a7b", "#d69e2e", "#c05621", "#805ad5", "#dd6b20",
   "#38a169", "#4c51bf", "#b83280"
 ];
@@ -115,8 +113,8 @@ const dotColors = {
   "Converted to profile": "#2558a8",
   "Medical": "#0d6e6e",
   "Vaccination": "#186534",
-  "Status changed": "#6f191c",
-  "Adopted": "#9b2c4e",
+  "Status changed": "#780116",
+  "Adopted": "#780116",
   "Cleared from quarantine": "#186534",
   "Marked ready": "#186534",
 };

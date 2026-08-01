@@ -1,7 +1,6 @@
-import "../css/adminDashboard.css";
-import "../css/sidebar.css";
 import "../css/auditTrail.css";
 import "../css/recordsWorkspace.css";
+import "../css/managementTables.css";
 
 import { protectPageByModule } from "../auth/authGuard.js";
 import { renderTopbarUser } from "../components/management/topbarUser.js";

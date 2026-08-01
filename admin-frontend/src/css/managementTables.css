@@ -1,0 +1,449 @@
+/* Shared management data UI. Loaded last to replace conflicting page themes. */
+.management-consistent-ui {
+  --mt-red: #780116;
+  --mt-midnight: #0D0D0D;
+  --mt-brown: #362822;
+  --mt-champagne: #EFE5D2;
+  --mt-navy: #0A1D4B;
+  --mt-gold: #F7B538;
+  --mt-cream: #FFF8EE;
+  --mt-white: #FFFFFF;
+  --mt-text: var(--mt-midnight);
+  --mt-muted: var(--mt-brown);
+  --mt-line: rgba(54, 40, 34, .18);
+  --mt-line-soft: rgba(54, 40, 34, .10);
+  --mt-head: var(--mt-champagne);
+  --mt-hover: rgba(120, 1, 22, .035);
+  --mt-active: rgba(120, 1, 22, .10);
+}
+
+/* Data panels and scroll shells */
+.management-consistent-ui :is(
+  .records-panel, .aa-table-panel, .sr-table-panel, .inv-table-panel,
+  .audit-panel, .archive-panel, .ap-records-panel, .um-directory-panel,
+  .cq-records, .report-data-card
+) {
+  overflow: hidden !important;
+  border: 1px solid var(--mt-line) !important;
+  background: var(--mt-white) !important;
+  box-shadow: 0 16px 38px rgba(54, 40, 34, .075) !important;
+}
+
+.management-consistent-ui :is(
+  .table-responsive, .records-table-wrap, .inventory-table-wrap,
+  .cq-table-wrap, .report-table-wrap, .um-table-shell
+) {
+  border-color: var(--mt-line-soft) !important;
+  background: var(--mt-white) !important;
+  scrollbar-color: rgba(120, 1, 22, .24) transparent;
+  scrollbar-width: thin;
+}
+
+/* One calm White data workspace replaces the former Cream and gradient bands. */
+.management-consistent-ui :is(
+  .intake-toolbar, .surrender-toolbar, .aa-toolbar-layout,
+  .records-toolbar, .cq-record-head, .rpt-card-head,
+  .table-section-head, .inv-table-panel > .panel-head
+) {
+  border-color: var(--mt-line-soft) !important;
+  background: var(--mt-white) !important;
+}
+
+.management-consistent-ui :is(.toolbar-tabs, .ap-tabs-wrap, .um-tabs-wrap) {
+  border-bottom-color: transparent !important;
+}
+
+.management-consistent-ui :is(.animal-record-list, .user-record-list) {
+  background: var(--mt-white) !important;
+}
+
+/* Status/view tabs: Burgundy type with a quiet light-Burgundy active fill. */
+.management-consistent-ui :is(
+  .intake-tabs, .aa-tabs, .sr-tabs, .archive-tabs, .ap-tabs,
+  .um-tabs, .inv-tabs, .audit-view-switch
+) {
+  width: max-content !important;
+  max-width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  padding: 4px !important;
+  overflow-x: auto !important;
+  border: 1px solid var(--mt-line) !important;
+  border-radius: 12px !important;
+  background: var(--mt-champagne) !important;
+  box-shadow: none !important;
+  scrollbar-width: none;
+}
+.management-consistent-ui :is(
+  .intake-tabs, .aa-tabs, .sr-tabs, .archive-tabs, .ap-tabs,
+  .um-tabs, .inv-tabs, .audit-view-switch
+)::-webkit-scrollbar { display: none; }
+
+.management-consistent-ui :is(
+  .intake-tab, .aa-tab, .sr-tab, .archive-tab, .ap-tab,
+  .um-tab, .inv-tab, .audit-view-btn
+) {
+  position: relative !important;
+  min-height: 36px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  flex: 0 0 auto !important;
+  padding: 0 13px !important;
+  border: 1px solid transparent !important;
+  border-radius: 9px !important;
+  color: var(--mt-muted) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font: 700 .7rem/1 "Poppins", sans-serif !important;
+  white-space: nowrap !important;
+  transition: color .16s ease, background-color .16s ease, border-color .16s ease !important;
+}
+.management-consistent-ui :is(
+  .intake-tab, .aa-tab, .sr-tab, .archive-tab, .ap-tab,
+  .um-tab, .inv-tab, .audit-view-btn
+)::after { display: none !important; }
+.management-consistent-ui :is(
+  .intake-tab, .aa-tab, .sr-tab, .archive-tab, .ap-tab,
+  .um-tab, .inv-tab, .audit-view-btn
+):hover {
+  border-color: rgba(120, 1, 22, .08) !important;
+  color: var(--mt-red) !important;
+  background: rgba(120, 1, 22, .055) !important;
+}
+.management-consistent-ui :is(
+  .intake-tab, .aa-tab, .sr-tab, .archive-tab, .ap-tab,
+  .um-tab, .inv-tab, .audit-view-btn
+).active {
+  border-color: rgba(120, 1, 22, .13) !important;
+  color: var(--mt-red) !important;
+  background: var(--mt-active) !important;
+  box-shadow: none !important;
+}
+.management-consistent-ui :is(.ap-tab, .um-tab, .inv-tab) > span,
+.management-consistent-ui .inv-tab > small {
+  min-width: 19px !important;
+  height: 19px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  padding: 0 5px !important;
+  border-radius: 999px !important;
+  color: var(--mt-red) !important;
+  background: rgba(120, 1, 22, .075) !important;
+  font-size: .56rem !important;
+  font-weight: 800 !important;
+}
+.management-consistent-ui :is(.ap-tab, .um-tab, .inv-tab).active > span,
+.management-consistent-ui .inv-tab.active > small {
+  color: var(--mt-white) !important;
+  background: var(--mt-red) !important;
+}
+
+/* Report tabs remain data-set cards, but share the same active treatment. */
+.management-consistent-ui .report-tab {
+  border-color: var(--mt-line) !important;
+  color: var(--mt-muted) !important;
+  background: var(--mt-white) !important;
+  box-shadow: none !important;
+}
+.management-consistent-ui .report-tab:hover {
+  border-color: rgba(120, 1, 22, .25) !important;
+  color: var(--mt-text) !important;
+  background: var(--mt-hover) !important;
+  box-shadow: 0 10px 24px rgba(43, 23, 25, .065) !important;
+}
+.management-consistent-ui .report-tab.active {
+  border-color: rgba(120, 1, 22, .30) !important;
+  color: var(--mt-red) !important;
+  background: var(--mt-active) !important;
+  box-shadow: 0 10px 24px rgba(120, 1, 22, .08) !important;
+}
+.management-consistent-ui :is(.report-tab-icon, .report-tab-count) {
+  color: var(--mt-red) !important;
+  background: rgba(120, 1, 22, .075) !important;
+}
+.management-consistent-ui .report-tab.active .report-tab-count {
+  color: var(--mt-white) !important;
+  background: var(--mt-red) !important;
+}
+
+/* Filters use White surfaces and a Burgundy focus ring, never a Cream block. */
+.management-consistent-ui :is(
+  .filter-toolbar, .aa-filter-toolbar, .ap-filter-toolbar, .um-filter-bar,
+  .archive-filter-grid, .audit-filter-grid, .cq-toolbar,
+  .inventory-filter-toolbar, .inventory-filter-controls, .report-filter-grid
+) {
+  border-color: var(--mt-line-soft) !important;
+  background: var(--mt-white) !important;
+}
+.management-consistent-ui :is(
+  .filter-toolbar, .aa-filter-toolbar, .ap-filter-toolbar, .um-filter-bar,
+  .archive-filter-grid, .audit-filter-grid, .cq-toolbar,
+  .inventory-filter-toolbar, .report-filter-grid
+) :is(input, select) {
+  border-color: var(--mt-line) !important;
+  color: var(--mt-text) !important;
+  background: var(--mt-white) !important;
+}
+.management-consistent-ui :is(
+  .filter-toolbar, .aa-filter-toolbar, .ap-filter-toolbar, .um-filter-bar,
+  .archive-filter-grid, .audit-filter-grid, .cq-toolbar,
+  .inventory-filter-toolbar, .report-filter-grid
+) :is(input, select):focus {
+  border-color: var(--mt-red) !important;
+  box-shadow: 0 0 0 4px rgba(120, 1, 22, .09) !important;
+}
+
+.management-consistent-ui :is(
+  .filter-toolbar, .aa-filter-toolbar, .ap-filter-toolbar, .um-filter-bar,
+  .archive-filter-grid, .audit-filter-grid, .cq-toolbar,
+  .inventory-filter-toolbar, .report-filter-grid
+) :is(.search-pill-sm, .cq-search, .report-search-field) > i {
+  color: var(--mt-red) !important;
+  background: rgba(120, 1, 22, .07) !important;
+}
+.management-consistent-ui .inventory-view-tools .view-btn {
+  border-color: var(--mt-line) !important;
+  color: var(--mt-red) !important;
+  background: var(--mt-white) !important;
+}
+.management-consistent-ui .inventory-view-tools .view-btn:is(:hover, .active) {
+  border-color: rgba(120, 1, 22, .18) !important;
+  color: var(--mt-red) !important;
+  background: var(--mt-active) !important;
+  box-shadow: none !important;
+}
+
+/* Desktop tables. Existing mobile table-to-card transformations stay intact. */
+@media (min-width: 769px) {
+  .management-consistent-ui :is(
+    .shelter-table, .rpt-table, .cq-table-wrap table, .um-user-table, .pet-table
+  ) {
+    width: 100% !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    color: var(--mt-text) !important;
+    background: var(--mt-white) !important;
+    font-family: "Poppins", sans-serif !important;
+  }
+  .management-consistent-ui :is(
+    .shelter-table, .rpt-table, .cq-table-wrap table, .um-user-table, .pet-table
+  ) thead { background: var(--mt-head) !important; }
+  .management-consistent-ui :is(
+    .shelter-table, .rpt-table, .cq-table-wrap table, .um-user-table, .pet-table
+  ) thead th {
+    padding: 14px 16px !important;
+    border-top: 1px solid var(--mt-line-soft) !important;
+    border-bottom: 1px solid var(--mt-line) !important;
+    color: var(--mt-red) !important;
+    background: var(--mt-head) !important;
+    font: 800 .625rem/1.35 "Poppins", sans-serif !important;
+    letter-spacing: .075em !important;
+    text-align: left;
+    text-transform: uppercase !important;
+    white-space: nowrap;
+  }
+  .management-consistent-ui :is(
+    .shelter-table, .rpt-table, .cq-table-wrap table, .um-user-table, .pet-table
+  ) tbody td {
+    padding: 14px 16px !important;
+    border-bottom: 1px solid var(--mt-line-soft) !important;
+    color: var(--mt-text) !important;
+    background: var(--mt-white) !important;
+    font: 500 .75rem/1.45 "Poppins", sans-serif !important;
+    vertical-align: middle !important;
+  }
+  .management-consistent-ui :is(
+    .shelter-table, .rpt-table, .cq-table-wrap table, .um-user-table, .pet-table
+  ) tbody tr:nth-child(even) td { background: var(--mt-white) !important; }
+  .management-consistent-ui :is(
+    .shelter-table, .rpt-table, .cq-table-wrap table, .um-user-table, .pet-table
+  ) tbody tr:hover td { background: var(--mt-hover) !important; }
+  .management-consistent-ui :is(
+    .shelter-table, .rpt-table, .cq-table-wrap table, .um-user-table, .pet-table
+  ) tbody :is(tr.row-active, tr[aria-selected="true"]) td {
+    background: rgba(120, 1, 22, .075) !important;
+  }
+  .management-consistent-ui :is(
+    .shelter-table, .rpt-table, .cq-table-wrap table, .um-user-table, .pet-table
+  ) tbody :is(tr.row-active, tr[aria-selected="true"]) td:first-child {
+    box-shadow: inset 3px 0 0 var(--mt-red) !important;
+  }
+  .management-consistent-ui :is(
+    .shelter-table, .rpt-table, .cq-table-wrap table, .um-user-table, .pet-table
+  ) tbody tr:last-child td { border-bottom-color: transparent !important; }
+}
+
+/* Semantic badges retain their status colors; geometry and type are consistent. */
+.management-consistent-ui :is(
+  .status-badge, .report-value-pill, .module-badge, .type-badge,
+  .reason-badge, .urgency-badge, .action-badge
+) {
+  min-height: 25px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  padding: 5px 9px !important;
+  border: 1px solid currentColor !important;
+  border-radius: 999px !important;
+  font: 800 .625rem/1 "Poppins", sans-serif !important;
+  white-space: nowrap !important;
+}
+
+/* Secondary row actions; destructive and success actions retain semantics. */
+.management-consistent-ui :is(.tbl-action-btn, .detail-btn, .cq-view) {
+  min-width: 34px !important;
+  min-height: 34px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  padding: 0 10px !important;
+  border: 1px solid var(--mt-line) !important;
+  border-radius: 9px !important;
+  color: var(--mt-red) !important;
+  background: var(--mt-white) !important;
+  box-shadow: none !important;
+  font: 700 .67rem/1 "Poppins", sans-serif !important;
+}
+.management-consistent-ui :is(.tbl-action-btn, .detail-btn, .cq-view):hover {
+  border-color: rgba(120, 1, 22, .22) !important;
+  color: var(--mt-red) !important;
+  background: var(--mt-active) !important;
+  transform: translateY(-1px);
+}
+
+/* Empty states and card-based directory equivalents */
+.management-consistent-ui :is(
+  .empty-state, .records-empty-state, .cq-empty, .report-empty-state,
+  .ap-empty-state, .pet-empty, .um-table-message, .user-board-empty
+) {
+  min-height: 230px !important;
+  align-content: center !important;
+  justify-content: center !important;
+  padding: 44px 24px !important;
+  color: var(--mt-muted) !important;
+  background: var(--mt-white) !important;
+  text-align: center !important;
+}
+.management-consistent-ui :is(
+  .empty-state-icon, .records-empty-state > span, .report-empty-state > span,
+  .ap-empty-state > span, .pet-empty > span, .cq-empty > i
+) {
+  color: var(--mt-red) !important;
+  background: rgba(120, 1, 22, .07) !important;
+}
+.management-consistent-ui :is(
+  .empty-state, .records-empty-state, .cq-empty, .report-empty-state,
+  .ap-empty-state, .pet-empty, .user-board-empty
+) :is(h3, strong) {
+  color: var(--mt-text) !important;
+  font-weight: 800 !important;
+}
+.management-consistent-ui :is(.animal-record-card, .user-record-card) {
+  border-color: var(--mt-line) !important;
+  color: var(--mt-text) !important;
+  background: var(--mt-white) !important;
+  box-shadow: 0 8px 22px rgba(54, 40, 34, .065) !important;
+}
+.management-consistent-ui :is(.animal-record-card, .user-record-card):hover {
+  border-color: rgba(120, 1, 22, .24) !important;
+  background: var(--mt-white) !important;
+  box-shadow: 0 12px 28px rgba(120, 1, 22, .075) !important;
+  transform: translateY(-1px);
+}
+
+/* Regal Navy is reserved for informational states; no other blue is introduced. */
+.management-consistent-ui :is(
+  .tone-blue .report-tab-icon, .cq-version, .badge-blue,
+  .status-info, .info-badge, .kpi-blue, .icon-blue,
+  .badge-quarantine, .event-medical, .alert-blue .alert-ico,
+  .compat-cat, .tile-blue, .source-barangay,
+  .rpt-kpi.tone-blue .rpt-kpi-icon, .cq-setting-icon.blue,
+  .b-dog, .b-male, #resultDialog .cq-detail > b
+) {
+  border-color: rgba(10, 29, 75, .20) !important;
+  color: var(--mt-navy) !important;
+  background: rgba(10, 29, 75, .09) !important;
+}
+
+/* Pagination and data footers */
+.management-consistent-ui :is(.um-pagination, .table-footer, .report-table-footer) {
+  border-top: 1px solid var(--mt-line-soft) !important;
+  color: var(--mt-muted) !important;
+  background: var(--mt-white) !important;
+}
+.management-consistent-ui .page-btn {
+  min-width: 34px !important;
+  height: 34px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 10px !important;
+  border: 1px solid var(--mt-line) !important;
+  border-radius: 9px !important;
+  color: var(--mt-red) !important;
+  background: var(--mt-white) !important;
+  box-shadow: none !important;
+  font: 700 .68rem/1 "Poppins", sans-serif !important;
+}
+.management-consistent-ui .page-btn:hover:not(:disabled):not(.active) {
+  border-color: rgba(120, 1, 22, .20) !important;
+  color: var(--mt-red) !important;
+  background: var(--mt-hover) !important;
+}
+.management-consistent-ui .page-btn.active {
+  border-color: var(--mt-red) !important;
+  color: var(--mt-white) !important;
+  background: var(--mt-red) !important;
+  box-shadow: 0 7px 16px rgba(120, 1, 22, .16) !important;
+}
+.management-consistent-ui .page-btn:disabled {
+  opacity: .38 !important;
+  cursor: not-allowed !important;
+}
+.management-consistent-ui .page-ellipsis {
+  min-width: 20px;
+  color: var(--mt-muted);
+  text-align: center;
+}
+
+/*
+ * Audit and Archive share a separately emitted workspace bundle that Vite
+ * loads after common CSS. These scoped rules deliberately carry one extra
+ * class of specificity so their tables still use this final system.
+ */
+body.management-consistent-ui :is(.audit-panel, .archive-panel) .shelter-table thead th {
+  border-block-color: var(--mt-line) !important;
+  color: var(--mt-red) !important;
+  background: var(--mt-head) !important;
+}
+body.management-consistent-ui :is(.audit-panel, .archive-panel) .shelter-table tbody td {
+  border-bottom-color: var(--mt-line-soft) !important;
+  color: var(--mt-text) !important;
+  background: var(--mt-white) !important;
+}
+body.management-consistent-ui :is(.audit-panel, .archive-panel) .shelter-table tbody tr:hover td {
+  background: var(--mt-hover) !important;
+}
+body.management-consistent-ui :is(.audit-panel, .archive-panel) .um-pagination {
+  border-top-color: var(--mt-line-soft) !important;
+  background: var(--mt-white) !important;
+}
+
+@media (max-width: 768px) {
+  .management-consistent-ui :is(
+    .intake-tabs, .aa-tabs, .sr-tabs, .archive-tabs, .ap-tabs,
+    .um-tabs, .inv-tabs, .audit-view-switch
+  ) { width: 100% !important; }
+  .management-consistent-ui :is(.um-pagination, .table-footer, .report-table-footer) {
+    justify-content: center !important;
+    gap: 7px !important;
+  }
+  .management-consistent-ui :is(.animal-record-card, .user-record-card) {
+    transform: none !important;
+  }
+}

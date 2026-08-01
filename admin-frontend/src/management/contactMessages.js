@@ -1,5 +1,3 @@
-import "../css/adminDashboard.css";
-import "../css/sidebar.css";
 import "../css/contactMessages.css";
 
 import Swal from "sweetalert2";

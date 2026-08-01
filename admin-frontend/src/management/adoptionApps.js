@@ -1,7 +1,6 @@
 // admin-frontend/src/management/adoptionApps.js
-import "../css/adminDashboard.css";
-import "../css/sidebar.css";
 import "../css/adoptionApps.css";
+import "../css/managementTables.css";
 import { renderPageHeader } from "../components/management/pageHeader.js";
 import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.js";
 
@@ -36,7 +35,7 @@ const QUIZ_DIMENSIONS = [
   { key:"adaptability",         label:"Routine stability" },
 ];
 
-const AVATAR_COLOR = "#ef1725";
+const AVATAR_COLOR = "#780116";
 
 function mapAdoptionFromBackend(a) {
   const compatibility = a.compatibility || null;
@@ -178,7 +177,7 @@ function compatColor(score) {
   if (!score) return { ring:"#a89c96", cls:"compat-none" };
   if (score >= 75) return { ring:"#23734c", cls:"compat-high" };
   if (score >= 55) return { ring:"#ffb51b", cls:"compat-mid" };
-  return { ring:"#ef1725", cls:"compat-low" };
+  return { ring:"#780116", cls:"compat-low" };
 }
 
 function compatPill(score, type) {
@@ -385,13 +384,13 @@ function renderDrawerContent(app) {
             const petVal     = (app.animal.vector[QUIZ_DIMENSIONS.indexOf(d)]||0) * 20;
             const adopterVal = (app.adopterAnswers?.[d.key]||0) * 20;
             const diff       = Math.abs(petVal - adopterVal);
-            const barColor   = diff <= 20 ? "#23734c" : diff <= 40 ? "#ffb51b" : "#ef1725";
+            const barColor   = diff <= 20 ? "#23734c" : diff <= 40 ? "#ffb51b" : "#780116";
             return `
               <div class="drawer-trait-row">
                 <span class="drawer-trait-name">${d.label}</span>
                 <div style="display:flex;flex-direction:column;gap:2px;flex:1">
                   <div class="drawer-trait-track" title="${app.animal.name}: ${Math.round(petVal)}%">
-                    <div class="drawer-trait-fill" style="width:${petVal}%;background:#ef1725"></div>
+                    <div class="drawer-trait-fill" style="width:${petVal}%;background:#780116"></div>
                   </div>
                   <div class="drawer-trait-track" title="Adopter: ${Math.round(adopterVal)}%">
                     <div class="drawer-trait-fill" style="width:${adopterVal}%;background:${barColor}"></div>
@@ -402,7 +401,7 @@ function renderDrawerContent(app) {
           }).join("")}
         </div>
         <div class="mt-2" style="font-size:0.72rem;color:var(--stone);display:flex;gap:12px">
-          <span style="display:flex;align-items:center;gap:4px"><span style="display:inline-block;width:10px;height:4px;background:#ef1725;border-radius:2px"></span>Pet trait</span>
+          <span style="display:flex;align-items:center;gap:4px"><span style="display:inline-block;width:10px;height:4px;background:#780116;border-radius:2px"></span>Pet trait</span>
           <span style="display:flex;align-items:center;gap:4px"><span style="display:inline-block;width:10px;height:4px;background:#23734c;border-radius:2px"></span>Adopter answer</span>
         </div>
 
@@ -410,7 +409,7 @@ function renderDrawerContent(app) {
         <div class="drawer-section-title mt-3"><i class="bi bi-list-ol"></i> Quiz Top Matches Shown</div>
         <div style="display:flex;flex-direction:column;gap:6px">
           ${app.quizTopMatches.map((m,i) => `
-            <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--cream);border-radius:9px;border:1px solid ${m.id===app.animal.id?"rgba(111,25,28,0.2)":"var(--border)"}">
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--cream);border-radius:9px;border:1px solid ${m.id===app.animal.id?"rgba(120, 1, 22,0.2)":"var(--border)"}">
               <span style="font-size:0.72rem;font-weight:700;color:var(--stone);min-width:16px">#${i+1}</span>
               <span>${emoji(m.species)}</span>
               <span style="font-size:0.84rem;font-weight:${m.id===app.animal.id?"800":"600"};color:${m.id===app.animal.id?"var(--clay)":"var(--ink)"}">

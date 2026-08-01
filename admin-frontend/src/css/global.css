@@ -5,16 +5,16 @@
 }
 
 :root {
-  --crimson: #970A12;
-  --wine: #6F191C;
+  --crimson: #780116;
+  --wine: #780116;
   --orange: #D1601E;
   --amber: #FECD6E;
-  --cream: #FDF8F4;
+  --cream: #FFF8EE;
   --yellow-soft: #F7E6A7;
   --dark: #1A1A1A;
   --gray: #66656D;
-  --line: rgba(151, 10, 18, 0.08);
-  --white: #ffffff;
+  --line: rgba(120, 1, 22, 0.08);
+  --white: #FFFFFF;
   --shadow: 0 16px 38px rgba(29, 18, 18, 0.08);
   --shadow-soft: 0 10px 26px rgba(29, 18, 18, 0.06);
   --radius-xl: 34px;
@@ -29,7 +29,7 @@ html {
 }
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   background: var(--cream);
   color: var(--dark);
   line-height: 1.6;
@@ -104,7 +104,7 @@ button {
   display: grid;
   place-items: center;
   position: relative;
-  box-shadow: 0 10px 24px rgba(151, 10, 18, 0.18);
+  box-shadow: 0 10px 24px rgba(120, 1, 22, 0.18);
   flex-shrink: 0;
 }
 
@@ -113,7 +113,7 @@ button {
   bottom: 8px;
   right: 8px;
   font-size: 12px;
-  color: #ffd9d9;
+  color: #FFF8EE;
 }
 
 .logo-text h2 {
@@ -133,7 +133,7 @@ button {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: rgba(151, 10, 18, 0.04);
+  background: rgba(120, 1, 22, 0.04);
   padding: 8px;
   border-radius: 999px;
 }
@@ -169,7 +169,7 @@ button {
   display: grid;
   place-items: center;
   font-size: 18px;
-  box-shadow: 0 12px 24px rgba(151, 10, 18, 0.18);
+  box-shadow: 0 12px 24px rgba(120, 1, 22, 0.18);
   transition: var(--transition);
 }
 
@@ -214,7 +214,7 @@ button {
 .primary-btn {
   background: linear-gradient(135deg, var(--crimson), var(--orange));
   color: var(--white);
-  box-shadow: 0 14px 28px rgba(151, 10, 18, 0.18);
+  box-shadow: 0 14px 28px rgba(120, 1, 22, 0.18);
 }
 
 .primary-btn:hover {
@@ -228,7 +228,7 @@ button {
 }
 
 .secondary-btn:hover {
-  background: #fff2ec;
+  background: #FFF8EE;
   transform: translateY(-2px);
 }
 
@@ -258,7 +258,7 @@ button {
 .section-label,
 .tagline {
   display: inline-block;
-  background: rgba(151, 10, 18, 0.08);
+  background: rgba(120, 1, 22, 0.08);
   color: var(--crimson);
   padding: 10px 16px;
   border-radius: 999px;
@@ -269,12 +269,12 @@ button {
 
 .light-label {
   background: rgba(255, 255, 255, 0.14);
-  color: #ffe0d2;
+  color: #FFF8EE;
 }
 
 /* Footer */
 .footer {
-  background: #fff;
+  background: #FFFFFF;
   padding-top: 42px;
   border-top: 1px solid var(--line);
 }
@@ -358,7 +358,7 @@ button {
   display: grid;
   place-items: center;
   font-size: 18px;
-  box-shadow: 0 12px 24px rgba(151, 10, 18, 0.12);
+  box-shadow: 0 12px 24px rgba(120, 1, 22, 0.12);
   transition: var(--transition);
 }
 
@@ -389,7 +389,7 @@ button {
   right: 0;
   width: 300px;
   background: var(--white);
-  border: 1px solid #eee2dd;
+  border: 1px solid #FFF8EE;
   border-radius: 20px;
   padding: 18px;
   box-shadow: var(--shadow);
@@ -434,7 +434,7 @@ button {
   display: block;
   width: 100%;
   font-size: 13px;
-  color: #c0392b;
+  color: #780116;
   margin: 6px 0 14px;
   line-height: 1.4;
   text-align: left;
@@ -462,7 +462,7 @@ body.auth-open {
 
 .auth-modal-card {
   width: min(860px, 100%);
-  background: #ffffff;
+  background: #FFFFFF;
   border-radius: 28px;
   overflow: hidden;
   display: grid;
@@ -476,8 +476,8 @@ body.auth-open {
 }
 
 .auth-modal-left {
-  color: #fff;
-  background: linear-gradient(145deg, #970A12 0%, #b43b1e 52%, #D1601E 100%);
+  color: #FFFFFF;
+  background: linear-gradient(145deg, #780116 0%, #780116 52%, #D1601E 100%);
   padding: 38px 30px;
   display: flex;
   flex-direction: column;
@@ -492,7 +492,7 @@ body.auth-open {
 }
 
 .auth-modal-left-simple p {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-size: 0.96rem;
   line-height: 1.7;
   margin: 0;
@@ -506,7 +506,7 @@ body.auth-open {
   padding: 9px 16px;
   border-radius: 999px;
   background: rgba(255,255,255,0.14);
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-size: 0.82rem;
   font-weight: 800;
   letter-spacing: 1px;
@@ -519,7 +519,7 @@ body.auth-open {
   padding: 7px 12px;
   border-radius: 999px;
   background: rgba(255,255,255,0.14);
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-size: 0.78rem;
   font-weight: 700;
   margin-bottom: 14px;
@@ -530,7 +530,7 @@ body.auth-open {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  background: #fffdfc;
+  background: #FFF8EE;
 }
 
 .auth-close-btn {
@@ -542,7 +542,7 @@ body.auth-open {
   border: none;
   border-radius: 50%;
   background: rgba(255,255,255,0.16);
-  color: #fff;
+  color: #FFFFFF;
   font-size: 17px;
   display: grid;
   place-items: center;
@@ -565,7 +565,7 @@ body.auth-open {
   min-height: 58px;
   border-radius: 16px;
   border: 1px solid #eadfd8;
-  background: #fff;
+  background: #FFFFFF;
   padding: 0 16px;
   margin-bottom: 8px;
 }
@@ -576,7 +576,7 @@ body.auth-open {
   border: none;
   outline: none;
   background: transparent;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-size: 0.98rem;
   color: #1f1a18;
 }
@@ -595,9 +595,9 @@ body.auth-open {
   min-height: 18px;
   margin: 0 0 8px;
   padding-left: 4px;
-  color: #b42318;
+  color: #780116;
   font-size: 0.84rem;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
 }
 
 .auth-extra-row {
@@ -610,7 +610,7 @@ body.auth-open {
   font-size: 0.9rem;
   color: #7f7673;
   text-decoration: none;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
 }
 
 .auth-submit-btn {
@@ -618,9 +618,9 @@ body.auth-open {
   min-height: 54px;
   border: none;
   border-radius: 999px;
-  background: linear-gradient(135deg, #970A12, #D1601E);
-  color: #fff;
-  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg, #780116, #D1601E);
+  color: #FFFFFF;
+  font-family: 'Poppins', sans-serif;
   font-size: 0.98rem;
   font-weight: 800;
   cursor: pointer;
@@ -635,17 +635,17 @@ body.auth-open {
   margin-top: 18px;
   text-align: center;
   color: #746e6b;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-size: 0.92rem;
 }
 
 .auth-switch-btn {
   border: none;
   background: transparent;
-  color: #970A12;
+  color: #780116;
   font-weight: 800;
   cursor: pointer;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
 }
 
 .auth-modal-card {
@@ -760,13 +760,13 @@ body.auth-open {
 
 #loggedUserName {
   font-weight: 600;
-  color: #fff;
+  color: #FFFFFF;
 }
 
 #logoutBtn {
   border: none;
-  background: #970A12;
-  color: #fff;
+  background: #780116;
+  color: #FFFFFF;
   padding: 8px 14px;
   border-radius: 999px;
   cursor: pointer;
@@ -783,12 +783,12 @@ body.auth-open {
 .animua-popup {
   border-radius: 28px !important;
   padding: 24px !important;
-  background: #fffaf8 !important;
-  box-shadow: 0 20px 60px rgba(151, 10, 18, 0.14) !important;
+  background: #FFF8EE !important;
+  box-shadow: 0 20px 60px rgba(120, 1, 22, 0.14) !important;
 }
 
 .animua-popup .swal2-title {
-  color: #7f2018 !important;
+  color: #780116 !important;
   font-weight: 800 !important;
   font-family: 'League Spartan', sans-serif !important;
 }
@@ -796,21 +796,21 @@ body.auth-open {
 .animua-popup .swal2-html-container {
   color: #6e6765 !important;
   font-size: 1rem !important;
-  font-family: 'Inter', sans-serif !important;
+  font-family: 'Poppins', sans-serif !important;
 }
 
 .animua-confirm {
-  background: linear-gradient(135deg, #970A12, #d1601e) !important;
+  background: linear-gradient(135deg, #780116, #d1601e) !important;
   border: none !important;
   border-radius: 999px !important;
   padding: 12px 26px !important;
   font-weight: 700 !important;
-  box-shadow: 0 10px 24px rgba(151, 10, 18, 0.22) !important;
+  box-shadow: 0 10px 24px rgba(120, 1, 22, 0.22) !important;
 }
 
 .animua-cancel {
-  background: #f3ece9 !important;
-  color: #7f2018 !important;
+  background: #FFF8EE !important;
+  color: #780116 !important;
   border: none !important;
   border-radius: 999px !important;
   padding: 12px 26px !important;
@@ -819,9 +819,9 @@ body.auth-open {
 
 .animua-toast {
   border-radius: 18px !important;
-  background: #fffaf8 !important;
-  color: #7f2018 !important;
-  box-shadow: 0 16px 35px rgba(151, 10, 18, 0.14) !important;
+  background: #FFF8EE !important;
+  color: #780116 !important;
+  box-shadow: 0 16px 35px rgba(120, 1, 22, 0.14) !important;
 }
 
 #userLoggedInBox {
@@ -836,8 +836,8 @@ body.auth-open {
 
 #loggedUserName {
   font-weight: 700;
-  color: #7f2018;
-  font-family: 'Inter', sans-serif;
+  color: #780116;
+  font-family: 'Poppins', sans-serif;
 }
 
 .logout-icon-btn {
@@ -845,19 +845,19 @@ body.auth-open {
   height: 42px;
   border: none;
   border-radius: 50%;
-  background: linear-gradient(135deg, #970A12, #d1601e);
-  color: #ffffff;
+  background: linear-gradient(135deg, #780116, #d1601e);
+  color: #FFFFFF;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 10px 24px rgba(151, 10, 18, 0.22);
+  box-shadow: 0 10px 24px rgba(120, 1, 22, 0.22);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .logout-icon-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 14px 28px rgba(151, 10, 18, 0.28);
+  box-shadow: 0 14px 28px rgba(120, 1, 22, 0.28);
 }
 
 .logout-icon-btn i {

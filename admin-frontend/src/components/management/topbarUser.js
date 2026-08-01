@@ -1,5 +1,6 @@
 import "../../css/topbarAlerts.css";
-import { getUserName, getUserRole } from "../../utils/storage.js";
+import Swal from "sweetalert2";
+import { clearUserSession, getUserName, getUserRole } from "../../utils/storage.js";
 import { canAccessModule, normalizeRole } from "../../auth/permissions.js";
 import { apiFetch } from "../../utils/api.js";
 
@@ -243,6 +244,10 @@ function bindAttentionCenter(button, role) {
     panel.hidden = !opening;
     button.setAttribute("aria-expanded", String(opening));
     if (opening) {
+      const accountMenu = document.getElementById("managementAccountMenu");
+      const accountTrigger = document.querySelector(".user-chip");
+      if (accountMenu) accountMenu.hidden = true;
+      accountTrigger?.setAttribute("aria-expanded", "false");
       await loadAttentionCenter(panel, button, role, {
         showLoading: !readCachedAttentionSummary(),
       });
@@ -274,6 +279,102 @@ function bindAttentionCenter(button, role) {
 
   const cached = readCachedAttentionSummary();
   if (cached) renderAttentionCenter(panel, button, cached, role);
+}
+
+function ensureAccountMenu(chip, name, role, initials) {
+  let menu = document.getElementById("managementAccountMenu");
+  if (!menu) {
+    menu = document.createElement("div");
+    menu.id = "managementAccountMenu";
+    menu.className = "management-account-menu";
+    menu.hidden = true;
+    menu.setAttribute("role", "menu");
+    menu.setAttribute("aria-label", "Account menu");
+    chip.closest(".topbar-right")?.append(menu);
+  }
+
+  if (!menu.hasChildNodes()) menu.innerHTML = `
+    <div class="management-account-head">
+      <span class="management-account-avatar" aria-hidden="true">${escapeHtml(initials)}</span>
+      <span class="management-account-identity">
+        <strong>${escapeHtml(name)}</strong>
+        <small>${escapeHtml(role)}</small>
+      </span>
+    </div>
+    <a class="management-account-action" href="/pages/accountSettings.html" role="menuitem">
+      <span class="management-account-action-icon"><i class="bi bi-gear" aria-hidden="true"></i></span>
+      <span><strong>Account Settings</strong><small>Profile, security, and preferences</small></span>
+      <i class="bi bi-chevron-right management-account-arrow" aria-hidden="true"></i>
+    </a>
+    <div class="management-account-divider" aria-hidden="true"></div>
+    <button class="management-account-action management-account-signout" type="button" role="menuitem">
+      <span class="management-account-action-icon"><i class="bi bi-box-arrow-right" aria-hidden="true"></i></span>
+      <span><strong>Sign Out</strong><small>Return to the management login</small></span>
+    </button>`;
+
+  return menu;
+}
+
+function bindAccountMenu(chip, menu) {
+  if (chip.dataset.accountMenuBound === "true") return;
+  chip.dataset.accountMenuBound = "true";
+  chip.setAttribute("role", "button");
+  chip.setAttribute("tabindex", "0");
+  chip.setAttribute("aria-haspopup", "menu");
+  chip.setAttribute("aria-controls", menu.id);
+  chip.setAttribute("aria-expanded", "false");
+  chip.setAttribute("title", "Open account menu");
+
+  const close = ({ restoreFocus = false } = {}) => {
+    menu.hidden = true;
+    chip.setAttribute("aria-expanded", "false");
+    if (restoreFocus) chip.focus();
+  };
+
+  const toggle = () => {
+    const opening = menu.hidden;
+    menu.hidden = !opening;
+    chip.setAttribute("aria-expanded", String(opening));
+    if (opening) {
+      const attentionPanel = document.getElementById("managementAttentionCenter");
+      const attentionButton = document.querySelector(".notif-btn");
+      if (attentionPanel) attentionPanel.hidden = true;
+      attentionButton?.setAttribute("aria-expanded", "false");
+      menu.querySelector('[role="menuitem"]')?.focus();
+    }
+  };
+
+  chip.addEventListener("click", (event) => {
+    event.stopPropagation();
+    toggle();
+  });
+  chip.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " " || event.key === "ArrowDown") {
+      event.preventDefault();
+      if (menu.hidden) toggle();
+    }
+  });
+  menu.addEventListener("click", (event) => event.stopPropagation());
+  menu.querySelector('a[href="/pages/accountSettings.html"]')?.addEventListener("click", () => close());
+  menu.querySelector(".management-account-signout")?.addEventListener("click", async () => {
+    close();
+    const result = await Swal.fire({
+      title: "Sign out?",
+      text: "You'll be returned to the management login screen.",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#780116",
+      cancelButtonColor: "#756367",
+      confirmButtonText: "Yes, sign out",
+    });
+    if (!result.isConfirmed) return;
+    clearUserSession();
+    window.location.replace("/pages/admin-login.html");
+  });
+  document.addEventListener("click", () => close());
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !menu.hidden) close({ restoreFocus: true });
+  });
 }
 
 export function renderTopbarUser() {
@@ -317,24 +418,7 @@ export function renderTopbarUser() {
       caret.setAttribute("aria-hidden", "true");
       chip.append(caret);
     }
-  }
-
-  if (chip && chip.dataset.accountSettingsBound !== "true") {
-    chip.dataset.accountSettingsBound = "true";
-    chip.setAttribute("role", "link");
-    chip.setAttribute("tabindex", "0");
-    chip.setAttribute("title", "Open Account Settings");
-
-    const openAccountSettings = () => {
-      window.location.href = "/pages/accountSettings.html";
-    };
-
-    chip.addEventListener("click", openAccountSettings);
-    chip.addEventListener("keydown", (event) => {
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault();
-        openAccountSettings();
-      }
-    });
+    const accountMenu = ensureAccountMenu(chip, name, role, initials);
+    bindAccountMenu(chip, accountMenu);
   }
 }

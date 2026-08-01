@@ -1,6 +1,8 @@
 export const PAGE_HEADER_CONFIGS = Object.freeze({
   dashboard: {
     headingId: "pageTitle",
+    image: "/images/dashboard.jpg",
+    imagePosition: "center 40%",
     eyebrow: "Shelter Operations",
     title: "Command Center",
     description: "Monitor animal care, intake movement, adoption readiness, and shelter priorities from one coordinated view.",

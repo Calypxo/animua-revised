@@ -1,5 +1,3 @@
-import "../css/adminDashboard.css";
-import "../css/sidebar.css";
 import "../css/announcements.css";
 
 import Swal from "sweetalert2";
@@ -465,7 +463,7 @@ async function confirmDelete(id) {
     showCancelButton: true,
     confirmButtonText: "Delete announcement",
     cancelButtonText: "Cancel",
-    confirmButtonColor: "#b42318",
+    confirmButtonColor: "#780116",
     cancelButtonColor: "#ede9e2",
     reverseButtons: true,
     focusCancel: true,

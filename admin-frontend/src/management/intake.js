@@ -1,7 +1,6 @@
 // admin-frontend/src/management/intake.js
-import "../css/adminDashboard.css";
-import "../css/sidebar.css";
 import "../css/intake.css";
+import "../css/managementTables.css";
 import { renderPageHeader } from "../components/management/pageHeader.js";
 import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.js";
 

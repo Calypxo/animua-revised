@@ -1,7 +1,6 @@
 // admin-frontend/src/management/surrenderRequests.js
-import "../css/adminDashboard.css";
-import "../css/sidebar.css";
 import "../css/surrenderRequests.css";
+import "../css/managementTables.css";
 import { renderPageHeader } from "../components/management/pageHeader.js";
 import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.js";
 
@@ -57,7 +56,7 @@ async function getPublicSubmittedRequests() {
           city: request.owner?.city || "Angeles City",
           isAngelesResident: request.owner?.isAngelesResident === true,
           idType: "Online Account",
-          color: "#6f191c",
+          color: "#780116",
           initials: ownerName
             .split(" ")
             .map(name => name[0])

@@ -46,7 +46,7 @@
   padding: 12px;
   border: 1px solid var(--ap-border);
   border-radius: 10px;
-  background: #fffaf4;
+  background: #FFF8EE;
 }
 
 .ap-list-page.user-management-page .um-health-dot {
@@ -57,7 +57,7 @@
 }
 
 .ap-list-page.user-management-page .um-health-dot.is-inactive { background: var(--ap-red); }
-.ap-list-page.user-management-page .um-health-metrics strong { color: var(--ap-ink); font: 800 1.45rem/1 "Outfit", sans-serif; }
+.ap-list-page.user-management-page .um-health-metrics strong { color: var(--ap-ink); font: 800 1.45rem/1 "Poppins", sans-serif; }
 .ap-list-page.user-management-page .um-health-metrics small { grid-column: 1 / -1; color: var(--ap-muted); font-size: .64rem; font-weight: 700; }
 .ap-list-page.user-management-page .um-account-health > p { margin: 0 0 14px; color: var(--ap-muted); font-size: .68rem; }
 
@@ -71,12 +71,12 @@
   padding: 12px 14px;
   border: 0;
   border-radius: 11px;
-  color: #fff;
+  color: #FFFFFF;
   background: var(--ap-ink);
-  font: 800 .78rem/1 "Inter", sans-serif;
+  font: 800 .78rem/1 "Poppins", sans-serif;
 }
 
-.ap-list-page.user-management-page .um-add-user-btn:hover { color: #fff; background: var(--ap-red-dark); transform: translateY(-1px); }
+.ap-list-page.user-management-page .um-add-user-btn:hover { color: #FFFFFF; background: var(--ap-red-dark); transform: translateY(-1px); }
 
 .ap-list-page.user-management-page .um-role-overview {
   position: relative;
@@ -87,7 +87,7 @@
   overflow: hidden;
   border: 1px solid var(--ap-border);
   border-radius: 18px;
-  background: #fff;
+  background: #FFFFFF;
   box-shadow: 0 16px 38px rgba(71,42,30,.12);
 }
 
@@ -108,7 +108,7 @@
   border: 0;
   border-right: 1px solid var(--ap-border);
   border-radius: 0;
-  background: #fff;
+  background: #FFFFFF;
   box-shadow: none;
 }
 
@@ -129,16 +129,16 @@
   place-items: center;
   border-radius: 11px;
   color: var(--ap-red);
-  background: #fff0e8;
+  background: #FFF8EE;
 }
 
 .ap-list-page.user-management-page .um-role-icon.is-active { color: #b56c00; background: #fff2d3; }
 .ap-list-page.user-management-page .um-role-icon.is-admin { color: #3c607f; background: #edf3f7; }
 .ap-list-page.user-management-page .um-role-icon.is-staff { color: #187b55; background: #e8f5ee; }
-.ap-list-page.user-management-page .um-role-icon.is-vet { color: #b73558; background: #fbeaf0; }
-.ap-list-page.user-management-page .um-role-icon.is-public { color: #68615c; background: #f1eeeb; }
+.ap-list-page.user-management-page .um-role-icon.is-vet { color: #780116; background: #FFF8EE; }
+.ap-list-page.user-management-page .um-role-icon.is-public { color: #68615c; background: #FFF8EE; }
 .ap-list-page.user-management-page .um-role-card > div { min-width: 0; display: grid; }
-.ap-list-page.user-management-page .um-role-card strong { color: var(--ap-ink); font: 800 1.8rem/1 "Outfit", sans-serif; }
+.ap-list-page.user-management-page .um-role-card strong { color: var(--ap-ink); font: 800 1.8rem/1 "Poppins", sans-serif; }
 .ap-list-page.user-management-page .um-role-card > div > span { max-width: 105px; margin-top: 5px; color: var(--ap-muted); font-size: .69rem; font-weight: 700; line-height: 1.35; }
 
 .ap-list-page.user-management-page .um-directory-panel { padding: 0; }
@@ -146,7 +146,7 @@
 .ap-list-page.user-management-page .um-directory-toolbar { display: block; }
 .ap-list-page.user-management-page .um-tabs-wrap { display: block; }
 .ap-list-page.user-management-page .um-tabs { display: flex; }
-.ap-list-page.user-management-page .um-tab > span { min-width: 18px; padding: 3px 5px; border-radius: 999px; background: #f1e8df; font: 700 .56rem/1 "DM Mono", monospace; }
+.ap-list-page.user-management-page .um-tab > span { min-width: 18px; padding: 3px 5px; border-radius: 999px; background: #FFF8EE; font: 700 .56rem/1 "Poppins", monospace; }
 
 .ap-list-page.user-management-page .um-filter-bar {
   grid-template-columns: minmax(260px, 2fr) minmax(150px, .8fr) minmax(150px, .8fr) minmax(90px, .45fr) auto;
@@ -154,33 +154,33 @@
 
 .ap-list-page.user-management-page .um-search-field { position: relative; display: block; }
 .ap-list-page.user-management-page .um-search-field > i { position: absolute; z-index: 1; left: 14px; bottom: 14px; color: #998e87; font-size: .82rem; }
-.ap-list-page.user-management-page .um-page-size-field > span { display: block; margin-bottom: 8px; color: #756b64; font: 800 .64rem/1 "Inter", sans-serif; letter-spacing: .08em; text-transform: uppercase; }
-.ap-list-page.user-management-page .um-page-size-field select { width: 100%; height: 43px; padding: 0 34px 0 13px; border: 1px solid #ddcfc4; border-radius: 10px; color: var(--ap-ink); background: #fff; font: 500 .8rem/1 "Inter", sans-serif; }
+.ap-list-page.user-management-page .um-page-size-field > span { display: block; margin-bottom: 8px; color: #756b64; font: 800 .64rem/1 "Poppins", sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+.ap-list-page.user-management-page .um-page-size-field select { width: 100%; height: 43px; padding: 0 34px 0 13px; border: 1px solid #ddcfc4; border-radius: 10px; color: var(--ap-ink); background: #FFFFFF; font: 500 .8rem/1 "Poppins", sans-serif; }
 
 .ap-list-page.user-management-page .user-record-avatar {
-  color: #fff;
+  color: #FFFFFF;
   background:
     radial-gradient(circle at 72% 25%, rgba(255,255,255,.2), transparent 5.5rem),
-    linear-gradient(145deg, color-mix(in srgb, var(--user-avatar-color) 74%, white), var(--user-avatar-color));
+    linear-gradient(145deg, color-mix(in srgb, var(--user-avatar-color) 74%, #FFFFFF), var(--user-avatar-color));
 }
 
-.ap-list-page.user-management-page .user-record-avatar span { color: #fff; text-shadow: 0 2px 12px rgba(0,0,0,.12); }
+.ap-list-page.user-management-page .user-record-avatar span { color: #FFFFFF; text-shadow: 0 2px 12px rgba(0,0,0,.12); }
 .ap-list-page.user-management-page .user-record-avatar small { color: rgba(255,255,255,.8); }
 .ap-list-page.user-management-page .animal-record-id { right: 10px; left: 10px; max-width: calc(100% - 20px); }
 
-.ap-list-page.user-management-page .animal-type-badge.role-admin { color: #753236; background: #f8e6e5; border-color: #ecd1d0; }
+.ap-list-page.user-management-page .animal-type-badge.role-admin { color: #780116; background: #FFF8EE; border-color: #EADFD4; }
 .ap-list-page.user-management-page .animal-type-badge.role-staff { color: #17695f; background: #e2f2ef; border-color: #cde6e1; }
 .ap-list-page.user-management-page .animal-type-badge.role-veterinarian { color: #315b87; background: #e7eff8; border-color: #d3e1ef; }
-.ap-list-page.user-management-page .animal-type-badge.role-public { color: #7b4c6c; background: #f5e9f1; border-color: #ead7e4; }
+.ap-list-page.user-management-page .animal-type-badge.role-public { color: #7b4c6c; background: #FFF8EE; border-color: #ead7e4; }
 .ap-list-page.user-management-page .status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 9px; }
 .ap-list-page.user-management-page .status-badge i { font-size: .4rem; }
 .ap-list-page.user-management-page .status-badge.badge-active { color: #187b55; background: #e5f4ec; }
-.ap-list-page.user-management-page .status-badge.badge-inactive { color: var(--ap-red-deep); background: #ffe7df; }
+.ap-list-page.user-management-page .status-badge.badge-inactive { color: var(--ap-red-deep); background: #FFF8EE; }
 
 .ap-list-page.user-management-page .user-card-footer-actions { display: grid; grid-template-columns: minmax(0, 1fr) 38px; gap: 8px; }
 .ap-list-page.user-management-page .user-action-menu { position: relative; }
-.ap-list-page.user-management-page .user-menu-trigger { width: 38px; height: 38px; display: grid; place-items: center; border: 1px solid #dfd1c6; border-radius: 8px; color: var(--ap-red-deep); background: #fff; }
-.ap-list-page.user-management-page .user-menu-trigger:hover { color: #fff; border-color: var(--ap-red); background: var(--ap-red); }
+.ap-list-page.user-management-page .user-menu-trigger { width: 38px; height: 38px; display: grid; place-items: center; border: 1px solid #dfd1c6; border-radius: 8px; color: var(--ap-red-deep); background: #FFFFFF; }
+.ap-list-page.user-management-page .user-menu-trigger:hover { color: #FFFFFF; border-color: var(--ap-red); background: var(--ap-red); }
 .ap-list-page.user-management-page .user-menu-popover { z-index: 20; right: 0; bottom: calc(100% + 7px); top: auto; min-width: 190px; }
 .ap-list-page.user-management-page .user-record-message { grid-column: 1 / -1; }
 
@@ -222,7 +222,7 @@
   margin: 0;
   border: 1px solid #dfd2c8;
   border-radius: 12px;
-  background: #fff;
+  background: #FFFFFF;
   box-shadow: none;
 }
 
@@ -242,7 +242,7 @@
   place-items: center;
   border-radius: 50%;
   color: var(--ap-red);
-  background: #fff0eb;
+  background: #FFF8EE;
 }
 
 .ap-list-page.user-management-page .um-search-field input {
@@ -269,7 +269,7 @@
   margin: 0;
   padding: 0;
   color: #7b6e68;
-  font: 800 .56rem/1 "Outfit", sans-serif;
+  font: 800 .56rem/1 "Poppins", sans-serif;
   letter-spacing: .04em;
   text-transform: uppercase;
 }
@@ -285,7 +285,7 @@
   box-shadow: none !important;
   color: #302a28 !important;
   background-color: transparent !important;
-  font: 700 .73rem/1 "Outfit", sans-serif !important;
+  font: 700 .73rem/1 "Poppins", sans-serif !important;
 }
 
 .ap-list-page.user-management-page .um-clear-filters {
@@ -294,15 +294,15 @@
   justify-content: center;
   gap: 8px;
   padding: 0 18px;
-  border-color: #efc3bd;
+  border-color: #EADFD4;
   color: var(--ap-red-deep);
-  background: #fff5f1;
+  background: #FFF8EE;
   box-shadow: none;
 }
 
 .ap-list-page.user-management-page .um-clear-filters:hover {
   border-color: var(--ap-red);
-  color: #fff;
+  color: #FFFFFF;
   background: var(--ap-red);
 }
 

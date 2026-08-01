@@ -1,0 +1,679 @@
+/*
+ * ANIMUA management brand theme
+ * Shared palette and typography for every authenticated management page.
+ */
+:root {
+  --animua-burgundy: #780116;
+  --animua-burgundy-dark: #780116;
+  --animua-midnight: #0D0D0D;
+  --animua-brown: #362822;
+  --animua-brown-soft: rgba(54, 40, 34, 0.08);
+  --animua-brown-line: rgba(54, 40, 34, 0.17);
+  --animua-champagne: #EFE5D2;
+  --animua-navy: #0A1D4B;
+  --animua-navy-soft: rgba(10, 29, 75, 0.09);
+  --animua-gold: #f7b538;
+  --animua-gold-soft: #fff1cf;
+  --animua-cream: #FFF8EE;
+  --animua-white: #FFFFFF;
+  --animua-text: #2b1719;
+  --animua-muted: #756367;
+  --animua-line: rgba(120, 1, 22, 0.14);
+  --animua-line-strong: rgba(120, 1, 22, 0.24);
+  --animua-shadow-soft: 0 10px 28px rgba(43, 23, 25, 0.08);
+  --animua-shadow: 0 20px 48px rgba(43, 23, 25, 0.12);
+  --clay: var(--animua-burgundy);
+  --clay-mid: var(--animua-burgundy-dark);
+  --clay-soft: rgba(120, 1, 22, 0.08);
+  --clay-muted: rgba(120, 1, 22, 0.12);
+  --ink: var(--animua-text);
+  --ink-2: #2B1719;
+  --ink-3: #5f484c;
+  --cream: var(--animua-cream);
+  --cream-2: #FFF8EE;
+  --cream-3: #FFF8EE;
+  --stone: var(--animua-muted);
+  --stone-2: #a08f92;
+  --stone-3: #FFF8EE;
+  --amber: #8d5b00;
+  --amber-soft: var(--animua-gold-soft);
+  --border: rgba(120, 1, 22, 0.09);
+  --border-md: var(--animua-line);
+  --shadow-sm: var(--animua-shadow-soft);
+  --shadow-md: var(--animua-shadow);
+  --font: "Poppins", sans-serif;
+  --management-modal-red: var(--animua-burgundy);
+  --management-modal-red-dark: var(--animua-burgundy-dark);
+  --management-modal-brown: var(--animua-brown);
+  --management-modal-brown-soft: var(--animua-brown-soft);
+  --management-modal-brown-line: var(--animua-brown-line);
+  --management-modal-midnight: var(--animua-midnight);
+  --management-modal-champagne: var(--animua-champagne);
+  --management-modal-navy: var(--animua-navy);
+  --management-modal-cream: var(--animua-cream);
+  --management-modal-section: #FFF8EE;
+  --management-modal-ink: var(--animua-text);
+  --management-modal-muted: var(--animua-muted);
+  --management-modal-line: var(--animua-line);
+}
+
+html,
+body,
+button,
+input,
+select,
+textarea {
+  font-family: "Poppins", sans-serif;
+}
+
+body.management-consistent-ui {
+  color: var(--animua-text) !important;
+  background: var(--animua-cream) !important;
+  font-weight: 400;
+}
+
+.management-consistent-ui :is(button, input, select, textarea, .topbar, .sidebar, .system-page-header, .modal, .um-modal, .announcement-modal, .swal2-popup) {
+  font-family: "Poppins", sans-serif !important;
+}
+
+.management-consistent-ui :is(h1, .page-title, .system-hero-copy h1) {
+  font-family: "Poppins", sans-serif !important;
+  font-weight: 800 !important;
+}
+
+.management-consistent-ui :is(h2, h3, .section-title, .panel-title, .card-title) {
+  font-family: "Poppins", sans-serif !important;
+  font-weight: 700 !important;
+}
+
+.management-consistent-ui :is(button, .btn, .nav-item, .nav-group-toggle, label, th, .tab, [class*=tab]) {
+  font-weight: 600;
+}
+
+.management-consistent-ui :is(p, li, td, small, .description, .subtitle) {
+  font-weight: 400;
+}
+
+.management-consistent-ui :is(code, .app-id-cell, .record-sub, .report-id, .time-cell, .date-cell) {
+  font-family: "Poppins", sans-serif !important;
+}
+
+.management-consistent-ui :is(.stage, .page-body, .main-content, .contact-message-page-body) {
+  background:
+    radial-gradient(circle at 100% 0, rgba(247, 181, 56, 0.1), transparent 24rem),
+    var(--animua-cream) !important;
+}
+
+.management-consistent-ui #sidebar-container {
+  --sb-red: var(--animua-burgundy);
+  --sb-red-dark: var(--animua-burgundy);
+  --sb-ink: var(--animua-text);
+  --sb-muted: var(--animua-muted);
+  --sb-border: var(--animua-line);
+}
+
+.management-consistent-ui .sidebar {
+  color: var(--animua-text) !important;
+  border-color: var(--animua-line) !important;
+  background: var(--animua-white) !important;
+  box-shadow: 8px 0 26px rgba(43, 23, 25, 0.06) !important;
+}
+
+.management-consistent-ui .sidebar-header {
+  border-bottom-color: var(--animua-line) !important;
+}
+
+.management-consistent-ui .brand-mark {
+  color: var(--animua-text) !important;
+  background: var(--animua-gold) !important;
+  box-shadow: 0 10px 22px rgba(247, 181, 56, 0.24) !important;
+}
+
+.management-consistent-ui .brand-copy strong {
+  color: var(--animua-burgundy) !important;
+  font-weight: 800 !important;
+}
+
+.management-consistent-ui .brand-copy small {
+  color: var(--animua-muted) !important;
+  font-weight: 600 !important;
+}
+
+.management-consistent-ui .nav-label {
+  color: var(--animua-muted) !important;
+  font-weight: 600 !important;
+}
+
+.management-consistent-ui .nav-section.nav-system {
+  border-top-color: var(--animua-line) !important;
+}
+
+.management-consistent-ui :is(.nav-item, .nav-group-toggle) {
+  color: var(--animua-burgundy) !important;
+  font-family: "Poppins", sans-serif !important;
+  font-weight: 600 !important;
+}
+
+.management-consistent-ui :is(.nav-item, .nav-group-toggle) .nav-icon {
+  color: currentColor !important;
+  background: rgba(120, 1, 22, 0.04) !important;
+}
+
+.management-consistent-ui :is(.nav-item:hover, .nav-group-toggle:hover, .nav-group.expanded > .nav-group-toggle) {
+  color: var(--animua-burgundy) !important;
+  border-color: rgba(120, 1, 22, 0.08) !important;
+  background: rgba(120, 1, 22, 0.055) !important;
+  box-shadow: inset 3px 0 0 var(--animua-burgundy), 0 7px 18px rgba(43, 23, 25, 0.045) !important;
+  transform: none !important;
+}
+
+.management-consistent-ui :is(.nav-item:hover, .nav-group-toggle:hover, .nav-group.expanded > .nav-group-toggle) .nav-icon {
+  color: var(--animua-burgundy) !important;
+  background: rgba(120, 1, 22, 0.075) !important;
+  box-shadow: inset 0 0 0 1px rgba(120, 1, 22, 0.1) !important;
+}
+
+.management-consistent-ui .nav-group.expanded > .nav-group-toggle {
+  border-color: rgba(120, 1, 22, 0.12) !important;
+  background: rgba(120, 1, 22, 0.105) !important;
+}
+
+.management-consistent-ui .nav-item.active {
+  color: var(--animua-burgundy) !important;
+  border-color: rgba(120, 1, 22, 0.12) !important;
+  background: rgba(120, 1, 22, 0.105) !important;
+  box-shadow: inset 3px 0 0 var(--animua-burgundy), 0 7px 18px rgba(43, 23, 25, 0.045) !important;
+  transform: none !important;
+}
+
+.management-consistent-ui .nav-item.active .nav-icon {
+  color: var(--animua-burgundy) !important;
+  background: rgba(120, 1, 22, 0.07) !important;
+}
+
+.management-consistent-ui .nav-group-indicator {
+  color: currentColor !important;
+  background: rgba(120, 1, 22, 0.08) !important;
+}
+
+.management-consistent-ui .nav-group.expanded > .nav-group-toggle .nav-group-indicator {
+  color: var(--animua-burgundy) !important;
+  background: rgba(247, 181, 56, 0.26) !important;
+}
+
+.management-consistent-ui .nav-submenu {
+  border-left-color: rgba(120, 1, 22, 0.26) !important;
+}
+
+.management-consistent-ui .nav-submenu > .nav-item:hover {
+  color: var(--animua-burgundy) !important;
+  border-color: transparent !important;
+  background: rgba(120, 1, 22, 0.045) !important;
+  box-shadow: none !important;
+}
+
+.management-consistent-ui .nav-submenu > .nav-item.active {
+  color: var(--animua-burgundy) !important;
+  border-color: transparent !important;
+  background: rgba(120, 1, 22, 0.085) !important;
+  box-shadow: none !important;
+}
+
+.management-consistent-ui .topbar {
+  color: var(--animua-text) !important;
+  border-bottom-color: var(--animua-line) !important;
+  background: rgba(255, 255, 255, 0.97) !important;
+  box-shadow: 0 6px 18px rgba(43, 23, 25, 0.05) !important;
+}
+
+.management-consistent-ui :is(.breadcrumb-link, .breadcrumb-current, .topbar nav) {
+  color: var(--animua-text) !important;
+}
+
+.management-consistent-ui .breadcrumb-current {
+  color: var(--animua-burgundy) !important;
+  font-weight: 700 !important;
+}
+
+.management-consistent-ui :is(.topbar .icon-btn, .topbar-quick-action, .user-chip) {
+  border-color: var(--animua-line) !important;
+  color: var(--animua-burgundy) !important;
+  background: var(--animua-white) !important;
+}
+
+.management-consistent-ui :is(.topbar .icon-btn, .topbar-quick-action, .user-chip):hover {
+  border-color: rgba(247, 181, 56, 0.72) !important;
+  color: var(--animua-burgundy) !important;
+  background: var(--animua-gold-soft) !important;
+}
+
+.management-consistent-ui :is(.notif-dot, .badge-count) {
+  color: var(--animua-text) !important;
+  background: var(--animua-gold) !important;
+}
+
+.management-consistent-ui .user-avatar {
+  color: var(--animua-white) !important;
+  background: var(--animua-burgundy) !important;
+}
+
+/* Keep the dashboard search as one field. Global input normalization used to
+   draw a second white pill inside the search container. */
+.management-consistent-ui .topbar .search-pill {
+  width: min(390px, 38vw);
+  height: 46px;
+  gap: 11px;
+  padding: 0 15px;
+  border: 1px solid var(--animua-line) !important;
+  border-radius: 14px;
+  color: var(--animua-text);
+  background: var(--animua-white) !important;
+  box-shadow: 0 5px 14px rgba(43, 23, 25, .04);
+}
+
+.management-consistent-ui .topbar .search-pill:hover {
+  border-color: rgba(247, 181, 56, .72) !important;
+}
+
+.management-consistent-ui .topbar .search-pill:focus-within {
+  border-color: var(--animua-gold) !important;
+  background: var(--animua-white) !important;
+  box-shadow: 0 0 0 4px rgba(247, 181, 56, .24) !important;
+}
+
+.management-consistent-ui .topbar .search-pill > i {
+  color: var(--animua-burgundy) !important;
+  font-size: .94rem;
+}
+
+.management-consistent-ui .topbar .search-pill input,
+.management-consistent-ui .topbar .search-pill input:focus {
+  width: 100%;
+  height: auto !important;
+  min-height: 0;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  color: var(--animua-text) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-size: .84rem;
+  font-weight: 500;
+}
+
+.management-consistent-ui .topbar .search-pill input::placeholder {
+  color: var(--animua-muted);
+  opacity: .78;
+}
+
+.management-consistent-ui .topbar .search-dropdown {
+  top: calc(100% + 9px);
+  right: auto;
+  min-width: min(390px, calc(100vw - 28px));
+  padding: 7px;
+  border-color: var(--animua-line) !important;
+  border-radius: 15px;
+  background: var(--animua-white) !important;
+  box-shadow: var(--animua-shadow);
+}
+
+.management-consistent-ui .topbar .search-result-item {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  gap: 11px;
+  min-height: 54px;
+  padding: 8px 10px;
+  border-radius: 11px;
+  color: var(--animua-text);
+  text-decoration: none;
+}
+
+.management-consistent-ui .topbar .search-result-item:hover,
+.management-consistent-ui .topbar .search-result-item:focus-visible {
+  color: var(--animua-burgundy);
+  background: var(--animua-cream);
+}
+
+.management-consistent-ui .topbar .search-result-item .sri-icon {
+  width: 36px;
+  height: 36px;
+  color: var(--animua-burgundy);
+  background: var(--animua-cream);
+}
+
+.management-consistent-ui .topbar .sri-copy { min-width: 0; display: grid; align-content: center; gap: 3px; }
+.management-consistent-ui .topbar .sri-name { overflow: hidden; font-size: .74rem; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.management-consistent-ui .topbar .sri-meta { overflow: hidden; color: var(--animua-muted); font-size: .62rem; text-overflow: ellipsis; white-space: nowrap; }
+.management-consistent-ui .topbar .sri-arrow { align-self: center; color: var(--animua-muted); font-size: .68rem; }
+.management-consistent-ui .topbar .search-empty { min-height: 80px; display: grid; place-items: center; align-content: center; gap: 7px; color: var(--animua-muted); font-size: .68rem; text-align: center; }
+.management-consistent-ui .topbar .search-empty i { color: var(--animua-burgundy); font-size: 1rem; }
+
+.management-consistent-ui .system-page-header {
+  --header-red: var(--animua-burgundy);
+  --header-coral: var(--animua-burgundy);
+  --header-ink: var(--animua-text);
+  --header-muted: var(--animua-muted);
+  --header-border: var(--animua-line);
+  font-family: "Poppins", sans-serif !important;
+}
+
+.management-consistent-ui .system-page-hero {
+  border: 1px solid rgba(255, 255, 255, 0.13) !important;
+  background:
+    linear-gradient(90deg, rgba(120, 1, 22, 0.97) 0%, rgba(120, 1, 22, 0.91) 46%, rgba(120, 1, 22, 0.82) 100%),
+    var(--header-photo, url(/images/policy-dog-banner.jpg))
+      var(--header-photo-position, center 44%) / cover no-repeat !important;
+  box-shadow: 0 24px 54px rgba(120, 1, 22, 0.24) !important;
+}
+
+.management-consistent-ui .system-page-hero::after {
+  border-color: rgba(247, 181, 56, 0.14) !important;
+}
+
+.management-consistent-ui :is(.system-hero-eyebrow, .system-hero-highlights i) {
+  color: var(--animua-gold) !important;
+}
+
+.management-consistent-ui .system-hero-copy h1 {
+  color: var(--animua-white) !important;
+  font-weight: 800 !important;
+}
+
+.management-consistent-ui .system-hero-copy > p {
+  color: rgba(255, 255, 255, 0.86) !important;
+  font-weight: 400 !important;
+}
+
+.management-consistent-ui .system-hero-highlights span {
+  border-color: rgba(247, 181, 56, 0.42) !important;
+  color: var(--animua-white) !important;
+  background: rgba(120, 1, 22, 0.42) !important;
+  font-weight: 600 !important;
+}
+
+.management-consistent-ui .system-hero-watermark {
+  color: rgba(247, 181, 56, 0.13) !important;
+}
+
+.management-consistent-ui .system-hero-operations {
+  color: var(--animua-text) !important;
+  border-color: rgba(247, 181, 56, 0.58) !important;
+  background: var(--animua-cream) !important;
+  box-shadow: 0 18px 42px rgba(120, 1, 22, 0.2) !important;
+  backdrop-filter: blur(12px);
+}
+
+.management-consistent-ui :is(.system-hero-live, .system-hero-queue) {
+  border-color: var(--animua-line) !important;
+}
+
+.management-consistent-ui .system-hero-live {
+  color: var(--animua-burgundy) !important;
+}
+
+.management-consistent-ui .system-hero-live > span {
+  background: var(--animua-gold) !important;
+  box-shadow: 0 0 0 5px rgba(247, 181, 56, 0.16) !important;
+}
+
+.management-consistent-ui .system-hero-queue small {
+  color: var(--animua-muted) !important;
+}
+
+.management-consistent-ui .system-hero-queue > div:first-child strong {
+  color: var(--animua-burgundy) !important;
+}
+
+.management-consistent-ui .system-queue-badge {
+  color: var(--animua-text) !important;
+  background: var(--animua-gold) !important;
+  box-shadow: 0 10px 22px rgba(247, 181, 56, 0.22) !important;
+}
+
+.management-consistent-ui .system-header-action {
+  border-color: var(--animua-gold) !important;
+  color: var(--animua-text) !important;
+  background: var(--animua-gold) !important;
+  font-weight: 600 !important;
+}
+
+.management-consistent-ui .system-header-action:hover {
+  border-color: var(--animua-burgundy) !important;
+  color: var(--animua-white) !important;
+  background: var(--animua-burgundy) !important;
+}
+
+.management-consistent-ui .system-header-action.is-secondary {
+  border-color: var(--animua-burgundy) !important;
+  color: var(--animua-burgundy) !important;
+  background: var(--animua-white) !important;
+}
+
+.management-consistent-ui .system-header-action.is-secondary:hover {
+  color: var(--animua-white) !important;
+  background: var(--animua-burgundy) !important;
+}
+
+.management-consistent-ui .system-summary {
+  border-color: var(--animua-line) !important;
+  background: var(--animua-white) !important;
+  box-shadow: var(--animua-shadow) !important;
+}
+
+.management-consistent-ui .system-summary-label {
+  color: var(--animua-text) !important;
+  background: var(--animua-gold) !important;
+  font-weight: 700 !important;
+}
+
+.management-consistent-ui .system-summary-metric {
+  border-right-color: var(--animua-line) !important;
+}
+
+.management-consistent-ui .system-summary-icon {
+  color: var(--animua-burgundy) !important;
+  background: var(--animua-gold-soft) !important;
+}
+
+.management-consistent-ui .system-summary-copy strong {
+  color: var(--animua-burgundy) !important;
+  font-family: "Poppins", sans-serif !important;
+  font-weight: 800 !important;
+}
+
+.management-consistent-ui .system-summary-copy small {
+  color: var(--animua-muted) !important;
+  font-weight: 500 !important;
+}
+
+.management-consistent-ui :is(.panel, .rpt-card, .records-card, .table-card, .post-card, .feed-filters, .cm-workspace, .cm-stats article, .channel-profile-card, .quick-composer) {
+  border-color: var(--animua-line) !important;
+  background: var(--animua-white) !important;
+  box-shadow: var(--animua-shadow-soft) !important;
+}
+
+.management-consistent-ui :is(.panel h2, .panel h3, .rpt-card h2, .rpt-card h3, .records-card h2, .table-card h2, .cm-page-header h1, .channel-profile-copy h2) {
+  color: var(--animua-burgundy) !important;
+}
+
+.management-consistent-ui :is(.shelter-table, .rpt-table) thead th {
+  border-color: var(--animua-line) !important;
+  color: var(--animua-burgundy) !important;
+  background: var(--animua-cream) !important;
+  font-weight: 700 !important;
+}
+
+.management-consistent-ui :is(.shelter-table, .rpt-table) tbody td {
+  border-bottom-color: rgba(120, 1, 22, 0.09) !important;
+  color: var(--animua-text) !important;
+  background: var(--animua-white) !important;
+}
+
+.management-consistent-ui :is(.shelter-table, .rpt-table) tbody tr:hover td {
+  background: #FFF8EE !important;
+}
+
+.management-consistent-ui :is(.filter-toolbar, .toolbar, .filters-panel, .um-pagination) {
+  border-color: var(--animua-line) !important;
+  background: var(--animua-cream) !important;
+}
+
+.management-consistent-ui :is(.aa-tab.active, .inv-tab.active, .archive-tab.active, .report-tab.active, .page-btn.active, [role=tab].active) {
+  border-color: var(--animua-gold) !important;
+  color: var(--animua-text) !important;
+  background: var(--animua-gold) !important;
+  box-shadow: 0 7px 18px rgba(247, 181, 56, 0.25) !important;
+}
+
+.management-consistent-ui :is(.btn-primary-clay, .btn-export, .btn-finalize, .primary-btn, .system-primary-action, .cm-refresh-btn) {
+  border-color: var(--animua-burgundy) !important;
+  color: var(--animua-white) !important;
+  background: var(--animua-burgundy) !important;
+  font-weight: 600 !important;
+  box-shadow: 0 8px 20px rgba(120, 1, 22, 0.18) !important;
+}
+
+.management-consistent-ui :is(.btn-primary-clay, .btn-export, .btn-finalize, .primary-btn, .system-primary-action, .cm-refresh-btn):hover {
+  border-color: var(--animua-burgundy-dark) !important;
+  color: var(--animua-white) !important;
+  background: var(--animua-burgundy-dark) !important;
+}
+
+.management-consistent-ui :is(.btn-outline-add, .btn-ghost-clay, .secondary-btn, .report-secondary-btn, .view-btn, .detail-btn, .tbl-action-btn) {
+  border-color: var(--animua-line-strong) !important;
+  color: var(--animua-burgundy) !important;
+  background: var(--animua-white) !important;
+  font-weight: 600 !important;
+}
+
+.management-consistent-ui :is(.btn-outline-add, .btn-ghost-clay, .secondary-btn, .report-secondary-btn, .view-btn, .detail-btn, .tbl-action-btn):hover {
+  border-color: var(--animua-gold) !important;
+  color: var(--animua-text) !important;
+  background: var(--animua-gold) !important;
+}
+
+.management-consistent-ui :is(.form-inp, .filter-select, input[type=date], input[type=search], input[type=text], input[type=email], input[type=password], textarea, select) {
+  border-color: var(--animua-line) !important;
+  color: var(--animua-text) !important;
+  background: var(--animua-white) !important;
+}
+
+.management-consistent-ui :is(input, textarea, select):focus {
+  border-color: var(--animua-burgundy) !important;
+  outline: 0 !important;
+  box-shadow: 0 0 0 4px rgba(247, 181, 56, 0.28) !important;
+}
+
+.management-consistent-ui :is(.um-modal, .announcement-modal, .modal-content, .drawer-panel) {
+  color: var(--animua-text) !important;
+  border-color: var(--animua-line) !important;
+  background: var(--animua-white) !important;
+  box-shadow: 0 30px 70px rgba(43, 23, 25, 0.24) !important;
+}
+
+.management-consistent-ui :is(.modal-header, .modal-footer, .um-modal-header, .um-modal-footer) {
+  border-color: var(--animua-line) !important;
+  background: var(--animua-cream) !important;
+}
+
+/* Warm brown is a page-level secondary neutral. System headers stay Burgundy. */
+body.management-consistent-ui :is(.page-body, .main-content, .contact-message-page-body) {
+  background:
+    radial-gradient(circle at 100% 0, rgba(247, 181, 56, 0.10), transparent 24rem),
+    radial-gradient(circle at 0 100%, rgba(54, 40, 34, 0.065), transparent 30rem),
+    var(--animua-cream) !important;
+}
+
+body.management-consistent-ui :is(.page-body, .main-content, .contact-message-page-body) :is(
+  .panel, .rpt-card, .records-card, .table-card, .cq-card,
+  .report-command-card, .report-catalog-section
+) {
+  border-color: var(--animua-brown-line) !important;
+  box-shadow: 0 16px 38px rgba(54, 40, 34, 0.075) !important;
+}
+
+body.management-consistent-ui :is(.page-body, .main-content, .contact-message-page-body) :is(
+  .panel-head p, .records-heading p, .section-heading p, .rpt-card-head p,
+  .table-section-head p, .filter-field > span, .result-count,
+  .inventory-filter-summary, .report-table-footer
+) {
+  color: var(--animua-brown) !important;
+}
+
+body.management-consistent-ui :is(.page-body, .main-content, .contact-message-page-body) :is(
+  .section-kicker, .records-heading small, .table-section-head small,
+  .inv-category-label, .ap-filter-label, .um-filter-label
+) {
+  color: var(--animua-brown) !important;
+}
+
+body.management-consistent-ui :is(.page-body, .main-content, .contact-message-page-body) :is(
+  .metric-value, .record-title, .item-name, .animal-name,
+  .actor-cell strong, .report-id, .drawer-info-val
+) {
+  color: var(--animua-midnight) !important;
+}
+
+body.management-consistent-ui :is(.page-body, .main-content, .contact-message-page-body) :is(
+  .result-count, .table-record-count, .report-tab-count,
+  .inventory-filter-summary span:last-child
+) {
+  background: var(--animua-champagne) !important;
+}
+
+body.management-consistent-ui :is(.page-body, .main-content, .contact-message-page-body) :is(
+  .tone-blue .report-tab-icon, .cq-version, .badge-blue,
+  .status-info, .info-badge, .kpi-blue, .icon-blue,
+  .badge-quarantine, .event-medical, .alert-blue .alert-ico,
+  .compat-cat, .tile-blue, .source-barangay,
+  .rpt-kpi.tone-blue .rpt-kpi-icon, .cq-setting-icon.blue,
+  .b-dog, .b-male
+) {
+  border-color: rgba(10, 29, 75, 0.20) !important;
+  color: var(--animua-navy) !important;
+  background: var(--animua-navy-soft) !important;
+}
+
+body.management-consistent-ui :is(.page-body, .main-content, .contact-message-page-body) :is(
+  .kpi-trend-blue, .text-blue
+) {
+  color: var(--animua-navy) !important;
+}
+
+body.management-consistent-ui :is(.page-body, .main-content, .contact-message-page-body) .um-toast.toast-info {
+  color: var(--animua-white) !important;
+  background: var(--animua-navy) !important;
+}
+
+.management-consistent-ui :is(button, a, input, select, textarea):focus-visible {
+  outline: 3px solid rgba(247, 181, 56, 0.78) !important;
+  outline-offset: 3px !important;
+}
+
+@media (max-width: 900px) {
+  .management-consistent-ui .system-page-hero {
+    background-position: center, var(--header-photo-position, 62% center) !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .management-consistent-ui .topbar .search-pill { width: min(270px, 42vw); }
+  .management-consistent-ui .system-page-hero { border-radius: 20px !important; }
+  .management-consistent-ui .system-summary { border-radius: 16px !important; }
+}
+
+@media (max-width: 560px) {
+  .management-consistent-ui .topbar .search-pill { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .management-consistent-ui *,
+  .management-consistent-ui *::before,
+  .management-consistent-ui *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

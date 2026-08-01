@@ -47,7 +47,7 @@
   gap: 7px;
   padding: 9px 18px;
   background: var(--clay);
-  color: #fff;
+  color: #FFFFFF;
   border: none;
   border-radius: var(--radius-sm);
   font: 600 0.875rem/1 var(--font);
@@ -124,13 +124,13 @@
 }
 
 .archive-tab:hover {
-  background: #fff;
+  background: #FFFFFF;
   color: var(--ink);
 }
 
 .archive-tab.active {
   background: var(--clay);
-  color: #fff;
+  color: #FFFFFF;
   border-color: var(--clay);
 }
 
@@ -149,7 +149,7 @@
 }
 
 .search-pill-sm:focus-within {
-  background: #fff;
+  background: #FFFFFF;
   border-color: var(--clay-mid);
   box-shadow: 0 0 0 3px var(--clay-muted);
 }
@@ -182,7 +182,7 @@
 
 .filter-select:focus {
   border-color: var(--clay-mid);
-  background: #fff;
+  background: #FFFFFF;
   box-shadow: 0 0 0 3px var(--clay-muted);
 }
 
@@ -267,7 +267,7 @@
 }
 
 .module-user {
-  background: rgba(151, 10, 18, 0.1);
+  background: rgba(120, 1, 22, 0.1);
   color: var(--clay);
 }
 
@@ -279,7 +279,7 @@
 
 .reason-duplicate,
 .reason-replaced {
-  background: rgba(151, 10, 18, 0.1);
+  background: rgba(120, 1, 22, 0.1);
   color: var(--clay);
 }
 
@@ -299,7 +299,7 @@
 }
 
 .reason-other {
-  background: #f1f3f5;
+  background: #FFF8EE;
   color: #495057;
 }
 
@@ -345,7 +345,7 @@
 
 .restore-btn:hover {
   background: var(--green);
-  color: #fff;
+  color: #FFFFFF;
   border-color: var(--green);
 }
 
@@ -366,7 +366,7 @@
   padding: 0 10px;
   border-radius: 8px;
   border: 1px solid var(--border-md);
-  background: #fff;
+  background: #FFFFFF;
   font: 500 0.82rem/1 var(--font);
   color: var(--stone);
   cursor: pointer;
@@ -383,7 +383,7 @@
 
 .page-btn.active {
   background: var(--clay);
-  color: #fff;
+  color: #FFFFFF;
   border-color: var(--clay);
   font-weight: 700;
 }
@@ -421,7 +421,7 @@
 }
 
 .um-modal {
-  background: #fff;
+  background: #FFFFFF;
   border-radius: var(--radius-lg);
   width: 100%;
   max-width: 680px;
@@ -535,7 +535,7 @@
   top: 24px;
   right: 24px;
   background: #161112;
-  color: #fff;
+  color: #FFFFFF;
   padding: 16px 20px;
   border-radius: 16px;
   font-size: 0.95rem;

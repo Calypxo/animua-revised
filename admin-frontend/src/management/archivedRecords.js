@@ -1,8 +1,6 @@
 import "../css/archivedRecords.css";
 import "../css/recordsWorkspace.css";
-import "../css/adminDashboard.css";
-import "../css/sidebar.css";
-
+import "../css/managementTables.css";
 import { protectPageByModule } from "../auth/authGuard.js";
 import { hasPermission } from "../auth/permissions.js";
 import { renderTopbarUser } from "../components/management/topbarUser.js";

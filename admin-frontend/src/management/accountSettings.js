@@ -1,5 +1,3 @@
-import "../css/adminDashboard.css";
-import "../css/sidebar.css";
 import "../css/accountSettings.css";
 import Swal from "sweetalert2";
 import { protectManagementPage } from "../auth/authGuard.js";
@@ -122,7 +120,7 @@ async function changePassword(event) {
     text: "You will be signed out and asked to log in with the new password.",
     showCancelButton: true,
     confirmButtonText: "Change password",
-    confirmButtonColor: "#ef1725",
+    confirmButtonColor: "#780116",
   });
   if (!confirmed.isConfirmed) return;
   const button = document.getElementById("changePasswordButton");
@@ -136,7 +134,7 @@ async function changePassword(event) {
       icon: "success",
       title: "Password changed",
       text: "Sign in again using your new password.",
-      confirmButtonColor: "#ef1725",
+      confirmButtonColor: "#780116",
     });
     clearUserSession();
     window.location.replace("/pages/admin-login.html");

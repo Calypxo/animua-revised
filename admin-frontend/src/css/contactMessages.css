@@ -9,15 +9,15 @@
   justify-content: space-between;
   gap: 18px;
   padding: 28px;
-  border: 1px solid rgba(122, 37, 30, 0.12);
+  border: 1px solid rgba(120, 1, 22, 0.12);
   border-radius: 18px;
-  background: #fffdf8;
+  background: #FFF8EE;
   box-shadow: 0 18px 48px rgba(45, 30, 22, 0.08);
 }
 
 .cm-eyebrow {
   display: block;
-  color: #9d3f33;
+  color: #780116;
   font-size: 0.74rem;
   font-weight: 850;
   letter-spacing: 0.08em;
@@ -27,7 +27,7 @@
 .cm-page-header h1 {
   margin: 6px 0 8px;
   color: #271f1c;
-  font-family: "Outfit", "Inter", sans-serif;
+  font-family: "Poppins", "Poppins", sans-serif;
   font-size: clamp(2rem, 4vw, 3.1rem);
   font-weight: 850;
   letter-spacing: 0;
@@ -51,8 +51,8 @@
   gap: 9px;
   border: 0;
   border-radius: 10px;
-  background: #9d3f33;
-  color: #fff;
+  background: #780116;
+  color: #FFFFFF;
   font-weight: 800;
 }
 
@@ -68,9 +68,9 @@
 
 .cm-stats article {
   padding: 18px 20px;
-  border: 1px solid rgba(122, 37, 30, 0.1);
+  border: 1px solid rgba(120, 1, 22, 0.1);
   border-radius: 14px;
-  background: #fffdf8;
+  background: #FFF8EE;
 }
 
 .cm-stats span {
@@ -84,7 +84,7 @@
 .cm-stats strong {
   display: block;
   margin-top: 6px;
-  color: #7f2f27;
+  color: #780116;
   font-size: 1.8rem;
   line-height: 1;
 }
@@ -99,9 +99,9 @@
 .cm-inbox-panel,
 .cm-detail-panel {
   min-height: 640px;
-  border: 1px solid rgba(122, 37, 30, 0.12);
+  border: 1px solid rgba(120, 1, 22, 0.12);
   border-radius: 18px;
-  background: #fffdf8;
+  background: #FFF8EE;
   box-shadow: 0 18px 48px rgba(45, 30, 22, 0.07);
 }
 
@@ -125,7 +125,7 @@
   position: absolute;
   left: 14px;
   top: 50%;
-  color: #8b2d25;
+  color: #780116;
   transform: translateY(-50%);
 }
 
@@ -133,11 +133,11 @@
 .cm-filter-row select,
 .cm-reply-form textarea {
   width: 100%;
-  border: 1px solid rgba(122, 37, 30, 0.16);
+  border: 1px solid rgba(120, 1, 22, 0.16);
   border-radius: 10px;
-  background: #fff;
+  background: #FFFFFF;
   color: #27211f;
-  font: 650 0.9rem "Inter", sans-serif;
+  font: 650 0.9rem "Poppins", sans-serif;
   outline: none;
 }
 
@@ -164,20 +164,20 @@
   gap: 5px;
   width: 100%;
   padding: 15px;
-  border: 1px solid rgba(122, 37, 30, 0.1);
+  border: 1px solid rgba(120, 1, 22, 0.1);
   border-radius: 12px;
-  background: #fff;
+  background: #FFFFFF;
   color: #27211f;
   text-align: left;
 }
 
 .cm-message-item.active {
-  border-color: rgba(157, 63, 51, 0.42);
-  background: #fff7f3;
+  border-color: rgba(120, 1, 22, 0.42);
+  background: #FFF8EE;
 }
 
 .cm-message-item strong {
-  color: #302420;
+  color: #2B1719;
   font-size: 0.98rem;
 }
 
@@ -197,8 +197,8 @@
 
 .cm-message-status.is-new,
 .cm-status-pill.is-new {
-  background: #f5e4df;
-  color: #8b2d25;
+  background: #FFF8EE;
+  color: #780116;
 }
 
 .cm-message-status.is-replied,
@@ -227,13 +227,13 @@
 }
 
 .cm-detail-empty i {
-  color: rgba(157, 63, 51, 0.28);
+  color: rgba(120, 1, 22, 0.28);
   font-size: 3rem;
 }
 
 .cm-detail-empty h2 {
   margin: 0;
-  color: #302420;
+  color: #2B1719;
   font-weight: 850;
 }
 
@@ -285,9 +285,9 @@
   align-items: center;
   gap: 8px;
   padding: 0 13px;
-  border: 1px solid rgba(157, 63, 51, 0.18);
+  border: 1px solid rgba(120, 1, 22, 0.18);
   border-radius: 10px;
-  color: #8b2d25;
+  color: #780116;
   font-weight: 800;
   text-decoration: none;
 }
@@ -301,9 +301,9 @@
 
 .cm-info-grid div {
   padding: 13px 14px;
-  border: 1px solid rgba(122, 37, 30, 0.1);
+  border: 1px solid rgba(120, 1, 22, 0.1);
   border-radius: 10px;
-  background: #fff;
+  background: #FFFFFF;
 }
 
 .cm-info-grid dt {
@@ -323,15 +323,15 @@
 .cm-user-message,
 .cm-reply-form {
   padding: 18px;
-  border: 1px solid rgba(122, 37, 30, 0.1);
+  border: 1px solid rgba(120, 1, 22, 0.1);
   border-radius: 14px;
-  background: #fff;
+  background: #FFFFFF;
 }
 
 .cm-user-message h3,
 .cm-reply-head h3 {
   margin: 0;
-  color: #7f2f27;
+  color: #780116;
   font-weight: 850;
 }
 
@@ -355,7 +355,7 @@
 }
 
 .cm-reply-head span {
-  color: #9d3f33;
+  color: #780116;
   font-size: 0.72rem;
   font-weight: 850;
   text-transform: uppercase;
@@ -371,7 +371,7 @@
 .cm-reply-form label {
   display: grid;
   gap: 8px;
-  color: #302420;
+  color: #2B1719;
   font-weight: 800;
 }
 
@@ -400,7 +400,7 @@
 }
 
 .cm-reply-actions p[data-type="error"] {
-  color: #8b2d25;
+  color: #780116;
 }
 
 .cm-reply-actions p[data-type="info"] {

@@ -2,13 +2,19 @@
   --management-modal-width: 56vw;
   --management-modal-radius: 30px;
   --management-modal-shadow: -24px 0 70px rgba(43, 22, 19, 0.24);
-  --management-modal-red: #ef1725;
-  --management-modal-red-dark: #c90f1d;
-  --management-modal-ink: #1f2329;
-  --management-modal-muted: #756b67;
+  --management-modal-red: #780116;
+  --management-modal-red-dark: #780116;
+  --management-modal-midnight: #0D0D0D;
+  --management-modal-brown: #362822;
+  --management-modal-brown-soft: rgba(54, 40, 34, 0.08);
+  --management-modal-brown-line: rgba(54, 40, 34, 0.18);
+  --management-modal-champagne: #EFE5D2;
+  --management-modal-navy: #0A1D4B;
+  --management-modal-ink: var(--management-modal-midnight);
+  --management-modal-muted: var(--management-modal-brown);
   --management-modal-line: #eadfd4;
-  --management-modal-cream: #fff9f4;
-  --management-modal-section: #fffcf9;
+  --management-modal-cream: #FFF8EE;
+  --management-modal-section: var(--management-modal-champagne);
 }
 
 body.management-modal-open,
@@ -52,7 +58,7 @@ body.management-drawer-open {
   border: 1px solid rgba(255, 255, 255, 0.72) !important;
   border-right: 0 !important;
   border-radius: var(--management-modal-radius) 0 0 var(--management-modal-radius) !important;
-  background: #fffdfa !important;
+  background: #FFF8EE !important;
   box-shadow: var(--management-modal-shadow) !important;
   transform: translate3d(104%, 0, 0) !important;
   transform-origin: right center !important;
@@ -67,7 +73,7 @@ body.management-drawer-open {
   flex: 0 0 auto !important;
   padding: 24px 28px 20px !important;
   border-bottom: 1px solid #eadfd4 !important;
-  background: linear-gradient(135deg, #fffaf4 0%, #fff 72%) !important;
+  background: linear-gradient(135deg, #FFF8EE 0%, #FFFFFF 72%) !important;
 }
 
 .management-side-modal > :is(.um-modal-body, .announcement-form) {
@@ -77,19 +83,19 @@ body.management-drawer-open {
   overflow-y: auto !important;
   overscroll-behavior: contain;
   scrollbar-width: thin;
-  scrollbar-color: #d9c8bc transparent;
+  scrollbar-color: rgba(54, 40, 34, .36) transparent;
 }
 
 .management-side-modal > .um-modal-body {
   padding: 26px 28px !important;
-  background: #fffdfa !important;
+  background: var(--management-modal-champagne) !important;
 }
 
 .management-side-modal > :is(.um-modal-footer, .modal-actions) {
   flex: 0 0 auto !important;
   padding: 17px 28px !important;
   border-top: 1px solid #eadfd4 !important;
-  background: rgba(255, 250, 244, 0.96) !important;
+  background: rgba(255, 248, 238, 0.96) !important;
 }
 
 .announcement-modal.management-side-modal .announcement-form.composer-layout {
@@ -154,9 +160,9 @@ body.management-drawer-open {
 .management-modal-layer > .management-side-modal,
 .aa-drawer,
 .surrender-requests-page .sr-drawer {
-  font-family: "Outfit", sans-serif !important;
+  font-family: "Poppins", sans-serif !important;
   color: var(--management-modal-ink) !important;
-  background: #fffdfb !important;
+  background: #FFF8EE !important;
 }
 
 .management-side-modal > :is(.um-modal-header, .modal-head),
@@ -182,7 +188,7 @@ body.management-drawer-open {
 .surrender-requests-page .drawer-header h3 {
   margin: 0 !important;
   color: var(--management-modal-ink) !important;
-  font-family: "Outfit", sans-serif !important;
+  font-family: "Poppins", sans-serif !important;
   font-size: 1.34rem !important;
   font-weight: 800 !important;
   line-height: 1.18 !important;
@@ -209,15 +215,15 @@ body.management-drawer-open {
   border: 1px solid #e5d8cf !important;
   border-radius: 50% !important;
   color: #786a65 !important;
-  background: #fff !important;
+  background: #FFFFFF !important;
 }
 
 .management-side-modal :is(.modal-close-btn,.drawer-close-btn):hover,
 .aa-drawer .drawer-close-btn:hover,
 .surrender-requests-page .drawer-close-btn:hover {
-  border-color: #f0bdb7 !important;
+  border-color: #EADFD4 !important;
   color: var(--management-modal-red) !important;
-  background: #fff0ed !important;
+  background: #FFF8EE !important;
 }
 
 .management-side-modal > .um-modal-body,
@@ -229,7 +235,7 @@ body.management-drawer-open {
   padding: 28px 34px 34px !important;
   overflow-y: auto !important;
   overscroll-behavior: contain !important;
-  background: #fffdfb !important;
+  background: #FFF8EE !important;
   scrollbar-width: thin;
   scrollbar-color: #d9c8bc transparent;
 }
@@ -239,10 +245,10 @@ body.management-drawer-open {
 .surrender-requests-page .drawer-section {
   margin: 0 0 20px !important;
   padding: 21px !important;
-  border: 1px solid var(--management-modal-line) !important;
+  border: 1px solid var(--management-modal-brown-line) !important;
   border-radius: 15px !important;
-  background: var(--management-modal-section) !important;
-  box-shadow: none !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 8px 22px rgba(54, 40, 34, .055) !important;
 }
 
 .management-side-modal :is(.form-section-title,.view-section-title,.drawer-section-title),
@@ -256,7 +262,7 @@ body.management-drawer-open {
   padding: 0 0 13px !important;
   border-bottom: 1px solid #eee1d7 !important;
   color: #2b2528 !important;
-  font-family: "Outfit", sans-serif !important;
+  font-family: "Poppins", sans-serif !important;
   font-size: .82rem !important;
   font-weight: 800 !important;
 }
@@ -270,8 +276,8 @@ body.management-drawer-open {
   place-items: center !important;
   margin: -4px 0 !important;
   border-radius: 50% !important;
-  color: var(--management-modal-red) !important;
-  background: #fff0e8 !important;
+  color: var(--management-modal-brown) !important;
+  background: var(--management-modal-brown-soft) !important;
 }
 
 .management-side-modal :is(input,select,textarea),
@@ -280,12 +286,12 @@ body.management-drawer-open {
   border: 1px solid #dfd3cb !important;
   border-radius: 10px !important;
   color: var(--management-modal-ink) !important;
-  background: #fff !important;
-  font-family: "Outfit", sans-serif !important;
+  background: #FFFFFF !important;
+  font-family: "Poppins", sans-serif !important;
 }
 
 .management-side-modal :is(input,select):not([type="radio"]):not([type="checkbox"]) { min-height: 44px !important; }
-.management-side-modal :is(input,select,textarea):focus { border-color: var(--management-modal-red) !important; box-shadow: 0 0 0 4px rgba(239,23,37,.09) !important; outline: 0 !important; }
+.management-side-modal :is(input,select,textarea):focus { border-color: var(--management-modal-red) !important; box-shadow: 0 0 0 4px rgba(120, 1, 22,.09) !important; outline: 0 !important; }
 
 .management-side-modal :is(.audit-detail-grid,.archive-detail-grid,.drawer-info-grid,.view-details-grid,.view-grid),
 .aa-drawer .drawer-info-grid,
@@ -296,15 +302,15 @@ body.management-drawer-open {
 .surrender-requests-page .drawer-info-item {
   min-height: 74px !important;
   padding: 14px 16px !important;
-  border: 1px solid #eee1d8 !important;
+  border: 1px solid var(--management-modal-brown-line) !important;
   border-radius: 12px !important;
-  background: #fff !important;
+  background: #FFFFFF !important;
 }
 
 .management-side-modal :is(.audit-detail-label,.archive-detail-label,.drawer-info-lbl,.view-detail-lbl,.view-field-lbl),
 .aa-drawer .drawer-info-lbl,
 .surrender-requests-page .drawer-info-lbl {
-  color: #887a73 !important;
+  color: var(--management-modal-brown) !important;
   font-size: .61rem !important;
   font-weight: 800 !important;
   letter-spacing: .06em !important;
@@ -316,7 +322,7 @@ body.management-drawer-open {
 .surrender-requests-page .drawer-info-val {
   margin-top: 5px !important;
   color: #3a3230 !important;
-  font-family: "Outfit", sans-serif !important;
+  font-family: "Poppins", sans-serif !important;
   font-size: .8rem !important;
   font-weight: 650 !important;
   line-height: 1.45 !important;
@@ -342,7 +348,7 @@ body.management-drawer-open {
   min-height: 46px !important;
   padding: 0 20px !important;
   border-radius: 999px !important;
-  font-family: "Outfit", sans-serif !important;
+  font-family: "Poppins", sans-serif !important;
   font-size: .78rem !important;
   font-weight: 800 !important;
 }
@@ -421,7 +427,7 @@ body.management-drawer-open {
 /* Adoption details: Intake-derived shell with the approved ANIMUA palette. */
 .aa-drawer,
 .aa-drawer :is(button,input,select,textarea) {
-  font-family: "Outfit", sans-serif !important;
+  font-family: "Poppins", sans-serif !important;
 }
 
 .aa-drawer-inner {
@@ -435,7 +441,7 @@ body.management-drawer-open {
 
 .aa-drawer .drawer-eyebrow {
   color: var(--management-modal-red) !important;
-  font-family: "Outfit", sans-serif !important;
+  font-family: "Poppins", sans-serif !important;
   font-size: .65rem !important;
   font-weight: 800 !important;
   letter-spacing: .09em !important;
@@ -451,13 +457,13 @@ body.management-drawer-open {
   padding: 18px 20px !important;
   border: 1px solid var(--management-modal-line) !important;
   border-radius: 15px !important;
-  background: linear-gradient(135deg,#fff6ef 0%,#fffdfb 76%) !important;
+  background: linear-gradient(135deg,#FFF8EE 0%,#FFF8EE 76%) !important;
 }
 
 .aa-drawer .journey-avatar {
-  color: #fff !important;
+  color: #FFFFFF !important;
   background: var(--management-modal-red) !important;
-  box-shadow: 0 7px 16px rgba(239,23,37,.15) !important;
+  box-shadow: 0 7px 16px rgba(120, 1, 22,.15) !important;
 }
 
 .aa-drawer .journey-pet {
@@ -468,7 +474,7 @@ body.management-drawer-open {
 
 .aa-drawer .application-journey :is(strong,small),
 .aa-drawer :is(.compat-ring-info h4,.compat-ring-info p,.drawer-trait-name,.no-score-box p,.req-item-name,.quiz-q,.quiz-a) {
-  font-family: "Outfit", sans-serif !important;
+  font-family: "Poppins", sans-serif !important;
 }
 
 .aa-drawer .journey-link {
@@ -478,7 +484,7 @@ body.management-drawer-open {
 .aa-drawer :is(.compat-ring-wrap,.no-score-box,.quiz-answers-wrap) {
   border: 1px solid #eee1d8 !important;
   border-radius: 12px !important;
-  background: #fff !important;
+  background: #FFFFFF !important;
 }
 
 .aa-drawer .compat-ring-track {
@@ -487,17 +493,17 @@ body.management-drawer-open {
 
 .aa-drawer .compat-ring-pct {
   color: var(--management-modal-ink) !important;
-  font-family: "DM Mono", monospace !important;
+  font-family: "Poppins", monospace !important;
 }
 
 .aa-drawer .compat-ring-sub,
 .aa-drawer .drawer-trait-score,
 .aa-drawer .quiz-a {
-  font-family: "DM Mono", monospace !important;
+  font-family: "Poppins", monospace !important;
 }
 
 .aa-drawer .drawer-trait-track {
-  background: #f0e4dc !important;
+  background: #FFF8EE !important;
 }
 
 .aa-drawer .no-score-box > i,
@@ -517,12 +523,12 @@ body.management-drawer-open {
 
 .aa-drawer .req-missing {
   color: #675b55 !important;
-  background: #fff9f0 !important;
+  background: #FFF8EE !important;
 }
 
 .aa-drawer .status-badge,
 .management-modal-layer .status-badge {
-  font-family: "Outfit", sans-serif !important;
+  font-family: "Poppins", sans-serif !important;
   font-size: .66rem !important;
   font-weight: 800 !important;
 }
@@ -538,15 +544,15 @@ body.management-drawer-open {
 }
 
 .aa-drawer .badge-rejected {
-  color: #c90f1d !important;
-  background: #fff0ed !important;
+  color: #780116 !important;
+  background: #FFF8EE !important;
 }
 
 .aa-drawer .btn-approve-app,
 .aa-drawer .btn-finalize,
 .management-modal-layer :is(.btn-reject-confirm,.btn-finalize) {
   border: 1px solid var(--management-modal-red) !important;
-  color: #fff !important;
+  color: #FFFFFF !important;
   background: var(--management-modal-red) !important;
 }
 
@@ -559,11 +565,11 @@ body.management-drawer-open {
 .aa-drawer :is(.btn-ghost-clay,.btn-danger-outline) {
   border: 1px solid #dfd3cb !important;
   color: #4f4743 !important;
-  background: #fff !important;
+  background: #FFFFFF !important;
 }
 
 .aa-drawer .btn-danger-outline {
-  border-color: #f0bdb7 !important;
+  border-color: #EADFD4 !important;
   color: var(--management-modal-red) !important;
 }
 
@@ -588,7 +594,7 @@ body.management-drawer-open {
 :is(.aa-drawer,.surrender-requests-page .sr-drawer) .drawer-info-lbl {
   margin: 0 !important;
   color: #504845 !important;
-  font-family: "Outfit", sans-serif !important;
+  font-family: "Poppins", sans-serif !important;
   font-size: 11px !important;
   font-weight: 700 !important;
   letter-spacing: normal !important;
@@ -604,8 +610,8 @@ body.management-drawer-open {
   border: 1px solid #dfd3cb !important;
   border-radius: 10px !important;
   color: var(--management-modal-ink) !important;
-  background: #fff !important;
-  font-family: "Outfit", sans-serif !important;
+  background: #FFFFFF !important;
+  font-family: "Poppins", sans-serif !important;
   font-size: 12px !important;
   font-weight: 500 !important;
   line-height: 1.45 !important;
@@ -628,7 +634,7 @@ body.management-drawer-open {
 
 .aa-drawer .journey-status :is(small,strong) {
   display: block;
-  font-family: "Outfit", sans-serif;
+  font-family: "Poppins", sans-serif;
 }
 
 .aa-drawer .journey-status small {
@@ -719,9 +725,9 @@ body.management-drawer-open {
   border-right: 0 !important;
   border-radius: var(--management-modal-radius, 30px) 0 0 var(--management-modal-radius, 30px) !important;
   color: var(--management-modal-ink, #1f2329) !important;
-  background: #fffdfb !important;
+  background: var(--management-modal-champagne) !important;
   box-shadow: var(--management-modal-shadow, -24px 0 70px rgba(43, 22, 19, .24)) !important;
-  font-family: "Outfit", sans-serif !important;
+  font-family: "Poppins", sans-serif !important;
   transform: translate3d(104%, 0, 0) !important;
   transform-origin: right center !important;
   transition: transform 280ms cubic-bezier(.22, .8, .24, 1) !important;
@@ -755,7 +761,7 @@ body.management-drawer-open {
   padding: 25px 34px 22px !important;
   border: 0 !important;
   border-bottom: 1px solid var(--management-modal-line, #eadfd4) !important;
-  background: var(--management-modal-cream, #fff9f4) !important;
+  background: var(--management-modal-cream, #FFF8EE) !important;
 }
 
 :is(
@@ -780,7 +786,7 @@ body.management-drawer-open {
 #viewItemModalBackdrop #viewItemModalInner .drawer-header h3 {
   margin: 0 !important;
   color: var(--management-modal-ink, #1f2329) !important;
-  font: 800 1.34rem/1.18 "Outfit", sans-serif !important;
+  font: 800 1.34rem/1.18 "Poppins", sans-serif !important;
 }
 
 :is(
@@ -793,7 +799,7 @@ body.management-drawer-open {
 #viewItemModalBackdrop #viewItemModalInner .drawer-header p {
   margin: 5px 0 0 !important;
   color: var(--management-modal-muted, #756b67) !important;
-  font: 500 .76rem/1.45 "Outfit", sans-serif !important;
+  font: 500 .76rem/1.45 "Poppins", sans-serif !important;
 }
 
 :is(
@@ -814,7 +820,7 @@ body.management-drawer-open {
   border: 1px solid #e5d8cf !important;
   border-radius: 50% !important;
   color: #786a65 !important;
-  background: #fff !important;
+  background: #FFFFFF !important;
   font-size: .9rem !important;
 }
 
@@ -826,9 +832,9 @@ body.management-drawer-open {
   #viewArchiveModalBackdrop
 ) .modal-close-btn:hover,
 #viewItemModalBackdrop #viewItemModalInner .drawer-close-btn:hover {
-  border-color: #f0bdb7 !important;
-  color: var(--management-modal-red, #ef1725) !important;
-  background: #fff0ed !important;
+  border-color: #EADFD4 !important;
+  color: var(--management-modal-red, #780116) !important;
+  background: #FFF8EE !important;
 }
 
 :is(
@@ -845,7 +851,7 @@ body.management-drawer-open {
   overflow-x: hidden !important;
   overflow-y: auto !important;
   overscroll-behavior: contain !important;
-  background: #fffdfb !important;
+  background: #FFF8EE !important;
   scrollbar-width: thin !important;
   scrollbar-color: #d9c8bc transparent !important;
 }
@@ -868,7 +874,7 @@ body.management-drawer-open {
   padding: 15px 26px !important;
   border: 0 !important;
   border-top: 1px solid var(--management-modal-line, #eadfd4) !important;
-  background: var(--management-modal-cream, #fff9f4) !important;
+  background: var(--management-modal-cream, #FFF8EE) !important;
 }
 
 :is(
@@ -884,7 +890,7 @@ body.management-drawer-open {
   flex: 0 0 auto !important;
   padding: 0 20px !important;
   border-radius: 999px !important;
-  font: 800 .78rem/1 "Outfit", sans-serif !important;
+  font: 800 .78rem/1 "Poppins", sans-serif !important;
 }
 
 #viewItemModalBackdrop #viewItemModalInner {
@@ -901,9 +907,10 @@ body.management-drawer-open {
 :is(#stockInModalBackdrop, #stockOutModalBackdrop, #itemModalBackdrop) .um-modal-body form {
   margin: 0 !important;
   padding: 21px !important;
-  border: 1px solid var(--management-modal-line, #eadfd4) !important;
+  border: 1px solid var(--management-modal-brown-line) !important;
   border-radius: 15px !important;
-  background: var(--management-modal-section, #fffcf9) !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 8px 22px rgba(54, 40, 34, .055) !important;
 }
 
 :is(#stockInModalBackdrop, #stockOutModalBackdrop, #itemModalBackdrop) .um-modal-body form::before {
@@ -912,9 +919,9 @@ body.management-drawer-open {
   align-items: center !important;
   margin: 0 0 18px !important;
   padding: 0 0 13px !important;
-  border-bottom: 1px solid #eee1d7 !important;
-  color: #2b2528 !important;
-  font: 800 .82rem/1.2 "Outfit", sans-serif !important;
+  border-bottom: 1px solid var(--management-modal-brown-line) !important;
+  color: var(--management-modal-brown) !important;
+  font: 800 .82rem/1.2 "Poppins", sans-serif !important;
 }
 
 #stockInModalBackdrop .um-modal-body form::before {
@@ -948,8 +955,8 @@ body.management-drawer-open {
 
 :is(#stockInModalBackdrop, #stockOutModalBackdrop, #itemModalBackdrop) .form-lbl {
   margin: 0 !important;
-  color: #504845 !important;
-  font: 700 11px/1.35 "Outfit", sans-serif !important;
+  color: var(--management-modal-brown) !important;
+  font: 700 11px/1.35 "Poppins", sans-serif !important;
   letter-spacing: normal !important;
   text-transform: none !important;
 }
@@ -961,8 +968,8 @@ body.management-drawer-open {
   border: 1px solid #dfd3cb !important;
   border-radius: 10px !important;
   color: var(--management-modal-ink, #1f2329) !important;
-  background: #fff !important;
-  font: 500 12px/1.45 "Outfit", sans-serif !important;
+  background: #FFFFFF !important;
+  font: 500 12px/1.45 "Poppins", sans-serif !important;
   text-align: left !important;
   outline: 0 !important;
 }
@@ -973,17 +980,18 @@ body.management-drawer-open {
 }
 
 :is(#stockInModalBackdrop, #stockOutModalBackdrop, #itemModalBackdrop) .form-inp:focus {
-  border-color: var(--management-modal-red, #ef1725) !important;
-  box-shadow: 0 0 0 4px rgba(239, 23, 37, .09) !important;
+  border-color: var(--management-modal-red, #780116) !important;
+  box-shadow: 0 0 0 4px rgba(120, 1, 22, .09) !important;
 }
 
 /* Inventory details retain stock insight and history in Intake sections. */
 #viewItemModalBackdrop #viewItemModalInner .drawer-section {
   margin: 0 0 20px !important;
   padding: 21px !important;
-  border: 1px solid var(--management-modal-line, #eadfd4) !important;
+  border: 1px solid var(--management-modal-brown-line) !important;
   border-radius: 15px !important;
-  background: var(--management-modal-section, #fffcf9) !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 8px 22px rgba(54, 40, 34, .055) !important;
 }
 
 #viewItemModalBackdrop #viewItemModalInner .drawer-section:last-child {
@@ -997,9 +1005,9 @@ body.management-drawer-open {
   gap: 10px !important;
   margin: 0 0 18px !important;
   padding: 0 0 13px !important;
-  border-bottom: 1px solid #eee1d7 !important;
-  color: #2b2528 !important;
-  font: 800 .82rem/1.2 "Outfit", sans-serif !important;
+  border-bottom: 1px solid var(--management-modal-brown-line) !important;
+  color: var(--management-modal-brown) !important;
+  font: 800 .82rem/1.2 "Poppins", sans-serif !important;
 }
 
 #viewItemModalBackdrop #viewItemModalInner .drawer-section-title > i {
@@ -1009,8 +1017,8 @@ body.management-drawer-open {
   place-items: center !important;
   margin: -4px 0 !important;
   border-radius: 50% !important;
-  color: var(--management-modal-red, #ef1725) !important;
-  background: #fff0e8 !important;
+  color: var(--management-modal-brown) !important;
+  background: var(--management-modal-brown-soft) !important;
 }
 
 #viewItemModalBackdrop #viewItemModalInner .drawer-info-grid {
@@ -1033,8 +1041,8 @@ body.management-drawer-open {
 
 #viewItemModalBackdrop #viewItemModalInner .drawer-info-lbl {
   margin: 0 !important;
-  color: #504845 !important;
-  font: 700 11px/1.35 "Outfit", sans-serif !important;
+  color: var(--management-modal-brown) !important;
+  font: 700 11px/1.35 "Poppins", sans-serif !important;
   letter-spacing: normal !important;
   text-transform: none !important;
 }
@@ -1045,11 +1053,11 @@ body.management-drawer-open {
   align-items: center !important;
   margin: 0 !important;
   padding: 11px 13px !important;
-  border: 1px solid #dfd3cb !important;
+  border: 1px solid var(--management-modal-brown-line) !important;
   border-radius: 10px !important;
   color: var(--management-modal-ink, #1f2329) !important;
-  background: #fff !important;
-  font-family: "Outfit", sans-serif !important;
+  background: #FFFFFF !important;
+  font-family: "Poppins", sans-serif !important;
   font-size: 12px !important;
   font-weight: 500 !important;
   line-height: 1.45 !important;
@@ -1069,10 +1077,10 @@ body.management-drawer-open {
   gap: 13px !important;
   margin: 0 0 20px !important;
   padding: 21px !important;
-  border: 1px solid var(--management-modal-line, #eadfd4) !important;
+  border: 1px solid var(--management-modal-brown-line) !important;
   border-radius: 15px !important;
-  background: var(--management-modal-section, #fffcf9) !important;
-  box-shadow: none !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 8px 22px rgba(54, 40, 34, .055) !important;
 }
 
 :is(#viewAuditModalBackdrop, #viewArchiveModalBackdrop) .detail-hero-icon {
@@ -1082,8 +1090,8 @@ body.management-drawer-open {
   display: grid !important;
   place-items: center !important;
   border-radius: 50% !important;
-  color: var(--management-modal-red, #ef1725) !important;
-  background: #fff0e8 !important;
+  color: var(--management-modal-brown) !important;
+  background: var(--management-modal-brown-soft) !important;
 }
 
 :is(#viewAuditModalBackdrop, #viewArchiveModalBackdrop) :is(.audit-detail-hero, .archive-detail-hero) > div {
@@ -1092,8 +1100,8 @@ body.management-drawer-open {
 }
 
 :is(#viewAuditModalBackdrop, #viewArchiveModalBackdrop) :is(.audit-detail-hero, .archive-detail-hero) > div > span {
-  color: var(--management-modal-red-dark, #c90f1d) !important;
-  font: 800 10px/1.25 "Outfit", sans-serif !important;
+  color: var(--management-modal-red-dark, #780116) !important;
+  font: 800 10px/1.25 "Poppins", sans-serif !important;
   letter-spacing: .06em !important;
   text-transform: uppercase !important;
 }
@@ -1101,13 +1109,13 @@ body.management-drawer-open {
 :is(#viewAuditModalBackdrop, #viewArchiveModalBackdrop) :is(.audit-detail-hero, .archive-detail-hero) h3 {
   margin: 4px 0 3px !important;
   color: #312b29 !important;
-  font: 800 14px/1.25 "Outfit", sans-serif !important;
+  font: 800 14px/1.25 "Poppins", sans-serif !important;
 }
 
 :is(#viewAuditModalBackdrop, #viewArchiveModalBackdrop) :is(.audit-detail-hero, .archive-detail-hero) p {
   margin: 0 !important;
   color: #817670 !important;
-  font: 500 11px/1.45 "Outfit", sans-serif !important;
+  font: 500 11px/1.45 "Poppins", sans-serif !important;
 }
 
 #viewAuditModalBackdrop .audit-detail-grid,
@@ -1117,9 +1125,9 @@ body.management-drawer-open {
   gap: 14px 16px !important;
   margin: 0 !important;
   padding: 21px !important;
-  border: 1px solid var(--management-modal-line, #eadfd4) !important;
+  border: 1px solid var(--management-modal-brown-line) !important;
   border-radius: 15px !important;
-  background: var(--management-modal-section, #fffcf9) !important;
+  background: #FFFFFF !important;
 }
 
 #viewAuditModalBackdrop .audit-detail-grid::before,
@@ -1129,9 +1137,9 @@ body.management-drawer-open {
   display: flex !important;
   align-items: center !important;
   padding: 0 0 13px !important;
-  border-bottom: 1px solid #eee1d7 !important;
-  color: #2b2528 !important;
-  font: 800 .82rem/1.2 "Outfit", sans-serif !important;
+  border-bottom: 1px solid var(--management-modal-brown-line) !important;
+  color: var(--management-modal-brown) !important;
+  font: 800 .82rem/1.2 "Poppins", sans-serif !important;
 }
 
 #viewAuditModalBackdrop .audit-detail-grid::before {
@@ -1156,8 +1164,8 @@ body.management-drawer-open {
 
 :is(#viewAuditModalBackdrop, #viewArchiveModalBackdrop) :is(.audit-detail-label, .archive-detail-label) {
   margin: 0 !important;
-  color: #504845 !important;
-  font: 700 11px/1.35 "Outfit", sans-serif !important;
+  color: var(--management-modal-brown) !important;
+  font: 700 11px/1.35 "Poppins", sans-serif !important;
   letter-spacing: normal !important;
   text-transform: none !important;
 }
@@ -1168,16 +1176,25 @@ body.management-drawer-open {
   align-items: center !important;
   margin: 0 !important;
   padding: 11px 13px !important;
-  border: 1px solid #dfd3cb !important;
+  border: 1px solid var(--management-modal-brown-line) !important;
   border-radius: 10px !important;
   color: var(--management-modal-ink, #1f2329) !important;
-  background: #fff !important;
-  font: 500 12px/1.45 "Outfit", sans-serif !important;
+  background: #FFFFFF !important;
+  font: 500 12px/1.45 "Poppins", sans-serif !important;
   overflow-wrap: anywhere !important;
 }
 
 :is(#viewAuditModalBackdrop, #viewArchiveModalBackdrop) :is(.audit-detail-item.full, .archive-detail-item.full) {
   grid-column: 1 / -1 !important;
+}
+
+/* Regal Navy is the single informational blue used inside management modals. */
+.management-side-modal :is(
+  .badge-blue, .status-info, .info-badge, .cq-version, .cq-detail > b
+) {
+  border-color: rgba(10, 29, 75, .20) !important;
+  color: var(--management-modal-navy) !important;
+  background: rgba(10, 29, 75, .09) !important;
 }
 
 @media (max-width: 800px) {

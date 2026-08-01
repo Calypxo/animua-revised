@@ -1,6 +1,5 @@
-import "../css/adminDashboard.css";
-import "../css/sidebar.css";
 import "../css/reports.css";
+import "../css/managementTables.css";
 import { protectManagementPage } from "../auth/authGuard.js";
 import { renderTopbarUser } from "../components/management/topbarUser.js";
 import { loadSidebar } from "../components/management/sidebarLoader.js";
