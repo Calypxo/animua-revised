@@ -44,6 +44,15 @@ function attentionItems(data, role) {
       detail: `${Number(data.pendingAdoptions || 0)} application(s) are waiting for a decision.`,
       href: "/pages/adoptionApplications.html",
     });
+    add({
+      id: "adoption-no-show",
+      count: data.adoptionNoShowRisk,
+      tone: "red",
+      icon: "bi-calendar-x-fill",
+      title: "Adoption attendance at risk",
+      detail: `${Number(data.adoptionNoShowRisk || 0)} approved adoption(s) need deadline or no-show review.`,
+      href: "/pages/adoptionApplications.html",
+    });
   }
 
   if (canAccessModule(role, "surrender")) {
@@ -54,6 +63,15 @@ function attentionItems(data, role) {
       icon: "bi-file-earmark-text-fill",
       title: "Surrender requests pending",
       detail: `${Number(data.pendingSurrenders || 0)} request(s) require management review.`,
+      href: "/pages/surrenders.html",
+    });
+    add({
+      id: "surrender-no-show",
+      count: data.surrenderNoShowRisk,
+      tone: "red",
+      icon: "bi-calendar-x-fill",
+      title: "Surrender attendance at risk",
+      detail: `${Number(data.surrenderNoShowRisk || 0)} approved surrender request(s) need deadline or no-show review.`,
       href: "/pages/surrenders.html",
     });
   }

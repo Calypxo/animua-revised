@@ -127,6 +127,16 @@ async function getPublicSubmittedRequests() {
         rejectedReason: request.rejectedReason || null,
         intakeId: request.intakeId || null,
         dropoffDate: request.dropoffDate || null,
+        surrenderAppointment: request.surrenderAppointment || null,
+        surrenderRescheduleRequest: request.surrenderRescheduleRequest || null,
+        attendanceDeadlineAt: request.attendanceDeadlineAt || null,
+        deadlineStatus: request.deadlineStatus || "",
+        deadlineReminderStage: request.deadlineReminderStage || "",
+        noShowRisk: request.noShowRisk === true,
+        arrivalConfirmedAt: request.arrivalConfirmedAt || null,
+        expiredAt: request.expiredAt || null,
+        expirationReason: request.expirationReason || "",
+        deadlineExtensions: request.deadlineExtensions || [],
 
         source: request.source || "Public Form",
       };
@@ -268,7 +278,7 @@ function urgencyCls(u) {
 }
 
 function statusBadge(s) {
-  const m = { Pending:{cls:"badge-pending"}, Approved:{cls:"badge-approved"}, Converted:{cls:"badge-converted"}, Rejected:{cls:"badge-rejected"} }[s] || {cls:"badge-pending"};
+  const m = { Pending:{cls:"badge-pending"}, Approved:{cls:"badge-approved"}, Converted:{cls:"badge-converted"}, Rejected:{cls:"badge-rejected"}, Expired:{cls:"badge-rejected"} }[s] || {cls:"badge-pending"};
   return `<span class="status-badge ${m.cls}">${escapeHtml(s || "Pending")}</span>`;
 }
 
@@ -674,6 +684,33 @@ function renderDrawer(r) {
         </div>
       </div>`;
   }
+  if (r.status === "Expired") {
+    statusSection = `
+      <div class="drawer-section">
+        <div class="drawer-section-title" style="color:var(--clay)"><i class="bi bi-calendar-x-fill"></i> Expired \u2014 No Show</div>
+        <div class="info-banner banner-rejected"><strong>${displayValue(r.expirationReason, "The 14-day attendance deadline passed without confirmed arrival.")}</strong><div class="mt-1">Expired ${formatDate(r.expiredAt)}</div></div>
+      </div>`;
+  }
+
+  const deadlineSection = ["Approved", "Expired"].includes(r.status) ? `
+    <div class="drawer-section deadline-workflow-card ${r.noShowRisk ? "is-risk" : ""}">
+      <div class="drawer-section-title"><i class="bi bi-calendar2-check"></i> Attendance Deadline</div>
+      <div class="drawer-info-grid">
+        <div class="drawer-info-item"><div class="drawer-info-lbl">Deadline</div><div class="drawer-info-val">${formatDate(r.attendanceDeadlineAt)}</div></div>
+        <div class="drawer-info-item"><div class="drawer-info-lbl">Current State</div><div class="drawer-info-val">${displayValue(r.deadlineStatus, "Awaiting appointment")}</div></div>
+        <div class="drawer-info-item"><div class="drawer-info-lbl">Drop-off Appointment</div><div class="drawer-info-val">${r.surrenderAppointment?.date ? `${formatDate(r.surrenderAppointment.date)} ${r.surrenderAppointment.time || ""}` : "Not scheduled"}</div></div>
+        <div class="drawer-info-item"><div class="drawer-info-lbl">Arrival</div><div class="drawer-info-val">${r.arrivalConfirmedAt ? `Confirmed ${formatDate(r.arrivalConfirmedAt)}` : "Not confirmed"}</div></div>
+      </div>
+      ${String(r.surrenderRescheduleRequest?.status || "").toLowerCase() === "pending" ? `
+        <div class="info-banner banner-approved mt-2">
+          <strong>Drop-off reschedule awaiting review</strong>
+          <div class="mt-1">${formatDate(r.surrenderRescheduleRequest.date)} ${r.surrenderRescheduleRequest.time || ""}</div>
+          <div class="mt-2">
+            <button class="btn-approve-confirm" id="drawerApproveRescheduleBtn"><i class="bi bi-check-lg"></i> Approve New Date</button>
+            <button class="btn-danger-outline" id="drawerRejectRescheduleBtn"><i class="bi bi-x-lg"></i> Reject Change</button>
+          </div>
+        </div>` : ""}
+    </div>` : "";
 
   // ── Footer buttons ────────────────────────────────────
   const submissionSection = `
@@ -722,11 +759,16 @@ function renderDrawer(r) {
         : ""
     }`;
 }
-    if (r.status === "Approved") {
-    footerBtns += `
-      <button class="btn-ghost-clay" disabled>
-        <i class="bi bi-info-circle"></i> Waiting for intake submission
-      </button>`;
+  if (r.status === "Approved") {
+    footerBtns += r.arrivalConfirmedAt
+      ? `<button class="btn-convert-confirm" id="drawerConvertBtn"><i class="bi bi-arrow-right-circle-fill"></i> Convert to Intake</button>`
+      : `
+        <button class="btn-ghost-clay" id="drawerExtendDeadlineBtn"><i class="bi bi-calendar-plus"></i> Extend</button>
+        <button class="btn-approve-confirm" id="drawerArrivalBtn"><i class="bi bi-person-check"></i> Confirm Arrival</button>
+        <button class="btn-danger-outline" id="drawerNoShowBtn"><i class="bi bi-calendar-x"></i> No Show</button>`;
+  }
+  if (r.status === "Expired") {
+    footerBtns += `<button class="btn-approve-confirm" id="drawerRestoreBtn"><i class="bi bi-arrow-counterclockwise"></i> Restore Request</button>`;
   }
 
   inner.innerHTML = `
@@ -759,6 +801,7 @@ function renderDrawer(r) {
       ${extraPetDetailsSection}
       ${docsSection}
       ${submissionSection}
+      ${deadlineSection}
       ${statusSection}
     </div>
     <div class="drawer-footer">${footerBtns}</div>`;
@@ -767,7 +810,13 @@ function renderDrawer(r) {
   document.getElementById("drawerCloseBtn")?.addEventListener("click",  closeDrawer);
   document.getElementById("drawerApproveBtn")?.addEventListener("click",()=> openApproveModal(r.id));
   document.getElementById("drawerRejectBtn")?.addEventListener("click", ()=> openRejectModal(r.id));
-  //document.getElementById("drawerConvertBtn")?.addEventListener("click",()=> openConvertModal(r.id));
+  document.getElementById("drawerExtendDeadlineBtn")?.addEventListener("click", () => runSurrenderDeadlineAction(r.id, "deadline/extend"));
+  document.getElementById("drawerArrivalBtn")?.addEventListener("click", () => runSurrenderDeadlineAction(r.id, "arrival"));
+  document.getElementById("drawerNoShowBtn")?.addEventListener("click", () => runSurrenderDeadlineAction(r.id, "no-show"));
+  document.getElementById("drawerRestoreBtn")?.addEventListener("click", () => runSurrenderDeadlineAction(r.id, "deadline/restore"));
+  document.getElementById("drawerApproveRescheduleBtn")?.addEventListener("click", () => runSurrenderRescheduleAction(r.id, "approve"));
+  document.getElementById("drawerRejectRescheduleBtn")?.addEventListener("click", () => runSurrenderRescheduleAction(r.id, "reject"));
+  document.getElementById("drawerConvertBtn")?.addEventListener("click", () => openConvertModal(r.id));
 }
 
 async function updateSurrenderStatusInBackend(id, payload) {
@@ -789,6 +838,78 @@ async function updateSurrenderStatusInBackend(id, payload) {
   }
 
   return data.request;
+}
+
+async function runSurrenderDeadlineAction(id, action) {
+  let payload = {};
+  if (action === "deadline/extend") {
+    const extensionDays = Number(window.prompt("How many additional days? Enter 1 to 30.", "7"));
+    if (!extensionDays) return;
+    const reason = window.prompt("Reason for extending the deadline:");
+    if (!reason) return;
+    payload = { extensionDays, reason };
+  } else if (action === "no-show") {
+    const reason = window.prompt("Reason for marking this request as a no-show:", "Missed shelter appointment.");
+    if (!reason) return;
+    payload = { reason };
+  } else if (action === "deadline/restore") {
+    const reason = window.prompt("Reason for restoring this expired request:");
+    if (!reason) return;
+    payload = { reason };
+  } else if (!window.confirm("Confirm that the owner and animal arrived at the shelter?")) {
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem("animua_token");
+    const response = await fetch(`${SURRENDER_REQUESTS_API_URL}/${encodeURIComponent(id)}/${action}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify(payload),
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.message || "Unable to update the attendance workflow.");
+    publicRequests = await getPublicSubmittedRequests();
+    allRequests = [...publicRequests];
+    renderStats();
+    applyFilters();
+    const request = allRequests.find(item => item.id === id);
+    if (request) renderDrawer(request);
+    showToast("success", result.message || "Attendance workflow updated.");
+  } catch (error) {
+    showToast("error", error.message || "Unable to update the attendance workflow.");
+  }
+}
+
+async function runSurrenderRescheduleAction(id, decision) {
+  const payload = {};
+  if (decision === "reject") {
+    const reason = window.prompt("Reason for rejecting this drop-off date change:");
+    if (!reason) return;
+    payload.reason = reason;
+  } else if (!window.confirm("Approve the requested drop-off date and time?")) {
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem("animua_token");
+    const response = await fetch(`${SURRENDER_REQUESTS_API_URL}/${encodeURIComponent(id)}/reschedule/${decision}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify(payload),
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.message || "Unable to review the drop-off reschedule.");
+    publicRequests = await getPublicSubmittedRequests();
+    allRequests = [...publicRequests];
+    renderStats();
+    applyFilters();
+    const request = allRequests.find(item => item.id === id);
+    if (request) renderDrawer(request);
+    showToast("success", result.message || "Drop-off reschedule reviewed.");
+  } catch (error) {
+    showToast("error", error.message || "Unable to review the drop-off reschedule.");
+  }
 }
 
 /* ══════════════════════════════════════════════════════
@@ -833,35 +954,14 @@ async function executeApprove() {
 
     Object.assign(r, updatedRequest);
 
-    sessionStorage.setItem(
-      "approved_surrender_for_intake",
-      JSON.stringify({
-        surrenderId: r.id,
-        ownerName: r.owner?.name || "",
-        ownerContact: r.owner?.contact || "",
-        approvedDate: new Date().toISOString().split("T")[0],
-
-        petName: r.pet?.name || "",
-        species: r.pet?.species || "",
-        breed: r.pet?.breed || "",
-        sex: r.pet?.sex || "",
-        age: r.pet?.age || "",
-        colorMarkings: r.pet?.colorMarkings || "",
-        vaccinationHistory: r.pet?.vaccinationHistory || "",
-        photoName: r.pet?.photoName || "",
-        photoType: r.pet?.photoType || "",
-        photoDataUrl: r.pet?.photoDataUrl || "",
-        surrenderReason: r.surrenderReason || "",
-      })
-    );
-
     closeModal("approveModalBackdrop");
-
-    showToast("success", `Request ${r.id} approved. Redirecting to Animal Intake...`);
-
-    setTimeout(() => {
-      navigateManagementPage("/pages/intakeList.html?source=surrender");
-    }, 900);
+    publicRequests = await getPublicSubmittedRequests();
+    allRequests = [...publicRequests];
+    renderStats();
+    applyFilters();
+    const approvedRequest = allRequests.find(item => item.id === r.id);
+    if (approvedRequest) renderDrawer(approvedRequest);
+    showToast("success", `Request ${r.id} approved. Awaiting appointment and shelter arrival.`);
 
   } catch (error) {
     console.error("Approve surrender request error:", error);
@@ -930,37 +1030,51 @@ async function executeReject() {
 function openConvertModal(id) {
   const r = allRequests.find(x=>x.id===id);
   if (!r) return;
+  if (r.status !== "Approved" || !r.arrivalConfirmedAt) {
+    showToast("error", "Confirm the owner and animal's arrival before starting Intake.");
+    return;
+  }
   confirmMode = { type:"convert", id };
   document.getElementById("convertConfirmMsg").textContent =
     `Convert ${r.id} (${r.pet.name} from ${r.owner.name}) to a formal Intake record?`;
-  document.getElementById("fDropoffDate").value = new Date().toISOString().split("T")[0];
   openModal("convertModalBackdrop");
 }
 async function executeConvert() {
   const r = allRequests.find(x => x.id === confirmMode.id);
 
   if (!r) return;
-
-  try {
-    const dropoffDate = document.getElementById("fDropoffDate").value;
-
-    const updatedRequest = await updateSurrenderStatusInBackend(r.id, {
-      status: "Converted",
-      dropoffDate,
-    });
-
-    Object.assign(r, updatedRequest);
-
-    closeModal("convertModalBackdrop");
-    renderStats();
-    applyFilters();
-    renderDrawer(r);
-
-    showToast("success", `Intake record ${r.intakeId} created from ${r.id}.`);
-  } catch (error) {
-    console.error("Convert surrender request error:", error);
-    showToast("error", error.message || "Failed to convert request.");
+  if (r.status !== "Approved" || !r.arrivalConfirmedAt) {
+    showToast("error", "Confirm the owner and animal's arrival before starting Intake.");
+    return;
   }
+
+  sessionStorage.setItem(
+    "approved_surrender_for_intake",
+    JSON.stringify({
+      surrenderId: r.id,
+      ownerName: r.owner?.name || "",
+      ownerContact: r.owner?.contact || "",
+      approvedDate: r.reviewedAt || new Date().toISOString().split("T")[0],
+      arrivalConfirmedAt: r.arrivalConfirmedAt,
+      petName: r.pet?.name || "",
+      species: r.pet?.species || "",
+      breed: r.pet?.breed || "",
+      sex: r.pet?.sex || "",
+      age: r.pet?.age || "",
+      colorMarkings: r.pet?.colorMarkings || "",
+      vaccinationHistory: r.pet?.vaccinationHistory || "",
+      photoName: r.pet?.photoName || "",
+      photoType: r.pet?.photoType || "",
+      photoDataUrl: r.pet?.photoDataUrl || "",
+      surrenderReason: r.surrenderReason || "",
+    })
+  );
+
+  closeModal("convertModalBackdrop");
+  showToast("success", "Arrival verified. Opening the Intake form...");
+  setTimeout(() => {
+    navigateManagementPage("/pages/intakeList.html?source=surrender");
+  }, 500);
 }
 
 /* ══════════════════════════════════════════════════════

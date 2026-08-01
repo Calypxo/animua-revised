@@ -4,6 +4,9 @@ const {
   buildShelterLabel,
   cleanText,
 } = require("../utils/animalIdentity");
+const {
+  getSurrenderConversionError,
+} = require("../services/surrenderWorkflowService");
 
 // ── COLLECTION NAMES ──────────────────────────────────
 const INTAKE_COL = "intakeRecords";
@@ -97,6 +100,30 @@ exports.createIntake = async (req, res) => {
       return res.status(400).json({ message: "Surrender reference ID is required for Approved Surrender." });
     }
 
+    let surrenderRef = null;
+    if (source === "Approved Surrender") {
+      surrenderRef = db.collection("surrenderRequests").doc(surrenderRefId);
+      const surrenderSnapshot = await surrenderRef.get();
+      if (!surrenderSnapshot.exists) {
+        return res.status(404).json({ message: "Referenced surrender request was not found." });
+      }
+
+      const conversionError = getSurrenderConversionError(surrenderSnapshot.data() || {});
+      if (conversionError) {
+        return res.status(400).json({ message: conversionError });
+      }
+
+      const duplicateSnapshot = await db.collection(INTAKE_COL)
+        .where("surrenderRefId", "==", surrenderRefId)
+        .limit(1)
+        .get();
+      if (!duplicateSnapshot.empty) {
+        return res.status(409).json({
+          message: "An Intake record already exists for this surrender request.",
+        });
+      }
+    }
+
     const year = new Date().getFullYear();
 
     // Auto-generate sequential ID: INT-YYYY-NNN
@@ -144,7 +171,25 @@ exports.createIntake = async (req, res) => {
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     };
 
-    await db.collection(INTAKE_COL).doc(intakeId).set(record);
+    const intakeRef = db.collection(INTAKE_COL).doc(intakeId);
+    const batch = db.batch();
+    batch.set(intakeRef, record);
+
+    if (surrenderRef) {
+      batch.update(surrenderRef, {
+        status: "Converted",
+        intakeId,
+        dropoffDate: intakeDate,
+        deadlineStatus: "Completed",
+        deadlineReminderStage: "Completed",
+        noShowRisk: false,
+        convertedAt: new Date().toISOString(),
+        convertedBy: req.user?.fullName || req.user?.email || "Staff",
+        updatedAt: new Date().toISOString(),
+      });
+    }
+
+    await batch.commit();
 
     await writeAuditLog({
       action:          "intake.created",
@@ -156,7 +201,13 @@ exports.createIntake = async (req, res) => {
       after:           { source, species, condition, status: record.status },
     });
 
-    res.status(201).json({ message: "Intake record created.", id: intakeId });
+    res.status(201).json({
+      message: surrenderRef
+        ? "Intake record created and surrender request converted."
+        : "Intake record created.",
+      id: intakeId,
+      surrenderConverted: Boolean(surrenderRef),
+    });
   } catch (err) {
     console.error("[createIntake]", err.message);
     res.status(500).json({ message: "Failed to create intake record." });

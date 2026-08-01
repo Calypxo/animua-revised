@@ -37,5 +37,12 @@ Password: AnimuaDev123!
 The seed script refuses to run unless every Firebase host points to localhost.
 Production builds do not connect to the emulators.
 
-Set `VITE_USE_FIREBASE_EMULATORS=false` only when you intentionally need a Vite
-development server to use the production Firebase project.
+Normal Vite development commands use the production Firebase project by default,
+matching a normally started backend. The `npm run dev:emulator` workflow explicitly
+sets `VITE_USE_FIREBASE_EMULATORS=true` for both Vite sites and supplies the matching
+Firebase emulator environment to the backend.
+
+If you start services manually and want emulator mode, set
+`VITE_USE_FIREBASE_EMULATORS=true` for each Vite site and start the backend with
+its Firebase emulator host variables. Prefer the complete root workflow above so
+the frontend and backend cannot accidentally use different Firebase projects.

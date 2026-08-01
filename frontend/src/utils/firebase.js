@@ -12,7 +12,7 @@ const productionFirebaseConfig = {
 };
 
 const useFirebaseEmulators =
-  import.meta.env.DEV && import.meta.env.VITE_USE_FIREBASE_EMULATORS !== "false";
+  import.meta.env.DEV && import.meta.env.VITE_USE_FIREBASE_EMULATORS === "true";
 const emulatorHost = import.meta.env.VITE_FIREBASE_EMULATOR_HOST || "127.0.0.1";
 
 const firebaseConfig = useFirebaseEmulators

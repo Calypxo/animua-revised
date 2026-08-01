@@ -17,6 +17,8 @@ const emulatorEnv = {
   GCLOUD_PROJECT: "demo-animua",
   FIREBASE_PROJECT_ID: "demo-animua",
   JWT_SECRET: process.env.JWT_SECRET || "animua-local-emulator-secret",
+  VITE_USE_FIREBASE_EMULATORS: "true",
+  VITE_FIREBASE_EMULATOR_HOST: "127.0.0.1",
 };
 
 function findJavaExecutable() {
@@ -196,7 +198,7 @@ async function main() {
       "5173",
       "--strictPort",
     ],
-    { cwd: path.join(repositoryDir, "frontend") }
+    { cwd: path.join(repositoryDir, "frontend"), env: emulatorEnv }
   );
   start(
     "Management frontend",
@@ -209,7 +211,7 @@ async function main() {
       "5174",
       "--strictPort",
     ],
-    { cwd: path.join(repositoryDir, "admin-frontend") }
+    { cwd: path.join(repositoryDir, "admin-frontend"), env: emulatorEnv }
   );
 
   await Promise.all([waitForPort(5000), waitForPort(5173), waitForPort(5174)]);

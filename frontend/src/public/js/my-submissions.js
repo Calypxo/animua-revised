@@ -254,7 +254,7 @@ function statusClass(status) {
   if (normalized.includes("converted")) return "converted";
   if (normalized.includes("finalized")) return "finalized";
   if (normalized.includes("received")) return "received";
-  if (normalized.includes("reject")) return "rejected";
+  if (normalized.includes("reject") || normalized.includes("expired")) return "rejected";
   if (normalized.includes("withdraw")) return "withdrawn";
   return "pending";
 }
@@ -269,6 +269,7 @@ function iconForStatus(status) {
   if (normalized.includes("received")) return "fa-regular fa-envelope";
   if (normalized.includes("assessment")) return "fa-solid fa-magnifying-glass";
   if (normalized.includes("reject")) return "fa-solid fa-xmark";
+  if (normalized.includes("expired")) return "fa-regular fa-calendar-xmark";
   if (normalized.includes("withdraw")) return "fa-solid fa-ban";
   return "fa-regular fa-clock";
 }
@@ -465,6 +466,10 @@ function getCompatibilityLabel(item) {
 function getApplicationMessage(status) {
   const normalized = String(status || "").toLowerCase();
 
+  if (normalized.includes("expired")) {
+    return "This application expired because the 14-day shelter attendance deadline passed without a confirmed arrival. Contact the shelter if you need staff to review or restore it.";
+  }
+
   if (normalized.includes("approved") || normalized.includes("finalized")) {
     return "Your application has been approved. Please wait for shelter staff to coordinate the next step.";
   }
@@ -557,7 +562,7 @@ function getScheduleSavedFeedback(kind) {
   return {
     type: "warning",
     title: "Schedule Saved",
-    message: `Reschedule is limited to one request only. Failure to attend your ${action} may result in account deactivation.`,
+    message: `Please attend your ${action} before the displayed 14-day deadline. One reschedule request is allowed and requires staff approval.`,
   };
 }
 
@@ -566,7 +571,7 @@ function renderSchedulePolicyWarning(kind) {
   return `
     <div class="schedule-feedback warning">
       <i class="fa-solid fa-triangle-exclamation"></i>
-      <p><strong>Reschedule Reminder</strong>Reschedule is limited to one request only. Failure to attend your ${action} may result in account deactivation.</p>
+      <p><strong>Attendance Reminder</strong>Please attend your ${action} before the 14-day deadline. One reschedule request is allowed and requires staff approval.</p>
     </div>
   `;
 }
@@ -575,25 +580,27 @@ function renderApplicationTimeline(status, submittedDate, decisionDateLabel = su
   const normalized = String(status || "").toLowerCase();
   const isApproved = normalized.includes("approved") || normalized.includes("finalized");
   const isRejected = normalized.includes("reject");
+  const isExpired = normalized.includes("expired");
   const isWithdrawn = normalized.includes("withdraw");
-  const middleLabel = isApproved || isRejected ? "Reviewed" : isWithdrawn ? "Withdrawn" : "Under Review";
-  const decisionLabel = isApproved ? "Approved" : isRejected ? "Rejected" : "Decision";
-  const decisionDate = isApproved || isRejected ? decisionDateLabel : "Pending";
+  const hasDecision = isApproved || isRejected || isExpired;
+  const middleLabel = hasDecision ? "Reviewed" : isWithdrawn ? "Withdrawn" : "Under Review";
+  const decisionLabel = isApproved ? "Approved" : isRejected ? "Rejected" : isExpired ? "Expired" : "Decision";
+  const decisionDate = hasDecision ? decisionDateLabel : "Pending";
 
   return `
-    <div class="application-timeline ${isApproved || isRejected ? "complete" : ""}">
+    <div class="application-timeline ${hasDecision ? "complete" : ""}">
       <div class="application-step done">
         <span><i class="fa-solid fa-check"></i></span>
         <strong>Submitted</strong>
         <small>${submittedDate}</small>
       </div>
-      <div class="application-step ${isApproved || isRejected ? "done" : "active"}">
-        <span>${isApproved || isRejected ? '<i class="fa-solid fa-check"></i>' : isWithdrawn ? '<i class="fa-solid fa-ban"></i>' : '<i class="fa-solid fa-minus"></i>'}</span>
+      <div class="application-step ${hasDecision ? "done" : "active"}">
+        <span>${hasDecision ? '<i class="fa-solid fa-check"></i>' : isWithdrawn ? '<i class="fa-solid fa-ban"></i>' : '<i class="fa-solid fa-minus"></i>'}</span>
         <strong>${middleLabel}</strong>
         <small>${isWithdrawn ? "By user" : submittedDate}</small>
       </div>
-      <div class="application-step ${isApproved || isRejected ? "active done" : ""}">
-        <span>${isApproved ? '<i class="fa-solid fa-check"></i>' : isRejected ? '<i class="fa-solid fa-xmark"></i>' : "3"}</span>
+      <div class="application-step ${hasDecision ? "active done" : ""}">
+        <span>${isApproved ? '<i class="fa-solid fa-check"></i>' : isRejected || isExpired ? '<i class="fa-solid fa-xmark"></i>' : "3"}</span>
         <strong>${decisionLabel}</strong>
         <small>${decisionDate}</small>
       </div>
@@ -603,6 +610,10 @@ function renderApplicationTimeline(status, submittedDate, decisionDateLabel = su
 
 function getSurrenderMessage(status) {
   const normalized = String(status || "").toLowerCase();
+
+  if (normalized.includes("expired")) {
+    return "This surrender request expired because the 14-day shelter attendance deadline passed without a confirmed drop-off. Contact the shelter if you need staff to review or restore it.";
+  }
 
   if (normalized.includes("approved") || normalized.includes("accepted") || normalized.includes("converted")) {
     return "Your surrender request has been approved. The shelter may contact you about the next steps.";
@@ -623,25 +634,27 @@ function renderSurrenderTimeline(status, submittedDate, decisionDateLabel = subm
   const normalized = String(status || "").toLowerCase();
   const isApproved = normalized.includes("approved") || normalized.includes("accepted") || normalized.includes("converted");
   const isRejected = normalized.includes("reject");
+  const isExpired = normalized.includes("expired");
+  const hasDecision = isApproved || isRejected || isExpired;
   const isReceivedOnly = normalized.includes("received");
-  const middleLabel = isApproved || isRejected ? "Reviewed" : isReceivedOnly ? "For Assessment" : cleanStatus(status, "surrender");
-  const decisionDate = isApproved || isRejected ? decisionDateLabel : "Pending";
+  const middleLabel = hasDecision ? "Reviewed" : isReceivedOnly ? "For Assessment" : cleanStatus(status, "surrender");
+  const decisionDate = hasDecision ? decisionDateLabel : "Pending";
 
   return `
-    <div class="application-timeline surrender-timeline ${isApproved || isRejected ? "complete" : ""}">
+    <div class="application-timeline surrender-timeline ${hasDecision ? "complete" : ""}">
       <div class="application-step done">
         <span><i class="fa-solid fa-check"></i></span>
         <strong>Received</strong>
         <small>${submittedDate}</small>
       </div>
-      <div class="application-step ${isApproved || isRejected ? "done" : "active"}">
-        <span>${isApproved || isRejected ? '<i class="fa-solid fa-check"></i>' : '<i class="fa-solid fa-minus"></i>'}</span>
+      <div class="application-step ${hasDecision ? "done" : "active"}">
+        <span>${hasDecision ? '<i class="fa-solid fa-check"></i>' : '<i class="fa-solid fa-minus"></i>'}</span>
         <strong>${escapeHtml(middleLabel)}</strong>
         <small>${submittedDate}</small>
       </div>
-      <div class="application-step ${isApproved || isRejected ? "active done" : ""}">
-        <span>${isApproved ? '<i class="fa-solid fa-check"></i>' : isRejected ? '<i class="fa-solid fa-xmark"></i>' : "3"}</span>
-        <strong>Decision</strong>
+      <div class="application-step ${hasDecision ? "active done" : ""}">
+        <span>${isApproved ? '<i class="fa-solid fa-check"></i>' : isRejected || isExpired ? '<i class="fa-solid fa-xmark"></i>' : "3"}</span>
+        <strong>${isExpired ? "Expired" : "Decision"}</strong>
         <small>${decisionDate}</small>
       </div>
     </div>
@@ -676,6 +689,47 @@ function renderSubmittedAnswers(details) {
     .join("");
 }
 
+function renderAttendanceDeadline(item, kind) {
+  const details = item?.details || {};
+  const deadline = parseDateValue(details.attendanceDeadlineAt)
+    || addDays(getDecisionDate(kind, item), 14);
+  const status = String(details.status || item?.status || "").toLowerCase();
+  const isExpired = status.includes("expired");
+  const isComplete = Boolean(details.arrivalConfirmedAt)
+    || status.includes("finalized")
+    || status.includes("converted");
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  deadline.setHours(23, 59, 59, 999);
+  const daysLeft = Math.max(0, Math.ceil((deadline.getTime() - now.getTime()) / (24 * 60 * 60 * 1000)));
+  const isUrgent = !isComplete && !isExpired && (details.noShowRisk === true || daysLeft <= 2);
+  const appointmentName = kind === "surrender" ? "drop-off" : "pickup";
+  const stateLabel = isComplete
+    ? "Arrival confirmed"
+    : isExpired
+      ? "Expired \u2014 No Show"
+      : details.deadlineStatus || (daysLeft === 1 ? "1 day remaining" : `${daysLeft} days remaining`);
+  const message = isComplete
+    ? `Your shelter ${appointmentName} attendance has been confirmed.`
+    : isExpired
+      ? "The deadline passed without confirmed attendance. Shelter staff may restore the request after review."
+      : daysLeft <= 7
+        ? `Reminder: complete your shelter ${appointmentName} within ${daysLeft} day${daysLeft === 1 ? "" : "s"} to keep this request active.`
+        : `Choose and attend a shelter ${appointmentName} date within 14 days of approval.`;
+
+  return `
+    <section class="attendance-deadline-card ${isExpired ? "is-expired" : isUrgent ? "is-urgent" : isComplete ? "is-complete" : ""}">
+      <span><i class="fa-regular ${isExpired ? "fa-calendar-xmark" : "fa-calendar-check"}"></i></span>
+      <div>
+        <small>14-day attendance deadline</small>
+        <strong>${escapeHtml(formatDate(deadline))}</strong>
+        <p>${escapeHtml(message)}</p>
+      </div>
+      <b>${escapeHtml(stateLabel)}</b>
+    </section>
+  `;
+}
+
 function renderApprovedAdoptionNextSteps(item) {
   const details = item.details || {};
   const schedule = details.pickupSchedule || {};
@@ -693,6 +747,7 @@ function renderApprovedAdoptionNextSteps(item) {
         <i class="fa-solid fa-check"></i>
         <p><strong>Congratulations, your application has been approved.</strong>You may now schedule a pickup date and time to bring your new companion home.</p>
       </div>
+      ${renderAttendanceDeadline(item, "adoption")}
 
       <section class="schedule-card">
         <header>
@@ -734,6 +789,7 @@ function renderApprovedAdoptionNextSteps(item) {
 function renderAcceptedSurrenderNextSteps(item) {
   const details = item.details || {};
   const appointment = details.surrenderAppointment || {};
+  const arrivalConfirmed = Boolean(details.arrivalConfirmedAt);
   const scheduleDate = getScheduleDate(appointment, details.dropoffDate);
   const hasSchedule = hasScheduleValue(appointment);
   const canReschedule = hasSchedule && !hasUsedReschedule(appointment);
@@ -748,6 +804,7 @@ function renderAcceptedSurrenderNextSteps(item) {
         <i class="fa-solid fa-check"></i>
         <p><strong>Congratulations, your surrender request has been accepted.</strong>You may now schedule an appointment to bring ${escapeHtml(item.name)} to the shelter.</p>
       </div>
+      ${renderAttendanceDeadline(item, "surrender")}
 
       <section class="schedule-card surrender-schedule-card">
         <header>
@@ -756,7 +813,7 @@ function renderAcceptedSurrenderNextSteps(item) {
             <h3>Schedule Surrender Appointment</h3>
             <p>Choose a date and time to bring ${escapeHtml(item.name)} to the shelter for turnover.</p>
           </div>
-          ${hasSchedule && canReschedule ? `<button type="button" data-schedule-kind="surrender">Request Re-sched</button>` : ""}
+          ${hasSchedule && canReschedule && !arrivalConfirmed ? `<button type="button" data-schedule-kind="surrender">Request Re-sched</button>` : ""}
         </header>
         <div class="schedule-info-grid">
           <article>
@@ -780,9 +837,15 @@ function renderAcceptedSurrenderNextSteps(item) {
           </article>
         </div>
       </section>
-      ${!hasSchedule ? '<div class="schedule-card-action-row"><button type="button" data-schedule-kind="surrender">Schedule Appointment</button></div>' : ""}
-      ${hasSchedule ? renderSchedulePolicyWarning("surrender") : ""}
-      ${renderPendingReschedule(pendingReschedule, "Appointment reschedule request")}
+      ${!hasSchedule && !arrivalConfirmed ? '<div class="schedule-card-action-row"><button type="button" data-schedule-kind="surrender">Schedule Appointment</button></div>' : ""}
+      ${hasSchedule && !arrivalConfirmed ? renderSchedulePolicyWarning("surrender") : ""}
+      ${!arrivalConfirmed ? renderPendingReschedule(pendingReschedule, "Appointment reschedule request") : ""}
+      ${arrivalConfirmed ? `
+        <div class="schedule-feedback saved">
+          <i class="fa-solid fa-check"></i>
+          <p><strong>Shelter arrival confirmed</strong>Shelter staff can now create and process the Intake record.</p>
+        </div>
+      ` : ""}
     </div>
   `;
 }
@@ -864,14 +927,10 @@ function parseDateValue(value) {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
-function addOneMonth(date) {
-  const maxDate = new Date(date);
-  const originalDay = maxDate.getDate();
-  maxDate.setMonth(maxDate.getMonth() + 1);
-  if (maxDate.getDate() !== originalDay) {
-    maxDate.setDate(0);
-  }
-  return maxDate;
+function addDays(date, days) {
+  const result = new Date(date);
+  result.setDate(result.getDate() + Number(days));
+  return result;
 }
 
 function getDecisionDate(kind, item) {
@@ -910,7 +969,9 @@ function getScheduleWindow(kind, item) {
     minDate.setTime(decisionDate.getTime());
   }
 
-  const maxDate = addOneMonth(decisionDate);
+  const configuredDeadline = parseDateValue(item?.details?.attendanceDeadlineAt);
+  const maxDate = configuredDeadline || addDays(decisionDate, 14);
+  maxDate.setHours(23, 59, 59, 999);
 
   return { minDate, maxDate };
 }
@@ -1005,7 +1066,7 @@ async function promptForSchedule(kind, item) {
 
         <div class="schedule-picker-section">
           <div class="schedule-limit-reminder">
-            <strong>${isSurrender ? "*Date is limited to one month from the request acceptance date." : "*Date is limited to one month from the application approval date."}</strong>
+            <strong>*Choose a date on or before your 14-day shelter attendance deadline: ${escapeHtml(formatDate(maxDate))}.</strong>
           </div>
           <div data-calendar-root></div>
 
@@ -1170,9 +1231,7 @@ async function promptForSchedule(kind, item) {
       }
 
       if (!chosenDate || !isScheduleDateAllowed(chosenDate, minDate, maxDate)) {
-        Swal.showValidationMessage(isSurrender
-          ? "Please choose a date within one month from the request acceptance date."
-          : "Please choose a date within one month from the application approval date.");
+        Swal.showValidationMessage("Please choose a date on or before your 14-day shelter attendance deadline.");
         return false;
       }
 
@@ -1370,6 +1429,7 @@ function showSubmissionDetails(item) {
           `}
 
           ${isAccepted ? renderAcceptedSurrenderNextSteps(item) : `
+          ${String(status).toLowerCase().includes("expired") ? renderAttendanceDeadline(item, "surrender") : ""}
           <div class="application-summary surrender-summary">
             <h3>Request Summary</h3>
             <div class="surrender-summary-list">
@@ -1503,6 +1563,7 @@ function showSubmissionDetails(item) {
         `}
 
         ${isApproved ? renderApprovedAdoptionNextSteps(item) : `
+        ${String(status).toLowerCase().includes("expired") ? renderAttendanceDeadline(item, "adoption") : ""}
         <div class="application-summary">
           <h3>Application Summary</h3>
           <div class="application-summary-grid">

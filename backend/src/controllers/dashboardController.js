@@ -1,5 +1,6 @@
 const { db } = require("../config/firebase");
 const { buildShelterLabel } = require("../utils/animalIdentity");
+const { reconcileRequestDeadlines } = require("../services/requestDeadlineService");
 
 const ATTENTION_CACHE_TTL_MS = Math.max(
   60_000,
@@ -52,6 +53,7 @@ async function countDocuments(query) {
 }
 
 async function buildAttentionSummary() {
+  await reconcileRequestDeadlines();
   const intake = db.collection("intakeRecords");
   const animals = db.collection("animals");
   const inventory = db.collection("inventoryItems");
@@ -68,6 +70,8 @@ async function buildAttentionSummary() {
     animalSnapshot,
     inventorySnapshot,
     newContactMessages,
+    approvedAdoptionSnapshot,
+    approvedSurrenderSnapshot,
   ] = await Promise.all([
     countDocuments(intake),
     countDocuments(intake.where("status", "==", "Converted")),
@@ -90,6 +94,8 @@ async function buildAttentionSummary() {
       )
       .get(),
     countDocuments(contactMessages.where("status", "==", "New")),
+    db.collection("adoptions").where("status", "==", "Approved").select("noShowRisk").get(),
+    db.collection("surrenderRequests").where("status", "==", "Approved").select("noShowRisk").get(),
   ]);
 
   const longStayCount = animalSnapshot.docs.reduce((count, document) => {
@@ -113,6 +119,8 @@ async function buildAttentionSummary() {
   });
 
   const generatedAt = new Date();
+  const adoptionNoShowRisk = approvedAdoptionSnapshot.docs.filter((doc) => doc.data().noShowRisk === true).length;
+  const surrenderNoShowRisk = approvedSurrenderSnapshot.docs.filter((doc) => doc.data().noShowRisk === true).length;
   return {
     intake: Math.max(
       0,
@@ -125,6 +133,8 @@ async function buildAttentionSummary() {
     criticalStockCount,
     longStayCount,
     newContactMessages,
+    adoptionNoShowRisk,
+    surrenderNoShowRisk,
     generatedAt: generatedAt.toISOString(),
     expiresAt: new Date(generatedAt.getTime() + ATTENTION_CACHE_TTL_MS).toISOString(),
   };

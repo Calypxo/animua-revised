@@ -1,5 +1,13 @@
 const { db } = require("../config/firebase");
 const { analyzeSurrenderReason } = require("../services/surrenderNlpService");
+const {
+  buildApprovalDeadlineFields,
+  reconcileRequestDeadlines,
+  validateScheduleDate,
+} = require("../services/requestDeadlineService");
+const {
+  getSurrenderConversionError,
+} = require("../services/surrenderWorkflowService");
 
 const COLLECTION_NAME = "surrenderRequests";
 const SETTINGS_COLLECTION_NAME = "surrenderSettings";
@@ -32,40 +40,6 @@ function generateRequestId() {
 
 function getAvailabilitySettingsRef() {
   return db.collection(SETTINGS_COLLECTION_NAME).doc(AVAILABILITY_SETTINGS_ID);
-}
-
-function parseScheduleDate(value) {
-  if (!value) return null;
-  const text = String(value).trim();
-  if (!text) return null;
-  const date = /^\d{4}-\d{2}-\d{2}$/.test(text)
-    ? new Date(`${text}T00:00:00`)
-    : new Date(text);
-  date.setHours(0, 0, 0, 0);
-  return Number.isNaN(date.getTime()) ? null : date;
-}
-
-function addOneMonth(date) {
-  const maxDate = new Date(date);
-  const originalDay = maxDate.getDate();
-  maxDate.setMonth(maxDate.getMonth() + 1);
-  if (maxDate.getDate() !== originalDay) {
-    maxDate.setDate(0);
-  }
-  return maxDate;
-}
-
-function isScheduleWithinDecisionWindow(dateValue, decisionValue) {
-  const scheduleDate = parseScheduleDate(dateValue);
-  const decisionDate = parseScheduleDate(decisionValue);
-  if (!scheduleDate || !decisionDate) return false;
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const minDate = decisionDate > today ? decisionDate : today;
-  const maxDate = addOneMonth(decisionDate);
-
-  return scheduleDate >= minDate && scheduleDate <= maxDate;
 }
 
 async function readSurrenderAvailability() {
@@ -275,6 +249,7 @@ async function createSurrenderRequest(req, res) {
 
 async function getAllSurrenderRequests(req, res) {
   try {
+    await reconcileRequestDeadlines("surrender");
 
     const snapshot = await db
       .collection(COLLECTION_NAME)
@@ -298,6 +273,7 @@ async function getAllSurrenderRequests(req, res) {
 
 async function getMySurrenderRequests(req, res) {
   try {
+    await reconcileRequestDeadlines("surrender");
     const snapshot = await db
       .collection(COLLECTION_NAME)
       .where("account.email", "==", req.user.email)
@@ -366,10 +342,11 @@ async function updateSurrenderStatus(req, res) {
       });
     }
 
-    if (status === "Converted" && current.status !== "Approved") {
-      return res.status(400).json({
-        message: "Only approved surrender requests can be converted.",
-      });
+    if (status === "Converted") {
+      const conversionError = getSurrenderConversionError(current);
+      if (conversionError) {
+        return res.status(400).json({ message: conversionError });
+      }
     }
 
     const updateData = {
@@ -378,6 +355,10 @@ async function updateSurrenderStatus(req, res) {
       reviewedBy: req.user.fullName || req.user.email,
       reviewedAt: new Date().toISOString().split("T")[0],
     };
+
+    if (status === "Approved" && current.status !== "Approved") {
+      Object.assign(updateData, buildApprovalDeadlineFields(new Date()));
+    }
 
     if (reviewNotes) {
       updateData.reviewNotes = reviewNotes;
@@ -392,6 +373,9 @@ async function updateSurrenderStatus(req, res) {
     }
 
     if (status === "Converted") {
+      updateData.deadlineStatus = "Completed";
+      updateData.deadlineReminderStage = "Completed";
+      updateData.noShowRisk = false;
       const year = new Date().getFullYear();
       updateData.intakeId =
         intakeId || `INT-${year}-${Date.now().toString().slice(-6)}`;
@@ -453,16 +437,15 @@ async function scheduleMySurrenderAppointment(req, res) {
       });
     }
 
-    if (!["approved", "accepted", "converted"].includes(String(data.status || "").toLowerCase())) {
+    if (String(data.status || "").toLowerCase() !== "approved") {
       return res.status(400).json({
         message: "Only accepted surrender requests can schedule an appointment.",
       });
     }
 
-    const acceptedDate = data.acceptedDate || data.acceptedAt || data.approvedDate || data.approvedAt || data.reviewedAt || data.updatedAt;
-    if (!isScheduleWithinDecisionWindow(date, acceptedDate)) {
+    if (!validateScheduleDate(data, date)) {
       return res.status(400).json({
-        message: "Surrender appointment date must be within one month from the request acceptance date.",
+        message: "Appointment date must be today or later and within the 14-day attendance deadline.",
       });
     }
 
@@ -478,34 +461,26 @@ async function scheduleMySurrenderAppointment(req, res) {
         });
       }
 
-      const surrenderAppointment = {
+      const surrenderRescheduleRequest = {
         date,
         time,
         location: SHELTER_LOCATION,
-        scheduledAt: existingAppointment.scheduledAt || now,
-        rescheduledAt: now,
-        rescheduledBy: email,
-        rescheduleCount: rescheduleCount + 1,
-        previousSchedule: existingAppointment || {
-          date: data.dropoffDate || "",
-          time: "",
-          location: SHELTER_LOCATION,
-        },
+        status: "Pending",
+        requestedAt: now,
+        requestedBy: email,
+        previousSchedule: existingAppointment,
       };
 
       await requestRef.update({
-        surrenderAppointment,
-        surrenderRescheduleRequest: null,
-        dropoffDate: date,
+        surrenderRescheduleRequest,
+        deadlineStatus: "Reschedule Pending",
         updatedAt: now,
       });
 
-      const updatedDoc = await requestRef.get();
-
       return res.json({
-        message: "Surrender appointment updated.",
-        request: updatedDoc.data(),
-        surrenderAppointment,
+        message: "Surrender appointment reschedule request sent for staff approval.",
+        requiresApproval: true,
+        surrenderRescheduleRequest,
       });
     }
 
@@ -519,6 +494,8 @@ async function scheduleMySurrenderAppointment(req, res) {
     await requestRef.update({
       surrenderAppointment,
       dropoffDate: date,
+      deadlineStatus: "Appointment Scheduled",
+      noShowRisk: false,
       updatedAt: new Date().toISOString(),
     });
 
@@ -560,6 +537,12 @@ async function approveSurrenderReschedule(req, res) {
       });
     }
 
+    if (!validateScheduleDate(data, request.date)) {
+      return res.status(400).json({
+        message: "The requested surrender appointment is outside the active 14-day attendance deadline.",
+      });
+    }
+
     const now = new Date().toISOString();
     const surrenderAppointment = {
       date: request.date,
@@ -576,6 +559,8 @@ async function approveSurrenderReschedule(req, res) {
       "surrenderRescheduleRequest.status": "Approved",
       "surrenderRescheduleRequest.reviewedAt": now,
       "surrenderRescheduleRequest.reviewedBy": req.user?.email || "Admin",
+      deadlineStatus: "Appointment Scheduled",
+      noShowRisk: false,
       updatedAt: now,
     });
 

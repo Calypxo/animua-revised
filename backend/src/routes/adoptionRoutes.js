@@ -3,6 +3,7 @@ const router = express.Router();
 const ctrl = require("../controllers/adoptionController");
 const authenticateToken = require("../middleware/authMiddleware");
 const authorizeRole = require("../middleware/roleMiddleware");
+const deadlines = require("../controllers/requestDeadlineController");
 
 function optionalAuthenticateToken(req, res, next) {
   if (!req.headers.authorization) {
@@ -27,5 +28,9 @@ router.patch("/:id/reject", authenticateToken, authorizeRole("Admin", "Staff"), 
 router.patch("/:id/reschedule/approve", authenticateToken, authorizeRole("Admin", "Staff"), ctrl.approveAdoptionReschedule);
 router.patch("/:id/reschedule/reject", authenticateToken, authorizeRole("Admin", "Staff"), ctrl.rejectAdoptionReschedule);
 router.patch("/:id/finalize", authenticateToken, authorizeRole("Admin", "Staff"), ctrl.finalizeAdoption);
+router.patch("/:id/deadline/extend", authenticateToken, authorizeRole("Admin", "Staff"), deadlines.extendAdoptionDeadline);
+router.patch("/:id/arrival", authenticateToken, authorizeRole("Admin", "Staff"), deadlines.confirmAdoptionArrival);
+router.patch("/:id/no-show", authenticateToken, authorizeRole("Admin", "Staff"), deadlines.markAdoptionNoShow);
+router.patch("/:id/deadline/restore", authenticateToken, authorizeRole("Admin", "Staff"), deadlines.restoreAdoptionDeadline);
 
 module.exports = router;

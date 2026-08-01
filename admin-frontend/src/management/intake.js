@@ -672,27 +672,6 @@ function validateForm() {
   return valid;
 }
 
-async function updateSurrenderStatusFromIntake(surrenderId, payload) {
-  const token = localStorage.getItem("animua_token");
-
-  const response = await fetch(`http://localhost:5000/api/surrenders/${surrenderId}/status`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(payload),
-  });
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || "Failed to update surrender request status.");
-  }
-
-  return data.request;
-}
-
 async function saveIntake(asDraft = false) {
   if (!asDraft && !validateForm()) return;
 
@@ -713,46 +692,29 @@ async function saveIntake(asDraft = false) {
     });
     if (activeButton) activeButton.innerHTML = `<span class="button-spinner" aria-hidden="true"></span>${asDraft ? "Saving draft…" : "Submitting…"}`;
 
-    let createdOrUpdatedData = null;
-
     if (editingId) {
-      createdOrUpdatedData = await updateIntake(editingId, payload);
+      await updateIntake(editingId, payload);
       showToast("success", "Intake record updated.");
     } else {
-      createdOrUpdatedData = await createIntake(payload);
+      await createIntake(payload);
       showToast("success", asDraft ? "Draft saved." : "Intake submitted for review.");
     }
 
-    const savedRecord =
-      createdOrUpdatedData?.record ||
-      createdOrUpdatedData?.intake ||
-      createdOrUpdatedData?.data ||
-      createdOrUpdatedData;
-
-    const savedIntakeId =
-      savedRecord?.id ||
-      savedRecord?.intakeId ||
-      payload.id ||
-      payload.intakeId ||
-      null;
-
     const isFromApprovedSurrender =
-      !asDraft &&
       !editingId &&
       payload.source === "Approved Surrender" &&
       payload.surrenderRefId;
 
     if (isFromApprovedSurrender) {
-      await updateSurrenderStatusFromIntake(payload.surrenderRefId, {
-        status: "Converted",
-        intakeId: savedIntakeId,
-        dropoffDate: payload.intakeDate,
-      });
-
       sessionStorage.removeItem("approved_surrender_for_intake");
       approvedSurrenderContext = null;
 
-      showToast("success", "Intake created and surrender request marked as converted.");
+      showToast(
+        "success",
+        asDraft
+          ? "Intake draft created and surrender request converted."
+          : "Intake created and surrender request converted."
+      );
     }
 
     closeModal("intakeModalBackdrop");

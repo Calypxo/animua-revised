@@ -19,6 +19,7 @@ const predictiveRoutes = require("./src/routes/predictiveRoutes");
 const matchRoutes = require("./src/routes/matchRoutes");
 const chatbotRoutes = require("./src/routes/chatbotRoutes");
 const surrenderRoutes = require("./src/routes/surrenderRoutes");
+const { reconcileRequestDeadlines } = require("./src/services/requestDeadlineService");
 const auditRoutes = require("./src/routes/auditRoutes");
 const reportRoutes = require("./src/routes/reportRoutes");
 
@@ -143,6 +144,16 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`ANIMUA Server active on port ${PORT}`);
+
+  reconcileRequestDeadlines().catch((error) => {
+    console.error("Initial request deadline check failed:", error.message);
+  });
+  const deadlineTimer = setInterval(() => {
+    reconcileRequestDeadlines().catch((error) => {
+      console.error("Scheduled request deadline check failed:", error.message);
+    });
+  }, 15 * 60 * 1000);
+  deadlineTimer.unref();
 
   trainInventoryModel()
     .then((summary) => {

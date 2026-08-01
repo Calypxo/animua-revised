@@ -1192,6 +1192,100 @@
   font-weight: 850;
 }
 
+.attendance-deadline-card {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  margin: 0 24px 16px;
+  padding: 13px 15px;
+  border: 1px solid rgba(35, 115, 76, .2);
+  border-radius: 11px;
+  background: #f4fbf7;
+}
+
+.attendance-deadline-card > span {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  color: #23734c;
+  background: #e2f3e9;
+}
+
+.attendance-deadline-card small,
+.attendance-deadline-card strong,
+.attendance-deadline-card p {
+  display: block;
+}
+
+.attendance-deadline-card small {
+  color: #23734c;
+  font-size: .58rem;
+  font-weight: 850;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.attendance-deadline-card strong {
+  margin-top: 2px;
+  color: #202830;
+  font-size: .82rem;
+}
+
+.attendance-deadline-card p {
+  margin: 3px 0 0;
+  color: #666a6e;
+  font-size: .63rem;
+  line-height: 1.45;
+}
+
+.attendance-deadline-card > b {
+  padding: 6px 9px;
+  border-radius: 999px;
+  color: #23734c;
+  background: #e2f3e9;
+  font-size: .58rem;
+  white-space: nowrap;
+}
+
+.attendance-deadline-card.is-urgent,
+.attendance-deadline-card.is-expired {
+  border-color: rgba(142, 22, 22, .24);
+  background: #fff4f2;
+}
+
+.attendance-deadline-card.is-urgent > span,
+.attendance-deadline-card.is-urgent > b,
+.attendance-deadline-card.is-expired > span,
+.attendance-deadline-card.is-expired > b {
+  color: #8e1616;
+  background: #f7ded9;
+}
+
+.attendance-deadline-card.is-urgent small,
+.attendance-deadline-card.is-expired small {
+  color: #8e1616;
+}
+
+@media (max-width: 600px) {
+  .attendance-deadline-card {
+    grid-template-columns: 38px minmax(0, 1fr);
+    margin-inline: 16px;
+  }
+
+  .attendance-deadline-card > span {
+    width: 38px;
+    height: 38px;
+  }
+
+  .attendance-deadline-card > b {
+    grid-column: 2;
+    justify-self: start;
+  }
+}
+
 .schedule-card {
   overflow: hidden;
   border: 1px solid rgba(226, 218, 210, 0.88);
