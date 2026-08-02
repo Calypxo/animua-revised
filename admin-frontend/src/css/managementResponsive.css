@@ -1,0 +1,353 @@
+/*
+ * Final responsive guardrails for every authenticated management page.
+ * Local page styles own their visuals; this layer owns shared viewport,
+ * overflow, touch-target, and narrow-screen behavior.
+ */
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body.management-consistent-ui {
+  min-width: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+body.management-consistent-ui,
+body.management-consistent-ui :is(
+  .shell, .stage, .page-body, .main-content, .topbar,
+  .system-page-header, .system-page-hero, .panel,
+  .records-panel, .rpt-card, .table-card
+) {
+  width: 100%;
+  max-width: 100%;
+}
+
+body.management-consistent-ui :is(
+  .shell, .stage, .topbar, .topbar-left, .topbar-right,
+  .page-body, .main-content, .system-page-header,
+  .system-page-hero, .system-hero-copy, .system-hero-operations,
+  .panel, .records-panel, .rpt-card, .table-card,
+  .modal-content, .um-modal, .management-side-modal
+) {
+  min-width: 0;
+}
+
+body.management-consistent-ui :is(img, video, canvas) {
+  max-width: 100%;
+}
+
+body.management-consistent-ui :is(
+  .table-responsive, .records-table-wrap, .inventory-table-wrap,
+  .cq-table-wrap, .report-table-wrap, .um-table-shell
+) {
+  max-width: 100%;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-inline: contain;
+  touch-action: pan-x pan-y;
+}
+
+body.management-consistent-ui :is(
+  .profile-tabs-bar, .announcement-category-rail,
+  .audit-view-switch, .aa-tabs, .sr-tabs, .ap-tabs,
+  .um-tabs, .inv-tabs, .intake-tabs, .report-tabs
+) {
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-inline: contain;
+}
+
+body.management-consistent-ui :is(
+  input, select, textarea, button, a,
+  .form-inp, .filter-select, .search-pill-sm
+) {
+  max-width: 100%;
+}
+
+body.management-consistent-ui :is(
+  .drawer-body, .um-modal-body, .modal-body,
+  .announcement-form, dialog
+) {
+  overscroll-behavior: contain;
+}
+
+body.management-consistent-ui :is(
+  .record-id, .app-id-cell, .report-id, .owner-email,
+  .user-email, .contact-value, code
+) {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+@media (max-width: 900px) {
+  body.management-consistent-ui :is(.page-body, .main-content) {
+    padding-inline: clamp(14px, 2.4vw, 20px) !important;
+  }
+
+  body.management-consistent-ui :is(
+    .panel-head, .rpt-card-head, .records-toolbar,
+    .table-section-head, .section-heading
+  ) {
+    min-width: 0;
+    flex-wrap: wrap;
+  }
+
+  body.management-consistent-ui :is(
+    .filter-toolbar, .aa-filter-toolbar, .ap-filter-toolbar,
+    .um-filter-bar, .inventory-filter-toolbar,
+    .inventory-filter-controls, .report-filter-grid,
+    .archive-filter-grid, .audit-filter-grid, .cq-toolbar
+  ) > * {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  body.management-consistent-ui :is(input, select, textarea) {
+    font-size: max(16px, 1em);
+  }
+
+  body.management-consistent-ui :is(.shell, .stage) {
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  body.management-consistent-ui .topbar {
+    min-height: 64px !important;
+    gap: 8px !important;
+    padding-right: max(10px, env(safe-area-inset-right)) !important;
+    padding-left: max(10px, env(safe-area-inset-left)) !important;
+  }
+
+  body.management-consistent-ui .topbar-left {
+    flex: 1 1 auto;
+    gap: 8px !important;
+    overflow: hidden;
+  }
+
+  body.management-consistent-ui .topbar-right {
+    flex: 0 0 auto;
+    gap: 6px !important;
+  }
+
+  body.management-consistent-ui .topbar nav {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  body.management-consistent-ui .topbar :is(.breadcrumb-current, .breadcrumb-link) {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  body.management-consistent-ui .topbar :is(.icon-btn, .topbar-quick-action) {
+    width: 42px !important;
+    min-width: 42px !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    flex-basis: 42px !important;
+  }
+
+  body.management-consistent-ui .user-chip {
+    min-width: 0 !important;
+    min-height: 42px !important;
+    padding: 4px !important;
+  }
+
+  body.management-consistent-ui .user-chip .caret {
+    display: none !important;
+  }
+
+  body.management-consistent-ui :is(.page-body, .main-content) {
+    padding-top: 14px !important;
+    padding-right: max(12px, env(safe-area-inset-right)) !important;
+    padding-bottom: max(28px, calc(20px + env(safe-area-inset-bottom))) !important;
+    padding-left: max(12px, env(safe-area-inset-left)) !important;
+  }
+
+  body.management-consistent-ui :is(
+    .system-page-hero, .panel, .rpt-card, .records-panel,
+    .table-card, .report-command-card, .report-catalog-section
+  ) {
+    border-radius: 18px !important;
+  }
+
+  body.management-consistent-ui :is(
+    .filter-toolbar, .aa-filter-toolbar, .ap-filter-toolbar,
+    .um-filter-bar, .inventory-filter-toolbar,
+    .inventory-filter-controls, .report-filter-grid,
+    .archive-filter-grid, .audit-filter-grid, .cq-toolbar,
+    .feed-filters
+  ) :is(input, select, .search-pill-sm, button) {
+    width: 100%;
+    min-width: 0 !important;
+  }
+
+  body.management-consistent-ui :is(
+    .modal-actions, .um-modal-footer, .drawer-footer,
+    .detail-actions, .form-actions
+  ) {
+    max-width: 100%;
+    flex-wrap: wrap;
+  }
+
+  body.management-consistent-ui :is(
+    .management-modal-layer > .management-side-modal,
+    .aa-drawer, .sr-drawer
+  ) {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    border-radius: 0 !important;
+  }
+
+  body.management-consistent-ui :is(
+    .management-side-modal > .um-modal-body,
+    .management-side-modal > .modal-body,
+    .management-side-modal > .drawer-body,
+    .aa-drawer .drawer-body, .sr-drawer .drawer-body
+  ) {
+    min-height: 0;
+    overflow-y: auto !important;
+  }
+
+  body.management-consistent-ui :is(.swal2-popup, dialog) {
+    width: min(100% - 24px, 680px) !important;
+    max-width: calc(100dvw - 24px) !important;
+    max-height: calc(100dvh - 24px) !important;
+  }
+
+  body.management-consistent-ui .um-pagination {
+    row-gap: 9px !important;
+  }
+}
+
+@media (max-width: 560px) {
+  body.management-consistent-ui .topbar :is(.breadcrumb-link, .breadcrumb-sep) {
+    display: none !important;
+  }
+
+  body.management-consistent-ui .topbar .breadcrumb-current {
+    display: block;
+    max-width: clamp(72px, 30vw, 150px);
+  }
+
+  body.management-consistent-ui :is(
+    .form-grid, .form-grid-2, .form-grid-3,
+    .fg-2, .fg-3, .view-grid, .info-grid,
+    .drawer-info-grid, .security-form-grid,
+    .audit-detail-grid, .archive-detail-grid, .cq-facts
+  ) {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  body.management-consistent-ui :is(
+    .modal-actions, .um-modal-footer, .drawer-footer,
+    .detail-actions, .form-actions
+  ) > :is(button, .btn, a) {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+
+  body.management-consistent-ui :is(
+    .management-side-modal > .um-modal-header,
+    .management-side-modal > .modal-head,
+    .management-side-modal .drawer-header,
+    .aa-drawer .drawer-header, .sr-drawer .drawer-header
+  ) {
+    padding: 16px 14px !important;
+  }
+
+  body.management-consistent-ui :is(
+    .management-side-modal > .um-modal-body,
+    .management-side-modal > .modal-body,
+    .management-side-modal > .drawer-body,
+    .aa-drawer .drawer-body, .sr-drawer .drawer-body
+  ) {
+    padding: 16px 14px 24px !important;
+  }
+
+  body.management-consistent-ui :is(
+    .management-side-modal > .um-modal-footer,
+    .management-side-modal > .modal-actions,
+    .management-side-modal > .drawer-footer,
+    .aa-drawer .drawer-footer, .sr-drawer .drawer-footer
+  ) {
+    padding: 12px 14px max(12px, env(safe-area-inset-bottom)) !important;
+  }
+
+  body.management-consistent-ui .um-pagination .page-btn {
+    min-width: 40px !important;
+    height: 40px !important;
+  }
+}
+
+@media (max-width: 420px) {
+  body.management-consistent-ui .topbar-right .notif-btn {
+    display: none !important;
+  }
+
+  body.management-consistent-ui :is(
+    .kpi-strip, .ap-stats, .sr-stats, .aa-stats,
+    .intake-stats, .um-stats, .report-summary-grid
+  ) {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  body.management-consistent-ui .system-hero-copy h1 {
+    font-size: clamp(1.75rem, 10vw, 2.35rem) !important;
+    overflow-wrap: anywhere;
+  }
+
+  body.management-consistent-ui .system-hero-highlights {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  body.management-consistent-ui .system-hero-highlights > span {
+    width: 100%;
+  }
+
+  body.management-consistent-ui .page-ellipsis {
+    display: none;
+  }
+}
+
+@media (pointer: coarse) {
+  body.management-consistent-ui :is(
+    button, [role="button"], .nav-item, .nav-group-toggle,
+    .page-btn, .view-btn, .detail-btn, .tbl-action-btn,
+    .system-header-action
+  ) {
+    min-height: 44px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 560px) {
+  body.management-consistent-ui :is(
+    .management-side-modal > .um-modal-header,
+    .management-side-modal > .modal-head,
+    .management-side-modal .drawer-header
+  ) {
+    min-height: 64px !important;
+    padding-block: 10px !important;
+  }
+
+  body.management-consistent-ui :is(
+    .management-side-modal > .um-modal-body,
+    .management-side-modal > .modal-body,
+    .management-side-modal > .drawer-body
+  ) {
+    padding-block: 12px !important;
+  }
+}

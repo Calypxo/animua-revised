@@ -1,5 +1,6 @@
 import "../../css/managementConsistency.css";
 import "../../css/brandTheme.css";
+import "../../css/managementResponsive.css";
 
 const PAGINATION_SELECTOR = ".um-pagination";
 
