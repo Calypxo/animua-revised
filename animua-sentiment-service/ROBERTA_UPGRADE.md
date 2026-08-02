@@ -14,7 +14,7 @@ It trains two classifiers from `surrender_sentiment_dataset.csv`:
 ```bash
 uv venv --python 3.12
 uv pip install torch --index-url https://download.pytorch.org/whl/cpu
-uv pip install -r requirements.txt
+uv pip install -r requirements-training.txt
 ```
 
 On Windows PowerShell, use `.venv\Scripts\python.exe` for the remaining
