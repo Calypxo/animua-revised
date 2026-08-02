@@ -4,101 +4,59 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/png" href="/favicon.png" />
-  <title>ANIMUA — Admin Access</title>
-
+  <title>Animua — Admin Access</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="stylesheet" href="/src/css/admin-login.css" />
 </head>
 <body>
-
-<div class="page">
-
-  <!-- ── LEFT VISUAL ── -->
-  <div class="left">
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-
-    <div class="left-hero">
-      <div class="tagline">Management Portal</div>
-      <h1>Hello,<br>Welcome<br><em>back.</em></h1>
-      <p>Authorized staff access only. Sign in to manage the Animua platform, content, and user accounts.</p>
-    </div>
-
-    
-  </div>
-
-  <!-- ── RIGHT FORM ── -->
-  <div class="right">
-    <div class="form-card">
-
-      <div class="form-header">
-        <div class="eyebrow">Admin Sign In</div>
-        <h2>Access Panel</h2>
-        <p>Enter your credentials to continue to the dashboard.</p>
+  <main class="page">
+    <section class="login-card" aria-labelledby="login-title">
+      <div class="visual-panel">
+        <div class="brand" aria-label="Animua"><i class="fa-solid fa-paw" aria-hidden="true"></i><span>Animua</span></div>
+        <span class="portal-label">Admin portal</span>
+        <div class="visual-icons" aria-hidden="true"><i class="fa-solid fa-dog"></i><i class="fa-solid fa-heart"></i><i class="fa-solid fa-cat"></i></div>
+        <div class="visual-content">
+          <h1>Welcome back.</h1>
+          <p>Continue managing matches, applications, and rescued animals through Animua.</p>
+          <div class="security-pill"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i>Secure staff access</div>
+        </div>
       </div>
-
-      <form id="login-form" novalidate>
-
-        <!-- Email -->
-        <div class="field">
-          <label for="login-email">Email Address</label>
-          <div class="input-wrap">
-            <input
-              type="email"
-              id="login-email"
-              placeholder="admin@animua.com"
-              autocomplete="email"
-            />
-            <span class="input-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/>
-              </svg>
-            </span>
-          </div>
-          <div class="field-error" id="err-email"></div>
+      <div class="form-panel">
+        <div class="form-card">
+          <header class="form-header">
+            <div class="eyebrow">Administrator access</div>
+            <h2 id="login-title">Welcome Back</h2>
+            <p>Sign in with your staff account to continue to the management dashboard.</p>
+          </header>
+          <form id="login-form" novalidate>
+            <div class="field">
+              <label for="login-email">Email</label>
+              <div class="input-wrap">
+                <input type="email" id="login-email" placeholder="admin@animua.com" autocomplete="email" required />
+                <span class="input-icon" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg></span>
+              </div>
+              <div class="field-error" id="err-email" role="alert"></div>
+            </div>
+            <div class="field">
+              <label for="login-password">Password</label>
+              <div class="input-wrap">
+                <input type="password" id="login-password" placeholder="Password" autocomplete="current-password" required />
+                <button class="input-icon toggle-pw" id="togglePassword" type="button" title="Show password" aria-label="Show password" aria-pressed="false"><svg id="eye-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></button>
+              </div>
+              <div class="field-error" id="err-password" role="alert"></div>
+            </div>
+            <div class="options-row"><a href="#" class="forgot-link">Forgot password?</a></div>
+            <button type="submit" class="btn-submit" id="loginBtn"><span class="spinner" id="loginSpinner" aria-hidden="true"></span><span id="loginBtnText">Sign In</span></button>
+          </form>
+          <p class="access-note"><i class="fa-solid fa-lock" aria-hidden="true"></i>Authorized Animua personnel only</p>
         </div>
-
-        <!-- Password -->
-        <div class="field">
-          <label for="login-password">Password</label>
-          <div class="input-wrap">
-            <input
-              type="password"
-              id="login-password"
-              placeholder="••••••••"
-              autocomplete="current-password"
-            />
-            <span class="input-icon toggle-pw" id="togglePassword" title="Show/hide password">
-              <svg id="eye-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>
-              </svg>
-            </span>
-          </div>
-          <div class="field-error" id="err-password"></div>
-        </div>
-
-        <!-- Options -->
-        <div class="options-row">
-          <a href="#" class="forgot-link">Forgot password?</a>
-        </div>
-
-        <!-- Submit -->
-        <button type="submit" class="btn-submit" id="loginBtn">
-          <span class="spinner" id="loginSpinner"></span>
-          <span id="loginBtnText">Sign In</span>
-        </button>
-
-      </form>
-
-    </div>
-  </div>
-
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script type="module" src="/src/management/admin-login.js"></script>
-
+      </div>
+    </section>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script type="module" src="/src/management/admin-login.js"></script>
 </body>
 </html>

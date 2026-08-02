@@ -7,10 +7,7 @@
   <title>ANIMUA — Surrender Requests</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/src/css/adminDashboard.css" />
-  <link rel="stylesheet" href="/src/css/sidebar.css" />
-  <link rel="stylesheet" href="/src/css/surrenderRequests.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 </head>
 <body class="loading surrender-requests-page">
 <div class="shell">
@@ -43,6 +40,20 @@
 
       <div id="pageHeaderMount"></div>
 
+      <section class="surrender-intake-control" aria-labelledby="surrenderIntakeControlTitle">
+        <div class="surrender-intake-control-icon"><i class="bi bi-building-gear" aria-hidden="true"></i></div>
+        <div class="surrender-intake-control-copy">
+          <span>Public request control</span>
+          <h2 id="surrenderIntakeControlTitle">Incoming surrender requests</h2>
+          <p id="surrenderAvailabilityDescription">Checking whether the public surrender form is open...</p>
+        </div>
+        <label class="surrender-availability-switch" for="surrenderAvailabilityToggle">
+          <input type="checkbox" id="surrenderAvailabilityToggle" role="switch" disabled />
+          <span class="surrender-switch-track" aria-hidden="true"><span></span></span>
+          <strong id="surrenderAvailabilityLabel">Checking</strong>
+        </label>
+      </section>
+
       <!-- NLP note banner -->
       <aside class="nlp-banner" aria-label="Classification status">
         <div class="nlp-banner-icon"><i class="bi bi-cpu-fill"></i></div>
@@ -57,29 +68,32 @@
       <div class="sr-layout" id="srLayout">
 
         <!-- Table panel -->
-        <section class="panel sr-table-panel" id="srTablePanel" aria-labelledby="requestsTitle">
-          <div class="records-heading">
-            <div>
-              <span class="section-kicker">Records</span>
-              <h2 id="requestsTitle">Surrender review queue</h2>
-              <p>Open a request to verify the owner, animal details, urgency, and next action.</p>
-            </div>
-            <div class="records-legend" aria-label="Queue guidance">
-              <span><i class="bi bi-circle-fill legend-critical"></i> Urgent review</span>
-              <span><i class="bi bi-circle-fill legend-ready"></i> Ready for intake</span>
-            </div>
-          </div>
-          <div class="panel-head surrender-toolbar">
-            <div class="toolbar-tabs">
-              <div class="sr-tabs" role="tablist" aria-label="Filter by request status">
-                <button class="sr-tab active" data-tab="all">All</button>
-                <button class="sr-tab" data-tab="Pending">Pending</button>
-                <button class="sr-tab" data-tab="Approved">Approved</button>
-                <button class="sr-tab" data-tab="Converted">Converted</button>
-                <button class="sr-tab" data-tab="Rejected">Rejected</button>
+        <section class="panel sr-table-panel archive-panel" id="srTablePanel" aria-labelledby="requestsTitle">
+          <div class="records-toolbar archive-toolbar surrender-records-toolbar">
+            <div class="surrender-heading-row">
+              <div class="records-heading">
+                <span class="records-heading-icon"><i class="bi bi-inbox-fill" aria-hidden="true"></i></span>
+                <div>
+                  <h2 id="requestsTitle">Surrender review queue</h2>
+                  <p>Open a request to verify the owner, animal details, urgency, and next action.</p>
+                </div>
+              </div>
+              <div class="records-legend" aria-label="Queue guidance">
+                <span><i class="bi bi-circle-fill legend-critical"></i> Urgent review</span>
+                <span><i class="bi bi-circle-fill legend-ready"></i> Ready for intake</span>
               </div>
             </div>
-            <div class="filter-toolbar" aria-label="Surrender request filters">
+            <div class="archive-tabs sr-tabs" role="tablist" aria-label="Filter by request status">
+              <button class="archive-tab sr-tab active" data-tab="all">All</button>
+              <button class="archive-tab sr-tab" data-tab="Pending">Pending</button>
+              <button class="archive-tab sr-tab" data-tab="Approved">Approved</button>
+              <button class="archive-tab sr-tab" data-tab="Converted">Converted</button>
+              <button class="archive-tab sr-tab" data-tab="Rejected">Rejected</button>
+              <button class="archive-tab sr-tab" data-tab="Expired">Expired</button>
+            </div>
+          </div>
+          <div class="surrender-toolbar">
+            <div class="archive-filter-grid surrender-filter-grid filter-toolbar" aria-label="Surrender request filters">
               <label class="filter-field search-filter" for="searchSR">
                 <span>Search requests</span>
                 <div class="search-pill-sm">
@@ -111,11 +125,17 @@
                   <option value="Other">Other</option>
                 </select>
               </label>
+              <button class="reference-clear-filters" id="clearSurrenderFilters" type="button"><i class="bi bi-arrow-counterclockwise"></i> Clear</button>
             </div>
           </div>
 
-          <div class="table-responsive">
-            <table class="shelter-table">
+          <div class="table-section-head reference-table-section-head">
+            <div><span>Review queue</span><h3>Submitted surrender requests</h3></div>
+            <strong id="surrenderResultLabel">0 records</strong>
+          </div>
+
+          <div class="table-responsive records-table-wrap">
+            <table class="shelter-table management-data-table">
               <colgroup>
                 <col class="col-owner" />
                 <col class="col-pet" />
@@ -133,7 +153,7 @@
                   <th>Urgency</th>
                   <th>Submitted</th>
                   <th>Status</th>
-                  <th></th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody id="srTableBody">
@@ -147,7 +167,7 @@
         <button class="sr-drawer-backdrop" id="srDrawerBackdrop" type="button" aria-label="Close surrender request details"></button>
 
         <!-- Detail drawer -->
-        <div class="sr-drawer" id="srDrawer">
+        <div class="sr-drawer management-side-modal intake-modal" id="srDrawer" role="dialog" aria-modal="true" aria-label="Surrender request details" aria-hidden="true">
           <div class="sr-drawer-inner" id="srDrawerInner"></div>
         </div>
 
@@ -177,6 +197,10 @@
           placeholder="Explain why this surrender request is being rejected…"></textarea>
         <span class="form-err" id="errRejectReason"></span>
       </div>
+      <div class="action-alert" id="rejectActionAlert" role="alert" hidden>
+        <i class="bi" aria-hidden="true"></i>
+        <div><strong></strong><span></span></div>
+      </div>
     </div>
     <div class="um-modal-footer">
       <button class="btn-ghost-clay" id="rejectModalCancel">Cancel</button>
@@ -201,13 +225,17 @@
         </div>
         <p id="approveConfirmMsg"></p>
         <p class="mt-2" style="font-size:0.82rem;color:var(--stone)">
-          Approving this request will allow it to be converted to a formal Intake record.
+          Approval starts the 14-day appointment window. The request can only be converted to Intake after staff confirms the owner and animal have arrived.
         </p>
       </div>
       <div class="form-group mt-3">
         <label class="form-lbl">Review Notes (optional)</label>
         <textarea class="form-inp form-textarea mt-1" id="approveNotes" rows="2"
           placeholder="Any conditions or notes for the intake staff…"></textarea>
+      </div>
+      <div class="action-alert" id="approveActionAlert" role="alert" hidden>
+        <i class="bi" aria-hidden="true"></i>
+        <div><strong></strong><span></span></div>
       </div>
     </div>
     <div class="um-modal-footer">
@@ -219,39 +247,47 @@
   </div>
 </div>
 
-<!-- CONVERT TO INTAKE MODAL -->
-<div class="um-modal-backdrop" id="convertModalBackdrop">
-  <div class="um-modal um-modal-xs" role="dialog" aria-modal="true">
+<!-- ATTENDANCE WORKFLOW MODAL -->
+<div class="um-modal-backdrop" id="workflowModalBackdrop">
+  <div class="um-modal um-modal-xs" role="dialog" aria-modal="true" aria-labelledby="workflowModalTitle">
     <div class="um-modal-header">
-      <h2>Convert to Intake</h2>
-      <button class="modal-close-btn" id="convertModalClose"><i class="bi bi-x-lg"></i></button>
+      <h2 id="workflowModalTitle">Update Attendance</h2>
+      <button class="modal-close-btn" id="workflowModalClose" type="button" aria-label="Close attendance action"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="um-modal-body">
-      <div class="confirm-body">
-        <div class="confirm-icon-wrap" style="background:var(--green-soft);color:var(--green)">
-          <i class="bi bi-arrow-right-circle-fill"></i>
+      <div class="workflow-guidance">
+        <div class="confirm-icon-wrap" id="workflowModalIcon">
+          <i class="bi bi-calendar2-check-fill"></i>
         </div>
-        <p id="convertConfirmMsg"></p>
-        <p class="mt-2" style="font-size:0.82rem;color:var(--stone)">
-          This will create a new Intake record pre-filled with the surrender details.
-        </p>
+        <div><strong id="workflowModalHeading"></strong><p id="workflowModalMessage"></p></div>
       </div>
-      <div class="form-group mt-3">
-        <label class="form-lbl">Scheduled Drop-off Date</label>
-        <input type="date" class="form-inp mt-1" id="fDropoffDate" />
+      <div class="form-group mt-3" id="workflowDaysGroup" hidden>
+        <label class="form-lbl" for="workflowDays">Additional Days <span class="req">*</span></label>
+        <input class="form-inp mt-1" id="workflowDays" type="number" min="1" max="30" inputmode="numeric" />
+        <span class="form-err" id="errWorkflowDays"></span>
+      </div>
+      <div class="form-group mt-3" id="workflowReasonGroup" hidden>
+        <label class="form-lbl" for="workflowReason">Reason <span class="req">*</span></label>
+        <textarea class="form-inp form-textarea mt-1" id="workflowReason" rows="3" maxlength="500"></textarea>
+        <div class="field-help">Enter at least 5 characters so the decision is clear in the audit history.</div>
+        <span class="form-err" id="errWorkflowReason"></span>
+      </div>
+      <div class="action-alert" id="workflowActionAlert" role="alert" hidden>
+        <i class="bi" aria-hidden="true"></i>
+        <div><strong></strong><span></span></div>
       </div>
     </div>
     <div class="um-modal-footer">
-      <button class="btn-ghost-clay" id="convertModalCancel">Cancel</button>
-      <button class="btn-convert-confirm" id="convertConfirmBtn">
-        <i class="bi bi-arrow-right-circle-fill"></i> Convert to Intake
+      <button class="btn-ghost-clay" id="workflowModalCancel" type="button">Cancel</button>
+      <button class="btn-approve-confirm" id="workflowConfirmBtn" type="button">
+        <i class="bi bi-check-lg"></i> Confirm
       </button>
     </div>
   </div>
 </div>
 
 <!-- Toast -->
-<div class="um-toast" id="umToast"><i class="bi" id="toastIcon"></i><span id="toastMsg"></span></div>
+<div class="um-toast" id="umToast" role="status" aria-live="polite"><i class="bi" id="toastIcon"></i><span id="toastMsg"></span></div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script type="module" src="/src/management/surrenderRequests.js"></script>

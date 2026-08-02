@@ -7,6 +7,8 @@
 
   <title>ANIMUA — Announcements</title>
 
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
   <link
     href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
     rel="stylesheet"
@@ -85,12 +87,6 @@
 
           <div class="feed-layout">
             <section class="feed-center" aria-label="Announcement feed">
-              <button id="quickCreatePost" class="quick-composer" type="button">
-                <span class="quick-composer-avatar"><i class="bi bi-heart-fill"></i></span>
-                <span class="quick-composer-prompt">Share an update with the ANIMUA community...</span>
-                <span class="quick-composer-action"><i class="bi bi-plus-lg"></i> Create post</span>
-              </button>
-
               <div class="feed-filters" aria-label="Filter posts">
                 <label class="feed-search">
                   <span class="sr-only">Search posts</span>
@@ -120,6 +116,42 @@
             </section>
 
             <aside class="feed-insights" aria-label="Publishing insights">
+              <section class="insight-card event-calendar-card" aria-labelledby="eventCalendarTitle">
+                <div class="event-calendar-heading">
+                  <h3 id="eventCalendarTitle">Upcoming near you</h3>
+                  <span class="event-calendar-icon"><i class="bi bi-calendar" aria-hidden="true"></i></span>
+                </div>
+                <div class="event-calendar-divider" aria-hidden="true"></div>
+
+                <div class="event-calendar-nav">
+                  <button id="eventCalendarPrev" type="button" aria-label="Previous month">
+                    <i class="bi bi-chevron-left" aria-hidden="true"></i>
+                  </button>
+                  <strong id="eventCalendarMonth" aria-live="polite">Month</strong>
+                  <button id="eventCalendarNext" type="button" aria-label="Next month">
+                    <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                  </button>
+                </div>
+
+                <div class="event-calendar-weekdays" aria-hidden="true">
+                  <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span>
+                  <span>Thu</span><span>Fri</span><span>Sat</span>
+                </div>
+                <div id="eventCalendarGrid" class="event-calendar-grid" role="grid" aria-label="Important event dates"></div>
+
+                <div class="event-calendar-legend">
+                  <span><i class="event-legend-dot"></i> Events</span>
+                  <span><i class="selected-legend-dot"></i> Selected date</span>
+                </div>
+                <button id="showManagementCalendarEvents" type="button" class="event-calendar-link">
+                  View all events <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                </button>
+
+                <div class="event-calendar-agenda">
+                  <div id="eventCalendarAgenda" class="event-calendar-agenda-list" aria-live="polite"></div>
+                </div>
+              </section>
+
               <section class="insight-card">
                 <div class="insight-card-head"><span>Publishing pulse</span><i class="bi bi-activity"></i></div>
                 <div class="insight-stat"><span>Published posts</span><strong id="insightPublished">0</strong></div>
@@ -142,112 +174,134 @@
     </div>
   </div>
 
-  <!-- Modal -->
-  <div id="announcementModalBackdrop" class="modal-backdrop-custom">
-    <div class="announcement-modal">
-      <div class="modal-head">
+  <!-- Create / edit community post modal -->
+  <div id="announcementModalBackdrop" class="modal-backdrop-custom um-modal-backdrop">
+    <div class="announcement-modal um-modal intake-modal" role="dialog" aria-modal="true" aria-labelledby="announcementModalTitle">
+      <div class="modal-head um-modal-header">
         <div>
-          <span class="composer-eyebrow">Community publisher</span>
-          <h2 id="announcementModalTitle">Create Post</h2>
-          <p>Share an update with the ANIMUA community.</p>
+          <h2 id="announcementModalTitle">Create Community Post</h2>
+          <p class="modal-subtitle">Share an update with the ANIMUA community.</p>
         </div>
 
-        <button id="announcementModalClose" class="icon-btn" type="button">
+        <button id="announcementModalClose" class="icon-btn modal-close-btn" type="button" aria-label="Close community post form">
           <i class="bi bi-x-lg"></i>
         </button>
       </div>
 
-      <form id="announcementForm" class="announcement-form composer-layout">
-        <section class="composer-media-column" aria-label="Post media">
-          <div id="mediaPreview" class="media-preview">
-            <img id="mediaPreviewImage" alt="Post media preview" hidden />
+      <div class="um-modal-body announcement-modal-body">
+        <form id="announcementForm" class="announcement-form composer-layout">
+          <section class="form-section composer-media-column" aria-label="Post media">
+            <div class="form-section-title">
+              <i class="bi bi-image"></i>
+              Post Media
+            </div>
 
-            <div class="media-placeholder">
-              <div class="media-placeholder-icon">
-                <i class="bi bi-image"></i>
+            <div class="composer-media-grid">
+              <div id="mediaPreview" class="media-preview">
+                <img id="mediaPreviewImage" alt="Post media preview" hidden />
+
+                <div class="media-placeholder">
+                  <div class="media-placeholder-icon">
+                    <i class="bi bi-image"></i>
+                  </div>
+                  <strong>Add a cover image</strong>
+                  <span>Choose a photo from your device to preview your post.</span>
+                </div>
               </div>
-              <strong>Add a cover image</strong>
-              <span>Paste a public image URL below to preview your post.</span>
+
+              <div class="media-upload-control form-group">
+                <span class="form-lbl">Cover Photo</span>
+                <div class="media-upload-actions">
+                  <label class="media-file-button" for="fImageFile">
+                    <i class="bi bi-upload"></i>
+                    <span>Choose photo</span>
+                  </label>
+                  <button id="removeImageBtn" class="media-remove-button" type="button" hidden>
+                    <i class="bi bi-trash3"></i>
+                    Remove
+                  </button>
+                </div>
+                <input id="fImageFile" class="media-file-input" type="file" accept="image/jpeg,image/png,image/webp" />
+                <small id="mediaPreviewStatus">JPG, PNG, or WebP up to 5 MB.</small>
+              </div>
             </div>
-          </div>
+          </section>
 
-          <label class="media-url-control">
-            <span>Media URL</span>
-            <div class="input-with-icon">
-              <i class="bi bi-link-45deg"></i>
-              <input id="fImageUrl" type="url" placeholder="https://example.com/photo.jpg" />
+          <section class="form-section composer-fields" aria-label="Post details">
+            <div class="form-section-title">
+              <i class="bi bi-megaphone"></i>
+              Post Details
             </div>
-            <small id="mediaPreviewStatus">JPG, PNG, or WebP links work best.</small>
-          </label>
-        </section>
 
-        <section class="composer-fields" aria-label="Post details">
-          <div class="composer-author">
-            <div class="composer-author-avatar"><i class="bi bi-heart-fill"></i></div>
-            <div>
-              <strong>ANIMUA Angeles City</strong>
-              <span><i class="bi bi-globe2"></i> Community post</span>
+            <div class="composer-author">
+              <div class="composer-author-avatar"><i class="bi bi-heart-fill"></i></div>
+              <div>
+                <strong>ANIMUA Angeles City</strong>
+                <span><i class="bi bi-globe2"></i> Community post</span>
+              </div>
             </div>
-          </div>
 
-          <label class="composer-control composer-title-control">
-            <span>Post title</span>
-            <input id="fTitle" type="text" placeholder="Tell everyone what this post is about" required />
-          </label>
+            <div class="form-grid community-post-grid">
+              <label class="composer-control composer-title-control form-group form-full">
+                <span class="form-lbl">Post Title <span class="req">*</span></span>
+                <input class="form-inp" id="fTitle" type="text" placeholder="Tell everyone what this post is about" required />
+              </label>
 
-          <label class="composer-control">
-            <span>Description</span>
-            <textarea id="fCaption" rows="6" placeholder="Share news, event details, or an important advisory..." required></textarea>
-          </label>
+              <label class="composer-control form-group form-full">
+                <span class="form-lbl">Description <span class="req">*</span></span>
+                <textarea class="form-inp form-textarea" id="fCaption" rows="6" placeholder="Share news, event details, or an important advisory..." required></textarea>
+              </label>
 
-          <div class="two-col">
-            <label class="composer-control">
-              <span>Post type</span>
-              <select id="fType">
-                <option value="News & Article">News &amp; Article</option>
-                <option value="Success Stories">Success Stories</option>
-                <option value="Upcoming Events">Upcoming Events</option>
-              </select>
-            </label>
+              <label class="composer-control form-group">
+                <span class="form-lbl">Post Type</span>
+                <select class="form-inp" id="fType">
+                  <option value="News & Article">News &amp; Article</option>
+                  <option value="Success Stories">Success Stories</option>
+                  <option value="Upcoming Events">Upcoming Events</option>
+                </select>
+              </label>
 
-            <label class="composer-control">
-              <span>Status</span>
-              <select id="fStatus">
-                <option value="Published">Publish now</option>
-                <option value="Draft">Save as draft</option>
-              </select>
-            </label>
-          </div>
+              <label class="composer-control form-group">
+                <span class="form-lbl">Status</span>
+                <select class="form-inp" id="fStatus">
+                  <option value="Published">Publish now</option>
+                  <option value="Draft">Save as draft</option>
+                </select>
+              </label>
 
-          <div class="two-col" id="eventFields">
-            <label class="composer-control">
-              <span>Event date</span>
-              <input id="fEventDate" type="date" />
-            </label>
+              <div class="event-fields form-grid form-full" id="eventFields">
+                <label class="composer-control form-group">
+                  <span class="form-lbl">Event Date</span>
+                  <input class="form-inp" id="fEventDate" type="date" />
+                  <small class="event-date-help">This date will appear on the event calendar.</small>
+                </label>
 
-            <label class="composer-control">
-              <span>Location</span>
-              <input id="fLocation" type="text" placeholder="Add a location" />
-            </label>
-          </div>
+                <label class="composer-control form-group">
+                  <span class="form-lbl">Location</span>
+                  <input class="form-inp" id="fLocation" type="text" placeholder="Add a location" />
+                </label>
+              </div>
 
-          <label class="composer-control">
-            <span>Audience</span>
-            <select id="fVisibleToPublic">
+              <label class="composer-control form-group form-full">
+                <span class="form-lbl">Audience</span>
+                <select class="form-inp" id="fVisibleToPublic">
               <option value="true">Public — visible on the public portal</option>
               <option value="false">Internal — hidden from the public portal</option>
-            </select>
-          </label>
+                </select>
+              </label>
 
-          <div class="modal-actions">
-            <button id="announcementCancelBtn" class="secondary-btn" type="button">Cancel</button>
-            <button class="primary-btn composer-submit" type="submit">
-              <i class="bi bi-send-fill"></i>
-              Publish Post
-            </button>
-          </div>
-        </section>
-      </form>
+            </div>
+          </section>
+        </form>
+      </div>
+
+      <div class="modal-actions um-modal-footer">
+        <button id="announcementCancelBtn" class="secondary-btn btn-ghost-clay" type="button">Cancel</button>
+        <button class="primary-btn composer-submit btn-primary-clay" type="submit" form="announcementForm">
+          <i class="bi bi-send-fill"></i>
+          Publish Post
+        </button>
+      </div>
     </div>
   </div>
 

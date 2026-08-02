@@ -6,13 +6,13 @@
 
 /* ── Sidebar tokens (inherit from dashboard :root) ──── */
 :root {
-  --sb-bg:         #780116;   /* = --clay */
-  --sb-bg-hover:   #89202400; /* transparent hover handled by alpha */
-  --sb-accent:     #97262b;   /* = --clay-mid */
-  --sb-cream:      #fdf2f2;
-  --sb-text:       rgba(253, 242, 242, 0.85);
-  --sb-text-dim:   rgba(253, 242, 242, 0.45);
-  --sb-border:     rgba(255, 255, 255, 0.08);
+  --sb-bg:         #FFF8EE;
+  --sb-bg-hover:   #FFFFFF;
+  --sb-accent:     #f7b538;
+  --sb-cream:      #FFF8EE;
+  --sb-text:       #2b1719;
+  --sb-text-dim:   #756367;
+  --sb-border:     rgba(120, 1, 22, 0.12);
   --sb-w:          260px;
 }
 
@@ -48,7 +48,7 @@
 
 .logo-icon-box {
   width: 34px; height: 34px;
-  background: #fff;
+  background: #FFFFFF;
   border-radius: 9px;
   display: flex;
   align-items: center;
@@ -58,15 +58,15 @@
 
 .logo-icon {
   font-size: 0.9rem;
-  color: var(--sb-bg);
+  color: #780116;
 }
 
 .logo-text {
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-weight: 800;
   font-size: 1.15rem;
   letter-spacing: 0.07em;
-  color: #fff;
+  color: #780116;
 }
 
 /* ── Nav scroll area ────────────────────────────────── */
@@ -102,7 +102,7 @@
   border-radius: 9px;
   color: var(--sb-text);
   text-decoration: none;
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-size: 0.875rem;
   font-weight: 500;
   transition: background 150ms ease, color 150ms ease;
@@ -129,24 +129,28 @@
 
 /* Hover */
 .nav-item:hover {
-  background: rgba(255, 255, 255, 0.09);
-  color: #fff;
+  border-color: rgba(247, 181, 56, 0.58);
+  background: #FFF8EE;
+  color: #780116;
+  box-shadow: inset 3px 0 0 #f7b538, 0 7px 18px rgba(43, 23, 25, 0.06);
+  transform: translateX(2px);
 }
 
 .nav-item:hover i {
-  color: rgba(255, 255, 255, 0.9);
+  color: #780116;
 }
 
 /* Active */
 .nav-item.active {
-  background: #fff;
-  color: var(--sb-bg);
+  background: #f7b538;
+  color: #2b1719;
   font-weight: 700;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  transform: none;
 }
 
 .nav-item.active i {
-  color: var(--sb-bg);
+  color: #780116;
 }
 
 /* ── Divider ────────────────────────────────────────── */
@@ -174,18 +178,18 @@
 }
 
 .user-card:hover {
-  background: rgba(255, 255, 255, 0.07);
+  background: #FFFFFF;
 }
 
 .avatar-circle {
   width: 34px; height: 34px;
-  background: #fff;
-  color: var(--sb-bg);
+  background: #FFFFFF;
+  color: #780116;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-weight: 800;
   font-size: 0.78rem;
   flex-shrink: 0;
@@ -197,10 +201,10 @@
 }
 
 .u-name {
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-size: 0.84rem;
   font-weight: 700;
-  color: #fff;
+  color: #2b1719;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -220,7 +224,7 @@
   border: 1px solid var(--sb-border);
   background: transparent;
   color: var(--sb-text);
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-size: 0.84rem;
   font-weight: 600;
   cursor: pointer;
@@ -236,9 +240,9 @@
 }
 
 .logout-btn:hover {
-  background: rgba(255, 255, 255, 0.95);
-  color: var(--sb-bg);
-  border-color: transparent;
+  background: #fff1cf;
+  color: #780116;
+  border-color: #f7b538;
 }
 
 /* ── Collapsed state (desktop narrow) ──────────────── */
@@ -302,7 +306,7 @@
   width: 42px;
   height: 42px;
   background: var(--sb-bg);
-  color: #fff;
+  color: #FFFFFF;
   border: none;
   border-radius: 9px;
   align-items: center;
@@ -310,7 +314,7 @@
   font-size: 1.3rem;
   z-index: 1001;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(111, 25, 28, 0.35);
+  box-shadow: 0 4px 14px rgba(120, 1, 22, 0.35);
   transition: background 150ms;
 }
 
@@ -432,7 +436,7 @@
   border:1px solid var(--sb-border);
   background:transparent;
   color:var(--sb-text);
-  font-family:'Outfit',sans-serif;
+  font-family:'Poppins',sans-serif;
   font-size:.84rem;
   font-weight:600;
   display:flex;
@@ -444,9 +448,10 @@
 }
 .account-settings-btn:hover,
 .account-settings-btn.active {
-  background:rgba(255,255,255,.95);
-  color:var(--sb-bg);
-  border-color:transparent;
+  background:#FFF8EE;
+  color:#780116;
+  border-color:rgba(247,181,56,.58);
+  box-shadow:inset 3px 0 0 #f7b538;
 }
 .sidebar.collapsed .account-settings-btn {
   padding:9px;

@@ -233,9 +233,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const loginForm = document.getElementById("login-form");
   const registerForm = document.getElementById("register-form");
 
-  console.log("openBtn:", openBtn);
-  console.log("authModal:", authModal);
-
   if (openBtn) {
     openBtn.addEventListener("click", (event) => {
       event.preventDefault();

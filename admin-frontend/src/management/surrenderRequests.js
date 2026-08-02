@@ -1,7 +1,8 @@
 // admin-frontend/src/management/surrenderRequests.js
-import "../css/adminDashboard.css";
-import "../css/sidebar.css";
 import "../css/surrenderRequests.css";
+import "../css/managementTables.css";
+import "../css/recordsWorkspace.css";
+import "../css/recordsPanelReference.css";
 import { renderPageHeader } from "../components/management/pageHeader.js";
 import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.js";
 
@@ -15,6 +16,8 @@ renderPageHeader(PAGE_HEADER_CONFIGS.surrenders);
 
 const SURRENDER_REQUESTS_API_URL =
   "http://localhost:5000/api/surrenders";
+const SURRENDER_AVAILABILITY_API_URL =
+  `${SURRENDER_REQUESTS_API_URL}/availability`;
 
 
 async function getPublicSubmittedRequests() {
@@ -45,14 +48,19 @@ async function getPublicSubmittedRequests() {
         id: request.id || `SR-PUBLIC-${String(index + 1).padStart(3, "0")}`,
         status: request.status || "Pending",
         submittedAt: request.submittedAt || new Date().toISOString().split("T")[0],
+        createdAt: request.createdAt || request.submittedAt || null,
+        updatedAt: request.updatedAt || null,
 
         owner: {
           name: ownerName,
+          email: request.owner?.email || request.account?.email || "—",
           contact: request.owner?.contact || "—",
           address: request.owner?.address || "—",
           barangay: request.owner?.barangay || "Not specified",
+          city: request.owner?.city || "Angeles City",
+          isAngelesResident: request.owner?.isAngelesResident === true,
           idType: "Online Account",
-          color: "#6f191c",
+          color: "#780116",
           initials: ownerName
             .split(" ")
             .map(name => name[0])
@@ -79,13 +87,18 @@ async function getPublicSubmittedRequests() {
 
         agreement: request.agreement || null,
 
+        account: {
+          email: request.account?.email || request.owner?.email || "—",
+          role: request.account?.role || "Public",
+        },
+
         nlp: {
           sentiment: request.nlp?.sentiment || "Neutral",
           category: request.nlp?.category || "Other",
           urgencyLabel: request.nlp?.urgencyLabel || "Low",
-          urgencyScore: request.nlp?.urgencyScore || 20,
-          confidence: request.nlp?.confidence || 0.5,
-          keywords: request.nlp?.keywords || [],
+          urgencyScore: request.nlp?.urgencyScore ?? 20,
+          confidence: request.nlp?.confidence ?? 0.5,
+          keywords: Array.isArray(request.nlp?.keywords) ? request.nlp.keywords : [],
           suggestedPriority: request.nlp?.suggestedPriority || "Normal Priority",
           source: request.nlp?.source || "TF-IDF + Logistic Regression",
         },
@@ -114,6 +127,16 @@ async function getPublicSubmittedRequests() {
         rejectedReason: request.rejectedReason || null,
         intakeId: request.intakeId || null,
         dropoffDate: request.dropoffDate || null,
+        surrenderAppointment: request.surrenderAppointment || null,
+        surrenderRescheduleRequest: request.surrenderRescheduleRequest || null,
+        attendanceDeadlineAt: request.attendanceDeadlineAt || null,
+        deadlineStatus: request.deadlineStatus || "",
+        deadlineReminderStage: request.deadlineReminderStage || "",
+        noShowRisk: request.noShowRisk === true,
+        arrivalConfirmedAt: request.arrivalConfirmedAt || null,
+        expiredAt: request.expiredAt || null,
+        expirationReason: request.expirationReason || "",
+        deadlineExtensions: request.deadlineExtensions || [],
 
         source: request.source || "Public Form",
       };
@@ -135,17 +158,120 @@ const PAGE_SIZE = 8;
 let activeTab   = "all";
 let activeId    = null;
 let confirmMode = null;
+let attendanceWorkflow = null;
 let currentRole = "";
+let surrenderAvailability = null;
 
 /* ══════════════════════════════════════════════════════
    HELPERS
 ══════════════════════════════════════════════════════ */
-const emoji = s => ({Dog:"D",Cat:"C",Rabbit:"R",Bird:"B"}[s]||"A");
+const emoji = s => ({Dog:"D",Cat:"C"}[s]||"A");
 const thumbCls = s => ({Dog:"thumb-dog",Cat:"thumb-cat"}[s]||"thumb-other");
+const escapeHtml = value => String(value ?? "")
+  .replaceAll("&", "&amp;")
+  .replaceAll("<", "&lt;")
+  .replaceAll(">", "&gt;")
+  .replaceAll('"', "&quot;")
+  .replaceAll("'", "&#039;");
+const displayValue = (value, fallback = "—") => escapeHtml(value || fallback);
+const safePhotoUrl = value => /^data:image\/(png|jpe?g|webp);base64,[A-Za-z0-9+/=]+$/i.test(value || "") ? value : "";
+
+function can(action) {
+  return hasPermission(currentRole, "surrender", action);
+}
+
+function renderSurrenderAvailability({ busy = false, error = "" } = {}) {
+  const control = document.querySelector(".surrender-intake-control");
+  const toggle = document.getElementById("surrenderAvailabilityToggle");
+  const label = document.getElementById("surrenderAvailabilityLabel");
+  const description = document.getElementById("surrenderAvailabilityDescription");
+  const accepting = surrenderAvailability?.acceptingRequests !== false;
+
+  if (toggle) {
+    toggle.checked = accepting;
+    toggle.disabled = busy || !can("approve") || surrenderAvailability === null;
+  }
+  control?.classList.toggle("is-paused", surrenderAvailability !== null && !accepting);
+  control?.classList.toggle("is-busy", busy);
+  control?.classList.toggle("has-error", Boolean(error));
+
+  if (label) {
+    label.textContent = error
+      ? "Unavailable"
+      : surrenderAvailability === null
+        ? "Checking"
+        : accepting
+          ? "Accepting"
+          : "Paused";
+  }
+  if (description) {
+    description.textContent = error
+      || (accepting
+        ? "The public surrender form is open and can receive new requests."
+        : "The public form is closed because shelter space or cages may be unavailable.");
+  }
+}
+
+async function loadSurrenderAvailability() {
+  renderSurrenderAvailability({ busy: true });
+  try {
+    const response = await fetch(SURRENDER_AVAILABILITY_API_URL, {
+      headers: { Accept: "application/json" },
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(data.message || "Unable to load the public request setting.");
+    }
+    surrenderAvailability = data.availability || { acceptingRequests: true };
+    renderSurrenderAvailability();
+  } catch (error) {
+    surrenderAvailability = null;
+    renderSurrenderAvailability({
+      error: error.message || "Unable to load the public request setting.",
+    });
+  }
+}
+
+async function updateSurrenderAvailability(acceptingRequests) {
+  const previous = surrenderAvailability;
+  surrenderAvailability = { ...(previous || {}), acceptingRequests };
+  renderSurrenderAvailability({ busy: true });
+
+  try {
+    const token = localStorage.getItem("animua_token");
+    const response = await fetch(SURRENDER_AVAILABILITY_API_URL, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ acceptingRequests }),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(data.message || "Unable to update incoming surrender requests.");
+    }
+    surrenderAvailability = data.availability;
+    renderSurrenderAvailability();
+    showToast(
+      "success",
+      acceptingRequests
+        ? "The public surrender form is now accepting requests."
+        : "New public surrender requests have been paused."
+    );
+  } catch (error) {
+    surrenderAvailability = previous;
+    renderSurrenderAvailability();
+    showToast("error", error.message || "Unable to update incoming surrender requests.");
+  }
+}
 
 function formatDate(d) {
   if (!d) return "—";
-  return new Date(d+"T00:00:00").toLocaleDateString("en-PH",{month:"short",day:"numeric",year:"numeric"});
+  const value = /^\d{4}-\d{2}-\d{2}$/.test(String(d)) ? `${d}T00:00:00` : d;
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "—";
+  return parsed.toLocaleDateString("en-PH",{month:"short",day:"numeric",year:"numeric"});
 }
 
 function urgencyCls(u) {
@@ -153,8 +279,8 @@ function urgencyCls(u) {
 }
 
 function statusBadge(s) {
-  const m = { Pending:{cls:"badge-pending"}, Approved:{cls:"badge-approved"}, Converted:{cls:"badge-converted"}, Rejected:{cls:"badge-rejected"} }[s] || {cls:"badge-pending"};
-  return `<span class="status-badge ${m.cls}">${s}</span>`;
+  const m = { Pending:{cls:"badge-pending"}, Approved:{cls:"badge-approved"}, Converted:{cls:"badge-converted"}, Rejected:{cls:"badge-rejected"}, Expired:{cls:"badge-rejected"} }[s] || {cls:"badge-pending"};
+  return `<span class="status-badge ${m.cls}">${escapeHtml(s || "Pending")}</span>`;
 }
 
 const CAT_CSS = {
@@ -170,7 +296,7 @@ const CAT_ICONS = {
 
 function catBadge(cat) {
   const cls = CAT_CSS[cat]||"cat-other", icon = CAT_ICONS[cat]||"bi-three-dots";
-  return `<span class="nlp-cat-badge ${cls}"><i class="bi ${icon}"></i>${cat}</span>`;
+  return `<span class="nlp-cat-badge ${cls}"><i class="bi ${icon}"></i>${escapeHtml(cat || "Other")}</span>`;
 }
 
 const URGENCY_FILL = { Critical:"fill-critical", High:"fill-high", Medium:"fill-medium", Low:"fill-low" };
@@ -218,9 +344,28 @@ function applyFilters() {
     return new Date(b.submittedAt) - new Date(a.submittedAt);
   });
 
+  const resultLabel = document.getElementById("surrenderResultLabel");
+  if (resultLabel) resultLabel.textContent = `${filtered.length} record${filtered.length === 1 ? "" : "s"}`;
+
   currentPage = 1;
   renderTable();
   renderPagination();
+}
+
+function clearSurrenderFilters() {
+  activeTab = "all";
+  const search = document.getElementById("searchSR");
+  const urgency = document.getElementById("filterUrgency");
+  const category = document.getElementById("filterCategory");
+  if (search) search.value = "";
+  if (urgency) urgency.value = "";
+  if (category) category.value = "";
+  document.querySelectorAll(".sr-tab").forEach((tab) => {
+    const selected = tab.dataset.tab === "all";
+    tab.classList.toggle("active", selected);
+    tab.setAttribute("aria-selected", String(selected));
+  });
+  applyFilters();
 }
 
 /* ══════════════════════════════════════════════════════
@@ -233,7 +378,7 @@ function renderTable() {
   const page  = filtered.slice(start, start+PAGE_SIZE);
 
   if (!page.length) {
-    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-muted">No surrender requests found.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7"><div class="reference-records-empty"><span><i class="bi bi-inbox"></i></span><strong>No surrender requests match</strong><small>Change the status, urgency, category, or search term to broaden this view.</small></div></td></tr>`;
     return;
   }
 
@@ -241,7 +386,7 @@ function renderTable() {
     <tr data-id="${r.id}" class="${r.id===activeId?"row-active":""}">
       <td data-label="Owner">
         <div class="owner-cell">
-          <div class="owner-avatar" style="background:${r.owner.color}">${r.owner.initials}</div>
+          <div class="owner-avatar">${r.owner.initials}</div>
           <div>
             <div class="owner-name">${r.owner.name}</div>
             <div class="owner-barangay"><i class="bi bi-geo-alt-fill" style="color:var(--clay);font-size:0.65rem"></i> Brgy. ${r.owner.barangay}</div>
@@ -262,8 +407,8 @@ function renderTable() {
       <td data-label="Submitted" class="submitted-date">${formatDate(r.submittedAt)}</td>
       <td data-label="Status">${statusBadge(r.status)}</td>
       <td data-label="Actions">
-        <button class="tbl-action-btn" data-action="view" data-id="${r.id}" title="View">
-          <i class="bi bi-chevron-right"></i>
+        <button class="tbl-action-btn" data-action="view" data-id="${r.id}" title="View details" aria-label="View surrender request details">
+          <i class="bi bi-eye"></i>
         </button>
       </td>
     </tr>`).join("");
@@ -302,6 +447,7 @@ function openDrawer(id) {
   activeId = id;
   document.querySelectorAll("tr[data-id]").forEach(row => row.classList.toggle("row-active", row.dataset.id === id));
   document.getElementById("srLayout")?.classList.add("drawer-open");
+  document.getElementById("srDrawer")?.setAttribute("aria-hidden", "false");
   document.body.classList.add("management-drawer-open");
   renderDrawer(r);
 }
@@ -309,6 +455,7 @@ function openDrawer(id) {
 function closeDrawer() {
   activeId = null;
   document.getElementById("srLayout")?.classList.remove("drawer-open");
+  document.getElementById("srDrawer")?.setAttribute("aria-hidden", "true");
   document.body.classList.remove("management-drawer-open");
   document.querySelectorAll("tr[data-id]").forEach(r => r.classList.remove("row-active"));
 }
@@ -316,6 +463,9 @@ function closeDrawer() {
 function renderDrawer(r) {
   const inner = document.getElementById("srDrawerInner");
   if (!inner) return;
+
+  const owner = r.owner || {};
+  const agreement = r.agreement || {};
 
   const pct  = URGENCY_PCT[r.nlp.urgencyLabel] || 25;
   const fill = URGENCY_FILL[r.nlp.urgencyLabel] || "fill-low";
@@ -393,6 +543,10 @@ function renderDrawer(r) {
           <div class="drawer-info-lbl">Full Name</div>
           <div class="drawer-info-val">${r.owner.name}</div>
         </div>
+        <div class="drawer-info-item drawer-info-full">
+          <div class="drawer-info-lbl">Email</div>
+          <div class="drawer-info-val">${displayValue(owner.email || r.account?.email)}</div>
+        </div>
         <div class="drawer-info-item">
           <div class="drawer-info-lbl">Contact</div>
           <div class="drawer-info-val">${r.owner.contact}</div>
@@ -417,9 +571,10 @@ function renderDrawer(r) {
     </div>`;
 
   // ── Pet section ───────────────────────────────────────
-  const petPhotoBlock = r.pet.photoDataUrl ? `
+  const submittedPhoto = safePhotoUrl(r.pet.photoDataUrl);
+  const petPhotoBlock = submittedPhoto ? `
     <div class="surrender-pet-photo">
-      <img src="${r.pet.photoDataUrl}" alt="Submitted photo of ${r.pet.name}">
+      <img src="${submittedPhoto}" alt="Submitted photo of ${displayValue(r.pet.name, "the animal")}">
       <div>
         <span>Submitted Animal Photo</span>
         <strong>${r.pet.photoName || "Uploaded photo"}</strong>
@@ -504,7 +659,10 @@ function renderDrawer(r) {
     statusSection = `
       <div class="drawer-section">
         <div class="drawer-section-title" style="color:var(--clay)"><i class="bi bi-x-circle-fill"></i> Rejection</div>
-        <div class="info-banner banner-rejected">${r.rejectedReason}</div>
+        <div class="info-banner banner-rejected">
+          <strong>${displayValue(r.rejectedReason, "No rejection reason provided.")}</strong>
+          <div class="mt-1" style="font-size:0.82rem">Reviewed by ${displayValue(r.reviewedBy, "Staff")} on ${formatDate(r.reviewedAt)}</div>
+        </div>
       </div>`;
   }
   if (r.status === "Approved") {
@@ -527,8 +685,63 @@ function renderDrawer(r) {
         </div>
       </div>`;
   }
+  if (r.status === "Expired") {
+    statusSection = `
+      <div class="drawer-section">
+        <div class="drawer-section-title" style="color:var(--clay)"><i class="bi bi-calendar-x-fill"></i> Expired \u2014 No Show</div>
+        <div class="info-banner banner-rejected"><strong>${displayValue(r.expirationReason, "The 14-day attendance deadline passed without confirmed arrival.")}</strong><div class="mt-1">Expired ${formatDate(r.expiredAt)}</div></div>
+      </div>`;
+  }
+
+  const deadlineSection = ["Approved", "Expired"].includes(r.status) ? `
+    <div class="drawer-section deadline-workflow-card ${r.noShowRisk ? "is-risk" : ""}">
+      <div class="drawer-section-title"><i class="bi bi-calendar2-check"></i> Attendance Deadline</div>
+      <div class="drawer-info-grid">
+        <div class="drawer-info-item"><div class="drawer-info-lbl">Deadline</div><div class="drawer-info-val">${formatDate(r.attendanceDeadlineAt)}</div></div>
+        <div class="drawer-info-item"><div class="drawer-info-lbl">Current State</div><div class="drawer-info-val">${displayValue(r.deadlineStatus, "Awaiting appointment")}</div></div>
+        <div class="drawer-info-item"><div class="drawer-info-lbl">Drop-off Appointment</div><div class="drawer-info-val">${r.surrenderAppointment?.date ? `${formatDate(r.surrenderAppointment.date)} ${r.surrenderAppointment.time || ""}` : "Not scheduled"}</div></div>
+        <div class="drawer-info-item"><div class="drawer-info-lbl">Arrival</div><div class="drawer-info-val">${r.arrivalConfirmedAt ? `Confirmed ${formatDate(r.arrivalConfirmedAt)}` : "Not confirmed"}</div></div>
+      </div>
+      ${String(r.surrenderRescheduleRequest?.status || "").toLowerCase() === "pending" ? `
+        <div class="info-banner banner-approved mt-2">
+          <strong>Drop-off reschedule awaiting review</strong>
+          <div class="mt-1">${formatDate(r.surrenderRescheduleRequest.date)} ${r.surrenderRescheduleRequest.time || ""}</div>
+          <div class="mt-2">
+            <button class="btn-approve-confirm" id="drawerApproveRescheduleBtn"><i class="bi bi-check-lg"></i> Approve New Date</button>
+            <button class="btn-danger-outline" id="drawerRejectRescheduleBtn"><i class="bi bi-x-lg"></i> Reject Change</button>
+          </div>
+        </div>` : ""}
+    </div>` : "";
 
   // ── Footer buttons ────────────────────────────────────
+  const submissionSection = `
+    <div class="drawer-section drawer-section-submission">
+      <div class="drawer-section-title"><i class="bi bi-shield-check"></i> Consent and Submission</div>
+      <div class="drawer-info-grid">
+        <div class="drawer-info-item">
+          <div class="drawer-info-lbl">Submitted</div>
+          <div class="drawer-info-val">${formatDate(r.submittedAt || r.createdAt)}</div>
+        </div>
+        <div class="drawer-info-item">
+          <div class="drawer-info-lbl">Source</div>
+          <div class="drawer-info-val">${displayValue(r.source, "Public Form")}</div>
+        </div>
+        <div class="drawer-info-item">
+          <div class="drawer-info-lbl">Terms Accepted</div>
+          <div class="drawer-info-val">${agreement.agreedToTerms ? "Yes" : "No"}</div>
+        </div>
+        <div class="drawer-info-item">
+          <div class="drawer-info-lbl">Accepted On</div>
+          <div class="drawer-info-val">${formatDate(agreement.agreedAt)}</div>
+        </div>
+        ${agreement.agreementText ? `
+          <div class="drawer-info-item drawer-info-full">
+            <div class="drawer-info-lbl">Consent Statement</div>
+            <div class="drawer-info-val">${escapeHtml(agreement.agreementText)}</div>
+          </div>` : ""}
+      </div>
+    </div>`;
+
   let footerBtns = `<button class="btn-ghost-clay" id="drawerCloseBtn"><i class="bi bi-x"></i> Close</button>`;
   if (r.status === "Pending") {
   footerBtns += `
@@ -547,30 +760,53 @@ function renderDrawer(r) {
         : ""
     }`;
 }
-    if (r.status === "Approved") {
-    footerBtns += `
-      <button class="btn-ghost-clay" disabled>
-        <i class="bi bi-info-circle"></i> Waiting for intake submission
-      </button>`;
+  if (r.status === "Approved") {
+    footerBtns += r.arrivalConfirmedAt
+      ? `<button class="btn-convert-confirm" id="drawerConvertBtn"><i class="bi bi-person-vcard-fill"></i> Complete Intake &amp; Start Profiling</button>`
+      : `
+        <button class="btn-ghost-clay" id="drawerExtendDeadlineBtn"><i class="bi bi-calendar-plus"></i> Extend</button>
+        <button class="btn-approve-confirm" id="drawerArrivalBtn"><i class="bi bi-person-check"></i> Confirm Arrival</button>
+        <button class="btn-danger-outline" id="drawerNoShowBtn"><i class="bi bi-calendar-x"></i> No Show</button>`;
+  }
+  if (r.status === "Expired") {
+    footerBtns += `<button class="btn-approve-confirm" id="drawerRestoreBtn"><i class="bi bi-arrow-counterclockwise"></i> Restore Request</button>`;
   }
 
   inner.innerHTML = `
     <div class="drawer-header">
       <div class="drawer-header-left">
-        <h3>${r.id}</h3>
-        <p>
-        ${r.owner.name} · ${emoji(r.pet.species)} ${r.pet.name} · ${statusBadge(r.status)}
-        ${r.source ? ` · <span style="color:var(--stone);font-size:0.78rem">${r.source}</span>` : ""}
-      </p>
+        <h3>Surrender Request Details</h3>
+        <p>${displayValue(r.id, "Surrender request")} · Submitted ${formatDate(r.submittedAt || r.createdAt)} · ${displayValue(r.source, "Public Form")}</p>
       </div>
       <button class="drawer-close-btn" id="drawerCloseX" aria-label="Close request details"><i class="bi bi-x-lg"></i></button>
     </div>
+    <div class="action-alert drawer-action-alert" id="drawerActionAlert" role="status" aria-live="polite" hidden>
+      <i class="bi" aria-hidden="true"></i>
+      <div><strong></strong><span></span></div>
+    </div>
     <div class="drawer-body">
+      <section class="surrender-overview" aria-label="Owner and animal summary">
+        <div class="overview-person">
+          <span class="overview-avatar">${displayValue(owner.initials, "OW")}</span>
+          <span><small>Owner</small><strong>${displayValue(owner.name, "Unknown owner")}</strong></span>
+        </div>
+        <span class="overview-link"><i class="bi bi-arrow-right"></i><small>is surrendering</small></span>
+        <div class="overview-animal">
+          <span class="overview-avatar overview-pet">${emoji(r.pet.species)}</span>
+          <span><small>Animal</small><strong>${displayValue(r.pet.name, "Unnamed animal")}</strong></span>
+        </div>
+        <div class="overview-date">
+          <small>Request Status</small>
+          <strong>${statusBadge(r.status)}</strong>
+        </div>
+      </section>
       ${nlpSection}
       ${ownerSection}
       ${petSection}
       ${extraPetDetailsSection}
       ${docsSection}
+      ${submissionSection}
+      ${deadlineSection}
       ${statusSection}
     </div>
     <div class="drawer-footer">${footerBtns}</div>`;
@@ -579,7 +815,13 @@ function renderDrawer(r) {
   document.getElementById("drawerCloseBtn")?.addEventListener("click",  closeDrawer);
   document.getElementById("drawerApproveBtn")?.addEventListener("click",()=> openApproveModal(r.id));
   document.getElementById("drawerRejectBtn")?.addEventListener("click", ()=> openRejectModal(r.id));
-  //document.getElementById("drawerConvertBtn")?.addEventListener("click",()=> openConvertModal(r.id));
+  document.getElementById("drawerExtendDeadlineBtn")?.addEventListener("click", () => openAttendanceWorkflow(r.id, "deadline/extend"));
+  document.getElementById("drawerArrivalBtn")?.addEventListener("click", () => openAttendanceWorkflow(r.id, "arrival"));
+  document.getElementById("drawerNoShowBtn")?.addEventListener("click", () => openAttendanceWorkflow(r.id, "no-show"));
+  document.getElementById("drawerRestoreBtn")?.addEventListener("click", () => openAttendanceWorkflow(r.id, "deadline/restore"));
+  document.getElementById("drawerApproveRescheduleBtn")?.addEventListener("click", () => openAttendanceWorkflow(r.id, "reschedule/approve"));
+  document.getElementById("drawerRejectRescheduleBtn")?.addEventListener("click", () => openAttendanceWorkflow(r.id, "reschedule/reject"));
+  document.getElementById("drawerConvertBtn")?.addEventListener("click", () => beginSurrenderIntake(r.id));
 }
 
 async function updateSurrenderStatusInBackend(id, payload) {
@@ -603,6 +845,173 @@ async function updateSurrenderStatusInBackend(id, payload) {
   return data.request;
 }
 
+const attendanceWorkflowConfig = {
+  arrival: {
+    title: "Confirm Shelter Arrival",
+    heading: "Owner and animal are physically at the shelter",
+    message: "This completes attendance and unlocks the final Intake review.",
+    icon: "bi-person-check-fill",
+    button: "Confirm Arrival",
+  },
+  "deadline/extend": {
+    title: "Extend Attendance Deadline",
+    heading: "Give the sender additional time",
+    message: "Choose 1 to 30 additional days and record why the extension is needed.",
+    icon: "bi-calendar-plus-fill",
+    button: "Extend Deadline",
+    needsDays: true,
+    needsReason: true,
+  },
+  "no-show": {
+    title: "Mark as No Show",
+    heading: "Close this request for non-attendance",
+    message: "The request will expire and the reason will be kept in its audit history.",
+    icon: "bi-calendar-x-fill",
+    button: "Mark No Show",
+    danger: true,
+    needsReason: true,
+    defaultReason: "Missed shelter appointment.",
+  },
+  "deadline/restore": {
+    title: "Restore Expired Request",
+    heading: "Reopen the attendance window",
+    message: "A new 14-day deadline will be created after you confirm.",
+    icon: "bi-arrow-counterclockwise",
+    button: "Restore Request",
+    needsReason: true,
+  },
+  "reschedule/approve": {
+    title: "Approve New Drop-off Date",
+    heading: "Accept the requested appointment change",
+    message: "The approved date must still fall inside the active attendance deadline.",
+    icon: "bi-calendar2-check-fill",
+    button: "Approve New Date",
+  },
+  "reschedule/reject": {
+    title: "Reject Date Change",
+    heading: "Keep the current drop-off schedule",
+    message: "Explain why the requested appointment change cannot be accepted.",
+    icon: "bi-calendar2-x-fill",
+    button: "Reject Change",
+    danger: true,
+    needsReason: true,
+  },
+};
+
+function setActionAlert(id, type = "error", title = "", message = "") {
+  const alert = document.getElementById(id);
+  if (!alert) return;
+  if (!message) {
+    alert.hidden = true;
+    return;
+  }
+  alert.className = `action-alert is-${type}${id === "drawerActionAlert" ? " drawer-action-alert" : ""}`;
+  alert.querySelector("i").className = `bi ${type === "success" ? "bi-check-circle-fill" : type === "warning" ? "bi-exclamation-triangle-fill" : "bi-exclamation-circle-fill"}`;
+  alert.querySelector("strong").textContent = title;
+  alert.querySelector("span").textContent = message;
+  alert.hidden = false;
+}
+
+function openAttendanceWorkflow(id, action) {
+  const request = allRequests.find(item => item.id === id);
+  const config = attendanceWorkflowConfig[action];
+  if (!request || !config) return;
+  attendanceWorkflow = { id, action };
+  document.getElementById("workflowModalTitle").textContent = config.title;
+  document.getElementById("workflowModalHeading").textContent = config.heading;
+  document.getElementById("workflowModalMessage").textContent = config.message;
+  document.querySelector("#workflowModalIcon i").className = `bi ${config.icon}`;
+  document.getElementById("workflowDaysGroup").hidden = !config.needsDays;
+  document.getElementById("workflowReasonGroup").hidden = !config.needsReason;
+  document.getElementById("workflowDays").value = config.needsDays ? "7" : "";
+  document.getElementById("workflowReason").value = config.defaultReason || "";
+  document.getElementById("errWorkflowDays").textContent = "";
+  document.getElementById("errWorkflowReason").textContent = "";
+  document.getElementById("workflowDays").removeAttribute("aria-invalid");
+  document.getElementById("workflowReason").removeAttribute("aria-invalid");
+  setActionAlert("workflowActionAlert");
+  const button = document.getElementById("workflowConfirmBtn");
+  button.className = config.danger ? "btn-reject-confirm" : "btn-approve-confirm";
+  button.innerHTML = `<i class="bi ${config.icon}"></i> ${config.button}`;
+  openModal("workflowModalBackdrop");
+}
+
+async function executeAttendanceWorkflow() {
+  if (!attendanceWorkflow) return;
+  const { id, action } = attendanceWorkflow;
+  const config = attendanceWorkflowConfig[action];
+  const daysInput = document.getElementById("workflowDays");
+  const reasonInput = document.getElementById("workflowReason");
+  const extensionDays = Number(daysInput.value);
+  const reason = reasonInput.value.trim();
+  let valid = true;
+
+  if (config.needsDays && (!Number.isInteger(extensionDays) || extensionDays < 1 || extensionDays > 30)) {
+    document.getElementById("errWorkflowDays").textContent = "Enter a whole number from 1 to 30.";
+    daysInput.setAttribute("aria-invalid", "true");
+    valid = false;
+  }
+  if (config.needsReason && reason.length < 5) {
+    document.getElementById("errWorkflowReason").textContent = "Enter a clear reason using at least 5 characters.";
+    reasonInput.setAttribute("aria-invalid", "true");
+    valid = false;
+  }
+  if (!valid) {
+    setActionAlert("workflowActionAlert", "warning", "Check the highlighted fields", "Complete the required information before confirming.");
+    return;
+  }
+
+  const payload = {};
+  if (config.needsDays) payload.extensionDays = extensionDays;
+  if (config.needsReason) payload.reason = reason;
+  const button = document.getElementById("workflowConfirmBtn");
+  const original = button.innerHTML;
+
+  try {
+    button.disabled = true;
+    button.innerHTML = '<span class="button-spinner" aria-hidden="true"></span> Updating…';
+    const token = localStorage.getItem("animua_token");
+    const response = await fetch(
+      `${SURRENDER_REQUESTS_API_URL}/${encodeURIComponent(id)}/${action}`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(payload),
+      }
+    );
+    const responseText = await response.text();
+    let result = {};
+    try {
+      result = responseText ? JSON.parse(responseText) : {};
+    } catch {
+      result = {};
+    }
+    if (!response.ok) {
+      const message = response.status === 404
+        ? "This attendance action is unavailable. Restart the management backend and try again."
+        : result.message || "Unable to update the attendance workflow.";
+      throw new Error(message);
+    }
+
+    closeModal("workflowModalBackdrop");
+    publicRequests = await getPublicSubmittedRequests();
+    allRequests = [...publicRequests];
+    renderStats();
+    applyFilters();
+    const request = allRequests.find(item => item.id === id);
+    if (request) {
+      renderDrawer(request);
+      setActionAlert("drawerActionAlert", "success", "Attendance updated", result.message || "The request workflow was updated successfully.");
+    }
+    showToast("success", result.message || "Attendance workflow updated.");
+  } catch (error) {
+    setActionAlert("workflowActionAlert", "error", "Could not update the request", error.message || "Please try again.");
+  } finally {
+    button.disabled = false;
+    button.innerHTML = original;
+  }
+}
+
 /* ══════════════════════════════════════════════════════
    ACTIONS
 ══════════════════════════════════════════════════════ */
@@ -621,6 +1030,7 @@ function openApproveModal(id) {
   document.getElementById("approveConfirmMsg").textContent =
     `Approve surrender request ${id} from ${r.owner.name} for ${r.pet.name}?`;
   document.getElementById("approveNotes").value = "";
+  setActionAlert("approveActionAlert");
   openModal("approveModalBackdrop");
 }
 async function executeApprove() {
@@ -635,7 +1045,13 @@ async function executeApprove() {
 
   if (!r) return;
 
+  const button = document.getElementById("approveConfirmBtn");
+  const original = button?.innerHTML;
   try {
+    if (button) {
+      button.disabled = true;
+      button.innerHTML = '<span class="button-spinner" aria-hidden="true"></span> Approving…';
+    }
     const reviewNotes = document.getElementById("approveNotes").value.trim() || null;
 
     const updatedRequest = await updateSurrenderStatusInBackend(r.id, {
@@ -645,39 +1061,23 @@ async function executeApprove() {
 
     Object.assign(r, updatedRequest);
 
-    sessionStorage.setItem(
-      "approved_surrender_for_intake",
-      JSON.stringify({
-        surrenderId: r.id,
-        ownerName: r.owner?.name || "",
-        ownerContact: r.owner?.contact || "",
-        approvedDate: new Date().toISOString().split("T")[0],
-
-        petName: r.pet?.name || "",
-        species: r.pet?.species || "",
-        breed: r.pet?.breed || "",
-        sex: r.pet?.sex || "",
-        age: r.pet?.age || "",
-        colorMarkings: r.pet?.colorMarkings || "",
-        vaccinationHistory: r.pet?.vaccinationHistory || "",
-        photoName: r.pet?.photoName || "",
-        photoType: r.pet?.photoType || "",
-        photoDataUrl: r.pet?.photoDataUrl || "",
-        surrenderReason: r.surrenderReason || "",
-      })
-    );
-
     closeModal("approveModalBackdrop");
-
-    showToast("success", `Request ${r.id} approved. Redirecting to Animal Intake...`);
-
-    setTimeout(() => {
-      navigateManagementPage("/pages/intakeList.html?source=surrender");
-    }, 900);
+    publicRequests = await getPublicSubmittedRequests();
+    allRequests = [...publicRequests];
+    renderStats();
+    applyFilters();
+    const approvedRequest = allRequests.find(item => item.id === r.id);
+    if (approvedRequest) renderDrawer(approvedRequest);
+    showToast("success", `Request ${r.id} approved. Awaiting appointment and shelter arrival.`);
 
   } catch (error) {
     console.error("Approve surrender request error:", error);
-    showToast("error", error.message || "Failed to approve request.");
+    setActionAlert("approveActionAlert", "error", "Approval was not saved", error.message || "Please try again.");
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.innerHTML = original;
+    }
   }
 }
 
@@ -696,7 +1096,9 @@ function openRejectModal(id) {
   document.getElementById("rejectConfirmMsg").textContent =
     `Reject surrender request ${id} from ${r.owner.name}?`;
   document.getElementById("rejectReason").value = "";
+  document.getElementById("rejectReason").removeAttribute("aria-invalid");
   document.getElementById("errRejectReason").textContent = "";
+  setActionAlert("rejectActionAlert");
   openModal("rejectModalBackdrop");
 }
 async function executeReject() {
@@ -709,8 +1111,10 @@ async function executeReject() {
 }
   const reason = document.getElementById("rejectReason")?.value.trim();
 
-  if (!reason) {
-    document.getElementById("errRejectReason").textContent = "A reason is required.";
+  if (!reason || reason.length < 5) {
+    document.getElementById("errRejectReason").textContent = "Enter a clear reason using at least 5 characters.";
+    document.getElementById("rejectReason").setAttribute("aria-invalid", "true");
+    setActionAlert("rejectActionAlert", "warning", "Reason required", "Add enough detail for staff and the sender to understand this decision.");
     return;
   }
 
@@ -718,7 +1122,13 @@ async function executeReject() {
 
   if (!r) return;
 
+  const button = document.getElementById("rejectConfirmBtn");
+  const original = button?.innerHTML;
   try {
+    if (button) {
+      button.disabled = true;
+      button.innerHTML = '<span class="button-spinner" aria-hidden="true"></span> Rejecting…';
+    }
     const updatedRequest = await updateSurrenderStatusInBackend(r.id, {
       status: "Rejected",
       rejectedReason: reason,
@@ -734,45 +1144,50 @@ async function executeReject() {
     showToast("info", `Request ${r.id} rejected.`);
   } catch (error) {
     console.error("Reject surrender request error:", error);
-    showToast("error", error.message || "Failed to reject request.");
+    setActionAlert("rejectActionAlert", "error", "Rejection was not saved", error.message || "Please try again.");
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.innerHTML = original;
+    }
   }
 }
 
-// Convert to intake
-function openConvertModal(id) {
+// Arrival is already confirmed, so open the one final intake review directly.
+function beginSurrenderIntake(id) {
   const r = allRequests.find(x=>x.id===id);
   if (!r) return;
-  confirmMode = { type:"convert", id };
-  document.getElementById("convertConfirmMsg").textContent =
-    `Convert ${r.id} (${r.pet.name} from ${r.owner.name}) to a formal Intake record?`;
-  document.getElementById("fDropoffDate").value = new Date().toISOString().split("T")[0];
-  openModal("convertModalBackdrop");
-}
-async function executeConvert() {
-  const r = allRequests.find(x => x.id === confirmMode.id);
-
-  if (!r) return;
-
-  try {
-    const dropoffDate = document.getElementById("fDropoffDate").value;
-
-    const updatedRequest = await updateSurrenderStatusInBackend(r.id, {
-      status: "Converted",
-      dropoffDate,
-    });
-
-    Object.assign(r, updatedRequest);
-
-    closeModal("convertModalBackdrop");
-    renderStats();
-    applyFilters();
-    renderDrawer(r);
-
-    showToast("success", `Intake record ${r.intakeId} created from ${r.id}.`);
-  } catch (error) {
-    console.error("Convert surrender request error:", error);
-    showToast("error", error.message || "Failed to convert request.");
+  if (r.status !== "Approved" || !r.arrivalConfirmedAt) {
+    showToast("error", "Confirm the owner and animal's arrival before starting Intake.");
+    return;
   }
+
+  sessionStorage.setItem(
+    "approved_surrender_for_intake",
+    JSON.stringify({
+      surrenderId: r.id,
+      ownerName: r.owner?.name || "",
+      ownerContact: r.owner?.contact || "",
+      approvedDate: r.reviewedAt || new Date().toISOString().split("T")[0],
+      arrivalConfirmedAt: r.arrivalConfirmedAt,
+      petName: r.pet?.name || "",
+      species: r.pet?.species || "",
+      breed: r.pet?.breed || "",
+      sex: r.pet?.sex || "",
+      age: r.pet?.age || "",
+      colorMarkings: r.pet?.colorMarkings || "",
+      vaccinationHistory: r.pet?.vaccinationHistory || "",
+      photoName: r.pet?.photoName || "",
+      photoType: r.pet?.photoType || "",
+      photoDataUrl: r.pet?.photoDataUrl || "",
+      surrenderReason: r.surrenderReason || "",
+    })
+  );
+
+  showToast("success", "Opening the final Intake review...");
+  setTimeout(() => {
+    navigateManagementPage("/pages/intakeList.html?source=surrender");
+  }, 500);
 }
 
 /* ══════════════════════════════════════════════════════
@@ -781,7 +1196,7 @@ async function executeConvert() {
 function openModal(id)  { document.getElementById(id)?.classList.add("open"); }
 function closeModal(id) { document.getElementById(id)?.classList.remove("open"); }
 function closeAllModals() {
-  ["rejectModalBackdrop","approveModalBackdrop","convertModalBackdrop"].forEach(closeModal);
+  ["rejectModalBackdrop","approveModalBackdrop","workflowModalBackdrop"].forEach(closeModal);
 }
 
 let toastT;
@@ -802,6 +1217,8 @@ async function init() {
     currentRole = session.role;
     renderTopbarUser();
     loadSidebar(); 
+
+    await loadSurrenderAvailability();
 
     publicRequests = await getPublicSubmittedRequests();
 
@@ -833,7 +1250,11 @@ async function init() {
     document.getElementById("searchSR")?.addEventListener("input",      applyFilters);
     document.getElementById("filterUrgency")?.addEventListener("change", applyFilters);
     document.getElementById("filterCategory")?.addEventListener("change",applyFilters);
+    document.getElementById("clearSurrenderFilters")?.addEventListener("click", clearSurrenderFilters);
     document.getElementById("srDrawerBackdrop")?.addEventListener("click", closeDrawer);
+    document.getElementById("surrenderAvailabilityToggle")?.addEventListener("change", event => {
+      updateSurrenderAvailability(event.currentTarget.checked);
+    });
 
     // Reject modal
     document.getElementById("rejectModalClose")?.addEventListener("click",  ()=>closeModal("rejectModalBackdrop"));
@@ -845,13 +1266,28 @@ async function init() {
     document.getElementById("approveModalCancel")?.addEventListener("click", ()=>closeModal("approveModalBackdrop"));
     document.getElementById("approveConfirmBtn")?.addEventListener("click",  executeApprove);
 
-    // Convert modal
-    document.getElementById("convertModalClose")?.addEventListener("click",  ()=>closeModal("convertModalBackdrop"));
-    document.getElementById("convertModalCancel")?.addEventListener("click", ()=>closeModal("convertModalBackdrop"));
-    document.getElementById("convertConfirmBtn")?.addEventListener("click",  executeConvert);
+    // Attendance workflow modal
+    document.getElementById("workflowModalClose")?.addEventListener("click",  ()=>closeModal("workflowModalBackdrop"));
+    document.getElementById("workflowModalCancel")?.addEventListener("click", ()=>closeModal("workflowModalBackdrop"));
+    document.getElementById("workflowConfirmBtn")?.addEventListener("click", executeAttendanceWorkflow);
+    document.getElementById("workflowDays")?.addEventListener("input", event => {
+      event.currentTarget.removeAttribute("aria-invalid");
+      document.getElementById("errWorkflowDays").textContent = "";
+      setActionAlert("workflowActionAlert");
+    });
+    document.getElementById("workflowReason")?.addEventListener("input", event => {
+      event.currentTarget.removeAttribute("aria-invalid");
+      document.getElementById("errWorkflowReason").textContent = "";
+      setActionAlert("workflowActionAlert");
+    });
+    document.getElementById("rejectReason")?.addEventListener("input", event => {
+      event.currentTarget.removeAttribute("aria-invalid");
+      document.getElementById("errRejectReason").textContent = "";
+      setActionAlert("rejectActionAlert");
+    });
 
     // Backdrop click
-    ["rejectModalBackdrop","approveModalBackdrop","convertModalBackdrop"].forEach(id=>{
+    ["rejectModalBackdrop","approveModalBackdrop","workflowModalBackdrop"].forEach(id=>{
       document.getElementById(id)?.addEventListener("click",e=>{if(e.target.id===id)closeModal(id);});
     });
 

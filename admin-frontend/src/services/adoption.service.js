@@ -29,3 +29,17 @@ export async function finalizeAdoption(id, payload) {
     body: JSON.stringify(payload),
   });
 }
+
+export async function updateAdoptionDeadline(id, action, payload = {}) {
+  return await apiFetch(`/adoptions/${encodeURIComponent(id)}/${action}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function reviewAdoptionReschedule(id, decision, payload = {}) {
+  return await apiFetch(`/adoptions/${encodeURIComponent(id)}/reschedule/${decision}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}

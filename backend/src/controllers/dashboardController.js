@@ -1,5 +1,18 @@
 const { db } = require("../config/firebase");
 const { buildShelterLabel } = require("../utils/animalIdentity");
+const { reconcileRequestDeadlines } = require("../services/requestDeadlineService");
+
+const ATTENTION_CACHE_TTL_MS = Math.max(
+  60_000,
+  Number(process.env.ATTENTION_CACHE_TTL_MS) || 15 * 60_000
+);
+
+let attentionCache = null;
+let attentionRefreshPromise = null;
+
+exports.invalidateAttentionCache = function invalidateAttentionCache() {
+  attentionCache = null;
+};
 
 function toDate(value) {
   if (!value) return null;
@@ -33,6 +46,140 @@ function inventoryLevel(item = {}) {
   if (reorderPoint > 0 && currentStock <= reorderPoint) return "Low";
   return "OK";
 }
+
+async function countDocuments(query) {
+  const snapshot = await query.count().get();
+  return Number(snapshot.data().count || 0);
+}
+
+async function buildAttentionSummary() {
+  await reconcileRequestDeadlines();
+  const intake = db.collection("intakeRecords");
+  const animals = db.collection("animals");
+  const inventory = db.collection("inventoryItems");
+  const contactMessages = db.collection("contactMessages");
+
+  const [
+    totalIntakes,
+    convertedIntakes,
+    rejectedIntakes,
+    archivedIntakes,
+    pendingAdoptions,
+    pendingSurrenders,
+    quarantine,
+    animalSnapshot,
+    inventorySnapshot,
+    newContactMessages,
+    approvedAdoptionSnapshot,
+    approvedSurrenderSnapshot,
+  ] = await Promise.all([
+    countDocuments(intake),
+    countDocuments(intake.where("status", "==", "Converted")),
+    countDocuments(intake.where("status", "==", "Rejected")),
+    countDocuments(intake.where("status", "==", "Archived")),
+    countDocuments(db.collection("adoptions").where("status", "==", "Pending")),
+    countDocuments(db.collection("surrenderRequests").where("status", "==", "Pending")),
+    countDocuments(animals.where("status", "==", "Quarantine")),
+    animals.select("status", "intakeDate", "createdAt").get(),
+    inventory
+      .select(
+        "currentStock",
+        "quantity",
+        "stock",
+        "onHand",
+        "reorderPoint",
+        "minimumStock",
+        "minStock",
+        "criticalPoint"
+      )
+      .get(),
+    countDocuments(contactMessages.where("status", "==", "New")),
+    db.collection("adoptions").where("status", "==", "Approved").select("noShowRisk").get(),
+    db.collection("surrenderRequests").where("status", "==", "Approved").select("noShowRisk").get(),
+  ]);
+
+  const longStayCount = animalSnapshot.docs.reduce((count, document) => {
+    const animal = document.data();
+    if (["Adopted", "Archived"].includes(animal.status)) return count;
+    return daysSince(animal.intakeDate || animal.createdAt) > 60
+      ? count + 1
+      : count;
+  }, 0);
+
+  let lowStockCount = 0;
+  let criticalStockCount = 0;
+  inventorySnapshot.docs.forEach((document) => {
+    const level = inventoryLevel(document.data());
+    if (level === "Critical") {
+      criticalStockCount += 1;
+      lowStockCount += 1;
+    } else if (level === "Low") {
+      lowStockCount += 1;
+    }
+  });
+
+  const generatedAt = new Date();
+  const adoptionNoShowRisk = approvedAdoptionSnapshot.docs.filter((doc) => doc.data().noShowRisk === true).length;
+  const surrenderNoShowRisk = approvedSurrenderSnapshot.docs.filter((doc) => doc.data().noShowRisk === true).length;
+  return {
+    intake: Math.max(
+      0,
+      totalIntakes - convertedIntakes - rejectedIntakes - archivedIntakes
+    ),
+    pendingAdoptions,
+    pendingSurrenders,
+    quarantine,
+    lowStockCount,
+    criticalStockCount,
+    longStayCount,
+    newContactMessages,
+    adoptionNoShowRisk,
+    surrenderNoShowRisk,
+    generatedAt: generatedAt.toISOString(),
+    expiresAt: new Date(generatedAt.getTime() + ATTENTION_CACHE_TTL_MS).toISOString(),
+  };
+}
+
+async function getCachedAttentionSummary(forceRefresh = false) {
+  if (
+    !forceRefresh &&
+    attentionCache &&
+    attentionCache.expiresAt > Date.now()
+  ) {
+    return { ...attentionCache.data, cached: true };
+  }
+
+  if (!attentionRefreshPromise) {
+    attentionRefreshPromise = buildAttentionSummary()
+      .then((data) => {
+        attentionCache = {
+          data,
+          expiresAt: Date.now() + ATTENTION_CACHE_TTL_MS,
+        };
+        return data;
+      })
+      .finally(() => {
+        attentionRefreshPromise = null;
+      });
+  }
+
+  const data = await attentionRefreshPromise;
+  return { ...data, cached: false };
+}
+
+exports.getAttentionSummary = async (req, res) => {
+  try {
+    const forceRefresh = req.query.refresh === "1";
+    const summary = await getCachedAttentionSummary(forceRefresh);
+    res.set("Cache-Control", "private, max-age=60");
+    return res.json(summary);
+  } catch (error) {
+    console.error("[getAttentionSummary]", error);
+    return res.status(500).json({
+      message: "Failed to load the management attention summary.",
+    });
+  }
+};
 
 exports.getDashboardStats = async (req, res) => {
   try {

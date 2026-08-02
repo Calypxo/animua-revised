@@ -18,7 +18,7 @@ const triggerWelcomeToast = () => {
             showConfirmButton: false,
             timer: 3500,
             timerProgressBar: true,
-            background: '#ffffff',
+            background: '#FFFFFF',
             color: '#333',
             didOpen: (toast) => {
                 toast.onmouseenter = Swal.stopTimer;

@@ -1,4 +1,4 @@
-import { apiFetch } from "../utils/api.js";
+import { API_BASE_URL, apiFetch } from "../utils/api.js";
 
 export async function getAnnouncements() {
   return await apiFetch("/announcements");
@@ -22,4 +22,43 @@ export async function deleteAnnouncement(id) {
   return await apiFetch(`/announcements/${encodeURIComponent(id)}`, {
     method: "DELETE",
   });
+}
+
+async function announcementImageRequest(id, options) {
+  const token = localStorage.getItem("animua_token");
+  const response = await fetch(
+    `${API_BASE_URL}/announcements/${encodeURIComponent(id)}/image`,
+    {
+      ...options,
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(options.headers || {}),
+      },
+    }
+  );
+
+  const contentType = response.headers.get("content-type") || "";
+  const data = contentType.includes("application/json")
+    ? await response.json()
+    : { message: await response.text() };
+
+  if (!response.ok) {
+    throw new Error(data.message || `Image request failed (${response.status})`);
+  }
+
+  return data;
+}
+
+export async function uploadAnnouncementImage(id, file) {
+  const formData = new FormData();
+  formData.append("photo", file);
+
+  return announcementImageRequest(id, {
+    method: "PATCH",
+    body: formData,
+  });
+}
+
+export async function deleteAnnouncementImage(id) {
+  return announcementImageRequest(id, { method: "DELETE" });
 }

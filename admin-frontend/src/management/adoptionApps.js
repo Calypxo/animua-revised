@@ -1,7 +1,7 @@
 // admin-frontend/src/management/adoptionApps.js
-import "../css/adminDashboard.css";
-import "../css/sidebar.css";
 import "../css/adoptionApps.css";
+import "../css/managementTables.css";
+import "../css/recordsPanelReference.css";
 import { renderPageHeader } from "../components/management/pageHeader.js";
 import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.js";
 
@@ -14,7 +14,9 @@ import {
   getAllAdoptions,
   approveAdoption,
   rejectAdoption,
-  finalizeAdoption
+  finalizeAdoption,
+  updateAdoptionDeadline,
+  reviewAdoptionReschedule
 } from "../services/adoption.service.js";
 
 renderPageHeader(PAGE_HEADER_CONFIGS.adoptions);
@@ -36,7 +38,7 @@ const QUIZ_DIMENSIONS = [
   { key:"adaptability",         label:"Routine stability" },
 ];
 
-const AVATAR_COLOR = "#ef1725";
+const AVATAR_COLOR = "#780116";
 
 function mapAdoptionFromBackend(a) {
   const compatibility = a.compatibility || null;
@@ -91,6 +93,16 @@ function mapAdoptionFromBackend(a) {
     adoptionDate: a.adoptionDate || "",
     adoptedName: a.adoptedName || "",
     processedBy: a.processedBy || "",
+    pickupSchedule: a.pickupSchedule || null,
+    pickupRescheduleRequest: a.pickupRescheduleRequest || null,
+    attendanceDeadlineAt: a.attendanceDeadlineAt || null,
+    deadlineStatus: a.deadlineStatus || "",
+    deadlineReminderStage: a.deadlineReminderStage || "",
+    noShowRisk: a.noShowRisk === true,
+    arrivalConfirmedAt: a.arrivalConfirmedAt || null,
+    expiredAt: a.expiredAt || null,
+    expirationReason: a.expirationReason || "",
+    deadlineExtensions: a.deadlineExtensions || [],
   };
 }
 
@@ -159,11 +171,11 @@ let currentRole = "";
 /* ══════════════════════════════════════════════════════
    HELPERS
 ══════════════════════════════════════════════════════ */
-const emoji = s => ({Dog:"🐶",Cat:"🐱",Rabbit:"🐰",Bird:"🐦"}[s]||"🐾");
+const emoji = s => ({Dog:"🐶",Cat:"🐱"}[s]||"🐾");
 const thumbCls = s => ({Dog:"thumb-dog",Cat:"thumb-cat"}[s]||"thumb-other");
 
 function statusBadge(s) {
-  const m = {Pending:{cls:"badge-pending"},Approved:{cls:"badge-approved"},Finalized:{cls:"badge-finalized"},Rejected:{cls:"badge-rejected"}}[s]||{cls:"badge-pending"};
+  const m = {Pending:{cls:"badge-pending"},Approved:{cls:"badge-approved"},Finalized:{cls:"badge-finalized"},Rejected:{cls:"badge-rejected"},Expired:{cls:"badge-rejected"}}[s]||{cls:"badge-pending"};
   return `<span class="status-badge ${m.cls}">${s}</span>`;
 }
 
@@ -178,7 +190,7 @@ function compatColor(score) {
   if (!score) return { ring:"#a89c96", cls:"compat-none" };
   if (score >= 75) return { ring:"#23734c", cls:"compat-high" };
   if (score >= 55) return { ring:"#ffb51b", cls:"compat-mid" };
-  return { ring:"#ef1725", cls:"compat-low" };
+  return { ring:"#780116", cls:"compat-low" };
 }
 
 function compatPill(score, type) {
@@ -234,6 +246,8 @@ function applyFilters() {
   });
 
   currentPage = 1;
+  const resultLabel = document.getElementById("adoptionResultLabel");
+  if (resultLabel) resultLabel.textContent = `${filtered.length} ${filtered.length === 1 ? "record" : "records"}`;
   renderTable();
   renderPagination();
 }
@@ -248,7 +262,7 @@ function renderTable() {
   const page  = filtered.slice(start, start+PAGE_SIZE);
 
   if (!page.length) {
-    tbody.innerHTML = `<tr><td colspan="8" class="text-center py-5 text-muted">No applications found.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8"><div class="reference-records-empty"><span><i class="bi bi-file-earmark-heart"></i></span><strong>No adoption applications found</strong><small>Adjust the status, search, or application type filters to broaden this view.</small></div></td></tr>`;
     return;
   }
 
@@ -279,11 +293,11 @@ function renderTable() {
         </span>
       </td>
       <td>${compatPill(a.compatScore, a.type)}</td>
-      <td style="font-family:var(--mono);font-size:0.76rem;color:var(--stone)">${formatDate(a.submitted)}</td>
+      <td class="table-date-cell">${formatDate(a.submitted)}</td>
       <td>${statusBadge(a.status)}</td>
       <td>
-        <button class="tbl-action-btn" data-action="view" data-id="${a.id}" title="View">
-          <i class="bi bi-chevron-right"></i>
+        <button class="tbl-action-btn" data-action="view" data-id="${a.id}" title="View details" aria-label="View adoption application details">
+          <i class="bi bi-eye"></i>
         </button>
       </td>
     </tr>`).join("");
@@ -385,13 +399,13 @@ function renderDrawerContent(app) {
             const petVal     = (app.animal.vector[QUIZ_DIMENSIONS.indexOf(d)]||0) * 20;
             const adopterVal = (app.adopterAnswers?.[d.key]||0) * 20;
             const diff       = Math.abs(petVal - adopterVal);
-            const barColor   = diff <= 20 ? "#23734c" : diff <= 40 ? "#ffb51b" : "#ef1725";
+            const barColor   = diff <= 20 ? "#23734c" : diff <= 40 ? "#ffb51b" : "#780116";
             return `
               <div class="drawer-trait-row">
                 <span class="drawer-trait-name">${d.label}</span>
                 <div style="display:flex;flex-direction:column;gap:2px;flex:1">
                   <div class="drawer-trait-track" title="${app.animal.name}: ${Math.round(petVal)}%">
-                    <div class="drawer-trait-fill" style="width:${petVal}%;background:#ef1725"></div>
+                    <div class="drawer-trait-fill" style="width:${petVal}%;background:#780116"></div>
                   </div>
                   <div class="drawer-trait-track" title="Adopter: ${Math.round(adopterVal)}%">
                     <div class="drawer-trait-fill" style="width:${adopterVal}%;background:${barColor}"></div>
@@ -402,7 +416,7 @@ function renderDrawerContent(app) {
           }).join("")}
         </div>
         <div class="mt-2" style="font-size:0.72rem;color:var(--stone);display:flex;gap:12px">
-          <span style="display:flex;align-items:center;gap:4px"><span style="display:inline-block;width:10px;height:4px;background:#ef1725;border-radius:2px"></span>Pet trait</span>
+          <span style="display:flex;align-items:center;gap:4px"><span style="display:inline-block;width:10px;height:4px;background:#780116;border-radius:2px"></span>Pet trait</span>
           <span style="display:flex;align-items:center;gap:4px"><span style="display:inline-block;width:10px;height:4px;background:#23734c;border-radius:2px"></span>Adopter answer</span>
         </div>
 
@@ -410,7 +424,7 @@ function renderDrawerContent(app) {
         <div class="drawer-section-title mt-3"><i class="bi bi-list-ol"></i> Quiz Top Matches Shown</div>
         <div style="display:flex;flex-direction:column;gap:6px">
           ${app.quizTopMatches.map((m,i) => `
-            <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--cream);border-radius:9px;border:1px solid ${m.id===app.animal.id?"rgba(111,25,28,0.2)":"var(--border)"}">
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--cream);border-radius:9px;border:1px solid ${m.id===app.animal.id?"rgba(120, 1, 22,0.2)":"var(--border)"}">
               <span style="font-size:0.72rem;font-weight:700;color:var(--stone);min-width:16px">#${i+1}</span>
               <span>${emoji(m.species)}</span>
               <span style="font-size:0.84rem;font-weight:${m.id===app.animal.id?"800":"600"};color:${m.id===app.animal.id?"var(--clay)":"var(--ink)"}">
@@ -517,6 +531,27 @@ function renderDrawerContent(app) {
       </div>
     </div>` : "";
 
+  const deadlineSection = ["Approved", "Expired"].includes(app.status) ? `
+    <div class="drawer-section deadline-workflow-card ${app.noShowRisk ? "is-risk" : ""}">
+      <div class="drawer-section-title"><i class="bi bi-calendar2-check"></i> Attendance Deadline</div>
+      <div class="drawer-info-grid">
+        <div class="drawer-info-item"><div class="drawer-info-lbl">Deadline</div><div class="drawer-info-val">${formatDate(app.attendanceDeadlineAt)}</div></div>
+        <div class="drawer-info-item"><div class="drawer-info-lbl">Current State</div><div class="drawer-info-val">${app.deadlineStatus || "Awaiting appointment"}</div></div>
+        <div class="drawer-info-item"><div class="drawer-info-lbl">Pickup Schedule</div><div class="drawer-info-val">${app.pickupSchedule?.date ? `${formatDate(app.pickupSchedule.date)} ${app.pickupSchedule.time || ""}` : "Not scheduled"}</div></div>
+        <div class="drawer-info-item"><div class="drawer-info-lbl">Arrival</div><div class="drawer-info-val">${app.arrivalConfirmedAt ? `Confirmed ${formatDate(app.arrivalConfirmedAt)}` : "Not confirmed"}</div></div>
+      </div>
+      ${String(app.pickupRescheduleRequest?.status || "").toLowerCase() === "pending" ? `
+        <div class="info-banner banner-approved mt-2">
+          <strong>Pickup reschedule awaiting review</strong>
+          <div class="mt-1">${formatDate(app.pickupRescheduleRequest.date)} ${app.pickupRescheduleRequest.time || ""}</div>
+          <div class="mt-2">
+            <button class="btn-approve-app" id="drawerApproveRescheduleBtn"><i class="bi bi-check-lg"></i> Approve New Date</button>
+            <button class="btn-danger-outline" id="drawerRejectRescheduleBtn"><i class="bi bi-x-lg"></i> Reject Change</button>
+          </div>
+        </div>` : ""}
+      ${app.expirationReason ? `<div class="info-banner banner-rejected mt-2">${app.expirationReason}</div>` : ""}
+    </div>` : "";
+
   // ── Footer action buttons ─────────────────────────────
   let footerBtns = `<button class="btn-ghost-clay" id="drawerCloseBtn"><i class="bi bi-x"></i> Close</button>`;
   if (app.status === "Pending") {
@@ -546,6 +581,9 @@ if (app.status === "Approved") {
           </button>`
         : ""
     }
+    <button class="btn-ghost-clay" id="drawerExtendDeadlineBtn"><i class="bi bi-calendar-plus"></i> Extend</button>
+    <button class="btn-ghost-clay" id="drawerArrivalBtn"><i class="bi bi-person-check"></i> Confirm Arrival</button>
+    <button class="btn-danger-outline" id="drawerNoShowBtn"><i class="bi bi-calendar-x"></i> No Show</button>
     ${
       can("finalize")
         ? `<button class="btn-finalize" id="drawerFinalizeBtn">
@@ -555,15 +593,17 @@ if (app.status === "Approved") {
     }`;
 }
 
+if (app.status === "Expired") {
+  footerBtns += `<button class="btn-approve-app" id="drawerRestoreBtn"><i class="bi bi-arrow-counterclockwise"></i> Restore Request</button>`;
+}
+
   // ── Assemble full drawer ──────────────────────────────
   inner.innerHTML = `
     <div class="drawer-header">
       <div class="drawer-header-left">
-        <span class="drawer-eyebrow">Application details</span>
-        <h3>${app.applicationId}</h3>
-        <p>Submitted ${formatDate(app.submitted)} · ${app.type}</p>
+        <h3>Adoption Application Details</h3>
+        <p>${app.applicationId} · Submitted ${formatDate(app.submitted)} · ${app.type}</p>
       </div>
-      <div class="drawer-header-status">${statusBadge(app.status)}</div>
       <button class="drawer-close-btn" id="drawerCloseX"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="drawer-body">
@@ -577,10 +617,15 @@ if (app.status === "Approved") {
           <span class="journey-avatar journey-pet">${emoji(app.animal.species)}</span>
           <span><small>Animal</small><strong>${app.animal.name}</strong></span>
         </div>
+        <div class="journey-status">
+          <small>Application Status</small>
+          <strong>${statusBadge(app.status)}</strong>
+        </div>
       </section>
       ${compatSection}
       ${adopterSection}
       ${animalSection}
+      ${deadlineSection}
       ${rejectedSection}
       ${finalizedSection}
     </div>
@@ -592,6 +637,12 @@ if (app.status === "Approved") {
   document.getElementById("drawerApproveBtn")?.addEventListener("click", () => approveApp(app.id));
   document.getElementById("drawerRejectBtn")?.addEventListener("click",  () => openRejectModal(app.id));
   document.getElementById("drawerFinalizeBtn")?.addEventListener("click",() => openFinalizeModal(app.id));
+  document.getElementById("drawerExtendDeadlineBtn")?.addEventListener("click", () => runAdoptionDeadlineAction(app.id, "deadline/extend"));
+  document.getElementById("drawerArrivalBtn")?.addEventListener("click", () => runAdoptionDeadlineAction(app.id, "arrival"));
+  document.getElementById("drawerNoShowBtn")?.addEventListener("click", () => runAdoptionDeadlineAction(app.id, "no-show"));
+  document.getElementById("drawerRestoreBtn")?.addEventListener("click", () => runAdoptionDeadlineAction(app.id, "deadline/restore"));
+  document.getElementById("drawerApproveRescheduleBtn")?.addEventListener("click", () => runAdoptionRescheduleAction(app.id, "approve"));
+  document.getElementById("drawerRejectRescheduleBtn")?.addEventListener("click", () => runAdoptionRescheduleAction(app.id, "reject"));
 }
 
 /* ══════════════════════════════════════════════════════
@@ -617,6 +668,58 @@ async function approveApp(id) {
   } catch (err) {
     console.error("[approveApp]", err);
     showToast("error", err.message || "Failed to approve application.");
+  }
+}
+
+async function runAdoptionDeadlineAction(id, action) {
+  let payload = {};
+  if (action === "deadline/extend") {
+    const extensionDays = Number(window.prompt("How many additional days? Enter 1 to 30.", "7"));
+    if (!extensionDays) return;
+    const reason = window.prompt("Reason for extending the deadline:");
+    if (!reason) return;
+    payload = { extensionDays, reason };
+  } else if (action === "no-show") {
+    const reason = window.prompt("Reason for marking this request as a no-show:", "Missed shelter appointment.");
+    if (!reason) return;
+    payload = { reason };
+  } else if (action === "deadline/restore") {
+    const reason = window.prompt("Reason for restoring this expired request:");
+    if (!reason) return;
+    payload = { reason };
+  } else if (!window.confirm("Confirm that the adopter arrived at the shelter?")) {
+    return;
+  }
+
+  try {
+    const result = await updateAdoptionDeadline(id, action, payload);
+    await loadAdoptions();
+    const app = adoptionApps.find(item => item.id === id);
+    if (app) renderDrawerContent(app);
+    showToast("success", result.message || "Attendance workflow updated.");
+  } catch (error) {
+    showToast("error", error.message || "Unable to update the attendance workflow.");
+  }
+}
+
+async function runAdoptionRescheduleAction(id, decision) {
+  const payload = {};
+  if (decision === "reject") {
+    const reason = window.prompt("Reason for rejecting this pickup date change:");
+    if (!reason) return;
+    payload.reason = reason;
+  } else if (!window.confirm("Approve the requested pickup date and time?")) {
+    return;
+  }
+
+  try {
+    const result = await reviewAdoptionReschedule(id, decision, payload);
+    await loadAdoptions();
+    const app = adoptionApps.find(item => item.id === id);
+    if (app) renderDrawerContent(app);
+    showToast("success", result.message || "Pickup reschedule reviewed.");
+  } catch (error) {
+    showToast("error", error.message || "Unable to review the pickup reschedule.");
   }
 }
 
@@ -762,6 +865,15 @@ async function init() {
 
     document.getElementById("searchApps")?.addEventListener("input",  applyFilters);
     document.getElementById("filterType")?.addEventListener("change", applyFilters);
+    document.getElementById("clearAdoptionFilters")?.addEventListener("click", () => {
+      activeTab = "all";
+      const search = document.getElementById("searchApps");
+      const type = document.getElementById("filterType");
+      if (search) search.value = "";
+      if (type) type.value = "";
+      document.querySelectorAll(".aa-tab").forEach((tab) => tab.classList.toggle("active", tab.dataset.tab === "all"));
+      applyFilters();
+    });
     document.getElementById("aaDrawerBackdrop")?.addEventListener("click", closeDrawer);
 
     // Reject modal

@@ -76,5 +76,15 @@ export function renderPageHeader(config = {}, target = "#pageHeaderMount") {
         ${metrics.map(renderMetric).join("")}
       </section>` : ""}`;
 
+  const hero = mount.querySelector(".system-page-hero");
+
+  if (hero && config.image) {
+    hero.style.setProperty("--header-photo", `url("${config.image}")`);
+    hero.style.setProperty(
+      "--header-photo-position",
+      config.imagePosition || "center"
+    );
+  }
+
   return mount;
 }

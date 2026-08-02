@@ -4,8 +4,13 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon server.js",
+    "test": "node --test --test-isolation=none",
+    "dev": "node scripts/dev.js",
+    "dev:emulator": "node scripts/dev.js --emulators",
+    "dev:backend": "nodemon server.js",
+    "seed:emulator": "node scripts/seedEmulator.js",
+    "seed:announcements": "node scripts/seedAnnouncementHighlights.js",
+    "sentiment": "..\\animua-sentiment-service\\.venv\\Scripts\\python.exe -B -m uvicorn --app-dir ..\\animua-sentiment-service app:app --host 127.0.0.1 --port 8002",
     "start": "node server.js"
   },
   "keywords": [],

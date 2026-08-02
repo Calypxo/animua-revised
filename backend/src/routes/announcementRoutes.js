@@ -4,6 +4,7 @@ const router = express.Router();
 const ctrl = require("../controllers/announcementController");
 const authenticateToken = require("../middleware/authMiddleware");
 const authorizeRole = require("../middleware/roleMiddleware");
+const uploadAnnouncementImage = require("../middleware/uploadAnnouncementImage");
 
 router.get("/test", (req, res) => {
   res.json({ message: "Announcement route file is working" });
@@ -32,6 +33,21 @@ router.put(
   authenticateToken,
   authorizeRole("Admin", "Staff", "Veterinarian"),
   ctrl.updateAnnouncement
+);
+
+router.patch(
+  "/:id/image",
+  authenticateToken,
+  authorizeRole("Admin", "Staff", "Veterinarian"),
+  uploadAnnouncementImage,
+  ctrl.uploadAnnouncementImage
+);
+
+router.delete(
+  "/:id/image",
+  authenticateToken,
+  authorizeRole("Admin", "Staff", "Veterinarian"),
+  ctrl.deleteAnnouncementImage
 );
 
 // Admin only can delete

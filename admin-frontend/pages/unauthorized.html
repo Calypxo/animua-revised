@@ -10,6 +10,50 @@
   />
 
   <title>Access Denied | ANIMUA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      margin: 0;
+      padding: 24px;
+      color: #2b1719;
+      background:
+        radial-gradient(circle at 100% 0, rgba(247, 181, 56, .18), transparent 24rem),
+        #FFF8EE;
+      font-family: "Poppins", sans-serif;
+    }
+    main {
+      width: min(520px, 100%);
+      padding: clamp(30px, 6vw, 52px);
+      border: 1px solid rgba(120, 1, 22, .14);
+      border-top: 8px solid #780116;
+      border-radius: 24px;
+      background: #FFFFFF;
+      box-shadow: 0 22px 54px rgba(43, 23, 25, .12);
+      text-align: center;
+    }
+    h1 { margin: 0 0 12px; color: #780116; font-size: clamp(2rem, 7vw, 3rem); font-weight: 800; }
+    p { margin: 0 auto 28px; color: #756367; line-height: 1.7; }
+    a {
+      display: inline-flex;
+      min-height: 48px;
+      align-items: center;
+      justify-content: center;
+      padding: 0 22px;
+      border-radius: 12px;
+      color: #FFFFFF;
+      background: #780116;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    a:hover { background: #780116; }
+    a:focus-visible { outline: 3px solid rgba(247, 181, 56, .82); outline-offset: 3px; }
+  </style>
 </head>
 
 <body>
@@ -20,7 +64,7 @@
       Your account does not have permission to access this page.
     </p>
 
-    <a href="/pages/management/dashboard.html">
+    <a href="/pages/dashboard.html">
       Return to Dashboard
     </a>
   </main>

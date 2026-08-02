@@ -1,8 +1,8 @@
 // admin-frontend/src/management/inventory.js
 
-import "../css/adminDashboard.css";
-import "../css/sidebar.css";
 import "../css/inventory.css";
+import "../css/managementTables.css";
+import "../css/recordsPanelReference.css";
 import { renderPageHeader } from "../components/management/pageHeader.js";
 import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.js";
 
@@ -192,7 +192,6 @@ let currentPage = 1;
 const PAGE_SIZE = 12;
 let activeTab = "all";
 let activeItemId = null;
-let viewMode = "table";
 let editingItemId = null;
 let stockInMode = "single";
 let stockOutMode = "single";
@@ -314,6 +313,8 @@ function applyFilters() {
     return d !== 0 ? d : a.daysUntilStockout - b.daysUntilStockout;
   });
 
+  const resultLabel = document.getElementById("inventoryResultLabel");
+  if (resultLabel) resultLabel.textContent = `${filtered.length} ${filtered.length === 1 ? "record" : "records"}`;
   const countLabel = document.getElementById("filterResultsCount");
   if (countLabel) {
     countLabel.textContent = filtered.length === store.length
@@ -439,9 +440,12 @@ function renderTable() {
   if (!page.length) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="7" class="inventory-loading-cell">
-          <i class="bi bi-inbox" style="font-size:1.5rem"></i>
-          <span>No inventory items found.</span>
+        <td colspan="7">
+          <div class="reference-records-empty">
+            <span><i class="bi bi-box-seam"></i></span>
+            <strong>No inventory items found</strong>
+            <small>Adjust the category, movement, risk, status, or search filters to broaden this view.</small>
+          </div>
         </td>
       </tr>
     `;
@@ -728,7 +732,7 @@ function renderCards() {
 }
 
 function renderView() {
-  viewMode === "table" ? renderTable() : renderCards();
+  renderTable();
 }
 
 /* ── Pagination ─────────────────────────────────────── */
@@ -1838,24 +1842,6 @@ async function init() {
     });
 
     document.getElementById("clearInventoryFilters")?.addEventListener("click", clearInventoryFilters);
-
-    document.getElementById("btnTableView")?.addEventListener("click", () => {
-      viewMode = "table";
-      document.getElementById("btnTableView")?.classList.add("active");
-      document.getElementById("btnCardView")?.classList.remove("active");
-      document.getElementById("tableView").style.display = "";
-      document.getElementById("cardView").style.display = "none";
-      renderView();
-    });
-
-    document.getElementById("btnCardView")?.addEventListener("click", () => {
-      viewMode = "card";
-      document.getElementById("btnCardView")?.classList.add("active");
-      document.getElementById("btnTableView")?.classList.remove("active");
-      document.getElementById("tableView").style.display = "none";
-      document.getElementById("cardView").style.display = "";
-      renderView();
-    });
 
     const stockInButton = document.getElementById("btnStockIn");
 const recordUsageButton = document.getElementById("btnRecordUsage");

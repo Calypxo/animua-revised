@@ -1,7 +1,7 @@
 // admin-frontend/src/management/userManagement.js
-import "../css/adminDashboard.css";
-import "../css/sidebar.css";
 import "../css/userManagement.css";
+import "../css/managementTables.css";
+import "../css/recordsPanelReference.css";
 import { renderPageHeader } from "../components/management/pageHeader.js";
 import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.js";
 
@@ -82,15 +82,27 @@ const ALL_PERMISSIONS = [
     key: "archive",
     label: "Archive",
   },
+  {
+    key: "announcements",
+    label: "Announcements",
+  },
+  {
+    key: "compatibility",
+    label: "Compatibility Quiz",
+  },
+  {
+    key: "contact",
+    label: "Contact Messages",
+  },
 ];
 
 const AVATAR_COLORS = [
-  "#6f191c",
+  "#780116",
   "#2558a8",
   "#186534",
   "#b86a00",
   "#0d6e6e",
-  "#9b2c4e",
+  "#780116",
   "#3d2b8a",
   "#1a6b5a",
   "#7a3b00",
@@ -360,7 +372,7 @@ function applyFilters() {
   const resultCount = document.getElementById("userResultCount");
   if (resultCount) {
     const accountLabel = filteredUsers.length === 1 ? "account" : "accounts";
-    resultCount.textContent = `${filteredUsers.length} ${accountLabel} shown · ${allUsers.length} total`;
+    resultCount.textContent = `${filteredUsers.length} ${accountLabel}`;
   }
 
   currentPage = 1;

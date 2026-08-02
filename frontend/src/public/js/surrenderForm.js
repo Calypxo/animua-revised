@@ -1,5 +1,6 @@
 const SUBMIT_SURRENDER_API_URL = "http://localhost:5000/api/surrenders";
 const MY_SURRENDER_REQUESTS_API_URL = `${SUBMIT_SURRENDER_API_URL}/my-requests`;
+const SURRENDER_AVAILABILITY_API_URL = `${SUBMIT_SURRENDER_API_URL}/availability`;
 
 const ANGELES_BARANGAYS = [
   "Agapito del Rosario", "Amsic", "Anunas", "Balibago", "Capaya", "Claro M. Recto",
@@ -31,6 +32,7 @@ let currentStep = 1;
 let highestVisitedStep = 1;
 let isSubmitting = false;
 let animalPhotoData = null;
+let surrenderAcceptingRequests = true;
 
 const MAX_ANIMAL_PHOTO_SIZE = 650 * 1024;
 
@@ -225,6 +227,56 @@ function clearFeedback() {
   document.getElementById("formFeedback")?.classList.add("hidden");
 }
 
+function applySurrenderAvailability(availability = {}) {
+  const acceptingRequests = availability.acceptingRequests !== false;
+  surrenderAcceptingRequests = acceptingRequests;
+
+  const workspace = document.querySelector(".surrender-workspace");
+  const panel = document.getElementById("surrenderAvailabilityPanel");
+  const message = document.getElementById("surrenderAvailabilityMessage");
+  const form = document.getElementById("surrenderForm");
+
+  workspace?.classList.toggle("is-not-accepting", !acceptingRequests);
+  if (panel) panel.hidden = acceptingRequests;
+  if (message && availability.closedMessage) {
+    message.textContent = availability.closedMessage;
+  }
+
+  form?.querySelectorAll("input, select, textarea, button").forEach(control => {
+    control.disabled = !acceptingRequests;
+  });
+  document.querySelectorAll(".surrender-step-link").forEach(control => {
+    control.disabled = !acceptingRequests;
+  });
+
+  const submitButton = document.getElementById("submitSurrenderBtn");
+  if (submitButton) submitButton.disabled = isSubmitting || !acceptingRequests;
+}
+
+async function loadSurrenderAvailability({ showError = false } = {}) {
+  const retryButton = document.getElementById("checkSurrenderAvailability");
+  retryButton?.setAttribute("aria-busy", "true");
+  if (retryButton) retryButton.disabled = true;
+
+  try {
+    const response = await fetch(SURRENDER_AVAILABILITY_API_URL, {
+      headers: { Accept: "application/json" },
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(data.message || "Unable to check surrender request availability.");
+    }
+    applySurrenderAvailability(data.availability || {});
+  } catch (error) {
+    if (showError) {
+      showFeedback(error.message || "Unable to check availability. Please try again.", "error");
+    }
+  } finally {
+    retryButton?.removeAttribute("aria-busy");
+    if (retryButton) retryButton.disabled = false;
+  }
+}
+
 function showStep(step, options = {}) {
   const nextStep = Math.min(4, Math.max(1, Number(step)));
   currentStep = nextStep;
@@ -291,7 +343,12 @@ async function submitSurrenderRequest(requestData) {
     throw new Error("We could not reach the shelter service. Check your connection and try again.");
   }
   const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(data.message || "The request could not be submitted. Review your details and try again.");
+  if (!response.ok) {
+    const error = new Error(data.message || "The request could not be submitted. Review your details and try again.");
+    error.code = data.code;
+    error.availability = data.availability;
+    throw error;
+  }
   return data;
 }
 
@@ -299,7 +356,7 @@ function setSubmitting(submitting) {
   isSubmitting = submitting;
   const button = document.getElementById("submitSurrenderBtn");
   if (!button) return;
-  button.disabled = submitting;
+  button.disabled = submitting || !surrenderAcceptingRequests;
   button.setAttribute("aria-busy", String(submitting));
   button.innerHTML = submitting
     ? '<i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i><span>Submitting securely…</span>'
@@ -384,6 +441,10 @@ async function handleSurrenderSubmit(event) {
     success?.focus();
     await loadMySurrenderRequests();
   } catch (error) {
+    if (error.code === "SURRENDER_REQUESTS_CLOSED") {
+      applySurrenderAvailability(error.availability || { acceptingRequests: false });
+      document.getElementById("surrenderAvailabilityPanel")?.focus({ preventScroll: true });
+    }
     showFeedback(error.message || "The request could not be submitted. Please try again.", "error");
   } finally {
     setSubmitting(false);
@@ -459,6 +520,10 @@ function renderRequestHistory(requests) {
 }
 
 function resetForAnotherRequest() {
+  if (!surrenderAcceptingRequests) {
+    document.getElementById("surrenderAvailabilityPanel")?.scrollIntoView({ behavior: "smooth", block: "center" });
+    return;
+  }
   const form = document.getElementById("surrenderForm");
   form?.reset();
   form?.classList.remove("hidden");
@@ -528,6 +593,7 @@ document.addEventListener("DOMContentLoaded", () => {
   bindWaiverLanguageToggle();
   bindAnimalPhotoUpload();
   showStep(1, { scroll: false, focus: false });
+  loadSurrenderAvailability();
   loadMySurrenderRequests();
   form?.addEventListener("submit", handleSurrenderSubmit);
 
@@ -544,4 +610,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("refreshRequestStatus")?.addEventListener("click", loadMySurrenderRequests);
   document.getElementById("trackSubmittedRequest")?.addEventListener("click", () => document.getElementById("mySurrenderRequests")?.scrollIntoView({ behavior: "smooth" }));
   document.getElementById("startAnotherRequest")?.addEventListener("click", resetForAnotherRequest);
+  document.getElementById("checkSurrenderAvailability")?.addEventListener("click", () => {
+    loadSurrenderAvailability({ showError: true });
+  });
 });

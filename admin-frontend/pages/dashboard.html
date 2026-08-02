@@ -11,11 +11,10 @@
   <!-- Bootstrap Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
   <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <!-- Custom CSS -->
-  <link rel="stylesheet" href="/src/css/adminDashboard.css" />
 </head>
 <body class="loading dashboard-page">
 
@@ -34,7 +33,7 @@
         </button>
         <div class="search-pill">
           <i class="bi bi-search"></i>
-          <input type="text" id="globalSearch" placeholder="Search animals, records, staff…" autocomplete="off" />
+          <input type="search" id="globalSearch" placeholder="Search animals or management pages…" autocomplete="off" aria-label="Search animals or management pages" aria-controls="searchDropdown" />
           <div id="searchDropdown" class="search-dropdown d-none"></div>
         </div>
       </div>
@@ -209,7 +208,7 @@
               </div>
             </div>
             <div class="table-responsive">
-              <table class="shelter-table" id="activityTable">
+              <table class="shelter-table management-data-table" id="activityTable">
                 <thead>
                   <tr>
                     <th>Animal</th>
@@ -367,7 +366,7 @@
               </div>
             </div>
             <div class="table-responsive">
-              <table class="shelter-table" id="recentAnimalsTable">
+              <table class="shelter-table management-data-table" id="recentAnimalsTable">
                 <thead>
                   <tr>
                     <th>ID</th>
@@ -378,7 +377,7 @@
                     <th>Status</th>
                     <th>Days in Shelter</th>
                     <th>Behavioral Assessment</th>
-                    <th>Action</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody id="recentAnimalsBody">

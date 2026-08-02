@@ -1,5 +1,6 @@
-import "../css/adminDashboard.css";
-import "../css/sidebar.css";
+import "../css/animalProfiling.css";
+import "../css/managementTables.css";
+import "../css/recordsPanelReference.css";
 import "../css/contactMessages.css";
 
 import Swal from "sweetalert2";
@@ -8,16 +9,23 @@ import { protectPageByModule } from "../auth/authGuard.js";
 import { hasPermission } from "../auth/permissions.js";
 import { renderTopbarUser } from "../components/management/topbarUser.js";
 import { loadSidebar } from "../components/management/sidebarLoader.js";
+import { renderPageHeader } from "../components/management/pageHeader.js";
+import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.js";
+import { cacheContactMessageCount } from "../components/management/contactMessageBadge.js";
 import { apiFetch } from "../utils/api.js";
 
 window.Swal = Swal;
+renderPageHeader(PAGE_HEADER_CONFIGS.contactMessages);
 
 const state = {
   messages: [],
+  users: [],
   filtered: [],
+  selectedUserKey: "",
   selectedId: "",
   search: "",
   status: "",
+  sort: "newest",
 };
 
 let currentRole = "";
@@ -43,9 +51,50 @@ function normalize(value = "") {
   return String(value).toLowerCase().trim();
 }
 
-function formatDate(value) {
-  if (!value) return "-";
+function messageStatus(message = {}) {
+  return message.status === "Replied" ? "Replied" : "New";
+}
 
+function messageUserKey(message = {}) {
+  return normalize(message.userId || message.email || `legacy:${message.fullName}`);
+}
+
+function buildUsers(messages = []) {
+  const users = new Map();
+
+  messages.forEach((message) => {
+    const key = messageUserKey(message);
+    if (!users.has(key)) {
+      users.set(key, {
+        key,
+        fullName: message.fullName || "Unknown user",
+        email: message.email || "",
+        messages: [],
+      });
+    }
+
+    const user = users.get(key);
+    user.messages.push(message);
+    user.fullName = message.fullName || user.fullName;
+    user.email = message.email || user.email;
+  });
+
+  return Array.from(users.values()).map((user) => {
+    user.messages.sort((left, right) => dateValue(right.createdAt) - dateValue(left.createdAt));
+    user.latestAt = user.messages[0]?.createdAt || "";
+    user.newCount = user.messages.filter((message) => messageStatus(message) === "New").length;
+    user.repliedCount = user.messages.length - user.newCount;
+    return user;
+  });
+}
+
+function dateValue(value) {
+  const timestamp = Date.parse(value);
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+}
+
+function formatDate(value) {
+  if (!value) return "Not recorded";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return String(value);
 
@@ -58,6 +107,28 @@ function formatDate(value) {
   });
 }
 
+function formatListDate(value) {
+  if (!value) return "Not recorded";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+
+  return date.toLocaleDateString("en-PH", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+function messagePreview(value = "") {
+  const text = String(value).replace(/\s+/g, " ").trim();
+  return text.length > 124 ? `${text.slice(0, 121)}...` : text;
+}
+
+function setText(id, value) {
+  const element = el(id);
+  if (element) element.textContent = String(value);
+}
+
 function setReplyStatus(message = "", type = "") {
   const status = el("replyStatus");
   if (!status) return;
@@ -67,106 +138,250 @@ function setReplyStatus(message = "", type = "") {
 
 function updateStats() {
   const total = state.messages.length;
-  const replied = state.messages.filter((item) => item.status === "Replied").length;
-  const fresh = state.messages.filter((item) => item.status !== "Replied").length;
+  const replied = state.messages.filter(
+    (message) => messageStatus(message) === "Replied"
+  ).length;
+  const fresh = total - replied;
+  const usersWithNew = state.users.filter((user) => user.newCount > 0).length;
+  const usersWithReplies = state.users.filter((user) => user.repliedCount > 0).length;
 
-  el("totalMessages").textContent = total;
-  el("newMessages").textContent = fresh;
-  el("repliedMessages").textContent = replied;
+  [
+    ["totalMessages", total],
+    ["newMessages", fresh],
+    ["heroNewMessages", fresh],
+    ["repliedMessages", replied],
+    ["tabAllCount", state.users.length],
+    ["tabNewCount", usersWithNew],
+    ["tabRepliedCount", usersWithReplies],
+  ].forEach(([id, value]) => setText(id, value));
+}
+
+function visibleUsers() {
+  return state.filtered;
 }
 
 function applyFilters() {
   const term = normalize(state.search);
 
-  state.filtered = state.messages.filter((message) => {
-    const haystack = normalize(
-      `${message.fullName} ${message.email} ${message.subject} ${message.message}`
-    );
+  state.filtered = state.users
+    .filter((user) => {
+      const haystack = normalize(
+        `${user.fullName} ${user.email} ${user.messages.map((message) => `${message.subject} ${message.message}`).join(" ")}`
+      );
+      const matchesSearch = !term || haystack.includes(term);
+      const matchesStatus =
+        !state.status || user.messages.some((message) => messageStatus(message) === state.status);
+      return matchesSearch && matchesStatus;
+    })
+    .sort((left, right) => {
+      const difference =
+        dateValue(right.latestAt) - dateValue(left.latestAt);
+      return state.sort === "oldest" ? -difference : difference;
+    });
 
-    const matchesSearch = !term || haystack.includes(term);
-    const matchesStatus = !state.status || message.status === state.status;
+  setText("contactResultLabel", `${state.filtered.length} ${state.filtered.length === 1 ? "user" : "users"}`);
 
-    return matchesSearch && matchesStatus;
+  const page = visibleUsers();
+  if (!page.some((user) => user.key === state.selectedUserKey)) {
+    state.selectedUserKey = "";
+    state.selectedId = "";
+  }
+
+  renderMessageList();
+  renderDetail();
+}
+
+function clearMessageFilters() {
+  state.search = "";
+  state.status = "";
+  state.sort = "newest";
+  if (el("messageSearch")) el("messageSearch").value = "";
+  if (el("messageSort")) el("messageSort").value = "newest";
+
+  document.querySelectorAll(".ap-tab[data-status]").forEach((tab) => {
+    const selected = tab.dataset.status === "";
+    tab.classList.toggle("active", selected);
+    tab.setAttribute("aria-selected", String(selected));
   });
+
+  applyFilters();
 }
 
 function renderMessageList() {
   const list = el("messageList");
   if (!list) return;
+  const page = visibleUsers();
 
-  if (!state.filtered.length) {
-    list.innerHTML = '<p class="cm-empty">No contact messages found.</p>';
+  if (!page.length) {
+    list.innerHTML = `
+      <div class="ap-empty-state">
+        <span><i class="bi bi-search" aria-hidden="true"></i></span>
+        <strong>No matching users</strong>
+        <p>Adjust the status or search filters to view more contact accounts.</p>
+        <button type="button" id="emptyClearMessageFilters">Clear all filters</button>
+      </div>`;
+    el("emptyClearMessageFilters")?.addEventListener(
+      "click",
+      clearMessageFilters
+    );
     return;
   }
 
-  list.innerHTML = state.filtered
-    .map((message) => {
-      const active = message.id === state.selectedId ? "active" : "";
-      const statusClass = message.status === "Replied" ? "is-replied" : "is-new";
+  list.innerHTML = page
+    .map((user) => {
+      const active = user.key === state.selectedUserKey;
+      const status = user.newCount ? `${user.newCount} New` : "Replied";
+      const statusClass = user.newCount ? "is-new" : "is-replied";
+      const latest = user.messages[0] || {};
+      const initial = String(user.fullName || user.email || "A").trim().charAt(0).toUpperCase();
 
       return `
-        <button class="cm-message-item ${active}" type="button" data-id="${escapeHtml(message.id)}">
-          <span class="cm-message-status ${statusClass}">${escapeHtml(message.status || "New")}</span>
-          <strong>${escapeHtml(message.subject || "Contact inquiry")}</strong>
-          <span>${escapeHtml(message.fullName || "Unknown sender")} - ${escapeHtml(message.email || "")}</span>
-          <small>${escapeHtml(formatDate(message.createdAt))}</small>
-        </button>
-      `;
+        <button
+          class="cm-message-item${active ? " active" : ""}"
+          type="button"
+          role="listitem"
+          data-user-key="${escapeHtml(user.key)}"
+          aria-pressed="${String(active)}"
+          aria-label="Open all contact messages from ${escapeHtml(user.fullName || "unknown user")}"
+        >
+          <span class="cm-message-avatar">${escapeHtml(initial || "A")}</span>
+          <span class="cm-message-copy">
+            <span class="cm-message-meta">
+              <strong>${escapeHtml(user.fullName || "Unknown user")}</strong>
+              <time datetime="${escapeHtml(user.latestAt || "")}">${escapeHtml(formatListDate(user.latestAt))}</time>
+            </span>
+            <small>${escapeHtml(messagePreview(latest.message) || latest.subject || "Contact inquiry")}</small>
+            <span class="cm-message-sender">
+              <span>${escapeHtml(user.email || "No email recorded")}</span>
+              <span class="cm-message-status ${statusClass}">${escapeHtml(status)}</span>
+            </span>
+          </span>
+          <i class="bi bi-chevron-right cm-message-arrow" aria-hidden="true"></i>
+        </button>`;
     })
     .join("");
 }
 
 function getSelectedMessage() {
-  return state.messages.find((message) => message.id === state.selectedId) || null;
+  return (
+    state.messages.find((message) => message.id === state.selectedId) || null
+  );
+}
+
+function getSelectedUser() {
+  return state.users.find((user) => user.key === state.selectedUserKey) || null;
 }
 
 function renderDetail() {
   const detail = el("messageDetail");
   const empty = el("messageDetailEmpty");
+  const user = getSelectedUser();
   const selected = getSelectedMessage();
-
   if (!detail || !empty) return;
 
-  if (!selected) {
+  if (!user || !selected) {
     detail.classList.add("hidden");
     empty.classList.remove("hidden");
+    document.querySelector(".cm-workspace")?.classList.remove("conversation-open");
     return;
   }
 
   empty.classList.add("hidden");
   detail.classList.remove("hidden");
+  document.querySelector(".cm-workspace")?.classList.add("conversation-open");
 
-  el("detailStatus").textContent = selected.status || "New";
-  el("detailStatus").className = `cm-status-pill ${selected.status === "Replied" ? "is-replied" : "is-new"}`;
-  el("detailSubject").textContent = selected.subject || "Contact inquiry";
-  el("detailMeta").textContent = `Received ${formatDate(selected.createdAt)}`;
-  el("detailName").textContent = selected.fullName || "-";
-  el("detailEmail").textContent = selected.email || "-";
-  el("detailDate").textContent = formatDate(selected.createdAt);
-  el("detailSource").textContent = selected.source || "Contact Us Page";
-  el("detailMessage").textContent = selected.message || "";
-  el("detailEmailLink").href = selected.email ? `mailto:${selected.email}` : "#";
+  setText("detailUserName", user.fullName || "Unknown user");
+
+  const history = el("userMessageHistory");
+  if (history) {
+    const initial = String(user.fullName || user.email || "A").trim().charAt(0).toUpperCase() || "A";
+    const conversationEvents = user.messages
+      .flatMap((message) => [
+        { type: "incoming", at: message.createdAt, message },
+        ...(message.replyMessage
+          ? [{ type: "outgoing", at: message.repliedAt || message.createdAt, message }]
+          : []),
+      ])
+      .sort((left, right) => dateValue(left.at) - dateValue(right.at));
+
+    history.innerHTML = conversationEvents
+      .map(({ type, message }) => {
+        if (type === "incoming") {
+          const itemStatus = messageStatus(message);
+          const active = message.id === state.selectedId;
+          return `
+          <div class="cm-chat-row is-incoming">
+            <span class="cm-chat-avatar" aria-hidden="true">${escapeHtml(initial)}</span>
+            <button class="cm-chat-bubble${active ? " active" : ""}" type="button" data-message-id="${escapeHtml(message.id)}" aria-pressed="${String(active)}">
+              <span class="cm-chat-subject">${escapeHtml(message.subject || "Contact inquiry")}</span>
+              <span class="cm-chat-message">${escapeHtml(message.message || "No message content recorded.")}</span>
+              <span class="cm-chat-meta">
+                <time datetime="${escapeHtml(message.createdAt || "")}">${escapeHtml(formatDate(message.createdAt))}</time>
+                <span>${itemStatus === "Replied" ? "Replied" : "Needs reply"}</span>
+              </span>
+            </button>
+          </div>`;
+        }
+
+        return `
+          <div class="cm-chat-row is-outgoing">
+            <div class="cm-chat-bubble">
+              <span class="cm-chat-subject">ANIMUA reply · ${escapeHtml(message.subject || "Contact inquiry")}</span>
+              <span class="cm-chat-message">${escapeHtml(message.replyMessage)}</span>
+              <span class="cm-chat-meta">
+                <time datetime="${escapeHtml(message.repliedAt || "")}">${escapeHtml(formatDate(message.repliedAt))}</time>
+                <span><i class="bi bi-check2-all" aria-hidden="true"></i> Sent</span>
+              </span>
+            </div>
+            <span class="cm-chat-avatar is-animua" aria-hidden="true"><i class="bi bi-shield-check"></i></span>
+          </div>`;
+      })
+      .join("");
+  }
+
+  const status = messageStatus(selected);
+  setText(
+    "replyContext",
+    `Replying to "${selected.subject || "Contact inquiry"}" sent ${formatDate(selected.createdAt)}.`
+  );
 
   const replyBox = el("replyMessage");
-  if (replyBox) {
-    replyBox.value = selected.replyMessage || "";
-  }
+  if (replyBox) replyBox.value = selected.replyMessage || "";
 
   const sendBtn = el("sendReplyBtn");
-  if (sendBtn) {
-    sendBtn.disabled = !can("reply");
-  }
+  if (sendBtn) sendBtn.disabled = !can("reply");
 
   setReplyStatus(
-    selected.status === "Replied" && selected.repliedAt
+    status === "Replied" && selected.repliedAt
       ? `Last replied ${formatDate(selected.repliedAt)}. Sending again will email an updated response.`
       : "",
-    selected.status === "Replied" ? "info" : ""
+    status === "Replied" ? "info" : ""
   );
 }
 
 function selectMessage(id) {
   state.selectedId = id;
+  renderDetail();
+}
+
+function selectUser(key) {
+  const user = state.users.find((item) => item.key === key);
+  state.selectedUserKey = user?.key || "";
+  state.selectedId =
+    user?.messages.find((message) => messageStatus(message) === "New")?.id ||
+    user?.messages[0]?.id ||
+    "";
+  renderMessageList();
+  renderDetail();
+  requestAnimationFrame(() => {
+    const thread = el("userMessageHistory");
+    if (thread) thread.scrollTop = thread.scrollHeight;
+  });
+}
+
+function closeConversation() {
+  state.selectedUserKey = "";
+  state.selectedId = "";
   renderMessageList();
   renderDetail();
 }
@@ -178,18 +393,21 @@ async function loadMessages() {
   try {
     const data = await apiFetch("/public/contact/messages");
     state.messages = data.messages || [];
-
-    if (!state.selectedId && state.messages[0]) {
-      state.selectedId = state.messages[0].id;
-    }
-
-    applyFilters();
+    state.users = buildUsers(state.messages);
+    cacheContactMessageCount(
+      state.messages.filter(
+        (message) => messageStatus(message) === "New"
+      ).length
+    );
     updateStats();
-    renderMessageList();
-    renderDetail();
+    applyFilters();
   } catch (error) {
     console.error("[contact messages]", error);
-    Swal.fire({
+    state.messages = [];
+    state.users = [];
+    updateStats();
+    applyFilters();
+    await Swal.fire({
       icon: "error",
       title: "Unable to load messages",
       text: error.message || "Please try again later.",
@@ -209,7 +427,6 @@ async function sendReply(event) {
 
   const selected = getSelectedMessage();
   const replyMessage = el("replyMessage")?.value.trim();
-
   if (!selected || !replyMessage) {
     setReplyStatus("Write a reply message before sending.", "error");
     return;
@@ -220,7 +437,7 @@ async function sendReply(event) {
     title: "Send ANIMUA reply?",
     text: `This will email ${selected.email}.`,
     showCancelButton: true,
-    confirmButtonText: "Send Reply",
+    confirmButtonText: "Send reply",
     cancelButtonText: "Cancel",
     customClass: {
       popup: "animua-popup",
@@ -229,12 +446,11 @@ async function sendReply(event) {
     },
     buttonsStyling: false,
   });
-
   if (!confirm.isConfirmed) return;
 
   const sendBtn = el("sendReplyBtn");
   sendBtn.disabled = true;
-  setReplyStatus("Sending styled ANIMUA reply...", "info");
+  setReplyStatus("Sending the official ANIMUA reply...", "info");
 
   try {
     await apiFetch(`/public/contact/${encodeURIComponent(selected.id)}/reply`, {
@@ -242,12 +458,10 @@ async function sendReply(event) {
       body: JSON.stringify({ replyMessage }),
     });
 
-    setReplyStatus("Reply sent successfully.", "success");
-
-    Swal.fire({
+    await Swal.fire({
       icon: "success",
-      title: "Reply Sent",
-      text: "The user received the styled ANIMUA reply email.",
+      title: "Reply sent",
+      text: "The sender received the official ANIMUA email response.",
       timer: 1700,
       showConfirmButton: false,
       customClass: {
@@ -255,7 +469,6 @@ async function sendReply(event) {
       },
       buttonsStyling: false,
     });
-
     await loadMessages();
   } catch (error) {
     console.error("[send contact reply]", error);
@@ -267,25 +480,38 @@ async function sendReply(event) {
 
 function bindEvents() {
   el("refreshMessagesBtn")?.addEventListener("click", loadMessages);
-
   el("messageSearch")?.addEventListener("input", (event) => {
     state.search = event.target.value;
     applyFilters();
-    renderMessageList();
   });
-
-  el("messageStatusFilter")?.addEventListener("change", (event) => {
-    state.status = event.target.value;
+  el("messageSort")?.addEventListener("change", (event) => {
+    state.sort = event.target.value;
     applyFilters();
-    renderMessageList();
+  });
+  el("clearMessageFilters")?.addEventListener("click", clearMessageFilters);
+
+  document.querySelectorAll(".ap-tab[data-status]").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".ap-tab[data-status]").forEach((item) => {
+        item.classList.remove("active");
+        item.setAttribute("aria-selected", "false");
+      });
+      tab.classList.add("active");
+      tab.setAttribute("aria-selected", "true");
+      state.status = tab.dataset.status || "";
+      applyFilters();
+    });
   });
 
   el("messageList")?.addEventListener("click", (event) => {
     const item = event.target.closest(".cm-message-item");
-    if (!item) return;
-    selectMessage(item.dataset.id);
+    if (item) selectUser(item.dataset.userKey);
   });
-
+  el("userMessageHistory")?.addEventListener("click", (event) => {
+    const item = event.target.closest("[data-message-id]");
+    if (item) selectMessage(item.dataset.messageId);
+  });
+  el("backToUsersBtn")?.addEventListener("click", closeConversation);
   el("replyForm")?.addEventListener("submit", sendReply);
 }
 
@@ -298,10 +524,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     loadSidebar();
     bindEvents();
     await loadMessages();
-
-    document.body.classList.remove("loading");
   } catch (error) {
     console.error("[contact messages init]", error);
+  } finally {
     document.body.classList.remove("loading");
   }
 });

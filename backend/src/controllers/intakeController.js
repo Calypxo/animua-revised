@@ -4,11 +4,94 @@ const {
   buildShelterLabel,
   cleanText,
 } = require("../utils/animalIdentity");
+const {
+  getSurrenderConversionError,
+} = require("../services/surrenderWorkflowService");
+const {
+  canAdvanceIntakeToProfiling,
+  shouldAutoAdvanceIntake,
+} = require("../services/intakeWorkflowService");
 
 // ── COLLECTION NAMES ──────────────────────────────────
 const INTAKE_COL = "intakeRecords";
 const ANIMAL_COL = "animals";
 const AUDIT_COL  = "auditLogs";
+
+async function prepareAnimalProfile(intake, intakeId, user = {}) {
+  const year = new Date().getFullYear();
+  const countSnap = await db.collection(ANIMAL_COL)
+    .where("intakeYear", "==", year)
+    .get();
+  const animalId = `ANIM-${year}-${String(countSnap.size + 1).padStart(3, "0")}`;
+  const today = new Date().toISOString().split("T")[0];
+  const actor = user.fullName || user.email || "Staff";
+  const shelterLabel = buildShelterLabel(intake, animalId);
+
+  return {
+    animalId,
+    shelterLabel,
+    profile: {
+      intakeId,
+      intakeYear: year,
+      name: "",
+      adoptedName: "",
+      previousName: intake.previousName || "",
+      identifyingDescription: intake.identifyingDescription || shelterLabel,
+      shelterLabel,
+      species: intake.species || "",
+      breed: intake.breed || "",
+      sex: intake.sex || "Unknown",
+      ageEstimate: intake.ageEstimate || "",
+      color: intake.color || "",
+      cageNumber: "",
+      housingType: "Unassigned",
+      source: intake.source || "",
+      intakeDate: intake.intakeDate || "",
+      intakeLocation: intake.location || "",
+      initialCondition: intake.condition || "",
+      initialWeight: intake.weight || null,
+      weight: intake.weight || null,
+      injuries: intake.injuries || "Unknown",
+      vaccinated: intake.vaccinated || "Unknown",
+      alteredStatus: intake.alteredStatus || "Unknown",
+      visibleDefects: intake.visibleDefects || "",
+      conditionNotes: intake.conditionNotes || "",
+      surrenderRefId: intake.surrenderRefId || null,
+      barangayDetails: intake.barangayDetails || null,
+      status: "Profiling",
+      currentStage: "profiling",
+      photoURL: null,
+      behavioralAssessment: null,
+      behavioralNotes: "",
+      behavioralAssessor: "",
+      behavioralDate: "",
+      compatibilityVector: [],
+      medicalRecords: [],
+      adoptionDate: "",
+      adopterName: "",
+      adoptionStaff: "",
+      notes: intake.intakeNotes || "",
+      history: [
+        {
+          date: intake.intakeDate || today,
+          event: "Intake recorded",
+          detail: `${intake.source || "Unknown source"} intake`,
+          actor: intake.encodedBy || "Staff",
+        },
+        {
+          date: today,
+          event: "Started profiling",
+          detail: `Intake ${intakeId} advanced to animal profiling`,
+          actor,
+        },
+      ],
+      intakedBy: intake.encodedBy || "",
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      createdBy: user.email || "",
+    },
+  };
+}
 
 // ── GET ALL INTAKE RECORDS ────────────────────────────
 // Optional query params: ?status=Pending&source=Rescue&species=Dog
@@ -97,6 +180,36 @@ exports.createIntake = async (req, res) => {
       return res.status(400).json({ message: "Surrender reference ID is required for Approved Surrender." });
     }
 
+    if (source === "Approved Surrender" && recordStatus === "Draft") {
+      return res.status(400).json({
+        message: "Arrived surrender intakes must be completed now and cannot be saved as drafts.",
+      });
+    }
+
+    let surrenderRef = null;
+    if (source === "Approved Surrender") {
+      surrenderRef = db.collection("surrenderRequests").doc(surrenderRefId);
+      const surrenderSnapshot = await surrenderRef.get();
+      if (!surrenderSnapshot.exists) {
+        return res.status(404).json({ message: "Referenced surrender request was not found." });
+      }
+
+      const conversionError = getSurrenderConversionError(surrenderSnapshot.data() || {});
+      if (conversionError) {
+        return res.status(400).json({ message: conversionError });
+      }
+
+      const duplicateSnapshot = await db.collection(INTAKE_COL)
+        .where("surrenderRefId", "==", surrenderRefId)
+        .limit(1)
+        .get();
+      if (!duplicateSnapshot.empty) {
+        return res.status(409).json({
+          message: "An Intake record already exists for this surrender request.",
+        });
+      }
+    }
+
     const year = new Date().getFullYear();
 
     // Auto-generate sequential ID: INT-YYYY-NNN
@@ -105,6 +218,13 @@ exports.createIntake = async (req, res) => {
       .get();
     const seq = String(countSnap.size + 1).padStart(3, "0");
     const intakeId = `INT-${year}-${seq}`;
+
+    const shouldAdvanceToProfiling = shouldAutoAdvanceIntake({
+      source,
+      status: recordStatus,
+    });
+    const actor = req.user?.fullName || req.user?.email || "Staff";
+    const approvedOn = new Date().toISOString().split("T")[0];
 
     const record = {
       animalName:    "",
@@ -144,7 +264,41 @@ exports.createIntake = async (req, res) => {
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     };
 
-    await db.collection(INTAKE_COL).doc(intakeId).set(record);
+    let preparedProfile = null;
+    if (shouldAdvanceToProfiling) {
+      preparedProfile = await prepareAnimalProfile(record, intakeId, req.user || {});
+      record.status = "Converted";
+      record.approvedBy = actor;
+      record.approvedAt = approvedOn;
+      record.animalProfileId = preparedProfile.animalId;
+    }
+
+    const intakeRef = db.collection(INTAKE_COL).doc(intakeId);
+    const batch = db.batch();
+    batch.set(intakeRef, record);
+
+    if (preparedProfile) {
+      batch.set(
+        db.collection(ANIMAL_COL).doc(preparedProfile.animalId),
+        preparedProfile.profile
+      );
+    }
+
+    if (surrenderRef) {
+      batch.update(surrenderRef, {
+        status: "Converted",
+        intakeId,
+        dropoffDate: intakeDate,
+        deadlineStatus: "Completed",
+        deadlineReminderStage: "Completed",
+        noShowRisk: false,
+        convertedAt: new Date().toISOString(),
+        convertedBy: req.user?.fullName || req.user?.email || "Staff",
+        updatedAt: new Date().toISOString(),
+      });
+    }
+
+    await batch.commit();
 
     await writeAuditLog({
       action:          "intake.created",
@@ -156,7 +310,30 @@ exports.createIntake = async (req, res) => {
       after:           { source, species, condition, status: record.status },
     });
 
-    res.status(201).json({ message: "Intake record created.", id: intakeId });
+    if (preparedProfile) {
+      await writeAuditLog({
+        action: "intake.converted",
+        module: "Intake Management",
+        targetId: intakeId,
+        targetName: preparedProfile.shelterLabel,
+        performedBy: req.user?.email,
+        performedByName: req.user?.fullName,
+        before: { status: "Pending" },
+        after: { status: "Converted", animalProfileId: preparedProfile.animalId },
+      });
+    }
+
+    res.status(201).json({
+      message: preparedProfile
+        ? "Intake completed and animal moved to profiling."
+        : surrenderRef
+        ? "Intake record created and surrender request converted."
+        : "Intake record created.",
+      id: intakeId,
+      surrenderConverted: Boolean(surrenderRef),
+      animalProfileId: preparedProfile?.animalId || null,
+      status: record.status,
+    });
   } catch (err) {
     console.error("[createIntake]", err.message);
     res.status(500).json({ message: "Failed to create intake record." });
@@ -332,9 +509,9 @@ exports.convertToProfile = async (req, res) => {
 
     const intake = doc.data();
 
-    if (intake.status !== "Approved") {
+    if (!canAdvanceIntakeToProfiling(intake.status)) {
       return res.status(400).json({
-        message: "Only Approved intakes can be converted to a profile."
+        message: "Only Pending or Approved intakes can be moved to profiling."
       });
     }
 
@@ -345,100 +522,10 @@ exports.convertToProfile = async (req, res) => {
       });
     }
 
-    // Auto-generate animal ID: ANIM-YYYY-NNN
-    const year = new Date().getFullYear();
-    const countSnap = await db.collection(ANIMAL_COL)
-      .where("intakeYear", "==", year)
-      .get();
-
-    const seq = String(countSnap.size + 1).padStart(3, "0");
-    const animalId = `ANIM-${year}-${seq}`;
-
-    const today = new Date().toISOString().split("T")[0];
-    const actor = req.user?.fullName || req.user?.email || "Admin";
-
-    const shelterLabel = buildShelterLabel(intake, animalId);
-    const animalProfile = {
-      intakeId: id,
-      intakeYear: year,
-
-      // Basic profile
-      name: "",
-      adoptedName: "",
-      previousName: intake.previousName || "",
-      identifyingDescription:
-        intake.identifyingDescription || shelterLabel,
-      shelterLabel,
-      species: intake.species || "",
-      breed: intake.breed || "",
-      sex: intake.sex || "Unknown",
-      ageEstimate: intake.ageEstimate || "",
-      color: intake.color || "",
-      cageNumber: "",
-      housingType: "Unassigned",
-      source: intake.source || "",
-      intakeDate: intake.intakeDate || "",
-      intakeLocation: intake.location || "",
-
-      // Medical baseline from intake
-      initialCondition: intake.condition || "",
-      initialWeight: intake.weight || null,
-      weight: intake.weight || null,
-      injuries: intake.injuries || "Unknown",
-      vaccinated: intake.vaccinated || "Unknown",
-      alteredStatus: intake.alteredStatus || "Unknown",
-      visibleDefects: intake.visibleDefects || "",
-      conditionNotes: intake.conditionNotes || "",
-
-      // References
-      surrenderRefId: intake.surrenderRefId || null,
-      barangayDetails: intake.barangayDetails || null,
-
-      // Lifecycle
-      status: "Profiling",
-      currentStage: "profiling",
-      photoURL: null,
-
-      // Behavioral
-      behavioralAssessment: null,
-      behavioralNotes: "",
-      behavioralAssessor: "",
-      behavioralDate: "",
-      compatibilityVector: [],
-
-      // Medical records
-      medicalRecords: [],
-
-      // Adoption fields
-      adoptionDate: "",
-      adopterName: "",
-      adoptionStaff: "",
-
-      // General notes
-      notes: intake.intakeNotes || "",
-
-      // Timeline / history
-      history: [
-        {
-          date: intake.intakeDate || today,
-          event: "Intake recorded",
-          detail: `${intake.source || "Unknown source"} intake`,
-          actor: intake.encodedBy || "Staff",
-        },
-        {
-          date: today,
-          event: "Converted to profile",
-          detail: `Intake ${id} converted to animal profile`,
-          actor,
-        }
-      ],
-
-      // Metadata
-      intakedBy: intake.encodedBy || "",
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-      createdBy: req.user?.email || "",
-    };
+    const originalStatus = intake.status;
+    const preparedProfile = await prepareAnimalProfile(intake, id, req.user || {});
+    const { animalId, shelterLabel, profile: animalProfile } = preparedProfile;
+    const approvedOn = new Date().toISOString().split("T")[0];
 
     // Batch write: create animal profile + update intake record
     const batch = db.batch();
@@ -448,6 +535,8 @@ exports.convertToProfile = async (req, res) => {
     batch.update(db.collection(INTAKE_COL).doc(id), {
       status: "Converted",
       animalProfileId: animalId,
+      approvedBy: intake.approvedBy || req.user?.fullName || req.user?.email || "Staff",
+      approvedAt: intake.approvedAt || approvedOn,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       updatedBy: req.user?.email || "",
     });
@@ -461,7 +550,7 @@ exports.convertToProfile = async (req, res) => {
       targetName: shelterLabel,
       performedBy: req.user?.email,
       performedByName: req.user?.fullName,
-      before: { status: "Approved" },
+      before: { status: originalStatus },
       after: { status: "Converted", animalProfileId: animalId },
     });
 

@@ -1,5 +1,154 @@
 .management-attention-center[hidden] { display: none !important; }
 
+.topbar-right { position: relative; }
+
+.management-account-menu[hidden] { display: none !important; }
+
+.management-account-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 3200;
+  width: min(330px, calc(100vw - 28px));
+  overflow: visible;
+  padding: 0 0 9px;
+  border: 1px solid rgba(120, 1, 22, .16);
+  border-radius: 16px;
+  color: #2B1719;
+  background: #FFFFFF;
+  box-shadow: 0 22px 54px rgba(43, 23, 25, .18);
+  font-family: "Poppins", sans-serif;
+  animation: managementAccountMenuIn 160ms cubic-bezier(.22, .8, .24, 1);
+}
+
+.management-account-menu::before {
+  content: "";
+  position: absolute;
+  top: -7px;
+  right: 29px;
+  width: 14px;
+  height: 14px;
+  border-top: 1px solid rgba(120, 1, 22, .16);
+  border-left: 1px solid rgba(120, 1, 22, .16);
+  background: #FFF8EE;
+  transform: rotate(45deg);
+}
+
+@keyframes managementAccountMenuIn {
+  from { opacity: 0; transform: translateY(-7px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.management-account-head {
+  min-height: 78px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(120, 1, 22, .12);
+  border-radius: 15px 15px 0 0;
+  background: #FFF8EE;
+}
+
+.management-account-avatar {
+  flex: 0 0 46px;
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #2B1719;
+  background: #F7B538;
+  font-size: .76rem;
+  font-weight: 800;
+}
+
+.management-account-identity {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.management-account-identity strong {
+  overflow: hidden;
+  color: #2B1719;
+  font-size: .86rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.management-account-identity small {
+  color: #756367;
+  font-size: .68rem;
+  font-weight: 500;
+}
+
+.management-account-action {
+  width: 100%;
+  min-height: 58px;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 14px;
+  border: 0;
+  border-radius: 0;
+  color: #2B1719;
+  background: transparent;
+  font-family: "Poppins", sans-serif;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 150ms ease, background 150ms ease;
+}
+
+.management-account-action:hover,
+.management-account-action:focus-visible {
+  color: #780116;
+  background: #FFF8EE;
+}
+
+.management-account-action-icon {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(247, 181, 56, .62);
+  border-radius: 10px;
+  color: #780116;
+  background: #FFFFFF;
+}
+
+.management-account-action > span:nth-child(2) {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.management-account-action strong {
+  color: inherit;
+  font-size: .76rem;
+  font-weight: 700;
+}
+
+.management-account-action small {
+  overflow: hidden;
+  color: #756367;
+  font-size: .62rem;
+  font-weight: 400;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.management-account-arrow { color: #756367; font-size: .68rem; }
+.management-account-divider { height: 1px; margin: 5px 14px; background: rgba(120, 1, 22, .12); }
+.management-account-signout { grid-template-columns: 36px minmax(0, 1fr); color: #780116; }
+.management-account-signout .management-account-action-icon { color: #780116; }
+
+.user-chip[aria-expanded="true"] .caret { transform: rotate(180deg); }
+.user-chip .caret { transition: transform 150ms ease; }
+
 .management-attention-center {
   position: fixed;
   top: 66px;
@@ -13,9 +162,9 @@
   border: 1px solid #eadfd4;
   border-radius: 20px;
   color: #1f2329;
-  background: #fffdfb;
+  background: #FFF8EE;
   box-shadow: 0 24px 64px rgba(43, 22, 19, .2);
-  font-family: "Outfit", sans-serif;
+  font-family: "Poppins", sans-serif;
   animation: attentionCenterIn 180ms cubic-bezier(.22, .8, .24, 1);
 }
 
@@ -32,13 +181,13 @@
   gap: 16px;
   padding: 18px 20px;
   border-bottom: 1px solid #eadfd4;
-  background: linear-gradient(135deg, #fff5ed, #fff 72%);
+  background: linear-gradient(135deg, #FFF8EE, #FFFFFF 72%);
 }
 
 .attention-center-head span {
   display: block;
   margin-bottom: 5px;
-  color: #c90f1d;
+  color: #780116;
   font-size: .63rem;
   font-weight: 800;
   letter-spacing: .075em;
@@ -61,11 +210,11 @@
   border: 1px solid #eadfd4;
   border-radius: 50%;
   color: #786d68;
-  background: #fff;
+  background: #FFFFFF;
   cursor: pointer;
 }
 
-.attention-refresh:hover { border-color: #f0bdb7; color: #ef1725; background: #fff0ed; }
+.attention-refresh:hover { border-color: #EADFD4; color: #780116; background: #FFF8EE; }
 .attention-refresh[aria-busy="true"] i { animation: attentionSpin .8s linear infinite; }
 @keyframes attentionSpin { to { transform: rotate(360deg); } }
 
@@ -95,7 +244,7 @@
 .attention-item:hover {
   border-color: #eadfd4;
   color: inherit;
-  background: #fff9f0;
+  background: #FFF8EE;
   transform: translateX(2px);
 }
 
@@ -105,12 +254,13 @@
   display: grid;
   place-items: center;
   border-radius: 12px;
-  color: #c90f1d;
-  background: #fff0ed;
+  color: #780116;
+  background: #FFF8EE;
   font-size: .9rem;
 }
 
 .attention-amber .attention-item-icon { color: #805300; background: #fff0cc; }
+.attention-blue .attention-item-icon { color: #0A1D4B; background: rgba(10, 29, 75, 0.09); }
 
 .attention-item-copy { min-width: 0; }
 .attention-item-copy strong { display: block; color: #2f2927; font-size: .78rem; font-weight: 800; line-height: 1.3; }
@@ -123,14 +273,15 @@
   place-items: center;
   padding: 0 7px;
   border-radius: 999px;
-  color: #c90f1d;
-  background: #fff0ed;
-  font-family: "DM Mono", monospace;
+  color: #780116;
+  background: #FFF8EE;
+  font-family: "Poppins", monospace;
   font-size: .65rem;
   font-weight: 800;
 }
 
 .attention-amber .attention-item-count { color: #805300; background: #fff0cc; }
+.attention-blue .attention-item-count { color: #0A1D4B; background: rgba(10, 29, 75, 0.09); }
 .attention-item-arrow { color: #b4a8a1; font-size: .7rem; }
 
 .attention-empty {
@@ -157,7 +308,7 @@
 
 .attention-empty strong { color: #1f2329; font-size: .86rem; }
 .attention-empty small { max-width: 280px; margin-top: 5px; color: #786d68; font-size: .7rem; line-height: 1.45; }
-.attention-error > span { color: #c90f1d; background: #fff0ed; }
+.attention-error > span { color: #780116; background: #FFF8EE; }
 
 .attention-center-footer {
   min-height: 60px;
@@ -167,7 +318,7 @@
   gap: 14px;
   padding: 12px 16px;
   border-top: 1px solid #eadfd4;
-  background: #fff9f4;
+  background: #FFF8EE;
 }
 
 .attention-center-footer :is(button, a) {
@@ -175,9 +326,9 @@
   align-items: center;
   gap: 6px;
   border: 0;
-  color: #c90f1d;
+  color: #780116;
   background: transparent;
-  font: 800 .67rem/1 "Outfit", sans-serif;
+  font: 800 .67rem/1 "Poppins", sans-serif;
   text-decoration: none;
   cursor: pointer;
 }
@@ -193,29 +344,31 @@
   display: grid;
   place-items: center;
   padding: 0 5px;
-  border: 2px solid #fff;
+  border: 2px solid #FFFFFF;
   border-radius: 999px;
-  color: #fff;
-  background: #ef1725;
-  box-shadow: 0 5px 12px rgba(239, 23, 37, .24);
-  font: 800 .57rem/1 "DM Mono", monospace;
+  color: #FFFFFF;
+  background: #780116;
+  box-shadow: 0 5px 12px rgba(120, 1, 22, .24);
+  font: 800 .57rem/1 "Poppins", monospace;
 }
 
 .attention-badge[hidden] { display: none !important; }
-.notif-btn.has-attention { color: #ef1725 !important; background: #fff0ed !important; }
+.notif-btn.has-attention { color: #780116 !important; background: #FFF8EE !important; }
 
 .attention-loading { display: grid; gap: 8px; padding: 8px; }
-.attention-loading span { height: 66px; border-radius: 12px; background: linear-gradient(90deg, #f7f1ec 25%, #fffaf6 50%, #f7f1ec 75%); background-size: 200% 100%; animation: attentionShimmer 1.2s infinite; }
+.attention-loading span { height: 66px; border-radius: 12px; background: linear-gradient(90deg, rgba(120, 1, 22, 0.09) 25%, rgba(247, 181, 56, 0.28) 50%, rgba(120, 1, 22, 0.09) 75%); background-size: 200% 100%; animation: attentionShimmer 1.2s infinite; }
 @keyframes attentionShimmer { to { background-position: -200% 0; } }
 
 @media (max-width: 700px) {
   .management-consistent-ui .topbar .notif-btn.topbar-quick-action { display: grid !important; }
   .management-attention-center { top: 68px; right: 12px; width: calc(100vw - 24px); max-height: calc(100dvh - 82px); }
   .attention-center-head { padding-inline: 16px; }
+  .management-account-menu { position: fixed; top: 66px; right: 12px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .management-attention-center,
+  .management-account-menu,
   .attention-refresh[aria-busy="true"] i,
   .attention-loading span { animation: none !important; }
 }

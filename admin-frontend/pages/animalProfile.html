@@ -7,10 +7,7 @@
   <title>ANIMUA — Animal Profile</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/src/css/adminDashboard.css" />
-  <link rel="stylesheet" href="/src/css/sidebar.css" />
-  <link rel="stylesheet" href="/src/css/animalProfiling.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 </head>
 <body class="loading animal-profile-page">
 <div class="shell">
@@ -115,7 +112,7 @@
         <!-- ── TAB: Medical / Quarantine ── -->
         <div class="tab-content" id="tab-medical" role="tabpanel">
           <div class="profile-section-header">
-            <div class="profile-section-title-wrap"><h4 class="tab-section-title">Medical Records</h4><p class="tab-section-sub">Clinical visits, treatments, and quarantine clearance.</p></div>
+            <div class="profile-section-title-wrap"><h4 class="tab-section-title">Medical &amp; Quarantine Care</h4><p class="tab-section-sub">Record clinical care, then add one clear quarantine decision when the animal is ready.</p></div>
             <button class="btn-primary-clay btn-sm-clay" id="btnAddMedical">
               <i class="bi bi-plus-lg"></i> Add Medical Record
             </button>
@@ -181,7 +178,6 @@
             <label class="form-lbl" for="eSpecies">Species <span class="req">*</span></label>
             <select class="form-inp" id="eSpecies">
               <option>Dog</option><option>Cat</option>
-              <option>Rabbit</option><option>Bird</option><option>Other</option>
             </select>
           </div>
           <div class="form-group">
@@ -251,7 +247,7 @@
     </div>
     <div class="um-modal-body">
       <form id="behavioralForm">
-        <div class="trait-scale-guide" aria-label="Scoring guide"><span><strong>1</strong> Low</span><span><strong>3</strong> Moderate</span><span><strong>5</strong> High</span></div>
+        <div class="trait-scale-guide" aria-label="Scoring guide"><span><strong>1</strong> Low</span><span><strong>2</strong></span><span><strong>3</strong> Moderate</span><span><strong>4</strong></span><span><strong>5</strong> High</span></div>
         <div class="trait-grid" id="traitGrid"></div>
         <div class="behavioral-form-meta">
           <div class="form-group">
@@ -260,7 +256,8 @@
           </div>
           <div class="form-group">
             <label class="form-lbl" for="behavioralAssessor">Assessed by</label>
-            <input type="text" class="form-inp" id="behavioralAssessor" placeholder="Staff name" />
+            <input type="text" class="form-inp account-linked-field" id="behavioralAssessor" readonly aria-readonly="true" />
+            <small class="account-linked-hint"><i class="bi bi-person-check-fill"></i> Uses the signed-in account.</small>
           </div>
         </div>
       </form>
@@ -278,10 +275,10 @@
 <!-- ══════════════════════════════════════
      ADD MEDICAL RECORD MODAL
 ══════════════════════════════════════ -->
-<div class="um-modal-backdrop" id="medicalModalBackdrop">
-  <div class="um-modal ap-modal" role="dialog" aria-modal="true">
+  <div class="um-modal-backdrop" id="medicalModalBackdrop">
+   <div class="um-modal ap-modal medical-modal" role="dialog" aria-modal="true" aria-labelledby="medicalModalTitle">
     <div class="um-modal-header">
-      <h2 id="medicalModalTitle">Add Medical Record</h2>
+      <div><span class="modal-kicker">Quarantine care</span><h2 id="medicalModalTitle">Add Medical Record</h2><p class="modal-subtitle" id="medicalModalSubtitle">Record a visit, treatment, or quarantine review.</p></div>
       <button class="modal-close-btn" id="medicalModalClose"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="um-modal-body">
@@ -297,7 +294,7 @@
               <option value="Treatment">Treatment</option>
               <option value="Surgery">Surgery</option>
               <option value="Deworming">Deworming</option>
-              <option value="Quarantine Clearance">Quarantine Clearance</option>
+                <option value="Quarantine Clearance" hidden>Quarantine Review</option>
             </select>
             <span class="form-err" id="errMedType"></span>
           </div>
@@ -307,8 +304,9 @@
             <span class="form-err" id="errMedDate"></span>
           </div>
           <div class="form-group form-full">
-            <label class="form-lbl" for="fMedVet">Veterinarian / Staff</label>
-            <input type="text" class="form-inp" id="fMedVet" placeholder="Dr. / Staff name" />
+            <label class="form-lbl" for="fMedVet">Recorded by</label>
+            <input type="text" class="form-inp account-linked-field" id="fMedVet" readonly aria-readonly="true" />
+            <small class="account-linked-hint"><i class="bi bi-person-check-fill"></i> Automatically linked to the signed-in account.</small>
           </div>
           <div class="form-group form-full">
             <label class="form-lbl" for="fMedDiagnosis">Diagnosis / Findings</label>
@@ -346,12 +344,13 @@
               placeholder="Next checkup date, restrictions, special care instructions…"></textarea>
           </div>
           <div class="form-group" id="medClearanceGroup">
-              <label class="form-lbl" for="fMedClearance">Quarantine Clearance</label>
+              <label class="form-lbl" for="fMedClearance">Quarantine decision</label>
               <select class="form-inp" id="fMedClearance">
               <option value="Pending">Pending</option>
               <option value="Cleared">Cleared</option>
               <option value="Hold">On Hold</option>
-            </select>
+              </select>
+              <small class="form-help">Choose one outcome for this quarantine review. “Cleared” completes the medical requirement.</small>
           </div>
           <div class="form-group">
             <label class="form-lbl" for="fMedWeight">Weight at Visit (kg)</label>

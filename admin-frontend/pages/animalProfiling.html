@@ -7,10 +7,7 @@
   <title>ANIMUA — Animal Profiling</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/src/css/adminDashboard.css" />
-  <link rel="stylesheet" href="/src/css/sidebar.css" />
-  <link rel="stylesheet" href="/src/css/animalProfiling.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 </head>
 <body class="loading ap-list-page">
 <div class="shell">
@@ -43,17 +40,27 @@
       </section>
 
       <section class="panel ap-records-panel" id="animalRecords" aria-labelledby="recordsTitle">
-        <div class="ap-records-heading"><div><span class="ap-section-kicker">Profile directory</span><h2 id="recordsTitle">Animal records</h2><p>Search, review, and track every shelter profile.</p></div><span class="ap-records-legend"><i class="bi bi-info-circle"></i> Select a record to open the full profile</span></div>
+        <div class="ap-records-heading">
+          <div class="reference-records-heading">
+            <span class="reference-records-icon"><i class="bi bi-heart-pulse-fill"></i></span>
+            <div><span class="ap-section-kicker">Profile directory</span><h2 id="recordsTitle">Animal records</h2><p>Search, review, and track every shelter profile.</p></div>
+          </div>
+          <span class="ap-records-legend"><i class="bi bi-info-circle"></i> Select a record to open the full profile</span>
+        </div>
         <div class="ap-toolbar">
           <div class="ap-tabs-wrap"><span class="ap-filter-label">Lifecycle stage</span><div class="ap-tabs" role="tablist" aria-label="Animal lifecycle stage">
             <button class="ap-tab active" type="button" role="tab" aria-selected="true" data-tab="all">All</button><button class="ap-tab" type="button" role="tab" aria-selected="false" data-tab="Profiling">Profiling</button><button class="ap-tab" type="button" role="tab" aria-selected="false" data-tab="Quarantine">Quarantine</button><button class="ap-tab" type="button" role="tab" aria-selected="false" data-tab="Ready">Ready</button><button class="ap-tab" type="button" role="tab" aria-selected="false" data-tab="Adopted">Adopted</button><button class="ap-tab" type="button" role="tab" aria-selected="false" data-tab="Archived">Archived</button>
           </div></div>
           <div class="ap-filter-toolbar">
             <label class="ap-filter-field ap-search-filter"><span>Search records</span><div class="ap-control"><i class="bi bi-search"></i><input type="search" id="searchAnimals" placeholder="Name, ID, breed, or species" autocomplete="off" /></div></label>
-            <label class="ap-filter-field"><span>Species</span><select id="filterSpecies"><option value="">All species</option><option>Dog</option><option>Cat</option><option>Rabbit</option><option>Bird</option><option>Other</option></select></label>
+            <label class="ap-filter-field"><span>Species</span><select id="filterSpecies"><option value="">All species</option><option>Dog</option><option>Cat</option></select></label>
             <label class="ap-filter-field"><span>Sex</span><select id="filterSex"><option value="">Any sex</option><option>Male</option><option>Female</option><option>Unknown</option></select></label>
             <button class="ap-clear-btn" id="clearAnimalFilters" type="button"><i class="bi bi-arrow-counterclockwise"></i> Clear</button>
           </div>
+        </div>
+        <div class="reference-table-section-head">
+          <div><span>Profile directory</span><h3>Current animal records</h3></div>
+          <strong id="animalResultLabel">0 records</strong>
         </div>
         <div class="animal-record-list" id="animalTableBody" role="list" aria-live="polite">
           <div class="ap-record-loading"><div class="um-spinner"></div><span>Loading animal profiles…</span></div>

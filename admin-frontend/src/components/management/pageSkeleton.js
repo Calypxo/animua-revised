@@ -115,13 +115,6 @@ function sidebarSkeletonMarkup() {
             ${skeletonLine(`animua-sk-nav-text animua-sk-nav-text-${(item % 3) + 1}`)}
           </div>`).join("")}
       </div>
-      <div class="animua-sk-account">
-        ${skeletonLine("animua-sk-account-avatar")}
-        <span>
-          ${skeletonLine("animua-sk-account-name")}
-          ${skeletonLine("animua-sk-account-role")}
-        </span>
-      </div>
     </aside>`;
 }
 

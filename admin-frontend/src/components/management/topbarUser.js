@@ -1,9 +1,18 @@
 import "../../css/topbarAlerts.css";
-import { getUserName, getUserRole } from "../../utils/storage.js";
+import Swal from "sweetalert2";
+import { clearUserSession, getUserName, getUserRole } from "../../utils/storage.js";
 import { canAccessModule, normalizeRole } from "../../auth/permissions.js";
 import { apiFetch } from "../../utils/api.js";
+import { cacheContactMessageCount } from "./contactMessageBadge.js";
 
 const ATTENTION_SEEN_KEY = "animua_attention_seen";
+const ATTENTION_CACHE_KEY = "animua_attention_summary";
+const ATTENTION_CLIENT_CACHE_TTL_MS = 15 * 60_000;
+const managementSwalClasses = {
+  popup: "animua-management-swal",
+  confirmButton: "animua-management-swal-confirm",
+  cancelButton: "animua-management-swal-cancel",
+};
 
 const escapeHtml = (value) => String(value ?? "")
   .replaceAll("&", "&amp;")
@@ -40,6 +49,15 @@ function attentionItems(data, role) {
       detail: `${Number(data.pendingAdoptions || 0)} application(s) are waiting for a decision.`,
       href: "/pages/adoptionApplications.html",
     });
+    add({
+      id: "adoption-no-show",
+      count: data.adoptionNoShowRisk,
+      tone: "red",
+      icon: "bi-calendar-x-fill",
+      title: "Adoption attendance at risk",
+      detail: `${Number(data.adoptionNoShowRisk || 0)} approved adoption(s) need deadline or no-show review.`,
+      href: "/pages/adoptionApplications.html",
+    });
   }
 
   if (canAccessModule(role, "surrender")) {
@@ -52,28 +70,35 @@ function attentionItems(data, role) {
       detail: `${Number(data.pendingSurrenders || 0)} request(s) require management review.`,
       href: "/pages/surrenders.html",
     });
+    add({
+      id: "surrender-no-show",
+      count: data.surrenderNoShowRisk,
+      tone: "red",
+      icon: "bi-calendar-x-fill",
+      title: "Surrender attendance at risk",
+      detail: `${Number(data.surrenderNoShowRisk || 0)} approved surrender request(s) need deadline or no-show review.`,
+      href: "/pages/surrenders.html",
+    });
   }
 
   if (canAccessModule(role, "inventory")) {
-    const lowStock = Array.isArray(data.lowStockItems) ? data.lowStockItems : [];
-    const critical = lowStock.filter((item) => item.level === "Critical").length;
+    const lowStockCount = Number(data.lowStockCount || 0);
+    const critical = Number(data.criticalStockCount || 0);
     add({
       id: "inventory",
-      count: lowStock.length,
+      count: lowStockCount,
       tone: critical ? "red" : "amber",
       icon: "bi-box-seam-fill",
       title: critical ? "Critical inventory attention" : "Low-stock inventory",
       detail: critical
-        ? `${critical} critical and ${Math.max(0, lowStock.length - critical)} low-stock item(s).`
-        : `${lowStock.length} item(s) should be restocked soon.`,
+        ? `${critical} critical and ${Math.max(0, lowStockCount - critical)} low-stock item(s).`
+        : `${lowStockCount} item(s) should be restocked soon.`,
       href: "/pages/inventory.html",
     });
   }
 
   if (canAccessModule(role, "animals")) {
-    const longStayAlert = (Array.isArray(data.alerts) ? data.alerts : [])
-      .find((alert) => String(alert.title || "").includes("over 60 days"));
-    const longStayCount = Number(String(longStayAlert?.title || "").match(/^\d+/)?.[0] || 0);
+    const longStayCount = Number(data.longStayCount || 0);
     add({
       id: "long-stay",
       count: longStayCount,
@@ -98,6 +123,41 @@ function attentionItems(data, role) {
   }
 
   return items;
+}
+
+function readCachedAttentionSummary() {
+  try {
+    const cached = JSON.parse(localStorage.getItem(ATTENTION_CACHE_KEY) || "null");
+    if (
+      !cached?.data ||
+      Date.now() - Number(cached.savedAt || 0) > ATTENTION_CLIENT_CACHE_TTL_MS
+    ) {
+      return null;
+    }
+    return cached.data;
+  } catch (_) {
+    return null;
+  }
+
+  if (canAccessModule(role, "contact")) {
+    add({
+      id: "contact",
+      count: data.newContactMessages,
+      tone: "blue",
+      icon: "bi-envelope-paper-fill",
+      title: "New contact messages",
+      detail: `${Number(data.newContactMessages || 0)} public ${Number(data.newContactMessages || 0) === 1 ? "inquiry awaits" : "inquiries await"} a reply.`,
+      href: "/pages/contactMessages.html",
+    });
+  }
+}
+
+function cacheAttentionSummary(data) {
+  localStorage.setItem(ATTENTION_CACHE_KEY, JSON.stringify({
+    savedAt: Date.now(),
+    data,
+  }));
+  cacheContactMessageCount(data.newContactMessages);
 }
 
 function ensureAttentionPanel() {
@@ -178,12 +238,16 @@ function renderAttentionCenter(panel, button, data, role) {
       </div>`;
 }
 
-async function loadAttentionCenter(panel, button, role, showLoading = false) {
+async function loadAttentionCenter(panel, button, role, options = {}) {
+  const { forceRefresh = false, showLoading = false } = options;
   const refresh = panel.querySelector("#attentionRefresh");
   if (showLoading) panel.classList.add("is-refreshing");
   refresh?.setAttribute("aria-busy", "true");
   try {
-    const data = await apiFetch("/dashboard/stats");
+    const data = await apiFetch(
+      `/dashboard/attention${forceRefresh ? "?refresh=1" : ""}`
+    );
+    cacheAttentionSummary(data);
     renderAttentionCenter(panel, button, data, role);
   } catch (error) {
     const summary = panel.querySelector("#attentionSummary");
@@ -212,14 +276,24 @@ function bindAttentionCenter(button, role) {
     panel.hidden = true;
     button.setAttribute("aria-expanded", "false");
   };
-  const toggle = () => {
-    panel.hidden = !panel.hidden;
-    button.setAttribute("aria-expanded", String(!panel.hidden));
+  const toggle = async () => {
+    const opening = panel.hidden;
+    panel.hidden = !opening;
+    button.setAttribute("aria-expanded", String(opening));
+    if (opening) {
+      const accountMenu = document.getElementById("managementAccountMenu");
+      const accountTrigger = document.querySelector(".user-chip");
+      if (accountMenu) accountMenu.hidden = true;
+      accountTrigger?.setAttribute("aria-expanded", "false");
+      await loadAttentionCenter(panel, button, role, {
+        showLoading: !readCachedAttentionSummary(),
+      });
+    }
   };
 
   button.addEventListener("click", (event) => {
     event.stopPropagation();
-    toggle();
+    void toggle();
   });
   panel.addEventListener("click", (event) => event.stopPropagation());
   document.addEventListener("click", close);
@@ -227,7 +301,10 @@ function bindAttentionCenter(button, role) {
     if (event.key === "Escape") close();
   });
   panel.querySelector("#attentionRefresh")?.addEventListener("click", () => {
-    loadAttentionCenter(panel, button, role, true);
+    void loadAttentionCenter(panel, button, role, {
+      forceRefresh: true,
+      showLoading: true,
+    });
   });
   panel.querySelector("#attentionMarkSeen")?.addEventListener("click", () => {
     localStorage.setItem(ATTENTION_SEEN_KEY, panel.dataset.signature || "");
@@ -237,8 +314,108 @@ function bindAttentionCenter(button, role) {
     panel.querySelector("#attentionMarkSeen").disabled = true;
   });
 
-  loadAttentionCenter(panel, button, role);
-  window.setInterval(() => loadAttentionCenter(panel, button, role), 60000);
+  const cached = readCachedAttentionSummary();
+  if (cached) renderAttentionCenter(panel, button, cached, role);
+}
+
+function ensureAccountMenu(chip, name, role, initials) {
+  let menu = document.getElementById("managementAccountMenu");
+  if (!menu) {
+    menu = document.createElement("div");
+    menu.id = "managementAccountMenu";
+    menu.className = "management-account-menu";
+    menu.hidden = true;
+    menu.setAttribute("role", "menu");
+    menu.setAttribute("aria-label", "Account menu");
+    chip.closest(".topbar-right")?.append(menu);
+  }
+
+  if (!menu.hasChildNodes()) menu.innerHTML = `
+    <div class="management-account-head">
+      <span class="management-account-avatar" aria-hidden="true">${escapeHtml(initials)}</span>
+      <span class="management-account-identity">
+        <strong>${escapeHtml(name)}</strong>
+        <small>${escapeHtml(role)}</small>
+      </span>
+    </div>
+    <a class="management-account-action" href="/pages/accountSettings.html" role="menuitem">
+      <span class="management-account-action-icon"><i class="bi bi-gear" aria-hidden="true"></i></span>
+      <span><strong>Account Settings</strong><small>Profile, security, and preferences</small></span>
+      <i class="bi bi-chevron-right management-account-arrow" aria-hidden="true"></i>
+    </a>
+    <div class="management-account-divider" aria-hidden="true"></div>
+    <button class="management-account-action management-account-signout" type="button" role="menuitem">
+      <span class="management-account-action-icon"><i class="bi bi-box-arrow-right" aria-hidden="true"></i></span>
+      <span><strong>Sign Out</strong><small>Return to the management login</small></span>
+    </button>`;
+
+  return menu;
+}
+
+function bindAccountMenu(chip, menu) {
+  if (chip.dataset.accountMenuBound === "true") return;
+  chip.dataset.accountMenuBound = "true";
+  chip.setAttribute("role", "button");
+  chip.setAttribute("tabindex", "0");
+  chip.setAttribute("aria-haspopup", "menu");
+  chip.setAttribute("aria-controls", menu.id);
+  chip.setAttribute("aria-expanded", "false");
+  chip.setAttribute("title", "Open account menu");
+
+  const close = ({ restoreFocus = false } = {}) => {
+    menu.hidden = true;
+    chip.setAttribute("aria-expanded", "false");
+    if (restoreFocus) chip.focus();
+  };
+
+  const toggle = () => {
+    const opening = menu.hidden;
+    menu.hidden = !opening;
+    chip.setAttribute("aria-expanded", String(opening));
+    if (opening) {
+      const attentionPanel = document.getElementById("managementAttentionCenter");
+      const attentionButton = document.querySelector(".notif-btn");
+      if (attentionPanel) attentionPanel.hidden = true;
+      attentionButton?.setAttribute("aria-expanded", "false");
+      menu.querySelector('[role="menuitem"]')?.focus();
+    }
+  };
+
+  chip.addEventListener("click", (event) => {
+    event.stopPropagation();
+    toggle();
+  });
+  chip.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " " || event.key === "ArrowDown") {
+      event.preventDefault();
+      if (menu.hidden) toggle();
+    }
+  });
+  menu.addEventListener("click", (event) => event.stopPropagation());
+  menu.querySelector('a[href="/pages/accountSettings.html"]')?.addEventListener("click", () => close());
+  menu.querySelector(".management-account-signout")?.addEventListener("click", async () => {
+    close();
+    const result = await Swal.fire({
+      title: "Sign out?",
+      html: "Your current management session will end and you will return to the login screen.",
+      icon: "question",
+      iconColor: "#780116",
+      showCancelButton: true,
+      reverseButtons: true,
+      focusCancel: true,
+      confirmButtonText: '<i class="bi bi-box-arrow-right"></i> Sign Out',
+      cancelButtonText: "Stay Signed In",
+      customClass: managementSwalClasses,
+      buttonsStyling: false,
+    });
+    if (!result.isConfirmed) return;
+    clearUserSession();
+    window.location.replace("/pages/admin-login.html");
+  });
+  document.addEventListener("click", () => close());
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !menu.hidden) close({ restoreFocus: true });
+  });
 }
 
 export function renderTopbarUser() {
@@ -282,24 +459,7 @@ export function renderTopbarUser() {
       caret.setAttribute("aria-hidden", "true");
       chip.append(caret);
     }
-  }
-
-  if (chip && chip.dataset.accountSettingsBound !== "true") {
-    chip.dataset.accountSettingsBound = "true";
-    chip.setAttribute("role", "link");
-    chip.setAttribute("tabindex", "0");
-    chip.setAttribute("title", "Open Account Settings");
-
-    const openAccountSettings = () => {
-      window.location.href = "/pages/accountSettings.html";
-    };
-
-    chip.addEventListener("click", openAccountSettings);
-    chip.addEventListener("keydown", (event) => {
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault();
-        openAccountSettings();
-      }
-    });
+    const accountMenu = ensureAccountMenu(chip, name, role, initials);
+    bindAccountMenu(chip, accountMenu);
   }
 }

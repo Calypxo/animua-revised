@@ -7,44 +7,11 @@ const {
 const ADOPTION_COL = "adoptions";
 const ANIMAL_COL = "animals";
 const SHELTER_LOCATION = "Angeles City Veterinary Office, Brgy. Pampang, Angeles City";
-const SCHEDULE_WINDOW_DAYS = 14;
-
-function parseScheduleDate(value) {
-  if (!value) return null;
-  if (value._seconds || value.seconds) {
-    const seconds = Number(value._seconds || value.seconds);
-    const date = new Date(seconds * 1000);
-    date.setHours(0, 0, 0, 0);
-    return Number.isNaN(date.getTime()) ? null : date;
-  }
-
-  const text = String(value).trim();
-  if (!text) return null;
-  const date = /^\d{4}-\d{2}-\d{2}$/.test(text)
-    ? new Date(`${text}T00:00:00`)
-    : new Date(text);
-  date.setHours(0, 0, 0, 0);
-  return Number.isNaN(date.getTime()) ? null : date;
-}
-
-function addScheduleWindowDays(date) {
-  const maxDate = new Date(date);
-  maxDate.setDate(maxDate.getDate() + SCHEDULE_WINDOW_DAYS);
-  return maxDate;
-}
-
-function isScheduleWithinDecisionWindow(dateValue, decisionValue) {
-  const scheduleDate = parseScheduleDate(dateValue);
-  const decisionDate = parseScheduleDate(decisionValue);
-  if (!scheduleDate || !decisionDate) return false;
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const minDate = decisionDate > today ? decisionDate : today;
-  const maxDate = addScheduleWindowDays(decisionDate);
-
-  return scheduleDate >= minDate && scheduleDate <= maxDate;
-}
+const {
+  buildApprovalDeadlineFields,
+  reconcileRequestDeadlines,
+  validateScheduleDate,
+} = require("../services/requestDeadlineService");
 
 exports.createAdoption = async (req, res) => {
   try {
@@ -251,6 +218,7 @@ exports.createAdoption = async (req, res) => {
 
 exports.getAllAdoptions = async (req, res) => {
   try {
+    await reconcileRequestDeadlines("adoption");
     const { status } = req.query;
 
     const snapshot = await db.collection(ADOPTION_COL).get();
@@ -316,6 +284,14 @@ exports.getAllAdoptions = async (req, res) => {
           adoptionDate: data.adoptionDate || "",
           pickupSchedule: data.pickupSchedule || null,
           pickupRescheduleRequest: data.pickupRescheduleRequest || null,
+          attendanceDeadlineAt: data.attendanceDeadlineAt || null,
+          deadlineStatus: data.deadlineStatus || "",
+          deadlineReminderStage: data.deadlineReminderStage || "",
+          noShowRisk: data.noShowRisk === true,
+          arrivalConfirmedAt: data.arrivalConfirmedAt || null,
+          expiredAt: data.expiredAt || null,
+          expirationReason: data.expirationReason || "",
+          deadlineExtensions: data.deadlineExtensions || [],
           processedBy: data.processedBy || "",
           submittedAt: data.submittedAt || null,
           updatedAt: data.updatedAt || null,
@@ -352,6 +328,7 @@ exports.getAllAdoptions = async (req, res) => {
 
 exports.getMyAdoptions = async (req, res) => {
   try {
+    await reconcileRequestDeadlines("adoption");
     const email = String(req.user?.email || "").trim().toLowerCase();
 
     if (!email) {
@@ -421,6 +398,14 @@ exports.getMyAdoptions = async (req, res) => {
             adoptionDate: data.adoptionDate || "",
             pickupSchedule: data.pickupSchedule || null,
             pickupRescheduleRequest: data.pickupRescheduleRequest || null,
+            attendanceDeadlineAt: data.attendanceDeadlineAt || null,
+            deadlineStatus: data.deadlineStatus || "",
+            deadlineReminderStage: data.deadlineReminderStage || "",
+            noShowRisk: data.noShowRisk === true,
+            arrivalConfirmedAt: data.arrivalConfirmedAt || null,
+            expiredAt: data.expiredAt || null,
+            expirationReason: data.expirationReason || "",
+            deadlineExtensions: data.deadlineExtensions || [],
             submittedAt: data.submittedAt || null,
             updatedAt: data.updatedAt || null,
           };
@@ -487,16 +472,15 @@ exports.scheduleMyAdoptionPickup = async (req, res) => {
       });
     }
 
-    if (!["approved", "finalized"].includes(String(data.status || "").toLowerCase())) {
+    if (String(data.status || "").toLowerCase() !== "approved") {
       return res.status(400).json({
         message: "Only approved applications can schedule a pickup.",
       });
     }
 
-    const approvalDate = data.approvedDate || data.approvedAt || data.updatedAt;
-    if (!isScheduleWithinDecisionWindow(date, approvalDate)) {
+    if (!validateScheduleDate(data, date)) {
       return res.status(400).json({
-        message: "Pickup date must be within 14 days from the application approval date.",
+        message: "Pickup date must be today or later and within the 14-day attendance deadline.",
       });
     }
 
@@ -512,33 +496,29 @@ exports.scheduleMyAdoptionPickup = async (req, res) => {
         });
       }
 
-      const pickupSchedule = {
+      const pickupRescheduleRequest = {
         date,
         time,
         location: SHELTER_LOCATION,
-        scheduledAt: existingSchedule.scheduledAt || now,
-        rescheduledAt: now,
-        rescheduledBy: email,
-        rescheduleCount: rescheduleCount + 1,
-        previousSchedule: existingSchedule || {
-          date: data.adoptionDate || "",
-          time: "",
-          location: SHELTER_LOCATION,
-        },
+        status: "Pending",
+        requestedAt: now,
+        requestedBy: email,
+        previousSchedule: existingSchedule,
       };
 
       await adoptionRef.update({
-        pickupSchedule,
-        pickupRescheduleRequest: null,
+        pickupRescheduleRequest,
+        deadlineStatus: "Reschedule Pending",
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
 
       const updatedDoc = await adoptionRef.get();
 
       return res.status(200).json({
-        message: "Pickup schedule updated.",
+        message: "Pickup reschedule request sent for staff approval.",
+        requiresApproval: true,
         request: updatedDoc.data(),
-        pickupSchedule,
+        pickupRescheduleRequest,
       });
     }
 
@@ -551,6 +531,8 @@ exports.scheduleMyAdoptionPickup = async (req, res) => {
 
     await adoptionRef.update({
       pickupSchedule,
+      deadlineStatus: "Appointment Scheduled",
+      noShowRisk: false,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
@@ -590,10 +572,9 @@ exports.approveAdoptionReschedule = async (req, res) => {
       });
     }
 
-    const approvalDate = data.approvedDate || data.approvedAt || data.updatedAt;
-    if (!isScheduleWithinDecisionWindow(request.date, approvalDate)) {
+    if (!validateScheduleDate(data, request.date)) {
       return res.status(400).json({
-        message: "Pickup date must be within 14 days from the application approval date.",
+        message: "The requested pickup date is outside the active 14-day attendance deadline.",
       });
     }
 
@@ -612,6 +593,8 @@ exports.approveAdoptionReschedule = async (req, res) => {
       "pickupRescheduleRequest.status": "Approved",
       "pickupRescheduleRequest.reviewedAt": now,
       "pickupRescheduleRequest.reviewedBy": req.user?.email || "Admin",
+      deadlineStatus: "Appointment Scheduled",
+      noShowRisk: false,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
@@ -704,6 +687,14 @@ exports.getAdoptionById = async (req, res) => {
       adoptionDate: data.adoptionDate || "",
       pickupSchedule: data.pickupSchedule || null,
       pickupRescheduleRequest: data.pickupRescheduleRequest || null,
+      attendanceDeadlineAt: data.attendanceDeadlineAt || null,
+      deadlineStatus: data.deadlineStatus || "",
+      deadlineReminderStage: data.deadlineReminderStage || "",
+      noShowRisk: data.noShowRisk === true,
+      arrivalConfirmedAt: data.arrivalConfirmedAt || null,
+      expiredAt: data.expiredAt || null,
+      expirationReason: data.expirationReason || "",
+      deadlineExtensions: data.deadlineExtensions || [],
       processedBy: data.processedBy || "",
       submittedAt: data.submittedAt || null,
       updatedAt: data.updatedAt || null,
@@ -745,9 +736,10 @@ exports.approveAdoption = async (req, res) => {
       });
     }
 
+    const now = new Date();
     await adoptionRef.update({
       status: "Approved",
-      approvedAt: admin.firestore.FieldValue.serverTimestamp(),
+      ...buildApprovalDeadlineFields(now),
       approvedBy: req.user?.email || "Admin",
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
@@ -865,6 +857,11 @@ exports.finalizeAdoption = async (req, res) => {
 
     batch.update(adoptionRef, {
       status: "Finalized",
+      arrivalConfirmedAt: adoptionData.arrivalConfirmedAt || new Date().toISOString(),
+      arrivalConfirmedBy: adoptionData.arrivalConfirmedBy || finalProcessedBy,
+      deadlineStatus: "Completed",
+      deadlineReminderStage: "Completed",
+      noShowRisk: false,
       adoptionDate: finalAdoptionDate,
       processedBy: finalProcessedBy,
       adoptedName: finalAdoptedName,

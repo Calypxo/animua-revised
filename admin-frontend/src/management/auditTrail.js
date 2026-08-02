@@ -1,7 +1,7 @@
-import "../css/adminDashboard.css";
-import "../css/sidebar.css";
 import "../css/auditTrail.css";
 import "../css/recordsWorkspace.css";
+import "../css/managementTables.css";
+import "../css/recordsPanelReference.css";
 
 import { protectPageByModule } from "../auth/authGuard.js";
 import { renderTopbarUser } from "../components/management/topbarUser.js";
@@ -295,7 +295,7 @@ function renderTable() {
         </span>
       </td>
       <td>
-        <button class="detail-btn" data-view-id="${escapeHtml(log.id)}" aria-label="View ${escapeHtml(log.record)} details">Review <i class="bi bi-arrow-right"></i></button>
+        <button class="tbl-action-btn" data-view-id="${escapeHtml(log.id)}" title="View details" aria-label="View ${escapeHtml(log.record)} details"><i class="bi bi-eye"></i></button>
       </td>
     </tr>
   `).join("");
@@ -317,6 +317,8 @@ function renderPagination() {
   }
 
   const totalPages = Math.max(1, Math.ceil(total / state.pageSize));
+  const start = (state.currentPage - 1) * state.pageSize + 1;
+  const end = Math.min(state.currentPage * state.pageSize, total);
 
   const pageButtons = [];
   for (let i = 1; i <= totalPages; i += 1) {
@@ -328,7 +330,7 @@ function renderPagination() {
   }
 
   bar.innerHTML = `
-    <span class="page-info">${total} result${total !== 1 ? "s" : ""}</span>
+    <span class="page-info">Showing ${start}&ndash;${end} of ${total}</span>
     <button class="page-btn" data-page="prev" ${state.currentPage === 1 ? "disabled" : ""}>
       <i class="bi bi-chevron-left"></i>
     </button>
@@ -596,6 +598,7 @@ function bindFilters() {
 function bindButtons() {
   getEl("btnExportAudit")?.addEventListener("click", exportLogs);
   getEl("btnResetFilters")?.addEventListener("click", resetFilters);
+  getEl("clearAuditFilters")?.addEventListener("click", resetFilters);
 
   getEl("viewAuditClose")?.addEventListener("click", closeViewModal);
   getEl("viewAuditCloseFooter")?.addEventListener("click", closeViewModal);

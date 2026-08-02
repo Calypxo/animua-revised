@@ -1,14 +1,14 @@
 // admin-frontend/src/management/intake.js
-import "../css/adminDashboard.css";
-import "../css/sidebar.css";
 import "../css/intake.css";
+import "../css/managementTables.css";
+import "../css/recordsPanelReference.css";
 import { renderPageHeader } from "../components/management/pageHeader.js";
 import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.js";
 
 import { protectPageByModule }         from "../auth/authGuard.js";
 import { hasPermission }               from "../auth/permissions.js";
 import { renderTopbarUser }            from "../components/management/topbarUser.js";
-import { loadSidebar }                 from "../components/management/sidebarLoader.js";
+import { loadSidebar, navigateManagementPage } from "../components/management/sidebarLoader.js";
 import { getUserName }                 from "../utils/storage.js";
 import { BARANGAYS }                   from "../utils/barangays.js";
 
@@ -18,7 +18,6 @@ import {
   getIntakeById,
   createIntake,
   updateIntake,
-  approveIntake,
   rejectIntake,
   convertToProfile
 } from "../services/intake.service.js";
@@ -48,7 +47,7 @@ let currentRole = "";
    HELPERS
 ══════════════════════════════════════════════════════ */
 const speciesInitial = s => String(s || "Animal").charAt(0).toUpperCase();
-const speciesThumb = s => ({ Dog:"thumb-dog", Cat:"thumb-cat", Rabbit:"thumb-rabbit", Bird:"thumb-bird" }[s] || "thumb-other");
+const speciesThumb = s => ({ Dog:"thumb-dog", Cat:"thumb-cat"}[s] || "thumb-other");
 
 const sourceCfg = {
   "Rescue":             { cls:"source-rescue",    icon:"bi-life-preserver",        label:"Rescue"            },
@@ -89,6 +88,35 @@ function statusBadge(status) {
 
 function today() {
   return new Date().toISOString().split("T")[0];
+}
+
+function setOptionalDetailsVisible(visible) {
+  const form = document.getElementById("intakeForm");
+  const toggle = document.getElementById("intakeOptionalToggle");
+  if (!form || !toggle) return;
+
+  form.classList.toggle("show-optional", visible);
+  toggle.setAttribute("aria-expanded", String(visible));
+  toggle.querySelector("i")?.classList.toggle("bi-plus-circle", !visible);
+  toggle.querySelector("i")?.classList.toggle("bi-dash-circle", visible);
+  const label = toggle.querySelector("span");
+  if (label) label.textContent = visible ? "Hide optional details" : "Show optional details";
+}
+
+function hasOptionalIntakeDetails(record = {}) {
+  return Boolean(
+    record.previousName ||
+    record.breed ||
+    record.ageEstimate ||
+    record.color ||
+    record.weight ||
+    record.conditionNotes ||
+    record.visibleDefects ||
+    record.intakeNotes ||
+    (record.injuries && record.injuries !== "Unknown") ||
+    (record.vaccinated && record.vaccinated !== "Unknown") ||
+    (record.alteredStatus && record.alteredStatus !== "Unknown")
+  );
 }
 
 function intakeLabel(record = {}) {
@@ -159,6 +187,8 @@ function applyFilters() {
   });
 
   currentPage = 1;
+  const resultLabel = document.getElementById("intakeResultLabel");
+  if (resultLabel) resultLabel.textContent = `${filtered.length} ${filtered.length === 1 ? "record" : "records"}`;
   renderTable();
   renderPagination();
 }
@@ -195,24 +225,23 @@ function renderTable() {
   }
 
   tbody.innerHTML = page.map(r => {
-    const canApprove =
-    r.status === "Pending" &&
-    can("approve");
-
   const canReject =
     r.status === "Pending" &&
     can("reject");
 
   const canConvert =
-    r.status === "Approved" &&
-    can("convert");
+    can("convert") &&
+    (
+      r.status === "Approved" ||
+      (r.status === "Pending" && can("approve"))
+    );
 
   const canEdit =
     (r.status === "Pending" || r.status === "Draft") &&
     can("edit");
 
     return `
-    <tr style="cursor:pointer" data-id="${r.id}">
+    <tr data-id="${r.id}">
       <td data-label="Intake ID" class="intake-code">${r.id}</td>
       <td data-label="Animal">
         <div class="animal-cell">
@@ -233,9 +262,8 @@ function renderTable() {
           <i class="bi bi-eye"></i>
         </button>
         ${canEdit    ? `<button class="tbl-action-btn" title="Edit" aria-label="Edit ${r.id}" data-action="edit" data-id="${r.id}"><i class="bi bi-pencil"></i></button>` : ""}
-        ${canApprove ? `<button class="tbl-action-btn approve" title="Approve" aria-label="Approve ${r.id}" data-action="approve" data-id="${r.id}"><i class="bi bi-check-lg"></i></button>` : ""}
         ${canReject  ? `<button class="tbl-action-btn reject" title="Reject" aria-label="Reject ${r.id}" data-action="reject" data-id="${r.id}"><i class="bi bi-x-lg"></i></button>` : ""}
-        ${canConvert ? `<button class="tbl-action-btn convert" title="Convert to Profile" aria-label="Convert ${r.id} to profile" data-action="convert" data-id="${r.id}"><i class="bi bi-arrow-right-circle"></i></button>` : ""}
+        ${canConvert ? `<button class="tbl-action-btn convert" title="${r.status === "Pending" ? "Approve and start profiling" : "Start profiling"}" aria-label="${r.status === "Pending" ? "Approve and start profiling for" : "Start profiling for"} ${r.id}" data-action="convert" data-id="${r.id}"><i class="bi bi-arrow-right-circle"></i></button>` : ""}
       </td>
     </tr>`;
   }).join("");
@@ -254,7 +282,6 @@ function renderTable() {
       const { action, id } = btn.dataset;
       if (action === "view")    openViewModal(id);
       if (action === "edit")    openEditModal(id);
-      if (action === "approve") openConfirmModal("approve", id);
       if (action === "reject")  openConfirmModal("reject",  id);
       if (action === "convert") openConfirmModal("convert", id);
     });
@@ -346,22 +373,27 @@ function renderDynamicSection(source) {
               <select class="form-inp" id="fBarangayName"></select>
               <span class="form-err" id="errBarangayName"></span>
             </div>
-            <div class="form-group">
-              <label class="form-lbl" for="fOfficerName">Barangay Officer / Captain</label>
-              <input type="text" class="form-inp" id="fOfficerName" placeholder="Full name" />
-            </div>
-            <div class="form-group">
-              <label class="form-lbl" for="fOfficerContact">Officer Contact</label>
-              <input type="text" class="form-inp" id="fOfficerContact" placeholder="Phone number" />
-            </div>
-            <div class="form-group">
-              <label class="form-lbl" for="fTurnoverDate">Turnover Date</label>
-              <input type="date" class="form-inp" id="fTurnoverDate" />
-            </div>
-            <div class="form-group form-full">
-              <label class="form-lbl" for="fImpoundReason">Reason for Impound</label>
-              <input type="text" class="form-inp" id="fImpoundReason" placeholder="e.g. Roaming / public disturbance" />
-            </div>
+            <details class="source-optional-details form-full">
+              <summary><i class="bi bi-plus-circle"></i> Add turnover contact details</summary>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-lbl" for="fOfficerName">Barangay Officer / Captain</label>
+                  <input type="text" class="form-inp" id="fOfficerName" placeholder="Full name" />
+                </div>
+                <div class="form-group">
+                  <label class="form-lbl" for="fOfficerContact">Officer Contact</label>
+                  <input type="text" class="form-inp" id="fOfficerContact" placeholder="Phone number" />
+                </div>
+                <div class="form-group">
+                  <label class="form-lbl" for="fTurnoverDate">Turnover Date</label>
+                  <input type="date" class="form-inp" id="fTurnoverDate" />
+                </div>
+                <div class="form-group">
+                  <label class="form-lbl" for="fImpoundReason">Reason for Impound</label>
+                  <input type="text" class="form-inp" id="fImpoundReason" placeholder="e.g. Roaming" />
+                </div>
+              </div>
+            </details>
           </div>
         </div>
       </div>`;
@@ -376,18 +408,23 @@ function renderDynamicSection(source) {
               <input type="text" class="form-inp" id="fSurrenderRef" placeholder="e.g. SR-2025-009" />
               <span class="form-err" id="errSurrenderRef"></span>
             </div>
-            <div class="form-group">
-              <label class="form-lbl" for="fOwnerName">Owner Name</label>
-              <input type="text" class="form-inp" id="fOwnerName" placeholder="Full name of owner" />
-            </div>
-            <div class="form-group">
-              <label class="form-lbl" for="fOwnerContact">Owner Contact</label>
-              <input type="text" class="form-inp" id="fOwnerContact" placeholder="Phone number" />
-            </div>
-            <div class="form-group">
-              <label class="form-lbl" for="fSurrenderApprovedDate">Surrender Approved Date</label>
-              <input type="date" class="form-inp" id="fSurrenderApprovedDate" />
-            </div>
+            <details class="source-optional-details form-full">
+              <summary><i class="bi bi-plus-circle"></i> Add surrender contact details</summary>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-lbl" for="fOwnerName">Owner Name</label>
+                  <input type="text" class="form-inp" id="fOwnerName" placeholder="Full name of owner" />
+                </div>
+                <div class="form-group">
+                  <label class="form-lbl" for="fOwnerContact">Owner Contact</label>
+                  <input type="text" class="form-inp" id="fOwnerContact" placeholder="Phone number" />
+                </div>
+                <div class="form-group">
+                  <label class="form-lbl" for="fSurrenderApprovedDate">Surrender Approved Date</label>
+                  <input type="date" class="form-inp" id="fSurrenderApprovedDate" />
+                </div>
+              </div>
+            </details>
           </div>
         </div>
       </div>`;
@@ -418,13 +455,19 @@ function openAddModal() {
 
   editingId = null;
   document.getElementById("intakeModalTitle").textContent    = "New Intake Record";
-  document.getElementById("intakeModalSubtitle").textContent = "Fill in all required fields and submit for review.";
+  document.getElementById("intakeModalSubtitle").textContent = "Start with the essentials. Optional details can be added now or during profiling.";
   document.getElementById("intakeForm").reset();
   document.getElementById("fIntakeId").value = "";
   document.getElementById("fIntakeDate").value = today();
+  document.getElementById("fSex").value = "Unknown";
+  setOptionalDetailsVisible(false);
   document.querySelectorAll(".source-opt").forEach(o => o.classList.remove("selected"));
+  document.getElementById("sourceSelector").classList.remove("is-locked");
   document.getElementById("fSource").value = "";
   document.getElementById("dynamicSection").innerHTML = "";
+  document.getElementById("btnSaveDraft").hidden = false;
+  document.getElementById("btnSubmitIntake").innerHTML =
+    '<i class="bi bi-send-fill"></i> Submit for Review';
   clearFormErrors();
   openModal("intakeModalBackdrop");
 }
@@ -441,11 +484,16 @@ function openApprovedSurrenderIntakeModal() {
 
   document.getElementById("intakeModalTitle").textContent = "New Intake from Approved Surrender";
   document.getElementById("intakeModalSubtitle").textContent =
-    "Review and complete the intake details before submitting.";
+    "Review the arrival details once. Saving will create the profile immediately.";
+  document.getElementById("btnSaveDraft").hidden = true;
+  document.getElementById("btnSubmitIntake").innerHTML =
+    '<i class="bi bi-person-vcard-fill"></i> Complete Intake & Start Profiling';
 
   document.getElementById("intakeForm").reset();
   document.getElementById("fIntakeId").value = "";
   document.getElementById("fIntakeDate").value = today();
+  setOptionalDetailsVisible(true);
+  document.getElementById("sourceSelector").classList.add("is-locked");
 
   document.getElementById("fIdentifyingDescription").value =
     surrender.colorMarkings ||
@@ -455,7 +503,7 @@ function openApprovedSurrenderIntakeModal() {
     surrender.petName || "";
   document.getElementById("fSpecies").value = surrender.species || "";
   document.getElementById("fBreed").value = surrender.breed || "";
-  document.getElementById("fSex").value = surrender.sex || "";
+  document.getElementById("fSex").value = surrender.sex || "Unknown";
   document.getElementById("fAgeEstimate").value = surrender.age || "";
   document.getElementById("fColor").value = surrender.colorMarkings || "";
   document.getElementById("fCondition").value = "Fair";
@@ -490,6 +538,8 @@ function openApprovedSurrenderIntakeModal() {
     if (approvedDateInput) {
       approvedDateInput.value = surrender.approvedDate || today();
     }
+    const sourceOptional = document.querySelector("#dynamicSection .source-optional-details");
+    if (sourceOptional) sourceOptional.open = true;
 
     console.log("Approved surrender prefill:", {
       surrenderId: surrender.surrenderId,
@@ -515,9 +565,13 @@ function openEditModal(id) {
   const r = intakeRecords.find(x => x.id === id);
   if (!r) return;
   editingId = id;
+  document.getElementById("sourceSelector").classList.remove("is-locked");
+  document.getElementById("btnSaveDraft").hidden = false;
+  document.getElementById("btnSubmitIntake").innerHTML =
+    '<i class="bi bi-check-lg"></i> Save Changes';
 
   document.getElementById("intakeModalTitle").textContent    = `Edit Intake — ${r.id}`;
-  document.getElementById("intakeModalSubtitle").textContent = "Update the intake details below.";
+  document.getElementById("intakeModalSubtitle").textContent = "Update the essentials or open optional details when needed.";
   document.getElementById("fIntakeId").value  = id;
   document.getElementById("fIdentifyingDescription").value =
     r.identifyingDescription || intakeLabel(r);
@@ -525,7 +579,7 @@ function openEditModal(id) {
     r.previousName || "";
   document.getElementById("fSpecies").value    = r.species;
   document.getElementById("fBreed").value      = r.breed     || "";
-  document.getElementById("fSex").value        = r.sex;
+  document.getElementById("fSex").value        = r.sex || "Unknown";
   document.getElementById("fAgeEstimate").value = r.ageEstimate || "";
   document.getElementById("fColor").value      = r.color     || "";
   document.getElementById("fCondition").value  = r.condition;
@@ -538,6 +592,7 @@ function openEditModal(id) {
   document.getElementById("fIntakeDate").value = r.intakeDate || today();
   document.getElementById("fLocation").value   = r.location  || "";
   document.getElementById("fIntakeNotes").value = r.intakeNotes || "";
+  setOptionalDetailsVisible(hasOptionalIntakeDetails(r));
 
   // Radio buttons
   const injVal = r.injuries   || "Unknown";
@@ -556,12 +611,16 @@ function openEditModal(id) {
       document.getElementById("fOfficerContact").value = b.officerContact || "";
       document.getElementById("fTurnoverDate").value   = b.turnoverDate   || "";
       document.getElementById("fImpoundReason").value  = b.impoundReason  || "";
+      const sourceOptional = document.querySelector("#dynamicSection .source-optional-details");
+      if (sourceOptional && (b.officerName || b.officerContact || b.turnoverDate || b.impoundReason)) sourceOptional.open = true;
     }
     if (r.source === "Approved Surrender" && r.surrenderRefId) {
       document.getElementById("fSurrenderRef").value            = r.surrenderRefId || "";
       document.getElementById("fOwnerName").value               = r.ownerName      || "";
       document.getElementById("fOwnerContact").value            = r.ownerContact   || "";
       document.getElementById("fSurrenderApprovedDate").value   = r.surrenderApprovedDate || "";
+      const sourceOptional = document.querySelector("#dynamicSection .source-optional-details");
+      if (sourceOptional && (r.ownerName || r.ownerContact || r.surrenderApprovedDate)) sourceOptional.open = true;
     }
   }, 50);
 
@@ -576,6 +635,10 @@ function collectFormData(asDraft = false) {
   const source    = document.getElementById("fSource").value;
   const injuries  = document.querySelector("input[name='injuries']:checked")?.value   || "Unknown";
   const vaccinated= document.querySelector("input[name='vaccinated']:checked")?.value || "Unknown";
+  const barangayName = document.getElementById("fBarangayName")?.value.trim() || "";
+  const resolvedLocation =
+    document.getElementById("fLocation").value.trim() ||
+    (source === "Barangay Impound" ? barangayName : "");
 
   const record = {
     identifyingDescription:
@@ -598,7 +661,7 @@ function collectFormData(asDraft = false) {
     visibleDefects:
       document.getElementById("fVisibleDefects").value.trim(),
     intakeDate:     document.getElementById("fIntakeDate").value,
-    location:       document.getElementById("fLocation").value.trim(),
+    location:       resolvedLocation,
     intakeNotes:    document.getElementById("fIntakeNotes").value.trim(),
     encodedBy:      getUserName()?.split(" ")[0] || "Staff",
     status:         asDraft ? "Draft" : "Pending",
@@ -608,7 +671,7 @@ function collectFormData(asDraft = false) {
 
   if (source === "Barangay Impound") {
     record.barangayDetails = {
-      barangayName:   document.getElementById("fBarangayName")?.value.trim()   || "",
+      barangayName,
       officerName:    document.getElementById("fOfficerName")?.value.trim()    || "",
       officerContact: document.getElementById("fOfficerContact")?.value.trim() || "",
       turnoverDate:   document.getElementById("fTurnoverDate")?.value          || "",
@@ -621,6 +684,7 @@ function collectFormData(asDraft = false) {
     record.ownerName       = document.getElementById("fOwnerName")?.value.trim()              || "";
     record.ownerContact    = document.getElementById("fOwnerContact")?.value.trim()           || "";
     record.surrenderApprovedDate = document.getElementById("fSurrenderApprovedDate")?.value   || "";
+    record.advanceToProfiling = !asDraft;
   }
 
   return record;
@@ -637,8 +701,11 @@ function validateForm() {
   const date      = document.getElementById("fIntakeDate").value;
   const description =
     document.getElementById("fIdentifyingDescription").value.trim();
+  const barangayName =
+    document.getElementById("fBarangayName")?.value.trim() || "";
   const location =
-    document.getElementById("fLocation").value.trim();
+    document.getElementById("fLocation").value.trim() ||
+    (source === "Barangay Impound" ? barangayName : "");
 
   if (!source)    { setErr("errSource",    "Please select an intake source."); valid = false; }
   if (!species)   { setErr("errSpecies",   "Species is required.");            valid = false; }
@@ -658,8 +725,7 @@ function validateForm() {
   }
 
   if (source === "Barangay Impound") {
-    const bn = document.getElementById("fBarangayName")?.value.trim();
-    if (!bn) { setErr("errBarangayName", "Barangay name is required."); valid = false; }
+    if (!barangayName) { setErr("errBarangayName", "Barangay name is required."); valid = false; }
   }
 
   if (source === "Approved Surrender") {
@@ -668,27 +734,6 @@ function validateForm() {
   }
 
   return valid;
-}
-
-async function updateSurrenderStatusFromIntake(surrenderId, payload) {
-  const token = localStorage.getItem("animua_token");
-
-  const response = await fetch(`http://localhost:5000/api/surrenders/${surrenderId}/status`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(payload),
-  });
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || "Failed to update surrender request status.");
-  }
-
-  return data.request;
 }
 
 async function saveIntake(asDraft = false) {
@@ -711,49 +756,43 @@ async function saveIntake(asDraft = false) {
     });
     if (activeButton) activeButton.innerHTML = `<span class="button-spinner" aria-hidden="true"></span>${asDraft ? "Saving draft…" : "Submitting…"}`;
 
-    let createdOrUpdatedData = null;
-
+    let result = null;
     if (editingId) {
-      createdOrUpdatedData = await updateIntake(editingId, payload);
+      await updateIntake(editingId, payload);
       showToast("success", "Intake record updated.");
     } else {
-      createdOrUpdatedData = await createIntake(payload);
-      showToast("success", asDraft ? "Draft saved." : "Intake submitted for review.");
+      result = await createIntake(payload);
+      showToast(
+        "success",
+        result.animalProfileId
+          ? "Intake completed. The animal is now in profiling."
+          : asDraft
+          ? "Draft saved."
+          : "Intake submitted for review."
+      );
     }
 
-    const savedRecord =
-      createdOrUpdatedData?.record ||
-      createdOrUpdatedData?.intake ||
-      createdOrUpdatedData?.data ||
-      createdOrUpdatedData;
-
-    const savedIntakeId =
-      savedRecord?.id ||
-      savedRecord?.intakeId ||
-      payload.id ||
-      payload.intakeId ||
-      null;
-
     const isFromApprovedSurrender =
-      !asDraft &&
       !editingId &&
       payload.source === "Approved Surrender" &&
       payload.surrenderRefId;
 
     if (isFromApprovedSurrender) {
-      await updateSurrenderStatusFromIntake(payload.surrenderRefId, {
-        status: "Converted",
-        intakeId: savedIntakeId,
-        dropoffDate: payload.intakeDate,
-      });
-
       sessionStorage.removeItem("approved_surrender_for_intake");
       approvedSurrenderContext = null;
 
-      showToast("success", "Intake created and surrender request marked as converted.");
+      if (!result?.animalProfileId) {
+        showToast("success", "Intake created and surrender request converted.");
+      }
     }
 
     closeModal("intakeModalBackdrop");
+    if (result?.animalProfileId) {
+      navigateManagementPage(
+        `/pages/animalProfile.html?id=${encodeURIComponent(result.animalProfileId)}`
+      );
+      return;
+    }
     await loadIntakeRecords();
   } catch (err) {
     console.error("[saveIntake]", err);
@@ -773,8 +812,9 @@ function openViewModal(id) {
   const r = intakeRecords.find(x => x.id === id);
   if (!r) return;
 
-  document.getElementById("viewModalTitle").textContent    = r.id;
-  document.getElementById("viewModalSubtitle").textContent = `${r.species} · ${r.source} · ${formatDate(r.intakeDate)}`;
+  document.getElementById("viewModalTitle").textContent = "Intake Record Details";
+  document.getElementById("viewModalSubtitle").textContent =
+    `${r.id} · ${r.species} · ${r.source} · ${formatDate(r.intakeDate)}`;
 
   const sc = sourceCfg[r.source] || sourceCfg["Rescue"];
   const cc = condCfg[r.condition] || condCfg["Fair"];
@@ -784,7 +824,7 @@ function openViewModal(id) {
     const b = r.barangayDetails;
     dynamicHtml = `
       <div class="view-section">
-        <div class="view-section-title">Barangay Turnover Details</div>
+        <div class="view-section-title"><i class="bi bi-building"></i> Barangay Turnover Details</div>
         <div class="view-grid">
           <div class="view-field"><div class="view-field-lbl">Barangay</div><div class="view-field-val">${b.barangayName||"—"}</div></div>
           <div class="view-field"><div class="view-field-lbl">Officer</div><div class="view-field-val">${b.officerName||"—"}</div></div>
@@ -796,7 +836,7 @@ function openViewModal(id) {
   } else if (r.source === "Approved Surrender") {
     dynamicHtml = `
       <div class="view-section">
-        <div class="view-section-title">Surrender Reference</div>
+        <div class="view-section-title"><i class="bi bi-file-earmark-check"></i> Surrender Reference</div>
         <div class="view-grid">
           <div class="view-field"><div class="view-field-lbl">Surrender ID</div><div class="view-field-val" style="font-family:var(--mono)">${r.surrenderRefId||"—"}</div></div>
           <div class="view-field"><div class="view-field-lbl">Owner</div><div class="view-field-val">${r.ownerName||"—"}</div></div>
@@ -810,7 +850,7 @@ function openViewModal(id) {
   if (r.approvedBy) {
     reviewHtml = `
       <div class="view-section">
-        <div class="view-section-title">Review</div>
+        <div class="view-section-title"><i class="bi bi-clipboard2-check"></i> Review</div>
         <div class="view-grid">
           <div class="view-field"><div class="view-field-lbl">Approved By</div><div class="view-field-val">${r.approvedBy}</div></div>
           <div class="view-field"><div class="view-field-lbl">Approved On</div><div class="view-field-val">${formatDate(r.approvedAt)}</div></div>
@@ -820,25 +860,28 @@ function openViewModal(id) {
   if (r.rejectedReason) {
     reviewHtml = `
       <div class="view-section">
-        <div class="view-section-title">Rejection Reason</div>
+        <div class="view-section-title"><i class="bi bi-x-circle"></i> Rejection Reason</div>
         <div class="view-field view-full"><div class="view-field-val" style="color:var(--clay)">${r.rejectedReason}</div></div>
       </div>`;
   }
 
   document.getElementById("viewModalBody").innerHTML = `
-    <div class="intake-id-header">
-      <span class="intake-id-badge">${r.id}</span>
-      <div>
-        <div class="intake-animal-name">${intakeLabel(r)}</div>
-        <div class="intake-animal-meta">${r.species}${r.breed ? " · " + r.breed : ""} · ${r.sex}</div>
-      </div>
-      <div class="ms-auto d-flex gap-2 flex-wrap">
-        ${sourceBadge(r.source)} ${statusBadge(r.status)}
+    <div class="view-section intake-summary-section">
+      <div class="view-section-title"><i class="bi bi-card-checklist"></i> Record Summary</div>
+      <div class="intake-id-header">
+        <span class="intake-id-badge">${r.id}</span>
+        <div>
+          <div class="intake-animal-name">${intakeLabel(r)}</div>
+          <div class="intake-animal-meta">${r.species}${r.breed ? " · " + r.breed : ""} · ${r.sex}</div>
+        </div>
+        <div class="ms-auto d-flex gap-2 flex-wrap">
+          ${sourceBadge(r.source)} ${statusBadge(r.status)}
+        </div>
       </div>
     </div>
 
     <div class="view-section">
-      <div class="view-section-title">Animal Information</div>
+      <div class="view-section-title"><i class="bi bi-heart-pulse"></i> Animal Information</div>
       <div class="view-grid">
         <div class="view-field"><div class="view-field-lbl">Age</div><div class="view-field-val">${r.ageEstimate||"Unknown"}</div></div>
         <div class="view-field"><div class="view-field-lbl">Color</div><div class="view-field-val">${r.color||"Unknown"}</div></div>
@@ -854,7 +897,7 @@ function openViewModal(id) {
     </div>
 
     <div class="view-section">
-      <div class="view-section-title">Intake Details</div>
+      <div class="view-section-title"><i class="bi bi-box-arrow-in-right"></i> Intake Details</div>
       <div class="view-grid">
         <div class="view-field"><div class="view-field-lbl">Intake Date</div><div class="view-field-val">${formatDate(r.intakeDate)}</div></div>
         <div class="view-field"><div class="view-field-lbl">Encoded By</div><div class="view-field-val">${r.encodedBy}</div></div>
@@ -879,9 +922,9 @@ function openViewModal(id) {
         : ""
     }
     ${
-      can("approve")
-        ? `<button type="button" class="btn-approve" id="vBtnApprove">
-            <i class="bi bi-check-lg"></i> Approve
+      can("approve") && can("convert")
+        ? `<button type="button" class="btn-convert" id="vBtnConvert">
+            <i class="bi bi-arrow-right-circle"></i> Approve &amp; Start Profiling
           </button>`
         : ""
     }`;
@@ -896,7 +939,6 @@ function openViewModal(id) {
   footer.innerHTML = footerBtns;
 
   document.getElementById("viewClose2")?.addEventListener("click", () => closeModal("viewModalBackdrop"));
-  document.getElementById("vBtnApprove")?.addEventListener("click", () => { closeModal("viewModalBackdrop"); openConfirmModal("approve", id); });
   document.getElementById("vBtnReject")?.addEventListener("click",  () => { closeModal("viewModalBackdrop"); openConfirmModal("reject",  id); });
   document.getElementById("vBtnConvert")?.addEventListener("click", () => { closeModal("viewModalBackdrop"); openConfirmModal("convert", id); });
 
@@ -914,35 +956,68 @@ function openConfirmModal(action, id) {
   confirmTargetId = id;
 
   const cfg = {
-    approve: {
-      title:    "Approve Intake",
-      msg:      `Approve intake record ${id} for ${intakeLabel(r)}? This will allow the record to be converted to an Animal Profile.`,
-      iconCls:  "approve",
-      iconIcon: "bi-check-circle-fill",
-      btnCls:   "btn-approve",
-      btnLabel: "Approve",
-    },
     reject: {
       title:    "Reject Intake",
       msg:      `Reject intake record ${id} for ${intakeLabel(r)}? Please provide a reason below.`,
       iconCls:  "reject",
       iconIcon: "bi-x-circle-fill",
       btnCls:   "btn-reject",
+      btnIcon:  "bi-x-lg",
       btnLabel: "Reject",
     },
     convert: {
-      title:    "Convert to Animal Profile",
-      msg:      `Convert ${intakeLabel(r)} (${id}) to a full Animal Profile? This will move the animal into the profiling stage.`,
+      title:    r.status === "Pending" ? "Approve & Start Profiling" : "Start Profiling",
+      msg:      r.status === "Pending"
+        ? `Approve intake ${id} for ${intakeLabel(r)} and create its Animal Profile now?`
+        : `Create the Animal Profile for ${intakeLabel(r)} (${id}) and start profiling now?`,
       iconCls:  "convert",
       iconIcon: "bi-arrow-right-circle-fill",
       btnCls:   "btn-convert",
-      btnLabel: "Convert",
+      btnIcon:  "bi-arrow-right-circle",
+      btnLabel: r.status === "Pending" ? "Approve & Start Profiling" : "Start Profiling",
     },
   };
 
   const c = cfg[action];
   document.getElementById("confirmTitle").textContent   = c.title;
-  document.getElementById("confirmMsg").textContent     = c.msg;
+  document.getElementById("confirmMsg").textContent =
+    action === "reject"
+      ? "Check the selected intake and document why it should not continue."
+      : "Check the selected intake before creating its Animal Profile.";
+
+  const panel = document.getElementById("confirmModalPanel");
+  panel?.classList.toggle("is-reject", action === "reject");
+  panel?.classList.toggle("is-convert", action === "convert");
+
+  document.getElementById("confirmKicker").textContent =
+    action === "reject" ? "Intake decision" : "Final intake action";
+  document.getElementById("confirmRecordId").textContent = id;
+  document.getElementById("confirmRecordName").textContent = intakeLabel(r);
+  document.getElementById("confirmRecordMeta").textContent = [
+    r.species,
+    r.sex,
+    r.source,
+    r.condition,
+  ].filter(Boolean).join(" / ") || "Animal intake record";
+
+  const impact = document.getElementById("confirmImpact");
+  impact.className =
+    "intake-decision-impact " +
+    (action === "reject" ? "is-reject" : "is-convert");
+  document.getElementById("confirmImpactIcon").className =
+    action === "reject"
+      ? "bi bi-info-circle"
+      : "bi bi-person-vcard";
+  document.getElementById("confirmImpactTitle").textContent =
+    action === "reject"
+      ? "Closes this intake record"
+      : r.status === "Pending"
+        ? "Approves and creates the Animal Profile"
+        : "Creates the Animal Profile";
+  document.getElementById("confirmImpactText").textContent =
+    action === "reject"
+      ? "No profile is created. The reason remains available for staff review and audit."
+      : "The intake moves to Converted and the new profile opens so staff can continue profiling.";
 
   const iconWrap = document.getElementById("confirmIcon");
   iconWrap.className = `confirm-icon-wrap ${c.iconCls}`;
@@ -950,7 +1025,7 @@ function openConfirmModal(action, id) {
 
   const btn = document.getElementById("confirmAction");
   btn.className   = c.btnCls;
-  btn.innerHTML   = c.btnLabel;
+  btn.innerHTML   = `<i class="bi ${c.btnIcon}"></i> ${c.btnLabel}`;
 
   // Show/hide rejection reason textarea
   const rrWrap = document.getElementById("rejectReasonWrap");
@@ -961,6 +1036,9 @@ function openConfirmModal(action, id) {
   document.getElementById("errRejectReason").textContent = "";
 
   openModal("confirmModalBackdrop");
+  if (action === "reject") {
+    requestAnimationFrame(() => document.getElementById("rejectReason")?.focus());
+  }
 }
 
 async function executeConfirmAction() {
@@ -983,11 +1061,6 @@ async function executeConfirmAction() {
       actionButton.disabled = true;
       actionButton.innerHTML = `<span class="button-spinner" aria-hidden="true"></span>Working…`;
     }
-    if (confirmAction === "approve") {
-      await approveIntake(confirmTargetId);
-      showToast("success", "Intake approved.");
-    }
-
     if (confirmAction === "reject") {
       const reason = document.getElementById("rejectReason")?.value.trim();
       if (!reason) {
@@ -999,8 +1072,15 @@ async function executeConfirmAction() {
     }
 
     if (confirmAction === "convert") {
-      await convertToProfile(confirmTargetId);
-      showToast("success", "Converted to Animal Profile.");
+      const result = await convertToProfile(confirmTargetId);
+      showToast("success", "Animal Profile created. Profiling has started.");
+      closeModal("confirmModalBackdrop");
+      if (result?.animalProfileId) {
+        navigateManagementPage(
+          `/pages/animalProfile.html?id=${encodeURIComponent(result.animalProfileId)}`
+        );
+        return;
+      }
     }
 
     closeModal("confirmModalBackdrop");
@@ -1152,6 +1232,7 @@ if (params.get("source") === "surrender") {
     // Source selector (inside modal — needs to re-bind on each open)
     // Done via event delegation instead
     document.getElementById("sourceSelector")?.addEventListener("click", e => {
+      if (e.currentTarget.classList.contains("is-locked")) return;
       const opt = e.target.closest(".source-opt");
       if (!opt) return;
       document.querySelectorAll(".source-opt").forEach(o => o.classList.remove("selected"));
@@ -1159,6 +1240,10 @@ if (params.get("source") === "surrender") {
       document.getElementById("fSource").value = opt.dataset.value;
       document.getElementById("errSource").textContent = "";
       renderDynamicSection(opt.dataset.value);
+    });
+
+    document.getElementById("intakeOptionalToggle")?.addEventListener("click", e => {
+      setOptionalDetailsVisible(e.currentTarget.getAttribute("aria-expanded") !== "true");
     });
 
     // Modal buttons

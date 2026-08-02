@@ -417,7 +417,7 @@ exports.deleteAnimalProfileImage = async (req, res) => {
 exports.saveBehavioralAssessment = async (req, res) => {
   try {
     const { id } = req.params;
-    const { traits, notes, assessor } = req.body;
+    const { traits, notes } = req.body;
 
     if (!traits || typeof traits !== "object") {
       return res.status(400).json({ message: "Trait scores object is required." });
@@ -464,13 +464,13 @@ exports.saveBehavioralAssessment = async (req, res) => {
       date: new Date().toISOString().split("T")[0],
       event: "Behavioral assessment completed",
       detail: "Behavioral dimensions recorded for compatibility matching",
-      actor: assessor || req.user?.fullName || req.user?.email || "Staff",
+      actor: req.user?.fullName || req.user?.email || "Staff",
     };
 
     await db.collection(ANIMAL_COL).doc(id).update({
       behavioralAssessment: traits,
       behavioralNotes: notes || "",
-      behavioralAssessor: assessor || req.user?.fullName || "",
+      behavioralAssessor: req.user?.fullName || req.user?.email || "Staff",
       behavioralDate: new Date().toISOString().split("T")[0],
       compatibilityVector,
       history: admin.firestore.FieldValue.arrayUnion(historyEntry),
@@ -506,7 +506,6 @@ exports.addMedicalRecord = async (req, res) => {
     const {
       type,
       date,
-      vet,
       diagnosis,
       treatment,
       notes,
@@ -544,6 +543,17 @@ exports.addMedicalRecord = async (req, res) => {
           "Medical records can only be added while the animal is in Quarantine."
         );
       }
+      if (
+        type === "Quarantine Clearance" &&
+        (animal.medicalRecords || []).some(
+          (record) => record.type === "Quarantine Clearance"
+        )
+      ) {
+        throw requestError(
+          409,
+          "A quarantine review already exists. Update its decision instead of creating another clearance record."
+        );
+      }
 
       let inventoryData = null;
       let currentStock = 0;
@@ -578,7 +588,7 @@ exports.addMedicalRecord = async (req, res) => {
         id: medId,
         type,
         date,
-        vet: vet || "",
+        vet: req.user?.fullName || req.user?.email || "Staff",
         diagnosis: diagnosis || "",
         treatment: treatment || "",
         notes: notes || "",
@@ -598,7 +608,7 @@ exports.addMedicalRecord = async (req, res) => {
         event: `Medical record added - ${type}`,
         detail: diagnosis || "",
         actor:
-          vet || req.user?.fullName || req.user?.email || "System User",
+          req.user?.fullName || req.user?.email || "System User",
       };
       const animalUpdates = {
         medicalRecords,
@@ -921,7 +931,6 @@ exports.updateMedicalRecord = async (req, res) => {
     const {
       type,
       date,
-      vet,
       diagnosis,
       treatment,
       notes,
@@ -1075,7 +1084,7 @@ exports.updateMedicalRecord = async (req, res) => {
         ...existing,
         type: type ?? existing.type,
         date: date ?? existing.date,
-        vet: vet ?? existing.vet,
+        vet: existing.vet || req.user?.fullName || req.user?.email || "Staff",
         diagnosis: diagnosis ?? existing.diagnosis,
         treatment: treatment ?? existing.treatment,
         notes: notes ?? existing.notes,

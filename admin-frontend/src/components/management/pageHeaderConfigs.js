@@ -1,6 +1,8 @@
 export const PAGE_HEADER_CONFIGS = Object.freeze({
   dashboard: {
     headingId: "pageTitle",
+    image: "/images/dashboard.jpg",
+    imagePosition: "center 40%",
     eyebrow: "Shelter Operations",
     title: "Command Center",
     description: "Monitor animal care, intake movement, adoption readiness, and shelter priorities from one coordinated view.",
@@ -181,6 +183,34 @@ export const PAGE_HEADER_CONFIGS = Object.freeze({
       { id: "announcementPublished", icon: "bi-send-check-fill", label: "Published", tone: "green" },
       { id: "announcementDrafts", icon: "bi-pencil-square", label: "Drafts", tone: "amber" },
       { id: "announcementEvents", icon: "bi-calendar-event-fill", label: "Upcoming Events", tone: "blue" }
+    ]
+  },
+  contactMessages: {
+    headingId: "pageTitle",
+    eyebrow: "Community Engagement",
+    title: "Contact Messages",
+    description: "Review public inquiries, keep responses organized, and send official ANIMUA replies from one coordinated inbox.",
+    watermarkIcon: "bi-envelope-paper-fill",
+    highlights: [
+      { icon: "bi-inbox", label: "Centralized inquiries" },
+      { icon: "bi-shield-check", label: "Role-protected access" },
+      { icon: "bi-send-check", label: "Official email replies" }
+    ],
+    queue: {
+      liveLabel: "Community inbox active",
+      label: "Priority queue",
+      title: "New messages awaiting a reply",
+      valueId: "heroNewMessages",
+      unit: "new"
+    },
+    actions: [
+      { id: "refreshMessagesBtn", icon: "bi-arrow-clockwise", label: "Refresh messages" }
+    ],
+    summaryLabel: "Inbox summary",
+    metrics: [
+      { id: "totalMessages", icon: "bi-envelope-paper-fill", label: "All Messages" },
+      { id: "newMessages", icon: "bi-envelope-exclamation-fill", label: "New Messages", tone: "amber" },
+      { id: "repliedMessages", icon: "bi-send-check-fill", label: "Replied", tone: "green" }
     ]
   },
   reports: {

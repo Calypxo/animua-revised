@@ -173,7 +173,7 @@
           <div class="contact-panel-head">
             <i class="fa-regular fa-envelope" aria-hidden="true"></i>
             <div>
-              <h2>Send an Email</h2>
+              <h2>Send a Message</h2>
               <p>
                 Send your questions, feedback, or non-urgent concerns. Your message
                 will be sent <strong>directly to the ANIMUA / Angeles City Veterinary Office team</strong>
@@ -183,16 +183,18 @@
           </div>
 
           <form class="contact-form" id="contactForm" novalidate>
-            <div class="contact-field-row">
-              <label class="contact-field">
-                <input type="text" name="fullName" placeholder="Full Name" autocomplete="name" required>
-                <i class="fa-regular fa-user" aria-hidden="true"></i>
-              </label>
-
-              <label class="contact-field">
-                <input type="email" name="email" placeholder="Email Address" autocomplete="email" required>
-                <i class="fa-regular fa-envelope" aria-hidden="true"></i>
-              </label>
+            <label class="contact-honeypot" aria-hidden="true">
+              Leave this field blank
+              <input type="text" name="website" tabindex="-1" autocomplete="off">
+            </label>
+            <div class="contact-account-card" id="contactAccountCard" aria-live="polite">
+              <span class="contact-account-avatar" id="contactAccountInitial">A</span>
+              <span class="contact-account-copy">
+                <small>Sending as your ANIMUA account</small>
+                <strong id="contactAccountName">Loading account...</strong>
+                <span id="contactAccountEmail"></span>
+              </span>
+              <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
             </div>
 
             <label class="contact-field">
@@ -207,12 +209,12 @@
 
             <button class="contact-submit-button" id="contactSubmit" type="submit">
               <i class="fa-solid fa-paper-plane" aria-hidden="true"></i>
-              <span>Send Email</span>
+              <span>Send Message</span>
             </button>
 
             <p class="contact-form-note">
               <i class="fa-solid fa-lock" aria-hidden="true"></i>
-              <span>This site is protected by reCAPTCHA and the Google <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a> and <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer">Terms of Service</a> apply.</span>
+              <span>Your account name and email are included automatically. This form uses automated abuse protection.</span>
             </p>
             <p class="contact-status" id="contactStatus" aria-live="polite"></p>
           </form>

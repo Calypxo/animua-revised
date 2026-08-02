@@ -1,5 +1,4 @@
 import json
-from pathlib import Path
 
 import joblib
 
@@ -14,6 +13,15 @@ except ImportError:
     torch = None
     AutoModelForSequenceClassification = None
     AutoTokenizer = None
+
+from model_config import (
+    EXPECTED_TASK_LABELS,
+    FALLBACK_SOURCE_LABEL,
+    MODEL_NAME,
+    MODEL_SOURCE_LABEL,
+    SERVICE_DIR,
+    TRANSFORMER_MODEL_DIR,
+)
 
 
 app = FastAPI(title="ANIMUA Surrender Sentiment Service")
@@ -38,13 +46,11 @@ app.add_middleware(
 )
 
 
-TRANSFORMER_MODEL_DIR = Path("models/roberta")
-
-sentiment_model = joblib.load("sentiment_model.pkl")
-category_model = joblib.load("category_model.pkl")
+sentiment_model = joblib.load(SERVICE_DIR / "sentiment_model.pkl")
+category_model = joblib.load(SERVICE_DIR / "category_model.pkl")
 transformer_models = {}
 
-REQUESTS_FILE = Path("surrender_requests.json")
+REQUESTS_FILE = SERVICE_DIR / "surrender_requests.json"
 
 ANGELES_BARANGAYS = [
     "Agapito del Rosario", "Amsic", "Anunas", "Balibago", "Capaya", "Claro M. Recto",
@@ -80,16 +86,41 @@ def load_transformer_task(task_name):
         return None
 
     try:
+        metadata_path = task_dir / "labels.json"
+        if not metadata_path.exists():
+            raise ValueError("labels.json is missing")
+
+        with open(metadata_path, "r", encoding="utf-8") as file:
+            metadata = json.load(file)
+
+        source_model = metadata.get("source_model")
+        if source_model != MODEL_NAME:
+            raise ValueError(
+                f"model was trained from {source_model!r}; expected {MODEL_NAME!r}"
+            )
+
         tokenizer = AutoTokenizer.from_pretrained(task_dir)
         model = AutoModelForSequenceClassification.from_pretrained(task_dir)
+
+        configured_labels = {
+            str(label) for label in model.config.id2label.values()
+        }
+        expected_labels = EXPECTED_TASK_LABELS[task_name]
+        if configured_labels != expected_labels:
+            raise ValueError(
+                f"unexpected labels {sorted(configured_labels)}; "
+                f"expected {sorted(expected_labels)}"
+            )
+
         model.eval()
         return {
             "tokenizer": tokenizer,
             "model": model,
             "id2label": model.config.id2label,
+            "source_model": source_model,
         }
     except Exception as error:
-        print(f"Unable to load RoBERTa {task_name} model:", error)
+        print(f"Unable to load Tagalog RoBERTa {task_name} model:", error)
         return None
 
 
@@ -152,20 +183,26 @@ def get_transformer_prediction(task_name, text):
         probabilities = torch.softmax(outputs.logits, dim=-1)[0]
 
     confidence, predicted_id = torch.max(probabilities, dim=-1)
-    label = task["id2label"][int(predicted_id)]
+    prediction_key = int(predicted_id)
+    label = task["id2label"].get(
+        prediction_key,
+        task["id2label"].get(str(prediction_key)),
+    )
+    if label is None:
+        raise ValueError(
+            f"Tagalog RoBERTa returned unknown {task_name} label id "
+            f"{prediction_key}"
+        )
 
     return label, round(float(confidence), 2)
 
 
 def predict_sentiment_and_category(reason):
-    sentiment_result = get_transformer_prediction("sentiment", reason)
-    category_result = get_transformer_prediction("category", reason)
-
-    if sentiment_result and category_result:
+    if all(transformer_models.values()):
         return {
-            "sentiment": sentiment_result,
-            "category": category_result,
-            "source": "RoBERTa Transformer"
+            "sentiment": get_transformer_prediction("sentiment", reason),
+            "category": get_transformer_prediction("category", reason),
+            "source": MODEL_SOURCE_LABEL,
         }
 
     sentiment_result = get_prediction_with_confidence(sentiment_model, reason)
@@ -174,7 +211,7 @@ def predict_sentiment_and_category(reason):
     return {
         "sentiment": sentiment_result,
         "category": category_result,
-        "source": "TF-IDF + Logistic Regression"
+        "source": FALLBACK_SOURCE_LABEL,
     }
 
 
@@ -208,6 +245,8 @@ def extract_keywords(reason):
         "hospitalized", "bedridden", "elderly", "disabled",
 
         "may sakit", "sugatan", "nabangga", "namamatay", "gamot",
+        "dumudugo", "malubha", "agarang", "nahihirapang huminga",
+        "walang malay", "hindi kumakain",
         "walang budget", "hindi afford", "nawalan", "trabaho",
         "lilipat", "bawal", "mag-aabroad", "condo",
         "nangangagat", "inatake", "delikado",
@@ -235,10 +274,15 @@ def map_urgency(sentiment, category, reason):
         "emergency", "immediately", "bleeding", "dying", "critical",
         "cannot stand", "not eating", "hit by", "attacked", "bit",
         "agad", "sugatan", "nabangga", "namamatay", "hindi makatayo",
-        "inatake", "nangangagat", "delikado", "kalsada"
+        "inatake", "nangangagat", "delikado", "kalsada", "dumudugo",
+        "agarang", "malubha", "nahihirapang huminga", "walang malay",
+        "hindi kumakain"
     ]
 
     has_emergency_word = any(word in text for word in emergency_words)
+
+    if has_emergency_word:
+        return "Critical", 95
 
     # Relocation should usually not become High Priority
     # unless the text also contains abandonment/emergency words.
@@ -248,17 +292,14 @@ def map_urgency(sentiment, category, reason):
     if category == "Relocation" and sentiment == "Negative":
         return "Medium", 45
 
-    if sentiment == "Urgent" and has_emergency_word:
-        return "Critical", 95
-
     if sentiment == "Urgent":
         return "High", 80
 
-    if sentiment == "Negative":
-        return "Medium", 55
-
     if category in ["Medical", "Abandonment Risk", "Behavioral"]:
         return "High", 75
+
+    if sentiment == "Negative":
+        return "Medium", 55
 
     return "Low", 25
 
@@ -285,7 +326,11 @@ def analyze_reason(reason):
             "confidence": 0.0,
             "keywords": [],
             "suggestedPriority": "Normal Priority",
-            "source": "RoBERTa Transformer" if all(transformer_models.values()) else "TF-IDF + Logistic Regression"
+            "source": (
+                MODEL_SOURCE_LABEL
+                if all(transformer_models.values())
+                else FALLBACK_SOURCE_LABEL
+            ),
         }
 
     predictions = predict_sentiment_and_category(reason)
@@ -317,7 +362,18 @@ def analyze_reason(reason):
 @app.get("/")
 def home():
     return {
-        "message": "ANIMUA surrender sentiment service is running."
+        "message": "ANIMUA surrender sentiment service is running.",
+        "configuredModel": MODEL_NAME,
+        "transformerReady": all(transformer_models.values()),
+        "loadedTasks": {
+            task_name: model is not None
+            for task_name, model in transformer_models.items()
+        },
+        "activeSource": (
+            MODEL_SOURCE_LABEL
+            if all(transformer_models.values())
+            else FALLBACK_SOURCE_LABEL
+        ),
     }
 
 

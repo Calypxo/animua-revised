@@ -1,12 +1,16 @@
+import "../../css/adminDashboard.css";
 import "../../css/sidebarRefresh.css";
 import "../../css/pageSkeleton.css";
 
-import Swal from "sweetalert2";
 import { initializeManagementModals } from "./managementModal.js";
 import { initializeManagementConsistency } from "./managementConsistency.js";
-import { clearUserSession, getUserName, getUserRole } from "../../utils/storage.js";
+import { clearUserSession, getUserRole } from "../../utils/storage.js";
 import { canAccessModule, normalizeRole } from "../../auth/permissions.js";
 import { workspaceSkeletonMarkup } from "./pageSkeleton.js";
+import {
+  isContactMessageCountStorageEvent,
+  readContactMessageCount,
+} from "./contactMessageBadge.js";
 
 const escapeHtml = (value) => String(value ?? "")
   .replaceAll("&", "&amp;")
@@ -67,24 +71,41 @@ export function navigateManagementPage(target) {
   window.location.assign(cleanLocation(url));
 }
 
-function initials(name) {
-  return String(name || "ANIMUA User")
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((part) => part[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-}
-
-function link({ allowed = true, href, icon, label }) {
+function link({ allowed = true, href, icon, label, badge = "" }) {
   if (!allowed) return "";
   return `
     <a class="nav-item" href="${href}" title="${escapeHtml(label)}">
       <span class="nav-icon"><i class="bi ${icon}" aria-hidden="true"></i></span>
       <span class="nav-text">${escapeHtml(label)}</span>
+      ${badge ? `<span class="nav-item-badge" data-nav-badge="${escapeHtml(badge)}" hidden>0</span>` : ""}
     </a>`;
+}
+
+function updateContactMessageBadge(sidebar, value = readContactMessageCount()) {
+  const badge = sidebar?.querySelector('[data-nav-badge="contact"]');
+  if (!badge) return;
+  const count = Math.max(0, Number(value || 0));
+  badge.textContent = count > 99 ? "99+" : String(count);
+  badge.hidden = value == null || count === 0;
+  badge.setAttribute(
+    "aria-label",
+    `${count} new contact message${count === 1 ? "" : "s"}`
+  );
+}
+
+function bindContactMessageBadge(container, sidebar) {
+  updateContactMessageBadge(sidebar);
+  if (container.dataset.contactBadgeBound === "true") return;
+  container.dataset.contactBadgeBound = "true";
+
+  window.addEventListener("animua:contact-count", (event) => {
+    updateContactMessageBadge(sidebar, event.detail?.count);
+  });
+  window.addEventListener("storage", (event) => {
+    if (isContactMessageCountStorageEvent(event)) {
+      updateContactMessageBadge(sidebar);
+    }
+  });
 }
 
 function group({ id, icon, label, items }) {
@@ -95,7 +116,10 @@ function group({ id, icon, label, items }) {
       <button class="nav-group-toggle" type="button" aria-expanded="false" aria-controls="${id}">
         <span class="nav-icon"><i class="bi ${icon}" aria-hidden="true"></i></span>
         <span class="nav-text">${escapeHtml(label)}</span>
-        <i class="bi bi-chevron-down nav-chevron" aria-hidden="true"></i>
+        <span class="nav-group-indicator" aria-hidden="true">
+          <i class="bi bi-plus-lg nav-plus"></i>
+          <i class="bi bi-dash-lg nav-minus"></i>
+        </span>
       </button>
       <div class="nav-submenu" id="${id}">
         ${visibleItems.join("")}
@@ -132,6 +156,7 @@ function mainNavigation(role) {
       ${link({ allowed: canAccessModule(role, "dashboard"), href: "/pages/dashboard.html", icon: "bi-grid-1x2", label: "Dashboard" })}
       ${animalGroup}
       ${link({ allowed: canAccessModule(role, "announcements"), href: "/pages/announcements.html", icon: "bi-megaphone", label: "Announcements" })}
+      ${link({ allowed: canAccessModule(role, "contact"), href: "/pages/contactMessages.html", icon: "bi-envelope-paper", label: "Contact Messages", badge: "contact" })}
       ${link({ allowed: canAccessModule(role, "compatibility"), href: "/pages/compatibilityQuiz.html", icon: "bi-stars", label: "Compatibility Quiz" })}
       ${operationsGroup}
     </section>`;
@@ -144,11 +169,6 @@ function systemNavigation(role) {
       ${link({ allowed: canAccessModule(role, "users"), href: "/pages/userManagement.html", icon: "bi-people", label: "User Management" })}
       ${link({ allowed: canAccessModule(role, "audit"), href: "/pages/auditTrail.html", icon: "bi-journal-check", label: "Audit Trail" })}
       ${link({ allowed: canAccessModule(role, "archive"), href: "/pages/archivedRecords.html", icon: "bi-archive", label: "Archived Records" })}
-      ${link({ href: "/pages/accountSettings.html", icon: "bi-gear", label: "Account Settings" })}
-      <button class="nav-item sidebar-signout" id="sidebar-logout" type="button" title="Sign Out">
-        <span class="nav-icon"><i class="bi bi-box-arrow-left" aria-hidden="true"></i></span>
-        <span class="nav-text">Sign Out</span>
-      </button>
     </section>`;
 }
 
@@ -164,14 +184,6 @@ function setActiveNavigation(sidebar, pathname = window.location.pathname) {
       if (group) setGroupExpanded(group, true);
     }
   });
-
-  const accountLink = sidebar.querySelector(".sidebar-account");
-  if (accountLink) {
-    const active = current === normalizePath(accountLink.getAttribute("href"));
-    accountLink.classList.toggle("active", active);
-    if (active) accountLink.setAttribute("aria-current", "page");
-    else accountLink.removeAttribute("aria-current");
-  }
 }
 
 function setGroupExpanded(group, expanded) {
@@ -216,22 +228,6 @@ function bindSidebar(container, sidebar, overlay) {
   });
   window.addEventListener("resize", () => {
     if (window.innerWidth > 768) closeMobile();
-  });
-
-  sidebar.querySelector("#sidebar-logout")?.addEventListener("click", async () => {
-    const result = await Swal.fire({
-      title: "Sign out?",
-      text: "You'll be returned to the login screen.",
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonColor: "#ef1725",
-      cancelButtonColor: "#746963",
-      confirmButtonText: "Yes, sign out",
-    });
-    if (result.isConfirmed) {
-      clearUserSession();
-      window.location.replace("/pages/admin-login.html");
-    }
   });
 }
 
@@ -387,6 +383,9 @@ function setupPersistentNavigation(container, sidebar) {
     if (event.data?.type === "animua:navigate") state.navigate(event.data.href);
     if (event.data?.type === "animua:toggle-sidebar") state.container.__animuaSidebarController?.toggle();
     if (event.data?.type === "animua:page-ready") markReady();
+    if (event.data?.type === "animua:contact-count") {
+      updateContactMessageBadge(state.sidebar, event.data.count);
+    }
   });
 
   window.__animuaPersistentNavigation = state;
@@ -399,7 +398,6 @@ export function loadSidebar() {
   initializeManagementModals();
   initializeManagementConsistency();
 
-  const name = getUserName() || "ANIMUA User";
   const role = normalizeRole(getUserRole());
   if (!role) {
     clearUserSession();
@@ -415,24 +413,22 @@ export function loadSidebar() {
   container.innerHTML = `
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
     <aside class="sidebar" id="sidebar" aria-label="Administration sidebar">
-      <a class="sidebar-brand" href="/pages/dashboard.html" aria-label="ANIMUA dashboard">
-        <span class="brand-mark"><i class="bi bi-heart-pulse-fill" aria-hidden="true"></i></span>
-        <span class="brand-copy"><strong>ANIMUA</strong><small>Admin workspace</small></span>
-      </a>
+      <header class="sidebar-header">
+        <a class="sidebar-brand" href="/pages/dashboard.html" aria-label="ANIMUA dashboard">
+          <span class="brand-mark"><i class="bi bi-heart-pulse-fill" aria-hidden="true"></i></span>
+          <span class="brand-copy"><strong>ANIMUA</strong><small>Management</small></span>
+        </a>
+      </header>
       <nav class="sidebar-nav" aria-label="Management navigation">
         ${mainNavigation(role)}
         ${systemNavigation(role)}
       </nav>
-      <a class="sidebar-account" href="/pages/accountSettings.html" title="Open account settings">
-        <span class="avatar-circle">${initials(name)}</span>
-        <span class="u-meta"><strong>${escapeHtml(name)}</strong><small>${escapeHtml(role)}</small></span>
-        <i class="bi bi-gear account-gear" aria-hidden="true"></i>
-      </a>
     </aside>`;
 
   const sidebar = container.querySelector("#sidebar");
   const overlay = container.querySelector("#sidebar-overlay");
   setActiveNavigation(sidebar);
+  bindContactMessageBadge(container, sidebar);
   bindSidebar(container, sidebar, overlay);
   setupPersistentNavigation(container, sidebar);
 }
