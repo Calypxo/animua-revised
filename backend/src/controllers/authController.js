@@ -337,6 +337,37 @@ async function sendPasswordChangeOtp({ email, fullName, otp }) {
   });
 }
 
+async function sendForgotPasswordOtp({ email, fullName, otp }) {
+  return sendEmailVerificationOtp({
+    email,
+    fullName,
+    otp,
+    subject: "Your ANIMUA password reset code",
+    preheader: "Use this verification code to reset your ANIMUA password.",
+    heading: "Reset your password",
+    introHtml: "We received a request to reset your ANIMUA password.<br>Use the verification code below to continue."
+  });
+}
+
+function validateNewPasswordValue(newPassword) {
+  if (typeof newPassword !== "string" || !newPassword) {
+    return { status: 400, message: "New password is required." };
+  }
+
+  if (newPassword.length > 128) {
+    return { status: 400, message: "Password must not exceed 128 characters." };
+  }
+
+  if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(newPassword)) {
+    return {
+      status: 400,
+      message: "New password must be at least 8 characters and include uppercase, lowercase, number, and special character."
+    };
+  }
+
+  return null;
+}
+
 async function validatePasswordChangeInput({ email, oldPassword, newPassword }) {
   if (!email) {
     return { status: 401, message: "Unauthorized." };
@@ -359,12 +390,8 @@ async function validatePasswordChangeInput({ email, oldPassword, newPassword }) 
     return { status: 400, message: "New password must be different from the current password." };
   }
 
-  if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(newPassword)) {
-    return {
-      status: 400,
-      message: "New password must be at least 8 characters and include uppercase, lowercase, number, and special character."
-    };
-  }
+  const newPasswordError = validateNewPasswordValue(newPassword);
+  if (newPasswordError) return newPasswordError;
 
   const userRef = db.collection("users").doc(email);
   const userDoc = await userRef.get();
@@ -380,6 +407,26 @@ async function validatePasswordChangeInput({ email, oldPassword, newPassword }) 
 
   if (!isMatch) {
     return { status: 401, message: "Current password is incorrect." };
+  }
+
+  return { userRef, userData };
+}
+
+async function validateForgotPasswordAccount(email) {
+  if (!email || typeof email !== "string" || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return { status: 400, message: "Please enter a valid email address." };
+  }
+
+  const userRef = db.collection("users").doc(email);
+  const userDoc = await userRef.get();
+
+  if (!userDoc.exists) {
+    return { status: 404, message: "No account was found for that email address." };
+  }
+
+  const userData = userDoc.data();
+  if (String(userData.status || "Active").toLowerCase() === "inactive") {
+    return { status: 403, message: "This account is inactive. Please contact ANIMUA support." };
   }
 
   return { userRef, userData };
@@ -1195,6 +1242,127 @@ exports.confirmPasswordChangeOtp = async (req, res) => {
     });
   } catch (error) {
     console.error("[Confirm Password Change OTP Error]", error.message);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+exports.requestForgotPasswordOtp = async (req, res) => {
+  try {
+    const email = String(req.body?.email || "").trim().toLowerCase();
+    const validation = await validateForgotPasswordAccount(email);
+
+    if (validation.status) {
+      return res.status(validation.status).json({ message: validation.message });
+    }
+
+    const otpRef = db.collection("forgotPasswordOtps").doc(email);
+    const existingOtpDoc = await otpRef.get();
+
+    if (existingOtpDoc.exists) {
+      const existing = existingOtpDoc.data();
+      const createdAt = existing.createdAt?.toDate ? existing.createdAt.toDate() : null;
+
+      if (createdAt && Date.now() - createdAt.getTime() < 30 * 1000) {
+        return res.status(429).json({ message: "Please wait before requesting another password reset OTP." });
+      }
+    }
+
+    const otp = String(Math.floor(100000 + Math.random() * 900000));
+    const otpHash = await bcrypt.hash(otp, 10);
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+    await otpRef.set({
+      email,
+      otpHash,
+      attempts: 0,
+      expiresAt,
+      createdAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    await sendForgotPasswordOtp({
+      email,
+      fullName: validation.userData.fullName,
+      otp
+    });
+
+    return res.status(200).json({ message: "We sent a six-digit OTP to your email." });
+  } catch (error) {
+    console.error("[Request Forgot Password OTP Error]", error.message);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+exports.confirmForgotPasswordOtp = async (req, res) => {
+  try {
+    const email = String(req.body?.email || "").trim().toLowerCase();
+    const otp = String(req.body?.otp || "").trim();
+    const { newPassword } = req.body || {};
+
+    if (!/^\d{6}$/.test(otp)) {
+      return res.status(400).json({ message: "Please enter the six-digit password reset OTP." });
+    }
+
+    const passwordError = validateNewPasswordValue(newPassword);
+    if (passwordError) {
+      return res.status(passwordError.status).json({ message: passwordError.message });
+    }
+
+    const validation = await validateForgotPasswordAccount(email);
+    if (validation.status) {
+      return res.status(validation.status).json({ message: validation.message });
+    }
+
+    const otpRef = db.collection("forgotPasswordOtps").doc(email);
+    const otpDoc = await otpRef.get();
+
+    if (!otpDoc.exists) {
+      return res.status(404).json({ message: "No password reset OTP request found. Please request a new code." });
+    }
+
+    const otpData = otpDoc.data();
+    const expiresAt = otpData.expiresAt?.toDate ? otpData.expiresAt.toDate() : new Date(otpData.expiresAt);
+
+    if (!expiresAt || expiresAt.getTime() < Date.now()) {
+      await otpRef.delete();
+      return res.status(410).json({ message: "Password reset OTP expired. Please request a new code." });
+    }
+
+    if ((otpData.attempts || 0) >= 5) {
+      await otpRef.delete();
+      return res.status(429).json({ message: "Too many password reset OTP attempts. Please request a new code." });
+    }
+
+    const isOtpMatch = await bcrypt.compare(otp, otpData.otpHash);
+
+    if (!isOtpMatch) {
+      await otpRef.update({
+        attempts: admin.firestore.FieldValue.increment(1),
+        lastAttemptAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+      return res.status(401).json({ message: "Incorrect password reset OTP. Please try again." });
+    }
+
+    const applyError = await applyPasswordChange({
+      userRef: validation.userRef,
+      userData: validation.userData,
+      newPassword,
+      auditUser: {
+        email,
+        fullName: validation.userData.fullName || email
+      }
+    });
+
+    if (applyError) {
+      return res.status(applyError.status).json({ message: applyError.message });
+    }
+
+    await otpRef.delete();
+
+    return res.status(200).json({
+      message: "Password reset successfully."
+    });
+  } catch (error) {
+    console.error("[Confirm Forgot Password OTP Error]", error.message);
     return res.status(500).json({ message: "Internal server error." });
   }
 };

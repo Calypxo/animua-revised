@@ -3965,30 +3965,6 @@ body.furbabies-page .hero-overlay::after {
   box-shadow: none !important;
 }
 
-body.furbabies-page .main-nav-wrap,
-body.furbabies-page .nav-shell {
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-}
-
-body.furbabies-page .header {
-  background: transparent !important;
-  box-shadow: none !important;
-  border: 0 !important;
-}
-
-body.furbabies-page .main-nav-wrap::before,
-body.furbabies-page .main-nav-wrap::after,
-body.furbabies-page .nav-shell::before,
-body.furbabies-page .nav-shell::after {
-  content: none !important;
-  display: none !important;
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-}
-
 @media (max-width: 900px) {
   body.furbabies-page .furbabies-hero {
     background: url("../../assets/images/find-furbabies-hero-custom.png") center center / cover no-repeat !important;
@@ -5451,8 +5427,2235 @@ body.furbabies-page .adoption-reminder .btn:hover {
     margin-top: 10px !important;
   }
 
-  body.furbabies-page .adoption-reminder .btn {
+body.furbabies-page .adoption-reminder .btn {
     grid-column: 1 !important;
     width: 100% !important;
+  }
+}
+
+/* Reference-style Find Furbabies browser */
+body.furbabies-page {
+  background: #f5f1e8 !important;
+  color: #20232a !important;
+}
+
+body.furbabies-page .furbabies-hero {
+  display: none !important;
+}
+
+body.furbabies-page .pet-browser-section {
+  position: relative !important;
+  padding: clamp(24px, 4vw, 42px) 0 54px !important;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(255, 255, 255, 0.9), transparent 28%),
+    linear-gradient(180deg, #f7f3ea 0%, #f1ede4 100%) !important;
+}
+
+body.furbabies-page .pet-browser-section > .container {
+  width: min(100% - 32px, 1240px) !important;
+  max-width: 1240px !important;
+}
+
+body.furbabies-page .browser-toolbar {
+  display: block !important;
+  margin: 0 0 12px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.furbabies-page .browser-toolbar-left {
+  display: block !important;
+}
+
+body.furbabies-page .browser-kicker {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-bottom: 8px !important;
+  color: #7f2420 !important;
+  font-size: 0.72rem !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.11em !important;
+  text-transform: uppercase !important;
+}
+
+body.furbabies-page .browser-toolbar-left h2 {
+  margin: 0 !important;
+  color: #23252c !important;
+  font-family: Inter, sans-serif !important;
+  font-size: clamp(2rem, 3.2vw, 2.65rem) !important;
+  font-weight: 900 !important;
+  line-height: 1.03 !important;
+  letter-spacing: 0 !important;
+}
+
+body.furbabies-page .browser-toolbar-left p {
+  margin-top: 6px !important;
+  color: #6c675f !important;
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+}
+
+body.furbabies-page .browser-surface {
+  width: 100% !important;
+  margin: 0 0 22px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  position: relative !important;
+  z-index: 40 !important;
+  overflow: visible !important;
+}
+
+body.furbabies-page .browser-filter-panel {
+  display: grid !important;
+  --browser-filter-height: 52px;
+  --browser-filter-radius: 999px;
+  --browser-filter-border: rgba(120, 1, 22, 0.16);
+  --browser-filter-bg: rgba(255, 248, 238, 0.96);
+  --browser-filter-text: var(--find-burgundy, #780116);
+  grid-template-columns: minmax(280px, 1fr) auto 154px !important;
+  gap: 10px !important;
+  align-items: center !important;
+  position: relative !important;
+  z-index: 45 !important;
+  overflow: visible !important;
+}
+
+body.furbabies-page .search-box {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: var(--browser-filter-height) !important;
+  min-height: var(--browser-filter-height) !important;
+  padding: 0 20px !important;
+  border: 1px solid var(--browser-filter-border) !important;
+  border-radius: var(--browser-filter-radius) !important;
+  background: var(--browser-filter-bg) !important;
+  box-sizing: border-box !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72) !important;
+}
+
+body.furbabies-page .search-box .browser-control-icon {
+  width: auto !important;
+  height: auto !important;
+  flex: 0 0 auto !important;
+  background: transparent !important;
+  color: #8a2e28 !important;
+  box-shadow: none !important;
+}
+
+body.furbabies-page .search-box .browser-control-icon i {
+  color: #8a2e28 !important;
+}
+
+body.furbabies-page .search-box input {
+  color: #24262d !important;
+  font-size: 0.92rem !important;
+  font-weight: 600 !important;
+}
+
+body.furbabies-page .search-box input::placeholder {
+  color: #9a948b !important;
+}
+
+body.furbabies-page .filter-tabs {
+  display: inline-flex !important;
+  gap: 2px !important;
+  height: var(--browser-filter-height) !important;
+  min-height: var(--browser-filter-height) !important;
+  padding: 5px !important;
+  border: 1px solid var(--browser-filter-border) !important;
+  border-radius: var(--browser-filter-radius) !important;
+  background: var(--browser-filter-bg) !important;
+  box-sizing: border-box !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72) !important;
+}
+
+body.furbabies-page .filter-tab {
+  height: 40px !important;
+  min-height: 40px !important;
+  min-width: 58px !important;
+  padding: 0 12px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  color: var(--browser-filter-text) !important;
+  box-shadow: none !important;
+  font-size: 0.72rem !important;
+  font-weight: 850 !important;
+}
+
+body.furbabies-page .filter-tab.active,
+body.furbabies-page .filter-tab:hover {
+  background: #84251f !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+body.furbabies-page .sort-select-wrap {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  height: var(--browser-filter-height) !important;
+  min-height: var(--browser-filter-height) !important;
+  border: 1px solid var(--browser-filter-border) !important;
+  border-radius: var(--browser-filter-radius) !important;
+  background: var(--browser-filter-bg) !important;
+  box-sizing: border-box !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72) !important;
+  z-index: 70 !important;
+}
+
+body.furbabies-page .sort-select-wrap::after {
+  content: "\f078" !important;
+  position: absolute !important;
+  right: 15px !important;
+  top: 50% !important;
+  color: #8a2e28 !important;
+  font-family: "Font Awesome 6 Free" !important;
+  font-size: 0.68rem !important;
+  font-weight: 900 !important;
+  pointer-events: none !important;
+  transform: translateY(-50%) !important;
+}
+
+body.furbabies-page #petSort {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  width: 100% !important;
+  height: 100% !important;
+  appearance: none !important;
+  padding: 0 32px 0 16px !important;
+  border: 0 !important;
+  border-radius: inherit !important;
+  background: transparent !important;
+  color: var(--browser-filter-text) !important;
+  font: 850 0.72rem Inter, sans-serif !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+  box-shadow: none !important;
+}
+
+body.furbabies-page .sort-menu {
+  position: absolute !important;
+  top: calc(100% + 8px) !important;
+  left: 0 !important;
+  z-index: 90 !important;
+  width: 100% !important;
+  padding: 8px !important;
+  border: 1px solid rgba(247, 201, 92, 0.45) !important;
+  border-radius: 16px !important;
+  background: rgba(255, 248, 238, 0.98) !important;
+  box-shadow: 0 18px 34px rgba(75, 43, 33, 0.14) !important;
+}
+
+body.furbabies-page .sort-menu[hidden] {
+  display: none !important;
+}
+
+body.furbabies-page .sort-menu-option {
+  display: flex !important;
+  align-items: center !important;
+  width: 100% !important;
+  min-height: 42px !important;
+  padding: 0 14px !important;
+  border: 0 !important;
+  border-radius: 12px !important;
+  background: transparent !important;
+  color: #683127 !important;
+  font: 850 0.82rem Inter, sans-serif !important;
+  text-align: left !important;
+  cursor: pointer !important;
+}
+
+body.furbabies-page .sort-menu-option:hover,
+body.furbabies-page .sort-menu-option.active {
+  background: rgba(120, 1, 22, 0.08) !important;
+  color: var(--find-burgundy, #780116) !important;
+}
+
+body.furbabies-page .floating-filter-btn {
+  display: none !important;
+}
+
+body.furbabies-page .pets-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 18px 22px !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+body.furbabies-page .pet-card {
+  overflow: hidden !important;
+  min-width: 0 !important;
+  border: 1px solid rgba(104, 76, 54, 0.12) !important;
+  border-radius: 12px !important;
+  background: #fffdf8 !important;
+  box-shadow: 0 14px 30px rgba(64, 49, 34, 0.08) !important;
+  transition: transform 180ms ease, box-shadow 180ms ease !important;
+}
+
+body.furbabies-page .pet-card:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 20px 42px rgba(64, 49, 34, 0.13) !important;
+}
+
+body.furbabies-page .pet-card-image {
+  height: 158px !important;
+  background: #d7d0c4 !important;
+}
+
+body.furbabies-page .pet-card-image img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center 32% !important;
+}
+
+body.furbabies-page .pet-badge {
+  left: 12px !important;
+  top: 12px !important;
+  min-height: 28px !important;
+  padding: 0 10px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255, 248, 238, 0.62) !important;
+  background: rgba(255, 248, 238, 0.68) !important;
+  color: var(--find-burgundy, #780116) !important;
+  box-shadow: 0 6px 14px rgba(70, 20, 16, 0.07) !important;
+  backdrop-filter: blur(8px) !important;
+  font-size: 0.58rem !important;
+  font-weight: 900 !important;
+  letter-spacing: 0 !important;
+}
+
+body.furbabies-page .pet-ready-badge {
+  right: 12px !important;
+  top: 12px !important;
+  gap: 5px !important;
+  padding: 6px 10px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255, 248, 238, 0.48) !important;
+  background: rgba(255, 248, 238, 0.72) !important;
+  color: #526f46 !important;
+  box-shadow: 0 8px 18px rgba(45, 42, 35, 0.08) !important;
+  backdrop-filter: blur(8px) !important;
+  font-size: 0.64rem !important;
+  font-weight: 900 !important;
+}
+
+body.furbabies-page .pet-ready-badge i {
+  color: #67a45d !important;
+  font-size: 0.55rem !important;
+}
+
+body.furbabies-page .pet-card-body {
+  padding: 12px 14px 14px !important;
+}
+
+body.furbabies-page .pet-card-top {
+  margin: 0 0 4px !important;
+}
+
+body.furbabies-page .pet-card-top h3 {
+  margin: 0 !important;
+  color: #24262d !important;
+  font-family: Inter, sans-serif !important;
+  font-size: 1rem !important;
+  font-weight: 950 !important;
+  line-height: 1.08 !important;
+}
+
+body.furbabies-page .pet-meta {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 5px !important;
+  margin: 5px 0 5px !important;
+  color: #4c4a4f !important;
+  font-size: 0.64rem !important;
+  font-weight: 800 !important;
+}
+
+body.furbabies-page .pet-meta i {
+  color: #84251f !important;
+  font-size: 0.74rem !important;
+}
+
+body.furbabies-page .pet-facts {
+  display: block !important;
+  margin: 0 0 9px !important;
+}
+
+body.furbabies-page .pet-fact {
+  display: inline-flex !important;
+  align-items: center !important;
+  min-height: 0 !important;
+  margin: 0 6px 6px 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+body.furbabies-page .pet-fact i,
+body.furbabies-page .pet-fact small {
+  display: none !important;
+}
+
+body.furbabies-page .pet-fact span {
+  display: inline !important;
+}
+
+body.furbabies-page .pet-fact strong {
+  color: #2f2e33 !important;
+  font-size: 0.68rem !important;
+  font-weight: 900 !important;
+  line-height: 1.2 !important;
+  white-space: normal !important;
+}
+
+body.furbabies-page .pet-fact:not(:first-child) strong,
+body.furbabies-page .pet-temperament strong {
+  display: inline-flex !important;
+  align-items: center !important;
+  min-height: 21px !important;
+  padding: 0 8px !important;
+  border-radius: 999px !important;
+  background: #eee9de !important;
+  color: #6c665e !important;
+  font-size: 0.62rem !important;
+  font-weight: 900 !important;
+}
+
+body.furbabies-page .pet-temperament {
+  display: inline-flex !important;
+  margin: -6px 0 10px !important;
+}
+
+body.furbabies-page .pet-temperament-icon,
+body.furbabies-page .pet-temperament small {
+  display: none !important;
+}
+
+body.furbabies-page .pet-actions {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 9px !important;
+  margin-top: auto !important;
+}
+
+body.furbabies-page .pet-actions .btn {
+  min-height: 34px !important;
+  padding: 0 10px !important;
+  border-radius: 999px !important;
+  font-size: 0.66rem !important;
+  font-weight: 950 !important;
+}
+
+body.furbabies-page .pet-actions .secondary-btn {
+  border: 1px solid rgba(132, 37, 31, 0.25) !important;
+  background: #fffdf8 !important;
+  color: #84251f !important;
+}
+
+body.furbabies-page .pet-actions .primary-btn {
+  gap: 7px !important;
+  border: 1px solid #84251f !important;
+  background: #84251f !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+body.furbabies-page .pet-actions .btn:hover {
+  transform: translateY(-1px) !important;
+}
+
+body.furbabies-page .adoption-reminder {
+  grid-template-columns: 52px minmax(0, 1fr) auto !important;
+  width: 100% !important;
+  margin-top: 28px !important;
+  padding: 18px 20px !important;
+  border-radius: 12px !important;
+  background: rgba(255, 253, 248, 0.94) !important;
+  box-shadow: 0 16px 32px rgba(64, 49, 34, 0.08) !important;
+}
+
+body.furbabies-page .adoption-reminder::before {
+  content: none !important;
+}
+
+body.furbabies-page .adoption-reminder > span {
+  width: 44px !important;
+  height: 44px !important;
+  margin: 0 !important;
+  border: 1px solid #e2c770 !important;
+  background: #fff7dd !important;
+  color: #84251f !important;
+}
+
+body.furbabies-page .adoption-reminder h3 {
+  font-family: Inter, sans-serif !important;
+  font-size: 1.1rem !important;
+}
+
+body.furbabies-page .adoption-reminder .btn::after {
+  content: "\f061" !important;
+  margin-left: 10px !important;
+  font-family: "Font Awesome 6 Free" !important;
+  font-weight: 900 !important;
+}
+
+@media (max-width: 980px) {
+  body.furbabies-page .browser-filter-panel {
+    grid-template-columns: 1fr !important;
+  }
+
+  body.furbabies-page .filter-tabs {
+    width: 100% !important;
+  }
+
+  body.furbabies-page .filter-tab {
+    flex: 1 1 0 !important;
+  }
+
+  body.furbabies-page .pets-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 1180px) and (min-width: 981px) {
+  body.furbabies-page .pets-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  body.furbabies-page .pet-browser-section > .container {
+    width: min(100% - 20px, 1240px) !important;
+  }
+
+  body.furbabies-page .pets-grid {
+    grid-template-columns: 1fr !important;
+    gap: 18px !important;
+  }
+
+  body.furbabies-page .floating-filter-btn {
+    width: 48px !important;
+    height: 48px !important;
+    top: auto !important;
+    right: 16px !important;
+    bottom: 18px !important;
+  }
+
+  body.furbabies-page .adoption-reminder {
+    grid-template-columns: 44px 1fr !important;
+  }
+
+  body.furbabies-page .adoption-reminder .btn {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+  }
+}
+
+body.furbabies-page .furbabies-hero {
+  position: relative !important;
+  min-height: clamp(540px, 68vh, 700px) !important;
+  display: flex !important;
+  align-items: center !important;
+  margin-top: 0 !important;
+  padding: clamp(118px, 14vh, 150px) 0 clamp(56px, 7vh, 86px) !important;
+  overflow: hidden !important;
+  background:
+    linear-gradient(90deg, rgba(18, 9, 7, 0.88) 0%, rgba(34, 15, 12, 0.74) 38%, rgba(34, 15, 12, 0.24) 72%, rgba(34, 15, 12, 0.08) 100%),
+    url("../../assets/images/find-furbabies-hero-bg.jpg") center / cover no-repeat !important;
+}
+
+body.furbabies-page .finder-shell {
+  width: min(1160px, 91%) !important;
+  display: block !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.furbabies-page .finder-left {
+  max-width: 650px !important;
+}
+
+body.furbabies-page .finder-left h1 {
+  max-width: 620px !important;
+  margin: 0 !important;
+  color: #ffffff !important;
+  font-size: clamp(3rem, 5.6vw, 5.2rem) !important;
+  font-weight: 900 !important;
+  line-height: 0.96 !important;
+  text-shadow: 0 3px 18px rgba(0, 0, 0, 0.34) !important;
+}
+
+body.furbabies-page .finder-left h1 span {
+  color: #f7c95c !important;
+}
+
+body.furbabies-page .finder-left p {
+  max-width: 560px !important;
+  margin: 18px 0 0 !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-size: clamp(0.95rem, 1.15vw, 1.12rem) !important;
+  font-weight: 650 !important;
+  line-height: 1.5 !important;
+}
+
+body.furbabies-page .finder-actions {
+  display: flex !important;
+  gap: 14px !important;
+  margin: 28px 0 0 !important;
+}
+
+body.furbabies-page .finder-actions .btn {
+  min-height: 48px !important;
+  padding: 0 28px !important;
+  border-radius: 999px !important;
+  font-size: 0.9rem !important;
+  font-weight: 850 !important;
+}
+
+body.furbabies-page .finder-actions .primary-btn {
+  border: 0 !important;
+  background: #970a18 !important;
+  color: #ffffff !important;
+  box-shadow: 0 18px 34px rgba(50, 10, 8, 0.26) !important;
+}
+
+body.furbabies-page .finder-actions .secondary-btn {
+  border: 1px solid rgba(255, 255, 255, 0.78) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
+}
+
+body.furbabies-page .finder-mini-note {
+  width: fit-content !important;
+  margin-top: 22px !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+  background: rgba(26, 14, 11, 0.58) !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+body.furbabies-page .hero-pet-count-hidden {
+  display: none !important;
+}
+
+body.furbabies-page .pet-browser-section {
+  padding-top: clamp(42px, 5vw, 64px) !important;
+}
+
+@media (max-width: 720px) {
+  body.furbabies-page .furbabies-hero {
+    min-height: 560px !important;
+    padding-top: 112px !important;
+  }
+
+  body.furbabies-page .finder-actions {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  body.furbabies-page .finder-actions .btn {
+    width: min(100%, 280px) !important;
+  }
+}
+
+/* Homepage palette alignment for Find Furbabies. */
+body.furbabies-page {
+  --find-burgundy: #780116;
+  --find-burgundy-dark: #5f0012;
+  --find-gold: #f7c95c;
+  --find-cream: #fff8ee;
+  --find-page: #f7f2e8;
+  --find-charcoal: #232D35;
+  --find-muted: #6f6760;
+  background: var(--find-page) !important;
+  color: var(--find-charcoal) !important;
+}
+
+body.furbabies-page .pet-browser-section {
+  background:
+    radial-gradient(circle at 10% 0%, rgba(255, 248, 238, 0.86), transparent 28%),
+    linear-gradient(180deg, #fff8ee 0%, #f7f2e8 100%) !important;
+}
+
+body.furbabies-page .browser-kicker,
+body.furbabies-page .search-box .browser-control-icon,
+body.furbabies-page .search-box .browser-control-icon i,
+body.furbabies-page .sort-select-wrap::after,
+body.furbabies-page .pet-meta i,
+body.furbabies-page .adoption-reminder > span {
+  color: var(--find-burgundy) !important;
+}
+
+body.furbabies-page .browser-kicker::before,
+body.furbabies-page .adoption-reminder::before {
+  background: var(--find-gold) !important;
+}
+
+body.furbabies-page .browser-toolbar-left h2,
+body.furbabies-page .pet-card-top h3,
+body.furbabies-page .pet-fact strong,
+body.furbabies-page #petSort,
+body.furbabies-page .search-box input {
+  color: var(--find-charcoal) !important;
+}
+
+body.furbabies-page .browser-toolbar-left p,
+body.furbabies-page .pet-meta,
+body.furbabies-page .pet-fact:not(:first-child) strong,
+body.furbabies-page .pet-temperament strong,
+body.furbabies-page .adoption-reminder p {
+  color: var(--find-muted) !important;
+}
+
+body.furbabies-page .search-box,
+body.furbabies-page .filter-tabs,
+body.furbabies-page #petSort,
+body.furbabies-page .pet-card,
+body.furbabies-page .pet-actions .secondary-btn,
+body.furbabies-page .adoption-reminder {
+  border-color: rgba(120, 1, 22, 0.16) !important;
+  background: rgba(255, 248, 238, 0.96) !important;
+}
+
+body.furbabies-page .filter-tab.active,
+body.furbabies-page .filter-tab:hover,
+body.furbabies-page .pet-badge,
+body.furbabies-page .pet-actions .primary-btn,
+body.furbabies-page .adoption-reminder .btn:hover,
+body.furbabies-page .finder-actions .primary-btn {
+  border-color: var(--find-burgundy) !important;
+  background: var(--find-burgundy) !important;
+  color: #ffffff !important;
+}
+
+body.furbabies-page .pet-badge {
+  border-color: rgba(255, 248, 238, 0.62) !important;
+  background: rgba(255, 248, 238, 0.68) !important;
+  color: var(--find-burgundy) !important;
+}
+
+body.furbabies-page .filter-tab,
+body.furbabies-page .pet-actions .secondary-btn,
+body.furbabies-page .adoption-reminder .btn {
+  color: var(--find-burgundy) !important;
+}
+
+body.furbabies-page .filter-tab.active,
+body.furbabies-page .filter-tab:hover {
+  box-shadow: none !important;
+}
+
+body.furbabies-page .sort-select-wrap {
+  border-color: rgba(120, 1, 22, 0.16) !important;
+  background: rgba(255, 248, 238, 0.96) !important;
+}
+
+body.furbabies-page #petSort {
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--find-burgundy) !important;
+  font-size: 0.78rem !important;
+}
+
+body.furbabies-page .pet-ready-badge {
+  background: rgba(255, 248, 238, 0.72) !important;
+  color: #526f46 !important;
+}
+
+body.furbabies-page .pet-fact:not(:first-child) strong,
+body.furbabies-page .pet-temperament strong {
+  background: rgba(247, 201, 92, 0.16) !important;
+}
+
+body.furbabies-page .pet-actions .primary-btn {
+  box-shadow: none !important;
+}
+
+body.furbabies-page .finder-actions .primary-btn {
+  box-shadow: 0 18px 34px rgba(120, 1, 22, 0.24) !important;
+}
+
+body.furbabies-page .finder-actions .secondary-btn {
+  border-color: rgba(255, 248, 238, 0.78) !important;
+  background: rgba(255, 248, 238, 0.08) !important;
+  color: #ffffff !important;
+}
+
+/* Final filter-row alignment */
+body.furbabies-page .browser-filter-panel {
+  --browser-filter-height: 44px;
+}
+
+body.furbabies-page .search-box,
+body.furbabies-page .filter-tabs,
+body.furbabies-page .sort-select-wrap,
+body.furbabies-page #petSort {
+  height: var(--browser-filter-height) !important;
+  min-height: var(--browser-filter-height) !important;
+  max-height: var(--browser-filter-height) !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+body.furbabies-page .sort-select-wrap {
+  overflow: visible !important;
+}
+
+body.furbabies-page .filter-tabs {
+  align-items: center !important;
+  padding: 3px !important;
+}
+
+body.furbabies-page .filter-tab {
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  min-width: 56px !important;
+  padding: 0 12px !important;
+  font-size: 0.72rem !important;
+  font-weight: 850 !important;
+  line-height: 1 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+body.furbabies-page #petSort,
+body.furbabies-page .search-box input {
+  font-size: 0.78rem !important;
+  line-height: 1 !important;
+}
+
+body.furbabies-page #petSort {
+  padding-left: 16px !important;
+  padding-right: 32px !important;
+  font-weight: 850 !important;
+}
+
+/* Final pet card content layout */
+body.furbabies-page .pet-card {
+  border-radius: 12px !important;
+  background: #fffdf8 !important;
+}
+
+body.furbabies-page .pet-card-image {
+  height: 178px !important;
+}
+
+body.furbabies-page .pet-card-body {
+  padding: 14px 16px 16px !important;
+}
+
+body.furbabies-page .pet-card-top {
+  margin: 0 !important;
+}
+
+body.furbabies-page .pet-card-top h3 {
+  margin: 0 0 8px !important;
+  color: #20252b !important;
+  font-size: 1.28rem !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+}
+
+body.furbabies-page .pet-meta {
+  gap: 8px !important;
+  margin: 0 0 9px !important;
+  color: #6f6a63 !important;
+  font-size: 0.72rem !important;
+  font-weight: 850 !important;
+  line-height: 1.1 !important;
+}
+
+body.furbabies-page .pet-facts {
+  margin: 0 0 10px !important;
+}
+
+body.furbabies-page .pet-fact {
+  margin: 0 !important;
+}
+
+body.furbabies-page .pet-fact:first-child {
+  display: block !important;
+}
+
+body.furbabies-page .pet-fact:first-child strong {
+  display: block !important;
+  color: #4f4740 !important;
+  font-size: 0.78rem !important;
+  font-weight: 900 !important;
+  line-height: 1.25 !important;
+}
+
+body.furbabies-page .pet-fact:not(:first-child) {
+  display: none !important;
+}
+
+body.furbabies-page .pet-temperament {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 7px !important;
+  min-height: 26px !important;
+  margin: 0 0 18px !important;
+}
+
+body.furbabies-page .pet-temperament span,
+body.furbabies-page .pet-temperament strong {
+  display: inline-flex !important;
+  align-items: center !important;
+  min-height: 26px !important;
+  padding: 0 12px !important;
+  border-radius: 999px !important;
+  background: #f2eadf !important;
+  color: #6b655f !important;
+  font-size: 0.7rem !important;
+  font-weight: 850 !important;
+}
+
+body.furbabies-page .pet-actions {
+  gap: 12px !important;
+}
+
+body.furbabies-page .pet-actions .btn {
+  min-height: 38px !important;
+  border-radius: 999px !important;
+  font-size: 0.72rem !important;
+  font-weight: 900 !important;
+}
+
+body.furbabies-page .pet-actions .secondary-btn {
+  background: transparent !important;
+  border-color: rgba(120, 1, 22, 0.2) !important;
+}
+
+/* Reference-style compact card details */
+body.furbabies-page .pets-grid {
+  align-items: start !important;
+}
+
+body.furbabies-page .pet-card {
+  height: auto !important;
+}
+
+body.furbabies-page .pet-card-body {
+  padding: 12px 14px 14px !important;
+}
+
+body.furbabies-page .pet-card-top h3 {
+  max-width: 100% !important;
+  margin: 0 0 7px !important;
+  color: #20252b !important;
+  font-size: 1.04rem !important;
+  font-weight: 950 !important;
+  line-height: 1.08 !important;
+  letter-spacing: 0 !important;
+}
+
+body.furbabies-page .pet-meta {
+  gap: 7px !important;
+  margin: 0 0 8px !important;
+  color: #6f6a63 !important;
+  font-size: 0.66rem !important;
+  font-weight: 800 !important;
+  line-height: 1.15 !important;
+}
+
+body.furbabies-page .pet-meta i {
+  font-size: 0.72rem !important;
+}
+
+body.furbabies-page .pet-facts,
+body.furbabies-page .pet-fact,
+body.furbabies-page .pet-fact span,
+body.furbabies-page .pet-fact strong {
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+body.furbabies-page .pet-facts {
+  margin: 0 0 8px !important;
+  padding: 0 !important;
+}
+
+body.furbabies-page .pet-fact:first-child strong {
+  color: #4b433d !important;
+  font-size: 0.78rem !important;
+  font-weight: 900 !important;
+  line-height: 1.2 !important;
+}
+
+body.furbabies-page .pet-temperament {
+  gap: 7px !important;
+  min-height: 0 !important;
+  margin: 0 0 16px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.furbabies-page .pet-temperament span,
+body.furbabies-page .pet-temperament strong {
+  min-height: 24px !important;
+  padding: 0 10px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: #f2eadf !important;
+  color: #6b655f !important;
+  box-shadow: none !important;
+  font-size: 0.64rem !important;
+  font-weight: 850 !important;
+  line-height: 1 !important;
+}
+
+body.furbabies-page .pet-actions {
+  margin-top: 0 !important;
+  gap: 10px !important;
+  padding-top: 2px !important;
+  overflow: visible !important;
+}
+
+body.furbabies-page .pet-actions .btn {
+  min-height: 34px !important;
+  font-size: 0.66rem !important;
+  transform: none !important;
+}
+
+/* Final pill text alignment */
+body.furbabies-page .pet-badge,
+body.furbabies-page .pet-ready-badge,
+body.furbabies-page .pet-temperament span,
+body.furbabies-page .pet-temperament strong {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+}
+
+body.furbabies-page .pet-badge {
+  height: 28px !important;
+  min-height: 28px !important;
+  padding: 0 11px !important;
+}
+
+body.furbabies-page .pet-ready-badge {
+  height: 30px !important;
+  min-height: 30px !important;
+  padding: 0 12px !important;
+}
+
+body.furbabies-page .pet-ready-badge i {
+  flex: 0 0 auto !important;
+}
+
+body.furbabies-page .pet-temperament span,
+body.furbabies-page .pet-temperament strong {
+  height: 24px !important;
+  min-height: 24px !important;
+  padding: 0 11px !important;
+}
+
+/* Final profile modal info cards */
+body.furbabies-page .profile-about-card,
+body.furbabies-page .profile-section-card {
+  display: block !important;
+  padding: 16px !important;
+  border: 1px solid rgba(111, 42, 31, 0.13) !important;
+  border-radius: 12px !important;
+  background: rgba(255, 249, 241, 0.92) !important;
+  box-shadow: none !important;
+}
+
+body.furbabies-page .profile-about-card {
+  margin-top: 16px !important;
+}
+
+body.furbabies-page .profile-body-sections {
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+body.furbabies-page .profile-about-card .profile-section-head,
+body.furbabies-page .profile-section-card .profile-section-head {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 10px !important;
+  margin: 0 0 12px !important;
+  padding: 0 !important;
+  color: #7b2b23 !important;
+}
+
+body.furbabies-page .profile-about-card .profile-section-head i,
+body.furbabies-page .profile-section-card .profile-section-head i {
+  width: 30px !important;
+  height: 30px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 30px !important;
+  border-radius: 999px !important;
+  background: #8e3127 !important;
+  color: #ffffff !important;
+  font-size: 0.72rem !important;
+}
+
+body.furbabies-page .profile-about-card .profile-section-head h4,
+body.furbabies-page .profile-section-card .profile-section-head h4 {
+  margin: 0 !important;
+  color: #20252b !important;
+  font-family: Inter, sans-serif !important;
+  font-size: 0.92rem !important;
+  font-weight: 950 !important;
+  line-height: 1.1 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+body.furbabies-page .profile-about-card .profile-short-description {
+  margin: 0 !important;
+  color: #554d48 !important;
+  font-size: 0.86rem !important;
+  font-weight: 650 !important;
+  line-height: 1.55 !important;
+}
+
+body.furbabies-page .profile-section-card .profile-traits {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  margin: 0 !important;
+}
+
+/* Match profile info cards to Suitable Home */
+body.furbabies-page .profile-about-card,
+body.furbabies-page .profile-section-card {
+  display: grid !important;
+  grid-template-columns: 54px 1fr !important;
+  align-items: start !important;
+  gap: 14px !important;
+  padding: 18px !important;
+}
+
+body.furbabies-page .profile-about-card .profile-section-head,
+body.furbabies-page .profile-section-card .profile-section-head {
+  display: contents !important;
+}
+
+body.furbabies-page .profile-about-card .profile-section-head i,
+body.furbabies-page .profile-section-card .profile-section-head i {
+  width: 46px !important;
+  height: 46px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  grid-column: 1 !important;
+  grid-row: 1 / span 2 !important;
+  border-radius: 999px !important;
+  background: #8e3127 !important;
+  color: #ffffff !important;
+  font-size: 0.92rem !important;
+}
+
+body.furbabies-page .profile-about-card .profile-section-head h4,
+body.furbabies-page .profile-section-card .profile-section-head h4 {
+  grid-column: 2 !important;
+  margin: 0 !important;
+  color: #7b2b23 !important;
+  font-family: Inter, sans-serif !important;
+  font-size: 1.05rem !important;
+  font-weight: 950 !important;
+  line-height: 1.15 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+body.furbabies-page .profile-about-card .profile-short-description,
+body.furbabies-page .profile-section-card .profile-traits {
+  grid-column: 2 !important;
+  margin: -4px 0 0 !important;
+}
+
+body.furbabies-page .profile-about-card .profile-short-description {
+  color: #554d48 !important;
+  font-size: 0.95rem !important;
+  font-weight: 750 !important;
+  line-height: 1.45 !important;
+}
+
+/* Compact profile info cards */
+body.furbabies-page .profile-visual-column {
+  display: grid !important;
+  grid-template-rows: auto 1fr !important;
+  gap: 14px !important;
+}
+
+body.furbabies-page .profile-about-card,
+body.furbabies-page .profile-section-card {
+  grid-template-columns: 34px 1fr !important;
+  gap: 9px !important;
+  padding: 12px 14px !important;
+  min-height: 0 !important;
+}
+
+body.furbabies-page .profile-about-card {
+  min-height: 116px !important;
+  margin-top: 0 !important;
+}
+
+body.furbabies-page .profile-about-card .profile-section-head i,
+body.furbabies-page .profile-section-card .profile-section-head i {
+  width: 30px !important;
+  height: 30px !important;
+  flex-basis: 30px !important;
+  font-size: 0.68rem !important;
+}
+
+body.furbabies-page .profile-about-card .profile-section-head h4,
+body.furbabies-page .profile-section-card .profile-section-head h4 {
+  font-size: 0.84rem !important;
+  line-height: 1.12 !important;
+}
+
+body.furbabies-page .profile-about-card .profile-short-description,
+body.furbabies-page .profile-section-card .profile-traits {
+  margin-top: -2px !important;
+}
+
+body.furbabies-page .profile-about-card .profile-short-description {
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  line-height: 1.42 !important;
+}
+
+body.furbabies-page .modern-traits .trait-chip {
+  min-height: 26px !important;
+  padding: 0 11px !important;
+  font-size: 0.68rem !important;
+}
+
+/* Final pet card button hover */
+body.furbabies-page .pet-actions .secondary-btn {
+  border: 1px solid rgba(120, 1, 22, 0.22) !important;
+  background: rgba(255, 253, 248, 0.98) !important;
+  color: var(--find-burgundy) !important;
+  box-shadow: none !important;
+}
+
+body.furbabies-page .pet-actions .secondary-btn:hover {
+  border-color: rgba(120, 1, 22, 0.42) !important;
+  background: rgba(120, 1, 22, 0.08) !important;
+  color: var(--find-burgundy) !important;
+  box-shadow: inset 0 0 0 1px rgba(120, 1, 22, 0.05) !important;
+  transform: none !important;
+}
+
+/* Final unified profile info cards */
+body.furbabies-page .profile-highlight-box,
+body.furbabies-page .profile-about-card,
+body.furbabies-page .profile-section-card {
+  display: grid !important;
+  grid-template-columns: 34px 1fr !important;
+  align-items: start !important;
+  gap: 10px !important;
+  padding: 14px !important;
+  border: 1px solid rgba(111, 42, 31, 0.13) !important;
+  border-radius: 12px !important;
+  background: rgba(255, 249, 241, 0.92) !important;
+  box-shadow: none !important;
+}
+
+body.furbabies-page .profile-highlight-head,
+body.furbabies-page .profile-about-card .profile-section-head,
+body.furbabies-page .profile-section-card .profile-section-head {
+  display: contents !important;
+}
+
+body.furbabies-page .profile-highlight-head i,
+body.furbabies-page .profile-about-card .profile-section-head i,
+body.furbabies-page .profile-section-card .profile-section-head i {
+  grid-column: 1 !important;
+  grid-row: 1 / span 2 !important;
+  width: 30px !important;
+  height: 30px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 30px !important;
+  border-radius: 999px !important;
+  background: #8e3127 !important;
+  color: #ffffff !important;
+  font-size: 0.68rem !important;
+}
+
+body.furbabies-page .profile-highlight-head h4,
+body.furbabies-page .profile-about-card .profile-section-head h4,
+body.furbabies-page .profile-section-card .profile-section-head h4 {
+  grid-column: 2 !important;
+  margin: 0 !important;
+  color: #7b2b23 !important;
+  font-family: Inter, sans-serif !important;
+  font-size: 0.84rem !important;
+  font-weight: 950 !important;
+  line-height: 1.12 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+body.furbabies-page .profile-highlight-box p,
+body.furbabies-page .profile-about-card .profile-short-description,
+body.furbabies-page .profile-section-card .profile-traits {
+  grid-column: 2 !important;
+  margin: -2px 0 0 !important;
+}
+
+body.furbabies-page .profile-highlight-box p,
+body.furbabies-page .profile-about-card .profile-short-description {
+  color: #554d48 !important;
+  font-family: Inter, sans-serif !important;
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  line-height: 1.42 !important;
+}
+
+body.furbabies-page .profile-section-card .profile-traits {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+}
+
+/* Final lock: keep all profile narrative boxes visually identical */
+body.furbabies-page .profile-highlight-box,
+body.furbabies-page .profile-about-card,
+body.furbabies-page .profile-section-card {
+  border: 1px solid rgba(111, 42, 31, 0.13) !important;
+  background: #fff9f1 !important;
+  color: #554d48 !important;
+}
+
+body.furbabies-page .profile-highlight-head h4,
+body.furbabies-page .profile-about-card .profile-section-head h4,
+body.furbabies-page .profile-section-card .profile-section-head h4 {
+  color: #7b2b23 !important;
+  font-family: Inter, sans-serif !important;
+  font-size: 0.84rem !important;
+  font-weight: 950 !important;
+}
+
+body.furbabies-page .profile-highlight-box p,
+body.furbabies-page .profile-about-card .profile-short-description,
+body.furbabies-page .profile-section-card .profile-traits,
+body.furbabies-page .profile-section-card .modern-traits .trait-chip {
+  color: #554d48 !important;
+  font-family: Inter, sans-serif !important;
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  line-height: 1.42 !important;
+}
+
+body.furbabies-page .profile-section-card .modern-traits .trait-chip {
+  min-height: 26px !important;
+  padding: 0 11px !important;
+  border-color: rgba(111, 42, 31, 0.13) !important;
+  background: rgba(255, 253, 248, 0.9) !important;
+}
+
+/* Final lock: keep every pet card the same compact size */
+body.furbabies-page .pets-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  align-items: stretch !important;
+}
+
+body.furbabies-page .pet-card {
+  height: 392px !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+body.furbabies-page .pet-card-image,
+body.furbabies-page .pet-card-image img {
+  height: 178px !important;
+  flex: 0 0 178px !important;
+}
+
+body.furbabies-page .pet-card-body {
+  height: 214px !important;
+  min-height: 214px !important;
+  padding: 12px 14px 14px !important;
+  display: grid !important;
+  grid-template-rows: 45px 18px 29px 1fr 36px !important;
+  gap: 0 !important;
+  overflow: hidden !important;
+}
+
+body.furbabies-page .pet-card-top,
+body.furbabies-page .pet-facts,
+body.furbabies-page .pet-temperament,
+body.furbabies-page .pet-actions {
+  min-width: 0 !important;
+}
+
+body.furbabies-page .pet-card-top h3 {
+  height: 38px !important;
+  margin: 0 0 7px !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  font-size: 1.04rem !important;
+  line-height: 1.08 !important;
+}
+
+body.furbabies-page .pet-meta {
+  height: 18px !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: nowrap !important;
+  gap: 7px !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+}
+
+body.furbabies-page .pet-meta span {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+body.furbabies-page .pet-facts {
+  height: 29px !important;
+  margin: 0 !important;
+  display: block !important;
+  overflow: hidden !important;
+}
+
+body.furbabies-page .pet-fact {
+  display: block !important;
+}
+
+body.furbabies-page .pet-fact + .pet-fact {
+  display: none !important;
+}
+
+body.furbabies-page .pet-fact i,
+body.furbabies-page .pet-fact small {
+  display: none !important;
+}
+
+body.furbabies-page .pet-fact strong {
+  display: block !important;
+  overflow: hidden !important;
+  color: #3b352f !important;
+  font-size: 0.82rem !important;
+  font-weight: 900 !important;
+  line-height: 1.2 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+body.furbabies-page .pet-temperament {
+  align-content: start !important;
+  height: 42px !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+}
+
+body.furbabies-page .pet-actions {
+  align-self: end !important;
+  height: 36px !important;
+  margin: 0 !important;
+  padding-top: 2px !important;
+}
+
+body.furbabies-page .pet-actions .btn {
+  min-height: 34px !important;
+  height: 34px !important;
+}
+
+@media (max-width: 1180px) and (min-width: 901px) {
+  body.furbabies-page .pets-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 900px) and (min-width: 641px) {
+  body.furbabies-page .pets-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  body.furbabies-page .pets-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  body.furbabies-page .pet-card {
+    height: auto !important;
+  }
+
+  body.furbabies-page .pet-card-body {
+    height: auto !important;
+    min-height: 214px !important;
+  }
+}
+
+/* Final repair: preserve the good pet-card layout while keeping sizes even */
+body.furbabies-page .pet-card {
+  height: 392px !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+body.furbabies-page .pet-card-body {
+  height: auto !important;
+  min-height: 214px !important;
+  flex: 1 1 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 12px 14px 14px !important;
+  overflow: hidden !important;
+}
+
+body.furbabies-page .pet-card-top {
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+}
+
+body.furbabies-page .pet-card-top h3 {
+  height: auto !important;
+  min-height: 22px !important;
+  max-height: 45px !important;
+  margin: 0 0 7px !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+}
+
+body.furbabies-page .pet-meta {
+  height: auto !important;
+  min-height: 18px !important;
+  margin: 0 0 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: nowrap !important;
+  gap: 7px !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+}
+
+body.furbabies-page .pet-facts {
+  height: auto !important;
+  min-height: 20px !important;
+  margin: 0 0 8px !important;
+  display: block !important;
+  overflow: hidden !important;
+}
+
+body.furbabies-page .pet-temperament {
+  height: auto !important;
+  min-height: 24px !important;
+  max-height: 56px !important;
+  margin: 0 0 12px !important;
+  display: flex !important;
+  align-content: flex-start !important;
+  overflow: hidden !important;
+}
+
+body.furbabies-page .pet-actions {
+  height: auto !important;
+  margin-top: auto !important;
+  padding-top: 2px !important;
+}
+
+/* Final warning-style adoption notice */
+body.furbabies-page .adoption-reminder {
+  display: grid !important;
+  grid-template-columns: 42px minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 14px !important;
+  width: 100% !important;
+  margin: 28px auto 0 !important;
+  padding: 16px 18px !important;
+  border: 1px solid rgba(166, 112, 18, 0.28) !important;
+  border-left: 5px solid #d5a11e !important;
+  border-radius: 12px !important;
+  background: #fff8e7 !important;
+  box-shadow: 0 12px 26px rgba(64, 49, 34, 0.07) !important;
+}
+
+body.furbabies-page .adoption-reminder::before {
+  content: none !important;
+}
+
+body.furbabies-page .adoption-reminder > span {
+  width: 38px !important;
+  height: 38px !important;
+  margin: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 1px solid rgba(213, 161, 30, 0.35) !important;
+  border-radius: 999px !important;
+  background: #fff2c7 !important;
+  color: #8a3b17 !important;
+  box-shadow: none !important;
+}
+
+body.furbabies-page .adoption-reminder h3 {
+  margin: 0 !important;
+  color: #3a2617 !important;
+  font-family: Inter, sans-serif !important;
+  font-size: 0.96rem !important;
+  font-weight: 900 !important;
+  line-height: 1.2 !important;
+}
+
+body.furbabies-page .adoption-reminder p {
+  margin: 3px 0 0 !important;
+  color: #6f5b42 !important;
+  font-size: 0.82rem !important;
+  font-weight: 650 !important;
+  line-height: 1.35 !important;
+}
+
+body.furbabies-page .adoption-reminder .btn {
+  display: none !important;
+}
+
+@media (max-width: 560px) {
+  body.furbabies-page .adoption-reminder {
+    grid-template-columns: 36px minmax(0, 1fr) !important;
+    gap: 12px !important;
+    padding: 14px !important;
+  }
+
+  body.furbabies-page .adoption-reminder > span {
+    width: 34px !important;
+    height: 34px !important;
+  }
+}
+
+/* Final red adoption notice treatment */
+body.furbabies-page .adoption-reminder {
+  border-color: rgba(120, 1, 22, 0.16) !important;
+  border-left: 1px solid rgba(120, 1, 22, 0.16) !important;
+  background: rgba(255, 248, 238, 0.96) !important;
+}
+
+body.furbabies-page .adoption-reminder > span {
+  border-color: rgba(120, 1, 22, 0.18) !important;
+  background: rgba(120, 1, 22, 0.08) !important;
+  color: var(--find-burgundy) !important;
+}
+
+body.furbabies-page .adoption-reminder h3 {
+  color: #20252b !important;
+}
+
+body.furbabies-page .adoption-reminder p {
+  color: #5f5751 !important;
+}
+
+/* Final wizard visibility lock */
+body.furbabies-page .adoption-checkboxes.adoption-step-hidden,
+body.furbabies-page .pledge-box.adoption-step-hidden,
+body.furbabies-page .adoption-bottom-grid.adoption-step-hidden,
+body.furbabies-page .adoption-upload-card.adoption-step-hidden,
+body.furbabies-page .adoption-review-field.adoption-step-hidden,
+body.furbabies-page .adoption-notice-field.adoption-step-hidden {
+  display: none !important;
+}
+
+body.furbabies-page .conditional-field[hidden],
+body.furbabies-page .conditional-field.adoption-step-hidden {
+  display: none !important;
+}
+
+/* Step 3 only: align paired readiness fields */
+body.furbabies-page .adoption-form.adoption-step-3-active .adoption-grid .form-group[data-adoption-field-step="3"]:not(.full):not(.adoption-step-hidden) {
+  display: grid !important;
+  grid-template-rows: 58px auto !important;
+  align-content: start !important;
+}
+
+body.furbabies-page .adoption-form.adoption-step-3-active .adoption-grid .form-group[data-adoption-field-step="3"]:not(.full):not(.adoption-step-hidden) label {
+  min-height: 58px !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  line-height: 1.35 !important;
+}
+
+body.furbabies-page .adoption-form.adoption-step-3-active .adoption-grid .form-group[data-adoption-field-step="3"]:not(.full):not(.adoption-step-hidden) input,
+body.furbabies-page .adoption-form.adoption-step-3-active .adoption-grid .form-group[data-adoption-field-step="3"]:not(.full):not(.adoption-step-hidden) select {
+  align-self: start !important;
+}
+
+body.furbabies-page #adoptionSubmitBtn:disabled {
+  cursor: not-allowed !important;
+  opacity: 0.58 !important;
+  box-shadow: none !important;
+}
+
+/* Final compact adoption wizard height */
+body.furbabies-page .adopt-form-panel .adoption-form {
+  min-height: 0 !important;
+  padding-top: 4px !important;
+  padding-bottom: 0 !important;
+}
+
+body.furbabies-page .selected-pet-box {
+  margin-bottom: 10px !important;
+}
+
+body.furbabies-page .adoption-section-title {
+  margin-bottom: 10px !important;
+  padding-top: 10px !important;
+}
+
+body.furbabies-page .adoption-grid {
+  gap: 10px 16px !important;
+}
+
+body.furbabies-page .form-group label,
+body.furbabies-page .adoption-upload-card label {
+  margin-bottom: 4px !important;
+}
+
+body.furbabies-page .form-group input,
+body.furbabies-page .form-group select,
+body.furbabies-page .form-group textarea,
+body.furbabies-page .adoption-upload-card input[type="file"] {
+  min-height: 36px !important;
+  padding-top: 9px !important;
+  padding-bottom: 9px !important;
+}
+
+body.furbabies-page .adoption-wizard-actions {
+  padding-top: 12px !important;
+  padding-bottom: 12px !important;
+  border-top: 0 !important;
+}
+
+body.furbabies-page .adoption-security-note {
+  padding-top: 9px !important;
+  padding-bottom: 9px !important;
+}
+
+/* Final compact selected-pet summary and muted form text */
+body.furbabies-page .selected-pet-box {
+  display: grid !important;
+  grid-template-columns: 78px 1fr !important;
+  gap: 12px !important;
+  margin-bottom: 8px !important;
+  padding: 12px 14px !important;
+}
+
+body.furbabies-page .selected-pet-box h3 {
+  grid-column: 1 / -1 !important;
+  font-size: 0.82rem !important;
+}
+
+body.furbabies-page .selected-pet-preview {
+  display: contents !important;
+}
+
+body.furbabies-page .selected-pet-image {
+  width: 78px !important;
+  height: 62px !important;
+  border-radius: 8px !important;
+}
+
+body.furbabies-page .selected-pet-preview > div {
+  align-self: center !important;
+}
+
+body.furbabies-page .selected-pet-box strong {
+  font-size: 1rem !important;
+  line-height: 1.05 !important;
+}
+
+body.furbabies-page .selected-pet-box span,
+body.furbabies-page .selected-pet-box small {
+  margin-top: 3px !important;
+  font-size: 0.72rem !important;
+  line-height: 1.25 !important;
+}
+
+body.furbabies-page .selected-pet-box em {
+  min-height: 24px !important;
+  margin-top: 5px !important;
+  padding: 0 12px !important;
+  font-size: 0.7rem !important;
+}
+
+body.furbabies-page .form-group input,
+body.furbabies-page .form-group select,
+body.furbabies-page .form-group textarea {
+  color: #6f6760 !important;
+}
+
+body.furbabies-page .form-group input::placeholder,
+body.furbabies-page .form-group textarea::placeholder {
+  color: #8a8179 !important;
+  opacity: 1 !important;
+}
+
+body.furbabies-page .form-group input[readonly] {
+  color: #8a8179 !important;
+}
+
+/* Final selected-pet summary strip */
+body.furbabies-page .selected-pet-box {
+  grid-template-columns: auto 82px minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 12px 16px !important;
+  border-color: rgba(111, 42, 31, 0.1) !important;
+  background: rgba(255, 253, 248, 0.78) !important;
+}
+
+body.furbabies-page .selected-pet-box h3 {
+  grid-column: auto !important;
+  align-self: center !important;
+  width: fit-content !important;
+  padding: 7px 11px !important;
+  border-radius: 999px !important;
+  background: rgba(142, 49, 39, 0.08) !important;
+  color: #7b2b23 !important;
+  font-size: 0.72rem !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+body.furbabies-page .selected-pet-preview {
+  display: contents !important;
+}
+
+body.furbabies-page .selected-pet-image {
+  grid-column: auto !important;
+  width: 82px !important;
+  height: 58px !important;
+}
+
+body.furbabies-page .selected-pet-preview > div {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  grid-template-rows: auto auto !important;
+  align-items: center !important;
+  gap: 4px 14px !important;
+  min-width: 0 !important;
+}
+
+body.furbabies-page .selected-pet-box strong {
+  grid-column: 1 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+body.furbabies-page .selected-pet-box span {
+  grid-column: 1 !important;
+  margin: 0 !important;
+}
+
+body.furbabies-page .selected-pet-box em {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  margin: 0 !important;
+  white-space: nowrap !important;
+}
+
+body.furbabies-page .selected-pet-box small {
+  grid-column: 2 !important;
+  grid-row: 2 !important;
+  margin: 0 !important;
+  color: #6f6760 !important;
+  white-space: nowrap !important;
+}
+
+/* Final roomier adoption wizard */
+body.furbabies-page .adoption-wizard-modal {
+  width: min(1100px, calc(100vw - 32px)) !important;
+  max-height: calc(100vh - 24px) !important;
+}
+
+body.furbabies-page .adoption-form-header {
+  padding: 24px 30px 18px !important;
+}
+
+body.furbabies-page .adoption-form-logo {
+  width: 56px !important;
+  height: 56px !important;
+  flex-basis: 56px !important;
+}
+
+body.furbabies-page .adoption-form-title h2 {
+  font-size: 1.7rem !important;
+}
+
+body.furbabies-page .adoption-form-title p {
+  font-size: 0.9rem !important;
+}
+
+body.furbabies-page .adoption-wizard-modal > .adoption-stepper {
+  top: 122px !important;
+  width: 220px !important;
+}
+
+body.furbabies-page .adoption-stepper-item {
+  min-height: 104px !important;
+  padding: 17px 16px !important;
+}
+
+body.furbabies-page .adoption-stepper-item span {
+  width: 36px !important;
+  height: 36px !important;
+  font-size: 0.92rem !important;
+}
+
+body.furbabies-page .adoption-stepper-item strong {
+  font-size: 0.98rem !important;
+}
+
+body.furbabies-page .adoption-stepper-item small {
+  font-size: 0.82rem !important;
+}
+
+body.furbabies-page .adopt-form-panel .adoption-form {
+  padding-left: 286px !important;
+}
+
+body.furbabies-page .selected-pet-box {
+  margin-left: 286px !important;
+  padding: 16px 18px !important;
+}
+
+body.furbabies-page .selected-pet-image {
+  width: 96px !important;
+  height: 70px !important;
+}
+
+body.furbabies-page .selected-pet-box h3 {
+  font-size: 0.82rem !important;
+  padding: 9px 14px !important;
+}
+
+body.furbabies-page .selected-pet-box strong {
+  font-size: 1.18rem !important;
+}
+
+body.furbabies-page .selected-pet-box span,
+body.furbabies-page .selected-pet-box small {
+  font-size: 0.86rem !important;
+}
+
+body.furbabies-page .selected-pet-box em {
+  min-height: 30px !important;
+  padding: 0 18px !important;
+  font-size: 0.82rem !important;
+}
+
+body.furbabies-page .adoption-section-title h3 {
+  font-size: 1.06rem !important;
+}
+
+body.furbabies-page .form-group label,
+body.furbabies-page .adoption-upload-card label {
+  font-size: 0.86rem !important;
+}
+
+body.furbabies-page .form-group input,
+body.furbabies-page .form-group select,
+body.furbabies-page .form-group textarea,
+body.furbabies-page .adoption-upload-card input[type="file"] {
+  min-height: 44px !important;
+  font-size: 0.96rem !important;
+}
+
+body.furbabies-page .adoption-wizard-actions {
+  padding-left: 286px !important;
+}
+
+body.furbabies-page .adoption-wizard-actions .btn {
+  min-height: 46px !important;
+  font-size: 0.9rem !important;
+}
+
+body.furbabies-page .adoption-security-note {
+  font-size: 0.86rem !important;
+}
+
+/* Final adoption modal proportions: taller, less wide */
+body.furbabies-page .adoption-wizard-modal {
+  width: min(980px, calc(100vw - 32px)) !important;
+  max-height: calc(100vh - 12px) !important;
+}
+
+body.furbabies-page .adoption-wizard-modal > .adoption-stepper {
+  width: 210px !important;
+}
+
+body.furbabies-page .adopt-form-panel .adoption-form,
+body.furbabies-page .adoption-wizard-actions {
+  padding-left: 266px !important;
+}
+
+body.furbabies-page .selected-pet-box {
+  margin-left: 266px !important;
+}
+
+body.furbabies-page .adoption-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+body.furbabies-page .adoption-grid .full,
+body.furbabies-page .adoption-grid .span-2 {
+  grid-column: 1 / -1 !important;
+}
+
+/* Final adoption modal proportions: narrow and tall */
+body.furbabies-page .adoption-wizard-modal {
+  width: min(820px, calc(100vw - 32px)) !important;
+  max-height: calc(100vh - 10px) !important;
+}
+
+body.furbabies-page .adoption-wizard-modal > .adoption-stepper {
+  width: 176px !important;
+  left: 24px !important;
+  top: 118px !important;
+}
+
+body.furbabies-page .adoption-stepper-item {
+  grid-template-columns: 34px 1fr !important;
+  min-height: 104px !important;
+  padding: 15px 12px !important;
+}
+
+body.furbabies-page .adoption-stepper-item span {
+  width: 32px !important;
+  height: 32px !important;
+}
+
+body.furbabies-page .adoption-stepper-item strong {
+  font-size: 0.9rem !important;
+}
+
+body.furbabies-page .adoption-stepper-item small {
+  font-size: 0.76rem !important;
+}
+
+body.furbabies-page .adopt-form-panel .adoption-form,
+body.furbabies-page .adoption-wizard-actions {
+  padding-left: 224px !important;
+  padding-right: 24px !important;
+}
+
+body.furbabies-page .selected-pet-box {
+  margin-left: 224px !important;
+  margin-right: 24px !important;
+}
+
+body.furbabies-page .adoption-grid {
+  grid-template-columns: 1fr !important;
+  gap: 12px !important;
+}
+
+body.furbabies-page .form-group input,
+body.furbabies-page .form-group select,
+body.furbabies-page .form-group textarea,
+body.furbabies-page .adoption-upload-card input[type="file"] {
+  min-height: 48px !important;
+}
+
+body.furbabies-page .form-group textarea {
+  min-height: 104px !important;
+}
+
+/* Final adoption wizard correction: balanced size and clean summary */
+body.furbabies-page .adoption-wizard-modal {
+  width: min(900px, calc(100vw - 32px)) !important;
+  max-height: calc(100vh - 18px) !important;
+}
+
+body.furbabies-page .adoption-form-header {
+  padding: 20px 28px 14px !important;
+}
+
+body.furbabies-page .adoption-form-logo {
+  width: 48px !important;
+  height: 48px !important;
+  flex-basis: 48px !important;
+  font-size: 1.1rem !important;
+}
+
+body.furbabies-page .adoption-form-title h2 {
+  font-size: 1.42rem !important;
+}
+
+body.furbabies-page .adoption-form-title p {
+  font-size: 0.82rem !important;
+}
+
+body.furbabies-page .adoption-wizard-modal > .adoption-stepper {
+  left: 24px !important;
+  top: 104px !important;
+  width: 186px !important;
+}
+
+body.furbabies-page .adoption-stepper-item {
+  min-height: 88px !important;
+  padding: 13px 12px !important;
+}
+
+body.furbabies-page .adoption-stepper-item span {
+  width: 30px !important;
+  height: 30px !important;
+  font-size: 0.82rem !important;
+}
+
+body.furbabies-page .adoption-stepper-item strong {
+  font-size: 0.84rem !important;
+}
+
+body.furbabies-page .adoption-stepper-item small {
+  font-size: 0.72rem !important;
+  line-height: 1.35 !important;
+}
+
+body.furbabies-page .adopt-form-panel .adoption-form,
+body.furbabies-page .adoption-wizard-actions {
+  padding-left: 232px !important;
+  padding-right: 24px !important;
+}
+
+body.furbabies-page .selected-pet-box {
+  grid-template-columns: auto 76px minmax(0, 1fr) !important;
+  margin-left: 232px !important;
+  margin-right: 24px !important;
+  padding: 12px 14px !important;
+}
+
+body.furbabies-page .selected-pet-image {
+  width: 76px !important;
+  height: 56px !important;
+}
+
+body.furbabies-page .selected-pet-box h3 {
+  padding: 7px 10px !important;
+  font-size: 0.7rem !important;
+}
+
+body.furbabies-page .selected-pet-preview > div {
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  gap: 3px 10px !important;
+}
+
+body.furbabies-page .selected-pet-box strong {
+  max-width: 100% !important;
+  font-size: 0.98rem !important;
+  line-height: 1.08 !important;
+}
+
+body.furbabies-page .selected-pet-box span,
+body.furbabies-page .selected-pet-box small {
+  font-size: 0.72rem !important;
+}
+
+body.furbabies-page .selected-pet-box em {
+  min-height: 24px !important;
+  padding: 0 12px !important;
+  font-size: 0.7rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  text-align: center !important;
+}
+
+
+body.furbabies-page .adoption-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px 14px !important;
+}
+
+body.furbabies-page .adoption-grid .full,
+body.furbabies-page .adoption-grid .span-2 {
+  grid-column: 1 / -1 !important;
+}
+
+body.furbabies-page .adoption-section-title h3 {
+  font-size: 0.94rem !important;
+}
+
+body.furbabies-page .form-group label,
+body.furbabies-page .adoption-upload-card label {
+  font-size: 0.76rem !important;
+}
+
+body.furbabies-page .form-group input,
+body.furbabies-page .form-group select,
+body.furbabies-page .form-group textarea,
+body.furbabies-page .adoption-upload-card input[type="file"] {
+  min-height: 38px !important;
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+  font-size: 0.84rem !important;
+}
+
+body.furbabies-page .form-group textarea {
+  min-height: 78px !important;
+}
+
+body.furbabies-page .adoption-wizard-actions .btn {
+  min-height: 40px !important;
+  font-size: 0.78rem !important;
+}
+
+body.furbabies-page .adoption-security-note {
+  font-size: 0.76rem !important;
+}
+
+@media (max-width: 820px) {
+  body.furbabies-page .selected-pet-box {
+    grid-template-columns: auto 78px minmax(0, 1fr) !important;
+  }
+
+  body.furbabies-page .selected-pet-preview > div {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  body.furbabies-page .selected-pet-box em,
+  body.furbabies-page .selected-pet-box small {
+    grid-column: 1 !important;
+    grid-row: auto !important;
+  }
+
+  body.furbabies-page .selected-pet-box,
+  body.furbabies-page .adopt-form-panel .adoption-form,
+  body.furbabies-page .adoption-wizard-actions {
+    margin-left: 20px !important;
+    padding-left: 20px !important;
   }
 }

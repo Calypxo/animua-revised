@@ -151,9 +151,9 @@
     <div class="container">
       <div class="browser-toolbar reveal">
         <div class="browser-toolbar-left">
-          <span class="browser-title-icon"><i class="fa-solid fa-paw" aria-hidden="true"></i></span>
           <div>
-            <h2>Available Companions</h2>
+            <span class="browser-kicker"><i class="fa-solid fa-paw" aria-hidden="true"></i> Discover Companions</span>
+            <h2>Available Furbabies</h2>
             <p id="resultsCount">40 pets found</p>
           </div>
         </div>
@@ -167,12 +167,26 @@
           </div>
 
           <div class="filter-tabs">
-            <button class="filter-tab active" data-filter="all"><i class="fa-solid fa-paw" aria-hidden="true"></i> All</button>
-            <button class="filter-tab" data-filter="dog"><i class="fa-solid fa-dog" aria-hidden="true"></i> Dog</button>
-            <button class="filter-tab" data-filter="cat"><i class="fa-solid fa-cat" aria-hidden="true"></i> Cat</button>
+            <button class="filter-tab active" data-filter="all">All</button>
+            <button class="filter-tab" data-filter="dog">Dogs</button>
+            <button class="filter-tab" data-filter="cat">Cats</button>
+          </div>
+
+          <div class="sort-select-wrap">
+            <button class="sort-select-trigger" id="petSort" type="button" aria-label="Sort furbabies" aria-haspopup="listbox" aria-expanded="false">
+              <span id="petSortLabel">Newest First</span>
+            </button>
+            <div class="sort-menu" id="petSortMenu" role="listbox" aria-label="Sort furbabies" hidden>
+              <button class="sort-menu-option active" type="button" role="option" aria-selected="true" data-sort-value="newest">Newest First</button>
+              <button class="sort-menu-option" type="button" role="option" aria-selected="false" data-sort-value="oldest">Oldest First</button>
+            </div>
           </div>
         </div>
       </div>
+
+      <button class="floating-filter-btn" type="button" aria-label="Filter furbabies">
+        <i class="fa-solid fa-sliders" aria-hidden="true"></i>
+      </button>
 
       <div class="pets-grid" id="petsGrid"></div>
 
@@ -188,7 +202,6 @@
           <h3>Every adoption saves a life.</h3>
           <p>All animals are vaccinated, dewormed, and given proper vet care before adoption.</p>
         </div>
-        <a class="btn secondary-btn" href="home.html#home-highlights">Learn About Adoption</a>
       </div>
     </div>
   </section>
@@ -443,7 +456,13 @@
 
           <div class="form-group">
             <label for="citizenship">Citizenship *</label>
-            <input type="text" id="citizenship" name="citizenship" placeholder="Enter your citizenship" required>
+            <select id="citizenship" name="citizenship" required>
+              <option value="">Select citizenship</option>
+              <option>Filipino</option>
+              <option>Dual Citizen</option>
+              <option>Foreign National</option>
+              <option>Other</option>
+            </select>
           </div>
 
           <div class="form-group">

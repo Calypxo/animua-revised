@@ -14,7 +14,7 @@ function normalizeAnnouncementType(value) {
 }
 
 function normalizeAnnouncement(data = {}) {
-  return {
+  const payload = {
     title: String(data.title || "").trim(),
     type: normalizeAnnouncementType(data.type),
     caption: String(data.caption || "").trim(),
@@ -23,6 +23,20 @@ function normalizeAnnouncement(data = {}) {
     status: String(data.status || "Published").trim(),
     visibleToPublic: data.visibleToPublic !== false,
   };
+
+  ["description", "body", "content", "summary", "source", "eventTime"].forEach((field) => {
+    if (Object.prototype.hasOwnProperty.call(data, field)) {
+      payload[field] = String(data[field] || "").trim();
+    }
+  });
+
+  ["details", "storyParagraphs"].forEach((field) => {
+    if (Object.prototype.hasOwnProperty.call(data, field)) {
+      payload[field] = Array.isArray(data[field]) ? data[field] : [];
+    }
+  });
+
+  return payload;
 }
 
 exports.getPublicAnnouncements = async (req, res) => {
@@ -49,9 +63,17 @@ exports.getPublicAnnouncements = async (req, res) => {
         title: item.title,
         type: normalizeAnnouncementType(item.type),
         caption: item.caption,
+        description: item.description || "",
+        body: item.body || "",
+        content: item.content || "",
+        summary: item.summary || "",
+        details: Array.isArray(item.details) ? item.details : [],
+        storyParagraphs: Array.isArray(item.storyParagraphs) ? item.storyParagraphs : [],
         imageUrl: item.imageUrl,
         eventDate: item.eventDate,
+        eventTime: item.eventTime || "",
         location: item.location,
+        source: item.source || item.createdByName || "ANIMUA City Government",
         createdAt: item.createdAt,
         updatedAt: item.updatedAt,
       }));

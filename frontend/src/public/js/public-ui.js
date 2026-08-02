@@ -28,7 +28,7 @@ const HIGHLIGHT_NEWS_ALERT_IMAGE = new URL(
   import.meta.url
 ).href;
 const HIGHLIGHT_SUCCESS_STORY_IMAGE = new URL(
-  "../../assets/images/highlight-success-story-main.jpg",
+  "../../assets/images/success-stories.jpg",
   import.meta.url
 ).href;
 const HIGHLIGHT_UPCOMING_EVENT_IMAGE = new URL(
@@ -51,6 +51,11 @@ const SUCCESS_MARCIA_ADOPTION_IMAGE = new URL(
   "../../assets/images/success-marcia-adoption.jpg",
   import.meta.url
 ).href;
+const announcementStoryHref = (storyId, type = "") => {
+  const params = new URLSearchParams({ story: storyId });
+  if (type) params.set("type", type);
+  return `announcements.html?${params.toString()}`;
+};
 
 const menuToggle = document.getElementById("menuToggle");
 const navbar = document.getElementById("navbar");
@@ -95,6 +100,7 @@ let pendingProfilePhotoDataUrl = "";
 let lastProfileTrigger = null;
 let hasPendingProfileChanges = false;
 let pendingPasswordChange = null;
+let pendingForgotPassword = null;
 let passwordOtpResendTimer = null;
 let passwordOtpResendRemaining = 0;
 
@@ -494,6 +500,7 @@ function setupHomeStories() {
   const STORY_AUTO_ADVANCE_MS = 7000;
   const newsAlerts = [
     {
+      id: "highlight-news-nepo-stray-cats",
       tag: "News & Alerts",
       title: "Pag-rescue sa stray cats, nagpapatuloy sa Angeles City",
       titleHtml: 'Pag-rescue sa<br><span>stray cats</span>',
@@ -518,6 +525,7 @@ function setupHomeStories() {
       ]
     },
     {
+      id: "highlight-news-cca-cat-rescue",
       tag: "News & Alerts",
       title: "Stray cat rescue at CCA",
       titleHtml: 'Stray cat rescue<br><span>at CCA</span>',
@@ -543,6 +551,7 @@ function setupHomeStories() {
       ]
     },
     {
+      id: "highlight-news-balibago-dog-rescue",
       tag: "News & Alerts",
       title: "Aso na-rescue sa Balibago",
       titleHtml: 'Aso na-rescue<br><span>sa Balibago</span>',
@@ -569,6 +578,7 @@ function setupHomeStories() {
   const latestNewsAlert = newsAlerts[0];
   const successStories = [
     {
+      id: "highlight-success-zach",
       tag: "Success Stories",
       title: "Zach starts a new life",
       titleHtml: 'Zach starts<br><span>a new life</span>',
@@ -585,6 +595,7 @@ function setupHomeStories() {
       ]
     },
     {
+      id: "highlight-success-lolong",
       tag: "Success Stories",
       title: "Lolong welcomed home",
       titleHtml: 'Lolong welcomed<br><span>home</span>',
@@ -601,6 +612,7 @@ function setupHomeStories() {
       ]
     },
     {
+      id: "highlight-success-whity",
       tag: "Success Stories",
       title: "Whity finds a family",
       titleHtml: 'Whity finds<br><span>a family</span>',
@@ -617,6 +629,7 @@ function setupHomeStories() {
       ]
     },
     {
+      id: "highlight-success-marcia",
       tag: "Success Stories",
       title: "Marcia finds care",
       titleHtml: 'Marcia finds<br><span>care</span>',
@@ -642,7 +655,7 @@ function setupHomeStories() {
     image: alert.image,
     imageAlt: alert.imageAlt,
     intro: "",
-    primary: { label: "View full update", href: alert.href }
+    primary: { label: "View full update", href: announcementStoryHref(alert.id || "highlight-news-nepo-stray-cats") }
   });
 
   const getSuccessStoryConfig = (story = successStories[0]) => ({
@@ -652,14 +665,15 @@ function setupHomeStories() {
     date: story.date,
     image: story.image,
     imageAlt: story.imageAlt,
-    intro: story.intro
+    intro: story.intro,
+    primary: { label: "View full update", href: announcementStoryHref(story.id || "highlight-success-zach") }
   });
 
   const highlightContent = {
     "new-furbabies": {
       tag: "Available Animals",
       title: "Meet Our Newest Furbabies",
-      image: "../../src/assets/images/service-browse-animal.jpg",
+      image: "../../src/assets/images/highlight-new-furbabies-cat.JPG",
       intro:
         "Discover the newest animals currently available for adoption at the Angeles City Veterinary Office. View their profiles to learn about their age, temperament, health information, and care needs.",
       primary: { label: "View All Furbabies", href: "find-furbabies.html" }
@@ -672,7 +686,8 @@ function setupHomeStories() {
       date: successStories[0].date,
       image: successStories[0].image,
       imageAlt: successStories[0].imageAlt,
-      intro: successStories[0].intro
+      intro: successStories[0].intro,
+      primary: { label: "View full update", href: announcementStoryHref(successStories[0].id) }
     },
     events: {
       tag: "Events",
@@ -680,7 +695,8 @@ function setupHomeStories() {
       image: HIGHLIGHT_UPCOMING_EVENT_IMAGE,
       imageAlt: "Angeles City Veterinary Office speaking at a community event",
       intro:
-        "Stay informed about the nearest published shelter or community event from the Angeles City Veterinary Office."
+        "Stay informed about the nearest published shelter or community event from the Angeles City Veterinary Office.",
+      primary: { label: "View full update", href: announcementStoryHref("demo-upcoming-event") }
     }
   };
 
@@ -1031,7 +1047,7 @@ function setupHomeStories() {
     const time = formatEventTime(event);
     const location = getEventLocation(event);
     const description = getEventDescription(event);
-    const detailHref = event.url || event.href || event.link || "";
+    const detailHref = announcementStoryHref(event.id || "demo-upcoming-event", "Upcoming Events");
     const contentRows = [date, time, location].filter(Boolean).join(" / ");
 
     return {
@@ -1042,7 +1058,7 @@ function setupHomeStories() {
       image: getEventImage(event),
       imageAlt: title,
       intro: description || "Stay informed about Angeles City Veterinary Office events and community activities.",
-      primary: detailHref ? { label: "View event details", href: detailHref } : undefined,
+      primary: { label: "View full update", href: detailHref },
       contentHtml: `
         <div class="story-news-caption">
           ${contentRows ? `<p>${escapeHtml(contentRows)}</p>` : ""}
@@ -1240,13 +1256,6 @@ function setupHomeStories() {
 
   const initializeHighlightPreviews = async () => {
     const pets = await loadNewestPets();
-    if (pets[0]) {
-      updateHighlightPreview(
-        "new-furbabies",
-        getPetImage(pets[0]),
-        `${pets[0].name || "Newest furbaby"} available for adoption`
-      );
-    }
 
     const events = await loadUpcomingEvents();
     updateHighlightPreview(
@@ -1465,49 +1474,44 @@ function setupFeaturedFurbabies() {
 
     const cards = pets.slice(0, 3).map((pet, index) => {
       const name = getFeaturedName(pet);
+      const typeIcon = String(pet.species || "").toLowerCase().includes("dog") ? "fa-dog" : "fa-cat";
       const facts = getFeaturedFacts(pet)
         .map((fact) => `<span>${escapeHtml(fact)}</span>`)
         .join("");
       return `
         <button type="button" class="featured-furbaby-card ${index === 0 ? "is-featured" : ""}" data-pet-id="${escapeHtml(pet.id || "")}" aria-label="View profile for ${escapeHtml(name)}">
           <img src="${escapeHtml(pet.photoURL || fallbackPetImage(pet))}" alt="${escapeHtml(name)} available for adoption">
-          <span class="featured-furbaby-favorite" aria-hidden="true"><i class="fa-regular fa-heart"></i></span>
           <span class="featured-furbaby-card-copy">
-            <strong><i class="fa-solid fa-paw" aria-hidden="true"></i>${escapeHtml(name)}</strong>
-            <em>${facts}</em>
+            <strong>${escapeHtml(name)}</strong>
+            <em><i class="fa-solid ${typeIcon}" aria-hidden="true"></i>${facts}</em>
+            ${index === 0 ? "<small>Calm, curious, and ready for a gentle home.</small>" : ""}
           </span>
+          <span class="featured-furbaby-arrow" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></span>
         </button>
       `;
     }).join("");
 
-    const dots = pets.slice(0, 3).map((_, index) =>
-      `<span class="${index === 0 ? "is-active" : ""}"></span>`
-    ).join("");
-
     grid.innerHTML = `
       <article class="featured-furbabies-showcase">
         <div class="featured-furbabies-copy">
-          <span class="section-label"><i class="fa-solid fa-paw" aria-hidden="true"></i> Featured Furbabies <i class="fa-solid fa-paw" aria-hidden="true"></i></span>
-          <h2>Meet Our Adoptable<br>Furbabies</h2>
-          <p>Looking for a friend? Explore a few of our featured animals who are waiting for a home.</p>
-
-          <div class="featured-furbabies-filter-pills" aria-label="Featured animal types">
-            <span class="is-active"><i class="fa-solid fa-border-all" aria-hidden="true"></i>All</span>
-            <span><i class="fa-solid fa-cat" aria-hidden="true"></i>Cats</span>
-            <span><i class="fa-solid fa-dog" aria-hidden="true"></i>Dogs</span>
-          </div>
+          <span class="section-label">Featured Furbabies</span>
+          <h2>Waiting<br>for a Home</h2>
+          <p>These animals are safe in our care and ready to find a family who will love them as much as they'll love you.</p>
 
           <div class="featured-furbabies-actions">
-            <a class="featured-furbabies-view-all" href="find-furbabies.html">View All Animals</a>
-            <a class="featured-furbabies-quiz-link" href="/pages/public/petCompatibility.html">
-              Take Match Quiz <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-            </a>
+            <a class="featured-furbabies-view-all" href="find-furbabies.html">View All Furbabies <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
           </div>
         </div>
 
         <div class="featured-furbabies-card-wrap">
           ${cards}
-          <div class="featured-furbabies-dots" aria-hidden="true">${dots}</div>
+        </div>
+
+        <div class="featured-furbabies-care-row" aria-label="Adoption care highlights">
+          <div><i class="fa-solid fa-shield-heart" aria-hidden="true"></i><strong>Safe & Healthy</strong><span>All animals are vaccinated, dewormed, and well cared for.</span></div>
+          <div><i class="fa-regular fa-heart" aria-hidden="true"></i><strong>Shelter Care</strong><span>They are given love, proper nutrition, and daily care.</span></div>
+          <div><i class="fa-solid fa-house" aria-hidden="true"></i><strong>Ready for Adoption</strong><span>Each one is waiting for a responsible and loving family.</span></div>
+          <div><i class="fa-solid fa-people-group" aria-hidden="true"></i><strong>Make a Difference</strong><span>Adopt and help us save more animals in need.</span></div>
         </div>
       </article>
     `;
@@ -1813,6 +1817,16 @@ document.addEventListener("keydown", (event) => {
 if (loginForm) {
   loginForm.addEventListener("submit", handleLogin);
 }
+
+document.querySelectorAll(".auth-muted-link").forEach((link) => {
+  if (!/forgot password/i.test(link.textContent || "") || link.dataset.forgotPasswordBound) return;
+
+  link.dataset.forgotPasswordBound = "true";
+  link.addEventListener("click", (event) => {
+    event.preventDefault();
+    showForgotPasswordDialog();
+  });
+});
 
 if (registerForm) {
   registerForm.addEventListener("submit", handleRegistration);
@@ -2546,6 +2560,21 @@ function maskProfileEmail(email = "") {
   return `${visible}${"*".repeat(Math.max(name.length - visible.length, 3))}@${domain}`;
 }
 
+async function readApiJson(response, fallbackMessage = "Request failed.") {
+  const contentType = response.headers.get("content-type") || "";
+
+  if (contentType.includes("application/json")) {
+    return response.json();
+  }
+
+  const text = await response.text().catch(() => "");
+  const message = /^\s*</.test(text)
+    ? "The password reset service is not available on this server yet. Please make sure the backend is running and updated."
+    : text.trim() || fallbackMessage;
+
+  throw new Error(message);
+}
+
 async function showChangePasswordDialog({ returnToProfile = false } = {}) {
   pendingPasswordChange = null;
   stopPasswordOtpCooldown();
@@ -2640,6 +2669,323 @@ async function showChangePasswordDialog({ returnToProfile = false } = {}) {
     willClose: stopPasswordOtpCooldown,
     preConfirm: handleChangePasswordConfirm
   });
+}
+
+async function showForgotPasswordDialog() {
+  pendingForgotPassword = null;
+  stopPasswordOtpCooldown();
+
+  const loginEmail = document.getElementById("login-email")?.value.trim().toLowerCase() || "";
+  const safeLoginEmail = escapeHtmlText(loginEmail);
+
+  return Swal.fire({
+    html: `
+      <div class="change-password-modal">
+        <div class="change-password-head">
+          <button type="button" class="change-password-back" aria-label="Back">
+            <i class="fa-solid fa-arrow-left"></i>
+          </button>
+          <div class="change-password-title-row">
+            <div class="change-password-icon" aria-hidden="true">
+              <i class="fa-solid fa-key"></i>
+            </div>
+            <div>
+              <h2>Forgot Password</h2>
+              <p>Enter your account email and we will send a one-time password.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="change-password-reminder">
+          <span aria-hidden="true"><i class="fa-solid fa-shield"></i></span>
+          <p><strong>Reminder:</strong> Use the OTP sent to your email before creating a new password.</p>
+        </div>
+
+        <label class="change-password-field" for="forgotPasswordEmail">
+          <span class="change-password-field-icon" aria-hidden="true"><i class="fa-solid fa-envelope"></i></span>
+          <div class="change-password-field-body">
+            <span>Email Address</span>
+            <div class="change-password-input-wrap">
+              <input id="forgotPasswordEmail" type="email" placeholder="Enter your account email" autocomplete="email" value="${safeLoginEmail}">
+            </div>
+          </div>
+        </label>
+      </div>
+    `,
+    showCancelButton: true,
+    showCloseButton: true,
+    confirmButtonText: "Send OTP",
+    cancelButtonText: "Cancel",
+    reverseButtons: true,
+    showLoaderOnConfirm: true,
+    allowOutsideClick: () => !Swal.isLoading(),
+    allowEscapeKey: () => !Swal.isLoading(),
+    customClass: {
+      popup: "animua-popup change-password-popup forgot-password-popup",
+      htmlContainer: "change-password-html",
+      actions: "change-password-actions",
+      confirmButton: "change-password-confirm",
+      cancelButton: "change-password-cancel",
+      closeButton: "change-password-close"
+    },
+    buttonsStyling: false,
+    didOpen: () => {
+      document.getElementById("forgotPasswordEmail")?.focus();
+      document.querySelector(".change-password-back")?.addEventListener("click", () => Swal.close());
+    },
+    willClose: stopPasswordOtpCooldown,
+    preConfirm: handleForgotPasswordSendOtp
+  });
+}
+
+async function handleForgotPasswordSendOtp() {
+  const email = document.getElementById("forgotPasswordEmail")?.value.trim().toLowerCase() || "";
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    Swal.showValidationMessage("Please enter a valid email address.");
+    return false;
+  }
+
+  const popup = Swal.getPopup();
+  popup?.classList.add("change-password-popup--loading");
+  const confirmButton = Swal.getConfirmButton();
+  if (confirmButton) confirmButton.textContent = "Sending OTP...";
+
+  try {
+    await requestForgotPasswordOtp(email);
+    pendingForgotPassword = { email };
+    showForgotPasswordOtpStep();
+  } catch (error) {
+    popup?.classList.remove("change-password-popup--loading");
+    if (confirmButton) confirmButton.textContent = "Send OTP";
+    Swal.showValidationMessage(error.message || "Failed to send password reset OTP.");
+  }
+
+  return false;
+}
+
+function showForgotPasswordOtpStep() {
+  const popup = Swal.getPopup();
+  const safeMaskedEmail = escapeHtmlText(maskProfileEmail(pendingForgotPassword?.email || ""));
+
+  Swal.hideLoading();
+
+  if (popup) {
+    popup.dataset.forgotPasswordOtpStep = "true";
+    popup.classList.add("change-password-popup--otp");
+    popup.classList.remove("change-password-popup--loading");
+  }
+
+  Swal.update({
+    html: `
+      <div class="change-password-modal password-otp-modal">
+        <button type="button" class="change-password-back password-change-otp-back" aria-label="Back">
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <div class="email-verification-screen password-change-otp-screen">
+          <h2>Reset Password</h2>
+          <p class="email-verification-copy">Enter the 6-digit code we sent to your email<br><strong>${safeMaskedEmail || "your email"}</strong></p>
+          <input type="text" id="password-change-otp-code" class="email-verification-hidden-input" inputmode="numeric" maxlength="6" autocomplete="one-time-code" aria-label="Six-digit email OTP">
+          <div class="email-verification-code-grid" id="password-change-otp-grid" aria-hidden="true">
+            ${Array.from({ length: 6 }, (_, index) => `<span class="email-verification-code-box" data-otp-index="${index}"></span>`).join("")}
+          </div>
+          <small class="auth-error email-verification-message" id="password-change-otp-message"></small>
+          <div class="email-verification-resend">
+            <span class="email-verification-resend-help">Didn't receive the code?</span>
+            <button type="button" class="auth-secondary-action" id="resend-password-change-otp-btn">Resend Code</button>
+          </div>
+          <div class="password-otp-actions">
+            <button type="button" class="password-otp-cancel">Cancel</button>
+            <button type="button" class="auth-submit-btn" id="confirm-password-change-otp-btn">
+              <i class="fa-solid fa-shield" aria-hidden="true"></i>
+              <span>Verify OTP</span>
+            </button>
+          </div>
+          <div class="password-otp-note">
+            <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+            <span>You must verify your OTP before creating a new password.</span>
+          </div>
+        </div>
+      </div>
+    `,
+    showConfirmButton: false,
+    showCancelButton: false
+  });
+
+  setupPasswordOtpInput();
+  startPasswordOtpCooldown();
+  document.getElementById("confirm-password-change-otp-btn")?.addEventListener("click", handleForgotPasswordOtpConfirm);
+  document.getElementById("resend-password-change-otp-btn")?.addEventListener("click", handleForgotPasswordOtpResend);
+  document.querySelector(".password-otp-cancel")?.addEventListener("click", () => Swal.close());
+  document.querySelector(".password-change-otp-back")?.addEventListener("click", () => {
+    Swal.close();
+    window.setTimeout(showForgotPasswordDialog, 0);
+  });
+}
+
+function handleForgotPasswordOtpConfirm() {
+  const message = document.getElementById("password-change-otp-message");
+  const otp = document.getElementById("password-change-otp-code")?.value.trim() || "";
+
+  message?.classList.remove("is-success");
+
+  if (!pendingForgotPassword?.email) {
+    if (message) message.textContent = "Please enter your email again.";
+    return;
+  }
+
+  if (!/^\d{6}$/.test(otp)) {
+    if (message) message.textContent = "Please enter the six-digit email OTP.";
+    return;
+  }
+
+  pendingForgotPassword.otp = otp;
+  stopPasswordOtpCooldown();
+  showForgotPasswordNewPasswordStep();
+}
+
+async function handleForgotPasswordOtpResend() {
+  const message = document.getElementById("password-change-otp-message");
+  const button = document.getElementById("resend-password-change-otp-btn");
+
+  message?.classList.remove("is-success");
+
+  if (!pendingForgotPassword?.email) {
+    if (message) message.textContent = "Please enter your email again.";
+    return;
+  }
+
+  if (passwordOtpResendRemaining > 0) return;
+
+  button.disabled = true;
+
+  try {
+    await requestForgotPasswordOtp(pendingForgotPassword.email);
+    if (message) {
+      message.textContent = "We sent a new email OTP. Please check your inbox.";
+      message.classList.add("is-success");
+    }
+    startPasswordOtpCooldown();
+  } catch (error) {
+    if (message) message.textContent = error.message || "Unable to resend email OTP.";
+    if (error.status === 429) {
+      startPasswordOtpCooldown();
+    } else {
+      updatePasswordOtpResendButton();
+    }
+  }
+}
+
+function showForgotPasswordNewPasswordStep() {
+  const popup = Swal.getPopup();
+  const safeMaskedEmail = escapeHtmlText(maskProfileEmail(pendingForgotPassword?.email || ""));
+
+  if (popup) {
+    popup.dataset.forgotPasswordNewPasswordStep = "true";
+    popup.classList.remove("change-password-popup--otp", "change-password-popup--loading");
+  }
+
+  Swal.update({
+    html: `
+      <div class="change-password-modal">
+        <div class="change-password-head">
+          <button type="button" class="change-password-back" aria-label="Back">
+            <i class="fa-solid fa-arrow-left"></i>
+          </button>
+          <div class="change-password-title-row">
+            <div class="change-password-icon" aria-hidden="true">
+              <i class="fa-solid fa-lock"></i>
+            </div>
+            <div>
+              <h2>New Password</h2>
+              <p>Create a new password for <strong>${safeMaskedEmail || "your account"}</strong>.</p>
+            </div>
+          </div>
+        </div>
+
+        <label class="change-password-field" for="forgotNewPassword">
+          <span class="change-password-field-icon" aria-hidden="true"><i class="fa-solid fa-lock"></i></span>
+          <div class="change-password-field-body">
+            <span>New Password</span>
+            <div class="change-password-input-wrap">
+              <input id="forgotNewPassword" type="password" placeholder="Enter your new password" autocomplete="new-password">
+              <button type="button" class="change-password-eye" data-password-target="forgotNewPassword" aria-label="Show new password">
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
+            <small>At least 8 characters with uppercase, lowercase, number, and special character.</small>
+          </div>
+        </label>
+
+        <label class="change-password-field" for="forgotConfirmNewPassword">
+          <span class="change-password-field-icon" aria-hidden="true"><i class="fa-solid fa-lock"></i></span>
+          <div class="change-password-field-body">
+            <span>Confirm New Password</span>
+            <div class="change-password-input-wrap">
+              <input id="forgotConfirmNewPassword" type="password" placeholder="Re-enter your new password" autocomplete="new-password">
+              <button type="button" class="change-password-eye" data-password-target="forgotConfirmNewPassword" aria-label="Show confirmed password">
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
+            <small>Passwords must match.</small>
+          </div>
+        </label>
+      </div>
+    `,
+    showCancelButton: true,
+    showConfirmButton: true,
+    confirmButtonText: "Reset Password",
+    cancelButtonText: "Cancel",
+    preConfirm: handleForgotPasswordResetConfirm
+  });
+
+  bindForgotPasswordNewPasswordControls();
+}
+
+function bindForgotPasswordNewPasswordControls() {
+  document.querySelector(".change-password-back")?.addEventListener("click", () => showForgotPasswordOtpStep());
+  document.querySelectorAll(".change-password-eye").forEach((button) => {
+    button.addEventListener("click", () => {
+      const input = document.getElementById(button.dataset.passwordTarget);
+      if (!input) return;
+
+      const isHidden = input.type === "password";
+      input.type = isHidden ? "text" : "password";
+      button.setAttribute("aria-label", `${isHidden ? "Hide" : "Show"} password`);
+      button.innerHTML = `<i class="fa-regular ${isHidden ? "fa-eye-slash" : "fa-eye"}"></i>`;
+    });
+  });
+}
+
+async function handleForgotPasswordResetConfirm() {
+  if (!pendingForgotPassword?.email || !pendingForgotPassword?.otp) {
+    Swal.showValidationMessage("Please verify your email OTP again.");
+    return false;
+  }
+
+  const passwords = validateForgotPasswordForm();
+  if (!passwords) return false;
+
+  const popup = Swal.getPopup();
+  popup?.classList.add("change-password-popup--loading");
+  const confirmButton = Swal.getConfirmButton();
+  if (confirmButton) confirmButton.textContent = "Resetting...";
+
+  try {
+    await confirmForgotPasswordOtp(
+      pendingForgotPassword.email,
+      pendingForgotPassword.otp,
+      passwords.newPassword
+    );
+    pendingForgotPassword = null;
+    showForgotPasswordSuccess();
+  } catch (error) {
+    popup?.classList.remove("change-password-popup--loading");
+    if (confirmButton) confirmButton.textContent = "Reset Password";
+    Swal.showValidationMessage(error.message || "Failed to reset password.");
+  }
+
+  return false;
 }
 
 async function handleChangePasswordConfirm() {
@@ -2929,6 +3275,33 @@ function showChangePasswordSuccess() {
   });
 }
 
+function showForgotPasswordSuccess() {
+  const popup = Swal.getPopup();
+  Swal.hideLoading();
+
+  if (popup) {
+    popup.dataset.passwordUpdated = "true";
+    popup.classList.remove("change-password-popup--loading");
+    popup.classList.add("change-password-popup--success");
+  }
+
+  Swal.update({
+    html: `
+      <div class="change-password-modal change-password-success">
+        <div class="change-password-icon change-password-success-icon" aria-hidden="true">
+          <i class="fa-solid fa-check"></i>
+        </div>
+        <span class="change-password-accent" aria-hidden="true"></span>
+        <h2>Password Reset</h2>
+        <p>Your password has been changed. You can log in with your new password.</p>
+      </div>
+    `,
+    showCancelButton: false,
+    showConfirmButton: true,
+    confirmButtonText: "OK"
+  });
+}
+
 function bindChangePasswordControls({ returnToProfile = false } = {}) {
   document.querySelector(".change-password-back")?.addEventListener("click", () => {
     if (returnToProfile) {
@@ -2983,6 +3356,33 @@ function validateChangePasswordForm() {
   }
 
   return { oldPassword, newPassword };
+}
+
+function validateForgotPasswordForm() {
+  const newPassword = document.getElementById("forgotNewPassword")?.value || "";
+  const confirmNewPassword = document.getElementById("forgotConfirmNewPassword")?.value || "";
+
+  if (!newPassword || !confirmNewPassword) {
+    Swal.showValidationMessage("Please fill in all password fields.");
+    return false;
+  }
+
+  if (newPassword.length < 8) {
+    Swal.showValidationMessage("New password must be at least 8 characters.");
+    return false;
+  }
+
+  if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(newPassword)) {
+    Swal.showValidationMessage("New password must include uppercase, lowercase, number, and special character.");
+    return false;
+  }
+
+  if (newPassword !== confirmNewPassword) {
+    Swal.showValidationMessage("New password confirmation does not match.");
+    return false;
+  }
+
+  return { newPassword };
 }
 
 function setupProfileModal() {
@@ -3315,6 +3715,46 @@ async function confirmPasswordChangeOtp(oldPassword, newPassword, otp) {
   return data;
 }
 
+async function requestForgotPasswordOtp(email) {
+  const response = await fetch(`${API_BASE_URL}/auth/request-forgot-password-otp`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ email })
+  });
+
+  const data = await readApiJson(response, "Unable to send password reset OTP.");
+
+  if (!response.ok) {
+    const error = new Error(data.message || "Unable to send password reset OTP.");
+    error.status = response.status;
+    throw error;
+  }
+
+  return data;
+}
+
+async function confirmForgotPasswordOtp(email, otp, newPassword) {
+  const response = await fetch(`${API_BASE_URL}/auth/confirm-forgot-password-otp`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ email, otp, newPassword })
+  });
+
+  const data = await readApiJson(response, "Failed to reset password.");
+
+  if (!response.ok) {
+    const error = new Error(data.message || "Failed to reset password.");
+    error.status = response.status;
+    throw error;
+  }
+
+  return data;
+}
+
 async function updatePassword(oldPassword, newPassword) {
   try {
     await changePasswordRequest(oldPassword, newPassword);
@@ -3352,9 +3792,11 @@ function initChatbotWidget() {
     "beforeend",
     `
       <section class="animua-chatbot" id="animuaChatbot" aria-live="polite">
-        <button type="button" class="animua-chatbot-toggle" id="chatbotToggle" aria-label="Open ANIMUA chat assistant" aria-expanded="false">
+        <button type="button" class="animua-chatbot-toggle" id="chatbotToggle" aria-label="Open ANIMUA chat assistant" aria-expanded="false" title="Need help finding a match?" data-tooltip="Need help finding a match?">
           <i class="fa-solid fa-comments"></i>
+          <span class="chatbot-launcher-text">Need help finding a match?</span>
         </button>
+        <span class="animua-chatbot-nudge" aria-hidden="true">Need help choosing a furbaby?</span>
 
         <div class="chatbot-panel hidden" id="chatbotPanel" role="dialog" aria-modal="false" aria-labelledby="chatbotTitle">
           <div class="chatbot-head">
