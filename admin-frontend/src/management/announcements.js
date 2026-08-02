@@ -807,12 +807,6 @@ function bindEvents() {
     newButton.addEventListener("click", () => openCreateModal());
   }
 
-  const quickCreate = getEl("quickCreatePost");
-  if (quickCreate) {
-    quickCreate.hidden = !can("create");
-    quickCreate.addEventListener("click", () => openCreateModal());
-  }
-
   getEl("announcementForm")?.addEventListener("submit", saveAnnouncement);
   getEl("announcementModalClose")?.addEventListener("click", closeModal);
   getEl("announcementCancelBtn")?.addEventListener("click", closeModal);

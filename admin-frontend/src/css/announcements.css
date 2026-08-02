@@ -1504,7 +1504,84 @@ body.loading .main-content {
 .post-reach,
 .post-actions button,
 .category-story strong,
-.category-story small,
-.quick-composer-prompt {
+.category-story small {
   opacity: 1 !important;
+}
+
+/* Keep the announcement workspace distinct from generic management cards.
+   The global theme deliberately normalizes most cards to white, but this
+   channel identity banner needs its burgundy treatment and light copy. */
+body.management-consistent-ui .page-body .social-channel {
+  gap: 14px;
+  margin-top: 20px;
+}
+
+body.management-consistent-ui .page-body .channel-profile-card {
+  min-height: 112px;
+  padding: 20px 24px;
+  border-color: rgba(120, 1, 22, .2) !important;
+  color: #FFFFFF !important;
+  background:
+    radial-gradient(circle at 84% 5%, rgba(247, 181, 56, .3), transparent 26%),
+    linear-gradient(120deg, #780116 0%, #8e0b25 62%, #620011 100%) !important;
+  box-shadow: 0 16px 34px rgba(120, 1, 22, .16) !important;
+}
+
+body.management-consistent-ui .page-body .channel-profile-avatar {
+  width: 58px;
+  height: 58px;
+  border-radius: 16px;
+  font-size: 1.4rem;
+}
+
+body.management-consistent-ui .page-body .channel-kicker {
+  margin-bottom: 3px;
+  color: #F7C85F !important;
+}
+
+body.management-consistent-ui .page-body .channel-profile-copy h2 {
+  color: #FFFFFF !important;
+  font-size: 1.35rem;
+}
+
+body.management-consistent-ui .page-body .channel-profile-copy p {
+  margin-top: 4px;
+  color: rgba(255, 255, 255, .9) !important;
+  font-size: .78rem;
+}
+
+body.management-consistent-ui .page-body .channel-profile-meta span {
+  min-width: 86px;
+  padding: 11px 13px;
+  border-color: rgba(255, 255, 255, .24) !important;
+  color: rgba(255, 255, 255, .86) !important;
+  background: rgba(255, 255, 255, .12) !important;
+}
+
+body.management-consistent-ui .page-body .channel-profile-meta strong {
+  color: #FFFFFF !important;
+}
+
+body.management-consistent-ui .page-body .announcement-category-rail {
+  gap: 8px;
+  padding: 10px;
+  border-color: #EADFD4 !important;
+  box-shadow: 0 7px 20px rgba(72, 43, 31, .055) !important;
+}
+
+body.management-consistent-ui .page-body .category-story {
+  min-height: 68px;
+  padding: 8px 12px;
+}
+
+body.management-consistent-ui .page-body .category-story-ring {
+  width: 48px;
+  height: 48px;
+  font-size: 1rem;
+}
+
+@media (max-width: 760px) {
+  body.management-consistent-ui .page-body .channel-profile-card {
+    padding: 18px;
+  }
 }

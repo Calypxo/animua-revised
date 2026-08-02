@@ -169,17 +169,17 @@
                 <div class="source-opt" data-value="Rescue">
                   <div class="source-opt-icon"><i class="bi bi-life-preserver"></i></div>
                   <div class="source-opt-label">Rescue</div>
-                  <div class="source-opt-desc">Found stray or emergency rescue</div>
+                  <div class="source-opt-desc">Stray or emergency rescue</div>
                 </div>
                 <div class="source-opt" data-value="Barangay Impound">
                   <div class="source-opt-icon"><i class="bi bi-building"></i></div>
                   <div class="source-opt-label">Barangay Impound</div>
-                  <div class="source-opt-desc">Turned over by local barangay</div>
+                  <div class="source-opt-desc">Local barangay turnover</div>
                 </div>
                 <div class="source-opt" data-value="Approved Surrender">
                   <div class="source-opt-icon"><i class="bi bi-file-earmark-check"></i></div>
                   <div class="source-opt-label">Approved Surrender</div>
-                  <div class="source-opt-desc">Pre-approved owner surrender request</div>
+                  <div class="source-opt-desc">Approved owner request</div>
                 </div>
               </div>
               <input type="hidden" id="fSource" />
@@ -190,7 +190,13 @@
 
         <!-- ── SECTION 2: Animal Info ── -->
         <div class="form-section">
-          <div class="form-section-title"><i class="bi bi-heart-pulse"></i> Animal Information</div>
+          <div class="form-section-title"><i class="bi bi-heart-pulse"></i> Animal Essentials</div>
+          <p class="form-section-help">Start with the details needed to identify the animal. Everything else can be added later.</p>
+          <button class="intake-optional-toggle" id="intakeOptionalToggle" type="button" aria-expanded="false">
+            <i class="bi bi-plus-circle"></i>
+            <span>Show optional details</span>
+            <small>Breed, age, weight, observations, and notes</small>
+          </button>
           <div class="form-grid">
             <div class="form-group form-full">
               <label class="form-lbl" for="fIdentifyingDescription">Identifying Description <span class="req">*</span></label>
@@ -198,8 +204,8 @@
                 placeholder="e.g. Brown dog with a white chest and white left front paw"></textarea>
               <span class="form-err" id="errIdentifyingDescription"></span>
             </div>
-            <div class="form-group">
-              <label class="form-lbl" for="fPreviousName">Known Previous Name</label>
+            <div class="form-group intake-optional-field">
+              <label class="form-lbl" for="fPreviousName">Known Previous Name <span class="optional-label">Optional</span></label>
               <input type="text" class="form-inp" id="fPreviousName"
                 placeholder="Owner surrender only; not a shelter-assigned name" />
             </div>
@@ -212,26 +218,26 @@
               </select>
               <span class="form-err" id="errSpecies"></span>
             </div>
-            <div class="form-group">
-              <label class="form-lbl" for="fBreed">Breed</label>
+            <div class="form-group intake-optional-field">
+              <label class="form-lbl" for="fBreed">Breed <span class="optional-label">Optional</span></label>
               <input type="text" class="form-inp" id="fBreed" placeholder="e.g. Aspin / Unknown" />
             </div>
             <div class="form-group">
-              <label class="form-lbl" for="fSex">Sex <span class="req">*</span></label>
+              <label class="form-lbl" for="fSex">Sex</label>
               <select class="form-inp" id="fSex">
                 <option value="">Select…</option>
                 <option>Male</option>
                 <option>Female</option>
-                <option>Unknown</option>
+                <option selected>Unknown</option>
               </select>
               <span class="form-err" id="errSex"></span>
             </div>
-            <div class="form-group">
-              <label class="form-lbl" for="fAgeEstimate">Age Estimate</label>
+            <div class="form-group intake-optional-field">
+              <label class="form-lbl" for="fAgeEstimate">Age Estimate <span class="optional-label">Optional</span></label>
               <input type="text" class="form-inp" id="fAgeEstimate" placeholder="e.g. 2 years / 3 months" />
             </div>
-            <div class="form-group">
-              <label class="form-lbl" for="fColor">Color / Markings</label>
+            <div class="form-group intake-optional-field">
+              <label class="form-lbl" for="fColor">Color / Markings <span class="optional-label">Optional</span></label>
               <input type="text" class="form-inp" id="fColor" placeholder="e.g. Brown with white spots" />
             </div>
           </div>
@@ -239,7 +245,7 @@
 
         <!-- ── SECTION 3: Initial Condition ── -->
         <div class="form-section">
-          <div class="form-section-title"><i class="bi bi-clipboard2-pulse"></i> Initial Condition</div>
+          <div class="form-section-title"><i class="bi bi-clipboard2-pulse"></i> Arrival Condition</div>
           <div class="form-grid">
             <div class="form-group">
               <label class="form-lbl" for="fCondition">Overall Condition <span class="req">*</span></label>
@@ -252,16 +258,16 @@
               </select>
               <span class="form-err" id="errCondition"></span>
             </div>
-            <div class="form-group">
+            <div class="form-group intake-optional-field">
               <label class="form-lbl" for="fWeight">Weight (kg)</label>
               <input type="number" class="form-inp" id="fWeight" placeholder="e.g. 4.5" min="0" step="0.1" />
             </div>
-            <div class="form-group form-full">
+            <div class="form-group form-full intake-optional-field">
               <label class="form-lbl" for="fConditionNotes">Condition Notes</label>
               <textarea class="form-inp form-textarea" id="fConditionNotes" rows="3"
                 placeholder="Describe visible injuries, behavior, vaccinations status, etc."></textarea>
             </div>
-            <div class="form-group">
+            <div class="form-group intake-optional-field">
               <label class="form-lbl">Visible Injuries?</label>
               <div class="radio-group">
                 <label class="radio-opt"><input type="radio" name="injuries" value="Yes" id="injYes" /> Yes</label>
@@ -269,7 +275,7 @@
                 <label class="radio-opt"><input type="radio" name="injuries" value="Unknown" id="injUnk" checked /> Unknown</label>
               </div>
             </div>
-            <div class="form-group">
+            <div class="form-group intake-optional-field">
               <label class="form-lbl">Vaccinated?</label>
               <div class="radio-group">
                 <label class="radio-opt"><input type="radio" name="vaccinated" value="Yes" id="vacYes" /> Yes</label>
@@ -277,7 +283,7 @@
                 <label class="radio-opt"><input type="radio" name="vaccinated" value="Unknown" id="vacUnk" checked /> Unknown</label>
               </div>
             </div>
-            <div class="form-group">
+            <div class="form-group intake-optional-field">
               <label class="form-lbl" for="fAlteredStatus">Spay / Neuter Status</label>
               <select class="form-inp" id="fAlteredStatus">
                 <option value="Unknown">Unknown</option>
@@ -287,7 +293,7 @@
                 <option value="Not applicable">Not applicable</option>
               </select>
             </div>
-            <div class="form-group form-full">
+            <div class="form-group form-full intake-optional-field">
               <label class="form-lbl" for="fVisibleDefects">Visible Defects / Special Physical Features</label>
               <textarea class="form-inp form-textarea" id="fVisibleDefects" rows="2"
                 placeholder="Describe any visible defect, disability, missing limb, impaired vision, or distinctive feature"></textarea>
@@ -300,7 +306,7 @@
 
         <!-- ── SECTION 5: Intake Details ── -->
         <div class="form-section">
-          <div class="form-section-title"><i class="bi bi-geo-alt-fill"></i> Intake Details</div>
+          <div class="form-section-title"><i class="bi bi-geo-alt-fill"></i> Arrival Details</div>
           <div class="form-grid">
             <div class="form-group">
               <label class="form-lbl" for="fIntakeDate">Intake Date <span class="req">*</span></label>
@@ -308,11 +314,11 @@
               <span class="form-err" id="errIntakeDate"></span>
             </div>
             <div class="form-group">
-              <label class="form-lbl" for="fLocation">Found / Picked Up At <span class="req">*</span></label>
-              <input type="text" class="form-inp" id="fLocation" placeholder="e.g. Brgy. Sto. Domingo, Angeles City" />
+              <label class="form-lbl" for="fLocation">Where did the animal come from? <span class="req">*</span></label>
+              <input type="text" class="form-inp" id="fLocation" placeholder="Street, landmark, barangay, or turnover location" />
               <span class="form-err" id="errLocation"></span>
             </div>
-            <div class="form-group form-full">
+            <div class="form-group form-full intake-optional-field">
               <label class="form-lbl" for="fIntakeNotes">Additional Notes</label>
               <textarea class="form-inp form-textarea" id="fIntakeNotes" rows="2"
                 placeholder="Any other relevant information…"></textarea>
@@ -356,19 +362,41 @@
      APPROVE / REJECT CONFIRM MODAL
 ══════════════════════════════════════ -->
 <div class="um-modal-backdrop" id="confirmModalBackdrop">
-  <div class="um-modal um-modal-xs" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+  <div class="um-modal um-modal-xs intake-decision-modal" id="confirmModalPanel" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmMsg">
     <div class="um-modal-header">
-      <h2 id="confirmTitle">Approve Intake</h2>
+      <div class="intake-decision-heading">
+        <span class="intake-decision-kicker" id="confirmKicker">Intake decision</span>
+        <h2 id="confirmTitle">Approve Intake</h2>
+      </div>
       <button class="modal-close-btn" id="confirmModalClose" type="button" aria-label="Close confirmation"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="um-modal-body">
       <div class="confirm-body">
-        <div class="confirm-icon-wrap" id="confirmIcon"><i class="bi bi-check-circle-fill"></i></div>
-        <p id="confirmMsg">Are you sure you want to approve this intake record?</p>
-        <div id="rejectReasonWrap" style="display:none; margin-top:14px">
-          <label class="form-lbl">Reason for Rejection <span class="req">*</span></label>
-          <textarea class="form-inp form-textarea mt-1" id="rejectReason" rows="3"
-            placeholder="Explain why this intake is being rejected…"></textarea>
+        <div class="intake-decision-summary">
+          <div class="confirm-icon-wrap" id="confirmIcon"><i class="bi bi-check-circle-fill"></i></div>
+          <div class="intake-decision-copy">
+            <p id="confirmMsg">Review this intake before continuing.</p>
+            <div class="intake-decision-record" aria-label="Selected intake">
+              <span id="confirmRecordId">INT-0000</span>
+              <div>
+                <strong id="confirmRecordName">Shelter animal</strong>
+                <small id="confirmRecordMeta">Animal intake record</small>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="intake-decision-impact" id="confirmImpact">
+          <i class="bi bi-arrow-right-circle" id="confirmImpactIcon" aria-hidden="true"></i>
+          <span>
+            <strong id="confirmImpactTitle">What happens next</strong>
+            <small id="confirmImpactText">The intake workflow will be updated.</small>
+          </span>
+        </div>
+        <div id="rejectReasonWrap" style="display:none">
+          <label class="form-lbl" for="rejectReason">Reason for rejection <span class="req">*</span></label>
+          <textarea class="form-inp form-textarea" id="rejectReason" rows="2" maxlength="500"
+            placeholder="Give staff a clear reason for this decision..."></textarea>
+          <small class="decision-field-help">This reason is saved with the intake for audit and follow-up.</small>
           <span class="form-err" id="errRejectReason"></span>
         </div>
       </div>
@@ -379,7 +407,6 @@
     </div>
   </div>
 </div>
-
 <!-- Toast -->
 <div class="um-toast" id="umToast" role="status" aria-live="polite"><i class="bi" id="toastIcon"></i><span id="toastMsg"></span></div>
 

@@ -13,6 +13,12 @@ function normalizeAnnouncementType(value) {
   return "News & Article";
 }
 
+function normalizeAnnouncementStatus(value) {
+  return String(value || "Published").toLowerCase().trim() === "published"
+    ? "Published"
+    : "Draft";
+}
+
 function normalizeAnnouncement(data = {}) {
   const payload = {
     title: String(data.title || "").trim(),
@@ -20,7 +26,7 @@ function normalizeAnnouncement(data = {}) {
     caption: String(data.caption || "").trim(),
     eventDate: String(data.eventDate || "").trim(),
     location: String(data.location || "").trim(),
-    status: String(data.status || "Published").trim(),
+    status: normalizeAnnouncementStatus(data.status),
     visibleToPublic: data.visibleToPublic !== false,
   };
 
@@ -51,7 +57,10 @@ exports.getPublicAnnouncements = async (req, res) => {
         ...doc.data(),
       }))
       .filter((item) => {
-        return item.visibleToPublic === true && item.status === "Published";
+        // Older records did not always persist visibleToPublic. Management has
+        // always treated those records as public, so the public endpoint must
+        // use the same default instead of silently hiding them.
+        return item.visibleToPublic !== false && normalizeAnnouncementStatus(item.status) === "Published";
       })
       .sort((a, b) => {
         const dateA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
@@ -78,6 +87,7 @@ exports.getPublicAnnouncements = async (req, res) => {
         updatedAt: item.updatedAt,
       }));
 
+    res.set("Cache-Control", "no-store");
     return res.status(200).json({ announcements });
   } catch (error) {
     console.error("[getPublicAnnouncements]", error);
@@ -107,6 +117,8 @@ exports.getAllAnnouncements = async (req, res) => {
           id: doc.id,
           ...data,
           type: normalizeAnnouncementType(data.type),
+          status: normalizeAnnouncementStatus(data.status),
+          visibleToPublic: data.visibleToPublic !== false,
         };
       })
       .sort((a, b) => {

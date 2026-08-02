@@ -196,25 +196,16 @@
         </div>
 
         <aside class="public-feed-sidebar" aria-label="Community highlights">
-          <section class="public-side-card announcement-calendar-card">
-            <div class="side-card-heading"><span>Upcoming near you</span><i class="fa-regular fa-calendar"></i></div>
-            <div class="calendar-divider" aria-hidden="true"></div>
-            <div class="announcement-calendar">
-              <div class="calendar-head">
-                <button id="publicCalendarPrev" type="button" aria-label="Previous month"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i></button>
-                <strong id="publicCalendarMonth" aria-live="polite">Month</strong>
-                <button id="publicCalendarNext" type="button" aria-label="Next month"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></button>
-              </div>
-              <div id="publicCalendarGrid" class="calendar-grid" role="grid" aria-label="Important event dates">
-                <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
-              </div>
-              <div class="calendar-legend">
-                <span><i class="legend-event"></i> Events</span>
-                <span><i class="legend-activity"></i> Selected date</span>
-              </div>
-              <button id="showCalendarEvents" type="button" class="calendar-link">View all events <i class="fa-solid fa-arrow-right"></i></button>
+          <section class="public-side-card upcoming-events-card">
+            <div class="side-card-heading">
+              <span>Upcoming events</span>
+              <i class="fa-regular fa-calendar" aria-hidden="true"></i>
             </div>
             <div id="upcomingEventList" class="upcoming-event-list" aria-live="polite"></div>
+            <button type="button" class="side-text-action" id="viewAllEventsBtn">
+              <span>View all events</span>
+              <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+            </button>
           </section>
 
           <section class="public-side-card quick-topics-card">

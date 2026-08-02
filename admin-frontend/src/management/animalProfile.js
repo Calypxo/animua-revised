@@ -56,7 +56,17 @@ const TRAIT_COLORS = [
 let animal = null;
 let editingMedId = null;
 let currentRole = "";
+let currentUser = null;
 let medicalInventoryItems = [];
+
+function signedInUserName() {
+  return String(
+    currentUser?.fullName ||
+    getUserName() ||
+    currentUser?.email ||
+    "Staff"
+  ).trim();
+}
 
 const speciesInitial = species => String(species || "Animal").charAt(0).toUpperCase();
 
@@ -99,7 +109,7 @@ const medTypeCfg = {
   Treatment: { cls: "med-treatment", icon: "bi-bandaid-fill" },
   Surgery: { cls: "med-surgery", icon: "bi-activity" },
   Deworming: { cls: "med-deworming", icon: "bi-capsule" },
-  "Quarantine Clearance": { cls: "med-clearance", icon: "bi-patch-check-fill" },
+  "Quarantine Clearance": { cls: "med-clearance", icon: "bi-patch-check-fill", label: "Quarantine Review" },
 };
 
 const clearanceCfg = {
@@ -424,7 +434,7 @@ if (addMedicalButton) {
         <div class="medical-record-card">
           <div class="med-card-header">
             <div class="d-flex align-items-center gap-2 flex-wrap">
-              <span class="med-type-badge ${tc.cls}"><i class="bi ${tc.icon}"></i>${r.type}</span>
+              <span class="med-type-badge ${tc.cls}"><i class="bi ${tc.icon}"></i>${tc.label || r.type}</span>
               ${
                 r.type === "Quarantine Clearance"
                   ? `
@@ -481,10 +491,20 @@ if (addMedicalButton) {
   const latestMedicalRecord =
     getLatestMedicalRecord();
 
-  document.getElementById("quarantineCard").innerHTML = `
-    <div class="qs-title"><i class="bi bi-shield-plus"></i> Quarantine Summary</div>
+  const quarantineCard = document.getElementById("quarantineCard");
+  const behaviorComplete = Boolean(animal.behavioralAssessment);
+  const latestClearanceRecord = getLatestClearanceRecord();
+  quarantineCard.innerHTML = `
+    <div class="qs-title"><i class="bi bi-shield-plus"></i> Care readiness</div>
+    <p class="quarantine-workflow-help">Medical visits document care. A single <strong>Quarantine Review</strong> records the final decision; update that review if the decision changes.</p>
+    <div class="care-workflow" aria-label="Animal care readiness workflow">
+      <div class="care-workflow-step is-complete"><i class="bi bi-check-lg"></i><span><strong>In quarantine</strong><small>Care tracking active</small></span></div>
+      <div class="care-workflow-step ${recs.length ? "is-complete" : "is-current"}"><i class="bi ${recs.length ? "bi-check-lg" : "bi-clipboard2-pulse"}"></i><span><strong>Medical care</strong><small>${recs.length} record${recs.length === 1 ? "" : "s"}</small></span></div>
+      <div class="care-workflow-step ${clearStatus === "Cleared" ? "is-complete" : "is-current"}"><i class="bi ${clearStatus === "Cleared" ? "bi-check-lg" : "bi-shield-check"}"></i><span><strong>Quarantine decision</strong><small>${cc.label}</small></span></div>
+      <div class="care-workflow-step ${behaviorComplete ? "is-complete" : ""}"><i class="bi ${behaviorComplete ? "bi-check-lg" : "bi-sliders"}"></i><span><strong>Behavior assessment</strong><small>${behaviorComplete ? "Complete" : "Pending"}</small></span></div>
+    </div>
     <div class="qs-grid">
-      <div class="qs-item"><div class="qs-lbl">Clearance Status</div>
+      <div class="qs-item"><div class="qs-lbl">Quarantine decision</div>
         <div class="qs-val"><span class="clearance-badge ${cc.cls}">${cc.label}</span></div>
       </div>
       <div class="qs-item"><div class="qs-lbl">Total Records</div><div class="qs-val">${recs.length}</div></div>
@@ -498,7 +518,12 @@ if (addMedicalButton) {
     }
   </div>
 </div>
-    </div>`;
+    </div>
+    ${animal.status === "Quarantine" && can("set_clearance") ? `<button type="button" class="btn-primary-clay quarantine-decision-btn" id="btnRecordQuarantineDecision"><i class="bi bi-shield-check"></i>${latestClearanceRecord ? "Update quarantine decision" : "Record quarantine decision"}</button>` : ""}`;
+
+  quarantineCard.querySelector("#btnRecordQuarantineDecision")?.addEventListener("click", () => {
+    openMedicalModal(latestClearanceRecord?.id || null, "Quarantine Clearance");
+  });
 }
 
 function renderBehavioralTab() {
@@ -777,7 +802,7 @@ function openBehavioralModal() {
 
   const ba = animal.behavioralAssessment || {};
   document.getElementById("behavioralNotes").value = animal.behavioralNotes || "";
-  document.getElementById("behavioralAssessor").value = animal.behavioralAssessor || getUserName()?.split(" ")[0] || "";
+  document.getElementById("behavioralAssessor").value = signedInUserName();
 
   const behaviorGroups = [
     { title: "Activity & routine", icon: "bi-activity", keys: ["energyLevel", "exerciseNeeds", "playfulness", "attentionNeeds"] },
@@ -799,23 +824,30 @@ function openBehavioralModal() {
           const val = ba[key] ?? 3;
           return `
             <div class="trait-modal-row">
-              <div class="trait-modal-header">
-                <label class="trait-modal-name" for="slider-${key}">${trait.label}</label>
-                <output class="trait-modal-score" id="score-${key}" for="slider-${key}">${val}</output>
+              <div class="trait-modal-copy">
+                <label class="trait-modal-name" id="label-${key}">${trait.label}</label>
+                <div class="trait-modal-desc" id="desc-${key}">${trait.desc}</div>
               </div>
-              <input type="range" class="trait-slider" id="slider-${key}" min="1" max="5" step="1" value="${val}" style="--val:${val}" aria-describedby="desc-${key}" />
-              <div class="trait-modal-desc" id="desc-${key}">${trait.desc}</div>
+              <input type="hidden" id="slider-${key}" value="${val}" />
+              <div class="trait-score-options" role="group" aria-labelledby="label-${key}" aria-describedby="desc-${key}">
+                ${[1, 2, 3, 4, 5].map(score => `<button type="button" class="trait-score-option${Number(val) === score ? " is-selected" : ""}" data-trait-key="${key}" data-score="${score}" aria-pressed="${Number(val) === score}">${score}</button>`).join("")}
+              </div>
             </div>`;
         }).join("")}
       </div>
     </section>`).join("");
 
-  TRAITS.forEach(t => {
-    const slider = document.getElementById(`slider-${t.key}`);
-    const score = document.getElementById(`score-${t.key}`);
-    slider?.addEventListener("input", () => {
-      score.textContent = slider.value;
-      slider.style.setProperty("--val", slider.value);
+  grid.querySelectorAll(".trait-score-option").forEach(button => {
+    button.addEventListener("click", () => {
+      const key = button.dataset.traitKey;
+      const score = button.dataset.score;
+      const input = document.getElementById(`slider-${key}`);
+      if (input) input.value = score;
+      button.parentElement.querySelectorAll(".trait-score-option").forEach(option => {
+        const selected = option === button;
+        option.classList.toggle("is-selected", selected);
+        option.setAttribute("aria-pressed", String(selected));
+      });
     });
   });
 
@@ -848,7 +880,7 @@ async function saveBehavioralAssessment() {
   });
 
   const notes = document.getElementById("behavioralNotes").value.trim();
-  const assessor = document.getElementById("behavioralAssessor").value.trim() || getUserName()?.split(" ")[0] || "Staff";
+  const assessor = signedInUserName();
 
   try {
     await saveBehavioralAssessmentApi(animal.id, { traits, notes, assessor });
@@ -863,7 +895,7 @@ async function saveBehavioralAssessment() {
   }
 }
 
-function openMedicalModal(medId = null) {
+function openMedicalModal(medId = null, defaultType = "") {
   const requiredPermission =
   medId
     ? "edit_medical"
@@ -886,11 +918,24 @@ if (!can(requiredPermission)) {
   }
 
   editingMedId = medId;
+  const editingRecord = medId
+    ? (animal.medicalRecords || []).find((item) => item.id === medId)
+    : null;
+  const isQuarantineReview =
+    defaultType === "Quarantine Clearance" ||
+    editingRecord?.type === "Quarantine Clearance";
 
   document.getElementById("medicalModalTitle").textContent =
-    medId ? "Edit Medical Record" : "Add Medical Record";
+    isQuarantineReview
+      ? medId ? "Update Quarantine Review" : "Record Quarantine Review"
+      : medId ? "Edit Medical Record" : "Add Medical Record";
+  document.getElementById("medicalModalSubtitle").textContent =
+    isQuarantineReview
+      ? "Review the animal and record one clear quarantine decision."
+      : "Record a clinical visit, treatment, vaccination, or procedure.";
 
   document.getElementById("medicalForm").reset();
+  document.getElementById("fMedVet").value = signedInUserName();
 
   const inventorySelect =
   document.getElementById("fMedInventoryItem");
@@ -945,8 +990,9 @@ const clearanceOption =
   );
 
 if (clearanceOption) {
+  const existingClearanceRecord = getLatestClearanceRecord();
   clearanceOption.disabled =
-    !can("set_clearance");
+    !can("set_clearance") || Boolean(existingClearanceRecord && existingClearanceRecord.id !== medId);
 }
 
 const updateClearanceVisibility = () => {
@@ -973,14 +1019,15 @@ const updateClearanceVisibility = () => {
 };
 
 if (typeSelect) {
+  typeSelect.disabled = false;
   typeSelect.onchange =
     updateClearanceVisibility;
+  if (!medId && defaultType) typeSelect.value = defaultType;
+  if (isQuarantineReview) typeSelect.disabled = true;
 }
 
   if (medId) {
-    const record = (animal.medicalRecords || []).find(
-      (item) => item.id === medId
-    );
+    const record = editingRecord;
 
     if (record) {
       document.getElementById("fMedType").value =
@@ -1284,6 +1331,10 @@ function getLatestMedicalRecord() {
 }
 
 function getLatestClearanceStatus() {
+  return getLatestClearanceRecord()?.clearance || "Pending";
+}
+
+function getLatestClearanceRecord() {
   const clearanceRecords = [
     ...(animal.medicalRecords || []),
   ].filter(
@@ -1293,7 +1344,7 @@ function getLatestClearanceStatus() {
   );
 
   if (clearanceRecords.length === 0) {
-    return "Pending";
+    return null;
   }
 
   clearanceRecords.sort((a, b) => {
@@ -1306,7 +1357,7 @@ function getLatestClearanceStatus() {
     return dateB - dateA;
   });
 
-  return clearanceRecords[0].clearance || "Pending";
+  return clearanceRecords[0];
 }
 
 async function markReadyForAdoption() {
@@ -1637,6 +1688,7 @@ async function init() {
   try {
     const session = await protectPageByModule("animals");
     currentRole = session.role;
+    currentUser = session.user || null;
 
     renderTopbarUser();
     await loadSidebar();

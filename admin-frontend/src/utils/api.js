@@ -1,7 +1,14 @@
-// admin-frontend/src/utils/api.js
-// render: "https://animua-backend.onrender.com/api"
-// local:   "http://localhost:5000/api"
-export const API_BASE_URL = "http://localhost:5000/api";
+const LOCAL_API_BASE_URL = "http://localhost:5000/api";
+const PRODUCTION_API_BASE_URL = "https://animua-backend.onrender.com/api";
+
+const isLocalHost =
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1";
+
+// Keep management and public pages on the same backend in every environment.
+export const API_BASE_URL = isLocalHost
+  ? LOCAL_API_BASE_URL
+  : PRODUCTION_API_BASE_URL;
 
 /**
  * Authenticated fetch wrapper.

@@ -1,16 +1,8 @@
 import Swal from "sweetalert2";
 import { API_BASE_URL } from "../../utils/api.js";
 
-const HIGHLIGHT_NEWS_ALERT_IMAGE = new URL(
-  "../../assets/images/highlight-news-alert-palit-an.png",
-  import.meta.url
-).href;
 const NEWS_CCA_CAT_RESCUE_IMAGE = new URL(
   "../../assets/images/news-cca-cat-rescue.png",
-  import.meta.url
-).href;
-const NEWS_BALIBAGO_DOG_RESCUE_IMAGE = new URL(
-  "../../assets/images/news-balibago-dog-rescue.jpg",
   import.meta.url
 ).href;
 const HIGHLIGHT_UPCOMING_EVENT_IMAGE = new URL(
@@ -19,18 +11,6 @@ const HIGHLIGHT_UPCOMING_EVENT_IMAGE = new URL(
 ).href;
 const SUCCESS_ZACH_ADOPTION_IMAGE = new URL(
   "../../assets/images/success-zach-adoption.jpg",
-  import.meta.url
-).href;
-const SUCCESS_LOLONG_ADOPTION_IMAGE = new URL(
-  "../../assets/images/success-lolong-adoption.jpg",
-  import.meta.url
-).href;
-const SUCCESS_WHITY_ADOPTION_IMAGE = new URL(
-  "../../assets/images/success-whity-adoption.jpg",
-  import.meta.url
-).href;
-const SUCCESS_MARCIA_ADOPTION_IMAGE = new URL(
-  "../../assets/images/success-marcia-adoption.jpg",
   import.meta.url
 ).href;
 
@@ -46,136 +26,6 @@ const TYPES = {
   "Upcoming Events": { icon: "fa-regular fa-calendar-check", slug: "event", label: "Event" },
 };
 
-const HOMEPAGE_HIGHLIGHT_POSTS = [
-  {
-    id: "highlight-news-nepo-stray-cats",
-    type: "News & Article",
-    title: "Pag-rescue sa stray cats, nagpapatuloy sa Angeles City",
-    caption:
-      "Ipinagpatuloy ng Angeles City Veterinary Office ang stray cat rescue operation sa Nepo Mart bilang bahagi ng kanilang programa para sa animal welfare.",
-    details: [
-      "Ipinagpatuloy ng Angeles City Veterinary Office ang stray cat rescue operation sa Nepo Mart.",
-      "Ligtas na dinala ang mga nahuling stray cat sa Angeles City Pound para sa observation at veterinary procedures.",
-      "Hinihikayat ang mga Angeleno na maging responsableng pet owners at makibahagi sa animal welfare initiatives.",
-    ],
-    image: HIGHLIGHT_NEWS_ALERT_IMAGE,
-    location: "Nepo Mart, Angeles City",
-    publishedAt: "2026-07-21",
-    source: "CLTV36 News",
-  },
-  {
-    id: "highlight-news-cca-cat-rescue",
-    type: "News & Article",
-    title: "Stray cat rescue at CCA",
-    caption:
-      "Nagsagawa ng stray cat rescue operation ang Angeles City Veterinary Office sa City College of Angeles upang mapangalagaan ang mga ligaw na pusa.",
-    details: [
-      "Nagsagawa ng stray cat rescue operation ang Angeles City Veterinary Office sa City College of Angeles.",
-      "Ligtas na nahuli at dinala sa Angeles City Pound ang mga stray cat upang mabigyan ng pagkalinga at serbisyong beterinaryo.",
-      "Hinimok din ang mga Angeleno na isulong ang responsible pet ownership at i-report ang hayop na nangangailangan ng tulong.",
-    ],
-    image: NEWS_CCA_CAT_RESCUE_IMAGE,
-    location: "City College of Angeles",
-    publishedAt: "2026-07-20",
-    source: "CLTV36 News",
-  },
-  {
-    id: "highlight-news-balibago-dog-rescue",
-    type: "News & Article",
-    title: "Aso na-rescue sa Balibago",
-    caption:
-      "Sa gitna ng search and rescue operations sa gumuhong ginagawang gusali sa Balibago, isang aso ang nailigtas at inilipat sa ligtas na pangangalaga.",
-    details: [
-      "Ayon sa ulat sa construction site, ang aso ay biglang nakita na papalabas mula sa rubble habang nagsasagawa ng operasyon.",
-      "Agad itong inasikaso at inilipat sa ligtas na pangangalaga ng mga rescuers.",
-      "Isasailalim ang aso sa masusing check-up ng City Veterinary Office ng Angeles City.",
-    ],
-    image: NEWS_BALIBAGO_DOG_RESCUE_IMAGE,
-    location: "Balibago, Angeles City",
-    publishedAt: "2025-05-14",
-    source: "Angeles City Information Office",
-  },
-  {
-    id: "highlight-success-zach",
-    type: "Success Stories",
-    title: "Zach starts a new life",
-    caption: "Rescued dog Zach is now starting a new life with his loving fur-parent.",
-    details: [
-      "Rescued dog Zach is now starting a new life with his loving fur-parent.",
-      "Zach was adopted by Hamara Dela Cruz of Brgy. Ninoy Aquino.",
-      "His adoption supports the Angeles City Government's Adopt, Don't Shop initiative.",
-    ],
-    image: SUCCESS_ZACH_ADOPTION_IMAGE,
-    location: "Brgy. Ninoy Aquino",
-    publishedAt: "2026-07-18",
-    source: "Angeles City Dog Pound and Animal Shelter",
-  },
-  {
-    id: "highlight-success-lolong",
-    type: "Success Stories",
-    title: "Lolong welcomed home",
-    caption: "Rescued cat Lolong is now starting a new life with a loving fur-parent.",
-    details: [
-      "Rescued cat Lolong is now starting a new life with a loving fur-parent.",
-      "Lolong was welcomed by Analyn Rivera of Brgy. Anunas.",
-      "The Angeles City Dog Pound and Animal Shelter continues to help rescued pets find forever homes.",
-    ],
-    image: SUCCESS_LOLONG_ADOPTION_IMAGE,
-    location: "Brgy. Anunas",
-    publishedAt: "2026-07-17",
-    source: "Angeles City Dog Pound and Animal Shelter",
-  },
-  {
-    id: "highlight-success-whity",
-    type: "Success Stories",
-    title: "Whity finds a family",
-    caption: "Rescued cat Whity is now starting a new life with a loving fur-parent.",
-    details: [
-      "Rescued cat Whity is now starting a new life with a loving fur-parent.",
-      "Whity was adopted by Noel Agustin of Barangay Margot.",
-      "This adoption is part of the city's continuing effort to promote responsible pet ownership.",
-    ],
-    image: SUCCESS_WHITY_ADOPTION_IMAGE,
-    location: "Barangay Margot",
-    publishedAt: "2026-07-16",
-    source: "Angeles City Dog Pound and Animal Shelter",
-  },
-  {
-    id: "highlight-success-marcia",
-    type: "Success Stories",
-    title: "Marcia finds care",
-    caption: "Rescued cat Marcia is now starting a new life with a loving fur-parent.",
-    details: [
-      "Rescued cat Marcia is now starting a new life with a loving fur-parent.",
-      "Marcia was welcomed by Analyn Rivera of Brgy. Anunas.",
-      "The shelter gives rescued animals not just temporary care, but a chance at a forever home.",
-    ],
-    image: SUCCESS_MARCIA_ADOPTION_IMAGE,
-    location: "Brgy. Anunas",
-    publishedAt: "2026-07-15",
-    source: "Angeles City Dog Pound and Animal Shelter",
-  },
-  {
-    id: "demo-upcoming-event",
-    type: "Upcoming Events",
-    title: "Veterinary Services Brought Closer to Angelenos",
-    caption:
-      "The City of Angeles continues its free anti-rabies vaccination program to protect pets and help prevent the spread of rabies in local communities.",
-    details: [
-      "Free anti-rabies vaccination services will be brought closer to local communities.",
-      "Pet owners are encouraged to prepare their pets and follow the guidance of the City Veterinary Office team.",
-      "This program supports healthier pets and safer neighborhoods across Angeles City.",
-    ],
-    image: HIGHLIGHT_UPCOMING_EVENT_IMAGE,
-    eventDate: "2026-08-16",
-    eventTime: "9:00 AM - 3:00 PM",
-    location: "Savannah Phase 1, Savannah Phase 2, and Green Plain Phase 3",
-    publishedAt: "2026-08-02",
-    source: "Angeles City Veterinary Office",
-  },
-];
-
-const today = new Date();
 const state = {
   announcements: [],
   search: "",
@@ -183,17 +33,12 @@ const state = {
   action: "",
   visibleCount: 5,
   targetedId: "",
-  calendarMonth: new Date(today.getFullYear(), today.getMonth(), 1),
-  selectedEventDate: "",
-  calendarInitialized: false,
 };
 
 const feed = document.getElementById("announcementFeed");
 const featured = document.getElementById("featuredAnnouncement");
 const status = document.getElementById("announcementStatus");
 const eventList = document.getElementById("upcomingEventList");
-const calendarGrid = document.getElementById("publicCalendarGrid");
-const calendarMonth = document.getElementById("publicCalendarMonth");
 const searchInput = document.getElementById("announcementSearch");
 const typeSelect = document.getElementById("announcementType");
 const typeSelectWrap = document.querySelector(".announcement-topic-select");
@@ -239,66 +84,20 @@ function publishedDate(value) {
     : "Recently";
 }
 
-function parseEventDate(value) {
-  if (!value) return "";
+function eventDateParts(value) {
+  if (!value) return { month: "Soon", day: "" };
   const parts = String(value).split("-").map(Number);
   const date = parts.length === 3 ? new Date(parts[0], parts[1] - 1, parts[2]) : new Date(value);
-  return Number.isNaN(date.getTime()) ? null : date;
-}
-
-function eventDateKey(date) {
-  if (!(date instanceof Date) || Number.isNaN(date.getTime())) return "";
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-}
-
-function eventDate(value, compact = false) {
-  const date = value instanceof Date ? value : parseEventDate(value);
-  if (!date) return value ? String(value) : "";
-  return date.toLocaleDateString("en-PH", compact
-    ? { month: "short", day: "numeric" }
-    : { weekday: "short", year: "numeric", month: "long", day: "numeric" });
-}
-
-function calendarEvents() {
-  return state.announcements
-    .filter((item) => normalizeType(item.type) === "Upcoming Events")
-    .map((item) => ({ ...item, calendarDate: parseEventDate(item.eventDate) }))
-    .filter((item) => item.calendarDate)
-    .sort((left, right) => left.calendarDate - right.calendarDate);
-}
-
-function initializeCalendar(events) {
-  if (state.calendarInitialized) return;
-  const now = new Date();
-  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const nextEvent = events.find((item) => item.calendarDate >= todayStart) || events[0];
-
-  if (nextEvent) {
-    state.calendarMonth = new Date(
-      nextEvent.calendarDate.getFullYear(),
-      nextEvent.calendarDate.getMonth(),
-      1
-    );
-    state.selectedEventDate = eventDateKey(nextEvent.calendarDate);
-  } else {
-    state.selectedEventDate = eventDateKey(todayStart);
-  }
-  state.calendarInitialized = true;
-}
-
-function setText(id, value) {
-  const element = document.getElementById(id);
-  if (element) element.textContent = value;
-}
-
-function eventDateParts(value) {
-  const date = parseEventDate(value);
-  if (!date) return { month: "Soon", day: "", full: "" };
+  if (Number.isNaN(date.getTime())) return { month: "Soon", day: "" };
   return {
     month: date.toLocaleDateString("en-PH", { month: "short" }).toUpperCase(),
     day: date.toLocaleDateString("en-PH", { day: "2-digit" }),
     full: date.toLocaleDateString("en-PH", { weekday: "short", year: "numeric", month: "long", day: "numeric" }),
   };
+}
+
+function eventDate(value) {
+  return eventDateParts(value).full || String(value || "Soon");
 }
 
 function getPostDate(item) {
@@ -510,86 +309,21 @@ function getFilteredPosts() {
 }
 
 function renderEvents() {
-  if (!eventList || !calendarGrid || !calendarMonth) return;
+  if (!eventList) return;
   eventList.replaceChildren();
-  const events = calendarEvents();
-  initializeCalendar(events);
+  const events = state.announcements
+    .filter((item) => normalizeType(item.type) === "Upcoming Events")
+    .slice(0, 3);
 
-  const month = state.calendarMonth;
-  const year = month.getFullYear();
-  const monthIndex = month.getMonth();
-  const monthEvents = events.filter(
-    (item) =>
-      item.calendarDate.getFullYear() === year &&
-      item.calendarDate.getMonth() === monthIndex
-  );
-  const byDate = new Map();
-  monthEvents.forEach((item) => {
-    const key = eventDateKey(item.calendarDate);
-    if (!byDate.has(key)) byDate.set(key, []);
-    byDate.get(key).push(item);
-  });
-
-  calendarMonth.textContent = month.toLocaleDateString("en-PH", {
-    month: "long",
-    year: "numeric",
-  });
-  calendarGrid.setAttribute("aria-label", `${calendarMonth.textContent} important event calendar`);
-  calendarGrid.replaceChildren();
-
-  ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].forEach((weekday) => {
-    const label = document.createElement("span");
-    label.textContent = weekday;
-    label.setAttribute("aria-hidden", "true");
-    calendarGrid.appendChild(label);
-  });
-
-  const firstWeekday = new Date(year, monthIndex, 1).getDay();
-  const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
-  const todayKey = eventDateKey(new Date());
-
-  for (let index = 0; index < 42; index += 1) {
-    const dayNumber = index - firstWeekday + 1;
-    if (dayNumber < 1 || dayNumber > daysInMonth) {
-      const empty = document.createElement("em");
-      empty.setAttribute("aria-hidden", "true");
-      calendarGrid.appendChild(empty);
-      continue;
-    }
-
-    const date = new Date(year, monthIndex, dayNumber);
-    const key = eventDateKey(date);
-    const dayEvents = byDate.get(key) || [];
-    const day = document.createElement("button");
-    day.type = "button";
-    day.dataset.calendarDate = key;
-    day.textContent = dayNumber;
-    day.classList.toggle("is-event", dayEvents.length > 0);
-    day.classList.toggle("is-activity", key === state.selectedEventDate);
-    day.classList.toggle("is-today", key === todayKey);
-    day.setAttribute("aria-pressed", String(key === state.selectedEventDate));
-    day.setAttribute(
-      "aria-label",
-      `${eventDate(date)}${dayEvents.length ? `, ${dayEvents.length} important event${dayEvents.length === 1 ? "" : "s"}` : ""}`
-    );
-    calendarGrid.appendChild(day);
-  }
-
-  const selectedEvents = state.selectedEventDate
-    ? byDate.get(state.selectedEventDate) || []
-    : monthEvents;
-
-  if (!selectedEvents.length) {
+  if (!events.length) {
     const message = document.createElement("p");
     message.className = "no-upcoming-events";
-    message.textContent = monthEvents.length
-      ? "Select a highlighted date to see its important events."
-      : "No important events are scheduled for this month.";
+    message.textContent = "New community events will be posted here soon.";
     eventList.appendChild(message);
     return;
   }
 
-  selectedEvents.slice(0, 4).forEach((item) => {
+  events.forEach((item) => {
     const row = document.createElement("article");
     row.className = "upcoming-event-row";
 
@@ -613,26 +347,6 @@ function renderEvents() {
   });
 }
 
-function moveCalendar(offset) {
-  state.calendarMonth = new Date(
-    state.calendarMonth.getFullYear(),
-    state.calendarMonth.getMonth() + offset,
-    1
-  );
-  const firstEvent = calendarEvents().find(
-    (item) =>
-      item.calendarDate.getFullYear() === state.calendarMonth.getFullYear() &&
-      item.calendarDate.getMonth() === state.calendarMonth.getMonth()
-  );
-  state.selectedEventDate = firstEvent ? eventDateKey(firstEvent.calendarDate) : "";
-  renderEvents();
-}
-
-function updateStats() {
-  setText("publicPostCount", state.announcements.length);
-  setText("publicStoryCount", state.announcements.filter((item) => normalizeType(item.type) === "Success Stories").length);
-  setText("publicEventCount", state.announcements.filter((item) => normalizeType(item.type) === "Upcoming Events").length);
-}
 function render() {
   if (!feed || !featured) return;
   const filtered = getFilteredPosts();
@@ -666,10 +380,10 @@ function render() {
   feed.appendChild(fragment);
 
   if (showAllButton) {
-    showAllButton.hidden = state.announcements.length <= 5;
+    showAllButton.hidden = filtered.length <= 5;
     showAllButton.querySelector("span").textContent = state.visibleCount >= filtered.length
-      ? "View all announcements"
-      : "View all announcements";
+      ? "Show fewer announcements"
+      : `View all ${filtered.length} announcements`;
   }
 }
 
@@ -793,16 +507,10 @@ function typeBadgeHtml(type, label = "") {
 }
 
 function mergeAnnouncements(items = []) {
-  const backendItems = Array.isArray(items) ? items : [];
-  const existingKeys = new Set(
-    backendItems.map((item) => `${normalizeType(item.type)}::${String(item.title || "").toLowerCase().trim()}`)
-  );
-  const highlights = HOMEPAGE_HIGHLIGHT_POSTS.filter((item) => {
-    const key = `${normalizeType(item.type)}::${String(item.title || "").toLowerCase().trim()}`;
-    return !existingKeys.has(key);
-  });
-
-  return [...highlights, ...backendItems];
+  // The management API is the single source of truth for this page. Static
+  // homepage highlights used to be prepended here, which pushed newly created
+  // management posts below the initial five-card limit.
+  return Array.isArray(items) ? items : [];
 }
 
 function findAnnouncementByQuery() {
@@ -846,27 +554,27 @@ function focusRequestedAnnouncement(item) {
   }, 120);
 }
 
-async function loadAnnouncements() {
-  setStatus("Loading the latest updates...", "fa-solid fa-spinner fa-spin");
+async function loadAnnouncements(silent = false) {
+  if (!silent) {
+    setStatus("Loading the latest updates...", "fa-solid fa-spinner fa-spin");
+  }
   try {
-    const response = await fetch(`${API_BASE_URL}/announcements/public`);
+    const response = await fetch(`${API_BASE_URL}/announcements/public`, { cache: "no-store" });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.message || "Announcements could not be loaded.");
     state.announcements = mergeAnnouncements(data.announcements);
     setStatus();
-    updateStats();
     renderEvents();
-    const requestedAnnouncement = findAnnouncementByQuery();
+    const requestedAnnouncement = silent ? null : findAnnouncementByQuery();
     render();
     focusRequestedAnnouncement(requestedAnnouncement);
   } catch (error) {
-    state.announcements = mergeAnnouncements();
-    setStatus("Showing saved community highlights while live announcements are unavailable.", "fa-solid fa-circle-info");
-    updateStats();
+    if (silent) return;
+    state.announcements = [];
+    setStatus("Live announcements are temporarily unavailable. Please try again shortly.", "fa-solid fa-circle-exclamation");
     renderEvents();
-    const requestedAnnouncement = findAnnouncementByQuery();
-    render();
-    focusRequestedAnnouncement(requestedAnnouncement);
+    featured?.replaceChildren();
+    feed?.replaceChildren();
   }
 }
 
@@ -919,10 +627,11 @@ document.querySelectorAll("[data-topic-search]").forEach((button) => {
 });
 
 showAllButton?.addEventListener("click", () => {
+  const showingAll = state.action === "all" && state.visibleCount >= state.announcements.length;
   state.type = "";
   state.search = "";
-  state.action = "all";
-  state.visibleCount = Math.max(state.announcements.length, 5);
+  state.action = showingAll ? "" : "all";
+  state.visibleCount = showingAll ? 5 : Math.max(state.announcements.length, 5);
   if (searchInput) searchInput.value = "";
   syncTypeDropdown("");
   document.getElementById("announcementsHeading")?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -944,23 +653,10 @@ document.getElementById("pastAnnouncementsBtn")?.addEventListener("click", () =>
   render();
 });
 
-document.getElementById("publicCalendarPrev")?.addEventListener("click", () => moveCalendar(-1));
-document.getElementById("publicCalendarNext")?.addEventListener("click", () => moveCalendar(1));
-calendarGrid?.addEventListener("click", (event) => {
-  const day = event.target.closest("[data-calendar-date]");
-  if (!day) return;
-  state.selectedEventDate = day.dataset.calendarDate || "";
-  renderEvents();
-});
-document.getElementById("showCalendarEvents")?.addEventListener("click", () => {
-  state.type = "Upcoming Events";
-  state.search = "";
-  const search = document.getElementById("announcementSearch");
-  const type = document.getElementById("announcementType");
-  if (search) search.value = "";
-  if (type) type.value = state.type;
-  document.getElementById("announcementsHeading")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  render();
-});
-
 loadAnnouncements();
+
+// Refresh when a visitor returns to this tab after management publishes or
+// updates a post in another tab.
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) loadAnnouncements(true);
+});

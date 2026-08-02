@@ -9,6 +9,7 @@
     "dev:emulator": "node scripts/dev.js --emulators",
     "dev:backend": "nodemon server.js",
     "seed:emulator": "node scripts/seedEmulator.js",
+    "seed:announcements": "node scripts/seedAnnouncementHighlights.js",
     "sentiment": "..\\animua-sentiment-service\\.venv\\Scripts\\python.exe -B -m uvicorn --app-dir ..\\animua-sentiment-service app:app --host 127.0.0.1 --port 8002",
     "start": "node server.js"
   },
