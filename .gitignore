@@ -9,6 +9,7 @@ dist/
 build/
 
 # local/generated artifacts
+.runtime-logs/
 .tmp-chrome-contact-check/
 .venv/
 .python/

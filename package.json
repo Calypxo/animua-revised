@@ -1,12 +1,13 @@
 {
   "scripts": {
-    "build": "npm --prefix frontend install && npm --prefix frontend run build -- --outDir ../dist --emptyOutDir && npm --prefix admin-frontend install && npm --prefix admin-frontend run build -- --outDir ../dist --emptyOutDir false && node scripts/prepare-sites-build.mjs",
+    "build": "npm run build:firebase",
+    "build:firebase": "npm --prefix frontend run build && npm --prefix admin-frontend run build",
+    "deploy:firebase": "npm run build:firebase && firebase deploy --only hosting",
+    "deploy:public": "npm --prefix frontend run build && firebase deploy --only hosting:public",
+    "deploy:admin": "npm --prefix admin-frontend run build && firebase deploy --only hosting:admin",
     "dev:emulator": "node scripts/dev-emulator.mjs",
     "emulators": "firebase emulators:start --only auth,firestore,storage --project demo-animua",
     "emulators:seed": "npm --prefix backend run seed:emulator",
     "backend:start": "node server.js"
-  },
-  "dependencies": {
-    "firebase": "^12.12.0"
   }
 }

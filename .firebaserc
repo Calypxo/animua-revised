@@ -5,9 +5,8 @@
   "targets": {
     "animua-angelescity": {
       "hosting": {
-        "admin": [
-          "animua-admin"
-        ]
+        "public": ["animua-angelescity"],
+        "admin": ["animua-admin"]
       }
     }
   },

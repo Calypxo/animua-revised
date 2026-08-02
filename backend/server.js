@@ -30,7 +30,9 @@ const { trainInventoryModel } = require("./src/services/predictiveService");
 // ─── CORS ─────────────────────────────────────────────────────────────────────
 const allowedOrigins = [
   "https://animua-angelescity.web.app",
+  "https://animua-angelescity.firebaseapp.com",
   "https://animua-admin.web.app",
+  "https://animua-admin.firebaseapp.com",
 
   "http://localhost:5173",
   "http://127.0.0.1:5173",

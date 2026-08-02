@@ -1,4 +1,6 @@
-const SUBMIT_SURRENDER_API_URL = "http://localhost:5000/api/surrenders";
+import { API_BASE_URL } from "../../utils/api.js";
+
+const SUBMIT_SURRENDER_API_URL = `${API_BASE_URL}/surrenders`;
 const MY_SURRENDER_REQUESTS_API_URL = `${SUBMIT_SURRENDER_API_URL}/my-requests`;
 const SURRENDER_AVAILABILITY_API_URL = `${SUBMIT_SURRENDER_API_URL}/availability`;
 

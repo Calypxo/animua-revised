@@ -11,11 +11,12 @@ import { hasPermission } from "../auth/permissions.js";
 import { renderTopbarUser }      from "../components/management/topbarUser.js";
 import { loadSidebar, navigateManagementPage } from "../components/management/sidebarLoader.js";
 import { getUserName }           from "../utils/storage.js";
+import { API_BASE_URL }          from "../utils/api.js";
 
 renderPageHeader(PAGE_HEADER_CONFIGS.surrenders);
 
 const SURRENDER_REQUESTS_API_URL =
-  "http://localhost:5000/api/surrenders";
+  `${API_BASE_URL}/surrenders`;
 const SURRENDER_AVAILABILITY_API_URL =
   `${SURRENDER_REQUESTS_API_URL}/availability`;
 
@@ -827,7 +828,7 @@ function renderDrawer(r) {
 async function updateSurrenderStatusInBackend(id, payload) {
   const token = localStorage.getItem("animua_token");
 
-  const response = await fetch(`http://localhost:5000/api/surrenders/${id}/status`, {
+  const response = await fetch(`${SURRENDER_REQUESTS_API_URL}/${encodeURIComponent(id)}/status`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",

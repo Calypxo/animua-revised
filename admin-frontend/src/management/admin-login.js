@@ -1,9 +1,4 @@
-
-// ── CONFIG ─────────────────────────────────────────────
-const API_BASE_URL =
-  (typeof import_meta_env !== "undefined" && import_meta_env.VITE_API_URL) ||
-  //"https://animua-backend.onrender.com/api"" || "http://localhost:5000/api"  // ← put your real deployed URL here
-  "http://localhost:5000/api";
+import { API_BASE_URL } from "../utils/api.js";
  
 // ── HELPERS ────────────────────────────────────────────
 function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
