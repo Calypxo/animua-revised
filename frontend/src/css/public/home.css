@@ -4782,7 +4782,7 @@ body.home-page .hero::before {
   z-index: -2 !important;
   display: block !important;
   background: url("../../assets/images/hero-shelter-dog-kennel.png") 56% 34% / cover no-repeat !important;
-  filter: brightness(0.86) contrast(1.12) saturate(0.88) sepia(0.08);
+  filter: brightness(1.04) contrast(1.05) saturate(0.96);
   transform: none !important;
 }
 
@@ -4794,10 +4794,10 @@ body.home-page .hero::after {
   display: block !important;
   background: linear-gradient(
     90deg,
-    rgba(5, 5, 5, 0.76) 0%,
-    rgba(5, 5, 5, 0.56) 34%,
-    rgba(5, 5, 5, 0.16) 62%,
-    rgba(5, 5, 5, 0.02) 100%
+    rgba(0, 0, 0, 0.78) 0%,
+    rgba(0, 0, 0, 0.58) 42%,
+    rgba(0, 0, 0, 0.25) 72%,
+    rgba(0, 0, 0, 0.12) 100%
   ) !important;
 }
 
@@ -8600,7 +8600,7 @@ body.home-page .home-match-quiz-layout {
   width: min(100%, 1280px);
   max-width: 1280px;
   display: grid;
-  grid-template-columns: minmax(0, 0.8fr) minmax(320px, 0.9fr);
+  grid-template-columns: minmax(0, 0.78fr) minmax(360px, 1fr);
   gap: clamp(28px, 4vw, 58px);
   align-items: center;
   padding: 0 clamp(24px, 5vw, 84px);
@@ -12805,7 +12805,7 @@ body.home-page .home-match-quiz-secondary {
 
 body.home-page .home-match-quiz-media {
   position: relative;
-  max-width: 600px;
+  max-width: 680px;
   padding: 0;
   border: 0;
   border-radius: 0;
@@ -12831,7 +12831,7 @@ body.home-page .home-match-quiz-media::after {
 }
 
 body.home-page .home-match-quiz-media img {
-  height: clamp(340px, 38vw, 520px);
+  height: clamp(370px, 42vw, 580px);
   object-fit: contain;
   filter: none;
 }
@@ -13999,9 +13999,12 @@ body.home-page .about-shelter-card img {
 body.home-page .about-shelter-card span {
   left: clamp(12px, 1.2vw, 18px);
   bottom: clamp(12px, 1.2vw, 18px);
-  padding: 6px 10px;
-  background: rgba(120, 1, 22, 0.84);
-  color: var(--cream);
+  padding: 6px 11px;
+  border: 1px solid rgba(247, 181, 56, 0.3);
+  background: rgba(30, 20, 19, 0.66);
+  box-shadow: 0 12px 24px rgba(12, 4, 5, 0.24);
+  backdrop-filter: blur(3px);
+  color: #fff8ee;
   font-size: clamp(11px, 0.82vw, 14px);
 }
 
@@ -14041,7 +14044,10 @@ body.home-page .about-shelter-card span::before {
 
 /* Shorter About ANIMUA section. */
 body.home-page .about-animua-section {
-  background: var(--cream);
+  background:
+    radial-gradient(circle at 6% 78%, rgba(247, 181, 56, 0.12), transparent 20%),
+    radial-gradient(circle at 88% 10%, rgba(255, 248, 238, 0.05), transparent 26%),
+    linear-gradient(135deg, #521017 0%, #6f141a 47%, #3a070c 100%);
 }
 
 body.home-page .about-animua-showcase {
@@ -14053,6 +14059,11 @@ body.home-page .about-animua-copy {
   height: 100%;
   padding-top: clamp(20px, 2.8vw, 34px);
   padding-bottom: clamp(20px, 2.8vw, 34px);
+  background: transparent;
+}
+
+body.home-page .about-animua-copy .section-label {
+  font-size: clamp(12px, 0.86vw, 14px);
 }
 
 body.home-page .about-shelter-gallery {
@@ -14062,12 +14073,13 @@ body.home-page .about-shelter-gallery {
 }
 
 body.home-page .about-animua-copy h2 {
-  margin-bottom: 10px;
-  font-size: clamp(30px, 3.2vw, 46px);
+  margin-bottom: 12px;
+  font-size: clamp(32px, 3.45vw, 50px);
 }
 
 body.home-page .about-animua-copy p {
-  line-height: 1.5;
+  font-size: clamp(14px, 1vw, 17px);
+  line-height: 1.48;
 }
 
 body.home-page .about-animua-points {
@@ -14077,7 +14089,8 @@ body.home-page .about-animua-points {
 
 body.home-page .about-animua-points span {
   min-height: 34px;
-  padding: 7px 12px 7px 9px;
+  padding: 7px 13px 7px 9px;
+  font-size: clamp(12px, 0.9vw, 14px);
 }
 
 body.home-page .about-animua-points i {
@@ -14114,9 +14127,9 @@ body.home-page .about-animua-points i {
   align-items: center;
   justify-content: center;
 
-  width: 112px;
-  height: 112px;
-  margin: 0 auto 14px;
+  width: 96px;
+  height: 96px;
+  margin: 0 auto 10px;
 
   border: 2px solid #edb536;
   border-radius: 50%;
@@ -14128,16 +14141,16 @@ body.home-page .about-animua-points i {
 }
 
 .process-main-icon {
-  width: 46px;
-  height: 46px;
+  width: 40px;
+  height: 40px;
   stroke-width: 1.9;
 }
 
 /* Small paw used inside the main icon */
 .process-detail-icon {
   position: absolute;
-  width: 15px;
-  height: 15px;
+  width: 13px;
+  height: 13px;
 
   padding: 1px;
   background: #fffaf2;
@@ -14148,16 +14161,16 @@ body.home-page .about-animua-points i {
 
 /* Paw inside the magnifying-glass lens */
 .process-icon--search .search-paw {
-  top: 44px;
-  left: 43px;
+  top: 38px;
+  left: 37px;
 }
 
 /* Paw inside the shield */
 .process-icon--shield .shield-paw {
-  right: 35px;
-  bottom: 35px;
-  width: 13px;
-  height: 13px;
+  right: 30px;
+  bottom: 30px;
+  width: 11px;
+  height: 11px;
 }
 
 body.home-page .how-animua-step h3 {
@@ -14315,33 +14328,33 @@ body.home-page .home-match-quiz-copy h2 {
 body.home-page .home-match-quiz-copy > p {
   max-width: 580px !important;
   margin-bottom: 20px !important;
-  font-size: clamp(16px, 1.12vw, 19px) !important;
-  line-height: 1.42 !important;
+  font-size: clamp(13px, 0.95vw, 15px) !important;
+  line-height: 1.4 !important;
 }
 
 body.home-page .home-match-quiz-points {
-  gap: 16px !important;
-  margin-bottom: 24px !important;
+  gap: 11px !important;
+  margin-bottom: 20px !important;
 }
 
 body.home-page .home-match-quiz-points article {
-  grid-template-columns: 54px minmax(0, 1fr) !important;
-  gap: 15px !important;
+  grid-template-columns: 44px minmax(0, 1fr) !important;
+  gap: 10px !important;
 }
 
 body.home-page .home-match-quiz-points article > span {
-  width: 54px !important;
-  height: 54px !important;
-  font-size: 1.18rem !important;
+  width: 44px !important;
+  height: 44px !important;
+  font-size: 0.98rem !important;
 }
 
 body.home-page .home-match-quiz-points h3 {
-  font-size: clamp(17px, 1.16vw, 20px) !important;
+  font-size: clamp(12px, 0.86vw, 14px) !important;
 }
 
 body.home-page .home-match-quiz-points p {
-  font-size: clamp(15px, 1vw, 17px) !important;
-  line-height: 1.34 !important;
+  font-size: clamp(11px, 0.78vw, 13px) !important;
+  line-height: 1.28 !important;
 }
 
 body.home-page .home-match-quiz-actions {
@@ -14354,5 +14367,496 @@ body.home-page .home-match-quiz-secondary {
   min-height: 50px !important;
   padding: 0 24px !important;
   font-size: clamp(0.92rem, 0.98vw, 1rem) !important;
+}
+
+body.home-page .home-match-quiz-copy h2 {
+  color: #111111 !important;
+}
+
+/* Featured furbabies editorial showcase. */
+body.home-page .featured-furbabies-section {
+  position: relative !important;
+  overflow: hidden !important;
+  padding: clamp(28px, 3.4vw, 46px) 0 clamp(24px, 3vw, 38px) !important;
+  background:
+    radial-gradient(circle at 6% 78%, rgba(247, 181, 56, 0.12), transparent 20%),
+    radial-gradient(circle at 88% 10%, rgba(255, 248, 238, 0.05), transparent 26%),
+    linear-gradient(135deg, #521017 0%, #6f141a 47%, #3a070c 100%) !important;
+}
+
+body.home-page .featured-furbabies-section::before {
+  content: none !important;
+  display: none !important;
+}
+
+body.home-page .featured-furbabies-layout {
+  width: min(100%, 1380px) !important;
+  max-width: 1380px !important;
+  padding: 0 clamp(20px, 3.2vw, 50px) !important;
+}
+
+body.home-page .featured-furbabies-grid,
+body.home-page .featured-furbabies-showcase {
+  width: 100% !important;
+}
+
+body.home-page .featured-furbabies-showcase {
+  display: grid !important;
+  grid-template-columns: minmax(300px, 0.7fr) minmax(680px, 1.72fr) !important;
+  grid-template-areas:
+    "copy cards"
+    "care care" !important;
+  gap: clamp(16px, 2vw, 24px) clamp(28px, 3vw, 48px) !important;
+  align-items: stretch !important;
+  min-height: 0 !important;
+}
+
+body.home-page .featured-furbabies-copy {
+  grid-area: copy !important;
+  max-width: 420px !important;
+  align-self: center !important;
+}
+
+body.home-page .featured-furbabies-copy .section-label {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 11px !important;
+  margin: 0 0 24px !important;
+  color: #f7c95c !important;
+  font-size: 0.8rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+}
+
+body.home-page .featured-furbabies-copy .section-label::after {
+  content: none !important;
+  display: none !important;
+}
+
+body.home-page .featured-furbabies-copy .section-label::before {
+  content: "" !important;
+  display: inline-block !important;
+  width: 38px !important;
+  height: 2px !important;
+  border-radius: 999px !important;
+  background: #f7c95c !important;
+}
+
+body.home-page .featured-furbabies-copy .section-label i {
+  display: none !important;
+}
+
+body.home-page .featured-furbabies-copy h2 {
+  margin: 0 0 12px !important;
+  color: #fff8ee !important;
+  font-size: clamp(2.25rem, 3.8vw, 3.75rem) !important;
+  font-weight: 900 !important;
+  line-height: 0.98 !important;
+}
+
+body.home-page .featured-furbabies-copy p {
+  max-width: 390px !important;
+  margin: 0 0 18px !important;
+  color: rgba(255, 248, 238, 0.88) !important;
+  font-size: clamp(0.9rem, 1vw, 1rem) !important;
+  font-weight: 600 !important;
+  line-height: 1.65 !important;
+}
+
+body.home-page .featured-furbabies-actions {
+  display: flex !important;
+  align-items: center !important;
+}
+
+body.home-page .featured-furbabies-view-all {
+  min-height: 46px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  padding: 0 22px !important;
+  border: 1.5px solid rgba(255, 248, 238, 0.66) !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: none !important;
+  color: #fff8ee !important;
+  font-size: 0.96rem !important;
+  font-weight: 900 !important;
+  letter-spacing: 0 !important;
+}
+
+body.home-page .featured-furbabies-view-all i {
+  margin-left: 0 !important;
+  transition: transform 180ms ease !important;
+}
+
+body.home-page .featured-furbabies-view-all:hover,
+body.home-page .featured-furbabies-view-all:focus-visible {
+  background: #fff8ee !important;
+  color: #780116 !important;
+  border-color: #fff8ee !important;
+  transform: translateY(-1px) !important;
+}
+
+body.home-page .featured-furbabies-view-all:hover i,
+body.home-page .featured-furbabies-view-all:focus-visible i {
+  transform: translateX(4px) !important;
+}
+
+body.home-page .featured-furbabies-filter-pills,
+body.home-page .featured-furbabies-quiz-link,
+body.home-page .featured-furbabies-dots,
+body.home-page .featured-furbaby-favorite {
+  display: none !important;
+}
+
+body.home-page .featured-furbabies-card-wrap {
+  grid-area: cards !important;
+  display: grid !important;
+  grid-template-columns: minmax(390px, 1.16fr) minmax(330px, 1fr) !important;
+  grid-template-rows: repeat(2, minmax(140px, 1fr)) !important;
+  gap: 10px !important;
+  min-height: 344px !important;
+  align-items: stretch !important;
+}
+
+body.home-page .featured-furbaby-card {
+  position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(255, 248, 238, 0.2) !important;
+  border-radius: 8px !important;
+  background: #2f0b0e !important;
+  box-shadow: none !important;
+}
+
+body.home-page .featured-furbaby-card.is-featured {
+  grid-row: 1 / span 2 !important;
+  height: 100% !important;
+  min-height: 344px !important;
+}
+
+body.home-page .featured-furbaby-card::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 1 !important;
+  background:
+    linear-gradient(180deg, transparent 34%, rgba(15, 5, 5, 0.3) 60%, rgba(15, 5, 5, 0.82) 100%),
+    linear-gradient(90deg, rgba(15, 5, 5, 0.12), transparent 42%) !important;
+  pointer-events: none !important;
+}
+
+body.home-page .featured-furbaby-card img {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  object-fit: cover !important;
+  transition: transform 420ms ease !important;
+}
+
+body.home-page .featured-furbaby-card:hover img,
+body.home-page .featured-furbaby-card:focus-visible img {
+  transform: scale(1.045) !important;
+}
+
+body.home-page .featured-furbaby-card-copy {
+  position: absolute !important;
+  left: clamp(18px, 1.8vw, 24px) !important;
+  right: 92px !important;
+  bottom: clamp(14px, 1.6vw, 20px) !important;
+  z-index: 2 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 9px !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  color: #fff8ee !important;
+}
+
+body.home-page .featured-furbaby-card-copy strong {
+  color: #fff8ee !important;
+  font-size: clamp(1.32rem, 1.8vw, 1.62rem) !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+}
+
+body.home-page .featured-furbaby-card:not(.is-featured) .featured-furbaby-card-copy strong {
+  font-size: clamp(1.18rem, 1.55vw, 1.42rem) !important;
+}
+
+body.home-page .featured-furbaby-card-copy em {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 8px !important;
+  color: rgba(255, 248, 238, 0.92) !important;
+  font-size: 0.86rem !important;
+  font-style: normal !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+}
+
+body.home-page .featured-furbaby-card-copy em i {
+  color: #f7c95c !important;
+}
+
+body.home-page .featured-furbaby-card-copy em span + span::before {
+  content: "" !important;
+  display: inline-block !important;
+  width: 4px !important;
+  height: 4px !important;
+  margin-right: 8px !important;
+  border-radius: 50% !important;
+  background: #f7c95c !important;
+  vertical-align: middle !important;
+}
+
+body.home-page .featured-furbaby-card-copy small {
+  max-width: 430px !important;
+  color: rgba(255, 248, 238, 0.86) !important;
+  font-size: 0.86rem !important;
+  font-weight: 600 !important;
+  line-height: 1.45 !important;
+}
+
+body.home-page .featured-furbaby-arrow {
+  position: absolute !important;
+  right: clamp(18px, 2vw, 28px) !important;
+  bottom: clamp(22px, 2.4vw, 32px) !important;
+  z-index: 2 !important;
+  width: 40px !important;
+  height: 40px !important;
+  display: grid !important;
+  place-items: center !important;
+  border: 2px solid rgba(247, 201, 92, 0.76) !important;
+  border-radius: 50% !important;
+  color: #f7c95c !important;
+  font-size: 0.9rem !important;
+  transition: background 180ms ease, color 180ms ease, transform 180ms ease !important;
+}
+
+body.home-page .featured-furbaby-card:hover .featured-furbaby-arrow,
+body.home-page .featured-furbaby-card:focus-visible .featured-furbaby-arrow {
+  background: #f7c95c !important;
+  color: #5a1014 !important;
+  transform: translateX(3px) !important;
+}
+
+body.home-page .featured-furbabies-care-row {
+  grid-area: care !important;
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  overflow: hidden !important;
+  margin: -12px auto 0 !important;
+  width: min(100%, 1060px) !important;
+  border-radius: 8px !important;
+  background: rgba(73, 10, 15, 0.38) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 248, 238, 0.04) !important;
+}
+
+body.home-page .featured-furbabies-care-row > div {
+  display: grid !important;
+  grid-template-columns: 28px minmax(0, 1fr) !important;
+  gap: 4px 10px !important;
+  padding: 9px 14px !important;
+  border-left: 1px solid rgba(255, 248, 238, 0.16) !important;
+}
+
+body.home-page .featured-furbabies-care-row > div:first-child {
+  border-left: 0 !important;
+}
+
+body.home-page .featured-furbabies-care-row i {
+  grid-row: span 2 !important;
+  align-self: start !important;
+  color: #f7c95c !important;
+  font-size: 1.18rem !important;
+}
+
+body.home-page .featured-furbabies-care-row strong {
+  color: #fff8ee !important;
+  font-size: 0.76rem !important;
+  font-weight: 900 !important;
+  line-height: 1.2 !important;
+}
+
+body.home-page .featured-furbabies-care-row span {
+  color: rgba(255, 248, 238, 0.78) !important;
+  font-size: 0.68rem !important;
+  font-weight: 600 !important;
+  line-height: 1.35 !important;
+}
+
+@media (max-width: 1060px) {
+  body.home-page .featured-furbabies-showcase {
+    grid-template-columns: 1fr !important;
+    grid-template-areas:
+      "copy"
+      "cards"
+      "care" !important;
+  }
+
+  body.home-page .featured-furbabies-copy {
+    max-width: 720px !important;
+    align-self: start !important;
+  }
+
+  body.home-page .featured-furbabies-card-wrap {
+    min-height: 340px !important;
+  }
+
+  body.home-page .featured-furbaby-card.is-featured {
+    min-height: 340px !important;
+  }
+
+  body.home-page .featured-furbabies-care-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  body.home-page .featured-furbabies-care-row > div:nth-child(odd) {
+    border-left: 0 !important;
+  }
+
+  body.home-page .featured-furbabies-care-row > div:nth-child(n + 3) {
+    border-top: 1px solid rgba(255, 248, 238, 0.16) !important;
+  }
+}
+
+@media (max-width: 720px) {
+  body.home-page .featured-furbabies-section {
+    padding: 32px 0 30px !important;
+  }
+
+  body.home-page .featured-furbabies-copy .section-label {
+    margin-bottom: 22px !important;
+    font-size: 0.78rem !important;
+  }
+
+  body.home-page .featured-furbabies-copy h2 {
+    font-size: clamp(2.5rem, 14vw, 3.6rem) !important;
+  }
+
+  body.home-page .featured-furbabies-card-wrap {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: none !important;
+    min-height: 0 !important;
+  }
+
+  body.home-page .featured-furbaby-card,
+  body.home-page .featured-furbaby-card.is-featured {
+    grid-row: auto !important;
+    min-height: 220px !important;
+  }
+
+  body.home-page .featured-furbaby-card-copy {
+    right: 76px !important;
+    bottom: 22px !important;
+  }
+
+  body.home-page .featured-furbaby-arrow {
+    width: 42px !important;
+    height: 42px !important;
+  }
+
+  body.home-page .featured-furbabies-care-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  body.home-page .featured-furbabies-care-row > div,
+  body.home-page .featured-furbabies-care-row > div:nth-child(odd) {
+    border-left: 0 !important;
+    border-top: 1px solid rgba(255, 248, 238, 0.16) !important;
+  }
+
+  body.home-page .featured-furbabies-care-row > div:first-child {
+    border-top: 0 !important;
+  }
+}
+
+/* Equalize the four homepage feature sections to the How ANIMUA Works height. */
+@media (min-width: 1041px) {
+  body.home-page {
+    --home-feature-section-height: clamp(495px, calc(34vw + 115px), 545px);
+    --home-feature-section-inner-height: calc(var(--home-feature-section-height) - clamp(42px, 5.3vw, 68px));
+  }
+
+  body.home-page .featured-furbabies-section,
+  body.home-page .home-match-quiz-section,
+  body.home-page .about-animua-section,
+  body.home-page .how-animua-works-section {
+    height: var(--home-feature-section-height) !important;
+    min-height: var(--home-feature-section-height) !important;
+    max-height: var(--home-feature-section-height) !important;
+    display: flex !important;
+    align-items: center !important;
+    overflow: hidden !important;
+    padding-top: clamp(22px, 2.8vw, 36px) !important;
+    padding-bottom: clamp(20px, 2.5vw, 32px) !important;
+  }
+
+  body.home-page .about-animua-section {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  body.home-page .featured-furbabies-section > .featured-furbabies-layout,
+  body.home-page .home-match-quiz-section > .home-match-quiz-layout,
+  body.home-page .about-animua-section > .about-animua-showcase,
+  body.home-page .how-animua-works-section > .how-animua-works-layout {
+    width: 100% !important;
+  }
+
+  body.home-page .featured-furbabies-showcase,
+  body.home-page .home-match-quiz-layout,
+  body.home-page .about-animua-showcase,
+  body.home-page .how-animua-works-layout {
+    min-height: 0 !important;
+    max-height: var(--home-feature-section-inner-height) !important;
+  }
+
+  body.home-page .featured-furbabies-card-wrap {
+    min-height: 0 !important;
+    height: min(414px, var(--home-feature-section-inner-height)) !important;
+  }
+
+  body.home-page .featured-furbaby-card.is-featured {
+    min-height: 0 !important;
+  }
+
+  body.home-page .home-match-quiz-media img {
+    height: min(440px, var(--home-feature-section-inner-height)) !important;
+  }
+
+  body.home-page .about-animua-showcase {
+    height: var(--home-feature-section-height) !important;
+    max-height: var(--home-feature-section-height) !important;
+  }
+
+  body.home-page .about-animua-copy,
+  body.home-page .about-shelter-gallery {
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: var(--home-feature-section-height) !important;
+  }
+
+  body.home-page .how-animua-works-head {
+    margin-bottom: clamp(14px, 1.8vw, 22px) !important;
+  }
+}
+
+@media (max-width: 1040px) {
+  body.home-page .featured-furbabies-section,
+  body.home-page .home-match-quiz-section,
+  body.home-page .about-animua-section,
+  body.home-page .how-animua-works-section {
+    min-height: 0 !important;
+  }
 }
 

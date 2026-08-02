@@ -118,7 +118,6 @@
     <section class="community-cover" aria-labelledby="communityTitle">
       <div class="container community-cover-inner">
         <div class="community-cover-copy">
-          <span class="community-eyebrow">Official ANIMUA channel</span>
           <h1 id="communityTitle">
             <span>Stories, updates,</span>
             <span>and moments</span>
@@ -134,50 +133,106 @@
       <div class="container public-social-layout">
         <div class="public-feed-column">
           <div class="announcement-toolbar">
-            <div><span class="section-label">Community feed</span><h2 id="announcementsHeading">Latest from ANIMUA</h2></div>
+            <div>
+              <span class="section-label">Community feed</span>
+              <h1 id="announcementsHeading">Latest from ANIMUA</h1>
+            </div>
             <div class="announcement-controls" aria-label="Filter announcements">
-              <label class="announcement-search"><span class="sr-only">Search announcements</span><i class="fa-solid fa-magnifying-glass"></i><input id="announcementSearch" type="search" placeholder="Search stories and updates..." autocomplete="off"></label>
-              <label><span class="sr-only">Filter by type</span><select id="announcementType"><option value="">All content</option><option value="News & Article">News &amp; Article</option><option value="Success Stories">Success Stories</option><option value="Upcoming Events">Upcoming Events</option></select></label>
+              <label class="announcement-search">
+                <span class="sr-only">Search announcements</span>
+                <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                <input id="announcementSearch" type="search" placeholder="Search stories and updates..." autocomplete="off">
+              </label>
+              <label class="announcement-topic-select">
+                <span class="sr-only">Filter by topic</span>
+                <select id="announcementType" class="announcement-topic-native" tabindex="-1" aria-hidden="true">
+                  <option value="">All topics</option>
+                  <option value="News & Article">News &amp; Article</option>
+                  <option value="Success Stories">Success Stories</option>
+                  <option value="Upcoming Events">Upcoming Events</option>
+                </select>
+                <button type="button" class="announcement-topic-toggle" id="announcementTypeToggle" aria-haspopup="listbox" aria-expanded="false">
+                  <span id="announcementTypeLabel">All topics</span>
+                  <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+                </button>
+                <div class="announcement-topic-menu" id="announcementTypeMenu" role="listbox" aria-label="Filter by topic">
+                  <button type="button" role="option" data-topic-value="" aria-selected="true">All topics</button>
+                  <button type="button" role="option" data-topic-value="News & Article" aria-selected="false">News &amp; Article</button>
+                  <button type="button" role="option" data-topic-value="Success Stories" aria-selected="false">Success Stories</button>
+                  <button type="button" role="option" data-topic-value="Upcoming Events" aria-selected="false">Upcoming Events</button>
+                </div>
+              </label>
             </div>
           </div>
 
-          <div id="announcementStatus" class="announcement-status" role="status" aria-live="polite"><i class="fa-solid fa-spinner fa-spin"></i><span>Loading the latest updates...</span></div>
+          <div id="announcementStatus" class="announcement-status" role="status" aria-live="polite">
+            <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
+            <span>Loading the latest updates...</span>
+          </div>
           <div id="featuredAnnouncement" class="featured-announcement" aria-live="polite"></div>
-          <div class="feed-section-heading"><h3>Recent posts</h3><span id="feedResultLabel">All community content</span></div>
           <div id="announcementFeed" class="public-announcement-feed" aria-live="polite"></div>
-          <button id="showAllAnnouncements" class="show-all-posts" type="button">View all posts <i class="fa-solid fa-arrow-right"></i></button>
+
+          <section class="more-from-shelter" aria-labelledby="moreShelterHeading">
+            <h2 id="moreShelterHeading">More from the shelter</h2>
+            <div class="shelter-action-grid">
+              <button type="button" class="shelter-action-card" data-public-type="News & Article">
+                <span aria-hidden="true"><i class="fa-solid fa-bullhorn"></i></span>
+                <strong>Official Announcements</strong>
+                <small>Important shelter policies, service updates, and public notices.</small>
+                <i class="fa-solid fa-arrow-right"></i>
+              </button>
+              <button type="button" class="shelter-action-card" id="pastAnnouncementsBtn">
+                <span aria-hidden="true"><i class="fa-regular fa-calendar-check"></i></span>
+                <strong>Past Announcements</strong>
+                <small>Browse previous updates and community posts.</small>
+                <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </div>
+            <button id="showAllAnnouncements" class="show-all-posts" type="button">
+              <span>View all announcements</span>
+              <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+            </button>
+          </section>
         </div>
 
         <aside class="public-feed-sidebar" aria-label="Community highlights">
-          <section class="public-side-card announcement-calendar-card">
-            <div class="side-card-heading"><span>Upcoming near you</span><i class="fa-regular fa-calendar"></i></div>
-            <div class="calendar-divider" aria-hidden="true"></div>
-            <div class="announcement-calendar">
-              <div class="calendar-head">
-                <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
-                <strong>July 2026</strong>
-                <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
-              </div>
-              <div class="calendar-grid" aria-label="July 2026 calendar">
-                <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
-                <em>29</em><em>30</em><b>1</b><b>2</b><b class="is-event">3</b><b>4</b><b>5</b>
-                <b>6</b><b>7</b><b>8</b><b>9</b><b>10</b><b>11</b><b>12</b>
-                <b>13</b><b class="is-activity">14</b><b>15</b><b>16</b><b>17</b><b class="has-dot">18</b><b>19</b>
-                <b>20</b><b>21</b><b>22</b><b class="is-activity">23</b><b class="is-activity">24</b><b class="is-activity">25</b><b class="has-dot">26</b>
-                <b class="is-activity">27</b><b class="is-activity">28</b><b class="is-activity">29</b><b>30</b><b class="is-activity">31</b><em>1</em><em>2</em>
-              </div>
-              <div class="calendar-legend">
-                <span><i class="legend-event"></i> Events</span>
-                <span><i class="legend-activity"></i> Activities</span>
-              </div>
-              <button type="button" class="calendar-link">View full calendar <i class="fa-solid fa-arrow-right"></i></button>
+          <section class="public-side-card upcoming-events-card">
+            <div class="side-card-heading">
+              <span>Upcoming events</span>
+              <i class="fa-regular fa-calendar" aria-hidden="true"></i>
             </div>
-            <div id="upcomingEventList" class="upcoming-event-list" hidden></div>
+            <div id="upcomingEventList" class="upcoming-event-list"></div>
+            <button type="button" class="side-text-action" id="viewAllEventsBtn">
+              <span>View all events</span>
+              <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+            </button>
           </section>
-          <section class="public-side-card channel-about-card">
-            <div class="side-card-heading"><span>About this channel</span><i class="fa-solid fa-shield-heart"></i></div>
-            <p>Every post is reviewed and published by ANIMUA management for the Angeles City animal-welfare community.</p>
-            <div class="channel-trust-row"><i class="fa-solid fa-shield-heart"></i><span><strong>Official source</strong>Verified shelter information</span></div>
+
+          <section class="public-side-card quick-topics-card">
+            <div class="side-card-heading">
+              <span>Quick topics</span>
+              <i class="fa-solid fa-tags" aria-hidden="true"></i>
+            </div>
+            <div class="quick-topic-list" aria-label="Quick topic filters">
+              <button type="button" data-topic-search="adoption">Adoption</button>
+              <button type="button" data-public-type="Success Stories">Rescue Stories</button>
+              <button type="button" data-topic-search="shelter">Shelter Updates</button>
+              <button type="button" data-public-type="Upcoming Events">Events</button>
+              <button type="button" data-topic-search="health">Health &amp; Wellness</button>
+              <button type="button" data-topic-search="volunteer">Volunteer</button>
+            </div>
+          </section>
+
+          <section class="public-side-card community-spotlight-card">
+            <div class="side-card-heading">
+              <span>Community spotlight</span>
+              <i class="fa-solid fa-quote-right" aria-hidden="true"></i>
+            </div>
+            <div class="spotlight-content">
+              <p>"Thank you ANIMUA for saving our Bella. We found not just help, but a family."</p>
+              <strong>- The Santos Family</strong>
+            </div>
+            <img src="../../src/assets/images/success-zach-adoption.jpg" alt="Adopted dog from the ANIMUA community">
           </section>
         </aside>
       </div>

@@ -838,6 +838,7 @@ const SCHEDULE_TIME_OPTIONS = [
   { label: "1:30 PM", value: "13:30" },
   { label: "2:30 PM", value: "14:30" },
 ];
+const SCHEDULE_WINDOW_DAYS = 14;
 
 function toDateInputValue(date) {
   const year = date.getFullYear();
@@ -864,13 +865,9 @@ function parseDateValue(value) {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
-function addOneMonth(date) {
+function addScheduleWindowDays(date) {
   const maxDate = new Date(date);
-  const originalDay = maxDate.getDate();
-  maxDate.setMonth(maxDate.getMonth() + 1);
-  if (maxDate.getDate() !== originalDay) {
-    maxDate.setDate(0);
-  }
+  maxDate.setDate(maxDate.getDate() + SCHEDULE_WINDOW_DAYS);
   return maxDate;
 }
 
@@ -910,7 +907,7 @@ function getScheduleWindow(kind, item) {
     minDate.setTime(decisionDate.getTime());
   }
 
-  const maxDate = addOneMonth(decisionDate);
+  const maxDate = addScheduleWindowDays(decisionDate);
 
   return { minDate, maxDate };
 }
@@ -1005,7 +1002,7 @@ async function promptForSchedule(kind, item) {
 
         <div class="schedule-picker-section">
           <div class="schedule-limit-reminder">
-            <strong>${isSurrender ? "*Date is limited to one month from the request acceptance date." : "*Date is limited to one month from the application approval date."}</strong>
+            <strong>${isSurrender ? "*Date is limited to 14 days from the request acceptance date." : "*Date is limited to 14 days from the application approval date."}</strong>
           </div>
           <div data-calendar-root></div>
 
@@ -1171,8 +1168,8 @@ async function promptForSchedule(kind, item) {
 
       if (!chosenDate || !isScheduleDateAllowed(chosenDate, minDate, maxDate)) {
         Swal.showValidationMessage(isSurrender
-          ? "Please choose a date within one month from the request acceptance date."
-          : "Please choose a date within one month from the application approval date.");
+          ? "Please choose a date within 14 days from the request acceptance date."
+          : "Please choose a date within 14 days from the application approval date.");
         return false;
       }
 
@@ -1290,7 +1287,10 @@ async function saveSchedule(item, kind) {
       };
     }
   } else {
-    item.details = result.requiresApproval
+    if (result.request) {
+      item.details = result.request;
+    } else {
+      item.details = result.requiresApproval
       ? {
           ...item.details,
           pickupRescheduleRequest: result.pickupRescheduleRequest,
@@ -1299,6 +1299,7 @@ async function saveSchedule(item, kind) {
           ...item.details,
           pickupSchedule: result.pickupSchedule || schedule,
         };
+    }
   }
 
   item.scheduleFeedback = result.requiresApproval

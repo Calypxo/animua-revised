@@ -15869,3 +15869,136 @@ button#chatbotSend.chatbot-input-send {
 .animua-chatbot-toggle::after {
   border-color: rgba(247, 181, 56, 0.22) !important;
 }
+
+/* Adoption-focused chatbot launcher refinement. */
+.animua-chatbot {
+  right: max(32px, env(safe-area-inset-right)) !important;
+  bottom: max(32px, env(safe-area-inset-bottom)) !important;
+  width: 76px !important;
+  height: 76px !important;
+}
+
+.animua-chatbot-toggle {
+  width: 56px !important;
+  height: 56px !important;
+  min-width: 56px !important;
+  min-height: 56px !important;
+  flex-basis: 56px !important;
+  border-color: rgba(255, 248, 238, 0.52) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 248, 238, 0.16),
+    inset 0 -4px 10px rgba(43, 0, 8, 0.12),
+    0 12px 24px rgba(43, 0, 8, 0.3),
+    0 0 0 4px rgba(247, 181, 56, 0.08) !important;
+}
+
+.animua-chatbot-toggle::before {
+  content: attr(data-tooltip) !important;
+  position: absolute !important;
+  right: calc(100% + 12px) !important;
+  top: 50% !important;
+  width: max-content !important;
+  max-width: 220px !important;
+  padding: 9px 12px !important;
+  border: 1px solid rgba(247, 181, 56, 0.32) !important;
+  border-radius: 999px !important;
+  background: rgba(255, 248, 238, 0.96) !important;
+  box-shadow: 0 12px 24px rgba(24, 15, 12, 0.22) !important;
+  color: #780116 !important;
+  font-size: 0.78rem !important;
+  font-weight: 800 !important;
+  line-height: 1.15 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translate(6px, -50%) !important;
+  transition: opacity 160ms ease, transform 160ms ease !important;
+  white-space: normal !important;
+}
+
+.animua-chatbot-toggle::after {
+  inset: -4px !important;
+  border-color: rgba(247, 181, 56, 0.16) !important;
+}
+
+.animua-chatbot-toggle:hover,
+.animua-chatbot-toggle:focus-visible {
+  transform: translateY(-2px) scale(1.02) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 248, 238, 0.18),
+    inset 0 -4px 10px rgba(43, 0, 8, 0.1),
+    0 16px 30px rgba(43, 0, 8, 0.34),
+    0 0 0 4px rgba(247, 181, 56, 0.12) !important;
+}
+
+.animua-chatbot-toggle:hover::before,
+.animua-chatbot-toggle:focus-visible::before {
+  opacity: 1 !important;
+  transform: translate(0, -50%) !important;
+}
+
+.animua-chatbot-toggle i {
+  font-size: 1.28rem !important;
+}
+
+.chatbot-launcher-text {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+}
+
+.animua-chatbot-nudge {
+  position: absolute !important;
+  right: 8px !important;
+  bottom: calc(100% + 8px) !important;
+  width: max-content !important;
+  max-width: 230px !important;
+  padding: 10px 13px !important;
+  border: 1px solid rgba(247, 181, 56, 0.34) !important;
+  border-radius: 18px 18px 4px 18px !important;
+  background: rgba(255, 248, 238, 0.96) !important;
+  box-shadow: 0 14px 28px rgba(24, 15, 12, 0.22) !important;
+  color: #780116 !important;
+  font-size: 0.82rem !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateY(8px) !important;
+  animation: chatbotNudgeIn 420ms ease 1.4s forwards !important;
+}
+
+.animua-chatbot.is-open .animua-chatbot-nudge {
+  display: none !important;
+}
+
+@keyframes chatbotNudgeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 640px) {
+  .animua-chatbot {
+    right: max(18px, env(safe-area-inset-right)) !important;
+    bottom: max(18px, env(safe-area-inset-bottom)) !important;
+    width: 66px !important;
+    height: 66px !important;
+  }
+
+  .animua-chatbot-toggle {
+    width: 52px !important;
+    height: 52px !important;
+    min-width: 52px !important;
+    min-height: 52px !important;
+    flex-basis: 52px !important;
+  }
+
+  .animua-chatbot-toggle::before,
+  .animua-chatbot-nudge {
+    display: none !important;
+  }
+}

@@ -54,6 +54,20 @@ function cleanMessage(value = "") {
   return String(value).replace(/\s+/g, " ").trim().slice(0, MAX_MESSAGE_LENGTH);
 }
 
+function normalizeIntentText(value = "") {
+  return String(value)
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\b(adapt|adpt|adpat|adpot|adobt|adop)\b/g, "adopt")
+    .replace(/\b(adapts|adpots)\b/g, "adopts")
+    .replace(/\b(adapted|adpotted)\b/g, "adopted")
+    .replace(/\b(adapting|adpoting)\b/g, "adopting")
+    .replace(/\b(adaption|adaptation|adoptation|adapation)\b/g, "adoption")
+    .replace(/\b(aadapt|aadapt)\b/g, "aadopt")
+    .replace(/\b(iadapt|iadapt)\b/g, "iadopt");
+}
+
 function cleanHistory(history = []) {
   if (!Array.isArray(history)) return [];
 
@@ -71,7 +85,7 @@ function normalizeLanguage(value = "") {
 }
 
 function hasTaglishSignal(text = "") {
-  const lower = String(text).toLowerCase();
+  const lower = normalizeIntentText(text);
 
   return includesAnyWord(lower, [
     "magkano",
@@ -1069,6 +1083,7 @@ function isLikelyGibberish(message = "") {
 }
 
 function isOnTopic(message = "") {
+  const normalizedMessage = normalizeIntentText(message);
   const topicWords = [
     "animua",
     "adopt",
@@ -1162,24 +1177,24 @@ function isOnTopic(message = "") {
     "browse"
   ];
 
-  return includesAnyWord(message, topicWords) ||
-    hasGreetingIntent(message) ||
-    hasThanksIntent(message) ||
-    hasGoodbyeIntent(message) ||
-    hasStrayIntent(message) ||
-    hasSurrenderIntent(message) ||
-    hasDonationIntent(message) ||
-    hasAccountTroubleIntent(message) ||
-    hasStatusExplanationIntent(message) ||
-    hasPetCareIntent(message) ||
-    hasQuizIntent(message) ||
-    hasTermsPrivacyIntent(message) ||
-    hasAnimalProfileIntent(message) ||
-    hasNavigationIntent(message) ||
-    hasGeneralAnimuaIntent(message) ||
-    hasAssistantHelpIntent(message) ||
-    hasAdoptionMotivationIntent(message) ||
-    includesAnyPhrase(message, ["log in", "sign in", "find furbabies", "match quiz", "contact us", "may sakit", "live chat"]);
+  return includesAnyWord(normalizedMessage, topicWords) ||
+    hasGreetingIntent(normalizedMessage) ||
+    hasThanksIntent(normalizedMessage) ||
+    hasGoodbyeIntent(normalizedMessage) ||
+    hasStrayIntent(normalizedMessage) ||
+    hasSurrenderIntent(normalizedMessage) ||
+    hasDonationIntent(normalizedMessage) ||
+    hasAccountTroubleIntent(normalizedMessage) ||
+    hasStatusExplanationIntent(normalizedMessage) ||
+    hasPetCareIntent(normalizedMessage) ||
+    hasQuizIntent(normalizedMessage) ||
+    hasTermsPrivacyIntent(normalizedMessage) ||
+    hasAnimalProfileIntent(normalizedMessage) ||
+    hasNavigationIntent(normalizedMessage) ||
+    hasGeneralAnimuaIntent(normalizedMessage) ||
+    hasAssistantHelpIntent(normalizedMessage) ||
+    hasAdoptionMotivationIntent(normalizedMessage) ||
+    includesAnyPhrase(normalizedMessage, ["log in", "sign in", "find furbabies", "match quiz", "contact us", "may sakit", "live chat"]);
 }
 
 function getGuardReply(message = "", language = "english") {
@@ -1203,7 +1218,7 @@ function getGuardReply(message = "", language = "english") {
 }
 
 function shouldUseLocalReply(message = "") {
-  const lower = message.toLowerCase();
+  const lower = normalizeIntentText(message);
 
   return (
     hasGreetingIntent(lower) ||
@@ -1244,7 +1259,7 @@ function shouldUseLocalReply(message = "") {
 }
 
 function needsPublicContext(message = "") {
-  const lower = message.toLowerCase();
+  const lower = normalizeIntentText(message);
 
   if (
     hasStrayIntent(lower) ||
@@ -1301,7 +1316,7 @@ function buildSystemPrompt(context = {}, language = "english") {
 }
 
 function getLocalReply(message, context = {}, language = "english") {
-  const lower = message.toLowerCase();
+  const lower = normalizeIntentText(message);
   const pets = Array.isArray(context.pets) ? context.pets : [];
   const events = Array.isArray(context.events) ? context.events : [];
 

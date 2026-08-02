@@ -7,6 +7,10 @@ const resultsCount = document.getElementById("resultsCount");
 const heroPetCount = document.getElementById("heroPetCount");
 const emptyState = document.getElementById("emptyState");
 const petSearch = document.getElementById("petSearch");
+const petSort = document.getElementById("petSort");
+const petSortLabel = document.getElementById("petSortLabel");
+const petSortMenu = document.getElementById("petSortMenu");
+const petSortOptions = document.querySelectorAll(".sort-menu-option");
 const filterTabs = document.querySelectorAll(".filter-tab");
 
 const profileModal = document.getElementById("profileModal");
@@ -44,6 +48,11 @@ const adoptionExitCancel = document.getElementById("adoptionExitCancel");
 const adoptionExitConfirmBtn = document.getElementById("adoptionExitConfirmBtn");
 const adoptionReviewSummary = document.getElementById("adoptionReviewSummary");
 const adoptionSectionTitle = document.getElementById("adoptionSectionTitle");
+const adoptionDeclarationCheckboxes = [
+  document.getElementById("confirmTruthful"),
+  document.getElementById("agreeDeclaration"),
+  document.getElementById("understandNoGuarantee")
+].filter(Boolean);
 const idFrontUpload = document.getElementById("idFrontUpload");
 const idBackUpload = document.getElementById("idBackUpload");
 const idFrontPreview = document.getElementById("idFrontPreview");
@@ -59,6 +68,7 @@ console.log("selectedPetName:", selectedPetName);
 console.log("petNameField:", petNameField);
 
 let currentFilter = "all";
+let currentSort = "newest";
 let currentPetForAdoption = null;
 let currentAdoptionStep = 1;
 let idFrontFileData = null;
@@ -154,24 +164,37 @@ function initializeAdoptionWizardFields() {
 
 function updateConditionalAdoptionFields() {
   const hasPets = getValue("hasCurrentPets") === "Yes";
+  const petCountValue = getValue("numberOfPets");
+  const petCount = Number(petCountValue);
+  const hasPetCount = hasPets && petCountValue !== "" && Number.isFinite(petCount) && petCount > 0;
   const visitsVet = getValue("visitVeterinarian") === "Yes";
+  const doesNotVisitVet = getValue("visitVeterinarian") === "No";
 
   [
     ["numberPetsGroup", "numberOfPets", hasPets],
-    ["currentPetTypeGroup", "currentPetType", hasPets],
-    ["vetClinicGroup", "vetClinicName", visitsVet]
+    ["currentPetTypeGroup", "currentPetType", hasPetCount],
+    ["vetClinicGroup", "vetClinicName", hasPetCount && visitsVet]
   ].forEach(([groupId, fieldId, show]) => {
     const group = getField(groupId);
     const field = getField(fieldId);
     if (!group || !field) return;
-    group.hidden = !show;
-    field.required = show;
-    if (!show) field.value = "";
+    const isCurrentStep = Number(group.dataset.adoptionFieldStep) === currentAdoptionStep;
+    const shouldShow = show && isCurrentStep;
+    group.hidden = !shouldShow;
+    group.classList.toggle("adoption-step-hidden", !shouldShow);
+    field.disabled = !shouldShow;
+    field.required = shouldShow;
+    if (isCurrentStep && !show && groupId !== "vetClinicGroup") field.value = "";
   });
+
+  const vetClinicName = getField("vetClinicName");
+  if (vetClinicName && doesNotVisitVet) {
+    vetClinicName.value = "None";
+  }
 
   const existingPets = getField("existingPets");
   if (existingPets) {
-    existingPets.value = hasPets
+    existingPets.value = hasPetCount
       ? `${getValue("numberOfPets") || "Not specified"} ${getValue("currentPetType") || "pet(s)"}`
       : "No current pets";
   }
@@ -188,6 +211,7 @@ function uploadPayload(fileData) {
 
 function setAdoptionStep(step) {
   currentAdoptionStep = Math.max(1, Math.min(4, Number(step) || 1));
+  adoptionForm?.classList.toggle("adoption-step-3-active", currentAdoptionStep === 3);
   document.querySelectorAll("[data-adoption-field-step]").forEach((group) => {
     const isActive = Number(group.dataset.adoptionFieldStep) === currentAdoptionStep;
     group.classList.toggle("adoption-step-hidden", !isActive);
@@ -214,7 +238,9 @@ function setAdoptionStep(step) {
     const [icon, title] = adoptionStepTitles[currentAdoptionStep] || adoptionStepTitles[1];
     adoptionSectionTitle.innerHTML = `<span><i class="fa-solid ${icon}" aria-hidden="true"></i></span><h3>${escapeHtml(title)}</h3>`;
   }
+  updateConditionalAdoptionFields();
   if (currentAdoptionStep === 4) renderAdoptionReview();
+  syncAdoptionSubmitState();
 }
 
 function closeAdoptionModalWithoutPrompt() {
@@ -233,6 +259,13 @@ function showAdoptionExitConfirm() {
 
 function validateAdoptionStep(step = currentAdoptionStep) {
   updateConditionalAdoptionFields();
+  if (step === 4) {
+    const uncheckedDeclaration = adoptionDeclarationCheckboxes.find((checkbox) => !checkbox.checked);
+    if (uncheckedDeclaration) {
+      uncheckedDeclaration.reportValidity();
+      return false;
+    }
+  }
   const fields = adoptionStepFields[step]
     .map((id) => getField(id))
     .filter((field) => field && !field.disabled && !field.closest("[hidden]"));
@@ -242,6 +275,16 @@ function validateAdoptionStep(step = currentAdoptionStep) {
     return false;
   }
   return true;
+}
+
+function areAdoptionDeclarationsChecked() {
+  return adoptionDeclarationCheckboxes.length === 3 &&
+    adoptionDeclarationCheckboxes.every((checkbox) => checkbox.checked);
+}
+
+function syncAdoptionSubmitState() {
+  if (!adoptionSubmitBtn) return;
+  adoptionSubmitBtn.disabled = currentAdoptionStep === 4 && !areAdoptionDeclarationsChecked();
 }
 
 function renderAdoptionReview() {
@@ -399,6 +442,14 @@ function fallbackImageForPet(type) {
   return type === "cat" ? catFallbackImage : dogFallbackImage;
 }
 
+function dateValue(value) {
+  if (!value) return 0;
+  if (value.seconds) return value.seconds * 1000;
+  if (value._seconds) return value._seconds * 1000;
+  const parsed = Date.parse(value);
+  return Number.isNaN(parsed) ? 0 : parsed;
+}
+
 function mapPetFromBackend(pet) {
   const rawSpecies = (pet.species || "").toLowerCase();
   const type =
@@ -420,6 +471,11 @@ function mapPetFromBackend(pet) {
     sex: pet.sex || "Unknown",
     color: textOr(pet.colorMarkings || pet.color),
     status: pet.status || "Ready for Adoption",
+    sortDate:
+      dateValue(pet.readyForAdoptionAt) ||
+      dateValue(pet.updatedAt) ||
+      dateValue(pet.createdAt) ||
+      dateValue(pet.intakeDate),
     traits: [
       formatAlteredStatus(pet.alteredStatus, pet.sex),
       formatVaccinationStatus(pet.vaccinated),
@@ -463,7 +519,10 @@ async function loadPublicPets() {
     console.log("API data:", data);
 
     const rawPets = Array.isArray(data) ? data : (data.pets || []);
-    pets = rawPets.map(mapPetFromBackend);
+    pets = rawPets.map((pet, index) => ({
+      ...mapPetFromBackend(pet),
+      sortIndex: index
+    }));
 
     applyFilters();
     openSelectedPetFromResults();
@@ -499,8 +558,8 @@ function renderPets(list) {
     card.className = "pet-card reveal";
     const petType = pet.type === "dog" ? "Dog" : pet.type === "cat" ? "Cat" : "Pet";
     const temperamentText = pet.traits && pet.traits.length
-      ? pet.traits.slice(0, 3).join(", ")
-      : "Ready for a loving home";
+      ? pet.traits.slice(0, 2).join(", ")
+      : "Gentle";
     const facts = [
       ["fa-paw", "Breed", pet.breed],
       ["fa-palette", "Color / Markings", pet.color],
@@ -508,10 +567,8 @@ function renderPets(list) {
     card.innerHTML = `
       <div class="pet-card-image">
         <img src="${escapeHtml(pet.image)}" alt="${escapeHtml(pet.name)}" data-fallback-src="${escapeHtml(fallbackImageForPet(pet.type))}">
-        <span class="pet-badge">
-          ${petType}
-        </span>
-        <span class="pet-ready-badge"><i class="fa-solid fa-circle-check"></i> Ready</span>
+        <span class="pet-badge">${petType}</span>
+        <span class="pet-ready-badge"><i class="fa-solid fa-circle" aria-hidden="true"></i> Ready</span>
       </div>
       <div class="pet-card-body">
         <div class="pet-card-top">
@@ -533,11 +590,33 @@ function renderPets(list) {
           <span><small>Temperament</small><strong>${escapeHtml(temperamentText)}</strong></span>
         </div>
         <div class="pet-actions">
-          <button class="btn secondary-btn view-profile-btn" data-id="${escapeHtml(pet.id)}">View Pet Profile</button>
-          <button class="btn primary-btn adopt-btn" data-id="${escapeHtml(pet.id)}">Adopt Now</button>
+          <button class="btn secondary-btn view-profile-btn" data-id="${escapeHtml(pet.id)}">View Profile</button>
+          <button class="btn primary-btn adopt-btn" data-id="${escapeHtml(pet.id)}"><i class="fa-solid fa-paw" aria-hidden="true"></i> Adopt</button>
         </div>
       </div>
     `;
+
+    const meta = card.querySelector(".pet-meta");
+    if (meta) {
+      const sexIcon = String(pet.sex || "").toLowerCase().startsWith("f") ? "fa-venus" : "fa-mars";
+      const sizeLabel = pet.size || pet.weight || "Medium";
+      meta.innerHTML = `
+        <i class="fa-solid ${sexIcon}" aria-hidden="true"></i>
+        <span>${escapeHtml(pet.sex)}</span>
+        <span aria-hidden="true">•</span>
+        <span>${escapeHtml(pet.age)}</span>
+        <span aria-hidden="true">•</span>
+        <span>${escapeHtml(sizeLabel)}</span>
+      `;
+    }
+
+    const temperament = card.querySelector(".pet-temperament");
+    if (temperament) {
+      const traitChips = (pet.traits && pet.traits.length ? pet.traits : ["Friendly"]).slice(0, 2);
+      temperament.innerHTML = traitChips
+        .map((trait) => `<span>${escapeHtml(trait)}</span>`)
+        .join("");
+    }
 
     petsGrid.appendChild(card);
 
@@ -605,6 +684,17 @@ function applyFilters() {
     return matchesFilter && matchesSearch;
   });
 
+  filtered.sort((a, b) => {
+    const dateA = a.sortDate || 0;
+    const dateB = b.sortDate || 0;
+    if (dateA || dateB) {
+      return currentSort === "oldest" ? dateA - dateB : dateB - dateA;
+    }
+    return currentSort === "oldest"
+      ? (b.sortIndex ?? 0) - (a.sortIndex ?? 0)
+      : (a.sortIndex ?? 0) - (b.sortIndex ?? 0);
+  });
+
   renderPets(filtered);
 }
 
@@ -621,6 +711,58 @@ if (petSearch) {
   petSearch.addEventListener("input", applyFilters);
 }
 
+function closeSortMenu() {
+  if (!petSortMenu || !petSort) return;
+  petSortMenu.hidden = true;
+  petSort.setAttribute("aria-expanded", "false");
+}
+
+function openSortMenu() {
+  if (!petSortMenu || !petSort) return;
+  petSortMenu.hidden = false;
+  petSort.setAttribute("aria-expanded", "true");
+}
+
+function setSort(value, label) {
+  currentSort = value;
+  if (petSortLabel) petSortLabel.textContent = label;
+  petSortOptions.forEach((option) => {
+    const isActive = option.dataset.sortValue === value;
+    option.classList.toggle("active", isActive);
+    option.setAttribute("aria-selected", String(isActive));
+  });
+  closeSortMenu();
+  applyFilters();
+}
+
+if (petSort && petSortMenu) {
+  petSort.addEventListener("click", () => {
+    if (petSortMenu.hidden) {
+      openSortMenu();
+    } else {
+      closeSortMenu();
+    }
+  });
+
+  petSortOptions.forEach((option) => {
+    option.addEventListener("click", () => {
+      setSort(option.dataset.sortValue || "newest", option.textContent.trim());
+    });
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!event.target.closest(".sort-select-wrap")) {
+      closeSortMenu();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeSortMenu();
+    }
+  });
+}
+
 function openProfileModal(pet) {
   if (!profileModal) {
     return;
@@ -635,8 +777,14 @@ function openProfileModal(pet) {
   pet.type === "cat" ? "Cat" :
   "Pet";
   const petTypeLabel = pet.type === "dog" ? "Dog" : pet.type === "cat" ? "Cat" : "Pet";
-  profileName.textContent = `${pet.name} - ${pet.age} ${pet.sex} ${petTypeLabel}`;
-  profileDescription.textContent = pet.description;
+  profileName.textContent = pet.name;
+  profileDescription.textContent = [
+    `A ${pet.age || "young"} ${String(pet.sex || "").toLowerCase()} ${petTypeLabel.toLowerCase()}${pet.color ? ` with ${String(pet.color).toLowerCase()} markings` : ""}.`,
+    pet.breed ? `${pet.breed} breed.` : "",
+    pet.description && !["good", "fair", "poor", "unknown"].includes(String(pet.description).trim().toLowerCase())
+      ? pet.description
+      : ""
+  ].filter(Boolean).join(" ");
   profileAge.textContent = pet.age;
   profileSex.textContent = pet.sex;
   profileBreed.textContent = pet.breed;
@@ -833,6 +981,10 @@ if (adoptionForm) {
       checkbox.setAttribute("aria-checked", String(checkbox.checked));
       checkbox.dispatchEvent(new Event("change", { bubbles: true }));
     });
+  });
+
+  adoptionDeclarationCheckboxes.forEach((checkbox) => {
+    checkbox.addEventListener("change", syncAdoptionSubmitState);
   });
 }
 
