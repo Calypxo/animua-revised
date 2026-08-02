@@ -14733,6 +14733,23 @@ button#chatbotSend.chatbot-input-send i {
   display: none !important;
 }
 
+.forgot-password-popup {
+  width: min(500px, calc(100% - 28px)) !important;
+  padding: 22px 24px 24px !important;
+}
+
+.forgot-password-popup .change-password-modal p {
+  max-width: 330px;
+}
+
+.forgot-password-popup .change-password-reminder {
+  padding: 11px 12px;
+}
+
+.forgot-password-popup:has(.password-otp-modal) {
+  width: min(430px, calc(100% - 24px)) !important;
+}
+
 @media (max-width: 560px) {
   .change-password-popup {
     width: calc(100% - 18px) !important;

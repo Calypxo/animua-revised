@@ -2560,6 +2560,21 @@ function maskProfileEmail(email = "") {
   return `${visible}${"*".repeat(Math.max(name.length - visible.length, 3))}@${domain}`;
 }
 
+async function readApiJson(response, fallbackMessage = "Request failed.") {
+  const contentType = response.headers.get("content-type") || "";
+
+  if (contentType.includes("application/json")) {
+    return response.json();
+  }
+
+  const text = await response.text().catch(() => "");
+  const message = /^\s*</.test(text)
+    ? "The password reset service is not available on this server yet. Please make sure the backend is running and updated."
+    : text.trim() || fallbackMessage;
+
+  throw new Error(message);
+}
+
 async function showChangePasswordDialog({ returnToProfile = false } = {}) {
   pendingPasswordChange = null;
   stopPasswordOtpCooldown();
@@ -2706,7 +2721,7 @@ async function showForgotPasswordDialog() {
     allowOutsideClick: () => !Swal.isLoading(),
     allowEscapeKey: () => !Swal.isLoading(),
     customClass: {
-      popup: "animua-popup change-password-popup",
+      popup: "animua-popup change-password-popup forgot-password-popup",
       htmlContainer: "change-password-html",
       actions: "change-password-actions",
       confirmButton: "change-password-confirm",
@@ -3709,7 +3724,7 @@ async function requestForgotPasswordOtp(email) {
     body: JSON.stringify({ email })
   });
 
-  const data = await response.json();
+  const data = await readApiJson(response, "Unable to send password reset OTP.");
 
   if (!response.ok) {
     const error = new Error(data.message || "Unable to send password reset OTP.");
@@ -3729,7 +3744,7 @@ async function confirmForgotPasswordOtp(email, otp, newPassword) {
     body: JSON.stringify({ email, otp, newPassword })
   });
 
-  const data = await response.json();
+  const data = await readApiJson(response, "Failed to reset password.");
 
   if (!response.ok) {
     const error = new Error(data.message || "Failed to reset password.");
