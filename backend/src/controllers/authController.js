@@ -186,18 +186,29 @@ function isPublicEmailAssetBaseUrl(url = "") {
   }
 }
 
-async function sendEmailVerificationOtp({ email, fullName, otp }) {
+async function sendEmailVerificationOtp({
+  email,
+  fullName,
+  otp,
+  subject = "Your ANIMUA verification code",
+  preheader = "Use this verification code to confirm your ANIMUA email address.",
+  heading = "Verify your email address",
+  introHtml = "Thank you for creating an ANIMUA account.<br>Use the verification code below to confirm your email address."
+}) {
   const safeFullName = escapeHtml(fullName || "ANIMUA user");
   const formattedOtp = formatOtpForEmail(otp);
   const heroImageSrc = escapeHtml(getEmailHeroImageSrc());
+  const safeSubject = String(subject || "Your ANIMUA verification code");
+  const safePreheader = escapeHtml(preheader);
+  const safeHeading = escapeHtml(heading);
 
   const mailOptions = {
     from: `"ANIMUA" <${process.env.EMAIL_USER}>`,
     to: email,
-    subject: "Your ANIMUA verification code",
+    subject: safeSubject,
     html: `
       <div style="display:none;max-height:0;overflow:hidden;color:#fbf6f2;font-size:1px;line-height:1px;">
-        Use this verification code to confirm your ANIMUA email address.
+        ${safePreheader}
       </div>
       <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0;padding:0;background:#ffffff;font-family:Segoe UI,Arial,sans-serif;color:#282828;">
         <tr>
@@ -210,10 +221,10 @@ async function sendEmailVerificationOtp({ email, fullName, otp }) {
               </tr>
               <tr>
                 <td align="center" style="padding:34px 36px 10px;background:#ffffff;">
-                  <h1 style="margin:0;color:#7b261d;font-family:Segoe UI,Arial,sans-serif;font-size:31px;line-height:1.2;font-weight:900;text-align:center;">Verify your email address</h1>
+                  <h1 style="margin:0;color:#7b261d;font-family:Segoe UI,Arial,sans-serif;font-size:31px;line-height:1.2;font-weight:900;text-align:center;">${safeHeading}</h1>
                   <div style="width:72px;margin:11px auto 14px;border-top:2px solid #efbd29;font-size:0;line-height:0;">&nbsp;</div>
                   <p style="margin:0 0 9px;color:#2c2c2c;font-family:Segoe UI,Arial,sans-serif;font-size:16px;line-height:1.45;font-weight:800;text-align:center;">Hello, ${safeFullName}!</p>
-                  <p style="margin:0;color:#4a4f54;font-family:Segoe UI,Arial,sans-serif;font-size:15px;line-height:1.55;text-align:center;">Thank you for creating an ANIMUA account.<br>Use the verification code below to confirm your email address.</p>
+                  <p style="margin:0;color:#4a4f54;font-family:Segoe UI,Arial,sans-serif;font-size:15px;line-height:1.55;text-align:center;">${introHtml}</p>
                 </td>
               </tr>
               <tr>
@@ -312,6 +323,146 @@ async function sendEmailVerificationOtp({ email, fullName, otp }) {
   };
 
   await transporter.sendMail(mailOptions);
+}
+
+async function sendPasswordChangeOtp({ email, fullName, otp }) {
+  return sendEmailVerificationOtp({
+    email,
+    fullName,
+    otp,
+    subject: "Your ANIMUA password change code",
+    preheader: "Use this verification code to confirm your ANIMUA password change.",
+    heading: "Verify your password change",
+    introHtml: "We received a request to change your ANIMUA password.<br>Use the verification code below to confirm it was you."
+  });
+}
+
+async function sendForgotPasswordOtp({ email, fullName, otp }) {
+  return sendEmailVerificationOtp({
+    email,
+    fullName,
+    otp,
+    subject: "Your ANIMUA password reset code",
+    preheader: "Use this verification code to reset your ANIMUA password.",
+    heading: "Reset your password",
+    introHtml: "We received a request to reset your ANIMUA password.<br>Use the verification code below to continue."
+  });
+}
+
+function validateNewPasswordValue(newPassword) {
+  if (typeof newPassword !== "string" || !newPassword) {
+    return { status: 400, message: "New password is required." };
+  }
+
+  if (newPassword.length > 128) {
+    return { status: 400, message: "Password must not exceed 128 characters." };
+  }
+
+  if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(newPassword)) {
+    return {
+      status: 400,
+      message: "New password must be at least 8 characters and include uppercase, lowercase, number, and special character."
+    };
+  }
+
+  return null;
+}
+
+async function validatePasswordChangeInput({ email, oldPassword, newPassword }) {
+  if (!email) {
+    return { status: 401, message: "Unauthorized." };
+  }
+
+  if (
+    typeof oldPassword !== "string" ||
+    typeof newPassword !== "string" ||
+    !oldPassword ||
+    !newPassword
+  ) {
+    return { status: 400, message: "Current and new password are required." };
+  }
+
+  if (oldPassword.length > 128 || newPassword.length > 128) {
+    return { status: 400, message: "Passwords must not exceed 128 characters." };
+  }
+
+  if (oldPassword === newPassword) {
+    return { status: 400, message: "New password must be different from the current password." };
+  }
+
+  const newPasswordError = validateNewPasswordValue(newPassword);
+  if (newPasswordError) return newPasswordError;
+
+  const userRef = db.collection("users").doc(email);
+  const userDoc = await userRef.get();
+
+  if (!userDoc.exists) {
+    return { status: 404, message: "User not found." };
+  }
+
+  const userData = userDoc.data();
+  const isMatch = IS_INSECURE_MODE
+    ? oldPassword === userData.password
+    : await bcrypt.compare(oldPassword, userData.password);
+
+  if (!isMatch) {
+    return { status: 401, message: "Current password is incorrect." };
+  }
+
+  return { userRef, userData };
+}
+
+async function validateForgotPasswordAccount(email) {
+  if (!email || typeof email !== "string" || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return { status: 400, message: "Please enter a valid email address." };
+  }
+
+  const userRef = db.collection("users").doc(email);
+  const userDoc = await userRef.get();
+
+  if (!userDoc.exists) {
+    return { status: 404, message: "No account was found for that email address." };
+  }
+
+  const userData = userDoc.data();
+  if (String(userData.status || "Active").toLowerCase() === "inactive") {
+    return { status: 403, message: "This account is inactive. Please contact ANIMUA support." };
+  }
+
+  return { userRef, userData };
+}
+
+async function applyPasswordChange({ userRef, userData, newPassword, auditUser }) {
+  if (userData.firebaseUid) {
+    try {
+      await admin.auth().updateUser(userData.firebaseUid, {
+        password: newPassword
+      });
+    } catch (firebaseError) {
+      console.warn("[Update Firebase Password Failed]", firebaseError.message);
+      return {
+        status: 502,
+        message: "Password was not changed because Firebase could not update your login password. Please try again."
+      };
+    }
+  }
+
+  const newStoredPassword = IS_INSECURE_MODE
+    ? newPassword
+    : await bcrypt.hash(newPassword, 12);
+
+  await userRef.update({
+    password: newStoredPassword,
+    updatedAt: admin.firestore.FieldValue.serverTimestamp()
+  });
+
+  await writeAccountAuditLog({
+    action: "account.password_changed",
+    user: auditUser,
+    after: { passwordChanged: true },
+  });
+
+  return null;
 }
 
 function verifyRecaptchaToken(token, remoteIp) {
@@ -980,86 +1131,262 @@ exports.updateUsername = async (req, res) => {
 
 
 // ─── CHANGE PASSWORD ──────────────────────────────────────────────────────────
+exports.requestPasswordChangeOtp = async (req, res) => {
+  try {
+    const email = req.user?.email;
+    const { oldPassword, newPassword } = req.body || {};
+    const validation = await validatePasswordChangeInput({ email, oldPassword, newPassword });
+
+    if (validation.status) {
+      return res.status(validation.status).json({ message: validation.message });
+    }
+
+    const otpRef = db.collection("passwordChangeOtps").doc(email);
+    const existingOtpDoc = await otpRef.get();
+
+    if (existingOtpDoc.exists) {
+      const existing = existingOtpDoc.data();
+      const createdAt = existing.createdAt?.toDate ? existing.createdAt.toDate() : null;
+
+      if (createdAt && Date.now() - createdAt.getTime() < 30 * 1000) {
+        return res.status(429).json({ message: "Please wait before requesting another password OTP." });
+      }
+    }
+
+    const otp = String(Math.floor(100000 + Math.random() * 900000));
+    const otpHash = await bcrypt.hash(otp, 10);
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+    await otpRef.set({
+      email,
+      otpHash,
+      attempts: 0,
+      expiresAt,
+      createdAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    await sendPasswordChangeOtp({
+      email,
+      fullName: validation.userData.fullName,
+      otp
+    });
+
+    return res.status(200).json({ message: "We sent a six-digit OTP to your email." });
+  } catch (error) {
+    console.error("[Request Password Change OTP Error]", error.message);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+exports.confirmPasswordChangeOtp = async (req, res) => {
+  try {
+    const email = req.user?.email;
+    const { oldPassword, newPassword } = req.body || {};
+    const otp = String(req.body?.otp || "").trim();
+
+    if (!/^\d{6}$/.test(otp)) {
+      return res.status(400).json({ message: "Please enter the six-digit password OTP." });
+    }
+
+    const validation = await validatePasswordChangeInput({ email, oldPassword, newPassword });
+
+    if (validation.status) {
+      return res.status(validation.status).json({ message: validation.message });
+    }
+
+    const otpRef = db.collection("passwordChangeOtps").doc(email);
+    const otpDoc = await otpRef.get();
+
+    if (!otpDoc.exists) {
+      return res.status(404).json({ message: "No password OTP request found. Please request a new code." });
+    }
+
+    const otpData = otpDoc.data();
+    const expiresAt = otpData.expiresAt?.toDate ? otpData.expiresAt.toDate() : new Date(otpData.expiresAt);
+
+    if (!expiresAt || expiresAt.getTime() < Date.now()) {
+      await otpRef.delete();
+      return res.status(410).json({ message: "Password OTP expired. Please request a new code." });
+    }
+
+    if ((otpData.attempts || 0) >= 5) {
+      await otpRef.delete();
+      return res.status(429).json({ message: "Too many password OTP attempts. Please request a new code." });
+    }
+
+    const isOtpMatch = await bcrypt.compare(otp, otpData.otpHash);
+
+    if (!isOtpMatch) {
+      await otpRef.update({
+        attempts: admin.firestore.FieldValue.increment(1),
+        lastAttemptAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+      return res.status(401).json({ message: "Incorrect password OTP. Please try again." });
+    }
+
+    const applyError = await applyPasswordChange({
+      userRef: validation.userRef,
+      userData: validation.userData,
+      newPassword,
+      auditUser: req.user
+    });
+
+    if (applyError) {
+      return res.status(applyError.status).json({ message: applyError.message });
+    }
+
+    await otpRef.delete();
+
+    return res.status(200).json({
+      message: "Password changed successfully."
+    });
+  } catch (error) {
+    console.error("[Confirm Password Change OTP Error]", error.message);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+exports.requestForgotPasswordOtp = async (req, res) => {
+  try {
+    const email = String(req.body?.email || "").trim().toLowerCase();
+    const validation = await validateForgotPasswordAccount(email);
+
+    if (validation.status) {
+      return res.status(validation.status).json({ message: validation.message });
+    }
+
+    const otpRef = db.collection("forgotPasswordOtps").doc(email);
+    const existingOtpDoc = await otpRef.get();
+
+    if (existingOtpDoc.exists) {
+      const existing = existingOtpDoc.data();
+      const createdAt = existing.createdAt?.toDate ? existing.createdAt.toDate() : null;
+
+      if (createdAt && Date.now() - createdAt.getTime() < 30 * 1000) {
+        return res.status(429).json({ message: "Please wait before requesting another password reset OTP." });
+      }
+    }
+
+    const otp = String(Math.floor(100000 + Math.random() * 900000));
+    const otpHash = await bcrypt.hash(otp, 10);
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+    await otpRef.set({
+      email,
+      otpHash,
+      attempts: 0,
+      expiresAt,
+      createdAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    await sendForgotPasswordOtp({
+      email,
+      fullName: validation.userData.fullName,
+      otp
+    });
+
+    return res.status(200).json({ message: "We sent a six-digit OTP to your email." });
+  } catch (error) {
+    console.error("[Request Forgot Password OTP Error]", error.message);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+exports.confirmForgotPasswordOtp = async (req, res) => {
+  try {
+    const email = String(req.body?.email || "").trim().toLowerCase();
+    const otp = String(req.body?.otp || "").trim();
+    const { newPassword } = req.body || {};
+
+    if (!/^\d{6}$/.test(otp)) {
+      return res.status(400).json({ message: "Please enter the six-digit password reset OTP." });
+    }
+
+    const passwordError = validateNewPasswordValue(newPassword);
+    if (passwordError) {
+      return res.status(passwordError.status).json({ message: passwordError.message });
+    }
+
+    const validation = await validateForgotPasswordAccount(email);
+    if (validation.status) {
+      return res.status(validation.status).json({ message: validation.message });
+    }
+
+    const otpRef = db.collection("forgotPasswordOtps").doc(email);
+    const otpDoc = await otpRef.get();
+
+    if (!otpDoc.exists) {
+      return res.status(404).json({ message: "No password reset OTP request found. Please request a new code." });
+    }
+
+    const otpData = otpDoc.data();
+    const expiresAt = otpData.expiresAt?.toDate ? otpData.expiresAt.toDate() : new Date(otpData.expiresAt);
+
+    if (!expiresAt || expiresAt.getTime() < Date.now()) {
+      await otpRef.delete();
+      return res.status(410).json({ message: "Password reset OTP expired. Please request a new code." });
+    }
+
+    if ((otpData.attempts || 0) >= 5) {
+      await otpRef.delete();
+      return res.status(429).json({ message: "Too many password reset OTP attempts. Please request a new code." });
+    }
+
+    const isOtpMatch = await bcrypt.compare(otp, otpData.otpHash);
+
+    if (!isOtpMatch) {
+      await otpRef.update({
+        attempts: admin.firestore.FieldValue.increment(1),
+        lastAttemptAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+      return res.status(401).json({ message: "Incorrect password reset OTP. Please try again." });
+    }
+
+    const applyError = await applyPasswordChange({
+      userRef: validation.userRef,
+      userData: validation.userData,
+      newPassword,
+      auditUser: {
+        email,
+        fullName: validation.userData.fullName || email
+      }
+    });
+
+    if (applyError) {
+      return res.status(applyError.status).json({ message: applyError.message });
+    }
+
+    await otpRef.delete();
+
+    return res.status(200).json({
+      message: "Password reset successfully."
+    });
+  } catch (error) {
+    console.error("[Confirm Forgot Password OTP Error]", error.message);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
 exports.changePassword = async (req, res) => {
   try {
     const email = req.user?.email;
     const { oldPassword, newPassword } = req.body || {};
+    const validation = await validatePasswordChangeInput({ email, oldPassword, newPassword });
 
-    if (!email) {
-      return res.status(401).json({ message: "Unauthorized." });
+    if (validation.status) {
+      return res.status(validation.status).json({ message: validation.message });
     }
 
-    if (
-      typeof oldPassword !== "string" ||
-      typeof newPassword !== "string" ||
-      !oldPassword ||
-      !newPassword
-    ) {
-      return res.status(400).json({ message: "Current and new password are required." });
-    }
-
-    if (oldPassword.length > 128 || newPassword.length > 128) {
-      return res.status(400).json({
-        message: "Passwords must not exceed 128 characters.",
-      });
-    }
-
-    if (oldPassword === newPassword) {
-      return res.status(400).json({
-        message: "New password must be different from the current password.",
-      });
-    }
-
-    if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(newPassword)) {
-      return res.status(400).json({
-        message: "New password must be at least 8 characters and include uppercase, lowercase, number, and special character."
-      });
-    }
-
-    const userRef = db.collection("users").doc(email);
-    const userDoc = await userRef.get();
-
-    if (!userDoc.exists) {
-      return res.status(404).json({ message: "User not found." });
-    }
-
-    const userData = userDoc.data();
-
-    const isMatch = IS_INSECURE_MODE
-      ? oldPassword === userData.password
-      : await bcrypt.compare(oldPassword, userData.password);
-
-    if (!isMatch) {
-      return res.status(401).json({ message: "Current password is incorrect." });
-    }
-
-    if (userData.firebaseUid) {
-      try {
-        await admin.auth().updateUser(userData.firebaseUid, {
-          password: newPassword
-        });
-      } catch (firebaseError) {
-        console.warn("[Update Firebase Password Failed]", firebaseError.message);
-        return res.status(502).json({
-          message: "Password was not changed because Firebase could not update your login password. Please try again."
-        });
-      }
-    }
-
-    const newStoredPassword = IS_INSECURE_MODE
-      ? newPassword
-      : await bcrypt.hash(newPassword, 12);
-
-    await userRef.update({
-      password: newStoredPassword,
-      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    const applyError = await applyPasswordChange({
+      userRef: validation.userRef,
+      userData: validation.userData,
+      newPassword,
+      auditUser: req.user
     });
 
-    await writeAccountAuditLog({
-      action: "account.password_changed",
-      user: req.user,
-      after: { passwordChanged: true },
-    });
+    if (applyError) {
+      return res.status(applyError.status).json({ message: applyError.message });
+    }
 
     return res.status(200).json({
       message: "Password changed successfully."

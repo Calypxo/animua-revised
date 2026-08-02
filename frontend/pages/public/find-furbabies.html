@@ -94,6 +94,11 @@
                   <span>My Applications</span>
                 </button>
 
+                <button type="button" class="user-dropdown-item" id="compatibilityResultsBtn">
+                  <i class="fa-solid fa-chart-simple"></i>
+                  <span>Compatibility Result</span>
+                </button>
+
                 <div class="user-dropdown-divider"></div>
 
                 <button type="button" id="logoutBtn" class="user-dropdown-item logout-option">
@@ -146,9 +151,9 @@
     <div class="container">
       <div class="browser-toolbar reveal">
         <div class="browser-toolbar-left">
-          <span class="browser-title-icon"><i class="fa-solid fa-paw" aria-hidden="true"></i></span>
           <div>
-            <h2>Available Companions</h2>
+            <span class="browser-kicker"><i class="fa-solid fa-paw" aria-hidden="true"></i> Discover Companions</span>
+            <h2>Available Furbabies</h2>
             <p id="resultsCount">40 pets found</p>
           </div>
         </div>
@@ -162,12 +167,26 @@
           </div>
 
           <div class="filter-tabs">
-            <button class="filter-tab active" data-filter="all"><i class="fa-solid fa-paw" aria-hidden="true"></i> All</button>
-            <button class="filter-tab" data-filter="dog"><i class="fa-solid fa-dog" aria-hidden="true"></i> Dog</button>
-            <button class="filter-tab" data-filter="cat"><i class="fa-solid fa-cat" aria-hidden="true"></i> Cat</button>
+            <button class="filter-tab active" data-filter="all">All</button>
+            <button class="filter-tab" data-filter="dog">Dogs</button>
+            <button class="filter-tab" data-filter="cat">Cats</button>
+          </div>
+
+          <div class="sort-select-wrap">
+            <button class="sort-select-trigger" id="petSort" type="button" aria-label="Sort furbabies" aria-haspopup="listbox" aria-expanded="false">
+              <span id="petSortLabel">Newest First</span>
+            </button>
+            <div class="sort-menu" id="petSortMenu" role="listbox" aria-label="Sort furbabies" hidden>
+              <button class="sort-menu-option active" type="button" role="option" aria-selected="true" data-sort-value="newest">Newest First</button>
+              <button class="sort-menu-option" type="button" role="option" aria-selected="false" data-sort-value="oldest">Oldest First</button>
+            </div>
           </div>
         </div>
       </div>
+
+      <button class="floating-filter-btn" type="button" aria-label="Filter furbabies">
+        <i class="fa-solid fa-sliders" aria-hidden="true"></i>
+      </button>
 
       <div class="pets-grid" id="petsGrid"></div>
 
@@ -183,27 +202,36 @@
           <h3>Every adoption saves a life.</h3>
           <p>All animals are vaccinated, dewormed, and given proper vet care before adoption.</p>
         </div>
-        <a class="btn secondary-btn" href="home.html#home-highlights">Learn About Adoption</a>
       </div>
     </div>
   </section>
 
   <!-- Footer -->
- <footer class="footer" id="contact">
-  <div class="container footer-grid">
-    <div class="footer-brand">
-      <a href="home.html" class="logo footer-logo">
-        <img src="../../src/assets/images/animua-logo-transparent.png" alt="ANIMUA" class="footer-logo-img">
-        <span class="footer-brand-copy">
-          <span class="footer-brand-name">ANIMUA</span>
-          <span class="footer-brand-tagline">Angeles City Animal Welfare Portal</span>
-        </span>
-      </a>
-      <p>
+  <footer class="footer" id="contact">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <a href="home.html" class="logo footer-logo">
+          <span class="footer-brand-copy">
+            <span class="footer-brand-name">ANIMUA</span>
+            <span class="footer-brand-tagline">Angeles City Animal Welfare Portal</span>
+          </span>
+        </a>
+        <p>
           Connecting people with shelter animals through responsible adoption,
           compatibility matching, and shelter-reviewed services.
         </p>
-    </div>
+        <div class="footer-social" aria-label="ANIMUA social links">
+          <a href="https://www.facebook.com/ACVeterinaryOffice" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+            <i class="fa-brands fa-facebook-f" aria-hidden="true"></i>
+          </a>
+          <a href="https://youtu.be/k770yCuEL0I?si=ybv8NXjhfzr4UbzI" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+            <i class="fa-brands fa-youtube" aria-hidden="true"></i>
+          </a>
+          <a href="mailto:acveterinary@angelescity.gov.ph" aria-label="Email Angeles City Veterinary Office">
+            <i class="fa-regular fa-envelope" aria-hidden="true"></i>
+          </a>
+        </div>
+      </div>
 
       <div class="footer-links">
         <h4>Explore</h4>
@@ -214,29 +242,41 @@
       </div>
 
       <div class="footer-links footer-support">
-        <h4>Shelter Services</h4>
+        <h4>Services</h4>
         <a href="home.html#home-highlights">Adoption Guide</a>
         <a href="surrender.html">Surrender Request</a>
         <a href="contact.html">Contact the Shelter</a>
+        <a href="home.html?quizIntro=open">Match Quiz</a>
+      </div>
+
+      <div class="footer-links footer-about">
+        <h4>About</h4>
+        <a href="home.html#about-animua">About ANIMUA</a>
+        <a href="home.html#how-animua-works">How It Works</a>
+        <a href="home.html#terms-privacy-notice">Privacy Policy</a>
+        <a href="home.html#terms-privacy-notice">Terms of Service</a>
       </div>
 
       <div class="footer-links footer-contact">
         <h4>Contact</h4>
-        <p>Angeles City Veterinary Office</p>
-        <p>City Hall Building, Pulung Maragul, Angeles City</p>
-        <a href="tel:0453220485">(045) 322-0485</a>
+        <p><i class="fa-regular fa-circle-user" aria-hidden="true"></i> Angeles City Veterinary Office</p>
+        <p><i class="fa-solid fa-location-dot" aria-hidden="true"></i> City Hall Building, Pulung Maragul, Angeles City</p>
+        <a href="tel:0453220485"><i class="fa-solid fa-phone" aria-hidden="true"></i> (045) 322-0485</a>
+        <a href="mailto:acveterinary@angelescity.gov.ph"><i class="fa-regular fa-envelope" aria-hidden="true"></i> acveterinary@angelescity.gov.ph</a>
       </div>
     </div>
 
-  <div class="footer-bottom">
-    <div class="container footer-bottom-inner">
-      <p>Developed for the Angeles City Veterinary Office.</p>
-      <p>Adoption applications and surrender requests are subject to shelter evaluation and approval.</p>
+    <div class="footer-bottom">
+      <div class="container footer-bottom-inner">
+        <p>&copy; 2026 ANIMUA. All rights reserved.</p>
+        <p>Developed for the Angeles City Veterinary Office.</p>
+        <p>Adoption applications and surrender requests are subject to shelter evaluation and approval.</p>
+        <i class="fa-solid fa-paw footer-paw" aria-hidden="true"></i>
+      </div>
     </div>
-  </div>
-</footer>
+  </footer>
 
-  <!-- Pet Profile Modal -->
+<!-- Pet Profile Modal -->
   <!-- Pet Profile Modal -->
 <div class="modal-overlay" id="profileModal">
   <div class="redesigned-profile-modal">
@@ -416,7 +456,13 @@
 
           <div class="form-group">
             <label for="citizenship">Citizenship *</label>
-            <input type="text" id="citizenship" name="citizenship" placeholder="Enter your citizenship" required>
+            <select id="citizenship" name="citizenship" required>
+              <option value="">Select citizenship</option>
+              <option>Filipino</option>
+              <option>Dual Citizen</option>
+              <option>Foreign National</option>
+              <option>Other</option>
+            </select>
           </div>
 
           <div class="form-group">

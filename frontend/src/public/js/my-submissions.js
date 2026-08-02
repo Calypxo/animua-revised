@@ -12,9 +12,11 @@ const submissionSortControl = document.getElementById("submissionSortControl");
 const submissionSortBtn = document.getElementById("submissionSortBtn");
 const submissionSortLabel = document.getElementById("submissionSortLabel");
 const submissionSortMenu = document.getElementById("submissionSortMenu");
+const compatibilityAccount = document.getElementById("compatibilityAccount");
 const compatibilityAccountBody = document.getElementById("compatibilityAccountBody");
 
 async function loadCompatibilityAccount() {
+  if (compatibilityAccount?.classList.contains("hidden")) return;
   if (!compatibilityAccountBody) return;
   const token = getToken();
   if (!token) { compatibilityAccountBody.innerHTML = `<p>Log in to view your saved compatibility result.</p>`; return; }
@@ -513,6 +515,10 @@ function hasScheduleValue(schedule, fallbackValue) {
   return Boolean(schedule?.date || fallbackValue || schedule?.time);
 }
 
+function hasUsedReschedule(schedule) {
+  return Boolean(schedule?.rescheduledAt || Number(schedule?.rescheduleCount || 0) >= 1);
+}
+
 function getPendingReschedule(details, fieldName) {
   const request = details?.[fieldName] || {};
   return String(request.status || "").toLowerCase() === "pending" ? request : null;
@@ -535,20 +541,44 @@ function renderPendingReschedule(request, label) {
 function renderScheduleFeedback(item) {
   const feedback = item?.scheduleFeedback;
   if (!feedback) return "";
+  const isPending = feedback.type === "pending";
+  const isWarning = feedback.type === "warning";
 
   return `
-    <div class="schedule-feedback ${feedback.type === "pending" ? "pending" : "saved"}">
-      <i class="fa-solid ${feedback.type === "pending" ? "fa-clock" : "fa-check"}"></i>
+    <div class="schedule-feedback ${isPending ? "pending" : isWarning ? "warning" : "saved"}">
+      <i class="fa-solid ${isPending ? "fa-clock" : isWarning ? "fa-triangle-exclamation" : "fa-check"}"></i>
       <p><strong>${escapeHtml(feedback.title)}</strong>${escapeHtml(feedback.message)}</p>
     </div>
   `;
 }
 
-function renderApplicationTimeline(status, submittedDate) {
+function getScheduleSavedFeedback(kind) {
+  const action = kind === "surrender" ? "surrender appointment" : "pickup schedule";
+  return {
+    type: "warning",
+    title: "Schedule Saved",
+    message: `Reschedule is limited to one request only. Failure to attend your ${action} may result in account deactivation.`,
+  };
+}
+
+function renderSchedulePolicyWarning(kind) {
+  const action = kind === "surrender" ? "surrender appointment" : "pickup schedule";
+  return `
+    <div class="schedule-feedback warning">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <p><strong>Reschedule Reminder</strong>Reschedule is limited to one request only. Failure to attend your ${action} may result in account deactivation.</p>
+    </div>
+  `;
+}
+
+function renderApplicationTimeline(status, submittedDate, decisionDateLabel = submittedDate) {
   const normalized = String(status || "").toLowerCase();
   const isApproved = normalized.includes("approved") || normalized.includes("finalized");
   const isRejected = normalized.includes("reject");
   const isWithdrawn = normalized.includes("withdraw");
+  const middleLabel = isApproved || isRejected ? "Reviewed" : isWithdrawn ? "Withdrawn" : "Under Review";
+  const decisionLabel = isApproved ? "Approved" : isRejected ? "Rejected" : "Decision";
+  const decisionDate = isApproved || isRejected ? decisionDateLabel : "Pending";
 
   return `
     <div class="application-timeline ${isApproved || isRejected ? "complete" : ""}">
@@ -558,14 +588,14 @@ function renderApplicationTimeline(status, submittedDate) {
         <small>${submittedDate}</small>
       </div>
       <div class="application-step ${isApproved || isRejected ? "done" : "active"}">
-        <span>${isWithdrawn ? '<i class="fa-solid fa-ban"></i>' : '<i class="fa-solid fa-minus"></i>'}</span>
-        <strong>${isWithdrawn ? "Withdrawn" : "Under Review"}</strong>
+        <span>${isApproved || isRejected ? '<i class="fa-solid fa-check"></i>' : isWithdrawn ? '<i class="fa-solid fa-ban"></i>' : '<i class="fa-solid fa-minus"></i>'}</span>
+        <strong>${middleLabel}</strong>
         <small>${isWithdrawn ? "By user" : submittedDate}</small>
       </div>
       <div class="application-step ${isApproved || isRejected ? "active done" : ""}">
         <span>${isApproved ? '<i class="fa-solid fa-check"></i>' : isRejected ? '<i class="fa-solid fa-xmark"></i>' : "3"}</span>
-        <strong>Decision</strong>
-        <small>${isApproved ? "Approved" : isRejected ? "Rejected" : "Pending"}</small>
+        <strong>${decisionLabel}</strong>
+        <small>${decisionDate}</small>
       </div>
     </div>
   `;
@@ -589,12 +619,13 @@ function getSurrenderMessage(status) {
   return "Your request is being assessed. The shelter may contact you for additional information.";
 }
 
-function renderSurrenderTimeline(status, submittedDate) {
+function renderSurrenderTimeline(status, submittedDate, decisionDateLabel = submittedDate) {
   const normalized = String(status || "").toLowerCase();
   const isApproved = normalized.includes("approved") || normalized.includes("accepted") || normalized.includes("converted");
   const isRejected = normalized.includes("reject");
   const isReceivedOnly = normalized.includes("received");
-  const middleLabel = isReceivedOnly ? "For Assessment" : cleanStatus(status, "surrender");
+  const middleLabel = isApproved || isRejected ? "Reviewed" : isReceivedOnly ? "For Assessment" : cleanStatus(status, "surrender");
+  const decisionDate = isApproved || isRejected ? decisionDateLabel : "Pending";
 
   return `
     <div class="application-timeline surrender-timeline ${isApproved || isRejected ? "complete" : ""}">
@@ -604,14 +635,14 @@ function renderSurrenderTimeline(status, submittedDate) {
         <small>${submittedDate}</small>
       </div>
       <div class="application-step ${isApproved || isRejected ? "done" : "active"}">
-        <span><i class="fa-solid fa-minus"></i></span>
+        <span>${isApproved || isRejected ? '<i class="fa-solid fa-check"></i>' : '<i class="fa-solid fa-minus"></i>'}</span>
         <strong>${escapeHtml(middleLabel)}</strong>
         <small>${submittedDate}</small>
       </div>
       <div class="application-step ${isApproved || isRejected ? "active done" : ""}">
         <span>${isApproved ? '<i class="fa-solid fa-check"></i>' : isRejected ? '<i class="fa-solid fa-xmark"></i>' : "3"}</span>
         <strong>Decision</strong>
-        <small>${isApproved ? "Accepted" : isRejected ? "Rejected" : "Pending"}</small>
+        <small>${decisionDate}</small>
       </div>
     </div>
   `;
@@ -650,6 +681,7 @@ function renderApprovedAdoptionNextSteps(item) {
   const schedule = details.pickupSchedule || {};
   const scheduleDate = getScheduleDate(schedule, details.adoptionDate);
   const hasSchedule = hasScheduleValue(schedule);
+  const canReschedule = hasSchedule && !hasUsedReschedule(schedule);
   const pendingReschedule = getPendingReschedule(details, "pickupRescheduleRequest");
   const scheduleLabel = scheduleDate
     ? `${formatScheduleValue(scheduleDate, "Not scheduled")} ${scheduleTimeOrFallback(schedule)}`
@@ -658,8 +690,8 @@ function renderApprovedAdoptionNextSteps(item) {
   return `
     <div class="approved-next-steps adoption-next-steps">
       <div class="approved-message">
-        <i class="fa-solid fa-circle-check"></i>
-        <p><strong>Great news! Your adoption application has been approved.</strong>Please schedule a pickup date and time to bring your new companion home.</p>
+        <i class="fa-solid fa-check"></i>
+        <p><strong>Congratulations, your application has been approved.</strong>You may now schedule a pickup date and time to bring your new companion home.</p>
       </div>
 
       <section class="schedule-card">
@@ -669,7 +701,7 @@ function renderApprovedAdoptionNextSteps(item) {
             <h3>Schedule Pet Pickup</h3>
             <p>Choose a convenient date and time to pick up ${escapeHtml(item.name)} from the shelter.</p>
           </div>
-          <button type="button" data-schedule-kind="adoption">${hasSchedule ? "Request Re-sched" : "Schedule Pickup"}</button>
+          ${hasSchedule && canReschedule ? `<button type="button" data-schedule-kind="adoption">Request Re-sched</button>` : ""}
         </header>
         <div class="schedule-info-grid">
           <article>
@@ -692,7 +724,8 @@ function renderApprovedAdoptionNextSteps(item) {
           </article>
         </div>
       </section>
-      ${renderScheduleFeedback(item)}
+      ${!hasSchedule ? '<div class="schedule-card-action-row"><button type="button" data-schedule-kind="adoption">Schedule Pickup</button></div>' : ""}
+      ${hasSchedule ? renderSchedulePolicyWarning("adoption") : ""}
       ${renderPendingReschedule(pendingReschedule, "Pickup reschedule request")}
     </div>
   `;
@@ -703,6 +736,7 @@ function renderAcceptedSurrenderNextSteps(item) {
   const appointment = details.surrenderAppointment || {};
   const scheduleDate = getScheduleDate(appointment, details.dropoffDate);
   const hasSchedule = hasScheduleValue(appointment);
+  const canReschedule = hasSchedule && !hasUsedReschedule(appointment);
   const pendingReschedule = getPendingReschedule(details, "surrenderRescheduleRequest");
   const scheduleLabel = scheduleDate
     ? `${formatScheduleValue(scheduleDate, "Not scheduled")} ${scheduleTimeOrFallback(appointment)}`
@@ -711,8 +745,8 @@ function renderAcceptedSurrenderNextSteps(item) {
   return `
     <div class="approved-next-steps surrender-next-steps">
       <div class="approved-message">
-        <i class="fa-solid fa-paw"></i>
-        <p><strong>Your surrender request has been accepted.</strong>Please schedule an appointment to bring ${escapeHtml(item.name)} to the shelter.</p>
+        <i class="fa-solid fa-check"></i>
+        <p><strong>Congratulations, your surrender request has been accepted.</strong>You may now schedule an appointment to bring ${escapeHtml(item.name)} to the shelter.</p>
       </div>
 
       <section class="schedule-card surrender-schedule-card">
@@ -722,7 +756,7 @@ function renderAcceptedSurrenderNextSteps(item) {
             <h3>Schedule Surrender Appointment</h3>
             <p>Choose a date and time to bring ${escapeHtml(item.name)} to the shelter for turnover.</p>
           </div>
-          <button type="button" data-schedule-kind="surrender">${hasSchedule ? "Request Re-sched" : "Schedule"}</button>
+          ${hasSchedule && canReschedule ? `<button type="button" data-schedule-kind="surrender">Request Re-sched</button>` : ""}
         </header>
         <div class="schedule-info-grid">
           <article>
@@ -746,7 +780,8 @@ function renderAcceptedSurrenderNextSteps(item) {
           </article>
         </div>
       </section>
-      ${renderScheduleFeedback(item)}
+      ${!hasSchedule ? '<div class="schedule-card-action-row"><button type="button" data-schedule-kind="surrender">Schedule Appointment</button></div>' : ""}
+      ${hasSchedule ? renderSchedulePolicyWarning("surrender") : ""}
       ${renderPendingReschedule(pendingReschedule, "Appointment reschedule request")}
     </div>
   `;
@@ -802,14 +837,83 @@ const SCHEDULE_TIME_OPTIONS = [
   { label: "10:00 AM", value: "10:00" },
   { label: "1:30 PM", value: "13:30" },
   { label: "2:30 PM", value: "14:30" },
-  { label: "Other", value: "other", custom: true },
 ];
+const SCHEDULE_WINDOW_DAYS = 14;
 
 function toDateInputValue(date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
+}
+
+function parseDateValue(value) {
+  if (!value) return null;
+  if (value?._seconds || value?.seconds) {
+    const seconds = Number(value._seconds || value.seconds);
+    const date = new Date(seconds * 1000);
+    date.setHours(0, 0, 0, 0);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  const text = String(value).trim();
+  if (!text) return null;
+  const date = /^\d{4}-\d{2}-\d{2}$/.test(text)
+    ? new Date(`${text}T00:00:00`)
+    : new Date(text);
+  date.setHours(0, 0, 0, 0);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function addScheduleWindowDays(date) {
+  const maxDate = new Date(date);
+  maxDate.setDate(maxDate.getDate() + SCHEDULE_WINDOW_DAYS);
+  return maxDate;
+}
+
+function getDecisionDate(kind, item) {
+  const details = item?.details || {};
+  const candidates = kind === "surrender"
+    ? [
+        details.acceptedDate,
+        details.acceptedAt,
+        details.approvedDate,
+        details.approvedAt,
+        details.reviewedAt,
+        details.updatedAt,
+        item?.acceptedDate,
+        item?.approvedDate,
+      ]
+    : [
+        details.approvedDate,
+        details.approvedAt,
+        details.acceptedDate,
+        details.acceptedAt,
+        details.updatedAt,
+        item?.approvedDate,
+        item?.approvedAt,
+      ];
+
+  return candidates.map(parseDateValue).find(Boolean) || parseDateValue(item?.submittedAt) || new Date();
+}
+
+function getScheduleWindow(kind, item) {
+  const decisionDate = getDecisionDate(kind, item);
+  decisionDate.setHours(0, 0, 0, 0);
+
+  const minDate = new Date();
+  minDate.setHours(0, 0, 0, 0);
+  if (decisionDate > minDate) {
+    minDate.setTime(decisionDate.getTime());
+  }
+
+  const maxDate = addScheduleWindowDays(decisionDate);
+
+  return { minDate, maxDate };
+}
+
+function isScheduleDateAllowed(date, minDate, maxDate) {
+  return date >= minDate && date <= maxDate;
 }
 
 function formatScheduleMonth(date) {
@@ -819,25 +923,29 @@ function formatScheduleMonth(date) {
   });
 }
 
-function renderScheduleCalendar(monthDate, selectedDate) {
+function renderScheduleCalendar(monthDate, selectedDate, minDate, maxDate) {
   const firstOfMonth = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
   const gridStart = new Date(firstOfMonth);
   gridStart.setDate(firstOfMonth.getDate() - firstOfMonth.getDay());
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
   const selectedValue = selectedDate ? toDateInputValue(selectedDate) : "";
   const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const previousMonth = new Date(monthDate.getFullYear(), monthDate.getMonth() - 1, 1);
+  const nextMonth = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 1);
+  const currentWindowMonth = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
+  const maxWindowMonth = new Date(maxDate.getFullYear(), maxDate.getMonth(), 1);
+  const canGoPrevious = previousMonth >= currentWindowMonth;
+  const canGoNext = nextMonth <= maxWindowMonth;
 
   const days = Array.from({ length: 42 }, (_, index) => {
     const day = new Date(gridStart);
     day.setDate(gridStart.getDate() + index);
     const isOutside = day.getMonth() !== monthDate.getMonth();
-    const isPast = day < today;
+    const isUnavailable = !isScheduleDateAllowed(day, minDate, maxDate);
     const value = toDateInputValue(day);
     const isSelected = value === selectedValue;
 
     return `
-      <button type="button" class="schedule-day ${isOutside ? "muted" : ""} ${isSelected ? "selected" : ""}" data-date="${value}" ${isPast ? "disabled" : ""}>
+      <button type="button" class="schedule-day ${isOutside ? "muted" : ""} ${isSelected ? "selected" : ""}" data-date="${value}" ${isUnavailable ? "disabled" : ""}>
         ${day.getDate()}
       </button>
     `;
@@ -845,9 +953,9 @@ function renderScheduleCalendar(monthDate, selectedDate) {
 
   return `
     <div class="schedule-calendar-head">
-      <button type="button" data-calendar-prev aria-label="Previous month"><i class="fa-solid fa-chevron-left"></i></button>
+      <button type="button" data-calendar-prev aria-label="Previous month" ${canGoPrevious ? "" : "disabled"}><i class="fa-solid fa-chevron-left"></i></button>
       <strong>${formatScheduleMonth(monthDate)}</strong>
-      <button type="button" data-calendar-next aria-label="Next month"><i class="fa-solid fa-chevron-right"></i></button>
+      <button type="button" data-calendar-next aria-label="Next month" ${canGoNext ? "" : "disabled"}><i class="fa-solid fa-chevron-right"></i></button>
     </div>
     <div class="schedule-weekdays">
       ${weekdays.map((day) => `<span>${day}</span>`).join("")}
@@ -860,12 +968,20 @@ function renderScheduleCalendar(monthDate, selectedDate) {
 
 async function promptForSchedule(kind, item) {
   const isSurrender = kind === "surrender";
+  const { minDate, maxDate } = getScheduleWindow(kind, item);
   const title = isSurrender ? "Schedule Surrender Appointment" : "Schedule Pet Pickup";
   const subtitle = isSurrender
     ? `Choose an available date and time to bring ${escapeHtml(item?.name || "your pet")} to the shelter.`
     : `Choose an available date and time to pick up ${escapeHtml(item?.name || "your pet")} from the shelter.`;
   const initialDate = new Date();
   initialDate.setDate(initialDate.getDate() + 1);
+  initialDate.setHours(0, 0, 0, 0);
+  if (initialDate < minDate) {
+    initialDate.setTime(minDate.getTime());
+  }
+  if (initialDate > maxDate) {
+    initialDate.setTime(maxDate.getTime());
+  }
   let visibleMonth = new Date(initialDate.getFullYear(), initialDate.getMonth(), 1);
   let selectedDate = initialDate;
   let selectedTime = "";
@@ -877,22 +993,23 @@ async function promptForSchedule(kind, item) {
           <i class="fa-solid fa-xmark"></i>
         </button>
         <header>
-          <h2>${escapeHtml(title)}</h2>
-          <p>${subtitle}</p>
+          <span class="schedule-picker-icon"><i class="fa-regular fa-calendar-days" aria-hidden="true"></i></span>
+          <div>
+            <h2>${escapeHtml(title)}</h2>
+            <p>${subtitle}</p>
+          </div>
         </header>
 
         <div class="schedule-picker-section">
-          <div class="schedule-section-title">
-            <span><i class="fa-regular fa-calendar-days"></i></span>
-            <strong>1. Select Date</strong>
+          <div class="schedule-limit-reminder">
+            <strong>${isSurrender ? "*Date is limited to 14 days from the request acceptance date." : "*Date is limited to 14 days from the application approval date."}</strong>
           </div>
           <div data-calendar-root></div>
-        </div>
 
-        <div class="schedule-picker-section schedule-time-section">
+          <div class="schedule-time-section">
           <div class="schedule-section-title">
             <span><i class="fa-regular fa-clock"></i></span>
-            <strong>2. Select Time</strong>
+            <strong>Available times</strong>
           </div>
           <div class="schedule-time-options">
             ${SCHEDULE_TIME_OPTIONS.map((time) => `
@@ -905,15 +1022,27 @@ async function promptForSchedule(kind, item) {
             <span>Enter preferred time</span>
             <input type="time" data-custom-time-input>
           </label>
+          </div>
+        </div>
+
+        <div class="schedule-selected-summary" data-schedule-summary hidden>
+          <span><i class="fa-regular fa-calendar-days"></i></span>
+          <div>
+            <strong>${isSurrender ? "Surrender appointment" : "Pickup schedule"}</strong>
+            <p data-schedule-summary-main></p>
+            <small><i class="fa-solid fa-location-dot"></i> Angeles City Veterinary Office, Brgy. Pampang, Angeles City</small>
+          </div>
         </div>
       </section>
     `,
     showConfirmButton: true,
-    showCancelButton: false,
-    confirmButtonText: "Save Schedule",
+    showCancelButton: true,
+    confirmButtonText: isSurrender ? "Confirm Appointment" : "Confirm Pickup Schedule",
+    cancelButtonText: "Reset",
     customClass: {
       popup: "schedule-picker-popup",
       confirmButton: "animua-confirm schedule-picker-save",
+      cancelButton: "schedule-picker-cancel",
     },
     buttonsStyling: false,
     didOpen: (popup) => {
@@ -921,30 +1050,72 @@ async function promptForSchedule(kind, item) {
       const calendarRoot = popup.querySelector("[data-calendar-root]");
       const customTimeField = popup.querySelector(".schedule-custom-time");
       const customTimeInput = popup.querySelector("[data-custom-time-input]");
+      const summary = popup.querySelector("[data-schedule-summary]");
+      const summaryMain = popup.querySelector("[data-schedule-summary-main]");
+
+      const updateSummary = () => {
+        if (!selectedDate || !selectedTime) {
+          summary.hidden = true;
+          return;
+        }
+
+        const dateLabel = selectedDate.toLocaleDateString("en-US", {
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+        });
+        const timeLabel = formatScheduleTime(selectedTime);
+        if (!timeLabel) {
+          summary.hidden = true;
+          return;
+        }
+
+        summaryMain.textContent = `${dateLabel} at ${timeLabel}`;
+        summary.hidden = false;
+      };
 
       const renderCalendar = () => {
-        calendarRoot.innerHTML = renderScheduleCalendar(visibleMonth, selectedDate);
-        picker.dataset.selectedDate = toDateInputValue(selectedDate);
+        calendarRoot.innerHTML = renderScheduleCalendar(visibleMonth, selectedDate, minDate, maxDate);
+        picker.dataset.selectedDate = selectedDate ? toDateInputValue(selectedDate) : "";
+        updateSummary();
       };
 
       renderCalendar();
 
       popup.addEventListener("click", (event) => {
+        const resetButton = event.target.closest(".schedule-picker-cancel");
+        if (resetButton) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          selectedDate = null;
+          selectedTime = "";
+          picker.dataset.selectedDate = "";
+          picker.dataset.selectedTime = "";
+          customTimeInput.value = "";
+          customTimeField.hidden = true;
+          popup.querySelectorAll("[data-time-value]").forEach((button) => {
+            button.classList.remove("selected");
+          });
+          renderCalendar();
+          updateSummary();
+          return;
+        }
+
         const cancelButton = event.target.closest("[data-schedule-cancel]");
         if (cancelButton) {
-          Swal.clickCancel();
+          Swal.close();
           return;
         }
 
         const previousButton = event.target.closest("[data-calendar-prev]");
-        if (previousButton) {
+        if (previousButton && !previousButton.disabled) {
           visibleMonth = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() - 1, 1);
           renderCalendar();
           return;
         }
 
         const nextButton = event.target.closest("[data-calendar-next]");
-        if (nextButton) {
+        if (nextButton && !nextButton.disabled) {
           visibleMonth = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + 1, 1);
           renderCalendar();
           return;
@@ -955,6 +1126,7 @@ async function promptForSchedule(kind, item) {
           selectedDate = new Date(`${dayButton.dataset.date}T00:00:00`);
           visibleMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
           renderCalendar();
+          updateSummary();
           return;
         }
 
@@ -970,14 +1142,16 @@ async function promptForSchedule(kind, item) {
           if (isCustom) {
             customTimeInput.focus();
           }
+          updateSummary();
         }
-      });
+      }, true);
 
       customTimeInput.addEventListener("input", () => {
         const customButton = popup.querySelector("[data-time-custom]");
         if (!customButton?.classList.contains("selected")) return;
         selectedTime = customTimeInput.value;
         picker.dataset.selectedTime = selectedTime;
+        updateSummary();
       });
     },
     preConfirm: () => {
@@ -985,9 +1159,17 @@ async function promptForSchedule(kind, item) {
       const picker = popup?.querySelector(".schedule-picker");
       const date = picker?.dataset.selectedDate;
       const time = picker?.dataset.selectedTime;
+      const chosenDate = parseDateValue(date);
 
       if (!date || !time) {
         Swal.showValidationMessage("Please choose both date and time.");
+        return false;
+      }
+
+      if (!chosenDate || !isScheduleDateAllowed(chosenDate, minDate, maxDate)) {
+        Swal.showValidationMessage(isSurrender
+          ? "Please choose a date within 14 days from the request acceptance date."
+          : "Please choose a date within 14 days from the application approval date.");
         return false;
       }
 
@@ -1013,22 +1195,39 @@ async function saveSchedule(item, kind) {
 
   if (item.isDemo) {
     if (isSurrender && existingSchedule) {
+      const previousSchedule = item.details.surrenderAppointment || {};
+      if (hasUsedReschedule(previousSchedule)) {
+        throw new Error("Surrender appointment can only be rescheduled once.");
+      }
       item.details = {
         ...item.details,
-        surrenderRescheduleRequest: {
+        surrenderAppointment: {
           ...schedule,
-          status: "Pending",
-          requestedAt: new Date().toISOString(),
+          location: "Angeles City Veterinary Office, Brgy. Pampang, Angeles City",
+          scheduledAt: previousSchedule.scheduledAt || new Date().toISOString(),
+          rescheduledAt: new Date().toISOString(),
+          rescheduleCount: Number(previousSchedule.rescheduleCount || 0) + 1,
+          previousSchedule,
         },
+        surrenderRescheduleRequest: null,
+        dropoffDate: schedule.date,
       };
     } else if (!isSurrender && existingSchedule) {
+      const previousSchedule = item.details.pickupSchedule || {};
+      if (hasUsedReschedule(previousSchedule)) {
+        throw new Error("Pickup can only be rescheduled once.");
+      }
       item.details = {
         ...item.details,
-        pickupRescheduleRequest: {
+        pickupSchedule: {
           ...schedule,
-          status: "Pending",
-          requestedAt: new Date().toISOString(),
+          location: "Angeles City Veterinary Office, Brgy. Pampang, Angeles City",
+          scheduledAt: previousSchedule.scheduledAt || new Date().toISOString(),
+          rescheduledAt: new Date().toISOString(),
+          rescheduleCount: Number(previousSchedule.rescheduleCount || 0) + 1,
+          previousSchedule,
         },
+        pickupRescheduleRequest: null,
       };
     } else if (isSurrender) {
       item.details = {
@@ -1049,13 +1248,7 @@ async function saveSchedule(item, kind) {
       };
     }
 
-    item.scheduleFeedback = existingSchedule
-      ? null
-      : {
-          type: "saved",
-          title: "Schedule Saved",
-          message: "Your schedule has been saved.",
-        };
+    item.scheduleFeedback = getScheduleSavedFeedback(kind);
     showSubmissionDetails(item);
     return;
   }
@@ -1094,7 +1287,10 @@ async function saveSchedule(item, kind) {
       };
     }
   } else {
-    item.details = result.requiresApproval
+    if (result.request) {
+      item.details = result.request;
+    } else {
+      item.details = result.requiresApproval
       ? {
           ...item.details,
           pickupRescheduleRequest: result.pickupRescheduleRequest,
@@ -1103,15 +1299,12 @@ async function saveSchedule(item, kind) {
           ...item.details,
           pickupSchedule: result.pickupSchedule || schedule,
         };
+    }
   }
 
   item.scheduleFeedback = result.requiresApproval
     ? null
-    : {
-        type: "saved",
-        title: "Schedule Saved",
-        message: "Your schedule has been saved.",
-      };
+    : getScheduleSavedFeedback(kind);
 
   showSubmissionDetails(item);
 }
@@ -1129,13 +1322,19 @@ function showSubmissionDetails(item) {
       ? pet.status.join(", ")
       : valueOrFallback(pet.status, "Healthy");
     const vaccinationStatus = valueOrFallback(pet.vaccinationHistory, "Not provided");
+    const decisionDate = formatDate(details.acceptedDate || details.acceptedAt || details.approvedDate || details.approvedAt || details.reviewedAt || details.updatedAt || item.submittedAt);
 
     Swal.fire({
       html: `
         <section class="application-detail-modal surrender-detail-modal">
           <header class="application-detail-header">
-            <span class="application-detail-accent"></span>
-            <h2>Request Details</h2>
+            <span class="application-detail-accent">
+              <i class="fa-regular fa-file-lines" aria-hidden="true"></i>
+            </span>
+            <div>
+              <h2>Request Details</h2>
+              <p>View the latest status and next steps for this request.</p>
+            </div>
             <button type="button" class="application-detail-x" data-close-application-modal aria-label="Close">
               <i class="fa-solid fa-xmark"></i>
             </button>
@@ -1162,7 +1361,7 @@ function showSubmissionDetails(item) {
             </span>
           </div>
 
-          ${renderSurrenderTimeline(status, submittedDate)}
+          ${renderSurrenderTimeline(status, submittedDate, decisionDate)}
 
           ${isAccepted ? "" : `
           <div class="application-detail-note surrender-detail-note">
@@ -1203,18 +1402,15 @@ function showSubmissionDetails(item) {
           </div>
           `}
 
-          <footer class="application-detail-actions">
-            <button type="button" class="application-close-btn" data-close-application-modal>Close</button>
-          </footer>
         </section>
       `,
       showConfirmButton: false,
       showCloseButton: false,
-      width: "min(560px, calc(100vw - 28px))",
+      width: "min(620px, calc(100vw - 28px))",
       padding: 0,
       background: "transparent",
       customClass: {
-        popup: "application-detail-popup",
+        popup: "application-detail-popup surrender-detail-popup",
       },
       didOpen: (popup) => {
         popup.querySelectorAll("[data-close-application-modal]").forEach((button) => {
@@ -1228,7 +1424,7 @@ function showSubmissionDetails(item) {
           event.currentTarget.classList.toggle("open", Boolean(isHidden));
         });
 
-        popup.querySelector("[data-schedule-kind]")?.addEventListener("click", async (event) => {
+        popup.querySelectorAll("[data-schedule-kind]").forEach((button) => button.addEventListener("click", async (event) => {
           try {
             Swal.close();
             await saveSchedule(item, event.currentTarget.dataset.scheduleKind);
@@ -1245,7 +1441,7 @@ function showSubmissionDetails(item) {
             });
             showSubmissionDetails(item);
           }
-        });
+        }));
       },
     });
     return;
@@ -1259,13 +1455,19 @@ function showSubmissionDetails(item) {
   const homeType = valueOrFallback(applicant.address);
   const petExperience = valueOrFallback(details.other_information?.existing_pets, "Not provided");
   const isApproved = isApprovedDecision(status, "adoption");
+  const decisionDate = formatDate(details.approvedDate || details.approvedAt || details.acceptedDate || details.acceptedAt || details.updatedAt || item.submittedAt);
 
   Swal.fire({
     html: `
-      <section class="application-detail-modal">
+      <section class="application-detail-modal adoption-detail-modal">
         <header class="application-detail-header">
-          <span class="application-detail-accent"></span>
-          <h2>Application Details</h2>
+          <span class="application-detail-accent">
+            <i class="fa-regular fa-file-lines" aria-hidden="true"></i>
+          </span>
+          <div>
+            <h2>Application Details</h2>
+            <p>View the latest status and next steps for this application.</p>
+          </div>
           <button type="button" class="application-detail-x" data-close-application-modal aria-label="Close">
             <i class="fa-solid fa-xmark"></i>
           </button>
@@ -1292,7 +1494,7 @@ function showSubmissionDetails(item) {
           </span>
         </div>
 
-        ${renderApplicationTimeline(status, submittedDate)}
+        ${renderApplicationTimeline(status, submittedDate, decisionDate)}
 
         ${isApproved ? "" : `
         <div class="application-detail-note">
@@ -1339,18 +1541,15 @@ function showSubmissionDetails(item) {
         </div>
         `}
 
-        <footer class="application-detail-actions">
-          <button type="button" class="application-close-btn" data-close-application-modal>Close</button>
-        </footer>
       </section>
     `,
     showConfirmButton: false,
     showCloseButton: false,
-    width: "min(560px, calc(100vw - 28px))",
+    width: "min(620px, calc(100vw - 28px))",
     padding: 0,
     background: "transparent",
     customClass: {
-      popup: "application-detail-popup",
+      popup: "application-detail-popup adoption-detail-popup",
     },
     didOpen: (popup) => {
       popup.querySelectorAll("[data-close-application-modal]").forEach((button) => {
@@ -1364,7 +1563,7 @@ function showSubmissionDetails(item) {
         event.currentTarget.classList.toggle("open", Boolean(isHidden));
       });
 
-      popup.querySelector("[data-schedule-kind]")?.addEventListener("click", async (event) => {
+      popup.querySelectorAll("[data-schedule-kind]").forEach((button) => button.addEventListener("click", async (event) => {
         try {
           Swal.close();
           await saveSchedule(item, event.currentTarget.dataset.scheduleKind);
@@ -1381,7 +1580,7 @@ function showSubmissionDetails(item) {
           });
           showSubmissionDetails(item);
         }
-      });
+      }));
     },
   });
 }

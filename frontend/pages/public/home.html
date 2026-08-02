@@ -93,6 +93,11 @@
                   <span>My Applications</span>
                 </button>
 
+                <button type="button" class="user-dropdown-item" id="compatibilityResultsBtn">
+                  <i class="fa-solid fa-chart-simple"></i>
+                  <span>Compatibility Result</span>
+                </button>
+
                 <div class="user-dropdown-divider"></div>
 
                 <button type="button" id="logoutBtn" class="user-dropdown-item logout-option">
@@ -148,7 +153,7 @@
         data-highlight-key="new-furbabies"
       >
         <span class="highlight-cover">
-          <img src="../../src/assets/images/service-browse-animal.jpg" alt="Cat ready for adoption">
+          <img src="../../src/assets/images/highlight-new-furbabies-cat.JPG" alt="Cat ready for adoption">
         </span>
         <span>New Furbabies</span>
       </button>
@@ -170,7 +175,7 @@
         data-highlight-key="success-stories"
       >
         <span class="highlight-cover">
-          <img src="../../src/assets/images/highlight-success-story-main.jpg" alt="Adopter with cats in a carrier">
+          <img src="../../src/assets/images/success-stories.jpg" alt="Adopter with cats in a carrier">
         </span>
         <span>Success Stories</span>
       </button>
@@ -198,7 +203,7 @@
       </div>
       <div class="story-modal-brand">
         <span class="story-modal-avatar" aria-hidden="true">
-          <img src="../../src/assets/images/service-browse-animal.jpg" alt="" id="storyModalAvatar">
+          <img src="../../src/assets/images/highlight-new-furbabies-cat.JPG" alt="" id="storyModalAvatar">
           <i class="fa-solid fa-paw"></i>
         </span>
         <span class="story-modal-brand-copy">
@@ -232,51 +237,62 @@
   <!-- Featured Furbabies -->
   <section class="featured-furbabies-section" aria-label="Featured furbabies">
     <div class="container featured-furbabies-layout">
-      <div class="featured-furbabies-head reveal">
-        <div class="featured-furbabies-title">
-          <span class="section-label">Featured Furbabies</span>
-          <h2>Meet Animals Looking for a Home</h2>
-          <p>
-            Explore animals currently available for adoption and learn about their
-            personality, care needs, and background.
-          </p>
-        </div>
-
-      </div>
-
       <div class="featured-furbabies-grid reveal" id="featuredFurbabiesGrid" aria-live="polite">
         <p class="featured-furbabies-state">Loading featured furbabies...</p>
       </div>
     </div>
   </section>
 
-  <!-- Upcoming Event -->
-  <section class="upcoming-event-section hidden" id="upcomingEventSection" aria-label="Upcoming event">
-    <div class="container upcoming-event-layout reveal">
-      <figure class="upcoming-event-media" id="upcomingEventMedia">
-        <img src="" alt="" id="upcomingEventImage">
-      </figure>
+  <!-- Match Quiz -->
+  <section class="home-match-quiz-section" aria-labelledby="homeMatchQuizTitle">
+    <div class="container home-match-quiz-layout reveal">
+      <div class="home-match-quiz-copy">
+        <span class="section-label">Compatibility Matching</span>
+        <h2 id="homeMatchQuizTitle">Take the<br>Match Quiz</h2>
+        <p>
+          Answer a few simple questions about your lifestyle, home environment,
+          and care preferences so ANIMUA can suggest adoptable animals that may
+          be a great fit for you.
+        </p>
 
-      <div class="upcoming-event-copy">
-        <span class="section-label" id="upcomingEventLabel">UPCOMING EVENT</span>
-        <h2 id="upcomingEventTitle"></h2>
-        <dl class="upcoming-event-meta" aria-label="Event details">
-          <div id="upcomingEventDateRow">
-            <dt>Date</dt>
-            <dd id="upcomingEventDate"></dd>
-          </div>
-          <div id="upcomingEventTimeRow">
-            <dt>Time</dt>
-            <dd id="upcomingEventTime"></dd>
-          </div>
-          <div id="upcomingEventLocationRow">
-            <dt>Location</dt>
-            <dd id="upcomingEventLocation"></dd>
-          </div>
-        </dl>
-        <p id="upcomingEventDescription"></p>
-        <button type="button" class="upcoming-event-action" id="upcomingEventAction">View Event</button>
+        <div class="home-match-quiz-points" aria-label="Match quiz benefits">
+          <article>
+            <span><i class="fa-regular fa-user" aria-hidden="true"></i></span>
+            <div>
+              <h3>Lifestyle-based matching</h3>
+              <p>Matches pets to your daily routine and activity level.</p>
+            </div>
+          </article>
+          <article>
+            <span><i class="fa-solid fa-house-chimney-medical" aria-hidden="true"></i></span>
+            <div>
+              <h3>Shelter-ready animals only</h3>
+              <p>Recommendations focus on animals marked ready for adoption.</p>
+            </div>
+          </article>
+          <article>
+            <span><i class="fa-regular fa-heart" aria-hidden="true"></i></span>
+            <div>
+              <h3>Better adoption fit</h3>
+              <p>A stronger match can support a happier future together.</p>
+            </div>
+          </article>
+        </div>
+
+        <div class="home-match-quiz-actions">
+          <a href="/pages/public/petCompatibility.html" class="home-match-quiz-primary">
+            <span>Start Match Quiz</span>
+            <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+          </a>
+          <button type="button" class="home-match-quiz-secondary" data-quiz-intro-trigger>
+            How Matching Works
+          </button>
+        </div>
       </div>
+
+      <figure class="home-match-quiz-media">
+        <img src="../../src/assets/images/match-quiz-form-showcase.png" alt="City Veterinarian adoption application form preview">
+      </figure>
     </div>
   </section>
 
@@ -339,7 +355,7 @@
   </div>
 
   <!-- How ANIMUA Works -->
-  <section class="how-animua-works-section" aria-label="How ANIMUA works">
+  <section class="how-animua-works-section" id="how-animua-works" aria-label="How ANIMUA works">
     <div class="container how-animua-works-layout">
       <div class="how-animua-works-head reveal">
         <span class="section-label">HOW ANIMUA WORKS</span>
@@ -354,57 +370,63 @@
         <article class="how-animua-step">
           <span class="how-animua-number">01</span>
           <div>
+            <!-- Explore Furbabies -->
+            <div class="process-icon process-icon--search">
+              <i data-lucide="search" class="process-main-icon"></i>
+              <i data-lucide="paw-print" class="process-detail-icon search-paw"></i>
+            </div>
             <h3>Explore Furbabies</h3>
             <p>
               Browse animals available for adoption and review their personality,
               health information, behavior, and care requirements.
             </p>
-            <span class="how-animua-visual">
-              <img src="../../src/assets/images/how-explore-furbabies.jpg" alt="Dog available for adoption inside the shelter">
-            </span>
           </div>
         </article>
 
         <article class="how-animua-step">
           <span class="how-animua-number">02</span>
           <div>
+            <!-- Check Compatibility -->
+            <div class="process-icon">
+              <i data-lucide="clipboard-check" class="process-main-icon"></i>
+            </div>
             <h3>Check Compatibility</h3>
             <p>
               Complete the matching quiz to compare your lifestyle, home environment,
               experience, and preferences with available animals.
             </p>
-            <span class="how-animua-visual">
-              <img src="../../src/assets/images/how-compatibility.jpg" alt="Shelter staff checking animal compatibility">
-            </span>
           </div>
         </article>
 
         <article class="how-animua-step">
           <span class="how-animua-number">03</span>
           <div>
+            <!-- Submit an Application -->
+            <div class="process-icon">
+              <i data-lucide="file-pen-line" class="process-main-icon"></i>
+            </div>
             <h3>Submit an Application</h3>
             <p>
               Select an animal and complete the online adoption application using
               accurate information.
             </p>
-            <span class="how-animua-visual">
-              <img src="../../src/assets/images/how-submit-application.jpg" alt="Adoption application being completed during animal review">
-            </span>
           </div>
         </article>
 
         <article class="how-animua-step">
           <span class="how-animua-number">04</span>
           <div>
+            <!-- Shelter Review -->
+            <div class="process-icon process-icon--shield">
+              <i data-lucide="shield-check" class="process-main-icon"></i>
+              <i data-lucide="paw-print" class="process-detail-icon shield-paw"></i>
+            </div>
             <h3>Shelter Review</h3>
             <p>
               The Angeles City Veterinary Office evaluates the application and provides
               instructions for the next steps. Compatibility results and submitted
               applications do not guarantee approval.
             </p>
-            <span class="how-animua-visual">
-              <img src="../../src/assets/images/how-shelter-review.jpg" alt="Shelter review documentation with cats in a cage">
-            </span>
           </div>
         </article>
       </div>
@@ -423,8 +445,7 @@
   <footer class="footer" id="contact">
     <div class="container footer-grid">
       <div class="footer-brand">
-        <a href="#home" class="logo footer-logo">
-          <img src="../../src/assets/images/animua-logo-transparent.png" alt="ANIMUA" class="footer-logo-img">
+        <a href="home.html" class="logo footer-logo">
           <span class="footer-brand-copy">
             <span class="footer-brand-name">ANIMUA</span>
             <span class="footer-brand-tagline">Angeles City Animal Welfare Portal</span>
@@ -434,28 +455,49 @@
           Connecting people with shelter animals through responsible adoption,
           compatibility matching, and shelter-reviewed services.
         </p>
+        <div class="footer-social" aria-label="ANIMUA social links">
+          <a href="https://www.facebook.com/ACVeterinaryOffice" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+            <i class="fa-brands fa-facebook-f" aria-hidden="true"></i>
+          </a>
+          <a href="https://youtu.be/k770yCuEL0I?si=ybv8NXjhfzr4UbzI" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+            <i class="fa-brands fa-youtube" aria-hidden="true"></i>
+          </a>
+          <a href="mailto:acveterinary@angelescity.gov.ph" aria-label="Email Angeles City Veterinary Office">
+            <i class="fa-regular fa-envelope" aria-hidden="true"></i>
+          </a>
+        </div>
       </div>
 
       <div class="footer-links">
         <h4>Explore</h4>
         <a href="home.html">Home</a>
         <a href="find-furbabies.html">Find Furbabies</a>
-        <a href="#" data-quiz-intro-trigger>Compatibility Quiz</a>
-        <a href="#home-highlights" data-footer-scroll>Upcoming Events</a>
+        <a href="home.html?quizIntro=open">Compatibility Quiz</a>
+        <a href="home.html#home-highlights">Upcoming Events</a>
       </div>
 
       <div class="footer-links footer-support">
-        <h4>Shelter Services</h4>
-        <a href="#home-highlights" data-footer-scroll>Adoption Guide</a>
+        <h4>Services</h4>
+        <a href="home.html#home-highlights">Adoption Guide</a>
         <a href="surrender.html">Surrender Request</a>
         <a href="contact.html">Contact the Shelter</a>
+        <a href="home.html?quizIntro=open">Match Quiz</a>
+      </div>
+
+      <div class="footer-links footer-about">
+        <h4>About</h4>
+        <a href="home.html#about-animua">About ANIMUA</a>
+        <a href="home.html#how-animua-works">How It Works</a>
+        <a href="home.html#terms-privacy-notice">Privacy Policy</a>
+        <a href="home.html#terms-privacy-notice">Terms of Service</a>
       </div>
 
       <div class="footer-links footer-contact">
         <h4>Contact</h4>
-        <p>Angeles City Veterinary Office</p>
-        <p>City Hall Building, Pulung Maragul, Angeles City</p>
-        <a href="tel:0453220485">(045) 322-0485</a>
+        <p><i class="fa-regular fa-circle-user" aria-hidden="true"></i> Angeles City Veterinary Office</p>
+        <p><i class="fa-solid fa-location-dot" aria-hidden="true"></i> City Hall Building, Pulung Maragul, Angeles City</p>
+        <a href="tel:0453220485"><i class="fa-solid fa-phone" aria-hidden="true"></i> (045) 322-0485</a>
+        <a href="mailto:acveterinary@angelescity.gov.ph"><i class="fa-regular fa-envelope" aria-hidden="true"></i> acveterinary@angelescity.gov.ph</a>
       </div>
     </div>
 
@@ -464,11 +506,12 @@
         <p>&copy; 2026 ANIMUA. All rights reserved.</p>
         <p>Developed for the Angeles City Veterinary Office.</p>
         <p>Adoption applications and surrender requests are subject to shelter evaluation and approval.</p>
+        <i class="fa-solid fa-paw footer-paw" aria-hidden="true"></i>
       </div>
     </div>
   </footer>
 
-  <section class="profile-modal-overlay hidden" id="profileModal" aria-hidden="true" aria-labelledby="profileModalTitle">
+<section class="profile-modal-overlay hidden" id="profileModal" aria-hidden="true" aria-labelledby="profileModalTitle">
     <button type="button" class="profile-modal-backdrop" data-profile-close aria-label="Close profile"></button>
     <article class="profile-modal-card" role="dialog" aria-modal="true" tabindex="-1">
       <button type="button" class="profile-modal-close" data-profile-close aria-label="Close profile">
@@ -477,7 +520,9 @@
 
       <div class="profile-modal-shell">
         <div class="profile-modal-title">
-          <span></span>
+          <span class="profile-title-icon" aria-hidden="true">
+            <i class="fa-regular fa-circle-user"></i>
+          </span>
           <h2 id="profileModalTitle">My Profile</h2>
         </div>
 

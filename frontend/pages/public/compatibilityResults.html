@@ -4,480 +4,362 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/png" href="/favicon.png" />
-  <title>ANIMUA — Your Best Matches</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+  <title>Compatibility Results | ANIMUA</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="../../src/css/public/public-design-system.css" />
-<link rel="stylesheet" href="../../src/css/public/compatibilityResults.css" />
-  
+  <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="../../src/css/public/home.css">
+  <link rel="stylesheet" href="../../src/css/global.css">
+  <link rel="stylesheet" href="../../src/css/public/compatibilityResults.css">
 </head>
-<body>
-
-<div class="bg-canvas">
-  <div class="bg-blob blob-1"></div>
-  <div class="bg-blob blob-2"></div>
-</div>
-
-<nav class="topnav">
-  <a href="/pages/public/home.html" class="nav-back">
-    <i class="bi bi-arrow-left"></i> Back to Homepage
-  </a>
-</nav>
-
-<main class="results-shell" id="resultsShell">
-  <div class="loading-state">
-    <div class="loading-icon"></div>
-    <p style="color:var(--stone);font-size:0.9rem">Loading your matches…</p>
-  </div>
-</main>
-
-<!-- ALL LOGIC INLINE — no external script needed -->
-<script>
-/* ══════════════════════════════════════════════════════
-   CONFIG
-══════════════════════════════════════════════════════ */
-const DISPLAY_TRAITS = [
-  { key:"energyLevel",          label:"Energy Level"     },
-  { key:"friendlinessToHumans", label:"Friendliness"     },
-  { key:"affectionLevel",       label:"Affection"        },
-  { key:"goodWithKids",         label:"Good With Kids"   },
-  { key:"goodWithOtherPets",    label:"Good With Pets"   },
-  { key:"trainingDifficulty",   label:"Trainability"     },
-];
-const TRAIT_COLORS  = ["#1a7a40","#0d7377","#2558a8","#f0a500","#9b2d30","#6f191c"];
-const RANK_EMOJI    = ["🥇","🥈","🥉","4️⃣","5️⃣"];
-const RANK_LABELS   = ["Best Match","2nd Match","3rd Match","4th Match","5th Match"];
-const STRIPE_CLASS  = ["s-1","s-2","s-3","",""];
-
-/* ── Helpers ───────────────────────────────────────── */
-function ringColor(pct) {
-  if (pct >= 80) return "#1a7a40";
-  if (pct >= 65) return "#0d7377";
-  if (pct >= 50) return "#f0a500";
-  return "#9b2d30";
-}
-
-function matchLabel(pct) {
-  if (pct >= 80) return { text:"Excellent Match", cls:"t-great" };
-  if (pct >= 65) return { text:"Great Match",     cls:"t-good"  };
-  if (pct >= 50) return { text:"Good Match",      cls:"t-ok"    };
-  return               { text:"Partial Match",    cls:"t-diff"  };
-}
-
-function animalLabel(pet = {}) {
-  return (
-    pet.displayLabel ||
-    pet.shelterLabel ||
-    pet.identifyingDescription ||
-    pet.name ||
-    `Animal ${pet.id || pet.petId || ""}`.trim()
-  );
-}
-
-function traitSymbol(petVal, userVal) {
-  if (!userVal) return { cls:"t-ok", sym:"–" };
-  const d = Math.abs(petVal - userVal);
-  if (d === 0) return { cls:"t-great", sym:"✓✓" };
-  if (d <= 1)  return { cls:"t-good",  sym:"✓"  };
-  if (d <= 2)  return { cls:"t-ok",    sym:"~"  };
-  return             { cls:"t-diff",   sym:"≠"  };
-}
-
-function buildSummary(pet) {
-  const traits = [];
-  if (Number(pet.affectionLevel) >= 4) traits.push("affectionate");
-  if (Number(pet.playfulness) >= 4) traits.push("playful");
-  if (Number(pet.friendlinessToHumans) >= 4) traits.push("great with people");
-  if (Number(pet.goodWithKids) >= 4) traits.push("wonderful around children");
-  if (Number(pet.goodWithOtherPets) >= 4) traits.push("comfortable with other pets");
-  if (Number(pet.groomingNeeds) > 0 && Number(pet.groomingNeeds) <= 2) traits.push("low-maintenance to groom");
-  if (Number(pet.noiseLevel) > 0 && Number(pet.noiseLevel) <= 2) traits.push("a quiet companion");
-  if (Number(pet.adaptability) >= 4) traits.push("adaptable to new routines");
-
-  const name = `<strong>${animalLabel(pet)}</strong>`;
-  const pct = Math.round(Number(pet.matchPercent || 0));
-  const species = (pet.species || "pet").toLowerCase();
-
-  if (!traits.length) {
-    return `${name} is a strong compatibility match with a ${pct}% score. This ${species}'s behavioral profile closely aligns with your lifestyle and care preferences.`;
-  }
-
-  const traitStr = traits.length > 1
-    ? traits.slice(0, -1).join(", ") + ` and ${traits[traits.length - 1]}`
-    : traits[0];
-
-  return `${name} is a ${pct}% match — this ${species} is ${traitStr}. The overall behavioral profile closely fits your daily routine and home environment.`;
-}
-
-/* ── Card builder ──────────────────────────────────── */
-function buildCard(pet, rank, prefs) {
-  const pct = Math.round(Number(pet.matchPercent || 0));
-  const fallbackImage = String(pet.species || "").toLowerCase() === "cat"
-    ? "/src/assets/images/cat.jpg"
-    : "/src/assets/images/dog.jpg";
-  const petImage = pet.photoURL || pet.photoUrl || fallbackImage;
-  const displayLabel = animalLabel(pet);
-
-  const bestMatchBadge = rank === 0
-    ? `<div class="best-match-badge"><i class="bi bi-stars"></i> Recommended for You</div>`
-    : "";
-
-  const circ = 2 * Math.PI * 26;
-  const offset = circ - (pct / 100) * circ;
-  const color = ringColor(pct);
-  const ml = matchLabel(pct);
-  const petId = pet.id || pet.petId || "";
-  const delay = rank * 80;
-
-  const traitBars = DISPLAY_TRAITS.map((t, i) => {
-    const val  = Number(pet[t.key] || 0);
-    const pctW = val * 20;
-    const uv   = prefs ? Number(prefs[t.key] || 0) : 0;
-    const ts   = traitSymbol(val, uv);
-    return `
-      <div class="trait-row">
-        <span class="trait-name">${t.label}</span>
-        <div class="trait-track">
-          <div class="trait-fill" style="width:${pctW}%;background:${TRAIT_COLORS[i]}"></div>
-        </div>
-        <span class="trait-match ${ts.cls}">${ts.sym}</span>
-      </div>`;
-  }).join("");
-
-  const chips = [
-    pet.species ? `<span class="info-chip chip-species">${pet.species}</span>` : "",
-    pet.sex     ? `<span class="info-chip chip-sex">${pet.sex==="Male"?"♂":"♀"} ${pet.sex}</span>` : "",
-    pet.size    ? `<span class="info-chip chip-size">📐 ${pet.size}</span>` : "",
-    pet.allergyFriendly === true  ? `<span class="info-chip chip-allergy">✓ Allergy-Friendly</span>` : "",
-    pet.specialNeeds    === true  ? `<span class="info-chip chip-special" style="background:var(--amber-soft);color:#7a4000">⭐ Special Needs</span>` : "",
-  ].filter(Boolean).join("");
-
-  return `
-  <article class="result-card ${rank===0?"rank-1":""}" style="animation-delay:${delay}ms">
-    
-    <div class="result-card-inner">
-      <div class="rank-stripe ${STRIPE_CLASS[rank]||""}"></div>
-      <div class="result-body">
-
-        <!-- Top row: name + score ring -->
-        <div class="card-top">
-          <div>
-            <div class="card-rank">
-              <span class="rank-num">${RANK_LABELS[rank]}</span>
-              <span class="rank-emoji">${RANK_EMOJI[rank]||""}</span>
-            </div>
-
-            <div class="pet-media">
-              <img src="${petImage}" alt="${displayLabel}" class="pet-image" onerror="this.onerror=null;this.src='${fallbackImage}'">
-            </div>
-
-            <div class="pet-name">${displayLabel}</div>
-            <div style="color:var(--stone-2);font-size:0.76rem;margin-top:4px">Shelter description</div>
-            ${bestMatchBadge}
-
-            <div class="pet-sub">
-              <span>${pet.species || "—"}</span>
-              ${pet.breed ? `<div class="pet-sub-dot"></div><span>${pet.breed}</span>` : ""}
-              ${pet.sex   ? `<div class="pet-sub-dot"></div><span>${pet.sex}</span>` : ""}
-              ${pet.size  ? `<div class="pet-sub-dot"></div><span>${pet.size}</span>` : ""}
-            </div>
-          </div>
-
-            <!-- Score ring -->
-            <div class="match-ring-wrap">
-              <div class="match-ring">
-                <svg viewBox="0 0 60 60">
-                  <circle class="ring-track" cx="30" cy="30" r="26"/>
-                  <circle class="ring-fill"
-                  cx="30" cy="30" r="26"
-                  stroke="${color}"
-                  stroke-dasharray="${circ}"
-                  stroke-dashoffset="${circ}"
-                  data-offset="${offset}"/>
-                </svg>
-                <div class="ring-label">
-                  <span class="ring-pct">${pct}%</span>
-                  <span class="ring-sub">match</span>
-                </div>
-              </div>
-              <span class="match-strength ${ml.cls}">${ml.text}</span>
-            </div>
-          </div>
-
-          <!-- Info chips -->
-          <div class="info-chips">${chips || '<span style="font-size:0.78rem;color:var(--stone-2)">No additional info</span>'}</div>
-
-          <!-- Trait bars -->
-          <div class="traits-section">
-            <div class="traits-title">
-              Trait comparison
-              <span style="font-weight:400;text-transform:none;font-style:italic;letter-spacing:0">
-                (pet profile vs. your answers)
-              </span>
-            </div>
-            <div class="trait-bars">${traitBars}</div>
-            <div class="trait-legend">
-              <span><b style="color:var(--green)">✓✓</b> Perfect match</span>
-              <span><b style="color:var(--teal)">✓</b> Very close</span>
-              <span><b style="color:var(--amber)">~</b> Near match</span>
-              <span><b style="color:var(--clay)">≠</b> Different</span>
-              <span style="color:var(--stone-2)">– No answer given</span>
-            </div>
-          </div>
-
-          <!-- Summary -->
-          <div class="pet-summary">${buildSummary(pet)}</div>
-
-          <!-- Actions -->
-          <div class="card-actions">
-            <a href="/pages/public/find-furbabies.html"
-               class="btn-profile view-btn"
-               data-pet-id="${petId}">
-              <i class="bi bi-eye"></i> View Profile
-            </a>
-            <a href="/pages/public/find-furbabies.html"
-               class="btn-adopt adopt-btn"
-               data-pet-id="${petId}">
-              Apply to Adopt
-            </a>
-          </div>
-
-        </div>
-      </div>
-    </article>`;
-}
-
-/* ══════════════════════════════════════════════════════
-   MAIN RENDER
-══════════════════════════════════════════════════════ */
-function getPetImage(pet = {}) {
-  const fallbackImage = String(pet.species || "").toLowerCase() === "cat"
-    ? "/src/assets/images/cat.jpg"
-    : "/src/assets/images/dog.jpg";
-  return {
-    src: pet.photoURL || pet.photoUrl || fallbackImage,
-    fallback: fallbackImage,
-  };
-}
-
-function petMetaLine(pet = {}) {
-  return [
-    pet.age || pet.ageEstimate || "",
-    pet.breed || "",
-    pet.sex || "",
-  ].filter(Boolean).join("  •  ");
-}
-
-function petFooterLine(pet = {}, petId = "") {
-  return [
-    pet.location || pet.city || "",
-    pet.shelterName || pet.shelter || "",
-  ].filter(Boolean).join("  •  ");
-}
-
-function matchTags(pet = {}, rank = 0) {
-  return [
-    rank === 0 ? `<span class="result-tag recommended"><i class="bi bi-stars"></i> Recommended for You</span>` : "",
-    Number(pet.playfulness || 0) >= 4 ? `<span class="result-tag"><i class="bi bi-paw"></i> Playful</span>` : `<span class="result-tag">Calm</span>`,
-    Number(pet.friendlinessToHumans || 0) >= 4 ? `<span class="result-tag"><i class="bi bi-heart-fill"></i> Friendly</span>` : "",
-    Number(pet.goodWithKids || 0) >= 4 ? `<span class="result-tag"><i class="bi bi-people-fill"></i> Good with People</span>` : "",
-  ].filter(Boolean).join("");
-}
-
-function scoreRing(pet = {}) {
-  const pct = Math.round(Number(pet.matchPercent || 0));
-  const circ = 2 * Math.PI * 26;
-  const offset = circ - (pct / 100) * circ;
-  const color = ringColor(pct);
-  const ml = matchLabel(pct);
-
-  return `
-    <div class="match-ring-wrap">
-      <div class="match-ring">
-        <svg viewBox="0 0 60 60">
-          <circle class="ring-track" cx="30" cy="30" r="26"/>
-          <circle class="ring-fill" cx="30" cy="30" r="26" stroke="${color}" stroke-dasharray="${circ}" stroke-dashoffset="${circ}" data-offset="${offset}"/>
-        </svg>
-        <div class="ring-label">
-          <span class="ring-pct">${pct}%</span>
-          <span class="ring-sub">match</span>
-        </div>
-      </div>
-      <span class="match-strength ${ml.cls}">${ml.text}</span>
-    </div>`;
-}
-
-function buildFeaturedCard(pet) {
-  const petId = pet.id || pet.petId || "";
-  const label = animalLabel(pet);
-  const image = getPetImage(pet);
-  const summary = buildSummary(pet).replace(/<[^>]*>/g, "");
-
-  return `
-    <article class="featured-match-card result-card rank-1">
-      <div class="featured-image-wrap">
-        <span class="featured-ribbon"><i class="bi bi-star-fill"></i> Top Match</span>
-        <img src="${image.src}" alt="${label}" class="featured-image" onerror="this.onerror=null;this.src='${image.fallback}'">
-      </div>
-      <div class="featured-content">
-        <h2>${label}</h2>
-        <div class="featured-meta">${petMetaLine(pet) || `${pet.species || "Pet"}  •  Shelter animal`}</div>
-        <div class="featured-specs">
-          ${pet.species ? `<span><i class="bi bi-paw"></i> ${pet.species}</span>` : ""}
-          ${pet.breed ? `<span><i class="bi bi-stars"></i> ${pet.breed}</span>` : ""}
-          ${pet.sex ? `<span><i class="bi bi-gender-ambiguous"></i> ${pet.sex}</span>` : ""}
-        </div>
-        <p>${summary}</p>
-        <div class="result-tags">${matchTags(pet, 0)}</div>
-        ${petFooterLine(pet, petId) ? `<div class="featured-footer">${petFooterLine(pet, petId)}</div>` : ""}
-      </div>
-      <aside class="featured-actions">
-        ${scoreRing(pet)}
-        <a href="/pages/public/find-furbabies.html" class="btn-profile view-btn" data-pet-id="${petId}">View Profile</a>
-        <a href="/pages/public/find-furbabies.html" class="btn-adopt adopt-btn" data-pet-id="${petId}">Apply to Adopt</a>
-      </aside>
-    </article>`;
-}
-
-function buildCompactCard(pet, rank) {
-  const petId = pet.id || pet.petId || "";
-  const label = animalLabel(pet);
-  const image = getPetImage(pet);
-  const pct = Math.round(Number(pet.matchPercent || 0));
-
-  return `
-    <article class="compact-match-card result-card">
-      <div class="compact-rank">${String(rank + 1).padStart(2, "0")}</div>
-      <img src="${image.src}" alt="${label}" class="compact-image" onerror="this.onerror=null;this.src='${image.fallback}'">
-      <div class="compact-body">
-        <h3>${label}</h3>
-        <div class="compact-meta">${petMetaLine(pet) || `${pet.species || "Pet"}`}</div>
-        <div class="compact-tags">${matchTags(pet, rank).replaceAll("Recommended for You", "Good Match")}</div>
-      </div>
-      <div class="compact-score">
-        <strong>${pct}%</strong>
-        <span>match</span>
-      </div>
-      <a href="/pages/public/find-furbabies.html" class="compact-profile view-btn" data-pet-id="${petId}">View Profile</a>
-    </article>`;
-}
-
-function render() {
-  const shell = document.getElementById("resultsShell");
-  if (!shell) return;
-
-  let results  = [];
-  let quizData = {};
-
-  try {
-    results = JSON.parse(localStorage.getItem("animua_match_results")) || [];
-    if (!results.length) {
-      const saved = JSON.parse(localStorage.getItem("animua_saved_result")) || null;
-      results = (saved?.matches || []).map(item => ({ id: item.animalId, name: item.animalName, matchScore: item.compatibilityScore, matchPercent: item.compatibilityPercent }));
-      if (saved) quizData = { preferences: saved.preferences || {}, filters: saved.filters || {} };
-    }
-  } catch(e) { console.error(e); }
-  try { quizData = Object.keys(quizData).length ? quizData : (JSON.parse(localStorage.getItem("animua_quiz_data")) || {}); } catch(e) { console.error(e); }
-
-  const prefs = quizData.preferences || null;
-
-  if (!results.length) {
-    shell.innerHTML = `
-      <div class="no-results">
-        <div class="no-results-icon">🔍</div>
-        <h2>No matches found</h2>
-        <p>We couldn't find any results. This usually means the quiz wasn't completed, or no pets matched your filters. Try adjusting your preferences and retaking the quiz.</p>
-        <a href="/pages/public/petCompatibility.html"
-           style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;
-                  background:var(--clay);color:#fff;border-radius:12px;
-                  font:700 0.9rem var(--sans);text-decoration:none">
-          <i class="bi bi-arrow-clockwise"></i> Take the Quiz
+<body class="home-page compatibility-results-page">
+  <header class="header scrolled" id="home">
+    <div class="main-nav-wrap">
+      <div class="container nav-shell">
+        <a href="home.html" class="logo">
+          <img src="../../src/assets/images/animua-logo-transparent.png" alt="ANIMUA" class="navbar-logo-img">
+          <span class="navbar-brand-copy">
+            <span class="navbar-brand-name">ANIMUA</span>
+            <span class="navbar-brand-tagline">Connect. Learn. Adopt.</span>
+          </span>
         </a>
-      </div>`;
-    return;
-  }
 
-  const top5 = results.slice(0, 5);
+        <nav class="navbar" id="navbar">
+          <a href="home.html">Home</a>
+          <a href="find-furbabies.html">Find Furbabies</a>
+          <a href="announcements.html">Announcements</a>
+          <a href="surrender.html">Surrender</a>
+          <a href="contact.html">Contact Us</a>
+        </nav>
 
-  shell.innerHTML = `
-    <!-- Hero -->
-    <section class="results-hero">
-      <div class="hero-text">
-        <div class="hero-eyebrow">Compatibility Results</div>
-        <h1 class="hero-title">Your <em>matches</em><br><span>are here.</span></h1>
-        <p class="hero-sub">Based on your quiz answers, these rescue animals best match your lifestyle, home, and care capacity — ranked by compatibility score.</p>
-      </div>
-      <div class="hero-badges">
-        <div class="hero-badge">
-          <div class="hb-num">${top5.length}</div>
-          <div class="hb-lbl">Matches Found</div>
+        <div class="nav-actions">
+          <div class="user-actions-wrap">
+            <div class="notification-wrap">
+              <button class="notification-btn" id="notificationBtn" aria-label="Notifications">
+                <i class="fa-solid fa-bell"></i>
+                <span class="notification-dot"></span>
+              </button>
+
+              <div class="notification-popup" id="notificationPopup">
+                <div class="notification-popup-head">
+                  <h4>Notifications</h4>
+                </div>
+                <ul class="notification-list">
+                  <li>New animals were recently added for adoption.</li>
+                  <li>Please complete forms carefully before submission.</li>
+                </ul>
+              </div>
+            </div>
+
+            <a href="home.html#login" id="loginNavBtn" class="login-btn" aria-label="Login">
+              <i class="fa-solid fa-user"></i>
+              <span>Login</span>
+            </a>
+
+            <div id="userLoggedInBox" class="hidden user-pill user-menu">
+              <button type="button" class="user-menu-btn" id="userMenuBtn">
+                <span class="user-avatar-mini">
+                  <i class="fa-regular fa-user"></i>
+                </span>
+                <span id="loggedUserName" class="user-pill-name"></span>
+                <span class="user-menu-chevron">
+                  <i class="fa-solid fa-chevron-down"></i>
+                </span>
+              </button>
+
+              <div class="user-dropdown hidden" id="userDropdown">
+                <div class="user-dropdown-head">
+                  <div class="user-dropdown-avatar">
+                    <span id="dropdownUserInitial">A</span>
+                  </div>
+                  <div>
+                    <strong id="dropdownUserName">Account</strong>
+                  </div>
+                </div>
+
+                <button type="button" class="user-dropdown-item" id="viewProfileBtn">
+                  <i class="fa-regular fa-user"></i>
+                  <span>View Profile</span>
+                </button>
+
+                <button type="button" class="user-dropdown-item" id="myApplicationsBtn">
+                  <i class="fa-regular fa-file-lines"></i>
+                  <span>My Applications</span>
+                </button>
+
+                <button type="button" class="user-dropdown-item" id="compatibilityResultsBtn">
+                  <i class="fa-solid fa-chart-simple"></i>
+                  <span>Compatibility Result</span>
+                </button>
+
+                <div class="user-dropdown-divider"></div>
+
+                <button type="button" id="logoutBtn" class="user-dropdown-item logout-option">
+                  <i class="fa-solid fa-right-from-bracket"></i>
+                  <span>Log out</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <button class="menu-toggle" id="menuToggle" aria-label="Toggle Navigation">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
         </div>
-        <div class="hero-badge">
-          <div class="hb-num">${Math.round(Number(top5[0]?.matchPercent || 0))}%</div>
-          <div class="hb-lbl">Top Score</div>
+      </div>
+    </div>
+  </header>
+
+  <main class="compatibility-results-main">
+    <section class="compatibility-results-hero container" aria-labelledby="compatibilityResultsTitle">
+      <div class="compatibility-hero-copy">
+        <h1 id="compatibilityResultsTitle">Compatibility Results</h1>
+        <p>Review your latest quiz result and your saved recommendations.</p>
+      </div>
+
+      <div class="compatibility-hero-art" aria-hidden="true">
+        <i class="fa-solid fa-paw compatibility-art-paw"></i>
+        <i class="fa-solid fa-check compatibility-art-check"></i>
+        <i class="fa-solid fa-sparkles compatibility-art-sparkle"></i>
+      </div>
+
+      <div class="compatibility-hero-actions">
+        <div class="compatibility-hero-dates" aria-label="Compatibility quiz dates">
+          <article>
+            <span><i class="fa-regular fa-calendar-days" aria-hidden="true"></i></span>
+            <div><small>Quiz completed</small><strong id="compatibilityCompletedDate">Loading...</strong></div>
+          </article>
+          <article>
+            <span><i class="fa-regular fa-calendar" aria-hidden="true"></i></span>
+            <div><small>Next allowed retake</small><strong id="compatibilityRetakeDate">Loading...</strong></div>
+          </article>
+        </div>
+        <a href="petCompatibility.html" class="compatibility-retake-btn" data-retake-quiz>
+          <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
+          <span>Retake Quiz</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="container compatibility-account" id="compatibilityAccount" aria-live="polite">
+      <div class="compatibility-account-head">
+        <div class="compatibility-account-title">
+          <span class="compatibility-account-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+          <div>
+            <span>Saved recommendation</span>
+            <h2>My Compatibility Result</h2>
+            <p>Your latest lifestyle match and quiz history.</p>
+          </div>
+        </div>
+        <button type="button" data-review-answers><i class="fa-regular fa-pen-to-square"></i>Review Quiz Answers</button>
+      </div>
+      <div id="compatibilityAccountBody" class="compatibility-account-body">
+        <div class="compatibility-loading">
+          <i class="fa-solid fa-circle-notch fa-spin"></i>
+          Loading your compatibility result...
         </div>
       </div>
     </section>
 
-    <section class="featured-match-section">
-      ${buildFeaturedCard(top5[0])}
-    </section>
-
-    <section class="more-matches-section">
-      <h2>More Great Matches for You</h2>
-      <div class="compact-results-grid">
-        ${top5.slice(1).map((pet, i) => buildCompactCard(pet, i + 1)).join("")}
+    <section class="container compatibility-info-card">
+      <span class="compatibility-info-icon"><i class="fa-solid fa-info"></i></span>
+      <div>
+        <h2>About your results</h2>
+        <p>Your compatibility scores are based on your quiz answers and our matching algorithm. These results are a guide to help you find the best match, but shelter approval is still required before any adoption can proceed.</p>
       </div>
     </section>
 
-    <!-- Footer -->
-    <div class="results-footer">
-      <p>These results are suggestions based on your answers. Final adoption approval depends on shelter review and pet availability.</p>
-    </div>`;
+    <section class="container compatibility-how-card">
+      <h2>How matching works</h2>
+      <div class="compatibility-how-grid">
+        <article>
+          <span><i class="fa-solid fa-shoe-prints"></i></span>
+          <div><h3>Lifestyle & activity</h3><p>We compare your daily routine and activity level with each animal's needs.</p></div>
+        </article>
+        <article>
+          <span><i class="fa-solid fa-house"></i></span>
+          <div><h3>Home environment</h3><p>Your home setup and space are matched with what the animal needs to thrive.</p></div>
+        </article>
+        <article>
+          <span><i class="fa-solid fa-heart"></i></span>
+          <div><h3>Care preferences</h3><p>From training style to grooming and time commitment, we factor in your preferences.</p></div>
+        </article>
+        <article>
+          <span><i class="fa-solid fa-paw"></i></span>
+          <div><h3>Recorded animal traits</h3><p>Age, energy, temperament, and habits are considered to find the best match.</p></div>
+        </article>
+      </div>
+    </section>
+  </main>
+  <footer class="footer" id="contact">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <a href="home.html" class="logo footer-logo">
+          <span class="footer-brand-copy">
+            <span class="footer-brand-name">ANIMUA</span>
+            <span class="footer-brand-tagline">Angeles City Animal Welfare Portal</span>
+          </span>
+        </a>
+        <p>
+          Connecting people with shelter animals through responsible adoption,
+          compatibility matching, and shelter-reviewed services.
+        </p>
+        <div class="footer-social" aria-label="ANIMUA social links">
+          <a href="https://www.facebook.com/ACVeterinaryOffice" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+            <i class="fa-brands fa-facebook-f" aria-hidden="true"></i>
+          </a>
+          <a href="https://youtu.be/k770yCuEL0I?si=ybv8NXjhfzr4UbzI" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+            <i class="fa-brands fa-youtube" aria-hidden="true"></i>
+          </a>
+          <a href="mailto:acveterinary@angelescity.gov.ph" aria-label="Email Angeles City Veterinary Office">
+            <i class="fa-regular fa-envelope" aria-hidden="true"></i>
+          </a>
+        </div>
+      </div>
 
+      <div class="footer-links">
+        <h4>Explore</h4>
+        <a href="home.html">Home</a>
+        <a href="find-furbabies.html">Find Furbabies</a>
+        <a href="home.html?quizIntro=open">Compatibility Quiz</a>
+        <a href="home.html#home-highlights">Upcoming Events</a>
+      </div>
 
-/* Attach navigation handlers */
-shell.querySelectorAll(".adopt-btn").forEach(btn => {
-  btn.addEventListener("click", (e) => {
-    const petId = btn.dataset.petId;
+      <div class="footer-links footer-support">
+        <h4>Services</h4>
+        <a href="home.html#home-highlights">Adoption Guide</a>
+        <a href="surrender.html">Surrender Request</a>
+        <a href="contact.html">Contact the Shelter</a>
+        <a href="home.html?quizIntro=open">Match Quiz</a>
+      </div>
 
-    if (petId) {
-      localStorage.setItem("animua_selected_pet_id", petId);
-      localStorage.setItem("animua_selected_pet_action", "adopt");
-    }
+      <div class="footer-links footer-about">
+        <h4>About</h4>
+        <a href="home.html#about-animua">About ANIMUA</a>
+        <a href="home.html#how-animua-works">How It Works</a>
+        <a href="home.html#terms-privacy-notice">Privacy Policy</a>
+        <a href="home.html#terms-privacy-notice">Terms of Service</a>
+      </div>
 
-    const token = localStorage.getItem("animua_token");
-    if (!token) {
-      e.preventDefault();
-      localStorage.setItem("animua_open_auth_modal", "true");
-      window.location.href = "/pages/public/find-furbabies.html";
-      return;
-    }
-  });
-});
+      <div class="footer-links footer-contact">
+        <h4>Contact</h4>
+        <p><i class="fa-regular fa-circle-user" aria-hidden="true"></i> Angeles City Veterinary Office</p>
+        <p><i class="fa-solid fa-location-dot" aria-hidden="true"></i> City Hall Building, Pulung Maragul, Angeles City</p>
+        <a href="tel:0453220485"><i class="fa-solid fa-phone" aria-hidden="true"></i> (045) 322-0485</a>
+        <a href="mailto:acveterinary@angelescity.gov.ph"><i class="fa-regular fa-envelope" aria-hidden="true"></i> acveterinary@angelescity.gov.ph</a>
+      </div>
+    </div>
 
-shell.querySelectorAll(".view-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const petId = btn.dataset.petId;
+    <div class="footer-bottom">
+      <div class="container footer-bottom-inner">
+        <p>&copy; 2026 ANIMUA. All rights reserved.</p>
+        <p>Developed for the Angeles City Veterinary Office.</p>
+        <p>Adoption applications and surrender requests are subject to shelter evaluation and approval.</p>
+        <i class="fa-solid fa-paw footer-paw" aria-hidden="true"></i>
+      </div>
+    </div>
+  </footer>
 
-    if (petId) {
-      localStorage.setItem("animua_selected_pet_id", petId);
-      localStorage.setItem("animua_selected_pet_action", "view");
-    }
-  });
-});
+<section class="profile-modal-overlay hidden" id="profileModal" aria-hidden="true" aria-labelledby="profileModalTitle">
+    <button type="button" class="profile-modal-backdrop" data-profile-close aria-label="Close profile"></button>
+    <article class="profile-modal-card" role="dialog" aria-modal="true" tabindex="-1">
+      <button type="button" class="profile-modal-close" data-profile-close aria-label="Close profile">
+        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+      </button>
 
-  setTimeout(() => {
-  document.querySelectorAll(".ring-fill").forEach((el) => {
-    const offset = el.getAttribute("data-offset");
-    el.style.strokeDashoffset = offset;
-  });
-}, 200);
-}
+      <div class="profile-modal-shell">
+        <div class="profile-modal-title">
+          <span class="profile-title-icon" aria-hidden="true">
+            <i class="fa-regular fa-circle-user"></i>
+          </span>
+          <h2 id="profileModalTitle">My Profile</h2>
+        </div>
 
-document.addEventListener("DOMContentLoaded", render);
-</script>
+        <section class="profile-summary-card">
+          <div class="profile-summary-main">
+            <div class="profile-avatar-wrap">
+              <div class="profile-summary-avatar" id="profileAvatarPreview">A</div>
+              <button type="button" class="profile-avatar-camera" id="profileAvatarPhotoBtn" aria-label="Change profile photo">
+                <i class="fa-solid fa-camera" aria-hidden="true"></i>
+              </button>
+            </div>
+            <div>
+              <h3 id="profileSummaryName">Account</h3>
+              <small>Member since <span id="profileMemberSince">2026</span> <b aria-hidden="true"></b></small>
+            </div>
+          </div>
+
+          <div class="profile-summary-actions">
+            <input type="file" id="profilePhotoInput" accept="image/png,image/jpeg,image/webp" hidden>
+            <button type="button" class="profile-outline-btn" id="profileChangePhotoBtn">
+              <i class="fa-solid fa-camera" aria-hidden="true"></i>
+              <span>Change Photo</span>
+            </button>
+          </div>
+        </section>
+
+        <form class="profile-form" id="profileForm">
+          <section class="profile-info-card">
+            <div class="profile-section-head">
+              <h3><i class="fa-solid fa-circle-user" aria-hidden="true"></i> Personal Information</h3>
+              <button type="button" class="profile-outline-btn profile-edit-inline" id="profileEditBtn">
+                <i class="fa-solid fa-pen" aria-hidden="true"></i>
+                <span>Edit Profile</span>
+              </button>
+            </div>
+
+            <label class="profile-info-row">
+              <i class="fa-regular fa-user" aria-hidden="true"></i>
+              <span><strong>Full Name</strong><input type="text" id="profileFullName" autocomplete="name" readonly></span>
+            </label>
+
+            <label class="profile-info-row">
+              <i class="fa-regular fa-envelope" aria-hidden="true"></i>
+              <span><strong>Email Address</strong><input type="email" id="profileEmail" autocomplete="email" readonly></span>
+            </label>
+
+            <label class="profile-info-row">
+              <i class="fa-solid fa-phone" aria-hidden="true"></i>
+              <span><strong>Mobile Number</strong><input type="tel" id="profilePhone" autocomplete="tel" readonly placeholder="Not added yet"></span>
+            </label>
+
+          </section>
+
+          <section class="profile-info-card profile-settings-card">
+            <h3><i class="fa-solid fa-gear" aria-hidden="true"></i> Account Settings</h3>
+
+            <button type="button" class="profile-settings-row" id="profilePasswordBtn">
+              <i class="fa-solid fa-lock" aria-hidden="true"></i>
+              <span><strong>Password</strong><small>Update your account password</small></span>
+              <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+            </button>
+
+            <button type="button" class="profile-settings-row" id="profileNotificationsBtn">
+              <i class="fa-regular fa-bell" aria-hidden="true"></i>
+              <span><strong>Notifications</strong><small id="profileNotificationSummary">Manage email and push notifications</small></span>
+              <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+            </button>
+
+          </section>
+
+          <p class="profile-status-message" id="profileStatusMessage" aria-live="polite"></p>
+
+          <div class="profile-modal-actions">
+            <button type="submit" class="profile-save-btn" id="profileSaveBtn">
+              <i class="fa-regular fa-floppy-disk" aria-hidden="true"></i>
+              <span>Save Changes</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </article>
+  </section>
+
+  <script type="module" src="../../src/public/js/public-ui.js"></script>
+  <script type="module" src="../../src/public/js/compatibility-results-account.js"></script>
 </body>
 </html>

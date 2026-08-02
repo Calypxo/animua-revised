@@ -2,6 +2,7 @@ const { db } = require("../config/firebase");
 
 const COLLECTION_NAME = "surrenderRequests";
 const SHELTER_LOCATION = "Angeles City Veterinary Office, Brgy. Pampang, Angeles City";
+const SCHEDULE_WINDOW_DAYS = 14;
 
 const PYTHON_SENTIMENT_API_URL =
   process.env.PYTHON_SENTIMENT_API_URL ||
@@ -26,6 +27,43 @@ function generateRequestId() {
   const year = new Date().getFullYear();
   const timestamp = Date.now().toString().slice(-6);
   return `SR-${year}-${timestamp}`;
+}
+
+function parseScheduleDate(value) {
+  if (!value) return null;
+  if (value._seconds || value.seconds) {
+    const seconds = Number(value._seconds || value.seconds);
+    const date = new Date(seconds * 1000);
+    date.setHours(0, 0, 0, 0);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  const text = String(value).trim();
+  if (!text) return null;
+  const date = /^\d{4}-\d{2}-\d{2}$/.test(text)
+    ? new Date(`${text}T00:00:00`)
+    : new Date(text);
+  date.setHours(0, 0, 0, 0);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function addScheduleWindowDays(date) {
+  const maxDate = new Date(date);
+  maxDate.setDate(maxDate.getDate() + SCHEDULE_WINDOW_DAYS);
+  return maxDate;
+}
+
+function isScheduleWithinDecisionWindow(dateValue, decisionValue) {
+  const scheduleDate = parseScheduleDate(dateValue);
+  const decisionDate = parseScheduleDate(decisionValue);
+  if (!scheduleDate || !decisionDate) return false;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const minDate = decisionDate > today ? decisionDate : today;
+  const maxDate = addScheduleWindowDays(decisionDate);
+
+  return scheduleDate >= minDate && scheduleDate <= maxDate;
 }
 
 async function analyzeSurrenderReason(reason) {
@@ -362,18 +400,33 @@ async function scheduleMySurrenderAppointment(req, res) {
       });
     }
 
+    const acceptedDate = data.acceptedDate || data.acceptedAt || data.approvedDate || data.approvedAt || data.reviewedAt || data.updatedAt;
+    if (!isScheduleWithinDecisionWindow(date, acceptedDate)) {
+      return res.status(400).json({
+        message: "Surrender appointment date must be within 14 days from the request acceptance date.",
+      });
+    }
+
     const existingAppointment = data.surrenderAppointment || null;
     const alreadyScheduled = Boolean(existingAppointment?.date || existingAppointment?.time);
     const now = new Date().toISOString();
 
     if (alreadyScheduled) {
-      const surrenderRescheduleRequest = {
+      const rescheduleCount = Number(existingAppointment?.rescheduleCount || 0);
+      if (rescheduleCount >= 1 || existingAppointment?.rescheduledAt) {
+        return res.status(400).json({
+          message: "Surrender appointment can only be rescheduled once.",
+        });
+      }
+
+      const surrenderAppointment = {
         date,
         time,
         location: SHELTER_LOCATION,
-        status: "Pending",
-        requestedAt: now,
-        requestedBy: email,
+        scheduledAt: existingAppointment.scheduledAt || now,
+        rescheduledAt: now,
+        rescheduledBy: email,
+        rescheduleCount: rescheduleCount + 1,
         previousSchedule: existingAppointment || {
           date: data.dropoffDate || "",
           time: "",
@@ -382,17 +435,18 @@ async function scheduleMySurrenderAppointment(req, res) {
       };
 
       await requestRef.update({
-        surrenderRescheduleRequest,
+        surrenderAppointment,
+        surrenderRescheduleRequest: null,
+        dropoffDate: date,
         updatedAt: now,
       });
 
       const updatedDoc = await requestRef.get();
 
       return res.json({
-        message: "Surrender appointment reschedule request sent for admin approval.",
-        requiresApproval: true,
+        message: "Surrender appointment updated.",
         request: updatedDoc.data(),
-        surrenderRescheduleRequest,
+        surrenderAppointment,
       });
     }
 
@@ -444,6 +498,13 @@ async function approveSurrenderReschedule(req, res) {
     if (String(request.status || "").toLowerCase() !== "pending") {
       return res.status(400).json({
         message: "No pending surrender reschedule request found.",
+      });
+    }
+
+    const acceptedDate = data.acceptedDate || data.acceptedAt || data.approvedDate || data.approvedAt || data.reviewedAt || data.updatedAt;
+    if (!isScheduleWithinDecisionWindow(request.date, acceptedDate)) {
+      return res.status(400).json({
+        message: "Surrender appointment date must be within 14 days from the request acceptance date.",
       });
     }
 

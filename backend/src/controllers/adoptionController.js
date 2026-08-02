@@ -7,6 +7,44 @@ const {
 const ADOPTION_COL = "adoptions";
 const ANIMAL_COL = "animals";
 const SHELTER_LOCATION = "Angeles City Veterinary Office, Brgy. Pampang, Angeles City";
+const SCHEDULE_WINDOW_DAYS = 14;
+
+function parseScheduleDate(value) {
+  if (!value) return null;
+  if (value._seconds || value.seconds) {
+    const seconds = Number(value._seconds || value.seconds);
+    const date = new Date(seconds * 1000);
+    date.setHours(0, 0, 0, 0);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  const text = String(value).trim();
+  if (!text) return null;
+  const date = /^\d{4}-\d{2}-\d{2}$/.test(text)
+    ? new Date(`${text}T00:00:00`)
+    : new Date(text);
+  date.setHours(0, 0, 0, 0);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function addScheduleWindowDays(date) {
+  const maxDate = new Date(date);
+  maxDate.setDate(maxDate.getDate() + SCHEDULE_WINDOW_DAYS);
+  return maxDate;
+}
+
+function isScheduleWithinDecisionWindow(dateValue, decisionValue) {
+  const scheduleDate = parseScheduleDate(dateValue);
+  const decisionDate = parseScheduleDate(decisionValue);
+  if (!scheduleDate || !decisionDate) return false;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const minDate = decisionDate > today ? decisionDate : today;
+  const maxDate = addScheduleWindowDays(decisionDate);
+
+  return scheduleDate >= minDate && scheduleDate <= maxDate;
+}
 
 exports.createAdoption = async (req, res) => {
   try {
@@ -455,18 +493,33 @@ exports.scheduleMyAdoptionPickup = async (req, res) => {
       });
     }
 
+    const approvalDate = data.approvedDate || data.approvedAt || data.updatedAt;
+    if (!isScheduleWithinDecisionWindow(date, approvalDate)) {
+      return res.status(400).json({
+        message: "Pickup date must be within 14 days from the application approval date.",
+      });
+    }
+
     const existingSchedule = data.pickupSchedule || null;
     const alreadyScheduled = Boolean(existingSchedule?.date || existingSchedule?.time);
     const now = new Date().toISOString();
 
     if (alreadyScheduled) {
-      const pickupRescheduleRequest = {
+      const rescheduleCount = Number(existingSchedule?.rescheduleCount || 0);
+      if (rescheduleCount >= 1 || existingSchedule?.rescheduledAt) {
+        return res.status(400).json({
+          message: "Pickup can only be rescheduled once.",
+        });
+      }
+
+      const pickupSchedule = {
         date,
         time,
         location: SHELTER_LOCATION,
-        status: "Pending",
-        requestedAt: now,
-        requestedBy: email,
+        scheduledAt: existingSchedule.scheduledAt || now,
+        rescheduledAt: now,
+        rescheduledBy: email,
+        rescheduleCount: rescheduleCount + 1,
         previousSchedule: existingSchedule || {
           date: data.adoptionDate || "",
           time: "",
@@ -475,14 +528,17 @@ exports.scheduleMyAdoptionPickup = async (req, res) => {
       };
 
       await adoptionRef.update({
-        pickupRescheduleRequest,
+        pickupSchedule,
+        pickupRescheduleRequest: null,
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
 
+      const updatedDoc = await adoptionRef.get();
+
       return res.status(200).json({
-        message: "Pickup reschedule request sent for admin approval.",
-        requiresApproval: true,
-        pickupRescheduleRequest,
+        message: "Pickup schedule updated.",
+        request: updatedDoc.data(),
+        pickupSchedule,
       });
     }
 
@@ -498,8 +554,11 @@ exports.scheduleMyAdoptionPickup = async (req, res) => {
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
+    const updatedDoc = await adoptionRef.get();
+
     res.status(200).json({
       message: "Pickup schedule saved.",
+      request: updatedDoc.data(),
       pickupSchedule,
     });
   } catch (error) {
@@ -528,6 +587,13 @@ exports.approveAdoptionReschedule = async (req, res) => {
     if (String(request.status || "").toLowerCase() !== "pending") {
       return res.status(400).json({
         message: "No pending pickup reschedule request found.",
+      });
+    }
+
+    const approvalDate = data.approvedDate || data.approvedAt || data.updatedAt;
+    if (!isScheduleWithinDecisionWindow(request.date, approvalDate)) {
+      return res.status(400).json({
+        message: "Pickup date must be within 14 days from the application approval date.",
       });
     }
 

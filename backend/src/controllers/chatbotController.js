@@ -30,7 +30,7 @@ const OFFICE_INFO = {
 };
 
 function getClientKey(req) {
-  return req.ip || req.headers["x-forwarded-for"] || "unknown";
+  return req?.ip || req?.headers?.["x-forwarded-for"] || "unknown";
 }
 
 function isRateLimited(req) {
@@ -54,6 +54,20 @@ function cleanMessage(value = "") {
   return String(value).replace(/\s+/g, " ").trim().slice(0, MAX_MESSAGE_LENGTH);
 }
 
+function normalizeIntentText(value = "") {
+  return String(value)
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\b(adapt|adpt|adpat|adpot|adobt|adop)\b/g, "adopt")
+    .replace(/\b(adapts|adpots)\b/g, "adopts")
+    .replace(/\b(adapted|adpotted)\b/g, "adopted")
+    .replace(/\b(adapting|adpoting)\b/g, "adopting")
+    .replace(/\b(adaption|adaptation|adoptation|adapation)\b/g, "adoption")
+    .replace(/\b(aadapt|aadapt)\b/g, "aadopt")
+    .replace(/\b(iadapt|iadapt)\b/g, "iadopt");
+}
+
 function cleanHistory(history = []) {
   if (!Array.isArray(history)) return [];
 
@@ -71,7 +85,7 @@ function normalizeLanguage(value = "") {
 }
 
 function hasTaglishSignal(text = "") {
-  const lower = String(text).toLowerCase();
+  const lower = normalizeIntentText(text);
 
   return includesAnyWord(lower, [
     "magkano",
@@ -124,8 +138,8 @@ function localizedReply(language, english, tagalog) {
 function getVerifiedFallback(language = "english") {
   return localizedReply(
     language,
-    "I can only help with ANIMUA and Angeles City Veterinary Office services, such as adoption, Find Furbabies, the Match Quiz, surrender requests, events, account help, donations, stray concerns, and contact information. Please ask about one of those services.",
-    "Makakatulong lang ako sa ANIMUA at Angeles City Veterinary Office services, tulad ng adoption, Find Furbabies, Match Quiz, surrender requests, events, account help, donations, stray concerns, at contact information. Magtanong tungkol sa isa sa mga services na iyon."
+    "I get you, but I am mainly here for ANIMUA and Angeles City Veterinary Office services. I can help with adoption, Find Furbabies, the Match Quiz, surrender requests, events, account help, donations, stray concerns, and contact details.",
+    "Gets ko, pero pang-ANIMUA at Angeles City Veterinary Office services talaga ako. Matutulungan kita sa adoption, Find Furbabies, Match Quiz, surrender requests, events, account help, donations, stray concerns, at contact details."
   );
 }
 
@@ -403,13 +417,46 @@ function hasFeeIntent(text = "") {
     ((text.includes("adopt") || text.includes("adoption")) && includesAnyWord(text, ["free", "libre"]));
 }
 
-function hasAdoptionFeeIntent(text = "") {
-  const mentionsAdoption =
-    text.includes("adopt") ||
-    includesAnyWord(text, ["adoption", "iadopt", "ampon", "umampon"]) ||
-    includesAnyPhrase(text, ["pag adopt", "mag adopt", "pa adopt", "pag ampon"]);
+function hasAdoptionMentionIntent(text = "") {
+  return text.includes("adopt") ||
+    includesAnyWord(text, ["adoption", "adopter", "iadopt", "aadopt", "ampon", "umampon"]) ||
+    includesAnyPhrase(text, [
+      "pag adopt",
+      "mag adopt",
+      "mag aadopt",
+      "mag aadop",
+      "pa adopt",
+      "pag ampon"
+    ]);
+}
 
-  return hasFeeIntent(text) && (mentionsAdoption || hasAnimalMentionIntent(text));
+function hasAdoptionFeeIntent(text = "") {
+  return hasFeeIntent(text) && (hasAdoptionMentionIntent(text) || hasAnimalMentionIntent(text));
+}
+
+function hasAdoptionMotivationIntent(text = "") {
+  if (!hasAdoptionMentionIntent(text)) return false;
+
+  return includesAnyWord(text, [
+    "why",
+    "bakit",
+    "reason",
+    "reasons",
+    "benefit",
+    "benefits",
+    "advantage",
+    "advantages",
+    "should"
+  ]) ||
+    includesAnyPhrase(text, [
+      "why adopt",
+      "why should i adopt",
+      "why do i adopt",
+      "bakit ako mag adopt",
+      "bakit ako mag aadopt",
+      "bakit kailangan mag adopt",
+      "bakit maganda mag adopt"
+    ]);
 }
 
 function hasDonationIntent(text = "") {
@@ -852,13 +899,22 @@ function hasTermsPrivacyIntent(text = "") {
 }
 
 function hasPetCareIntent(text = "") {
-  return includesAnyWord(text, [
-    "food",
-    "water",
-    "health",
-    "shelter",
-    "exercise",
-    "hygiene",
+  const hasAnimalContext =
+    hasAnimalMentionIntent(text) ||
+    hasAdoptionMentionIntent(text) ||
+    includesAnyPhrase(text, [
+      "pet care",
+      "care for a pet",
+      "care for my pet",
+      "care for my dog",
+      "care for my cat",
+      "before adoption",
+      "after adoption",
+      "responsible pet",
+      "first week"
+    ]);
+
+  const hasVeterinaryCareTopic = includesAnyWord(text, [
     "vaccination",
     "vaccinations",
     "vaccine",
@@ -869,6 +925,16 @@ function hasPetCareIntent(text = "") {
     "neuter",
     "neutering",
     "quarantine",
+    "rabies"
+  ]);
+
+  const hasGeneralCareTopic = includesAnyWord(text, [
+    "food",
+    "water",
+    "health",
+    "shelter",
+    "exercise",
+    "hygiene",
     "temperament",
     "behavior",
     "behaviour",
@@ -876,7 +942,9 @@ function hasPetCareIntent(text = "") {
     "adjustment",
     "prepare",
     "home"
-  ]) || includesAnyPhrase(text, ["pet care", "first week", "before adoption", "responsible pet", "care for a pet"]);
+  ]);
+
+  return hasVeterinaryCareTopic || (hasAnimalContext && hasGeneralCareTopic);
 }
 
 function hasQuizIntent(text = "") {
@@ -1015,11 +1083,13 @@ function isLikelyGibberish(message = "") {
 }
 
 function isOnTopic(message = "") {
+  const normalizedMessage = normalizeIntentText(message);
   const topicWords = [
     "animua",
     "adopt",
     "adoption",
     "iadopt",
+    "aadopt",
     "adopter",
     "ampon",
     "umampon",
@@ -1107,23 +1177,24 @@ function isOnTopic(message = "") {
     "browse"
   ];
 
-  return includesAnyWord(message, topicWords) ||
-    hasGreetingIntent(message) ||
-    hasThanksIntent(message) ||
-    hasGoodbyeIntent(message) ||
-    hasStrayIntent(message) ||
-    hasSurrenderIntent(message) ||
-    hasDonationIntent(message) ||
-    hasAccountTroubleIntent(message) ||
-    hasStatusExplanationIntent(message) ||
-    hasPetCareIntent(message) ||
-    hasQuizIntent(message) ||
-    hasTermsPrivacyIntent(message) ||
-    hasAnimalProfileIntent(message) ||
-    hasNavigationIntent(message) ||
-    hasGeneralAnimuaIntent(message) ||
-    hasAssistantHelpIntent(message) ||
-    includesAnyPhrase(message, ["log in", "sign in", "find furbabies", "match quiz", "contact us", "may sakit", "live chat"]);
+  return includesAnyWord(normalizedMessage, topicWords) ||
+    hasGreetingIntent(normalizedMessage) ||
+    hasThanksIntent(normalizedMessage) ||
+    hasGoodbyeIntent(normalizedMessage) ||
+    hasStrayIntent(normalizedMessage) ||
+    hasSurrenderIntent(normalizedMessage) ||
+    hasDonationIntent(normalizedMessage) ||
+    hasAccountTroubleIntent(normalizedMessage) ||
+    hasStatusExplanationIntent(normalizedMessage) ||
+    hasPetCareIntent(normalizedMessage) ||
+    hasQuizIntent(normalizedMessage) ||
+    hasTermsPrivacyIntent(normalizedMessage) ||
+    hasAnimalProfileIntent(normalizedMessage) ||
+    hasNavigationIntent(normalizedMessage) ||
+    hasGeneralAnimuaIntent(normalizedMessage) ||
+    hasAssistantHelpIntent(normalizedMessage) ||
+    hasAdoptionMotivationIntent(normalizedMessage) ||
+    includesAnyPhrase(normalizedMessage, ["log in", "sign in", "find furbabies", "match quiz", "contact us", "may sakit", "live chat"]);
 }
 
 function getGuardReply(message = "", language = "english") {
@@ -1147,7 +1218,7 @@ function getGuardReply(message = "", language = "english") {
 }
 
 function shouldUseLocalReply(message = "") {
-  const lower = message.toLowerCase();
+  const lower = normalizeIntentText(message);
 
   return (
     hasGreetingIntent(lower) ||
@@ -1158,6 +1229,7 @@ function shouldUseLocalReply(message = "") {
     hasDonationIntent(lower) ||
     hasGeneralAnimuaIntent(lower) ||
     hasApplicationIntent(lower) ||
+    hasAdoptionMotivationIntent(lower) ||
     hasAdoptionFeeIntent(lower) ||
     hasOfflineAdoptionIntent(lower) ||
     hasPostAdoptionIntent(lower) ||
@@ -1187,7 +1259,7 @@ function shouldUseLocalReply(message = "") {
 }
 
 function needsPublicContext(message = "") {
-  const lower = message.toLowerCase();
+  const lower = normalizeIntentText(message);
 
   if (
     hasStrayIntent(lower) ||
@@ -1195,6 +1267,7 @@ function needsPublicContext(message = "") {
     hasUrgentMedicalIntent(lower) ||
     hasSurrenderIntent(lower) ||
     hasAdoptionProcessIntent(lower) ||
+    hasAdoptionMotivationIntent(lower) ||
     hasOfflineAdoptionIntent(lower) ||
     hasPostAdoptionIntent(lower) ||
     hasAdoptionEligibilityIntent(lower) ||
@@ -1243,7 +1316,7 @@ function buildSystemPrompt(context = {}, language = "english") {
 }
 
 function getLocalReply(message, context = {}, language = "english") {
-  const lower = message.toLowerCase();
+  const lower = normalizeIntentText(message);
   const pets = Array.isArray(context.pets) ? context.pets : [];
   const events = Array.isArray(context.events) ? context.events : [];
 
@@ -1374,6 +1447,14 @@ function getLocalReply(message, context = {}, language = "english") {
       language,
       "For surrender requests, open the Surrender page and complete the form with accurate owner, contact, barangay, animal, vaccination, and reason details. Only qualified Angeles City residents may submit through ANIMUA. Each request is reviewed individually, and submission does not guarantee acceptance. Do not bring the animal to the shelter unless the office confirms the next step.",
       "Para sa surrender request, buksan ang Surrender page at kumpletuhin ang owner, contact, barangay, animal, vaccination, at reason details. Qualified Angeles City residents lang ang maaaring magsumite sa ANIMUA. Bawat request ay hiwalay na nire-review, at hindi garantiya ng acceptance ang submission. Huwag dalhin agad ang animal sa shelter hangga't walang confirmation mula sa office."
+    );
+  }
+
+  if (hasAdoptionMotivationIntent(lower)) {
+    return localizedReply(
+      language,
+      "Adopting is worth considering because you give a shelter animal a safer home, free up space so the office can care for more animals, and gain a companion whose needs match your lifestyle. Through ANIMUA, you can check Find Furbabies, use the Match Quiz, and submit an application with no adoption fee. The best reason to adopt is not just that it feels kind, but that you are ready to give steady care, time, patience, and a long-term home.",
+      "Maganda mag-adopt kung ready ka na, kasi nabibigyan mo ng mas ligtas na tahanan ang shelter animal, nakakatulong ka rin na magkaroon ng space para maalagaan pa ang ibang animals, at maaari kang makahanap ng companion na tugma sa lifestyle mo. Sa ANIMUA, puwede mong tingnan ang Find Furbabies, gamitin ang Match Quiz, at mag-submit ng application nang walang adoption fee. Pinakamahalaga: mag-adopt kapag kaya mong magbigay ng consistent na care, oras, pasensya, at long-term home."
     );
   }
 
@@ -1557,8 +1638,8 @@ function getLocalReply(message, context = {}, language = "english") {
     if (!events.length) {
       return localizedReply(
         language,
-        "Events are shown on the Home page event section. No published event is currently available in the chatbot context, so please check the Home page or contact the Angeles City Veterinary Office for official confirmation about dates, time, location, requirements, and whether a service is free.",
-        "Makikita ang events sa Home page event section. Walang published event na available sa chatbot context ngayon, kaya pakitingnan ang Home page o kontakin ang Angeles City Veterinary Office para sa official confirmation tungkol sa date, time, location, requirements, at kung libre ang service."
+        "Events are shown in the Home page event section. There are no published upcoming events available right now, so please check the Home page again later or contact the Angeles City Veterinary Office for official confirmation about dates, time, location, requirements, and whether a service is free.",
+        "Makikita ang events sa Home page event section. Wala pang published upcoming events na available ngayon, kaya pakitingnan muli ang Home page mamaya o kontakin ang Angeles City Veterinary Office para sa official confirmation tungkol sa date, time, location, requirements, at kung libre ang service."
       );
     }
 
@@ -1842,9 +1923,9 @@ exports.sendChatbotMessage = async (req, res) => {
       return res.status(429).json({ message: "Please wait a moment before sending another message." });
     }
 
-    const message = cleanMessage(req.body.message || "");
-    const history = cleanHistory(req.body.history || []);
-    const language = resolveReplyLanguage(req.body.language || "", message);
+    const message = cleanMessage(req.body?.message || "");
+    const history = cleanHistory(req.body?.history || []);
+    const language = resolveReplyLanguage(req.body?.language || "", message);
 
     if (!message) {
       return res.status(400).json({ message: "Message is required." });
@@ -1891,8 +1972,11 @@ exports.sendChatbotMessage = async (req, res) => {
     });
   } catch (error) {
     console.error("[Chatbot Error]", error.message);
-    return res.status(500).json({
-      message: "Unable to answer right now. Please try again later."
+    const language = resolveReplyLanguage(req.body?.language || "", req.body?.message || "");
+
+    return res.status(200).json({
+      reply: getVerifiedFallback(language),
+      mode: "fallback"
     });
   }
 };
