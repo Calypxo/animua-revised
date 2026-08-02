@@ -185,9 +185,6 @@
 }
 .em-dog    { background: #e7eef9; }
 .em-cat    { background: #fff6e0; }
-.em-bird   { background: #e8f8ef; }
-.em-rabbit { background: #FFF8EE; }
-.em-other  { background: #FFF8EE; }
 
 .pet-name { font-weight: 700; color: var(--txt-h); font-size: 0.85rem; }
 .pet-id-tag { font-size: 0.66rem; color: var(--txt-g); font-weight: 500; }
@@ -205,9 +202,6 @@
 }
 .b-dog    { background: #e7eef9; color: #1d4ed8; }
 .b-cat    { background: #fff6e0; color: #92400e; }
-.b-bird   { background: #e8f8ef; color: #15803d; }
-.b-rabbit { background: #FFF8EE; color: var(--crimson); }
-.b-other  { background: #FFF8EE; color: var(--txt-m); }
 .b-male   { background: #e7eef9; color: #1d4ed8; }
 .b-female { background: #FFF8EE; color: #780116; }
 .b-small  { background: #e8f8ef; color: #15803d; }

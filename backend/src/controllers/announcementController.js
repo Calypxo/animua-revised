@@ -1,4 +1,4 @@
-const { db, admin } = require("../config/firebase");
+const { db, admin, bucket } = require("../config/firebase");
 
 const ANNOUNCEMENT_COL = "announcements";
 
@@ -18,7 +18,6 @@ function normalizeAnnouncement(data = {}) {
     title: String(data.title || "").trim(),
     type: normalizeAnnouncementType(data.type),
     caption: String(data.caption || "").trim(),
-    imageUrl: String(data.imageUrl || "").trim(),
     eventDate: String(data.eventDate || "").trim(),
     location: String(data.location || "").trim(),
     status: String(data.status || "Published").trim(),
@@ -128,6 +127,8 @@ exports.createAnnouncement = async (req, res) => {
 
     const announcementData = {
       ...payload,
+      imageUrl: "",
+      imagePath: "",
 
       createdBy: req.user.email || "",
       createdByName: req.user.fullName || req.user.email || "ANIMUA User",
@@ -203,6 +204,96 @@ exports.updateAnnouncement = async (req, res) => {
   }
 };
 
+exports.uploadAnnouncementImage = async (req, res) => {
+  let uploadedImagePath = "";
+
+  try {
+    const { id } = req.params;
+    if (!req.file) {
+      return res.status(400).json({ message: "No image file uploaded." });
+    }
+
+    const announcementRef = db.collection(ANNOUNCEMENT_COL).doc(id);
+    const announcementDoc = await announcementRef.get();
+    if (!announcementDoc.exists) {
+      return res.status(404).json({ message: "Announcement not found." });
+    }
+
+    const announcementData = announcementDoc.data();
+    const extensionByMimeType = {
+      "image/jpeg": "jpg",
+      "image/png": "png",
+      "image/webp": "webp",
+    };
+    const extension = extensionByMimeType[req.file.mimetype];
+    if (!extension) {
+      return res.status(400).json({ message: "Only JPG, PNG, and WebP images are allowed." });
+    }
+
+    uploadedImagePath = `announcements/${id}/cover-${Date.now()}.${extension}`;
+    const imageFile = bucket.file(uploadedImagePath);
+    await imageFile.save(req.file.buffer, {
+      metadata: {
+        contentType: req.file.mimetype,
+        cacheControl: "public, max-age=31536000",
+      },
+      resumable: false,
+    });
+    await imageFile.makePublic();
+
+    const imageUrl = `https://storage.googleapis.com/${bucket.name}/${uploadedImagePath}`;
+    await announcementRef.update({
+      imageUrl,
+      imagePath: uploadedImagePath,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedBy: req.user.email || "",
+    });
+
+    if (announcementData.imagePath && announcementData.imagePath !== uploadedImagePath) {
+      await bucket.file(announcementData.imagePath).delete().catch(() => {});
+    }
+
+    return res.status(200).json({
+      message: "Announcement image uploaded successfully.",
+      imageUrl,
+    });
+  } catch (error) {
+    if (uploadedImagePath) {
+      await bucket.file(uploadedImagePath).delete().catch(() => {});
+    }
+    console.error("[uploadAnnouncementImage]", error.message);
+    return res.status(500).json({ message: "Failed to upload announcement image." });
+  }
+};
+
+exports.deleteAnnouncementImage = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const announcementRef = db.collection(ANNOUNCEMENT_COL).doc(id);
+    const announcementDoc = await announcementRef.get();
+    if (!announcementDoc.exists) {
+      return res.status(404).json({ message: "Announcement not found." });
+    }
+
+    const announcementData = announcementDoc.data();
+    await announcementRef.update({
+      imageUrl: "",
+      imagePath: "",
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedBy: req.user.email || "",
+    });
+
+    if (announcementData.imagePath) {
+      await bucket.file(announcementData.imagePath).delete().catch(() => {});
+    }
+
+    return res.status(200).json({ message: "Announcement image removed successfully." });
+  } catch (error) {
+    console.error("[deleteAnnouncementImage]", error.message);
+    return res.status(500).json({ message: "Failed to remove announcement image." });
+  }
+};
+
 exports.deleteAnnouncement = async (req, res) => {
   try {
     if (req.user?.role !== "Admin") {
@@ -221,7 +312,12 @@ exports.deleteAnnouncement = async (req, res) => {
       });
     }
 
+    const announcementData = announcementDoc.data();
     await announcementRef.delete();
+
+    if (announcementData.imagePath) {
+      await bucket.file(announcementData.imagePath).delete().catch(() => {});
+    }
 
     return res.status(200).json({
       message: "Announcement deleted successfully.",

@@ -108,9 +108,6 @@
 }
 .thumb-dog   { background:var(--amber-soft); }
 .thumb-cat   { background:var(--blue-soft);  }
-.thumb-rabbit{ background:var(--teal-soft);  }
-.thumb-bird  { background:var(--green-soft); }
-.thumb-other { background:var(--cream-3);    }
 .animal-name { font-weight:700; font-size:0.875rem; color:var(--ink); }
 .animal-sub  { font-size:0.72rem; color:var(--stone); font-family:var(--mono); }
 

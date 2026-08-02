@@ -165,7 +165,7 @@ let surrenderAvailability = null;
 /* ══════════════════════════════════════════════════════
    HELPERS
 ══════════════════════════════════════════════════════ */
-const emoji = s => ({Dog:"D",Cat:"C",Rabbit:"R",Bird:"B"}[s]||"A");
+const emoji = s => ({Dog:"D",Cat:"C"}[s]||"A");
 const thumbCls = s => ({Dog:"thumb-dog",Cat:"thumb-cat"}[s]||"thumb-other");
 const escapeHtml = value => String(value ?? "")
   .replaceAll("&", "&amp;")

@@ -66,6 +66,12 @@ textarea {
   font-family: "Poppins", sans-serif;
 }
 
+html,
+body.management-consistent-ui,
+body.management-consistent-ui * {
+  scroll-behavior: smooth;
+}
+
 body.management-consistent-ui {
   color: var(--animua-text) !important;
   background: var(--animua-cream) !important;
@@ -693,6 +699,8 @@ body.management-consistent-ui :is(.page-body, .main-content, .contact-message-pa
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html,
+  body.management-consistent-ui,
   .management-consistent-ui *,
   .management-consistent-ui *::before,
   .management-consistent-ui *::after {

@@ -33,7 +33,7 @@ const escapeHtml = (value) =>
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;",
   })[character]);
 const speciesEmoji = (species) =>
-  ({ Dog: "🐶", Cat: "🐱", Rabbit: "🐰", Bird: "🐦" })[species] || "🐾";
+  ({ Dog: "🐶", Cat: "🐱"})[species] || "🐾";
 const statusClass = (status) => {
   const value = String(status || "").toLowerCase();
   if (value === "ready") return "ready";

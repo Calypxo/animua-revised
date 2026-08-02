@@ -8,6 +8,11 @@ import { cacheContactMessageCount } from "./contactMessageBadge.js";
 const ATTENTION_SEEN_KEY = "animua_attention_seen";
 const ATTENTION_CACHE_KEY = "animua_attention_summary";
 const ATTENTION_CLIENT_CACHE_TTL_MS = 15 * 60_000;
+const managementSwalClasses = {
+  popup: "animua-management-swal",
+  confirmButton: "animua-management-swal-confirm",
+  cancelButton: "animua-management-swal-cancel",
+};
 
 const escapeHtml = (value) => String(value ?? "")
   .replaceAll("&", "&amp;")
@@ -392,12 +397,16 @@ function bindAccountMenu(chip, menu) {
     close();
     const result = await Swal.fire({
       title: "Sign out?",
-      text: "You'll be returned to the management login screen.",
+      html: "Your current management session will end and you will return to the login screen.",
       icon: "question",
+      iconColor: "#780116",
       showCancelButton: true,
-      confirmButtonColor: "#780116",
-      cancelButtonColor: "#756367",
-      confirmButtonText: "Yes, sign out",
+      reverseButtons: true,
+      focusCancel: true,
+      confirmButtonText: '<i class="bi bi-box-arrow-right"></i> Sign Out',
+      cancelButtonText: "Stay Signed In",
+      customClass: managementSwalClasses,
+      buttonsStyling: false,
     });
     if (!result.isConfirmed) return;
     clearUserSession();

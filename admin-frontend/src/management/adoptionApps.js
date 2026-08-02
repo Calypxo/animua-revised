@@ -171,7 +171,7 @@ let currentRole = "";
 /* ══════════════════════════════════════════════════════
    HELPERS
 ══════════════════════════════════════════════════════ */
-const emoji = s => ({Dog:"🐶",Cat:"🐱",Rabbit:"🐰",Bird:"🐦"}[s]||"🐾");
+const emoji = s => ({Dog:"🐶",Cat:"🐱"}[s]||"🐾");
 const thumbCls = s => ({Dog:"thumb-dog",Cat:"thumb-cat"}[s]||"thumb-other");
 
 function statusBadge(s) {

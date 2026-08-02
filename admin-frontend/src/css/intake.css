@@ -232,9 +232,6 @@
 
 .thumb-dog   { background: var(--amber-soft); }
 .thumb-cat   { background: var(--blue-soft); }
-.thumb-rabbit{ background: var(--teal-soft); }
-.thumb-bird  { background: var(--green-soft); }
-.thumb-other { background: var(--cream-3); }
 
 .animal-name { font-weight: 700; font-size: 0.875rem; color: var(--ink); }
 .animal-sub  { font-size: 0.72rem; color: var(--stone); font-family: var(--mono); }
@@ -1122,9 +1119,6 @@ select.form-inp { cursor: pointer; }
 }
 .thumb-dog { border-color: #f0d49c; background: #fff4db; color: #9a5e00; }
 .thumb-cat { border-color: #EADFD4; background: #FFF8EE; color: #780116; }
-.thumb-rabbit { border-color: #EADFD4; background: #FFF8EE; color: #780116; }
-.thumb-bird { border-color: #e9d1a9; background: #FFF8EE; color: #8d620e; }
-.thumb-other { border-color: #e0d4ce; background: #FFF8EE; color: #675d58; }
 .animal-name {
   overflow: hidden;
   max-width: 240px;

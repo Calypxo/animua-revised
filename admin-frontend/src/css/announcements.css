@@ -1413,3 +1413,98 @@ body.loading .main-content {
     transition-duration: 1ms !important;
   }
 }
+
+/* Announcement image picker and final contrast safeguards. */
+#announcementModalBackdrop .media-upload-control {
+  align-self: center !important;
+}
+
+#announcementModalBackdrop .media-file-input {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+#announcementModalBackdrop .media-upload-actions {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 9px !important;
+}
+
+#announcementModalBackdrop .media-file-button,
+#announcementModalBackdrop .media-remove-button {
+  min-height: 42px !important;
+  display: inline-flex !important;
+  flex: 0 0 auto !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  margin: 0 !important;
+  padding: 0 15px !important;
+  border: 1px solid #D8C9BF !important;
+  border-radius: 10px !important;
+  color: #2B1719 !important;
+  background: #FFFFFF !important;
+  font: 750 12px/1 "Poppins", sans-serif !important;
+  cursor: pointer !important;
+}
+
+#announcementModalBackdrop .media-file-button:hover,
+#announcementModalBackdrop .media-file-button:focus-within {
+  border-color: #780116 !important;
+  color: #780116 !important;
+}
+
+#announcementModalBackdrop .media-remove-button {
+  color: #780116 !important;
+  background: #FFF8EE !important;
+}
+
+#announcementModalBackdrop .media-remove-button[hidden] {
+  display: none !important;
+}
+
+#announcementModalBackdrop .media-upload-control small {
+  color: #5F534E !important;
+  font: 500 10px/1.45 "Poppins", sans-serif !important;
+}
+
+.channel-profile-copy h2,
+.channel-profile-meta strong {
+  color: #FFFFFF !important;
+}
+
+.insight-card-head,
+.insight-stat strong,
+.event-calendar-heading,
+.event-calendar-heading h3,
+.event-calendar-nav,
+.event-calendar-nav strong {
+  color: #2B1719 !important;
+}
+
+.insight-stat,
+.editorial-guide li,
+.event-calendar-legend,
+.event-calendar-event-copy > small,
+.event-calendar-empty {
+  color: #5F534E !important;
+}
+
+.post-body h3,
+.post-body p,
+.post-reach,
+.post-actions button,
+.category-story strong,
+.category-story small,
+.quick-composer-prompt {
+  opacity: 1 !important;
+}

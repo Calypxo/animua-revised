@@ -15,9 +15,17 @@ function enhanceLayer(layer) {
   const panel = layer.querySelector(PANEL_SELECTOR);
   if (!panel) return;
 
+  const isConfirmModal = panel.classList.contains("um-modal-xs");
+
   layer.dataset.managementModalReady = "true";
   layer.classList.add("management-modal-layer");
-  panel.classList.add("management-side-modal");
+  if (isConfirmModal) {
+    layer.classList.add("management-confirm-layer");
+    panel.classList.add("management-confirm-modal");
+    panel.classList.remove("management-side-modal");
+  } else {
+    panel.classList.add("management-side-modal");
+  }
   panel.setAttribute("role", panel.getAttribute("role") || "dialog");
   panel.setAttribute("aria-modal", "true");
   layer.setAttribute("aria-hidden", String(!layer.classList.contains("open")));

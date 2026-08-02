@@ -1,4 +1,5 @@
 const fs = require("node:fs");
+const net = require("node:net");
 const path = require("node:path");
 const { spawn } = require("node:child_process");
 
@@ -10,6 +11,7 @@ const pythonPath = path.join(
   ".venv",
   process.platform === "win32" ? "Scripts/python.exe" : "bin/python"
 );
+const sentimentPort = 8002;
 
 const children = [];
 let shuttingDown = false;
@@ -45,7 +47,37 @@ function shutdown(exitCode = 0) {
   setTimeout(() => process.exit(exitCode), 300).unref();
 }
 
-if (fs.existsSync(pythonPath)) {
+function isPortAvailable(port, host = "127.0.0.1") {
+  return new Promise((resolve) => {
+    const server = net.createServer();
+    server.once("error", (error) => {
+      server.close(() => resolve(false));
+    });
+    server.once("listening", () => {
+      server.close(() => resolve(true));
+    });
+    server.listen(port, host);
+  });
+}
+
+async function startSentimentService() {
+  if (!fs.existsSync(pythonPath)) {
+    console.warn(
+      `Tagalog sentiment environment not found at ${pythonPath}. ` +
+        "Surrender submissions will use the Node fallback."
+    );
+    return;
+  }
+
+  const portAvailable = await isPortAvailable(sentimentPort);
+  if (!portAvailable) {
+    console.log(
+      `Sentiment service port ${sentimentPort} is already in use; ` +
+        "assuming an existing service is available."
+    );
+    return;
+  }
+
   const sentiment = start(
     pythonPath,
     [
@@ -58,7 +90,7 @@ if (fs.existsSync(pythonPath)) {
       "--host",
       "127.0.0.1",
       "--port",
-      "8002",
+      `${sentimentPort}`,
     ],
     {
       cwd: repositoryDir,
@@ -74,21 +106,33 @@ if (fs.existsSync(pythonPath)) {
       );
     }
   });
-} else {
-  console.warn(
-    `Tagalog sentiment environment not found at ${pythonPath}. ` +
-      "Surrender submissions will use the Node fallback."
-  );
 }
 
-const nodemonPath = require.resolve("nodemon/bin/nodemon.js");
-if (useFirebaseEmulators) {
-  console.log("Backend is using the local Firebase emulators (demo-animua).");
-}
-const backend = start(process.execPath, [nodemonPath, "server.js"], {
-  env: firebaseEmulatorEnv,
-});
-backend.on("exit", (code) => shutdown(code || 0));
+function createBackendProcess() {
+  const nodemonPath = require.resolve("nodemon/bin/nodemon.js");
+  if (process.platform === "win32") {
+    console.warn(
+      "Windows detected: starting backend with node server.js instead of nodemon to avoid Windows process-tree issues."
+    );
+    return start(process.execPath, ["server.js"], {
+      env: firebaseEmulatorEnv,
+    });
+  }
 
-process.on("SIGINT", () => shutdown(0));
-process.on("SIGTERM", () => shutdown(0));
+  if (useFirebaseEmulators) {
+    console.log("Backend is using the local Firebase emulators (demo-animua).");
+  }
+  return start(process.execPath, [nodemonPath, "server.js"], {
+    env: firebaseEmulatorEnv,
+  });
+}
+
+(async () => {
+  await startSentimentService();
+
+  const backend = createBackendProcess();
+  backend.on("exit", (code) => shutdown(code || 0));
+
+  process.on("SIGINT", () => shutdown(0));
+  process.on("SIGTERM", () => shutdown(0));
+})();

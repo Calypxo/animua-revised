@@ -19,7 +19,7 @@ let animals = [];
 ══════════════════════════════════════════════════════ */
 let filtered = [];
 let currentPage = 1;
-const PAGE_SIZE = 8;
+const PAGE_SIZE = 4;
 let activeTab   = "all";
 
 /* ══════════════════════════════════════════════════════

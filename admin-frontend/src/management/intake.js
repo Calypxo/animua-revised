@@ -47,7 +47,7 @@ let currentRole = "";
    HELPERS
 ══════════════════════════════════════════════════════ */
 const speciesInitial = s => String(s || "Animal").charAt(0).toUpperCase();
-const speciesThumb = s => ({ Dog:"thumb-dog", Cat:"thumb-cat", Rabbit:"thumb-rabbit", Bird:"thumb-bird" }[s] || "thumb-other");
+const speciesThumb = s => ({ Dog:"thumb-dog", Cat:"thumb-cat"}[s] || "thumb-other");
 
 const sourceCfg = {
   "Rescue":             { cls:"source-rescue",    icon:"bi-life-preserver",        label:"Rescue"            },
@@ -907,6 +907,7 @@ function openConfirmModal(action, id) {
       iconCls:  "reject",
       iconIcon: "bi-x-circle-fill",
       btnCls:   "btn-reject",
+      btnIcon:  "bi-x-lg",
       btnLabel: "Reject",
     },
     convert: {
@@ -917,6 +918,7 @@ function openConfirmModal(action, id) {
       iconCls:  "convert",
       iconIcon: "bi-arrow-right-circle-fill",
       btnCls:   "btn-convert",
+      btnIcon:  "bi-arrow-right-circle",
       btnLabel: r.status === "Pending" ? "Approve & Start Profiling" : "Start Profiling",
     },
   };
@@ -931,7 +933,7 @@ function openConfirmModal(action, id) {
 
   const btn = document.getElementById("confirmAction");
   btn.className   = c.btnCls;
-  btn.innerHTML   = c.btnLabel;
+  btn.innerHTML   = `<i class="bi ${c.btnIcon}"></i> ${c.btnLabel}`;
 
   // Show/hide rejection reason textarea
   const rrWrap = document.getElementById("rejectReasonWrap");

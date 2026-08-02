@@ -211,18 +211,25 @@
                     <i class="bi bi-image"></i>
                   </div>
                   <strong>Add a cover image</strong>
-                  <span>Paste a public image URL to preview your post.</span>
+                  <span>Choose a photo from your device to preview your post.</span>
                 </div>
               </div>
 
-              <label class="media-url-control form-group">
-                <span class="form-lbl">Media URL</span>
-                <div class="input-with-icon">
-                  <i class="bi bi-link-45deg"></i>
-                  <input class="form-inp" id="fImageUrl" type="url" placeholder="https://example.com/photo.jpg" />
+              <div class="media-upload-control form-group">
+                <span class="form-lbl">Cover Photo</span>
+                <div class="media-upload-actions">
+                  <label class="media-file-button" for="fImageFile">
+                    <i class="bi bi-upload"></i>
+                    <span>Choose photo</span>
+                  </label>
+                  <button id="removeImageBtn" class="media-remove-button" type="button" hidden>
+                    <i class="bi bi-trash3"></i>
+                    Remove
+                  </button>
                 </div>
-                <small id="mediaPreviewStatus">JPG, PNG, or WebP links work best.</small>
-              </label>
+                <input id="fImageFile" class="media-file-input" type="file" accept="image/jpeg,image/png,image/webp" />
+                <small id="mediaPreviewStatus">JPG, PNG, or WebP up to 5 MB.</small>
+              </div>
             </div>
           </section>
 

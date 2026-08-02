@@ -14,6 +14,8 @@ import {
   createAnnouncement,
   updateAnnouncement,
   deleteAnnouncement,
+  uploadAnnouncementImage,
+  deleteAnnouncementImage,
 } from "../services/announcement.service.js";
 
 window.Swal = Swal;
@@ -28,6 +30,10 @@ const state = {
   calendarMonth: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
   selectedEventDate: "",
   calendarInitialized: false,
+  selectedImageFile: null,
+  previewObjectUrl: "",
+  existingImageUrl: "",
+  removeImageRequested: false,
 };
 
 let currentRole = "";
@@ -529,6 +535,7 @@ async function loadAnnouncements() {
 
 function resetForm() {
   state.editingId = null;
+  clearImageSelection();
 
   getEl("announcementForm").reset();
   getEl("fType").value = "News & Article";
@@ -536,6 +543,17 @@ function resetForm() {
   getEl("fVisibleToPublic").value = "true";
   updateMediaPreview("");
   syncEventFields();
+}
+
+function clearImageSelection() {
+  if (state.previewObjectUrl) {
+    URL.revokeObjectURL(state.previewObjectUrl);
+  }
+
+  state.selectedImageFile = null;
+  state.previewObjectUrl = "";
+  state.existingImageUrl = "";
+  state.removeImageRequested = false;
 }
 
 function syncEventFields() {
@@ -551,7 +569,7 @@ function syncEventFields() {
   });
 }
 
-function updateMediaPreview(value) {
+function updateMediaPreview(value, options = {}) {
   const preview = getEl("mediaPreview");
   const image = getEl("mediaPreviewImage");
   const status = getEl("mediaPreviewStatus");
@@ -564,27 +582,68 @@ function updateMediaPreview(value) {
 
   if (!url) {
     image.removeAttribute("src");
-    status.textContent = "JPG, PNG, or WebP links work best.";
+    status.textContent = "JPG, PNG, or WebP up to 5 MB.";
+    getEl("removeImageBtn").hidden = true;
     return;
   }
 
-  status.textContent = "Loading image preview...";
+  status.textContent = options.fileName
+    ? `${options.fileName} is ready to upload.`
+    : "Current cover photo.";
 
   image.onload = () => {
     image.hidden = false;
     preview.classList.add("has-image");
     preview.classList.remove("invalid");
-    status.textContent = "Image ready for your post.";
+    getEl("removeImageBtn").hidden = false;
   };
 
   image.onerror = () => {
     image.hidden = true;
     preview.classList.remove("has-image");
     preview.classList.add("invalid");
-    status.textContent = "This image could not be loaded. Check that the URL is public.";
+    getEl("removeImageBtn").hidden = false;
+    status.textContent = "This image could not be previewed. Choose another photo.";
   };
 
   image.src = url;
+}
+
+function selectAnnouncementImage(file) {
+  if (!file) return;
+
+  const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+  if (!allowedTypes.includes(file.type)) {
+    getEl("fImageFile").value = "";
+    showToast("Choose a JPG, PNG, or WebP image.", "warning");
+    return;
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    getEl("fImageFile").value = "";
+    showToast("The cover photo must be 5 MB or smaller.", "warning");
+    return;
+  }
+
+  if (state.previewObjectUrl) URL.revokeObjectURL(state.previewObjectUrl);
+  state.selectedImageFile = file;
+  state.previewObjectUrl = URL.createObjectURL(file);
+  state.removeImageRequested = false;
+  updateMediaPreview(state.previewObjectUrl, { fileName: file.name });
+}
+
+function removeAnnouncementImage() {
+  if (state.previewObjectUrl) URL.revokeObjectURL(state.previewObjectUrl);
+  state.selectedImageFile = null;
+  state.previewObjectUrl = "";
+  state.removeImageRequested = Boolean(state.existingImageUrl);
+  getEl("fImageFile").value = "";
+  updateMediaPreview("");
+
+  const status = getEl("mediaPreviewStatus");
+  if (status && state.removeImageRequested) {
+    status.textContent = "The current cover photo will be removed when you save.";
+  }
 }
 
 function openCreateModal(defaultType = "News & Article") {
@@ -615,7 +674,8 @@ function openEditModal(id) {
   getEl("fTitle").value = item.title || "";
   getEl("fType").value = normalizePostType(item.type);
   getEl("fCaption").value = item.caption || "";
-  getEl("fImageUrl").value = item.imageUrl || "";
+  clearImageSelection();
+  state.existingImageUrl = item.imageUrl || "";
   getEl("fStatus").value = item.status || "Published";
   getEl("fVisibleToPublic").value = item.visibleToPublic === false ? "false" : "true";
   syncEventFields();
@@ -623,7 +683,7 @@ function openEditModal(id) {
     getEl("fEventDate").value = item.eventDate || "";
     getEl("fLocation").value = item.location || "";
   }
-  updateMediaPreview(item.imageUrl || "");
+  updateMediaPreview(state.existingImageUrl);
 
   getEl("announcementModalBackdrop").classList.add("open");
 }
@@ -638,7 +698,6 @@ function getFormPayload() {
     title: getEl("fTitle").value.trim(),
     type: normalizePostType(getEl("fType").value),
     caption: getEl("fCaption").value.trim(),
-    imageUrl: getEl("fImageUrl").value.trim(),
     eventDate: getEl("fEventDate").value,
     location: getEl("fLocation").value.trim(),
     status: getEl("fStatus").value,
@@ -669,20 +728,36 @@ async function saveAnnouncement(event) {
     return;
   }
 
+  let detailsSaved = false;
+
   try {
+    let announcementId = state.editingId;
+
     if (state.editingId) {
       await updateAnnouncement(state.editingId, payload);
-      showToast("Announcement updated.", "success");
     } else {
-      await createAnnouncement(payload);
-      showToast("Announcement created.", "success");
+      const created = await createAnnouncement(payload);
+      announcementId = created.announcementId;
+      if (!announcementId) throw new Error("The new announcement ID was not returned.");
+      state.editingId = announcementId;
+    }
+    detailsSaved = true;
+
+    if (state.selectedImageFile) {
+      await uploadAnnouncementImage(announcementId, state.selectedImageFile);
+    } else if (state.removeImageRequested) {
+      await deleteAnnouncementImage(announcementId);
     }
 
+    showToast(`Announcement ${action === "edit" ? "updated" : "created"}.`, "success");
     closeModal();
     await loadAnnouncements();
   } catch (error) {
     console.error("Failed to save announcement:", error);
-    showToast(error.message || "Failed to save announcement.", "danger");
+    const message = detailsSaved
+      ? `Post details were saved, but the photo change failed: ${error.message}`
+      : error.message || "Failed to save announcement.";
+    showToast(message, "danger");
   }
 }
 
@@ -741,9 +816,10 @@ function bindEvents() {
   getEl("announcementForm")?.addEventListener("submit", saveAnnouncement);
   getEl("announcementModalClose")?.addEventListener("click", closeModal);
   getEl("announcementCancelBtn")?.addEventListener("click", closeModal);
-  getEl("fImageUrl")?.addEventListener("input", (event) => {
-    updateMediaPreview(event.target.value);
+  getEl("fImageFile")?.addEventListener("change", (event) => {
+    selectAnnouncementImage(event.target.files?.[0]);
   });
+  getEl("removeImageBtn")?.addEventListener("click", removeAnnouncementImage);
   getEl("fType")?.addEventListener("change", syncEventFields);
   getEl("eventCalendarPrev")?.addEventListener("click", () => moveEventCalendar(-1));
   getEl("eventCalendarNext")?.addEventListener("click", () => moveEventCalendar(1));
