@@ -7,52 +7,11 @@ const {
 const ADOPTION_COL = "adoptions";
 const ANIMAL_COL = "animals";
 const SHELTER_LOCATION = "Angeles City Veterinary Office, Brgy. Pampang, Angeles City";
-<<<<<<< HEAD
 const {
   buildApprovalDeadlineFields,
   reconcileRequestDeadlines,
   validateScheduleDate,
 } = require("../services/requestDeadlineService");
-=======
-const SCHEDULE_WINDOW_DAYS = 14;
-
-function parseScheduleDate(value) {
-  if (!value) return null;
-  if (value._seconds || value.seconds) {
-    const seconds = Number(value._seconds || value.seconds);
-    const date = new Date(seconds * 1000);
-    date.setHours(0, 0, 0, 0);
-    return Number.isNaN(date.getTime()) ? null : date;
-  }
-
-  const text = String(value).trim();
-  if (!text) return null;
-  const date = /^\d{4}-\d{2}-\d{2}$/.test(text)
-    ? new Date(`${text}T00:00:00`)
-    : new Date(text);
-  date.setHours(0, 0, 0, 0);
-  return Number.isNaN(date.getTime()) ? null : date;
-}
-
-function addScheduleWindowDays(date) {
-  const maxDate = new Date(date);
-  maxDate.setDate(maxDate.getDate() + SCHEDULE_WINDOW_DAYS);
-  return maxDate;
-}
-
-function isScheduleWithinDecisionWindow(dateValue, decisionValue) {
-  const scheduleDate = parseScheduleDate(dateValue);
-  const decisionDate = parseScheduleDate(decisionValue);
-  if (!scheduleDate || !decisionDate) return false;
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const minDate = decisionDate > today ? decisionDate : today;
-  const maxDate = addScheduleWindowDays(decisionDate);
-
-  return scheduleDate >= minDate && scheduleDate <= maxDate;
-}
->>>>>>> origin/main
 
 exports.createAdoption = async (req, res) => {
   try {
@@ -521,11 +480,7 @@ exports.scheduleMyAdoptionPickup = async (req, res) => {
 
     if (!validateScheduleDate(data, date)) {
       return res.status(400).json({
-<<<<<<< HEAD
         message: "Pickup date must be today or later and within the 14-day attendance deadline.",
-=======
-        message: "Pickup date must be within 14 days from the application approval date.",
->>>>>>> origin/main
       });
     }
 
@@ -560,15 +515,10 @@ exports.scheduleMyAdoptionPickup = async (req, res) => {
       const updatedDoc = await adoptionRef.get();
 
       return res.status(200).json({
-<<<<<<< HEAD
         message: "Pickup reschedule request sent for staff approval.",
         requiresApproval: true,
-        pickupRescheduleRequest,
-=======
-        message: "Pickup schedule updated.",
         request: updatedDoc.data(),
-        pickupSchedule,
->>>>>>> origin/main
+        pickupRescheduleRequest,
       });
     }
 
@@ -622,16 +572,9 @@ exports.approveAdoptionReschedule = async (req, res) => {
       });
     }
 
-<<<<<<< HEAD
     if (!validateScheduleDate(data, request.date)) {
       return res.status(400).json({
         message: "The requested pickup date is outside the active 14-day attendance deadline.",
-=======
-    const approvalDate = data.approvedDate || data.approvedAt || data.updatedAt;
-    if (!isScheduleWithinDecisionWindow(request.date, approvalDate)) {
-      return res.status(400).json({
-        message: "Pickup date must be within 14 days from the application approval date.",
->>>>>>> origin/main
       });
     }
 

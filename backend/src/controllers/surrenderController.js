@@ -13,12 +13,8 @@ const COLLECTION_NAME = "surrenderRequests";
 const SETTINGS_COLLECTION_NAME = "surrenderSettings";
 const AVAILABILITY_SETTINGS_ID = "requestAvailability";
 const SHELTER_LOCATION = "Angeles City Veterinary Office, Brgy. Pampang, Angeles City";
-<<<<<<< HEAD
 const CLOSED_CAPACITY_MESSAGE =
   "The shelter is not accepting surrender requests right now because space or cages may be unavailable. Please check again later or contact the shelter for urgent concerns.";
-=======
-const SCHEDULE_WINDOW_DAYS = 14;
->>>>>>> origin/main
 
 const MAX_SURRENDER_PHOTO_DATA_URL_LENGTH = 900000;
 
@@ -42,7 +38,6 @@ function generateRequestId() {
   return `SR-${year}-${timestamp}`;
 }
 
-<<<<<<< HEAD
 function getAvailabilitySettingsRef() {
   return db.collection(SETTINGS_COLLECTION_NAME).doc(AVAILABILITY_SETTINGS_ID);
 }
@@ -67,30 +62,6 @@ async function getSurrenderAvailability(_req, res) {
       error: error.message,
     });
   }
-=======
-function parseScheduleDate(value) {
-  if (!value) return null;
-  if (value._seconds || value.seconds) {
-    const seconds = Number(value._seconds || value.seconds);
-    const date = new Date(seconds * 1000);
-    date.setHours(0, 0, 0, 0);
-    return Number.isNaN(date.getTime()) ? null : date;
-  }
-
-  const text = String(value).trim();
-  if (!text) return null;
-  const date = /^\d{4}-\d{2}-\d{2}$/.test(text)
-    ? new Date(`${text}T00:00:00`)
-    : new Date(text);
-  date.setHours(0, 0, 0, 0);
-  return Number.isNaN(date.getTime()) ? null : date;
-}
-
-function addScheduleWindowDays(date) {
-  const maxDate = new Date(date);
-  maxDate.setDate(maxDate.getDate() + SCHEDULE_WINDOW_DAYS);
-  return maxDate;
->>>>>>> origin/main
 }
 
 async function updateSurrenderAvailability(req, res) {
@@ -118,7 +89,6 @@ async function updateSurrenderAvailability(req, res) {
       },
     }, { merge: true });
 
-<<<<<<< HEAD
     return res.json({
       message: acceptingRequests
         ? "Incoming surrender requests are now open."
@@ -135,29 +105,6 @@ async function updateSurrenderAvailability(req, res) {
       message: "Failed to update surrender request availability.",
       error: error.message,
     });
-=======
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const minDate = decisionDate > today ? decisionDate : today;
-  const maxDate = addScheduleWindowDays(decisionDate);
-
-  return scheduleDate >= minDate && scheduleDate <= maxDate;
-}
-
-async function analyzeSurrenderReason(reason) {
-  const response = await fetch(PYTHON_SENTIMENT_API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      reason,
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error("Python sentiment service failed.");
->>>>>>> origin/main
   }
 }
 
@@ -498,11 +445,7 @@ async function scheduleMySurrenderAppointment(req, res) {
 
     if (!validateScheduleDate(data, date)) {
       return res.status(400).json({
-<<<<<<< HEAD
         message: "Appointment date must be today or later and within the 14-day attendance deadline.",
-=======
-        message: "Surrender appointment date must be within 14 days from the request acceptance date.",
->>>>>>> origin/main
       });
     }
 
@@ -594,16 +537,9 @@ async function approveSurrenderReschedule(req, res) {
       });
     }
 
-<<<<<<< HEAD
     if (!validateScheduleDate(data, request.date)) {
       return res.status(400).json({
         message: "The requested surrender appointment is outside the active 14-day attendance deadline.",
-=======
-    const acceptedDate = data.acceptedDate || data.acceptedAt || data.approvedDate || data.approvedAt || data.reviewedAt || data.updatedAt;
-    if (!isScheduleWithinDecisionWindow(request.date, acceptedDate)) {
-      return res.status(400).json({
-        message: "Surrender appointment date must be within 14 days from the request acceptance date.",
->>>>>>> origin/main
       });
     }
 

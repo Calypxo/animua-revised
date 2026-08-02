@@ -1369,7 +1369,6 @@ body.announcements-page .animua-chatbot-toggle {
     bottom: max(18px, env(safe-area-inset-bottom)) !important;
   }
 }
-<<<<<<< HEAD
 
 /* Compact announcement page content, without touching shared navbar/footer. */
 .community-cover {
@@ -1779,5 +1778,3 @@ body.announcements-page .announcements-section {
   line-height: 1.5;
   text-align: center;
 }
-=======
->>>>>>> origin/main

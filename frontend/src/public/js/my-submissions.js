@@ -928,17 +928,10 @@ function parseDateValue(value) {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
-<<<<<<< HEAD
 function addDays(date, days) {
   const result = new Date(date);
   result.setDate(result.getDate() + Number(days));
   return result;
-=======
-function addScheduleWindowDays(date) {
-  const maxDate = new Date(date);
-  maxDate.setDate(maxDate.getDate() + SCHEDULE_WINDOW_DAYS);
-  return maxDate;
->>>>>>> origin/main
 }
 
 function getDecisionDate(kind, item) {
@@ -977,13 +970,9 @@ function getScheduleWindow(kind, item) {
     minDate.setTime(decisionDate.getTime());
   }
 
-<<<<<<< HEAD
   const configuredDeadline = parseDateValue(item?.details?.attendanceDeadlineAt);
   const maxDate = configuredDeadline || addDays(decisionDate, 14);
   maxDate.setHours(23, 59, 59, 999);
-=======
-  const maxDate = addScheduleWindowDays(decisionDate);
->>>>>>> origin/main
 
   return { minDate, maxDate };
 }
@@ -1078,11 +1067,7 @@ async function promptForSchedule(kind, item) {
 
         <div class="schedule-picker-section">
           <div class="schedule-limit-reminder">
-<<<<<<< HEAD
             <strong>*Choose a date on or before your 14-day shelter attendance deadline: ${escapeHtml(formatDate(maxDate))}.</strong>
-=======
-            <strong>${isSurrender ? "*Date is limited to 14 days from the request acceptance date." : "*Date is limited to 14 days from the application approval date."}</strong>
->>>>>>> origin/main
           </div>
           <div data-calendar-root></div>
 
@@ -1247,13 +1232,7 @@ async function promptForSchedule(kind, item) {
       }
 
       if (!chosenDate || !isScheduleDateAllowed(chosenDate, minDate, maxDate)) {
-<<<<<<< HEAD
         Swal.showValidationMessage("Please choose a date on or before your 14-day shelter attendance deadline.");
-=======
-        Swal.showValidationMessage(isSurrender
-          ? "Please choose a date within 14 days from the request acceptance date."
-          : "Please choose a date within 14 days from the application approval date.");
->>>>>>> origin/main
         return false;
       }
 

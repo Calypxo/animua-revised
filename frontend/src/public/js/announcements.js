@@ -175,6 +175,7 @@ const HOMEPAGE_HIGHLIGHT_POSTS = [
   },
 ];
 
+const today = new Date();
 const state = {
   announcements: [],
   search: "",
@@ -182,28 +183,17 @@ const state = {
   action: "",
   visibleCount: 5,
   targetedId: "",
-};
-
-<<<<<<< HEAD
-const today = new Date();
-const state = {
-  announcements: [],
-  search: "",
-  type: "",
   calendarMonth: new Date(today.getFullYear(), today.getMonth(), 1),
   selectedEventDate: "",
   calendarInitialized: false,
 };
-=======
->>>>>>> origin/main
+
 const feed = document.getElementById("announcementFeed");
 const featured = document.getElementById("featuredAnnouncement");
 const status = document.getElementById("announcementStatus");
 const eventList = document.getElementById("upcomingEventList");
-<<<<<<< HEAD
 const calendarGrid = document.getElementById("publicCalendarGrid");
 const calendarMonth = document.getElementById("publicCalendarMonth");
-=======
 const searchInput = document.getElementById("announcementSearch");
 const typeSelect = document.getElementById("announcementType");
 const typeSelectWrap = document.querySelector(".announcement-topic-select");
@@ -212,7 +202,6 @@ const typeLabel = document.getElementById("announcementTypeLabel");
 const typeMenu = document.getElementById("announcementTypeMenu");
 const showAllButton = document.getElementById("showAllAnnouncements");
 const pastAnnouncementsButton = document.getElementById("pastAnnouncementsBtn");
->>>>>>> origin/main
 
 document.querySelector("[data-login-link]")?.classList.toggle("hidden", localStorage.getItem("is_logged_in") === "true");
 
@@ -250,7 +239,6 @@ function publishedDate(value) {
     : "Recently";
 }
 
-<<<<<<< HEAD
 function parseEventDate(value) {
   if (!value) return "";
   const parts = String(value).split("-").map(Number);
@@ -301,21 +289,16 @@ function initializeCalendar(events) {
 function setText(id, value) {
   const element = document.getElementById(id);
   if (element) element.textContent = value;
-=======
+}
+
 function eventDateParts(value) {
-  if (!value) return { month: "Soon", day: "" };
-  const parts = String(value).split("-").map(Number);
-  const date = parts.length === 3 ? new Date(parts[0], parts[1] - 1, parts[2]) : new Date(value);
-  if (Number.isNaN(date.getTime())) return { month: "Soon", day: "" };
+  const date = parseEventDate(value);
+  if (!date) return { month: "Soon", day: "", full: "" };
   return {
     month: date.toLocaleDateString("en-PH", { month: "short" }).toUpperCase(),
     day: date.toLocaleDateString("en-PH", { day: "2-digit" }),
     full: date.toLocaleDateString("en-PH", { weekday: "short", year: "numeric", month: "long", day: "numeric" }),
   };
-}
-
-function eventDate(value) {
-  return eventDateParts(value).full || String(value || "Soon");
 }
 
 function getPostDate(item) {
@@ -356,7 +339,6 @@ function getStoryDetails(item = {}) {
       seen.add(key);
       return true;
     });
->>>>>>> origin/main
 }
 
 function setStatus(message = "", icon = "") {
@@ -631,7 +613,6 @@ function renderEvents() {
   });
 }
 
-<<<<<<< HEAD
 function moveCalendar(offset) {
   state.calendarMonth = new Date(
     state.calendarMonth.getFullYear(),
@@ -652,9 +633,6 @@ function updateStats() {
   setText("publicStoryCount", state.announcements.filter((item) => normalizeType(item.type) === "Success Stories").length);
   setText("publicEventCount", state.announcements.filter((item) => normalizeType(item.type) === "Upcoming Events").length);
 }
-
-=======
->>>>>>> origin/main
 function render() {
   if (!feed || !featured) return;
   const filtered = getFilteredPosts();
@@ -876,6 +854,7 @@ async function loadAnnouncements() {
     if (!response.ok) throw new Error(data.message || "Announcements could not be loaded.");
     state.announcements = mergeAnnouncements(data.announcements);
     setStatus();
+    updateStats();
     renderEvents();
     const requestedAnnouncement = findAnnouncementByQuery();
     render();
@@ -883,6 +862,7 @@ async function loadAnnouncements() {
   } catch (error) {
     state.announcements = mergeAnnouncements();
     setStatus("Showing saved community highlights while live announcements are unavailable.", "fa-solid fa-circle-info");
+    updateStats();
     renderEvents();
     const requestedAnnouncement = findAnnouncementByQuery();
     render();
