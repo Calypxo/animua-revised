@@ -415,8 +415,10 @@ export function loadSidebar() {
     <aside class="sidebar" id="sidebar" aria-label="Administration sidebar">
       <header class="sidebar-header">
         <a class="sidebar-brand" href="/pages/dashboard.html" aria-label="ANIMUA dashboard">
-          <span class="brand-mark"><i class="bi bi-heart-pulse-fill" aria-hidden="true"></i></span>
-          <span class="brand-copy"><strong>ANIMUA</strong><small>Management</small></span>
+          <span class="brand-mark">
+            <img class="brand-logo" src="/images/animua_logo1.svg" alt="" aria-hidden="true">
+          </span>
+          <span class="brand-copy"><strong>NIMUA</strong></span>
         </a>
       </header>
       <nav class="sidebar-nav" aria-label="Management navigation">
