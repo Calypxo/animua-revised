@@ -52,7 +52,7 @@
 }
 
 .submissions-page .header .navbar-logo-img {
-  display: none !important;
+  display: block !important;
 }
 
 .submissions-page .navbar-brand-copy,
@@ -2677,7 +2677,7 @@ body.home-page.submissions-page .header.scrolled .navbar-brand-copy {
 }
 
 body.home-page.submissions-page .header .navbar-logo-img {
-  display: none !important;
+  display: block !important;
 }
 
 body.home-page.submissions-page .navbar a,

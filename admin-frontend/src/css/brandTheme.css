@@ -135,13 +135,16 @@ body.management-consistent-ui {
 
 .management-consistent-ui .brand-mark {
   color: var(--animua-text) !important;
-  background: var(--animua-gold) !important;
-  box-shadow: 0 10px 22px rgba(247, 181, 56, 0.24) !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 .management-consistent-ui .brand-copy strong {
   color: var(--animua-burgundy) !important;
-  font-weight: 800 !important;
+  font-family: "League Spartan", "Inter", sans-serif !important;
+  font-weight: 900 !important;
+  letter-spacing: 0 !important;
+  text-transform: lowercase !important;
 }
 
 .management-consistent-ui .brand-copy small {
