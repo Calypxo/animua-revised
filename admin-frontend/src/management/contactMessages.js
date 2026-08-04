@@ -491,10 +491,8 @@ async function sendReply(event) {
 
     await Swal.fire({
       icon: "success",
-      title: result.emailSent ? "Reply sent" : "Reply saved",
-      text: result.emailSent
-        ? "The sender received the official ANIMUA email response."
-        : "The message was saved in the user's ANIMUA notifications. Email delivery needs backend email settings.",
+      title: "Reply saved",
+      text: result.message || "The message was saved in the user's ANIMUA account.",
       timer: 1700,
       showConfirmButton: false,
       customClass: {
