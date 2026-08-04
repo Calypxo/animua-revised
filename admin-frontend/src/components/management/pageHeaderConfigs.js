@@ -2,7 +2,7 @@ export const PAGE_HEADER_CONFIGS = Object.freeze({
   dashboard: {
     headingId: "pageTitle",
     image: "/images/dashboard.jpg",
-    imagePosition: "center 40%",
+    imagePosition: "center 30%",
     eyebrow: "Shelter Operations",
     title: "Command Center",
     description: "Monitor animal care, intake movement, adoption readiness, and shelter priorities from one coordinated view.",
@@ -27,6 +27,8 @@ export const PAGE_HEADER_CONFIGS = Object.freeze({
   },
   intake: {
     headingId: "pageTitle",
+    image: "/images/intake.jpg",
+    imagePosition: "center 45%",
     eyebrow: "Animal Management",
     title: "Intake Management",
     description: "Review incoming cases, document animal condition, and move approved records into profiling and care monitoring.",
@@ -49,6 +51,8 @@ export const PAGE_HEADER_CONFIGS = Object.freeze({
   },
   surrenders: {
     headingId: "pageTitle",
+    image: "/images/surrenders.jpg",
+    imagePosition: "center 45%",
     eyebrow: "Animal Management",
     title: "Surrender Requests",
     description: "Review owner submissions, prioritize urgent cases, and guide approved animals into the intake workflow.",
@@ -71,6 +75,8 @@ export const PAGE_HEADER_CONFIGS = Object.freeze({
     ]
   },
   animalProfiling: {
+    image: "/images/animal-profiling.jpg",
+    imagePosition: "center 45%",
     headingId: "pageTitle",
     eyebrow: "Animal Management",
     title: "Animal Profiling",
@@ -94,6 +100,8 @@ export const PAGE_HEADER_CONFIGS = Object.freeze({
     ]
   },
   users: {
+    image: "/images/user-management.jpg",
+    imagePosition: "center 45%",
     headingId: "userManagementTitle",
     eyebrow: "System Administration",
     title: "User Management",
@@ -118,6 +126,8 @@ export const PAGE_HEADER_CONFIGS = Object.freeze({
   },
   adoptions: {
     headingId: "pageTitle",
+    image: "/images/adoptions.jpg",
+    imagePosition: "center 15%",
     eyebrow: "Adoption Management",
     title: "Adoption Applications",
     description: "Review direct and AI-matched adoption requests, record decisions, and guide approved applicants to placement.",
@@ -140,6 +150,8 @@ export const PAGE_HEADER_CONFIGS = Object.freeze({
     ]
   },
   inventory: {
+    image: "/images/inventory.jpg",
+    imagePosition: "center 45%", 
     headingId: "pageTitle",
     eyebrow: "Resource Management",
     title: "Inventory Management",
@@ -166,6 +178,8 @@ export const PAGE_HEADER_CONFIGS = Object.freeze({
   },
   announcements: {
     headingId: "pageTitle",
+    image: "/images/announcements.jpg",
+    imagePosition: "center 35%",
     eyebrow: "Community Engagement",
     title: "Announcements",
     description: "Publish trusted news and articles, celebrate success stories, and keep the community informed about upcoming events.",
@@ -187,6 +201,8 @@ export const PAGE_HEADER_CONFIGS = Object.freeze({
   },
   contactMessages: {
     headingId: "pageTitle",
+    image: "/images/contact-messages.jpg",
+    imagePosition: "center 85%",
     eyebrow: "Community Engagement",
     title: "Contact Messages",
     description: "Review public inquiries, keep responses organized, and send official ANIMUA replies from one coordinated inbox.",
@@ -215,6 +231,8 @@ export const PAGE_HEADER_CONFIGS = Object.freeze({
   },
   reports: {
     headingId: "pageTitle",
+    image: "/images/reports.jpg",
+    imagePosition: "center 25%",
     eyebrow: "Operational Intelligence",
     title: "Reports Center",
     description: "Explore live shelter data, narrow records by date, and export reliable operational reports for review and planning.",
@@ -239,6 +257,8 @@ export const PAGE_HEADER_CONFIGS = Object.freeze({
   },
   auditTrail: {
     headingId: "pageTitle",
+    image: "/images/audit-trail.jpg",
+    imagePosition: "center 85%",  
     eyebrow: "System Governance",
     title: "Audit Trail",
     description: "Review staff actions, system events, and affected records with a clear, searchable history of administrative activity.",
@@ -263,6 +283,8 @@ export const PAGE_HEADER_CONFIGS = Object.freeze({
   },
   archivedRecords: {
     headingId: "pageTitle",
+    image: "/images/archived-records.jpg",
+    imagePosition: "center 55%",
     eyebrow: "Records Governance",
     title: "Archived Records",
     description: "Review retained records across shelter modules, understand why they were archived, and restore eligible animal profiles safely.",
@@ -288,6 +310,8 @@ export const PAGE_HEADER_CONFIGS = Object.freeze({
   },
   accountSettings: {
     headingId: "pageTitle",
+    image: "/images/account-settings.jpg",
+    imagePosition: "center 45%",
     eyebrow: "Personal Workspace",
     title: "Account Settings",
     description: "Manage the identity shown across ANIMUA and keep your management account protected with clear, secure controls.",
