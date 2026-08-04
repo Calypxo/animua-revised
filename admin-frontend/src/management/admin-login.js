@@ -126,15 +126,17 @@ async function handleAdminLogin(e) {
   const btn   = document.getElementById("togglePassword");
   const field = document.getElementById("login-password");
   const icon  = document.getElementById("eye-icon");
-  if (!btn || !field) return;
+  if (!btn || !field || !icon) return;
  
   const eyeOpen = `<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>`;
   const eyeClosed = `<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-10-8-10-8a18.44 18.44 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 10 8 10 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>`;
+
+  icon.innerHTML = eyeClosed;
  
   btn.addEventListener("click", () => {
     const show = field.type === "password";
     field.type = show ? "text" : "password";
-    icon.innerHTML = show ? eyeClosed : eyeOpen;
+    icon.innerHTML = show ? eyeOpen : eyeClosed;
     btn.setAttribute("aria-pressed", String(show));
     btn.setAttribute("aria-label", show ? "Hide password" : "Show password");
     btn.title = show ? "Hide password" : "Show password";
