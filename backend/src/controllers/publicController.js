@@ -1,4 +1,4 @@
-const { db } = require("../config/firebase");
+const { admin, db } = require("../config/firebase");
 const nodemailer = require("nodemailer");
 const path = require("path");
 const {
@@ -81,6 +81,49 @@ const serializeContactDate = (value) => {
   if (value?._seconds) return new Date(value._seconds * 1000).toISOString();
   if (value?.seconds) return new Date(value.seconds * 1000).toISOString();
   return value;
+};
+
+const buildContactThread = (data = {}) => {
+  const storedMessages = Array.isArray(data.messages) ? data.messages : [];
+  const messages = storedMessages
+    .map((item) => ({
+      sender: item.sender === "admin" ? "admin" : "user",
+      name:
+        item.name ||
+        (item.sender === "admin" ? "ANIMUA Team" : data.fullName || "User"),
+      message: item.message || "",
+      createdAt: serializeContactDate(item.createdAt),
+    }))
+    .filter((item) => item.message);
+
+  if (!messages.length && data.message) {
+    messages.push({
+      sender: "user",
+      name: data.fullName || "User",
+      message: data.message,
+      createdAt: serializeContactDate(data.createdAt),
+    });
+  }
+
+  if (!storedMessages.length && data.replyMessage) {
+    messages.push({
+      sender: "admin",
+      name: data.repliedBy || "ANIMUA Team",
+      message: data.replyMessage,
+      createdAt: serializeContactDate(data.repliedAt),
+    });
+  }
+
+  return messages.sort((a, b) => {
+    const dateA = Date.parse(a.createdAt) || 0;
+    const dateB = Date.parse(b.createdAt) || 0;
+    return dateA - dateB;
+  });
+};
+
+const getLatestUserMessage = (messages = [], fallback = "") => {
+  const latestUser = [...messages].reverse().find((item) => item.sender === "user");
+  return latestUser?.message || fallback || "";
 };
 
 const isPublishedEvent = (event = {}) => {
@@ -329,6 +372,7 @@ exports.getContactMessages = async (req, res) => {
     const messages = snapshot.docs
       .map((doc) => {
         const data = doc.data() || {};
+        const messages = buildContactThread(data);
 
         return {
           id: doc.id,
@@ -336,7 +380,9 @@ exports.getContactMessages = async (req, res) => {
           fullName: data.fullName || "",
           email: data.email || "",
           subject: data.subject || "",
-          message: data.message || "",
+          message: getLatestUserMessage(messages, data.message),
+          originalMessage: data.message || "",
+          messages,
           status: data.status || "New",
           source: data.source || "Contact Us Page",
           recipient: data.recipient || CONTACT_RECIPIENT,
@@ -360,6 +406,62 @@ exports.getContactMessages = async (req, res) => {
     console.error("[getContactMessages]", error.message);
     return res.status(500).json({
       message: "Failed to load contact messages.",
+    });
+  }
+};
+
+/**
+ * GET /api/public/contact/my-messages
+ * Contact message history for the current logged-in user.
+ */
+exports.getMyContactMessages = async (req, res) => {
+  try {
+    const email = normalizeContactText(req.user?.email, 160).toLowerCase();
+
+    if (!email || !isValidEmail(email)) {
+      return res.status(400).json({
+        message: "A valid account email is required.",
+      });
+    }
+
+    const snapshot = await db
+      .collection(CONTACT_COL)
+      .where("email", "==", email)
+      .get();
+
+    const messages = snapshot.docs
+      .map((doc) => {
+        const data = doc.data() || {};
+        const thread = buildContactThread(data);
+
+        return {
+          id: doc.id,
+          subject: data.subject || "Contact inquiry",
+          message: getLatestUserMessage(thread, data.message),
+          originalMessage: data.message || "",
+          status: data.status || "New",
+          createdAt: serializeContactDate(data.createdAt),
+          repliedAt: serializeContactDate(data.repliedAt),
+          replyMessage: data.replyMessage || "",
+          fullName: data.fullName || "",
+          messages: thread,
+        };
+      })
+      .sort((a, b) => {
+        const dateA = Date.parse(a.createdAt) || 0;
+        const dateB = Date.parse(b.createdAt) || 0;
+        return dateB - dateA;
+      })
+      .slice(0, 5);
+
+    return res.status(200).json({
+      messages,
+      total: messages.length,
+    });
+  } catch (error) {
+    console.error("[getMyContactMessages]", error.message);
+    return res.status(500).json({
+      message: "Failed to load your messages.",
     });
   }
 };
@@ -395,6 +497,14 @@ exports.submitContactMessage = async (req, res) => {
       email,
       subject,
       message,
+      messages: [
+        {
+          sender: "user",
+          name: fullName,
+          message,
+          createdAt: new Date().toISOString(),
+        },
+      ],
       recipient: CONTACT_RECIPIENT,
       status: "New",
       source: "Contact Us Page",
@@ -553,6 +663,72 @@ exports.submitContactMessage = async (req, res) => {
 };
 
 /**
+ * POST /api/public/contact/:id/follow-up
+ * User follow-up reply inside their existing Contact Us conversation.
+ */
+exports.addContactFollowUp = async (req, res) => {
+  try {
+    const contactId = String(req.params.id || "").trim();
+    const email = normalizeContactText(req.user?.email, 160).toLowerCase();
+    const message = normalizeContactText(req.body.message, 2000);
+
+    if (!contactId || !email || !message) {
+      return res.status(400).json({
+        message: "Conversation ID, account email, and reply message are required.",
+      });
+    }
+
+    if (!isValidEmail(email)) {
+      return res.status(400).json({
+        message: "A valid account email is required.",
+      });
+    }
+
+    const contactRef = db.collection(CONTACT_COL).doc(contactId);
+    const contactDoc = await contactRef.get();
+
+    if (!contactDoc.exists) {
+      return res.status(404).json({
+        message: "Conversation not found.",
+      });
+    }
+
+    const contact = contactDoc.data() || {};
+    const savedEmail = normalizeContactText(contact.email, 160).toLowerCase();
+
+    if (savedEmail !== email) {
+      return res.status(403).json({
+        message: "This conversation does not belong to your account.",
+      });
+    }
+
+    const createdAt = new Date().toISOString();
+
+    await contactRef.update({
+      status: "New",
+      message,
+      updatedAt: createdAt,
+      messages: admin.firestore.FieldValue.arrayUnion({
+        sender: "user",
+        name: contact.fullName || req.user?.fullName || "User",
+        message,
+        createdAt,
+      }),
+    });
+    invalidateAttentionCache();
+
+    return res.status(200).json({
+      message: "Your reply has been added to the conversation.",
+    });
+  } catch (error) {
+    console.error("[addContactFollowUp]", error.message);
+    return res.status(500).json({
+      message: "Failed to save your reply. Please try again later.",
+    });
+  }
+};
+
+/**
  * POST /api/public/contact/:id/reply
  * Staff/Admin reply email for a saved Contact Us inquiry.
  */
@@ -701,6 +877,12 @@ exports.replyToContactMessage = async (req, res) => {
       replyMessage,
       repliedAt: new Date().toISOString(),
       repliedBy: req.user?.email || req.user?.uid || "ANIMUA Team",
+      messages: admin.firestore.FieldValue.arrayUnion({
+        sender: "admin",
+        name: req.user?.fullName || req.user?.email || "ANIMUA Team",
+        message: replyMessage,
+        createdAt: new Date().toISOString(),
+      }),
     });
     invalidateAttentionCache();
 

@@ -278,11 +278,11 @@
 
 <!-- Pet Profile Modal -->
   <!-- Pet Profile Modal -->
-<div class="modal-overlay" id="profileModal">
+<div class="modal-overlay" id="petProfileModal">
   <div class="redesigned-profile-modal">
     <span class="profile-type-badge" id="profileType">Dog</span>
     <span class="profile-status-pill" id="profileStatus">Ready for Adoption</span>
-    <button class="modal-close profile-close-btn" data-close="profileModal">
+    <button class="modal-close profile-close-btn" data-close="petProfileModal">
       <i class="fa-solid fa-xmark"></i>
     </button>
 
@@ -415,12 +415,17 @@
         <div class="adoption-grid">
           <div class="form-group">
             <label for="fullName">Full Name *</label>
-            <input type="text" id="fullName" name="full_name" placeholder="Enter your full name" required>
+            <input type="text" id="fullName" name="full_name" placeholder="Enter your full name" readonly required>
           </div>
 
           <div class="form-group">
             <label for="birthdate">Birthdate *</label>
-            <input type="date" id="birthdate" name="birthdate" required>
+            <div class="date-picker-field" data-date-picker>
+              <input type="text" id="birthdate" name="birthdate" placeholder="Select birthdate" autocomplete="off" inputmode="none" required>
+              <button type="button" class="date-picker-button" id="birthdatePickerBtn" aria-label="Open birthdate calendar" aria-haspopup="dialog" aria-expanded="false">
+                <i class="fa-regular fa-calendar-days" aria-hidden="true"></i>
+              </button>
+            </div>
           </div>
 
           <div class="form-group">
@@ -467,7 +472,7 @@
 
           <div class="form-group">
             <label for="contactNumber">Contact Number(s) *</label>
-            <input type="text" id="contactNumber" name="contact_number" placeholder="09XXXXXXXXX" required>
+            <input type="tel" id="contactNumber" name="contact_number" placeholder="09XXXXXXXXX" inputmode="numeric" pattern="[0-9]*" maxlength="11" required>
           </div>
 
           <div class="form-group">
@@ -606,23 +611,6 @@
             <div class="adoption-review-summary" id="adoptionReviewSummary"></div>
           </div>
 
-          <div class="form-group full adoption-upload-card">
-            <h3>Upload a Valid Government-Issued ID</h3>
-            <p>Front side required. Back side optional unless required by the selected ID. Accepted files: JPG, JPEG, PNG, and PDF. Maximum size: 5 MB per file.</p>
-            <div class="adoption-upload-grid">
-              <div>
-                <label for="idFrontUpload">Front side *</label>
-                <input type="file" id="idFrontUpload" name="id_front_upload" accept=".jpg,.jpeg,.png,.pdf" required>
-                <div class="upload-preview" id="idFrontPreview"></div>
-              </div>
-              <div>
-                <label for="idBackUpload">Back side</label>
-                <input type="file" id="idBackUpload" name="id_back_upload" accept=".jpg,.jpeg,.png,.pdf">
-                <div class="upload-preview" id="idBackPreview"></div>
-              </div>
-            </div>
-            <p class="adoption-privacy-notice">Your ID will be used only to verify your identity and support the shelter's adoption review. It will not be displayed publicly.</p>
-          </div>
         </div>
 
         <div class="pledge-box">
@@ -653,11 +641,6 @@
           <div class="form-group">
             <label for="issuedYear">Year</label>
             <input type="text" id="issuedYear" name="issued_year" placeholder="Year">
-          </div>
-
-          <div class="form-group full">
-            <label for="signatureName">Signature / Printed Name</label>
-            <input type="text" id="signatureName" name="signature_name">
           </div>
         </div>
 

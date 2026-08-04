@@ -11,7 +11,9 @@ const {
   getPublicPetById,
   getPublicEvents,
   getContactMessages,
+  getMyContactMessages,
   submitContactMessage,
+  addContactFollowUp,
   replyToContactMessage,
 } = require("../controllers/publicController");
 
@@ -25,12 +27,18 @@ router.get(
   authorizeRole("Admin", "Staff"),
   getContactMessages
 );
+router.get("/contact/my-messages", authenticateToken, getMyContactMessages);
 router.post(
   "/contact",
   rejectContactHoneypot,
   contactRateLimiter,
   authenticateToken,
   submitContactMessage
+);
+router.post(
+  "/contact/:id/follow-up",
+  authenticateToken,
+  addContactFollowUp
 );
 router.post(
   "/contact/:id/reply",

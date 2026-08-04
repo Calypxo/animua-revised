@@ -78,17 +78,17 @@ const quizPageFrame = document.getElementById("quizPageFrame");
 const quizPageTriggers = document.querySelectorAll("[data-quiz-page-trigger]");
 const quizPageCloseButtons = document.querySelectorAll("[data-quiz-page-close]");
 let lastQuizIntroTrigger = null;
-const profileModal = document.getElementById("profileModal");
-const profileModalCard = profileModal?.querySelector(".profile-modal-card");
-const profileCloseButtons = document.querySelectorAll("[data-profile-close]");
-const profileForm = document.getElementById("profileForm");
-const profileEditBtn = document.getElementById("profileEditBtn");
-const profileSaveBtn = document.getElementById("profileSaveBtn");
-const profileChangePhotoBtn = document.getElementById("profileChangePhotoBtn");
-const profileAvatarPhotoBtn = document.getElementById("profileAvatarPhotoBtn");
-const profilePhotoInput = document.getElementById("profilePhotoInput");
-const profilePasswordBtn = document.getElementById("profilePasswordBtn");
-const profileNotificationsBtn = document.getElementById("profileNotificationsBtn");
+let profileModal = document.querySelector("#profileModal.profile-modal-overlay");
+let profileModalCard = profileModal?.querySelector(".profile-modal-card");
+let profileCloseButtons = document.querySelectorAll("[data-profile-close]");
+let profileForm = document.getElementById("profileForm");
+let profileEditBtn = document.getElementById("profileEditBtn");
+let profileSaveBtn = document.getElementById("profileSaveBtn");
+let profileChangePhotoBtn = document.getElementById("profileChangePhotoBtn");
+let profileAvatarPhotoBtn = document.getElementById("profileAvatarPhotoBtn");
+let profilePhotoInput = document.getElementById("profilePhotoInput");
+let profilePasswordBtn = document.getElementById("profilePasswordBtn");
+let profileNotificationsBtn = document.getElementById("profileNotificationsBtn");
 const PROFILE_PHOTO_MAX_SIDE = 420;
 const PROFILE_PHOTO_MAX_BYTES = 320000;
 const DEFAULT_NOTIFICATION_SETTINGS = {
@@ -222,6 +222,125 @@ function closeQuizPageModal(event) {
   quizPageModal.setAttribute("aria-hidden", "true");
   if (quizPageFrame) quizPageFrame.src = "";
   document.body.classList.remove("modal-open");
+}
+
+function getAccountProfileModalMarkup() {
+  return `
+    <section class="profile-modal-overlay hidden" id="profileModal" aria-hidden="true" aria-labelledby="profileModalTitle">
+      <button type="button" class="profile-modal-backdrop" data-profile-close aria-label="Close profile"></button>
+      <article class="profile-modal-card" role="dialog" aria-modal="true" tabindex="-1">
+        <button type="button" class="profile-modal-close" data-profile-close aria-label="Close profile">
+          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        </button>
+
+        <div class="profile-modal-shell">
+          <div class="profile-modal-title">
+            <span class="profile-title-icon" aria-hidden="true">
+              <i class="fa-regular fa-user"></i>
+            </span>
+            <h2 id="profileModalTitle">My Profile</h2>
+          </div>
+
+          <section class="profile-summary-card">
+            <div class="profile-summary-main">
+              <div class="profile-avatar-wrap">
+                <div class="profile-summary-avatar" id="profileAvatarPreview">A</div>
+                <button type="button" class="profile-avatar-camera" id="profileAvatarPhotoBtn" aria-label="Change profile photo">
+                  <i class="fa-solid fa-camera" aria-hidden="true"></i>
+                </button>
+              </div>
+              <div>
+                <h3 id="profileSummaryName">Account</h3>
+                <small>Member since <span id="profileMemberSince">2026</span> <b aria-hidden="true"></b></small>
+              </div>
+            </div>
+
+            <div class="profile-summary-actions">
+              <input type="file" id="profilePhotoInput" accept="image/png,image/jpeg,image/webp" hidden>
+              <button type="button" class="profile-outline-btn" id="profileChangePhotoBtn">
+                <i class="fa-solid fa-camera" aria-hidden="true"></i>
+                <span>Change Photo</span>
+              </button>
+            </div>
+          </section>
+
+          <form class="profile-form" id="profileForm">
+            <section class="profile-info-card">
+              <div class="profile-section-head">
+                <h3><i class="fa-solid fa-circle-user" aria-hidden="true"></i> Personal Information</h3>
+                <button type="button" class="profile-outline-btn profile-edit-inline" id="profileEditBtn">
+                  <i class="fa-solid fa-pen" aria-hidden="true"></i>
+                  <span>Edit Profile</span>
+                </button>
+              </div>
+
+              <label class="profile-info-row">
+                <i class="fa-regular fa-user" aria-hidden="true"></i>
+                <span><strong>Full Name</strong><input type="text" id="profileFullName" autocomplete="name" readonly></span>
+              </label>
+
+              <label class="profile-info-row">
+                <i class="fa-regular fa-envelope" aria-hidden="true"></i>
+                <span><strong>Email Address</strong><input type="email" id="profileEmail" autocomplete="email" readonly></span>
+              </label>
+
+              <label class="profile-info-row">
+                <i class="fa-solid fa-phone" aria-hidden="true"></i>
+                <span><strong>Mobile Number</strong><input type="tel" id="profilePhone" autocomplete="tel" readonly placeholder="Not added yet"></span>
+              </label>
+            </section>
+
+            <section class="profile-info-card profile-settings-card">
+              <h3><i class="fa-solid fa-gear" aria-hidden="true"></i> Account Settings</h3>
+
+              <button type="button" class="profile-settings-row" id="profilePasswordBtn">
+                <i class="fa-solid fa-lock" aria-hidden="true"></i>
+                <span><strong>Password</strong><small>Update your account password</small></span>
+                <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+              </button>
+
+              <button type="button" class="profile-settings-row" id="profileNotificationsBtn">
+                <i class="fa-regular fa-bell" aria-hidden="true"></i>
+                <span><strong>Notifications</strong><small id="profileNotificationSummary">Manage email and push notifications</small></span>
+                <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+              </button>
+            </section>
+
+            <p class="profile-status-message" id="profileStatusMessage" aria-live="polite"></p>
+
+            <div class="profile-modal-actions">
+              <button type="submit" class="profile-save-btn" id="profileSaveBtn">
+                <i class="fa-regular fa-floppy-disk" aria-hidden="true"></i>
+                <span>Save Changes</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </article>
+    </section>
+  `;
+}
+
+function refreshProfileModalElements() {
+  profileModal = document.querySelector("#profileModal.profile-modal-overlay");
+  profileModalCard = profileModal?.querySelector(".profile-modal-card");
+  profileCloseButtons = document.querySelectorAll("[data-profile-close]");
+  profileForm = document.getElementById("profileForm");
+  profileEditBtn = document.getElementById("profileEditBtn");
+  profileSaveBtn = document.getElementById("profileSaveBtn");
+  profileChangePhotoBtn = document.getElementById("profileChangePhotoBtn");
+  profileAvatarPhotoBtn = document.getElementById("profileAvatarPhotoBtn");
+  profilePhotoInput = document.getElementById("profilePhotoInput");
+  profilePasswordBtn = document.getElementById("profilePasswordBtn");
+  profileNotificationsBtn = document.getElementById("profileNotificationsBtn");
+}
+
+function ensureAccountProfileModal() {
+  if (!document.querySelector("#profileModal.profile-modal-overlay")) {
+    document.body.insertAdjacentHTML("beforeend", getAccountProfileModalMarkup());
+  }
+  refreshProfileModalElements();
+  return profileModal;
 }
 
 function showLoginView() {
@@ -1925,6 +2044,7 @@ function setupUserDropdown() {
 }
 
 async function openProfileModal(trigger = null) {
+  ensureAccountProfileModal();
   if (!profileModal) return;
 
   if (!localStorage.getItem("animua_token")) {
@@ -3386,6 +3506,8 @@ function validateForgotPasswordForm() {
 }
 
 function setupProfileModal() {
+  ensureAccountProfileModal();
+
   profileCloseButtons.forEach((button) => {
     button.addEventListener("click", closeProfileModal);
   });

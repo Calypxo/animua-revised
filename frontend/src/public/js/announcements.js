@@ -420,61 +420,110 @@ function showAnnouncementDetail(item) {
   const postedTime = item.eventTime || "Official update";
   const priority = type === "Upcoming Events" ? "Event" : type === "Success Stories" ? "Story" : "Medium";
   const detailLabel = type === "News & Article" ? "News & Alerts" : TYPES[type].label;
+  const titleClass = title.length > 58 ? " is-long-title" : "";
+  const fallbackImage = FALLBACK_IMAGES[type] || NEWS_CCA_CAT_RESCUE_IMAGE;
 
   Swal.fire({
     html: `
-      <article class="announcement-detail">
-        <span class="announcement-detail-handle" aria-hidden="true"></span>
-        <div class="announcement-detail-kicker">${typeBadgeHtml(type, detailLabel)}</div>
-        <h2>${escapeHtml(title)}</h2>
-        <div class="announcement-detail-meta">
-          <span><i class="fa-regular fa-calendar" aria-hidden="true"></i>${escapeHtml(getPostDate(item))}</span>
-          <span>${escapeHtml(postedTime)}</span>
-          <span><i class="fa-solid fa-building-columns" aria-hidden="true"></i>${escapeHtml(source)}</span>
-        </div>
-        <img src="${escapeHtml(image)}" alt="${escapeHtml(title)}">
-        <div class="announcement-detail-copy">
-        ${details.length
-          ? details.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join("")
-          : `<p>${escapeHtml(getCaption(item))}</p>`}
-        </div>
-        <div class="announcement-detail-info">
-          <span>
-            <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
-            <strong>Affected Areas</strong>
-            <small>${escapeHtml(item.location || "Angeles City")}</small>
-          </span>
-          <span>
-            <i class="fa-solid fa-tag" aria-hidden="true"></i>
-            <strong>Priority</strong>
-            <small>${escapeHtml(priority)}</small>
-          </span>
-          <span>
-            <i class="fa-regular fa-clock" aria-hidden="true"></i>
-            <strong>Read Time</strong>
-            <small>${readMinutes} min</small>
-          </span>
-        </div>
-        <div class="announcement-detail-note">
-          <i class="fa-solid fa-shield-heart" aria-hidden="true"></i>
-          <span><strong>Stay Safe, ANIMUA.</strong> Monitor official channels and follow safety protocols. Your safety is our top priority.</span>
-        </div>
-        <div class="announcement-detail-actions">
-          <button type="button" class="announcement-detail-back" data-announcement-detail-close>
-            <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
-            <span>Back to Announcements</span>
+      <article class="announcement-detail${titleClass}">
+        <header class="announcement-detail-header">
+          <button type="button" class="announcement-detail-close" data-announcement-detail-close aria-label="Close announcement details">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
           </button>
-          <button type="button" class="announcement-detail-share" data-announcement-detail-share data-share-title="${escapeHtml(title)}" data-share-text="${escapeHtml(shareText)}">
-            <i class="fa-solid fa-share-nodes" aria-hidden="true"></i>
-            <span>Share Update</span>
+        </header>
+        <div class="announcement-detail-content">
+          <span class="announcement-detail-handle" aria-hidden="true"></span>
+          <div class="announcement-detail-kicker">${typeBadgeHtml(type, detailLabel)}</div>
+          <h2>${escapeHtml(title)}</h2>
+          <div class="announcement-detail-meta">
+            <span><i class="fa-regular fa-calendar" aria-hidden="true"></i>${escapeHtml(getPostDate(item))}</span>
+            <span>${escapeHtml(postedTime)}</span>
+            <span><i class="fa-solid fa-building-columns" aria-hidden="true"></i>${escapeHtml(source)}</span>
+          </div>
+          <button type="button" class="announcement-detail-photo-button" data-announcement-photo-src="${escapeHtml(image)}" data-announcement-photo-title="${escapeHtml(title)}" aria-label="View full photo for ${escapeHtml(title)}">
+            <img src="${escapeHtml(image)}" alt="${escapeHtml(title)}" data-fallback-src="${escapeHtml(fallbackImage)}">
+            <span><i class="fa-solid fa-expand" aria-hidden="true"></i></span>
           </button>
+          <div class="announcement-detail-copy">
+          ${details.length
+            ? details.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join("")
+            : `<p>${escapeHtml(getCaption(item))}</p>`}
+          </div>
+          <div class="announcement-detail-info">
+            <span>
+              <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+              <strong>Affected Areas</strong>
+              <small>${escapeHtml(item.location || "Angeles City")}</small>
+            </span>
+            <span>
+              <i class="fa-solid fa-tag" aria-hidden="true"></i>
+              <strong>Priority</strong>
+              <small>${escapeHtml(priority)}</small>
+            </span>
+            <span>
+              <i class="fa-regular fa-clock" aria-hidden="true"></i>
+              <strong>Read Time</strong>
+              <small>${readMinutes} min</small>
+            </span>
+          </div>
+          <div class="announcement-detail-note">
+            <i class="fa-solid fa-shield-heart" aria-hidden="true"></i>
+            <span><strong>Stay Safe, ANIMUA.</strong> Monitor official channels and follow safety protocols. Your safety is our top priority.</span>
+          </div>
+          <div class="announcement-detail-actions">
+            <button type="button" class="announcement-detail-back" data-announcement-detail-close>
+              <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+              <span>Back to Announcements</span>
+            </button>
+            <button type="button" class="announcement-detail-share" data-announcement-detail-share data-share-title="${escapeHtml(title)}" data-share-text="${escapeHtml(shareText)}">
+              <i class="fa-solid fa-share-nodes" aria-hidden="true"></i>
+              <span>Share Update</span>
+            </button>
+          </div>
         </div>
       </article>
     `,
     showConfirmButton: false,
-    showCloseButton: true,
+    showCloseButton: false,
     didOpen: (popup) => {
-      popup.querySelector("[data-announcement-detail-close]")?.addEventListener("click", () => Swal.close());
+      popup.querySelectorAll("[data-announcement-detail-close]").forEach((button) => {
+        button.addEventListener("click", () => Swal.close());
+      });
+      popup.querySelectorAll(".announcement-detail-photo-button img").forEach((photo) => {
+        photo.addEventListener("error", () => {
+          const fallbackSrc = photo.dataset.fallbackSrc;
+          if (fallbackSrc && photo.src !== fallbackSrc) {
+            photo.src = fallbackSrc;
+            const photoButton = photo.closest("[data-announcement-photo-src]");
+            if (photoButton) photoButton.dataset.announcementPhotoSrc = fallbackSrc;
+          }
+        });
+      });
+      popup.querySelector("[data-announcement-photo-src]")?.addEventListener("click", (event) => {
+        const button = event.currentTarget;
+        const photoSrc = button.dataset.announcementPhotoSrc || image;
+        const photoTitle = button.dataset.announcementPhotoTitle || title;
+
+        Swal.fire({
+          html: `
+            <figure class="announcement-photo-viewer">
+              <img src="${escapeHtml(photoSrc)}" alt="${escapeHtml(photoTitle)}">
+              <button type="button" class="announcement-photo-inline-close" data-announcement-photo-close aria-label="Close full photo">
+                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+              </button>
+            </figure>
+          `,
+          showConfirmButton: false,
+          showCloseButton: false,
+          customClass: {
+            popup: "announcement-photo-popup",
+          },
+          buttonsStyling: false,
+          didOpen: (photoPopup) => {
+            photoPopup.querySelector("[data-announcement-photo-close]")?.addEventListener("click", () => Swal.close());
+          },
+        });
+      });
       popup.querySelector("[data-announcement-detail-share]")?.addEventListener("click", async (event) => {
         const button = event.currentTarget;
         const payload = {
@@ -495,7 +544,6 @@ function showAnnouncementDetail(item) {
     },
     customClass: {
       popup: "animua-popup announcement-detail-popup",
-      closeButton: "announcement-detail-close",
     },
     buttonsStyling: false,
   });

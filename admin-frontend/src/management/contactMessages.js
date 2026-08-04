@@ -296,16 +296,47 @@ function renderDetail() {
   if (history) {
     const initial = String(user.fullName || user.email || "A").trim().charAt(0).toUpperCase() || "A";
     const conversationEvents = user.messages
-      .flatMap((message) => [
-        { type: "incoming", at: message.createdAt, message },
-        ...(message.replyMessage
-          ? [{ type: "outgoing", at: message.repliedAt || message.createdAt, message }]
-          : []),
-      ])
+      .flatMap((message) => {
+        if (Array.isArray(message.messages) && message.messages.length) {
+          return message.messages.map((entry) => ({
+            type: entry.sender === "admin" ? "outgoing" : "incoming",
+            at: entry.createdAt || message.createdAt,
+            message,
+            entry,
+          }));
+        }
+
+        return [
+          {
+            type: "incoming",
+            at: message.createdAt,
+            message,
+            entry: {
+              sender: "user",
+              message: message.message,
+              createdAt: message.createdAt,
+            },
+          },
+          ...(message.replyMessage
+            ? [
+                {
+                  type: "outgoing",
+                  at: message.repliedAt || message.createdAt,
+                  message,
+                  entry: {
+                    sender: "admin",
+                    message: message.replyMessage,
+                    createdAt: message.repliedAt || message.createdAt,
+                  },
+                },
+              ]
+            : []),
+        ];
+      })
       .sort((left, right) => dateValue(left.at) - dateValue(right.at));
 
     history.innerHTML = conversationEvents
-      .map(({ type, message }) => {
+      .map(({ type, message, entry }) => {
         if (type === "incoming") {
           const itemStatus = messageStatus(message);
           const active = message.id === state.selectedId;
@@ -314,9 +345,9 @@ function renderDetail() {
             <span class="cm-chat-avatar" aria-hidden="true">${escapeHtml(initial)}</span>
             <button class="cm-chat-bubble${active ? " active" : ""}" type="button" data-message-id="${escapeHtml(message.id)}" aria-pressed="${String(active)}">
               <span class="cm-chat-subject">${escapeHtml(message.subject || "Contact inquiry")}</span>
-              <span class="cm-chat-message">${escapeHtml(message.message || "No message content recorded.")}</span>
+              <span class="cm-chat-message">${escapeHtml(entry.message || "No message content recorded.")}</span>
               <span class="cm-chat-meta">
-                <time datetime="${escapeHtml(message.createdAt || "")}">${escapeHtml(formatDate(message.createdAt))}</time>
+                <time datetime="${escapeHtml(entry.createdAt || "")}">${escapeHtml(formatDate(entry.createdAt))}</time>
                 <span>${itemStatus === "Replied" ? "Replied" : "Needs reply"}</span>
               </span>
             </button>
@@ -326,10 +357,10 @@ function renderDetail() {
         return `
           <div class="cm-chat-row is-outgoing">
             <div class="cm-chat-bubble">
-              <span class="cm-chat-subject">ANIMUA reply · ${escapeHtml(message.subject || "Contact inquiry")}</span>
-              <span class="cm-chat-message">${escapeHtml(message.replyMessage)}</span>
+              <span class="cm-chat-subject">ANIMUA reply - ${escapeHtml(message.subject || "Contact inquiry")}</span>
+              <span class="cm-chat-message">${escapeHtml(entry.message || message.replyMessage)}</span>
               <span class="cm-chat-meta">
-                <time datetime="${escapeHtml(message.repliedAt || "")}">${escapeHtml(formatDate(message.repliedAt))}</time>
+                <time datetime="${escapeHtml(entry.createdAt || message.repliedAt || "")}">${escapeHtml(formatDate(entry.createdAt || message.repliedAt))}</time>
                 <span><i class="bi bi-check2-all" aria-hidden="true"></i> Sent</span>
               </span>
             </div>

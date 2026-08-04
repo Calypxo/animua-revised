@@ -13,7 +13,7 @@ const petSortMenu = document.getElementById("petSortMenu");
 const petSortOptions = document.querySelectorAll(".sort-menu-option");
 const filterTabs = document.querySelectorAll(".filter-tab");
 
-const profileModal = document.getElementById("profileModal");
+const profileModal = document.getElementById("petProfileModal");
 const adoptModal = document.getElementById("adoptModal");
 
 const profileImage = document.getElementById("profileImage");
@@ -48,15 +48,17 @@ const adoptionExitCancel = document.getElementById("adoptionExitCancel");
 const adoptionExitConfirmBtn = document.getElementById("adoptionExitConfirmBtn");
 const adoptionReviewSummary = document.getElementById("adoptionReviewSummary");
 const adoptionSectionTitle = document.getElementById("adoptionSectionTitle");
+const birthdateField = document.getElementById("birthdate");
+const birthdatePickerBtn = document.getElementById("birthdatePickerBtn");
+const idFrontUpload = document.getElementById("idFrontUpload");
+const idBackUpload = document.getElementById("idBackUpload");
+const idFrontPreview = document.getElementById("idFrontPreview");
+const idBackPreview = document.getElementById("idBackPreview");
 const adoptionDeclarationCheckboxes = [
   document.getElementById("confirmTruthful"),
   document.getElementById("agreeDeclaration"),
   document.getElementById("understandNoGuarantee")
 ].filter(Boolean);
-const idFrontUpload = document.getElementById("idFrontUpload");
-const idBackUpload = document.getElementById("idBackUpload");
-const idFrontPreview = document.getElementById("idFrontPreview");
-const idBackPreview = document.getElementById("idBackPreview");
 
 console.log("API_BASE_URL:", API_BASE_URL);
 console.log("petsGrid:", petsGrid);
@@ -73,6 +75,9 @@ let currentPetForAdoption = null;
 let currentAdoptionStep = 1;
 let idFrontFileData = null;
 let idBackFileData = null;
+let adoptionSelectMenus = [];
+const ADOPTION_PENDING_SOURCE = "find_furbabies_adopt_click";
+const ADOPTION_PENDING_MAX_AGE_MS = 15 * 60 * 1000;
 
 function textOr(value, fallback = "Not recorded") {
   const text = String(value ?? "").trim();
@@ -95,14 +100,14 @@ const adoptionStepFields = {
   1: ["fullName", "birthdate", "age", "address", "civilStatus", "gender", "citizenship", "contactNumber", "occupation"],
   2: ["spouseName", "childrenNames", "hasCurrentPets", "numberOfPets", "currentPetType", "visitVeterinarian", "vetClinicName", "housingType", "residenceAllowsPets", "existingPets"],
   3: ["whyAdopt", "primaryCaregiver", "petStayLocation", "hoursAlone", "provideVetCare", "provideDailyCare", "cannotCarePlan", "additionalInfo"],
-  4: ["idFrontUpload", "idBackUpload", "confirmTruthful", "agreeDeclaration", "understandNoGuarantee"]
+  4: ["confirmTruthful", "agreeDeclaration", "understandNoGuarantee"]
 };
 
 const adoptionStepTitles = {
   1: ["fa-shield-heart", "Personal Information"],
   2: ["fa-house-chimney", "Household Information"],
   3: ["fa-heart-circle-check", "Adoption Readiness"],
-  4: ["fa-clipboard-check", "Review, ID Upload, and Declaration"]
+  4: ["fa-clipboard-check", "Review and Declaration"]
 };
 
 function calculateAgeFromBirthdate(value) {
@@ -110,12 +115,359 @@ function calculateAgeFromBirthdate(value) {
   const birthdate = new Date(value);
   if (Number.isNaN(birthdate.getTime())) return "";
   const today = new Date();
+  today.setHours(0, 0, 0, 0);
   let age = today.getFullYear() - birthdate.getFullYear();
   const monthDiff = today.getMonth() - birthdate.getMonth();
   if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthdate.getDate())) {
     age -= 1;
   }
   return age >= 0 ? String(age) : "";
+}
+
+function formatDateValue(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function parseDateValue(value) {
+  const match = String(value || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return null;
+  const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function syncBirthdateAge() {
+  if (!birthdateField) return;
+  const age = calculateAgeFromBirthdate(birthdateField.value);
+  if (getField("age")) getField("age").value = age;
+}
+
+function validateBirthdateField() {
+  if (!birthdateField) return true;
+  const value = birthdateField.value.trim();
+  const selected = parseDateValue(value);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  let message = "";
+  if (!value) {
+    message = "Please select your birthdate.";
+  } else if (!selected) {
+    message = "Please use the calendar to select a valid birthdate.";
+  } else if (selected > today) {
+    message = "Birthdate cannot be in the future.";
+  }
+
+  birthdateField.setCustomValidity(message);
+  return !message;
+}
+
+function setupBirthdatePicker() {
+  if (!birthdateField || !birthdatePickerBtn) return;
+
+  const fieldWrap = birthdateField.closest("[data-date-picker]") || birthdateField.parentElement;
+  const picker = document.createElement("div");
+  picker.className = "birthdate-calendar";
+  picker.hidden = true;
+  picker.setAttribute("role", "dialog");
+  picker.setAttribute("aria-label", "Choose birthdate");
+  fieldWrap?.appendChild(picker);
+
+  const today = new Date();
+  const monthNames = Array.from({ length: 12 }, (_, month) =>
+    new Date(2000, month, 1).toLocaleString("en-US", { month: "long" })
+  );
+  let viewDate = parseDateValue(birthdateField.value) || new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+
+  const closePicker = () => {
+    picker.hidden = true;
+    birthdatePickerBtn.setAttribute("aria-expanded", "false");
+  };
+
+  const openPicker = () => {
+    const selected = parseDateValue(birthdateField.value);
+    if (selected) viewDate = selected;
+    renderPicker();
+    picker.hidden = false;
+    birthdatePickerBtn.setAttribute("aria-expanded", "true");
+  };
+
+  const chooseDate = (date) => {
+    birthdateField.value = formatDateValue(date);
+    birthdateField.dispatchEvent(new Event("change", { bubbles: true }));
+    closePicker();
+    birthdateField.focus();
+  };
+
+  const renderPicker = () => {
+    const selected = parseDateValue(birthdateField.value);
+    const monthStart = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1);
+    const gridStart = new Date(monthStart);
+    gridStart.setDate(monthStart.getDate() - monthStart.getDay());
+    const weekdays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+    const yearStart = today.getFullYear() - 100;
+    const yearEnd = today.getFullYear();
+    const yearOptions = Array.from({ length: yearEnd - yearStart + 1 }, (_, index) => {
+      const year = yearEnd - index;
+      return `<option value="${year}"${year === viewDate.getFullYear() ? " selected" : ""}>${year}</option>`;
+    }).join("");
+
+    const days = Array.from({ length: 42 }, (_, index) => {
+      const day = new Date(gridStart);
+      day.setDate(gridStart.getDate() + index);
+      const value = formatDateValue(day);
+      const isMuted = day.getMonth() !== viewDate.getMonth();
+      const isSelected = selected && value === formatDateValue(selected);
+      const isToday = value === formatDateValue(today);
+      return `
+        <button type="button" class="calendar-day${isMuted ? " is-muted" : ""}${isSelected ? " is-selected" : ""}${isToday ? " is-today" : ""}" data-date="${value}">
+          ${day.getDate()}
+        </button>
+      `;
+    }).join("");
+
+    picker.innerHTML = `
+      <div class="calendar-head">
+        <div class="calendar-selects">
+          <select class="calendar-select" data-calendar-month aria-label="Birth month">
+            ${monthNames.map((month, index) => `<option value="${index}"${index === viewDate.getMonth() ? " selected" : ""}>${escapeHtml(month)}</option>`).join("")}
+          </select>
+          <select class="calendar-select calendar-year-select" data-calendar-year aria-label="Birth year">
+            ${yearOptions}
+          </select>
+        </div>
+        <div class="calendar-nav">
+          <button type="button" data-calendar-action="prev" aria-label="Previous month"><i class="fa-solid fa-chevron-up" aria-hidden="true"></i></button>
+          <button type="button" data-calendar-action="next" aria-label="Next month"><i class="fa-solid fa-chevron-down" aria-hidden="true"></i></button>
+        </div>
+      </div>
+      <div class="calendar-weekdays">${weekdays.map((day) => `<span>${day}</span>`).join("")}</div>
+      <div class="calendar-days">${days}</div>
+      <div class="calendar-foot">
+        <button type="button" data-calendar-action="clear">Clear</button>
+        <button type="button" data-calendar-action="confirm">Confirm</button>
+      </div>
+    `;
+  };
+
+  fieldWrap?.addEventListener("pointerdown", (event) => {
+    if (event.target.closest(".birthdate-calendar") || event.target.closest(".date-picker-button")) {
+      event.stopPropagation();
+    }
+  });
+
+  birthdateField.addEventListener("click", openPicker);
+  birthdateField.addEventListener("focus", openPicker);
+  birthdateField.addEventListener("input", () => {
+    validateBirthdateField();
+    syncBirthdateAge();
+  });
+  birthdatePickerBtn.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (picker.hidden) openPicker();
+    else closePicker();
+  });
+
+  picker.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const dayButton = event.target.closest("[data-date]");
+    if (dayButton) {
+      const selectedDate = parseDateValue(dayButton.dataset.date);
+      if (selectedDate) chooseDate(selectedDate);
+      return;
+    }
+
+    const action = event.target.closest("[data-calendar-action]")?.dataset.calendarAction;
+    if (action === "prev") {
+      viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1);
+      renderPicker();
+    } else if (action === "next") {
+      viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1);
+      renderPicker();
+    } else if (action === "clear") {
+      birthdateField.value = "";
+      birthdateField.dispatchEvent(new Event("change", { bubbles: true }));
+      closePicker();
+    } else if (action === "confirm") {
+      closePicker();
+    }
+  });
+
+  picker.addEventListener("change", (event) => {
+    event.stopPropagation();
+    const monthSelect = event.target.closest("[data-calendar-month]");
+    const yearSelect = event.target.closest("[data-calendar-year]");
+    if (monthSelect || yearSelect) {
+      const month = Number(picker.querySelector("[data-calendar-month]")?.value ?? viewDate.getMonth());
+      const year = Number(picker.querySelector("[data-calendar-year]")?.value ?? viewDate.getFullYear());
+      viewDate = new Date(year, month, 1);
+      renderPicker();
+    }
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!fieldWrap?.contains(event.target)) closePicker();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closePicker();
+  });
+}
+
+function syncAdoptionSelectMenus() {
+  adoptionSelectMenus.forEach(({ select, wrapper, button, label }) => {
+    const selectedOption = select.options[select.selectedIndex];
+    label.textContent = selectedOption?.textContent || select.options[0]?.textContent || "Select";
+    button.disabled = select.disabled;
+    wrapper.classList.toggle("is-disabled", select.disabled);
+    wrapper.classList.toggle("has-value", Boolean(select.value));
+    wrapper.querySelectorAll("[data-select-value]").forEach((optionButton) => {
+      const isActive = optionButton.dataset.selectValue === select.value;
+      optionButton.classList.toggle("is-active", isActive);
+      optionButton.setAttribute("aria-selected", String(isActive));
+    });
+  });
+}
+
+function closeAdoptionSelectMenus(exceptWrapper = null) {
+  adoptionSelectMenus.forEach(({ wrapper, button, menu }) => {
+    if (wrapper === exceptWrapper) return;
+    wrapper.classList.remove("is-open", "opens-up");
+    button.setAttribute("aria-expanded", "false");
+    menu.hidden = true;
+  });
+}
+
+function getAdoptionSelectMenu(select) {
+  return adoptionSelectMenus.find((menuConfig) => menuConfig.select === select);
+}
+
+function showCustomSelectInvalid(select) {
+  const customMenu = getAdoptionSelectMenu(select);
+  if (!customMenu) {
+    select.reportValidity();
+    return;
+  }
+
+  const { wrapper, button, menu } = customMenu;
+  wrapper.classList.add("is-invalid");
+  closeAdoptionSelectMenus(wrapper);
+  wrapper.classList.add("is-open");
+  button.setAttribute("aria-expanded", "true");
+  menu.hidden = false;
+  positionAdoptionSelectMenu(wrapper, menu);
+  button.focus();
+}
+
+function positionAdoptionSelectMenu(wrapper, menu) {
+  wrapper.classList.remove("opens-up");
+  const modal = wrapper.closest(".adoption-wizard-modal");
+  const boundary = modal?.getBoundingClientRect() || document.documentElement.getBoundingClientRect();
+  const wrapperRect = wrapper.getBoundingClientRect();
+  const menuHeight = Math.min(menu.scrollHeight, 260);
+  const spaceBelow = boundary.bottom - wrapperRect.bottom - 18;
+  const spaceAbove = wrapperRect.top - boundary.top - 18;
+
+  if (spaceBelow < menuHeight && spaceAbove > spaceBelow) {
+    wrapper.classList.add("opens-up");
+  }
+}
+
+function setupAdoptionSelectMenus() {
+  if (!adoptionForm) return;
+
+  adoptionForm.querySelectorAll(".form-group select").forEach((select) => {
+    if (select.dataset.customSelectReady === "true") return;
+    select.dataset.customSelectReady = "true";
+    select.classList.add("native-adoption-select");
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "adoption-select-menu";
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "adoption-select-trigger";
+    button.setAttribute("aria-haspopup", "listbox");
+    button.setAttribute("aria-expanded", "false");
+
+    const label = document.createElement("span");
+    const icon = document.createElement("i");
+    icon.className = "fa-solid fa-chevron-down";
+    icon.setAttribute("aria-hidden", "true");
+    button.append(label, icon);
+
+    const menu = document.createElement("div");
+    menu.className = "adoption-select-options";
+    menu.setAttribute("role", "listbox");
+    menu.hidden = true;
+
+    Array.from(select.options).forEach((option) => {
+      const optionButton = document.createElement("button");
+      optionButton.type = "button";
+      optionButton.dataset.selectValue = option.value;
+      optionButton.setAttribute("role", "option");
+      optionButton.textContent = option.textContent;
+    optionButton.addEventListener("click", () => {
+        select.value = option.value;
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+        wrapper.classList.remove("is-invalid");
+        closeAdoptionSelectMenus();
+        button.focus();
+      });
+      menu.appendChild(optionButton);
+    });
+
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (select.disabled) return;
+      const willOpen = !wrapper.classList.contains("is-open");
+      closeAdoptionSelectMenus(wrapper);
+      wrapper.classList.toggle("is-open", willOpen);
+      button.setAttribute("aria-expanded", String(willOpen));
+      menu.hidden = !willOpen;
+      if (willOpen) positionAdoptionSelectMenu(wrapper, menu);
+    });
+
+    select.addEventListener("change", () => {
+      wrapper.classList.remove("is-invalid");
+      syncAdoptionSelectMenus();
+    });
+    select.after(wrapper);
+    wrapper.append(button, menu);
+    adoptionSelectMenus.push({ select, wrapper, button, label, menu });
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!event.target.closest(".adoption-select-menu")) closeAdoptionSelectMenus();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeAdoptionSelectMenus();
+  });
+
+  syncAdoptionSelectMenus();
+}
+
+function setupNumericContactField() {
+  const contactNumber = getField("contactNumber");
+  if (!contactNumber) return;
+
+  const sanitizeContactNumber = () => {
+    const digitsOnly = contactNumber.value.replace(/\D/g, "").slice(0, 11);
+    if (contactNumber.value !== digitsOnly) {
+      contactNumber.value = digitsOnly;
+    }
+  };
+
+  contactNumber.addEventListener("input", sanitizeContactNumber);
+  contactNumber.addEventListener("paste", () => {
+    window.setTimeout(sanitizeContactNumber, 0);
+  });
 }
 
 function generateLocalApplicationReference() {
@@ -127,7 +479,12 @@ function generateLocalApplicationReference() {
 
 function prefillApplicantFromAccount() {
   const fullName = localStorage.getItem("user_name") || "";
-  if (fullName && !getValue("fullName")) getField("fullName").value = fullName;
+  const fullNameField = getField("fullName");
+  if (fullNameField) {
+    fullNameField.value = fullName;
+    fullNameField.readOnly = true;
+    fullNameField.classList.add("readonly-account-field");
+  }
   if (!getValue("applicantAccountId")) {
     getField("applicantAccountId").value = localStorage.getItem("user_email") || "";
   }
@@ -138,7 +495,6 @@ function syncIssuedDateFields() {
   if (getField("issuedDay")) getField("issuedDay").value = String(now.getDate());
   if (getField("issuedMonth")) getField("issuedMonth").value = now.toLocaleString("en-US", { month: "long" });
   if (getField("issuedYear")) getField("issuedYear").value = String(now.getFullYear());
-  if (getField("signatureName")) getField("signatureName").value = getValue("fullName");
   if (getField("submissionTimestamp")) getField("submissionTimestamp").value = now.toISOString();
   if (getField("applicationReference") && !getValue("applicationReference")) {
     getField("applicationReference").value = generateLocalApplicationReference();
@@ -198,6 +554,8 @@ function updateConditionalAdoptionFields() {
       ? `${getValue("numberOfPets") || "Not specified"} ${getValue("currentPetType") || "pet(s)"}`
       : "No current pets";
   }
+
+  syncAdoptionSelectMenus();
 }
 
 function uploadPayload(fileData) {
@@ -222,7 +580,6 @@ function setAdoptionStep(step) {
 
   document.getElementById("selectedPetBox")?.classList.toggle("adoption-step-hidden", currentAdoptionStep !== 1);
   document.querySelector(".adoption-notice-field")?.classList.toggle("adoption-step-hidden", currentAdoptionStep !== 3);
-  document.querySelector(".adoption-upload-card")?.classList.toggle("adoption-step-hidden", currentAdoptionStep !== 4);
   document.querySelector(".adoption-review-field")?.classList.toggle("adoption-step-hidden", currentAdoptionStep !== 4);
 
   adoptionStepButtons.forEach((button) => {
@@ -239,6 +596,7 @@ function setAdoptionStep(step) {
     adoptionSectionTitle.innerHTML = `<span><i class="fa-solid ${icon}" aria-hidden="true"></i></span><h3>${escapeHtml(title)}</h3>`;
   }
   updateConditionalAdoptionFields();
+  syncAdoptionSelectMenus();
   if (currentAdoptionStep === 4) renderAdoptionReview();
   syncAdoptionSubmitState();
 }
@@ -247,6 +605,10 @@ function closeAdoptionModalWithoutPrompt() {
   if (!adoptModal) return;
   adoptModal.classList.remove("show");
   adoptionExitConfirm?.setAttribute("hidden", "");
+  localStorage.removeItem("animua_selected_pet_id");
+  localStorage.removeItem("animua_selected_pet_action");
+  localStorage.removeItem("animua_selected_pet_source");
+  localStorage.removeItem("animua_selected_pet_timestamp");
   if (!profileModal || !profileModal.classList.contains("show")) {
     document.body.classList.remove("menu-open");
   }
@@ -259,6 +621,10 @@ function showAdoptionExitConfirm() {
 
 function validateAdoptionStep(step = currentAdoptionStep) {
   updateConditionalAdoptionFields();
+  if (step === 1 && !validateBirthdateField()) {
+    birthdateField?.reportValidity();
+    return false;
+  }
   if (step === 4) {
     const uncheckedDeclaration = adoptionDeclarationCheckboxes.find((checkbox) => !checkbox.checked);
     if (uncheckedDeclaration) {
@@ -271,6 +637,10 @@ function validateAdoptionStep(step = currentAdoptionStep) {
     .filter((field) => field && !field.disabled && !field.closest("[hidden]"));
   const invalid = fields.find((field) => !field.checkValidity());
   if (invalid) {
+    if (invalid.matches("select.native-adoption-select")) {
+      showCustomSelectInvalid(invalid);
+      return false;
+    }
     invalid.reportValidity();
     return false;
   }
@@ -810,6 +1180,8 @@ function openProfileModal(pet) {
 function openSelectedPetFromResults() {
   const selectedPetId = localStorage.getItem("animua_selected_pet_id");
   const selectedAction = localStorage.getItem("animua_selected_pet_action");
+  const selectedSource = localStorage.getItem("animua_selected_pet_source");
+  const selectedAt = Number(localStorage.getItem("animua_selected_pet_timestamp") || 0);
   const token = localStorage.getItem("animua_token");
 
   if (!selectedPetId || !pets.length) return;
@@ -821,15 +1193,32 @@ function openSelectedPetFromResults() {
     openProfileModal(selectedPet);
     localStorage.removeItem("animua_selected_pet_id");
     localStorage.removeItem("animua_selected_pet_action");
+    localStorage.removeItem("animua_selected_pet_source");
+    localStorage.removeItem("animua_selected_pet_timestamp");
     return;
   }
 
   if (selectedAction === "adopt") {
+    const isRecentAdoptClick =
+      selectedSource === ADOPTION_PENDING_SOURCE &&
+      selectedAt &&
+      Date.now() - selectedAt <= ADOPTION_PENDING_MAX_AGE_MS;
+
+    if (!isRecentAdoptClick) {
+      localStorage.removeItem("animua_selected_pet_id");
+      localStorage.removeItem("animua_selected_pet_action");
+      localStorage.removeItem("animua_selected_pet_source");
+      localStorage.removeItem("animua_selected_pet_timestamp");
+      return;
+    }
+
     if (!token) return;
 
     showAdoptModalForPet(selectedPet);
     localStorage.removeItem("animua_selected_pet_id");
     localStorage.removeItem("animua_selected_pet_action");
+    localStorage.removeItem("animua_selected_pet_source");
+    localStorage.removeItem("animua_selected_pet_timestamp");
   }
 }
 
@@ -870,6 +1259,8 @@ function openAdoptModal(pet) {
   currentPetForAdoption = pet;
   localStorage.setItem("animua_selected_pet_id", pet.id);
   localStorage.setItem("animua_selected_pet_action", "adopt");
+  localStorage.setItem("animua_selected_pet_source", ADOPTION_PENDING_SOURCE);
+  localStorage.setItem("animua_selected_pet_timestamp", String(Date.now()));
 
   if (!token) {
     localStorage.setItem("animua_open_auth_modal", "true");
@@ -939,6 +1330,8 @@ adoptionExitConfirm?.addEventListener("click", (event) => {
 
 if (adoptionForm) {
   initializeAdoptionWizardFields();
+  setupAdoptionSelectMenus();
+  setupNumericContactField();
   setAdoptionStep(1);
 
   adoptionStepButtons.forEach((button) => {
@@ -959,9 +1352,10 @@ if (adoptionForm) {
     setAdoptionStep(currentAdoptionStep - 1);
   });
 
-  getField("birthdate")?.addEventListener("change", (event) => {
-    const age = calculateAgeFromBirthdate(event.target.value);
-    if (getField("age")) getField("age").value = age;
+  setupBirthdatePicker();
+  birthdateField?.addEventListener("change", () => {
+    validateBirthdateField();
+    syncBirthdateAge();
   });
 
   ["hasCurrentPets", "numberOfPets", "currentPetType", "visitVeterinarian"].forEach((id) => {
@@ -1075,7 +1469,7 @@ if (adoptionForm) {
         issued_day: getValue("issuedDay"),
         issued_month: getValue("issuedMonth"),
         issued_year: getValue("issuedYear"),
-        signature_name: getValue("signatureName"),
+        signature_name: getValue("fullName"),
       };
 
       const token = localStorage.getItem("animua_token");
@@ -1093,11 +1487,11 @@ if (adoptionForm) {
         body: JSON.stringify(formData)
       });
 
-      if (!res.ok) {
-        throw new Error("Failed to submit adoption request");
-      }
+      const result = await res.json().catch(() => ({}));
 
-      const result = await res.json();
+      if (!res.ok) {
+        throw new Error(result.message || "Failed to submit adoption request");
+      }
 
       const referenceNumber = result.applicationId || formData.application_reference;
       formMessage.textContent = `Adoption request submitted successfully! Reference: ${referenceNumber}`;
@@ -1122,7 +1516,7 @@ if (adoptionForm) {
       }, 1200);
     } catch (error) {
       console.error("Adoption submit error:", error);
-      formMessage.textContent = "Failed to submit. Please try again.";
+      formMessage.textContent = error.message || "Failed to submit. Please try again.";
       formMessage.style.color = "red";
     }
   });
