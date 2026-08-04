@@ -27,19 +27,14 @@ router.get(
   authorizeRole("Admin", "Staff"),
   getContactMessages
 );
-router.get("/contact/my-messages", authenticateToken, getMyContactMessages);
+router.get("/contact/my-messages", getMyContactMessages);
 router.post(
   "/contact",
   rejectContactHoneypot,
   contactRateLimiter,
-  authenticateToken,
   submitContactMessage
 );
-router.post(
-  "/contact/:id/follow-up",
-  authenticateToken,
-  addContactFollowUp
-);
+router.post("/contact/:id/follow-up", addContactFollowUp);
 router.post(
   "/contact/:id/reply",
   authenticateToken,

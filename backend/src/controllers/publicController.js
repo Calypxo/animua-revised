@@ -412,15 +412,15 @@ exports.getContactMessages = async (req, res) => {
 
 /**
  * GET /api/public/contact/my-messages
- * Contact message history for the current logged-in user.
+ * Public contact message history for the email entered on the Contact Us page.
  */
 exports.getMyContactMessages = async (req, res) => {
   try {
-    const email = normalizeContactText(req.user?.email, 160).toLowerCase();
+    const email = normalizeContactText(req.query.email, 160).toLowerCase();
 
     if (!email || !isValidEmail(email)) {
       return res.status(400).json({
-        message: "A valid account email is required.",
+        message: "A valid email address is required.",
       });
     }
 
@@ -472,16 +472,19 @@ exports.getMyContactMessages = async (req, res) => {
  */
 exports.submitContactMessage = async (req, res) => {
   try {
-    const email = normalizeContactText(req.user?.email, 160).toLowerCase();
+    const email = normalizeContactText(
+      req.user?.email || req.body.email,
+      160
+    ).toLowerCase();
     const fullName =
-      normalizeContactText(req.user?.fullName, 120) ||
+      normalizeContactText(req.user?.fullName || req.body.fullName, 120) ||
       normalizeContactText(email.split("@")[0], 120);
     const subject = normalizeContactText(req.body.subject, 160);
     const message = normalizeContactText(req.body.message, 2000);
 
-    if (!subject || !message) {
+    if (!fullName || !email || !subject || !message) {
       return res.status(400).json({
-        message: "Please enter a subject and message.",
+        message: "Please complete all contact form fields.",
       });
     }
 
@@ -664,23 +667,26 @@ exports.submitContactMessage = async (req, res) => {
 
 /**
  * POST /api/public/contact/:id/follow-up
- * User follow-up reply inside their existing Contact Us conversation.
+ * Public follow-up reply inside an existing Contact Us conversation.
  */
 exports.addContactFollowUp = async (req, res) => {
   try {
     const contactId = String(req.params.id || "").trim();
-    const email = normalizeContactText(req.user?.email, 160).toLowerCase();
+    const email = normalizeContactText(
+      req.user?.email || req.body.email,
+      160
+    ).toLowerCase();
     const message = normalizeContactText(req.body.message, 2000);
 
     if (!contactId || !email || !message) {
       return res.status(400).json({
-        message: "Conversation ID, account email, and reply message are required.",
+        message: "Conversation ID, email, and reply message are required.",
       });
     }
 
     if (!isValidEmail(email)) {
       return res.status(400).json({
-        message: "A valid account email is required.",
+        message: "Please enter a valid email address.",
       });
     }
 
@@ -698,7 +704,7 @@ exports.addContactFollowUp = async (req, res) => {
 
     if (savedEmail !== email) {
       return res.status(403).json({
-        message: "This conversation does not belong to your account.",
+        message: "This conversation does not belong to that email address.",
       });
     }
 

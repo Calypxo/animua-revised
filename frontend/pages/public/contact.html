@@ -168,33 +168,30 @@
         </article>
       </section>
 
-      <section class="contact-content-grid reveal" aria-label="Email form and office map">
+      <section class="contact-content-grid reveal" aria-label="Message form and previous replies">
         <article class="contact-form-panel">
           <div class="contact-panel-head">
             <i class="fa-regular fa-envelope" aria-hidden="true"></i>
             <div>
-              <h2>Send a Message</h2>
+              <h2>Message the Staff</h2>
               <p>
-                Send your questions, feedback, or non-urgent concerns. Your message
-                will be sent <strong>directly to the ANIMUA / Angeles City Veterinary Office team</strong>
-                and we'll get back to you through your email.
+                Send your questions, feedback, or concerns directly to the
+                <strong>ANIMUA</strong> team. Staff replies will appear in your messages.
               </p>
             </div>
           </div>
 
           <form class="contact-form" id="contactForm" novalidate>
-            <label class="contact-honeypot" aria-hidden="true">
-              Leave this field blank
-              <input type="text" name="website" tabindex="-1" autocomplete="off">
-            </label>
-            <div class="contact-account-card" id="contactAccountCard" aria-live="polite">
-              <span class="contact-account-avatar" id="contactAccountInitial">A</span>
-              <span class="contact-account-copy">
-                <small>Sending as your ANIMUA account</small>
-                <strong id="contactAccountName">Loading account...</strong>
-                <span id="contactAccountEmail"></span>
-              </span>
-              <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+            <div class="contact-field-row">
+              <label class="contact-field">
+                <input type="text" name="fullName" placeholder="Full Name" autocomplete="name" required>
+                <i class="fa-regular fa-user" aria-hidden="true"></i>
+              </label>
+
+              <label class="contact-field">
+                <input type="email" name="email" placeholder="Email Address" autocomplete="email" required>
+                <i class="fa-regular fa-envelope" aria-hidden="true"></i>
+              </label>
             </div>
 
             <label class="contact-field">
@@ -203,47 +200,98 @@
             </label>
 
             <label class="contact-field">
-              <textarea name="message" placeholder="Message" required></textarea>
+              <textarea name="message" placeholder="Type your message here..." required></textarea>
               <i class="fa-regular fa-comment" aria-hidden="true"></i>
             </label>
+
+            <p class="contact-private-note">
+              <i class="fa-solid fa-lock" aria-hidden="true"></i>
+              <span>This conversation is private and secure.</span>
+            </p>
 
             <button class="contact-submit-button" id="contactSubmit" type="submit">
               <i class="fa-solid fa-paper-plane" aria-hidden="true"></i>
               <span>Send Message</span>
             </button>
 
-            <p class="contact-form-note">
-              <i class="fa-solid fa-lock" aria-hidden="true"></i>
-              <span>Your account name and email are included automatically. This form uses automated abuse protection.</span>
-            </p>
             <p class="contact-status" id="contactStatus" aria-live="polite"></p>
           </form>
+
+          <aside class="contact-response-note">
+            <span><i class="fa-solid fa-paper-plane" aria-hidden="true"></i></span>
+            <p>
+              <strong>We'll get back to you.</strong>
+              Staff replies will appear in your messages inbox.
+              <a href="my-submissions.html">Learn more about our response time.</a>
+            </p>
+          </aside>
         </article>
 
-        <article class="contact-map-panel">
-          <div class="contact-map-head">
+        <article class="contact-replies-panel">
+          <div class="contact-panel-head contact-replies-head">
+            <i class="fa-regular fa-comments" aria-hidden="true"></i>
             <div>
-              <span>Office Location</span>
-              <h2>Angeles City Veterinary Office</h2>
+              <h2>Conversation</h2>
+              <p>Open a subject to view the full conversation and reply.</p>
             </div>
           </div>
-          <iframe
-            title="Google Map showing Angeles City Veterinary Office"
-            src="https://www.google.com/maps?q=Angeles%20City%20Veterinary%20Office%20Brgy.%20Pampanga%20Angeles%20City%20Pampanga%202009&z=16&output=embed"
-            loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade"
-            allowfullscreen>
-          </iframe>
+
+          <div class="contact-reply-list" id="contactMessageList">
+            <p class="contact-reply-empty">Send a message to start a conversation with the ANIMUA team.</p>
+          </div>
+
         </article>
       </section>
 
+      <section class="contact-office-panel reveal" aria-label="Office location">
+        <h2><i class="fa-solid fa-location-dot" aria-hidden="true"></i> Find Us</h2>
+        <div class="contact-office-layout">
+          <article class="contact-office-card">
+            <div class="contact-office-card-head">
+              <div>
+                <small class="contact-office-label">Official Office Location</small>
+                <h3>Angeles City Veterinary Office</h3>
+                <p>City Hall Building, Pulung Maragul, Angeles City, Pampanga 2009</p>
+              </div>
+            </div>
+            <div class="contact-office-info-list">
+              <div class="contact-office-info-row">
+                <span><i class="fa-solid fa-car" aria-hidden="true"></i></span>
+                <p><strong>Easy Access</strong>Located inside the City Hall compound with parking available.</p>
+              </div>
+              <div class="contact-office-info-row">
+                <span><i class="fa-solid fa-bus" aria-hidden="true"></i></span>
+                <p><strong>Nearby Landmarks</strong>Near Marquee Mall, Robinsons Angeles, and other key establishments.</p>
+              </div>
+            </div>
+            <div class="contact-office-meta">
+              <span><i class="fa-solid fa-phone" aria-hidden="true"></i> (045) 322-0485</span>
+              <span><i class="fa-regular fa-clock" aria-hidden="true"></i> Mon-Fri, 8 AM - 5 PM</span>
+            </div>
+          </article>
+          <div class="contact-map-frame">
+            <iframe
+              title="Google Map showing Angeles City Veterinary Office"
+              src="https://www.google.com/maps?q=Angeles%20City%20Veterinary%20Office%20Brgy.%20Pampanga%20Angeles%20City%20Pampanga%202009&z=15&output=embed"
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              allowfullscreen>
+            </iframe>
+          </div>
+        </div>
+      </section>
+
       <aside class="contact-emergency-strip reveal">
-        <span class="contact-emergency-icon"><i class="fa-solid fa-phone-volume" aria-hidden="true"></i></span>
-        <p>
-          <span class="contact-reminder-label">Reminder</span>
-          <strong>For urgent concerns or animal emergencies, please call the Angeles City Veterinary Office.</strong>
-          Our team is available during office hours to assist you as quickly as possible.
-        </p>
+        <span class="contact-emergency-icon"><i class="fa-regular fa-bell" aria-hidden="true"></i></span>
+        <div class="contact-emergency-main">
+          <strong>For urgent concerns or animal emergencies</strong>
+          <span>Please call the Angeles City Veterinary Office directly at <a href="tel:0453220485">(045) 322-0485</a>.</span>
+        </div>
+        <div class="contact-emergency-divider" aria-hidden="true"></div>
+        <div class="contact-emergency-hours">
+          <i class="fa-regular fa-clock" aria-hidden="true"></i>
+          <span>Our team is available during office hours to assist you as quickly as possible.</span>
+        </div>
       </aside>
     </div>
   </main>
