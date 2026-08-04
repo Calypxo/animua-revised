@@ -412,15 +412,15 @@ exports.getContactMessages = async (req, res) => {
 
 /**
  * GET /api/public/contact/my-messages
- * Public contact message history for the email entered on the Contact Us page.
+ * Contact message history for the current logged-in user.
  */
 exports.getMyContactMessages = async (req, res) => {
   try {
-    const email = normalizeContactText(req.query.email, 160).toLowerCase();
+    const email = normalizeContactText(req.user?.email, 160).toLowerCase();
 
     if (!email || !isValidEmail(email)) {
       return res.status(400).json({
-        message: "A valid email address is required.",
+        message: "A valid account email is required.",
       });
     }
 
@@ -667,26 +667,26 @@ exports.submitContactMessage = async (req, res) => {
 
 /**
  * POST /api/public/contact/:id/follow-up
- * Public follow-up reply inside an existing Contact Us conversation.
+ * User follow-up reply inside an existing Contact Us conversation.
  */
 exports.addContactFollowUp = async (req, res) => {
   try {
     const contactId = String(req.params.id || "").trim();
     const email = normalizeContactText(
-      req.user?.email || req.body.email,
+      req.user?.email,
       160
     ).toLowerCase();
     const message = normalizeContactText(req.body.message, 2000);
 
     if (!contactId || !email || !message) {
       return res.status(400).json({
-        message: "Conversation ID, email, and reply message are required.",
+        message: "Conversation ID, account email, and reply message are required.",
       });
     }
 
     if (!isValidEmail(email)) {
       return res.status(400).json({
-        message: "Please enter a valid email address.",
+        message: "A valid account email is required.",
       });
     }
 
@@ -704,7 +704,7 @@ exports.addContactFollowUp = async (req, res) => {
 
     if (savedEmail !== email) {
       return res.status(403).json({
-        message: "This conversation does not belong to that email address.",
+        message: "This conversation does not belong to your account.",
       });
     }
 

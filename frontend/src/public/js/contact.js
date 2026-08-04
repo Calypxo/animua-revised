@@ -91,6 +91,15 @@ function getLoggedInContactUser() {
   return { name, email };
 }
 
+function getAuthToken() {
+  return localStorage.getItem("animua_token") || "";
+}
+
+function requireLogin(message = "Please log in before sending a message.") {
+  setStatus(message, "error");
+  document.getElementById("loginNavBtn")?.click();
+}
+
 function applyAccountPrefill() {
   const user = getLoggedInContactUser();
   if (!user) return "";
@@ -115,10 +124,12 @@ function applyAccountPrefill() {
 }
 
 async function fetchJson(url, options = {}) {
+  const token = getAuthToken();
   const response = await fetch(url, {
     ...options,
     headers: {
       "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(options.headers || {}),
     },
   });
@@ -191,9 +202,12 @@ function renderConversationThread(item = {}) {
 
 async function openConversation(contactId) {
   const item = currentContactMessages.find((message) => message.id === contactId);
-  const email = emailInput?.value || localStorage.getItem(CONTACT_EMAIL_KEY) || "";
 
   if (!item) return;
+  if (!getAuthToken()) {
+    requireLogin("Please log in before replying to a conversation.");
+    return;
+  }
 
   const result = await Swal.fire({
     titleText: item.subject || "Contact inquiry",
@@ -237,10 +251,10 @@ async function openConversation(contactId) {
   try {
     await fetchJson(`${API_BASE_URL}/public/contact/${encodeURIComponent(item.id)}/follow-up`, {
       method: "POST",
-      body: JSON.stringify({ email, message: result.value }),
+      body: JSON.stringify({ message: result.value }),
     });
 
-    await loadContactMessages(email);
+    await loadContactMessages();
 
     Swal.fire({
       icon: "success",
@@ -267,17 +281,15 @@ async function openConversation(contactId) {
   }
 }
 
-async function loadContactMessages(email) {
-  const normalizedEmail = String(email || "").trim().toLowerCase();
-  if (!normalizedEmail) {
+async function loadContactMessages() {
+  if (!getAuthToken()) {
     renderMessageList([]);
     return;
   }
 
   try {
     contactMessageList?.setAttribute("aria-busy", "true");
-    const url = `${API_BASE_URL}/public/contact/my-messages?email=${encodeURIComponent(normalizedEmail)}`;
-    const data = await fetchJson(url);
+    const data = await fetchJson(`${API_BASE_URL}/public/contact/my-messages`);
     renderMessageList(data.messages || []);
   } catch (error) {
     console.error("[contact messages]", error);
@@ -296,6 +308,11 @@ contactForm?.addEventListener("submit", async (event) => {
 
   const payload = getFormPayload();
 
+  if (!getAuthToken()) {
+    requireLogin();
+    return;
+  }
+
   if (!payload.fullName || !payload.email || !payload.subject || !payload.message) {
     setStatus("Please complete all fields before sending.", "error");
     return;
@@ -313,7 +330,7 @@ contactForm?.addEventListener("submit", async (event) => {
     contactForm.reset();
     applyAccountPrefill();
     setStatus(data.message || "Your message has been sent to the ANIMUA team.", "success");
-    await loadContactMessages(payload.email);
+    await loadContactMessages();
 
     Swal.fire({
       icon: "success",
@@ -353,6 +370,6 @@ contactMessageList?.addEventListener("click", (event) => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-  const accountEmail = applyAccountPrefill();
-  loadContactMessages(accountEmail || localStorage.getItem(CONTACT_EMAIL_KEY));
+  applyAccountPrefill();
+  loadContactMessages();
 });
