@@ -484,15 +484,17 @@ async function sendReply(event) {
   setReplyStatus("Sending the official ANIMUA reply...", "info");
 
   try {
-    await apiFetch(`/public/contact/${encodeURIComponent(selected.id)}/reply`, {
+    const result = await apiFetch(`/public/contact/${encodeURIComponent(selected.id)}/reply`, {
       method: "POST",
       body: JSON.stringify({ replyMessage }),
     });
 
     await Swal.fire({
       icon: "success",
-      title: "Reply sent",
-      text: "The sender received the official ANIMUA email response.",
+      title: result.emailSent ? "Reply sent" : "Reply saved",
+      text: result.emailSent
+        ? "The sender received the official ANIMUA email response."
+        : "The message was saved in the user's ANIMUA notifications. Email delivery needs backend email settings.",
       timer: 1700,
       showConfirmButton: false,
       customClass: {

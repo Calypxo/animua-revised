@@ -753,12 +753,6 @@ exports.replyToContactMessage = async (req, res) => {
       });
     }
 
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-      return res.status(503).json({
-        message: "Reply email is not configured.",
-      });
-    }
-
     const contactRef = db.collection(CONTACT_COL).doc(contactId);
     const contactDoc = await contactRef.get();
 
@@ -853,43 +847,24 @@ exports.replyToContactMessage = async (req, res) => {
       </div>
     `;
 
-    await contactTransporter.sendMail({
-      from: `"ANIMUA Team" <${process.env.EMAIL_USER}>`,
-      to: recipientEmail,
-      replyTo: CONTACT_RECIPIENT,
-      subject: `Re: [ANIMUA Contact] ${inquiryTopic}`,
-      text: [
-        `Hello ${firstName},`,
-        "",
-        "Thank you for reaching out to ANIMUA.",
-        "",
-        replyMessage,
-        "",
-        "Warm regards,",
-        "ANIMUA Team",
-        "Angeles City Animal Welfare Portal",
-      ].join("\n"),
-      html: replyHtml,
-      attachments: [
-        {
-          filename: "animua-contact-email-header.png",
-          path: emailHeaderPath,
-          cid: "animuaReplyHeader",
-        },
-      ],
-    });
+    const repliedAt = new Date().toISOString();
+    const repliedBy = req.user?.email || req.user?.uid || "ANIMUA Team";
+    const emailConfigured = Boolean(process.env.EMAIL_USER && process.env.EMAIL_PASS);
+    let emailSent = false;
+    let emailError = "";
 
     await contactRef.update({
       status: "Replied",
       replyMessage,
-      repliedAt: new Date().toISOString(),
-      repliedBy: req.user?.email || req.user?.uid || "ANIMUA Team",
+      repliedAt,
+      repliedBy,
       messages: admin.firestore.FieldValue.arrayUnion({
         sender: "admin",
         name: req.user?.fullName || req.user?.email || "ANIMUA Team",
         message: replyMessage,
-        createdAt: new Date().toISOString(),
+        createdAt: repliedAt,
       }),
+      replyEmailStatus: emailConfigured ? "Pending" : "Not configured",
     });
     invalidateAttentionCache();
 
@@ -904,13 +879,59 @@ exports.replyToContactMessage = async (req, res) => {
       respectSettings: false,
     });
 
+    if (emailConfigured) {
+      try {
+        await contactTransporter.sendMail({
+          from: `"ANIMUA Team" <${process.env.EMAIL_USER}>`,
+          to: recipientEmail,
+          replyTo: CONTACT_RECIPIENT,
+          subject: `Re: [ANIMUA Contact] ${inquiryTopic}`,
+          text: [
+            `Hello ${firstName},`,
+            "",
+            "Thank you for reaching out to ANIMUA.",
+            "",
+            replyMessage,
+            "",
+            "Warm regards,",
+            "ANIMUA Team",
+            "Angeles City Animal Welfare Portal",
+          ].join("\n"),
+          html: replyHtml,
+          attachments: [
+            {
+              filename: "animua-contact-email-header.png",
+              path: emailHeaderPath,
+              cid: "animuaReplyHeader",
+            },
+          ],
+        });
+        emailSent = true;
+        await contactRef.update({
+          replyEmailStatus: "Sent",
+          replyEmailError: admin.firestore.FieldValue.delete(),
+        });
+      } catch (mailError) {
+        emailError = mailError.message || "Email delivery failed.";
+        console.error("[replyToContactMessage email]", emailError);
+        await contactRef.update({
+          replyEmailStatus: "Failed",
+          replyEmailError: emailError,
+        });
+      }
+    }
+
     return res.status(200).json({
-      message: "Reply email has been sent.",
+      message: emailSent
+        ? "Reply saved and email has been sent."
+        : "Reply saved. Email delivery is not configured or failed.",
+      emailSent,
+      emailConfigured,
     });
   } catch (error) {
     console.error("[replyToContactMessage]", error.message);
     return res.status(500).json({
-      message: "Failed to send reply email. Please try again later.",
+      message: "Failed to save reply. Please try again later.",
     });
   }
 };
