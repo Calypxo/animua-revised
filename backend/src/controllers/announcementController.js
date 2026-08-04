@@ -1,4 +1,5 @@
 const { db, admin, bucket } = require("../config/firebase");
+const { createNotificationForUsersBySetting } = require("../services/notificationService");
 
 const ANNOUNCEMENT_COL = "announcements";
 
@@ -43,6 +44,30 @@ function normalizeAnnouncement(data = {}) {
   });
 
   return payload;
+}
+
+function shouldNotifyEventAnnouncement(data = {}) {
+  return data.type === "Upcoming Events" &&
+    data.status === "Published" &&
+    data.visibleToPublic !== false;
+}
+
+async function notifyEventAnnouncement(announcementId, data = {}) {
+  if (!shouldNotifyEventAnnouncement(data)) return;
+
+  await createNotificationForUsersBySetting({
+    category: "event",
+    type: "event_announcement",
+    title: data.title || "Upcoming ANIMUA event",
+    message: data.caption || data.description || "A new ANIMUA event is available.",
+    link: "/pages/public/announcements.html",
+    referenceId: announcementId,
+    metadata: {
+      eventDate: data.eventDate || "",
+      eventTime: data.eventTime || "",
+      location: data.location || "",
+    },
+  }, "announcementsEvents");
 }
 
 exports.getPublicAnnouncements = async (req, res) => {
@@ -177,6 +202,8 @@ exports.createAnnouncement = async (req, res) => {
       .collection(ANNOUNCEMENT_COL)
       .add(announcementData);
 
+    await notifyEventAnnouncement(docRef.id, announcementData);
+
     return res.status(201).json({
       message: "Announcement created successfully.",
       announcementId: docRef.id,
@@ -226,6 +253,8 @@ exports.updateAnnouncement = async (req, res) => {
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       updatedBy: req.user.email || "",
     });
+
+    await notifyEventAnnouncement(id, payload);
 
     return res.status(200).json({
       message: "Announcement updated successfully.",

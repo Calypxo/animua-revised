@@ -551,8 +551,15 @@ button.cm-chat-bubble.active {
 }
 
 .contact-messages-page .cm-compose-send:disabled {
-  cursor: not-allowed;
   opacity: 0.45;
+}
+
+.contact-messages-page .cm-compose-send:disabled[data-sending="true"] {
+  cursor: wait;
+}
+
+.contact-messages-page .cm-compose-send:disabled:not([data-sending="true"]) {
+  cursor: not-allowed;
 }
 
 .contact-messages-page .cm-history-list {

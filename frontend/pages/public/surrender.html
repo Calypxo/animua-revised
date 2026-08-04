@@ -268,6 +268,35 @@
                 </select>
                 <small class="field-help" id="barangayHelp">Only supported Angeles City barangays can be submitted.</small><small class="field-error" id="barangayError"></small>
               </div>
+              <div class="form-group full">
+                <label class="identity-document-title">Valid ID <span class="req">*</span></label>
+                <div class="identity-document-grid" aria-label="Valid ID uploads">
+                  <div class="identity-document-field">
+                    <label class="identity-document-upload" for="identityIdFront">
+                      <span class="identity-document-preview" id="identityIdFrontPreview"><i class="fa-regular fa-id-card" aria-hidden="true"></i></span>
+                      <span class="identity-document-copy">
+                        <strong id="identityIdFrontLabel">Upload front of ID</strong>
+                        <small>JPG, PNG, or WebP up to 400 KB.</small>
+                      </span>
+                    </label>
+                    <input type="file" id="identityIdFront" name="identityIdFront" accept="image/png,image/jpeg,image/webp" required aria-describedby="identityIdFrontHelp identityIdFrontError">
+                    <small class="field-help" id="identityIdFrontHelp">Use an ID where your name and address are visible.</small>
+                    <small class="field-error" id="identityIdFrontError"></small>
+                  </div>
+                  <div class="identity-document-field">
+                    <label class="identity-document-upload" for="identityIdBack">
+                      <span class="identity-document-preview" id="identityIdBackPreview"><i class="fa-regular fa-address-card" aria-hidden="true"></i></span>
+                      <span class="identity-document-copy">
+                        <strong id="identityIdBackLabel">Upload back of ID</strong>
+                        <small>JPG, PNG, or WebP up to 400 KB.</small>
+                      </span>
+                    </label>
+                    <input type="file" id="identityIdBack" name="identityIdBack" accept="image/png,image/jpeg,image/webp" required aria-describedby="identityIdBackHelp identityIdBackError">
+                    <small class="field-help" id="identityIdBackHelp">Upload the reverse side for staff verification.</small>
+                    <small class="field-error" id="identityIdBackError"></small>
+                  </div>
+                </div>
+              </div>
             </div>
             <div class="step-actions step-actions-end"><button type="button" class="btn primary-btn" data-next-step="2">Continue to animal details <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button></div>
           </section>

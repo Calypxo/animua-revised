@@ -236,6 +236,18 @@
 .identity-explanation, .reason-guidance, .submission-expectation { display: flex; align-items: flex-start; gap: 11px; margin-top: 20px; padding: 14px 16px; border-left: 4px solid var(--sr-blue); background: var(--sr-blue-soft); }
 .identity-explanation i, .submission-expectation i { margin-top: 3px; color: var(--sr-blue); }
 .identity-explanation p, .submission-expectation p { margin: 0; color: #405c69; font-size: .76rem; line-height: 1.55; }
+.identity-document-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 0; }
+.identity-document-field { min-width: 0; }
+.identity-document-title { display: inline-block; margin-bottom: 8px; color: #493f3b; font-size: .76rem; font-weight: 850; }
+.identity-document-field input[type="file"] { position: absolute; width: 1px !important; height: 1px !important; min-height: 1px !important; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.identity-document-upload { min-height: 96px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; margin-top: 0; padding: 11px; border: 1px dashed rgba(120, 1, 22, 0.2); border-radius: 11px; background: rgba(255, 253, 249, 0.86); text-align: center; cursor: pointer; transition: border-color .16s ease, background .16s ease, box-shadow .16s ease; }
+.identity-document-upload:hover, .identity-document-field:focus-within .identity-document-upload { border-color: rgba(120, 1, 22, 0.52); background: rgba(255, 248, 242, 0.72); box-shadow: 0 0 0 2px rgba(120, 1, 22, .055); }
+.identity-document-field.is-invalid .identity-document-upload { border-color: #bd332a; background: #fff8f6; box-shadow: 0 0 0 3px rgba(189, 51, 42, .08); }
+.identity-document-preview { width: 30px; height: 30px; display: grid; place-items: center; overflow: hidden; border: 1px solid rgba(120, 1, 22, 0.13); border-radius: 8px; color: var(--sr-red); background: rgba(120, 1, 22, 0.045); font-size: 0.8rem; }
+.identity-document-preview img { width: 100%; height: 100%; object-fit: cover; }
+.identity-document-copy strong, .identity-document-copy small { display: block; }
+.identity-document-copy strong { overflow: hidden; color: var(--sr-ink); font-size: .68rem; text-overflow: ellipsis; white-space: nowrap; }
+.identity-document-copy small { margin-top: 2px; color: #81746d; font-size: .58rem; line-height: 1.25; }
 .surrender-page .surrender-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 19px 16px; margin-top: 24px; }
 .surrender-page .surrender-form-grid .full { grid-column: 1 / -1; }
 .surrender-page .form-group { min-width: 0; margin: 0; }
@@ -258,6 +270,122 @@
 .surrender-page .surrender-form :is(input, select, textarea):focus { border-color: var(--sr-red); box-shadow: 0 0 0 3px rgba(142,42,32,.11); }
 .surrender-page .surrender-form :is(input, select, textarea).is-invalid { border-color: #bd332a; background: #fff8f6; box-shadow: 0 0 0 3px rgba(189,51,42,.08); }
 .surrender-page .surrender-form input[readonly] { color: #53656d; border-color: #d4dfe2; background: #f1f5f6; cursor: not-allowed; }
+.surrender-page .native-surrender-select {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+.surrender-page .surrender-select-menu {
+  position: relative !important;
+  width: 100% !important;
+  z-index: 5 !important;
+}
+.surrender-page .surrender-select-menu.is-open {
+  z-index: 40 !important;
+}
+.surrender-page .surrender-select-trigger {
+  width: 100% !important;
+  min-height: 44px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  padding: 0 14px !important;
+  border: 1px solid rgba(111, 42, 31, 0.15) !important;
+  border-radius: 10px !important;
+  background: rgba(255, 253, 248, 0.92) !important;
+  color: #6f6760 !important;
+  font-size: 0.82rem !important;
+  font-weight: 500 !important;
+  line-height: 1 !important;
+  text-align: left !important;
+  cursor: pointer !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.62) !important;
+}
+.surrender-page .surrender-select-menu.has-value .surrender-select-trigger {
+  color: #3b352f !important;
+  font-weight: 650 !important;
+}
+.surrender-page .surrender-select-trigger i {
+  color: #742319 !important;
+  font-size: 0.78rem !important;
+  transition: transform 0.16s ease !important;
+}
+.surrender-page .surrender-select-menu.is-open .surrender-select-trigger i {
+  transform: rotate(180deg) !important;
+}
+.surrender-page .surrender-select-trigger:hover,
+.surrender-page .surrender-select-trigger:focus-visible {
+  border-color: rgba(120, 1, 22, 0.34) !important;
+  background: #fff8ef !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(120, 1, 22, 0.08) !important;
+}
+.surrender-page .surrender-select-menu.is-invalid .surrender-select-trigger {
+  border-color: rgba(120, 1, 22, 0.58) !important;
+  background: #fff8ef !important;
+  box-shadow: 0 0 0 3px rgba(120, 1, 22, 0.11) !important;
+}
+.surrender-page .surrender-select-menu.is-disabled .surrender-select-trigger {
+  opacity: 0.68 !important;
+  cursor: not-allowed !important;
+}
+.surrender-page .surrender-select-options {
+  position: absolute !important;
+  top: calc(100% + 8px) !important;
+  bottom: auto !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 60 !important;
+  display: grid !important;
+  gap: 3px !important;
+  max-height: min(260px, calc(100vh - 120px)) !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  padding: 6px !important;
+  border: 1px solid rgba(255, 226, 156, 0.42) !important;
+  border-radius: 14px !important;
+  background: linear-gradient(180deg, #fffdf8 0%, #fff8ef 100%) !important;
+  box-shadow: 0 18px 38px rgba(35, 18, 13, 0.18), 0 0 0 1px rgba(116, 35, 25, 0.04) inset !important;
+}
+.surrender-page .surrender-select-menu.opens-up .surrender-select-options {
+  top: auto !important;
+  bottom: calc(100% + 8px) !important;
+}
+.surrender-page .surrender-select-options[hidden] {
+  display: none !important;
+}
+.surrender-page .surrender-select-options button {
+  width: 100% !important;
+  min-height: 34px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  padding: 0 11px !important;
+  border: 0 !important;
+  border-radius: 10px !important;
+  background: transparent !important;
+  color: #742319 !important;
+  font-size: 0.74rem !important;
+  font-weight: 650 !important;
+  line-height: 1 !important;
+  text-align: left !important;
+  cursor: pointer !important;
+}
+.surrender-page .surrender-select-options button.is-active {
+  background: #f4ebe5 !important;
+  color: #742319 !important;
+  font-weight: 750 !important;
+  box-shadow: inset 0 0 0 1px rgba(116, 35, 25, 0.06) !important;
+}
+.surrender-page .surrender-select-options button:hover,
+.surrender-page .surrender-select-options button:focus-visible {
+  background: #fff0c9 !important;
+  color: #780116 !important;
+  outline: none !important;
+}
 .field-help, .field-error { display: block; margin-top: 7px; font-size: .68rem; line-height: 1.45; }
 .field-help { color: #81746d; }
 .field-error { min-height: 0; color: #b62822; font-weight: 750; }
@@ -2910,5 +3038,212 @@ body.surrender-page .surrender-page-text {
 
   body.surrender-page .surrender-page-text {
     margin-top: 44px !important;
+  }
+}
+
+/* Homepage-aligned palette pass */
+body.surrender-page,
+.surrender-page {
+  --sr-red: var(--animua-red, #8E2A20);
+  --sr-red-dark: var(--animua-red-dark, #721B14);
+  --sr-red-soft: rgba(142, 42, 32, 0.09);
+  --sr-gold: var(--animua-gold, #F1C045);
+  --sr-cream: var(--animua-cream, #D6D0C5);
+  --sr-paper: #fffdf9;
+  --sr-ink: var(--animua-charcoal, #20303A);
+  --sr-muted: #6f6864;
+  --sr-line: rgba(107, 79, 63, 0.14);
+  background:
+    linear-gradient(180deg, rgba(255, 253, 249, 0.55), rgba(214, 208, 197, 0.86)),
+    var(--sr-cream) !important;
+  color: var(--sr-ink);
+}
+
+body.surrender-page .surrender-notice-box,
+body.surrender-page .request-status-panel,
+body.surrender-page .surrender-form-wrap,
+body.surrender-page .surrender-progress-rail,
+body.surrender-page .request-status-card,
+body.surrender-page .notice-item,
+body.surrender-page .notice-item + .notice-item {
+  border-color: var(--sr-line) !important;
+  background: rgba(255, 253, 249, 0.94) !important;
+  box-shadow: var(--animua-shadow-soft, 0 10px 28px rgba(75, 43, 33, 0.09)) !important;
+}
+
+body.surrender-page .surrender-form-heading {
+  background:
+    radial-gradient(circle at 12% 18%, rgba(241, 192, 69, 0.12), transparent 34%),
+    linear-gradient(135deg, rgba(142, 42, 32, 0.045), rgba(255, 253, 249, 0.94)) !important;
+}
+
+body.surrender-page .progress-rail-intro {
+  background: linear-gradient(145deg, var(--sr-red-dark), var(--sr-red)) !important;
+}
+
+body.surrender-page .surrender-hero-actions .primary-btn,
+body.surrender-page .submit-request-btn,
+body.surrender-page .step-section-icon,
+body.surrender-page .waiver-card > header > span,
+body.surrender-page .animal-photo-action,
+body.surrender-page .request-status-card .status-refresh-btn {
+  background: linear-gradient(135deg, var(--sr-red), var(--sr-red-dark)) !important;
+  color: #fffdf9 !important;
+}
+
+body.surrender-page .surrender-hero-actions .primary-btn:hover,
+body.surrender-page .surrender-hero-actions .primary-btn:focus-visible,
+body.surrender-page .submit-request-btn:hover,
+body.surrender-page .submit-request-btn:focus-visible,
+body.surrender-page .animal-photo-action:hover,
+body.surrender-page .animal-photo-action:focus-visible,
+body.surrender-page .request-status-card .status-refresh-btn:hover,
+body.surrender-page .request-status-card .status-refresh-btn:focus-visible {
+  background: linear-gradient(135deg, #9d3328, var(--sr-red-dark)) !important;
+}
+
+body.surrender-page .notice-step-icon,
+body.surrender-page .request-card-icon,
+body.surrender-page .surrender-page-image figcaption i,
+body.surrender-page .animal-photo-preview {
+  background: var(--sr-red) !important;
+  color: var(--sr-gold) !important;
+}
+
+body.surrender-page .surrender-gentle-notice,
+body.surrender-page .reason-guidance,
+body.surrender-page .submission-expectation {
+  border-left-color: var(--sr-gold) !important;
+  background: rgba(241, 192, 69, 0.16) !important;
+}
+
+body.surrender-page .surrender-form :is(input, select, textarea),
+body.surrender-page .check-option,
+body.surrender-page .waiver-card,
+body.surrender-page .waiver-box,
+body.surrender-page .agreement-option,
+body.surrender-page .review-summary article,
+body.surrender-page .success-request-id {
+  border-color: var(--sr-line) !important;
+  background: rgba(255, 253, 249, 0.92) !important;
+}
+
+body.surrender-page .surrender-form :is(input, select, textarea):focus,
+body.surrender-page .animal-photo-field:focus-within .animal-photo-upload,
+body.surrender-page .animal-photo-upload:hover {
+  border-color: var(--sr-red) !important;
+  box-shadow: 0 0 0 3px rgba(142, 42, 32, 0.1) !important;
+}
+
+/* Restore the hero after the palette pass so it does not become a white card. */
+body.surrender-page .surrender-page-hero {
+  background:
+    linear-gradient(90deg, rgba(114, 27, 20, 0.92) 0%, rgba(114, 27, 20, 0.68) 38%, rgba(114, 27, 20, 0.18) 68%),
+    url("../../assets/images/surrender-hero-bg.png") center top / cover no-repeat !important;
+}
+
+body.surrender-page .surrender-page-hero-grid {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.surrender-page .surrender-page-text {
+  background: transparent !important;
+}
+
+body.surrender-page .surrender-page-text h1,
+body.surrender-page .surrender-hero-lead {
+  color: #fffdf9 !important;
+  text-shadow: 0 3px 18px rgba(48, 10, 8, 0.28);
+}
+
+body.surrender-page .surrender-page-text h1 span {
+  color: var(--sr-gold) !important;
+}
+
+/* Final surrender page warmth pass: match the homepage cream instead of the flat gray wash. */
+body.surrender-page,
+body.surrender-page .surrender-page {
+  --sr-red: #780116;
+  --sr-red-dark: #5f0012;
+  --sr-gold: #F7B538;
+  --sr-cream: var(--animua-warm-cream, #F8F3EA);
+  --sr-paper: #FFFDF9;
+  background:
+    radial-gradient(circle at 14% 18%, rgba(241, 192, 69, 0.14), transparent 26rem),
+    radial-gradient(circle at 88% 38%, rgba(120, 1, 22, 0.07), transparent 28rem),
+    linear-gradient(180deg, #FFFDF9 0%, #F8F3EA 34%, #EFE7DA 100%) !important;
+}
+
+body.surrender-page .surrender-notice-section,
+body.surrender-page .surrender-form-section {
+  background: transparent !important;
+}
+
+body.surrender-page .surrender-notice-box {
+  overflow: visible;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.surrender-page .surrender-notice-heading .section-label {
+  color: var(--sr-red-dark) !important;
+}
+
+body.surrender-page .surrender-notice-heading .section-label::before,
+body.surrender-page .surrender-notice-heading .section-label::after {
+  background: var(--sr-gold) !important;
+}
+
+body.surrender-page .surrender-notice-grid {
+  gap: 18px !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+body.surrender-page .surrender-notice-grid::before {
+  border-top-color: rgba(241, 192, 69, 0.42) !important;
+}
+
+body.surrender-page .notice-item,
+body.surrender-page .notice-item + .notice-item {
+  border: 1px solid rgba(107, 79, 63, 0.13) !important;
+  border-radius: 14px !important;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(255, 248, 238, 0.92)) !important;
+  box-shadow: 0 14px 30px rgba(75, 43, 33, 0.08) !important;
+}
+
+body.surrender-page .request-status-panel {
+  background:
+    linear-gradient(135deg, rgba(142, 42, 32, 0.08), rgba(255, 253, 249, 0.84)) !important;
+}
+
+body.surrender-page .animal-photo-preview {
+  border: 1px solid rgba(120, 1, 22, 0.16) !important;
+  color: var(--sr-red) !important;
+  background:
+    linear-gradient(145deg, rgba(120, 1, 22, 0.08), rgba(247, 181, 56, 0.12)) !important;
+  box-shadow: none !important;
+}
+
+body.surrender-page .surrender-form-heading {
+  background: var(--sr-paper) !important;
+}
+
+body.surrender-page,
+body.surrender-page .surrender-page {
+  background:
+    radial-gradient(circle at 12% 18%, rgba(247, 181, 56, 0.07), transparent 24rem),
+    radial-gradient(circle at 90% 42%, rgba(120, 1, 22, 0.035), transparent 26rem),
+    linear-gradient(180deg, #fffdf9 0%, #fbf7ef 42%, #f8f3ea 100%) !important;
+}
+
+@media (max-width: 640px) {
+  body.surrender-page .identity-document-grid {
+    grid-template-columns: 1fr;
   }
 }

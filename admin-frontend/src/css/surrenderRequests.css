@@ -857,6 +857,43 @@
   color: var(--brand-ink);
   font: 800 12px/1.35 'Poppins', sans-serif;
 }
+.surrender-requests-page .identity-document-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+}
+.surrender-requests-page .identity-document-strip figure {
+  min-width: 0;
+  overflow: hidden;
+  margin: 0;
+  border: 1px solid #ead8cc;
+  border-radius: 10px;
+  background: #fffdfa;
+}
+.surrender-requests-page .identity-document-strip img,
+.surrender-requests-page .identity-document-strip i {
+  width: 100%;
+  height: 118px;
+  display: grid;
+  place-items: center;
+  object-fit: cover;
+  color: #780116;
+  background: rgba(120, 1, 22, 0.07);
+  font-size: 28px;
+}
+.surrender-requests-page .identity-document-strip figcaption {
+  overflow: hidden;
+  padding: 8px 10px;
+  color: #5f4c45;
+  font-size: 11px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.surrender-requests-page .identity-document-strip .is-missing {
+  border-style: dashed;
+}
 .surrender-requests-page .doc-list { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; }
 .surrender-requests-page .doc-item { min-height: 52px; }
 .surrender-requests-page .drawer-footer {

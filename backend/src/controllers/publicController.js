@@ -7,6 +7,7 @@ const {
 const {
   invalidateAttentionCache,
 } = require("./dashboardController");
+const { createUserNotification } = require("../services/notificationService");
 
 const ANIMAL_COL = "animals";
 const EVENT_COL = "events";
@@ -736,7 +737,7 @@ exports.addContactFollowUp = async (req, res) => {
 
 /**
  * POST /api/public/contact/:id/reply
- * Staff/Admin reply email for a saved Contact Us inquiry.
+ * Staff/Admin in-app reply for a saved Contact Us inquiry.
  */
 exports.replyToContactMessage = async (req, res) => {
   try {
@@ -752,12 +753,6 @@ exports.replyToContactMessage = async (req, res) => {
       });
     }
 
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-      return res.status(503).json({
-        message: "Reply email is not configured.",
-      });
-    }
-
     const contactRef = db.collection(CONTACT_COL).doc(contactId);
     const contactDoc = await contactRef.get();
 
@@ -768,7 +763,6 @@ exports.replyToContactMessage = async (req, res) => {
     }
 
     const contact = contactDoc.data() || {};
-    const recipientName = normalizeContactText(contact.fullName, 120) || "there";
     const recipientEmail = normalizeContactText(contact.email, 160).toLowerCase();
     const inquiryTopic = normalizeContactText(contact.subject, 160) || "your inquiry";
 
@@ -778,127 +772,47 @@ exports.replyToContactMessage = async (req, res) => {
       });
     }
 
-    const firstName = recipientName.split(/\s+/)[0] || recipientName;
-    const emailHeaderPath = path.join(__dirname, "../assets/animua-contact-email-header.png");
-    const replyHtml = `
-      <div style="margin:0;padding:0;background:#ffffff;font-family:Arial,'Helvetica Neue',Helvetica,sans-serif;color:#2f2a27;">
-        <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;background:#ffffff;margin:0;padding:0;">
-          <tr>
-            <td align="center" style="padding:10px 6px;">
-              <table role="presentation" cellpadding="0" cellspacing="0" width="760" style="width:760px;max-width:100%;border-collapse:separate;border-spacing:0;background:#ffffff;border:1px solid #eadccc;overflow:hidden;">
-                <tr>
-                  <td style="padding:0;margin:0;background:#ffffff;">
-                    <img src="cid:animuaReplyHeader" alt="ANIMUA - Angeles City Animal Welfare Portal" width="760" style="display:block;width:100%;max-width:760px;height:auto;border:0;outline:none;text-decoration:none;">
-                  </td>
-                </tr>
-
-                <tr>
-                  <td style="padding:0;background:#ffffff;">
-                    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:separate;border-spacing:0;background:#ffffff;border-radius:18px 18px 0 0;margin-top:-1px;padding:28px 66px 0;">
-                      <tr>
-                        <td valign="top" width="58" style="width:58px;padding:0 18px 20px 0;">
-                          <div style="width:46px;height:46px;border-radius:50%;background:#7f130f;color:#ffffff;text-align:center;line-height:46px;font-size:15px;font-weight:800;letter-spacing:0.02em;">RPL</div>
-                        </td>
-                        <td valign="top" style="padding:0 0 20px;">
-                          <h1 style="margin:0;color:#5b201c;font-size:24px;line-height:1.16;font-weight:800;">We've Received Your Inquiry</h1>
-                          <div style="width:46px;height:3px;background:#d79a25;border-radius:99px;margin:8px 0 17px;"></div>
-                          <p style="margin:0 0 12px;color:#2f2a27;font-size:14px;line-height:1.55;">Hello ${escapeEmailHtml(firstName)},</p>
-                          <p style="margin:0 0 16px;color:#2f2a27;font-size:14px;line-height:1.55;">Thank you for reaching out to ANIMUA. We truly appreciate your interest and your care for animals in our community.</p>
-                          <p style="margin:0;color:#2f2a27;font-size:14px;line-height:1.55;">Here is our response to your inquiry about <strong style="color:#7f130f;">${escapeEmailHtml(inquiryTopic)}</strong>:</p>
-                        </td>
-                      </tr>
-                    </table>
-
-                    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;background:#ffffff;padding:0 66px 28px;">
-                      <tr>
-                        <td style="padding:0;">
-                          <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:separate;border-spacing:0;background:#ffffff;border:1px solid #ead7bf;border-radius:9px;">
-                            <tr>
-                              <td style="padding:20px 24px 6px;">
-                                <table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
-                                  <tr>
-                                    <td valign="middle" style="padding:0 10px 0 0;">
-                                      <div style="width:28px;height:28px;border-radius:50%;background:#7f130f;color:#ffffff;text-align:center;line-height:28px;font-size:11px;font-weight:800;">MSG</div>
-                                    </td>
-                                    <td valign="middle" style="color:#5b201c;font-size:16px;font-weight:800;">Our Reply</td>
-                                  </tr>
-                                  <tr>
-                                    <td></td>
-                                    <td style="padding-top:7px;"><div style="width:32px;height:2px;background:#d79a25;border-radius:99px;"></div></td>
-                                  </tr>
-                                </table>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td style="padding:8px 48px 25px;color:#2f2a27;font-size:14px;line-height:1.65;white-space:pre-line;">${escapeEmailHtml(replyMessage)}</td>
-                            </tr>
-                            <tr>
-                              <td style="padding:0 48px 25px;color:#2f2a27;font-size:14px;line-height:1.45;">
-                                <div>Warm regards,</div>
-                                <div style="color:#7f130f;font-weight:800;">ANIMUA Team</div>
-                                <div style="font-size:12px;">Angeles City Animal Welfare Portal</div>
-                              </td>
-                            </tr>
-                          </table>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-        </table>
-      </div>
-    `;
-
-    await contactTransporter.sendMail({
-      from: `"ANIMUA Team" <${process.env.EMAIL_USER}>`,
-      to: recipientEmail,
-      replyTo: CONTACT_RECIPIENT,
-      subject: `Re: [ANIMUA Contact] ${inquiryTopic}`,
-      text: [
-        `Hello ${firstName},`,
-        "",
-        "Thank you for reaching out to ANIMUA.",
-        "",
-        replyMessage,
-        "",
-        "Warm regards,",
-        "ANIMUA Team",
-        "Angeles City Animal Welfare Portal",
-      ].join("\n"),
-      html: replyHtml,
-      attachments: [
-        {
-          filename: "animua-contact-email-header.png",
-          path: emailHeaderPath,
-          cid: "animuaReplyHeader",
-        },
-      ],
-    });
+    const repliedAt = new Date().toISOString();
+    const repliedBy = req.user?.email || req.user?.uid || "ANIMUA Team";
 
     await contactRef.update({
       status: "Replied",
       replyMessage,
-      repliedAt: new Date().toISOString(),
-      repliedBy: req.user?.email || req.user?.uid || "ANIMUA Team",
+      repliedAt,
+      repliedBy,
       messages: admin.firestore.FieldValue.arrayUnion({
         sender: "admin",
         name: req.user?.fullName || req.user?.email || "ANIMUA Team",
         message: replyMessage,
-        createdAt: new Date().toISOString(),
+        createdAt: repliedAt,
       }),
+      deliveryChannel: "in-app",
     });
     invalidateAttentionCache();
 
+    try {
+      await createUserNotification({
+        userEmail: recipientEmail,
+        category: "contact",
+        type: "contact_reply",
+        title: "Staff replied to your message",
+        message: `ANIMUA replied about ${inquiryTopic}.`,
+        link: "/pages/public/contact.html",
+        referenceId: contactId,
+        respectSettings: false,
+      });
+    } catch (notificationError) {
+      console.error("[replyToContactMessage notification]", notificationError.message);
+    }
+
     return res.status(200).json({
-      message: "Reply email has been sent.",
+      message: "Reply saved to the user's ANIMUA account.",
+      deliveryChannel: "in-app",
     });
   } catch (error) {
     console.error("[replyToContactMessage]", error.message);
     return res.status(500).json({
-      message: "Failed to send reply email. Please try again later.",
+      message: "Failed to save reply. Please try again later.",
     });
   }
 };

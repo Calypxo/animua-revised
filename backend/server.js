@@ -22,6 +22,7 @@ const surrenderRoutes = require("./src/routes/surrenderRoutes");
 const { reconcileRequestDeadlines } = require("./src/services/requestDeadlineService");
 const auditRoutes = require("./src/routes/auditRoutes");
 const reportRoutes = require("./src/routes/reportRoutes");
+const notificationRoutes = require("./src/routes/notificationRoutes");
 
 const authenticateToken = require("./src/middleware/authMiddleware");
 const authorizeRole = require("./src/middleware/roleMiddleware");
@@ -107,6 +108,7 @@ app.use("/api/surrenders", surrenderRoutes);
 app.use("/api", matchRoutes);
 app.use("/api/audit", auditRoutes);
 app.use("/api/reports", reportRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 app.get("/", (req, res) => {
   res.send("ANIMUA Backend is Live!");

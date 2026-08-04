@@ -12,6 +12,7 @@ const {
   reconcileRequestDeadlines,
   validateScheduleDate,
 } = require("../services/requestDeadlineService");
+const { createUserNotification } = require("../services/notificationService");
 
 exports.createAdoption = async (req, res) => {
   try {
@@ -744,6 +745,16 @@ exports.approveAdoption = async (req, res) => {
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
+    await createUserNotification({
+      userEmail: data.applicant?.email || data.account?.email || data.userEmail,
+      category: "application",
+      type: "adoption_approved",
+      title: "Adoption application approved",
+      message: `Your adoption application for ${data.pet_label || data.pet_name || "a pet"} was approved.`,
+      link: "/pages/public/my-submissions.html",
+      referenceId: id,
+    });
+
     res.status(200).json({
       message: "Adoption request approved.",
     });
@@ -787,6 +798,16 @@ exports.rejectAdoption = async (req, res) => {
       status: "Rejected",
       rejectedReason: reason.trim(),
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    await createUserNotification({
+      userEmail: data.applicant?.email || data.account?.email || data.userEmail,
+      category: "application",
+      type: "adoption_rejected",
+      title: "Adoption application update",
+      message: `Your adoption application for ${data.pet_label || data.pet_name || "a pet"} was reviewed.`,
+      link: "/pages/public/my-submissions.html",
+      referenceId: id,
     });
 
     res.status(200).json({
@@ -894,6 +915,16 @@ exports.finalizeAdoption = async (req, res) => {
   });
 
     await batch.commit();
+
+    await createUserNotification({
+      userEmail: adoptionData.applicant?.email || adoptionData.account?.email || adoptionData.userEmail,
+      category: "application",
+      type: "adoption_finalized",
+      title: "Adoption finalized",
+      message: `${finalAdoptedName} has been finalized for adoption.`,
+      link: "/pages/public/my-submissions.html",
+      referenceId: id,
+    });
 
     res.status(200).json({
       message: "Adoption finalized successfully.",

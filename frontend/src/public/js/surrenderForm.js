@@ -26,6 +26,8 @@ const FIELD_ERRORS = {
   contactNo: "contactError",
   ownerAddress: "addressError",
   ownerBarangay: "barangayError",
+  identityIdFront: "identityIdFrontError",
+  identityIdBack: "identityIdBackError",
   reasons: "reasonError",
   agreeAllTerms: "agreementError",
 };
@@ -34,9 +36,12 @@ let currentStep = 1;
 let highestVisitedStep = 1;
 let isSubmitting = false;
 let animalPhotoData = null;
+let identityDocumentData = { front: null, back: null };
 let surrenderAcceptingRequests = true;
+const surrenderSelectMenus = [];
 
 const MAX_ANIMAL_PHOTO_SIZE = 650 * 1024;
+const MAX_ID_PHOTO_SIZE = 400 * 1024;
 
 function getFormValue(id) {
   return document.getElementById(id)?.value.trim() || "";
@@ -119,7 +124,128 @@ function setFieldError(field, message = "") {
   const error = errorId ? document.getElementById(errorId) : null;
   field.classList.toggle("is-invalid", Boolean(message));
   field.setAttribute("aria-invalid", String(Boolean(message)));
+  field.closest(".identity-document-field")?.classList.toggle("is-invalid", Boolean(message));
+  getSurrenderSelectMenu(field)?.wrapper.classList.toggle("is-invalid", Boolean(message));
   if (error) error.textContent = message;
+}
+
+function syncSurrenderSelectMenus() {
+  surrenderSelectMenus.forEach(({ select, wrapper, button, label }) => {
+    const selectedOption = select.options[select.selectedIndex];
+    label.textContent = selectedOption?.textContent || select.options[0]?.textContent || "Select";
+    button.disabled = select.disabled;
+    wrapper.classList.toggle("is-disabled", select.disabled);
+    wrapper.classList.toggle("has-value", Boolean(select.value));
+    wrapper.querySelectorAll("[data-select-value]").forEach((optionButton) => {
+      const isActive = optionButton.dataset.selectValue === select.value;
+      optionButton.classList.toggle("is-active", isActive);
+      optionButton.setAttribute("aria-selected", String(isActive));
+    });
+  });
+}
+
+function closeSurrenderSelectMenus(exceptWrapper = null) {
+  surrenderSelectMenus.forEach(({ wrapper, button, menu }) => {
+    if (wrapper === exceptWrapper) return;
+    wrapper.classList.remove("is-open", "opens-up");
+    button.setAttribute("aria-expanded", "false");
+    menu.hidden = true;
+  });
+}
+
+function getSurrenderSelectMenu(select) {
+  return surrenderSelectMenus.find((menuConfig) => menuConfig.select === select);
+}
+
+function positionSurrenderSelectMenu(wrapper, menu) {
+  wrapper.classList.remove("opens-up");
+  const panel = wrapper.closest(".surrender-form-wrap") || document.documentElement;
+  const boundary = panel.getBoundingClientRect();
+  const wrapperRect = wrapper.getBoundingClientRect();
+  const menuHeight = Math.min(menu.scrollHeight, 260);
+  const spaceBelow = boundary.bottom - wrapperRect.bottom - 18;
+  const spaceAbove = wrapperRect.top - boundary.top - 18;
+
+  if (spaceBelow < menuHeight && spaceAbove > spaceBelow) {
+    wrapper.classList.add("opens-up");
+  }
+}
+
+function setupSurrenderSelectMenus() {
+  const form = document.getElementById("surrenderForm");
+  if (!form) return;
+
+  form.querySelectorAll(".form-group select").forEach((select) => {
+    if (select.dataset.customSelectReady === "true") return;
+    select.dataset.customSelectReady = "true";
+    select.classList.add("native-surrender-select");
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "surrender-select-menu";
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "surrender-select-trigger";
+    button.setAttribute("aria-haspopup", "listbox");
+    button.setAttribute("aria-expanded", "false");
+
+    const label = document.createElement("span");
+    const icon = document.createElement("i");
+    icon.className = "fa-solid fa-chevron-down";
+    icon.setAttribute("aria-hidden", "true");
+    button.append(label, icon);
+
+    const menu = document.createElement("div");
+    menu.className = "surrender-select-options";
+    menu.setAttribute("role", "listbox");
+    menu.hidden = true;
+
+    Array.from(select.options).forEach((option) => {
+      const optionButton = document.createElement("button");
+      optionButton.type = "button";
+      optionButton.dataset.selectValue = option.value;
+      optionButton.setAttribute("role", "option");
+      optionButton.textContent = option.textContent;
+      optionButton.addEventListener("click", () => {
+        select.value = option.value;
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+        wrapper.classList.remove("is-invalid");
+        closeSurrenderSelectMenus();
+        button.focus();
+      });
+      menu.appendChild(optionButton);
+    });
+
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (select.disabled) return;
+      const willOpen = !wrapper.classList.contains("is-open");
+      closeSurrenderSelectMenus(wrapper);
+      wrapper.classList.toggle("is-open", willOpen);
+      button.setAttribute("aria-expanded", String(willOpen));
+      menu.hidden = !willOpen;
+      if (willOpen) positionSurrenderSelectMenu(wrapper, menu);
+    });
+
+    select.addEventListener("change", () => {
+      wrapper.classList.remove("is-invalid");
+      syncSurrenderSelectMenus();
+    });
+    select.after(wrapper);
+    wrapper.append(button, menu);
+    surrenderSelectMenus.push({ select, wrapper, button, label, menu });
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!event.target.closest(".surrender-select-menu")) closeSurrenderSelectMenus();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeSurrenderSelectMenus();
+  });
+
+  syncSurrenderSelectMenus();
 }
 
 function setAnimalPhotoError(message = "") {
@@ -181,7 +307,74 @@ function bindAnimalPhotoUpload() {
   });
 }
 
+function getIdentityDocumentSide(input) {
+  return input?.id === "identityIdBack" ? "back" : "front";
+}
+
+function setIdentityDocumentPreview(side, fileData = null) {
+  const preview = document.getElementById(side === "back" ? "identityIdBackPreview" : "identityIdFrontPreview");
+  const label = document.getElementById(side === "back" ? "identityIdBackLabel" : "identityIdFrontLabel");
+  if (!preview || !label) return;
+
+  if (!fileData) {
+    preview.innerHTML = `<i class="fa-regular ${side === "back" ? "fa-address-card" : "fa-id-card"}" aria-hidden="true"></i>`;
+    label.textContent = side === "back" ? "Upload back of ID" : "Upload front of ID";
+    return;
+  }
+
+  preview.innerHTML = `<img src="${fileData.dataUrl}" alt="">`;
+  label.textContent = fileData.name;
+}
+
+function clearIdentityDocumentPreview(side) {
+  identityDocumentData[side] = null;
+  setIdentityDocumentPreview(side, null);
+}
+
+function bindIdentityDocumentUploads() {
+  document.querySelectorAll("#identityIdFront, #identityIdBack").forEach(input => {
+    input.addEventListener("change", () => {
+      const side = getIdentityDocumentSide(input);
+      const file = input.files?.[0];
+      setFieldError(input, "");
+      clearIdentityDocumentPreview(side);
+      if (!file) return;
+
+      if (!file.type.startsWith("image/")) {
+        input.value = "";
+        setFieldError(input, "Upload a JPG, PNG, or WebP image.");
+        return;
+      }
+
+      if (file.size > MAX_ID_PHOTO_SIZE) {
+        input.value = "";
+        setFieldError(input, "ID photo must be 400 KB or smaller.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = typeof reader.result === "string" ? reader.result : "";
+        if (!dataUrl) {
+          setFieldError(input, "We could not preview this ID photo. Please choose another image.");
+          return;
+        }
+        const fileData = { name: file.name, type: file.type, size: file.size, dataUrl };
+        identityDocumentData[side] = fileData;
+        setIdentityDocumentPreview(side, fileData);
+      };
+      reader.onerror = () => {
+        input.value = "";
+        setFieldError(input, "We could not read this ID photo. Please choose another image.");
+      };
+      reader.readAsDataURL(file);
+    });
+  });
+}
+
 function validationMessage(field) {
+  if (field.id === "identityIdFront") return "Upload the front of your valid ID with your address visible.";
+  if (field.id === "identityIdBack") return "Upload the back of your valid ID.";
   if (field.id === "ownerBarangay") {
     if (!field.value) return "Select your barangay in Angeles City.";
     if (!isValidAngelesBarangay(field.value)) return "Choose a supported Angeles City barangay.";
@@ -210,7 +403,16 @@ function validateStep(step, focusInvalid = true) {
   });
 
   if (firstInvalid && focusInvalid) {
-    firstInvalid.focus();
+    const customSelect = getSurrenderSelectMenu(firstInvalid);
+    if (customSelect) {
+      customSelect.wrapper.classList.add("is-invalid", "is-open");
+      customSelect.button.setAttribute("aria-expanded", "true");
+      customSelect.menu.hidden = false;
+      positionSurrenderSelectMenu(customSelect.wrapper, customSelect.menu);
+      customSelect.button.focus();
+    } else {
+      firstInvalid.focus();
+    }
     showFeedback("Please review the highlighted field before continuing.", "error");
   }
   return !firstInvalid;
@@ -247,6 +449,7 @@ function applySurrenderAvailability(availability = {}) {
   form?.querySelectorAll("input, select, textarea, button").forEach(control => {
     control.disabled = !acceptingRequests;
   });
+  syncSurrenderSelectMenus();
   document.querySelectorAll(".surrender-step-link").forEach(control => {
     control.disabled = !acceptingRequests;
   });
@@ -381,6 +584,20 @@ function buildRequestPayload(loggedInUser) {
       barangay,
       city: "Angeles City",
       isAngelesResident: true,
+      identityDocuments: {
+        front: identityDocumentData.front ? {
+          name: identityDocumentData.front.name,
+          type: identityDocumentData.front.type,
+          size: identityDocumentData.front.size,
+          dataUrl: identityDocumentData.front.dataUrl,
+        } : null,
+        back: identityDocumentData.back ? {
+          name: identityDocumentData.back.name,
+          type: identityDocumentData.back.type,
+          size: identityDocumentData.back.size,
+          dataUrl: identityDocumentData.back.dataUrl,
+        } : null,
+      },
     },
     pet: {
       name: getFormValue("petName"),
@@ -538,6 +755,8 @@ function resetForAnotherRequest() {
   fillOwnerInfoFromAccount();
   updateReasonCount();
   clearAnimalPhotoPreview();
+  clearIdentityDocumentPreview("front");
+  clearIdentityDocumentPreview("back");
   showStep(1);
 }
 
@@ -594,6 +813,8 @@ document.addEventListener("DOMContentLoaded", () => {
   bindStepNavigation();
   bindWaiverLanguageToggle();
   bindAnimalPhotoUpload();
+  bindIdentityDocumentUploads();
+  setupSurrenderSelectMenus();
   showStep(1, { scroll: false, focus: false });
   loadSurrenderAvailability();
   loadMySurrenderRequests();
