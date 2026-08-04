@@ -384,7 +384,7 @@ function renderDetail() {
 
   setReplyStatus(
     status === "Replied" && selected.repliedAt
-      ? `Last replied ${formatDate(selected.repliedAt)}. Sending again will email an updated response.`
+      ? `Last replied ${formatDate(selected.repliedAt)}. Sending again will add another in-app response.`
       : "",
     status === "Replied" ? "info" : ""
   );
@@ -466,7 +466,7 @@ async function sendReply(event) {
   const confirm = await Swal.fire({
     icon: "question",
     title: "Send ANIMUA reply?",
-    text: `This will email ${selected.email}.`,
+    text: `This will save the reply to ${selected.fullName || selected.email || "the user's"} ANIMUA account.`,
     showCancelButton: true,
     confirmButtonText: "Send reply",
     cancelButtonText: "Cancel",
@@ -481,7 +481,9 @@ async function sendReply(event) {
 
   const sendBtn = el("sendReplyBtn");
   sendBtn.disabled = true;
-  setReplyStatus("Sending the official ANIMUA reply...", "info");
+  sendBtn.dataset.sending = "true";
+  sendBtn.setAttribute("aria-busy", "true");
+  setReplyStatus("Saving the ANIMUA reply...", "info");
 
   try {
     const result = await apiFetch(`/public/contact/${encodeURIComponent(selected.id)}/reply`, {
@@ -505,6 +507,8 @@ async function sendReply(event) {
     console.error("[send contact reply]", error);
     setReplyStatus(error.message || "Failed to send reply.", "error");
   } finally {
+    delete sendBtn.dataset.sending;
+    sendBtn.removeAttribute("aria-busy");
     sendBtn.disabled = !can("reply");
   }
 }
