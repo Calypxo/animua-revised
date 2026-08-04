@@ -5,6 +5,7 @@ const {
   reconcileRequestDeadlines,
   validateScheduleDate,
 } = require("../services/requestDeadlineService");
+const { createUserNotification } = require("../services/notificationService");
 const {
   getSurrenderConversionError,
 } = require("../services/surrenderWorkflowService");
@@ -17,6 +18,7 @@ const CLOSED_CAPACITY_MESSAGE =
   "The shelter is not accepting surrender requests right now because space or cages may be unavailable. Please check again later or contact the shelter for urgent concerns.";
 
 const MAX_SURRENDER_PHOTO_DATA_URL_LENGTH = 900000;
+const MAX_ID_PHOTO_DATA_URL_LENGTH = 560000;
 
 const ANGELES_BARANGAYS = [
   "Agapito del Rosario", "Amsic", "Anunas", "Balibago", "Capaya", "Claro M. Recto",
@@ -36,6 +38,25 @@ function generateRequestId() {
   const year = new Date().getFullYear();
   const timestamp = Date.now().toString().slice(-6);
   return `SR-${year}-${timestamp}`;
+}
+
+function normalizeImageDocument(document = {}) {
+  const dataUrl = typeof document.dataUrl === "string" ? document.dataUrl.trim() : "";
+  if (!dataUrl) return null;
+  return {
+    name: String(document.name || "").trim().slice(0, 160),
+    type: String(document.type || "").trim().slice(0, 80),
+    size: Number(document.size || 0),
+    dataUrl,
+  };
+}
+
+function isValidImageDataUrl(dataUrl, maxLength) {
+  return Boolean(
+    dataUrl &&
+    dataUrl.length <= maxLength &&
+    /^data:image\/(png|jpe?g|webp);base64,[A-Za-z0-9+/=]+$/i.test(dataUrl)
+  );
 }
 
 function getAvailabilitySettingsRef() {
@@ -126,6 +147,9 @@ async function createSurrenderRequest(req, res) {
     const pet = body.pet || {};
     const agreement = body.agreement || {};
     const surrenderReason = body.surrenderReason?.trim();
+    const identityDocuments = owner.identityDocuments || {};
+    const identityIdFront = normalizeImageDocument(identityDocuments.front);
+    const identityIdBack = normalizeImageDocument(identityDocuments.back);
 
     if (!surrenderReason) {
       return res.status(400).json({
@@ -148,6 +172,21 @@ async function createSurrenderRequest(req, res) {
     if (!agreement.agreedToTerms) {
       return res.status(400).json({
         message: "You must agree to the surrender terms before submitting.",
+      });
+    }
+
+    if (!identityIdFront || !identityIdBack) {
+      return res.status(400).json({
+        message: "Valid ID front and back photos are required.",
+      });
+    }
+
+    if (
+      !isValidImageDataUrl(identityIdFront.dataUrl, MAX_ID_PHOTO_DATA_URL_LENGTH) ||
+      !isValidImageDataUrl(identityIdBack.dataUrl, MAX_ID_PHOTO_DATA_URL_LENGTH)
+    ) {
+      return res.status(400).json({
+        message: "Valid ID photos must be JPG, PNG, or WebP images under 400 KB each.",
       });
     }
 
@@ -185,6 +224,10 @@ async function createSurrenderRequest(req, res) {
         barangay: owner.barangay,
         city: "Angeles City",
         isAngelesResident: true,
+        identityDocuments: {
+          front: identityIdFront,
+          back: identityIdBack,
+        },
       },
 
       pet: {
@@ -382,6 +425,16 @@ async function updateSurrenderStatus(req, res) {
     }
 
     await requestRef.update(updateData);
+
+    await createUserNotification({
+      userEmail: current.account?.email || current.owner?.email,
+      category: "surrender",
+      type: `surrender_${String(status).toLowerCase()}`,
+      title: "Surrender request update",
+      message: `Your surrender request for ${current.pet?.name || "your pet"} is now ${status}.`,
+      link: "/pages/public/my-submissions.html",
+      referenceId: id,
+    });
 
     const updatedDoc = await requestRef.get();
 

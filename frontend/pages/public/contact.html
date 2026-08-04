@@ -168,8 +168,57 @@
         </article>
       </section>
 
-      <section class="contact-content-grid reveal" aria-label="Message form and previous replies">
-        <article class="contact-form-panel">
+      <section class="contact-content-grid reveal" id="contactContentGrid" aria-label="Message form and previous replies">
+        <article class="contact-login-panel hidden" id="contactLoginPanel">
+          <div class="contact-login-info">
+            <div class="contact-panel-head">
+              <i class="fa-regular fa-envelope" aria-hidden="true"></i>
+              <div>
+                <h2>Message the Staff</h2>
+                <p>For detailed concerns, our team is ready to help.</p>
+                <p>Please log in to send us a message and track your conversations.</p>
+              </div>
+            </div>
+
+            <div class="contact-login-benefits">
+              <div class="contact-login-benefit">
+                <span><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></span>
+                <div>
+                  <strong>Secure &amp; private</strong>
+                  <p>Your messages are protected.</p>
+                </div>
+              </div>
+
+              <div class="contact-login-benefit">
+                <span><i class="fa-regular fa-clock" aria-hidden="true"></i></span>
+                <div>
+                  <strong>Timely response</strong>
+                  <p>We'll get back to you as soon as we can.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <span class="contact-login-divider" aria-hidden="true"></span>
+
+          <div class="contact-login-action">
+            <div class="contact-login-card">
+              <h3>Log in to continue</h3>
+              <p>Access your account to send a message and view your conversation history.</p>
+              <button class="contact-login-button" id="contactLoginButton" type="button">
+                <i class="fa-solid fa-user" aria-hidden="true"></i>
+                <span>Login</span>
+              </button>
+            </div>
+
+            <p class="contact-login-private-note">
+              <i class="fa-solid fa-lock" aria-hidden="true"></i>
+              <span>Your conversations are private to your ANIMUA account.</span>
+            </p>
+          </div>
+        </article>
+
+        <article class="contact-form-panel" id="contactFormPanel">
           <div class="contact-panel-head">
             <i class="fa-regular fa-envelope" aria-hidden="true"></i>
             <div>
@@ -227,7 +276,7 @@
           </aside>
         </article>
 
-        <article class="contact-replies-panel">
+        <article class="contact-replies-panel" id="contactRepliesPanel">
           <div class="contact-panel-head contact-replies-head">
             <i class="fa-regular fa-comments" aria-hidden="true"></i>
             <div>

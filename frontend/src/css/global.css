@@ -240,6 +240,7 @@ button {
 .notification-btn,
 .login-btn,
 .menu-toggle {
+  position: relative;
   width: 42px;
   height: 42px;
   display: inline-grid;
@@ -263,39 +264,80 @@ button {
 
 .notification-dot {
   position: absolute;
-  top: 9px;
-  right: 9px;
-  width: 9px;
-  height: 9px;
+  top: 3px;
+  right: 1px;
+  min-width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
   border: 2px solid var(--animua-white);
-  border-radius: 50%;
-  background: var(--animua-red-coral);
+  border-radius: 999px;
+  background: #f4c542;
+  color: #780116;
+  font-size: 0.58rem;
+  font-weight: 900;
+  line-height: 1;
+  box-shadow: 0 6px 12px rgba(38, 27, 23, 0.18);
+}
+
+.notification-dot[hidden] {
+  display: none;
+}
+
+.notification-dot:empty {
+  display: none;
 }
 
 .notification-popup {
   position: absolute;
-  top: calc(100% + 12px);
-  right: 0;
-  z-index: 1100;
-  width: min(310px, 84vw);
+  top: calc(100% + 11px);
+  right: -14px;
+  z-index: 1200;
+  width: min(318px, calc(100vw - 24px));
   display: none;
-  padding: 18px;
-  border: 1px solid var(--animua-line);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: var(--animua-shadow);
+  overflow: visible;
+  padding: 0 0 10px;
+  border: 1px solid rgba(105, 78, 58, 0.18);
+  border-radius: 11px;
+  background:
+    radial-gradient(circle at 90% 22%, rgba(213, 188, 127, 0.11) 0 34px, transparent 35px),
+    linear-gradient(145deg, rgba(255, 253, 246, 0.99), rgba(248, 241, 232, 0.98));
+  box-shadow: 0 16px 36px rgba(30, 22, 18, 0.18);
+  color: var(--animua-charcoal);
 }
 
 .notification-popup.show {
   display: block;
 }
 
-.notification-popup-head h4 {
-  margin-bottom: 9px;
+.notification-popup::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  right: 25px;
+  width: 16px;
+  height: 16px;
+  border-left: 1px solid rgba(105, 78, 58, 0.18);
+  border-top: 1px solid rgba(105, 78, 58, 0.18);
+  background: rgba(255, 253, 246, 0.98);
+  transform: rotate(45deg);
+}
+
+.notification-popup-title h4 {
+  margin: 0;
   color: var(--animua-red-dark);
   font-family: "League Spartan", "Inter", sans-serif;
-  font-size: 1.45rem;
+  font-size: 1.26rem;
   line-height: 1;
+}
+
+.notification-popup-title p {
+  margin: 4px 0 0;
+  color: rgba(38, 27, 23, 0.52);
+  font-size: 0.62rem;
+  font-weight: 750;
 }
 
 .notification-list {
@@ -306,6 +348,109 @@ button {
 
 .notification-list li + li {
   margin-top: 8px;
+}
+
+.notification-popup-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 56px;
+  margin: 0;
+  padding: 13px 15px 11px;
+  border-bottom: 1px solid rgba(105, 78, 58, 0.13);
+}
+
+.notification-settings-mini {
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  border: 1px solid rgba(105, 78, 58, 0.16);
+  border-radius: 999px;
+  background: rgba(120, 1, 22, 0.055);
+  color: var(--animua-red-dark);
+  font-size: 0.66rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.notification-inbox-list {
+  display: grid;
+  gap: 7px;
+  max-height: 304px;
+  overflow-y: auto;
+  padding: 10px 10px 0;
+}
+
+.notification-item {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 9px;
+  padding: 9px;
+  border: 1px solid rgba(105, 78, 58, 0.12);
+  border-radius: 9px;
+  background: rgba(255, 253, 246, 0.66);
+  color: inherit;
+  text-decoration: none;
+}
+
+.notification-item.is-unread {
+  border-color: rgba(123, 38, 29, 0.22);
+  background: linear-gradient(90deg, rgba(123, 38, 29, 0.075), rgba(255, 253, 246, 0.76));
+  box-shadow: inset 3px 0 0 rgba(120, 1, 22, 0.7);
+}
+
+.notification-item-icon {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(123, 38, 29, 0.08);
+  color: var(--animua-red-dark);
+  font-size: 0.82rem;
+}
+
+.notification-item-copy {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.notification-item-copy strong {
+  overflow: hidden;
+  color: #171b1f;
+  font-size: 0.72rem;
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notification-item-copy small {
+  color: rgba(38, 27, 23, 0.68);
+  font-size: 0.65rem;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.notification-item-copy time {
+  color: rgba(38, 27, 23, 0.46);
+  font-size: 0.6rem;
+  font-weight: 700;
+}
+
+.notification-empty {
+  margin: 0;
+  padding: 14px 12px;
+  border: 1px dashed rgba(105, 78, 58, 0.18);
+  border-radius: 10px;
+  background: rgba(255, 253, 246, 0.72);
+  color: rgba(38, 27, 23, 0.62);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.4;
 }
 
 .menu-toggle {
@@ -1088,6 +1233,16 @@ button {
 }
 
 @media (max-width: 760px) {
+  .notification-popup {
+    right: 0;
+    transform: none;
+  }
+
+  .notification-popup::before {
+    right: 13px;
+    transform: rotate(45deg);
+  }
+
   .profile-modal-overlay {
     padding: 12px;
   }

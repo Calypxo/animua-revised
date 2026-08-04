@@ -4756,8 +4756,8 @@ body.home-page .user-menu-btn i {
 }
 
 body.home-page .notification-dot {
-  top: 6px;
-  right: 7px;
+  top: -4px;
+  right: -11px;
   background: #F1C045;
   border-color: #F4EFEA;
 }
@@ -6164,8 +6164,8 @@ body.home-page .user-menu-btn i {
 }
 
 body.home-page .notification-dot {
-  top: 8px;
-  right: 9px;
+  top: -4px;
+  right: -11px;
   background: #F1C045;
 }
 
@@ -6976,8 +6976,8 @@ body.home-page .header.scrolled .user-menu-btn:hover {
 }
 
 body.home-page .notification-dot {
-  top: 8px;
-  right: -2px;
+  top: -4px;
+  right: -11px;
   border-color: rgba(255, 255, 255, 0.72);
 }
 

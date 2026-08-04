@@ -64,6 +64,7 @@ const header = document.querySelector(".header");
 
 const notificationBtn = document.getElementById("notificationBtn");
 const notificationPopup = document.getElementById("notificationPopup");
+const notificationDot = document.querySelector(".notification-dot");
 
 const authModal = document.getElementById("authModal");
 const openAuthModalBtn =
@@ -1856,8 +1857,7 @@ if (heroLearnMore) {
 if (notificationBtn) {
   notificationBtn.addEventListener("click", (event) => {
     event.stopPropagation();
-    notificationPopup?.classList.remove("show");
-    showNotificationSettingsDialog();
+    toggleNotificationsPopup();
   });
 }
 
@@ -1869,6 +1869,162 @@ if (notificationBtn && notificationPopup) {
     ) {
       notificationPopup.classList.remove("show");
     }
+  });
+}
+
+function getNotificationIcon(category = "", type = "") {
+  if (category === "contact") return "fa-regular fa-envelope";
+  if (category === "application") return "fa-solid fa-file-circle-check";
+  if (category === "surrender") return "fa-solid fa-hand-holding-heart";
+  if (category === "event" || type.includes("event")) return "fa-solid fa-bullhorn";
+  return "fa-solid fa-bell";
+}
+
+function formatNotificationTime(value = "") {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString("en-PH", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit"
+  });
+}
+
+function updateNotificationBadge(unreadCount = 0) {
+  if (!notificationDot || !notificationBtn) return;
+
+  const safeCount = Math.max(0, Number(unreadCount || 0));
+  notificationDot.hidden = safeCount <= 0;
+  notificationDot.textContent = safeCount > 99 ? "99+" : safeCount ? String(safeCount) : "";
+  notificationBtn.setAttribute(
+    "aria-label",
+    safeCount > 0 ? `Notifications, ${safeCount} unread` : "Notifications"
+  );
+}
+
+function renderNotificationsPopup(items = [], unreadCount = 0) {
+  if (!notificationPopup) return;
+
+  notificationPopup.innerHTML = `
+    <div class="notification-popup-head">
+      <div class="notification-popup-title">
+        <h4>Notifications</h4>
+        <p>${unreadCount > 0 ? `${unreadCount} unread update${unreadCount === 1 ? "" : "s"}` : "All caught up"}</p>
+      </div>
+      <button type="button" class="notification-settings-mini" id="notificationSettingsMini">
+        <i class="fa-solid fa-gear" aria-hidden="true"></i>
+        <span>Settings</span>
+      </button>
+    </div>
+    <div class="notification-list notification-inbox-list">
+      ${items.length
+        ? items.map((item) => `
+            <a class="notification-item ${item.read === true ? "" : "is-unread"}" href="${item.link || "#"}">
+              <span class="notification-item-icon"><i class="${getNotificationIcon(item.category, item.type || "")}" aria-hidden="true"></i></span>
+              <span class="notification-item-copy">
+                <strong>${escapeHtmlText(item.title || "ANIMUA update")}</strong>
+                <small>${escapeHtmlText(item.message || "")}</small>
+                <time>${escapeHtmlText(formatNotificationTime(item.createdAt || item.eventDate))}</time>
+              </span>
+            </a>
+          `).join("")
+        : '<p class="notification-empty">No notifications yet.</p>'}
+    </div>
+  `;
+
+  notificationPopup.querySelector("#notificationSettingsMini")?.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    notificationPopup.classList.remove("show");
+    showNotificationSettingsDialog();
+  });
+
+  updateNotificationBadge(unreadCount);
+}
+
+function renderNotificationsLoading() {
+  if (!notificationPopup) return;
+  notificationPopup.innerHTML = `
+    <div class="notification-popup-head">
+      <div class="notification-popup-title">
+        <h4>Notifications</h4>
+        <p>Checking updates</p>
+      </div>
+    </div>
+    <div class="notification-list notification-inbox-list">
+      <p class="notification-empty">Loading notifications...</p>
+    </div>
+  `;
+}
+
+async function fetchNotifications({ markRead = false } = {}) {
+  const token = localStorage.getItem("animua_token");
+  if (!token) throw new Error("Please log in to view notifications.");
+
+  const response = await fetch(`${API_BASE_URL}/notifications`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.message || "Unable to load notifications.");
+
+  renderNotificationsPopup(data.notifications || [], Number(data.unreadCount || 0));
+
+  if (markRead && Number(data.unreadCount || 0) > 0) {
+    fetch(`${API_BASE_URL}/notifications/read`, {
+      method: "PATCH",
+      headers: { Authorization: `Bearer ${token}` }
+    }).then(() => {
+      updateNotificationBadge(0);
+      notificationPopup?.querySelectorAll(".notification-item.is-unread")
+        .forEach((item) => item.classList.remove("is-unread"));
+    }).catch((error) => console.warn("[notifications read]", error.message));
+  }
+
+  return data;
+}
+
+async function toggleNotificationsPopup() {
+  if (!notificationPopup) return;
+
+  if (!localStorage.getItem("animua_token")) {
+    localStorage.setItem("animua_open_auth_modal", "true");
+    showLoginView();
+    openAuthModal();
+    return;
+  }
+
+  const willOpen = !notificationPopup.classList.contains("show");
+  document.getElementById("userDropdown")?.classList.add("hidden");
+  notificationPopup.classList.toggle("show", willOpen);
+  if (!willOpen) return;
+
+  renderNotificationsLoading();
+  try {
+    await fetchNotifications({ markRead: true });
+  } catch (error) {
+    notificationPopup.innerHTML = `
+      <div class="notification-popup-head">
+        <div class="notification-popup-title">
+          <h4>Notifications</h4>
+          <p>Could not load updates</p>
+        </div>
+      </div>
+      <div class="notification-list notification-inbox-list">
+        <p class="notification-empty">${escapeHtmlText(error.message || "Unable to load notifications.")}</p>
+      </div>
+    `;
+  }
+}
+
+function refreshNotificationDot() {
+  if (!localStorage.getItem("animua_token")) {
+    updateNotificationBadge(0);
+    return;
+  }
+  fetchNotifications({ markRead: false }).catch(() => {
+    updateNotificationBadge(0);
   });
 }
 
@@ -2013,6 +2169,7 @@ function setupUserDropdown() {
 
   userMenuBtn.addEventListener("click", (event) => {
     event.stopPropagation();
+    notificationPopup?.classList.remove("show");
     userDropdown.classList.toggle("hidden");
   });
 
@@ -2330,10 +2487,17 @@ async function showNotificationSettingsDialog({ returnToProfile = false } = {}) 
             checked: settings.applicationUpdates
           })}
           ${renderNotificationToggleRow({
+            key: "surrenderRequestUpdates",
+            icon: "fa-solid fa-hand-holding-heart",
+            title: "Surrender Request Updates",
+            description: "Surrender approval, rejection, appointment, or request status changes.",
+            checked: settings.surrenderRequestUpdates
+          })}
+          ${renderNotificationToggleRow({
             key: "announcementsEvents",
             icon: "fa-solid fa-bullhorn",
-            title: "Announcement Notifications",
-            description: "Updates about announcements, alerts, and important notices.",
+            title: "Event Notifications",
+            description: "Upcoming ANIMUA events, announcements, alerts, and important notices.",
             checked: settings.announcementsEvents
           })}
         </div>
@@ -2466,6 +2630,7 @@ async function saveNotificationSettings(settings) {
     notificationPreference
   };
   setNotificationSummary(currentProfileAccount);
+  refreshNotificationDot();
   return currentProfileAccount;
 }
 
@@ -3614,6 +3779,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupAboutPhotoLightbox();
   setupRevealAnimations();
   updateAuthUI();
+  refreshNotificationDot();
   showWelcomeToastIfNeeded();
 
   if (loginSection && registerSection) {

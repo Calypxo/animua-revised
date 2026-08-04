@@ -60,6 +60,10 @@ async function getPublicSubmittedRequests() {
           barangay: request.owner?.barangay || "Not specified",
           city: request.owner?.city || "Angeles City",
           isAngelesResident: request.owner?.isAngelesResident === true,
+          identityDocuments: {
+            front: request.owner?.identityDocuments?.front || null,
+            back: request.owner?.identityDocuments?.back || null,
+          },
           idType: "Online Account",
           color: "#780116",
           initials: ownerName
@@ -117,10 +121,23 @@ async function getPublicSubmittedRequests() {
             name: "Animal photo",
             status: request.pet?.photoDataUrl ? "submitted" : "missing",
           },
+          {
+            name: "Valid ID front",
+            status: request.owner?.identityDocuments?.front?.dataUrl ? "submitted" : "missing",
+          },
+          {
+            name: "Valid ID back",
+            status: request.owner?.identityDocuments?.back?.dataUrl ? "submitted" : "missing",
+          },
         ],
 
-        docsSubmitted: 1 + (request.agreement?.agreedToTerms ? 1 : 0) + (request.pet?.photoDataUrl ? 1 : 0),
-        totalDocs: 3,
+        docsSubmitted:
+          1 +
+          (request.agreement?.agreedToTerms ? 1 : 0) +
+          (request.pet?.photoDataUrl ? 1 : 0) +
+          (request.owner?.identityDocuments?.front?.dataUrl ? 1 : 0) +
+          (request.owner?.identityDocuments?.back?.dataUrl ? 1 : 0),
+        totalDocs: 5,
 
         reviewedBy: request.reviewedBy || null,
         reviewedAt: request.reviewedAt || null,
@@ -536,6 +553,23 @@ function renderDrawer(r) {
     </div>`;
 
   // ── Owner section ─────────────────────────────────────
+  const identityIdFrontUrl = safePhotoUrl(owner.identityDocuments?.front?.dataUrl);
+  const identityIdBackUrl = safePhotoUrl(owner.identityDocuments?.back?.dataUrl);
+  const identityDocumentsBlock = `
+        <div class="drawer-info-item drawer-info-full">
+          <div class="drawer-info-lbl">Submitted Valid ID</div>
+          <div class="identity-document-strip">
+            <figure class="${identityIdFrontUrl ? "" : "is-missing"}">
+              ${identityIdFrontUrl ? `<img src="${identityIdFrontUrl}" alt="Front of submitted valid ID">` : `<i class="bi bi-card-image"></i>`}
+              <figcaption>${displayValue(owner.identityDocuments?.front?.name, "Front ID")}</figcaption>
+            </figure>
+            <figure class="${identityIdBackUrl ? "" : "is-missing"}">
+              ${identityIdBackUrl ? `<img src="${identityIdBackUrl}" alt="Back of submitted valid ID">` : `<i class="bi bi-card-image"></i>`}
+              <figcaption>${displayValue(owner.identityDocuments?.back?.name, "Back ID")}</figcaption>
+            </figure>
+          </div>
+        </div>`;
+
   const ownerSection = `
     <div class="drawer-section drawer-section-owner">
       <div class="drawer-section-title"><i class="bi bi-person-fill"></i> Owner Information</div>
@@ -568,6 +602,7 @@ function renderDrawer(r) {
             <span style="font-size:0.75rem;color:var(--stone)">(Barangay verified)</span>
           </div>
         </div>
+        ${identityDocumentsBlock}
       </div>
     </div>`;
 

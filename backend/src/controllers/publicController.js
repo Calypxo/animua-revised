@@ -7,6 +7,7 @@ const {
 const {
   invalidateAttentionCache,
 } = require("./dashboardController");
+const { createUserNotification } = require("../services/notificationService");
 
 const ANIMAL_COL = "animals";
 const EVENT_COL = "events";
@@ -891,6 +892,17 @@ exports.replyToContactMessage = async (req, res) => {
       }),
     });
     invalidateAttentionCache();
+
+    await createUserNotification({
+      userEmail: recipientEmail,
+      category: "contact",
+      type: "contact_reply",
+      title: "Staff replied to your message",
+      message: `ANIMUA replied about ${inquiryTopic}.`,
+      link: "/pages/public/contact.html",
+      referenceId: contactId,
+      respectSettings: false,
+    });
 
     return res.status(200).json({
       message: "Reply email has been sent.",
