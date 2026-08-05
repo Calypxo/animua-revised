@@ -258,12 +258,14 @@ function renderTable() {
       <td data-label="Date" class="intake-date">${formatDate(r.intakeDate)}</td>
       <td data-label="Status">${statusBadge(r.status)}</td>
       <td data-label="Actions" class="table-actions">
-        <button class="tbl-action-btn" title="View Details" aria-label="View ${r.id}" data-action="view" data-id="${r.id}">
-          <i class="bi bi-eye"></i>
-        </button>
-        ${canEdit    ? `<button class="tbl-action-btn" title="Edit" aria-label="Edit ${r.id}" data-action="edit" data-id="${r.id}"><i class="bi bi-pencil"></i></button>` : ""}
-        ${canReject  ? `<button class="tbl-action-btn reject" title="Reject" aria-label="Reject ${r.id}" data-action="reject" data-id="${r.id}"><i class="bi bi-x-lg"></i></button>` : ""}
-        ${canConvert ? `<button class="tbl-action-btn convert" title="${r.status === "Pending" ? "Approve and start profiling" : "Start profiling"}" aria-label="${r.status === "Pending" ? "Approve and start profiling for" : "Start profiling for"} ${r.id}" data-action="convert" data-id="${r.id}"><i class="bi bi-arrow-right-circle"></i></button>` : ""}
+        <div class="intake-action-group">
+          <button class="tbl-action-btn" title="View Details" aria-label="View ${r.id}" data-action="view" data-id="${r.id}">
+            <i class="bi bi-eye"></i>
+          </button>
+          ${canEdit    ? `<button class="tbl-action-btn" title="Edit" aria-label="Edit ${r.id}" data-action="edit" data-id="${r.id}"><i class="bi bi-pencil"></i></button>` : ""}
+          ${canReject  ? `<button class="tbl-action-btn reject" title="Reject" aria-label="Reject ${r.id}" data-action="reject" data-id="${r.id}"><i class="bi bi-x-lg"></i></button>` : ""}
+          ${canConvert ? `<button class="tbl-action-btn convert" title="${r.status === "Pending" ? "Approve and start profiling" : "Start profiling"}" aria-label="${r.status === "Pending" ? "Approve and start profiling for" : "Start profiling for"} ${r.id}" data-action="convert" data-id="${r.id}"><i class="bi bi-arrow-right-circle"></i></button>` : ""}
+        </div>
       </td>
     </tr>`;
   }).join("");
@@ -566,7 +568,7 @@ function openEditModal(id) {
   if (!r) return;
   editingId = id;
   document.getElementById("sourceSelector").classList.remove("is-locked");
-  document.getElementById("btnSaveDraft").hidden = false;
+  document.getElementById("btnSaveDraft").hidden = !["Pending", "Draft"].includes(r.status);
   document.getElementById("btnSubmitIntake").innerHTML =
     '<i class="bi bi-check-lg"></i> Save Changes';
 
@@ -640,6 +642,10 @@ function collectFormData(asDraft = false) {
     document.getElementById("fLocation").value.trim() ||
     (source === "Barangay Impound" ? barangayName : "");
 
+  const currentRecord = editingId
+    ? intakeRecords.find(record => record.id === editingId)
+    : null;
+
   const record = {
     identifyingDescription:
       document.getElementById("fIdentifyingDescription").value.trim(),
@@ -664,7 +670,9 @@ function collectFormData(asDraft = false) {
     location:       resolvedLocation,
     intakeNotes:    document.getElementById("fIntakeNotes").value.trim(),
     encodedBy:      getUserName()?.split(" ")[0] || "Staff",
-    status:         asDraft ? "Draft" : "Pending",
+    status:         editingId
+      ? (asDraft ? "Draft" : currentRecord?.status || "Pending")
+      : (asDraft ? "Draft" : "Pending"),
     barangayDetails: null,
     surrenderRefId:  null,
   };
@@ -816,9 +824,6 @@ function openViewModal(id) {
   document.getElementById("viewModalSubtitle").textContent =
     `${r.id} · ${r.species} · ${r.source} · ${formatDate(r.intakeDate)}`;
 
-  const sc = sourceCfg[r.source] || sourceCfg["Rescue"];
-  const cc = condCfg[r.condition] || condCfg["Fair"];
-
   let dynamicHtml = "";
   if (r.source === "Barangay Impound" && r.barangayDetails) {
     const b = r.barangayDetails;
@@ -866,17 +871,16 @@ function openViewModal(id) {
   }
 
   document.getElementById("viewModalBody").innerHTML = `
-    <div class="view-section intake-summary-section">
-      <div class="view-section-title"><i class="bi bi-card-checklist"></i> Record Summary</div>
-      <div class="intake-id-header">
-        <span class="intake-id-badge">${r.id}</span>
-        <div>
-          <div class="intake-animal-name">${intakeLabel(r)}</div>
-          <div class="intake-animal-meta">${r.species}${r.breed ? " · " + r.breed : ""} · ${r.sex}</div>
-        </div>
-        <div class="ms-auto d-flex gap-2 flex-wrap">
-          ${sourceBadge(r.source)} ${statusBadge(r.status)}
-        </div>
+    <div class="intake-record-hero">
+      <span class="intake-record-hero-icon" aria-hidden="true">${speciesInitial(r.species)}</span>
+      <div class="intake-record-hero-copy">
+        <span>Intake record · ${r.id}</span>
+        <h3>${intakeLabel(r)}</h3>
+        <p>${r.species}${r.breed ? " · " + r.breed : ""} · ${r.sex || "Unknown sex"}</p>
+      </div>
+      <div class="intake-record-hero-badges">
+        ${sourceBadge(r.source)}
+        ${statusBadge(r.status)}
       </div>
     </div>
 
@@ -911,9 +915,15 @@ function openViewModal(id) {
 
   // Footer buttons based on status
   const footer = document.getElementById("viewModalFooter");
-  let footerBtns = `<button type="button" class="btn-ghost-clay" id="viewClose2">Close</button>`;
+  let actionBtns = "";
+  if (can("edit")) {
+    actionBtns += `
+      <button type="button" class="btn-outline-save" id="vBtnEdit">
+        <i class="bi bi-pencil"></i> Edit Record
+      </button>`;
+  }
   if (r.status === "Pending" && (can("approve") || can("reject"))) {
-  footerBtns += `
+  actionBtns += `
     ${
       can("reject")
         ? `<button type="button" class="btn-reject" id="vBtnReject">
@@ -930,15 +940,23 @@ function openViewModal(id) {
     }`;
 }
   if (r.status === "Approved" && can("convert")) {
-    footerBtns += `
+    actionBtns += `
       <button type="button" class="btn-convert" id="vBtnConvert">
         <i class="bi bi-arrow-right-circle"></i> Convert to Animal Profile
       </button>`;
   }
 
-  footer.innerHTML = footerBtns;
+  footer.innerHTML = `
+    <div class="intake-view-footer-actions">
+      <button type="button" class="btn-ghost-clay" id="viewClose2">Close</button>
+      ${actionBtns}
+    </div>`;
 
   document.getElementById("viewClose2")?.addEventListener("click", () => closeModal("viewModalBackdrop"));
+  document.getElementById("vBtnEdit")?.addEventListener("click", () => {
+    closeModal("viewModalBackdrop");
+    openEditModal(id);
+  });
   document.getElementById("vBtnReject")?.addEventListener("click",  () => { closeModal("viewModalBackdrop"); openConfirmModal("reject",  id); });
   document.getElementById("vBtnConvert")?.addEventListener("click", () => { closeModal("viewModalBackdrop"); openConfirmModal("convert", id); });
 

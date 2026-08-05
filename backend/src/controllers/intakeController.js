@@ -340,7 +340,7 @@ exports.createIntake = async (req, res) => {
   }
 };
 
-// ── UPDATE INTAKE RECORD (Pending / Draft only) ───────
+// ── UPDATE INTAKE RECORD ───────────────────────────────
 exports.updateIntake = async (req, res) => {
   try {
     const { id } = req.params;
@@ -348,9 +348,6 @@ exports.updateIntake = async (req, res) => {
     if (!doc.exists) return res.status(404).json({ message: "Record not found." });
 
     const current = doc.data();
-    if (!["Pending","Draft"].includes(current.status)) {
-      return res.status(400).json({ message: `Cannot edit a record with status: ${current.status}.` });
-    }
 
   const allowed = [
     "identifyingDescription","previousName",
@@ -367,6 +364,18 @@ exports.updateIntake = async (req, res) => {
     allowed.forEach(key => {
       if (req.body[key] !== undefined) updates[key] = req.body[key];
     });
+
+    // Editing record details must never bypass or reverse the review workflow.
+    // Only Draft and Pending records may switch between those two statuses.
+    if (
+      updates.status !== undefined &&
+      !(
+        ["Pending", "Draft"].includes(current.status) &&
+        ["Pending", "Draft"].includes(updates.status)
+      )
+    ) {
+      delete updates.status;
+    }
 
     if (
       updates.identifyingDescription !== undefined
