@@ -318,7 +318,6 @@ function catBadge(cat) {
 }
 
 const URGENCY_FILL = { Critical:"fill-critical", High:"fill-high", Medium:"fill-medium", Low:"fill-low" };
-const URGENCY_PCT  = { Critical:95, High:75, Medium:50, Low:25 };
 
 /* ══════════════════════════════════════════════════════
    STATS
@@ -485,65 +484,87 @@ function renderDrawer(r) {
   const owner = r.owner || {};
   const agreement = r.agreement || {};
 
-  const pct  = URGENCY_PCT[r.nlp.urgencyLabel] || 25;
+  const urgencyScore = Math.max(0, Math.min(100, Number(r.nlp.urgencyScore) || 0));
   const fill = URGENCY_FILL[r.nlp.urgencyLabel] || "fill-low";
-  const confPct = Math.round(r.nlp.confidence * 100);
+  const confPct = Math.max(0, Math.min(100, Math.round((Number(r.nlp.confidence) || 0) * 100)));
+  const confidenceNote = confPct >= 75
+    ? "Strong match"
+    : confPct >= 50
+      ? "Moderate match — verify with the message"
+      : "Low match — staff review needed";
+  const priority = r.nlp.suggestedPriority || "Normal Priority";
+  const urgencyNote = {
+    Critical: "Review immediately and check for an urgent welfare risk.",
+    High: "Review soon; the message may describe a serious welfare concern.",
+    Medium: "Review in the normal queue and confirm the owner's situation.",
+    Low: "No urgent risk was detected, but staff should still verify the request.",
+  }[r.nlp.urgencyLabel] || "Review the owner's message before making a decision.";
+  const keywords = Array.isArray(r.nlp.keywords) ? r.nlp.keywords : [];
 
-  // ── NLP analysis section ─────────────────────────────
+  // ── Plain-language automated triage section ──────────
   const nlpSection = `
     <div class="drawer-section drawer-section-analysis">
-      <div class="drawer-section-title"><i class="bi bi-cpu"></i> Sentiment Analysis</div>
+      <div class="drawer-section-title"><i class="bi bi-clipboard2-heart"></i> Request Triage</div>
       <div class="nlp-analysis-card">
-        <div class="nlp-analysis-header">
-          <span class="nlp-chip"><i class="bi bi-cpu-fill"></i> NLP Classified</span>
-          <span style="font-size:0.75rem;color:var(--stone)">
-            ${r.nlp.source || "TF-IDF + Logistic Regression"}
-          </span>
+        <div class="triage-callout">
+          <span class="triage-callout-icon" aria-hidden="true"><i class="bi bi-flag-fill"></i></span>
+          <div class="triage-callout-copy">
+            <span>Recommended staff response</span>
+            <strong>${escapeHtml(priority)}</strong>
+            <p>${urgencyNote}</p>
+          </div>
+          <div class="triage-urgency ${urgencyCls(r.nlp.urgencyLabel)}">
+            <span>${escapeHtml(r.nlp.urgencyLabel || "Low")}</span>
+            <small>${urgencyScore}/100 urgency</small>
+          </div>
         </div>
-        <div class="nlp-category-row">
-          <div>
-            <div style="font-size:0.72rem;font-weight:700;color:var(--stone);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.06em">Category</div>
+
+        <div class="triage-signals" aria-label="Automated review signals">
+          <div class="triage-signal">
+            <span class="triage-signal-label">Reason category</span>
             ${catBadge(r.nlp.category)}
           </div>
-          <div class="nlp-confidence">Confidence: <span>${confPct}%</span></div>
-        </div>
-        <div style="margin-top:10px">
-        <div style="font-size:0.72rem;font-weight:700;color:var(--stone);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em">
-          Sentiment Result
-        </div>
-
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-          <span class="nlp-cat-badge cat-other">
-            <i class="bi bi-chat-heart-fill"></i>
-            ${r.nlp.sentiment || "Neutral"}
-          </span>
-
-          <span style="font-size:0.75rem;color:var(--stone)">
-            ${r.nlp.confidence < 0.5
-              ? "Low confidence — needs staff review"
-              : `Suggested Priority: ${r.nlp.suggestedPriority || "Normal Priority"}`}
-          </span>
-        </div>
-      </div>
-        <div>
-          <div style="font-size:0.72rem;font-weight:700;color:var(--stone);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em">Urgency Level</div>
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-            <span class="urgency-badge ${urgencyCls(r.nlp.urgencyLabel)}">${r.nlp.urgencyLabel}</span>
-            <span style="font-size:0.75rem;color:var(--stone);font-family:var(--mono)">Score: ${r.nlp.urgencyScore}/100</span>
+          <div class="triage-signal">
+            <span class="triage-signal-label">Message tone</span>
+            <span class="nlp-cat-badge cat-other">
+              <i class="bi bi-chat-heart-fill"></i>${escapeHtml(r.nlp.sentiment || "Neutral")}
+            </span>
           </div>
+          <div class="triage-signal triage-confidence">
+            <span class="triage-signal-label">Analysis confidence</span>
+            <strong>${confPct}%</strong>
+            <small class="triage-signal-status">${confidenceNote}</small>
+            <p>How sure the automated analysis is about the category and tone.</p>
+          </div>
+        </div>
+
+        <div class="triage-meter">
+          <div class="triage-meter-heading">
+            <span>Urgency score</span>
+            <strong>${urgencyScore} / 100</strong>
+          </div>
+          <p>Estimates how quickly staff should review the request. A higher score means faster review.</p>
           <div class="urgency-meter">
-            <div class="urgency-meter-track">
-              <div class="urgency-meter-fill ${fill}" style="width:${pct}%"></div>
+            <div class="urgency-meter-track" role="meter" aria-label="Urgency score" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${urgencyScore}">
+              <div class="urgency-meter-fill ${fill}" style="width:${urgencyScore}%"></div>
             </div>
           </div>
+          <div class="triage-meter-scale" aria-hidden="true"><span>Low</span><span>Medium</span><span>High</span><span>Critical</span></div>
         </div>
-        ${r.nlp.keywords.length ? `
-        <div style="margin-top:10px">
-          <div style="font-size:0.72rem;font-weight:700;color:var(--stone);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em">Detected Keywords</div>
+
+        ${keywords.length ? `
+        <div class="triage-keywords">
+          <span class="triage-signal-label">Signals found in the message</span>
           <div class="reason-keywords">
-            ${r.nlp.keywords.map(k=>`<span class="keyword-tag">${k}</span>`).join("")}
+            ${keywords.map(k=>`<span class="keyword-tag">${escapeHtml(k)}</span>`).join("")}
           </div>
         </div>` : ""}
+
+        <div class="triage-disclaimer">
+          <i class="bi bi-info-circle" aria-hidden="true"></i>
+          <span><strong>Decision support only.</strong> Confirm the result against the owner's message before acting.</span>
+          <small>Analyzed by ${escapeHtml(r.nlp.source || "automated text analysis")}</small>
+        </div>
       </div>
 
       <div class="surrender-reason-panel">

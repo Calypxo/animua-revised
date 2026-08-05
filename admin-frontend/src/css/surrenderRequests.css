@@ -1440,3 +1440,228 @@
     border-top: 1px solid rgba(120, 1, 22, .1);
   }
 }
+
+/* Plain-language surrender triage summary. */
+.surrender-requests-page .nlp-analysis-card {
+  overflow: hidden;
+  padding: 0 !important;
+  border: 1px solid #e7d9cf;
+  background: #FFFFFF;
+  box-shadow: 0 10px 28px rgba(66, 35, 27, .06);
+}
+
+.surrender-requests-page .triage-callout {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 18px;
+  border-bottom: 1px solid #eadfd6;
+  background: linear-gradient(135deg, #fff8ee 0%, #fffdf9 100%);
+}
+
+.surrender-requests-page .triage-callout-icon {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  color: #FFFFFF;
+  background: var(--brand-red, #780116);
+  font-size: 17px;
+  box-shadow: 0 7px 16px rgba(120, 1, 22, .16);
+}
+
+.surrender-requests-page .triage-callout-copy {
+  min-width: 0;
+}
+
+.surrender-requests-page .triage-callout-copy > span,
+.surrender-requests-page .triage-signal-label {
+  display: block;
+  color: #82746e;
+  font: 800 10px/1.25 "Poppins", sans-serif;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.surrender-requests-page .triage-callout-copy strong {
+  display: block;
+  margin-top: 5px;
+  color: #2d2423;
+  font: 800 18px/1.25 "Poppins", sans-serif;
+}
+
+.surrender-requests-page .triage-callout-copy p {
+  margin: 4px 0 0;
+  color: #6f625d;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.surrender-requests-page .triage-urgency {
+  min-width: 112px;
+  padding: 9px 12px;
+  border: 1px solid currentColor;
+  border-radius: 11px;
+  text-align: center;
+}
+
+.surrender-requests-page .triage-urgency span,
+.surrender-requests-page .triage-urgency small {
+  display: block;
+}
+
+.surrender-requests-page .triage-urgency span {
+  font: 800 12px/1.2 "Poppins", sans-serif;
+  text-transform: uppercase;
+}
+
+.surrender-requests-page .triage-urgency small {
+  margin-top: 3px;
+  color: #675b56;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.surrender-requests-page .triage-signals {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  padding: 16px 18px 0;
+}
+
+.surrender-requests-page .triage-signal {
+  min-width: 0;
+  min-height: 96px;
+  padding: 13px;
+  border: 1px solid #eee3db;
+  border-radius: 12px;
+  background: #fffaf4;
+}
+
+.surrender-requests-page .triage-signal > .nlp-cat-badge {
+  max-width: 100%;
+  margin-top: 10px;
+  white-space: normal;
+}
+
+.surrender-requests-page .triage-confidence strong {
+  display: block;
+  margin-top: 7px;
+  color: var(--brand-red, #780116);
+  font: 800 20px/1.15 "Poppins", sans-serif;
+}
+
+.surrender-requests-page .triage-confidence .triage-signal-status {
+  display: block;
+  margin-top: 3px;
+  color: #645954;
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.surrender-requests-page .triage-confidence p,
+.surrender-requests-page .triage-meter > p {
+  margin: 5px 0 0;
+  color: #857873;
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+.surrender-requests-page .triage-meter {
+  margin: 14px 18px 0;
+  padding: 13px 14px 11px;
+  border-radius: 12px;
+  background: #f8f3ef;
+}
+
+.surrender-requests-page .triage-meter-heading,
+.surrender-requests-page .triage-meter-scale {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.surrender-requests-page .triage-meter-heading {
+  color: #514744;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.surrender-requests-page .triage-meter-heading strong {
+  color: #2d2423;
+  font-family: var(--mono);
+}
+
+.surrender-requests-page .triage-meter .urgency-meter {
+  margin-top: 9px;
+}
+
+.surrender-requests-page .triage-meter-scale {
+  margin-top: 6px;
+  color: #978b85;
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.surrender-requests-page .triage-keywords {
+  padding: 15px 18px 0;
+}
+
+.surrender-requests-page .triage-keywords .reason-keywords {
+  margin-top: 8px;
+}
+
+.surrender-requests-page .triage-disclaimer {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 12px 18px;
+  border-top: 1px solid #eee3db;
+  color: #695d58;
+  background: #fcfaf8;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.surrender-requests-page .triage-disclaimer > i {
+  color: var(--brand-red, #780116);
+  font-size: 13px;
+}
+
+.surrender-requests-page .triage-disclaimer small {
+  color: #968983;
+  text-align: right;
+}
+
+@media (max-width: 720px) {
+  .surrender-requests-page .triage-callout {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .surrender-requests-page .triage-urgency {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .surrender-requests-page .triage-signals {
+    grid-template-columns: 1fr;
+  }
+
+  .surrender-requests-page .triage-signal {
+    min-height: 0;
+  }
+
+  .surrender-requests-page .triage-disclaimer {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .surrender-requests-page .triage-disclaimer small {
+    grid-column: 2;
+    text-align: left;
+  }
+}

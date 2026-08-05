@@ -12,6 +12,10 @@ const pythonPath = path.join(
   process.platform === "win32" ? "Scripts/python.exe" : "bin/python"
 );
 const sentimentPort = 8002;
+const sentimentStatusUrl = `http://127.0.0.1:${sentimentPort}/`;
+const sentimentStartupTimeoutMs = Number(
+  process.env.PYTHON_SENTIMENT_STARTUP_TIMEOUT_MS || 180000
+);
 
 const children = [];
 let shuttingDown = false;
@@ -60,6 +64,45 @@ function isPortAvailable(port, host = "127.0.0.1") {
   });
 }
 
+function wait(delayMs) {
+  return new Promise((resolve) => setTimeout(resolve, delayMs));
+}
+
+async function waitForSentimentService(child = null) {
+  const startedAt = Date.now();
+
+  while (Date.now() - startedAt < sentimentStartupTimeoutMs) {
+    if (child && child.exitCode !== null) return false;
+
+    try {
+      const response = await fetch(sentimentStatusUrl, {
+        signal: AbortSignal.timeout(2000),
+      });
+      if (response.ok) {
+        const status = await response.json();
+        if (status.transformerReady) {
+          console.log(
+            `Tagalog RoBERTa is ready (${status.activeSource || "transformer"}).`
+          );
+          return true;
+        }
+
+        console.warn(
+          "Tagalog sentiment service started, but its RoBERTa models are not ready. " +
+            `Loaded tasks: ${JSON.stringify(status.loadedTasks || {})}.`
+        );
+        return false;
+      }
+    } catch (_error) {
+      // The service has not bound its port yet while transformers are importing.
+    }
+
+    await wait(500);
+  }
+
+  return false;
+}
+
 async function startSentimentService() {
   if (!fs.existsSync(pythonPath)) {
     console.warn(
@@ -72,9 +115,15 @@ async function startSentimentService() {
   const portAvailable = await isPortAvailable(sentimentPort);
   if (!portAvailable) {
     console.log(
-      `Sentiment service port ${sentimentPort} is already in use; ` +
-        "assuming an existing service is available."
+      `Sentiment service port ${sentimentPort} is already in use; checking it.`
     );
+    const ready = await waitForSentimentService();
+    if (!ready) {
+      console.warn(
+        `The existing service on port ${sentimentPort} is not transformer-ready. ` +
+          "Surrender submissions may use the Node fallback."
+      );
+    }
     return;
   }
 
@@ -106,6 +155,15 @@ async function startSentimentService() {
       );
     }
   });
+
+  console.log("Loading Tagalog RoBERTa models; this can take several seconds...");
+  const ready = await waitForSentimentService(sentiment);
+  if (!ready) {
+    console.warn(
+      `Tagalog RoBERTa did not become ready within ${sentimentStartupTimeoutMs} ms. ` +
+        "Starting the backend with the Node fallback available."
+    );
+  }
 }
 
 function createBackendProcess() {

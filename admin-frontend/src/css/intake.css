@@ -1641,3 +1641,255 @@ body.modal-open { overflow: hidden; }
     flex: 1 1 0 !important;
   }
 }
+
+/* Intake table actions: preserve the table cell and align its button group. */
+html body.management-consistent-ui #intakeTableBody td.table-actions {
+  display: table-cell !important;
+  min-width: 176px !important;
+  padding-inline: 12px !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  white-space: nowrap !important;
+}
+
+#intakeTableBody .intake-action-group {
+  min-height: 36px;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  vertical-align: middle;
+}
+
+#intakeTableBody .intake-action-group .tbl-action-btn {
+  margin: 0 !important;
+}
+
+/* Intake View Details: one scoped side-panel layout without stacked legacy cards. */
+#viewModalBackdrop > .intake-view-modal {
+  width: min(780px, calc(100vw - 32px)) !important;
+  max-width: 780px !important;
+}
+
+#viewModalBackdrop .um-modal-header {
+  min-height: 88px !important;
+  align-items: center !important;
+  padding: 20px 26px 17px !important;
+}
+
+#viewModalBackdrop .um-modal-header h2 {
+  font-size: 19px !important;
+}
+
+#viewModalBackdrop .modal-subtitle {
+  margin-top: 5px !important;
+  font-size: 11px !important;
+}
+
+#viewModalBackdrop .um-modal-body {
+  padding: 22px 24px 28px !important;
+  background: #FFF8EE !important;
+}
+
+#viewModalBackdrop .intake-record-hero {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 13px;
+  margin-bottom: 16px;
+  padding: 16px 18px;
+  border: 1px solid #eadfd4;
+  border-radius: 13px;
+  background: #FFFFFF;
+  box-shadow: 0 8px 22px rgba(54, 40, 34, .05);
+}
+
+#viewModalBackdrop .intake-record-hero-icon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #FFFFFF;
+  background: #780116;
+  font: 800 14px/1 "Poppins", sans-serif;
+}
+
+#viewModalBackdrop .intake-record-hero-copy {
+  min-width: 0;
+}
+
+#viewModalBackdrop .intake-record-hero-copy > span {
+  display: block;
+  color: #780116;
+  font: 800 9px/1.2 "Poppins", sans-serif;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+#viewModalBackdrop .intake-record-hero-copy h3 {
+  margin: 5px 0 2px;
+  overflow: hidden;
+  color: #2d2523;
+  font: 800 14px/1.3 "Poppins", sans-serif;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#viewModalBackdrop .intake-record-hero-copy p {
+  margin: 0;
+  color: #7b6f69;
+  font-size: 10px;
+}
+
+#viewModalBackdrop .intake-record-hero-badges {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+#viewModalBackdrop .view-section {
+  margin: 0 0 16px !important;
+  padding: 18px !important;
+  border: 1px solid #eadfd4 !important;
+  border-radius: 13px !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 8px 22px rgba(54, 40, 34, .05) !important;
+}
+
+#viewModalBackdrop .view-section:last-child {
+  margin-bottom: 0 !important;
+}
+
+#viewModalBackdrop .view-section-title {
+  min-height: 28px !important;
+  margin: 0 0 15px !important;
+  padding: 0 0 10px !important;
+  color: #2b2528 !important;
+  font-size: 12px !important;
+  text-transform: none !important;
+}
+
+#viewModalBackdrop .view-section-title > i {
+  width: 27px !important;
+  height: 27px !important;
+  margin: 0 !important;
+  color: #780116 !important;
+  background: #FFF8EE !important;
+}
+
+#viewModalBackdrop .view-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 13px 15px !important;
+}
+
+#viewModalBackdrop .view-field {
+  min-width: 0 !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 5px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+#viewModalBackdrop .view-field-lbl {
+  margin: 0 !important;
+  color: #504845 !important;
+  font: 700 10px/1.35 "Poppins", sans-serif !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+#viewModalBackdrop .view-field-val {
+  min-height: 42px !important;
+  display: flex !important;
+  align-items: center !important;
+  margin: 0 !important;
+  padding: 10px 12px !important;
+  border: 1px solid #dfd3cb !important;
+  border-radius: 9px !important;
+  color: #2f2927 !important;
+  background: #FFFFFF !important;
+  font: 500 11px/1.45 "Poppins", sans-serif !important;
+  overflow-wrap: anywhere;
+}
+
+#viewModalBackdrop .view-field-val .source-badge,
+#viewModalBackdrop .view-field-val .cond-badge,
+#viewModalBackdrop .view-field-val .status-badge {
+  margin: 0 !important;
+}
+
+#viewModalBackdrop .um-modal-footer {
+  min-height: 68px !important;
+  justify-content: flex-end !important;
+  gap: 12px !important;
+  padding: 13px 24px !important;
+}
+
+#viewModalBackdrop .intake-view-footer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+#viewModalBackdrop .um-modal-footer button {
+  min-height: 40px !important;
+  padding: 0 17px !important;
+  font-size: 11px !important;
+}
+
+@media (max-width: 720px) {
+  html body.management-consistent-ui #intakeTableBody td.table-actions {
+    display: grid !important;
+    min-width: 0 !important;
+  }
+
+  #intakeTableBody .intake-action-group {
+    justify-content: flex-end;
+  }
+
+  #viewModalBackdrop > .intake-view-modal {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  #viewModalBackdrop .intake-record-hero {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  #viewModalBackdrop .intake-record-hero-badges {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+
+  #viewModalBackdrop .view-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  #viewModalBackdrop .um-modal-footer {
+    align-items: stretch !important;
+  }
+
+  #viewModalBackdrop .intake-view-footer-actions {
+    flex: 1 1 auto;
+  }
+}
+
+@media (max-width: 560px) {
+  #viewModalBackdrop .um-modal-footer,
+  #viewModalBackdrop .intake-view-footer-actions {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  #viewModalBackdrop .um-modal-footer button {
+    width: 100% !important;
+  }
+}
