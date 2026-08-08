@@ -27,6 +27,7 @@ const notificationRoutes = require("./src/routes/notificationRoutes");
 const authenticateToken = require("./src/middleware/authMiddleware");
 const authorizeRole = require("./src/middleware/roleMiddleware");
 const { trainInventoryModel } = require("./src/services/predictiveService");
+const auditMutationMiddleware = require("./src/middleware/auditMutationMiddleware");
 
 // ─── CORS ─────────────────────────────────────────────────────────────────────
 const allowedOrigins = [
@@ -93,6 +94,7 @@ app.use(
 );
 
 // ─── ROUTES ───────────────────────────────────────────────────────────────────
+app.use("/api", auditMutationMiddleware);
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/intake", intakeRoutes);

@@ -1,9 +1,11 @@
 import { API_BASE_URL } from "../utils/api.js";
 import "../css/animalProfiling.css";
+import "../css/managementTables.css";
 
 import { protectPageByModule } from "../auth/authGuard.js";
 import { renderTopbarUser } from "../components/management/topbarUser.js";
 import { loadSidebar, navigateManagementPage } from "../components/management/sidebarLoader.js";
+import { showManagementNotice } from "../components/management/managementAlerts.js";
 import {
   getUserName,
 } from "../utils/storage.js";
@@ -206,7 +208,12 @@ async function loadAnimal() {
     animal.medicalRecords = animal.medicalRecords || [];
   } catch (err) {
     console.error("[loadAnimal]", err);
-    alert("Animal not found.");
+    await showManagementNotice({
+      icon: "error",
+      title: "Animal record not found",
+      text: "The record may have been archived, removed, or is no longer available.",
+      confirmButtonText: "Back to animal profiles",
+    });
     navigateManagementPage("/pages/animalProfiling.html");
   }
 }

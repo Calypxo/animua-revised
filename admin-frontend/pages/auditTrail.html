@@ -10,7 +10,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 </head>
-<body class="loading">
+<body class="loading audit-trail-page">
   <div class="shell">
     <div id="sidebar-container"></div>
 
@@ -66,10 +66,10 @@
                 <p>Search and review staff actions, affected records, and system outcomes.</p>
               </div>
             </div>
-            <div class="audit-view-switch" aria-label="Audit log views">
-              <button class="audit-view-btn active" data-audit-view="all"><i class="bi bi-list-ul"></i> All activity</button>
-              <button class="audit-view-btn" data-audit-view="attention"><i class="bi bi-exclamation-circle"></i> Needs attention</button>
-              <button class="audit-view-btn" data-audit-view="success"><i class="bi bi-check2-circle"></i> Successful</button>
+            <div class="audit-view-switch" role="tablist" aria-label="Audit log views">
+              <button class="audit-view-btn active" type="button" role="tab" aria-selected="true" data-audit-view="all"><i class="bi bi-list-ul"></i> All activity</button>
+              <button class="audit-view-btn" type="button" role="tab" aria-selected="false" data-audit-view="attention"><i class="bi bi-exclamation-circle"></i> Needs attention</button>
+              <button class="audit-view-btn" type="button" role="tab" aria-selected="false" data-audit-view="success"><i class="bi bi-check2-circle"></i> Successful</button>
             </div>
           </div>
 
@@ -134,16 +134,16 @@
           </div>
 
           <div class="table-responsive records-table-wrap">
-            <table class="shelter-table management-data-table">
+            <table class="shelter-table management-data-table audit-log-table">
               <thead>
                 <tr>
-                  <th>Date & Time</th>
-                  <th>Actor</th>
-                  <th>Module</th>
-                  <th>Action</th>
-                  <th>Record</th>
-                  <th>Status</th>
-                  <th>Actions</th>
+                  <th scope="col">Event time</th>
+                  <th scope="col">Performed by</th>
+                  <th scope="col">System area</th>
+                  <th scope="col">Activity</th>
+                  <th scope="col">Affected record</th>
+                  <th scope="col">Outcome</th>
+                  <th scope="col" class="audit-review-heading"><span class="visually-hidden">Review event</span></th>
                 </tr>
               </thead>
               <tbody id="auditTableBody">
@@ -169,7 +169,7 @@
           <h2>Audit Log Details</h2>
           <p class="modal-subtitle">Detailed activity information</p>
         </div>
-        <button class="modal-close-btn" id="viewAuditClose">
+        <button class="modal-close-btn" id="viewAuditClose" type="button" aria-label="Close audit log details">
           <i class="bi bi-x-lg"></i>
         </button>
       </div>
@@ -179,7 +179,7 @@
       </div>
 
       <div class="um-modal-footer">
-        <button class="btn-outline-add" id="viewAuditCloseFooter">Close</button>
+        <button class="btn-outline-add" id="viewAuditCloseFooter" type="button">Close</button>
       </div>
     </div>
   </div>

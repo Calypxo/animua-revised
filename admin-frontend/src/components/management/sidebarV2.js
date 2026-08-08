@@ -200,6 +200,10 @@ function bindSidebar(container, sidebar, overlay) {
   });
 
   const toggle = document.getElementById("sidebarToggle");
+  if (toggle) {
+    toggle.type = "button";
+    toggle.setAttribute("aria-label", "Toggle management navigation");
+  }
   const closeMobile = () => {
     sidebar.classList.remove("mobile-show");
     overlay.classList.remove("active");

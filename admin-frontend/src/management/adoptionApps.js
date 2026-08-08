@@ -9,6 +9,10 @@ import { protectPageByModule } from "../auth/authGuard.js";
 import { hasPermission } from "../auth/permissions.js";
 import { renderTopbarUser }      from "../components/management/topbarUser.js";
 import { loadSidebar }           from "../components/management/sidebarLoader.js";
+import {
+  confirmManagementAction,
+  promptManagementText,
+} from "../components/management/managementAlerts.js";
 import { getUserName }           from "../utils/storage.js";
 import {
   getAllAdoptions,
@@ -262,7 +266,7 @@ function renderTable() {
   const page  = filtered.slice(start, start+PAGE_SIZE);
 
   if (!page.length) {
-    tbody.innerHTML = `<tr><td colspan="8"><div class="reference-records-empty"><span><i class="bi bi-file-earmark-heart"></i></span><strong>No adoption applications found</strong><small>Adjust the status, search, or application type filters to broaden this view.</small></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7"><div class="reference-records-empty"><span><i class="bi bi-file-earmark-heart"></i></span><strong>No adoption applications found</strong><small>Adjust the status, search, or application type filters to broaden this view.</small></div></td></tr>`;
     return;
   }
 
@@ -293,7 +297,6 @@ function renderTable() {
         </span>
       </td>
       <td>${compatPill(a.compatScore, a.type)}</td>
-      <td class="table-date-cell">${formatDate(a.submitted)}</td>
       <td>${statusBadge(a.status)}</td>
       <td>
         <button class="tbl-action-btn" data-action="view" data-id="${a.id}" title="View details" aria-label="View adoption application details">
@@ -674,20 +677,55 @@ async function approveApp(id) {
 async function runAdoptionDeadlineAction(id, action) {
   let payload = {};
   if (action === "deadline/extend") {
-    const extensionDays = Number(window.prompt("How many additional days? Enter 1 to 30.", "7"));
-    if (!extensionDays) return;
-    const reason = window.prompt("Reason for extending the deadline:");
+    const extensionDaysValue = await promptManagementText({
+      title: "Extend pickup deadline",
+      text: "Choose how many additional days the adopter will receive.",
+      input: "number",
+      value: "7",
+      confirmButtonText: "Continue",
+      inputAttributes: { min: "1", max: "30", step: "1" },
+      validate: (value) => {
+        const days = Number(value);
+        return Number.isInteger(days) && days >= 1 && days <= 30
+          ? undefined
+          : "Enter a whole number from 1 to 30.";
+      },
+    });
+    if (extensionDaysValue === null) return;
+    const reason = await promptManagementText({
+      title: "Reason for extension",
+      text: "Add a short operational note for the audit trail.",
+      input: "textarea",
+      placeholder: "Enter the reason for extending the deadline",
+      confirmButtonText: "Extend deadline",
+    });
     if (!reason) return;
-    payload = { extensionDays, reason };
+    payload = { extensionDays: Number(extensionDaysValue), reason };
   } else if (action === "no-show") {
-    const reason = window.prompt("Reason for marking this request as a no-show:", "Missed shelter appointment.");
+    const reason = await promptManagementText({
+      title: "Mark as no-show",
+      text: "This note will be recorded in the adoption workflow.",
+      input: "textarea",
+      value: "Missed shelter appointment.",
+      confirmButtonText: "Mark no-show",
+    });
     if (!reason) return;
     payload = { reason };
   } else if (action === "deadline/restore") {
-    const reason = window.prompt("Reason for restoring this expired request:");
+    const reason = await promptManagementText({
+      title: "Restore expired request",
+      text: "Explain why this adoption request should return to the active workflow.",
+      input: "textarea",
+      placeholder: "Enter the restoration reason",
+      confirmButtonText: "Restore request",
+    });
     if (!reason) return;
     payload = { reason };
-  } else if (!window.confirm("Confirm that the adopter arrived at the shelter?")) {
+  } else if (!(await confirmManagementAction({
+    title: "Confirm adopter arrival",
+    text: "This will update the shelter attendance record for this adoption.",
+    confirmButtonText: "Confirm arrival",
+  }))) {
     return;
   }
 
@@ -705,10 +743,20 @@ async function runAdoptionDeadlineAction(id, action) {
 async function runAdoptionRescheduleAction(id, decision) {
   const payload = {};
   if (decision === "reject") {
-    const reason = window.prompt("Reason for rejecting this pickup date change:");
+    const reason = await promptManagementText({
+      title: "Reject pickup date change",
+      text: "Add the reason staff cannot approve the requested schedule.",
+      input: "textarea",
+      placeholder: "Enter the rejection reason",
+      confirmButtonText: "Reject change",
+    });
     if (!reason) return;
     payload.reason = reason;
-  } else if (!window.confirm("Approve the requested pickup date and time?")) {
+  } else if (!(await confirmManagementAction({
+    title: "Approve pickup schedule",
+    text: "The requested pickup date and time will become the active shelter schedule.",
+    confirmButtonText: "Approve schedule",
+  }))) {
     return;
   }
 

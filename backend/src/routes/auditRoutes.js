@@ -4,6 +4,7 @@ const router = express.Router();
 
 const {
   getAuditLogs,
+  createAuditEvent,
 } = require(
   "../controllers/auditController"
 );
@@ -22,6 +23,13 @@ router.get(
   authenticateToken,
   authorizeRole("Admin"),
   getAuditLogs
+);
+
+router.post(
+  "/events",
+  authenticateToken,
+  authorizeRole("Admin", "Staff", "Veterinarian"),
+  createAuditEvent
 );
 
 module.exports = router;

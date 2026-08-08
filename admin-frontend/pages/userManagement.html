@@ -69,9 +69,9 @@
           <div class="um-tabs-wrap ap-tabs-wrap">
             <span class="ap-filter-label">Account type</span>
             <div class="um-tabs ap-tabs" role="tablist" aria-label="Account groups">
-              <button class="um-tab ap-tab active" data-tab="all" role="tab" aria-selected="true">All users <span id="tabAllCount">0</span></button>
-              <button class="um-tab ap-tab" data-tab="staff" role="tab" aria-selected="false">Care team <span id="tabStaffCount">0</span></button>
-              <button class="um-tab ap-tab" data-tab="public" role="tab" aria-selected="false">Public <span id="tabPublicCount">0</span></button>
+              <button class="um-tab ap-tab active" type="button" data-tab="all" role="tab" aria-selected="true"><i class="bi bi-people"></i>All users <span id="tabAllCount">0</span></button>
+              <button class="um-tab ap-tab" type="button" data-tab="staff" role="tab" aria-selected="false"><i class="bi bi-person-badge"></i>Care team <span id="tabStaffCount">0</span></button>
+              <button class="um-tab ap-tab" type="button" data-tab="public" role="tab" aria-selected="false"><i class="bi bi-globe2"></i>Public <span id="tabPublicCount">0</span></button>
             </div>
           </div>
           <div class="um-filter-bar ap-filter-toolbar" aria-label="Directory filters">
@@ -126,75 +126,86 @@
 
 <!-- ADD / EDIT MODAL (Management users only) -->
 <div class="um-modal-backdrop" id="userModalBackdrop">
-  <div class="um-modal" id="userModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="um-modal user-create-modal" id="userModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="userModalSubtitle">
     <div class="um-modal-header">
-      <h2 id="modalTitle">Add Management User</h2>
-      <button class="modal-close-btn" id="modalCloseBtn" type="button"><i class="bi bi-x-lg"></i></button>
+      <div>
+        <h2 id="modalTitle">Add Management User</h2>
+        <p class="modal-subtitle" id="userModalSubtitle">Create a secure shelter account and assign its access role.</p>
+      </div>
+      <button class="modal-close-btn" id="modalCloseBtn" type="button" aria-label="Close user form"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="um-modal-body">
       <form id="userForm" novalidate>
         <input type="hidden" id="formUserId" />
-        <div class="avatar-preview-row mb-4">
-          <div class="avatar-preview-circle" id="avatarPreview">?</div>
-          <p class="form-hint">Initials auto-generated from name.</p>
-        </div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label class="form-lbl" for="fFirstName">First Name <span class="req">*</span></label>
-            <input type="text" class="form-inp" id="fFirstName" placeholder="Juan" required />
-            <span class="form-err" id="errFirstName"></span>
+        <section class="user-form-section">
+          <div class="user-form-section-title"><i class="bi bi-person-vcard"></i><span>Account identity</span></div>
+          <div class="avatar-preview-row">
+            <div class="avatar-preview-circle" id="avatarPreview">?</div>
+            <div><strong>Profile initials</strong><p class="form-hint">Generated automatically from the user’s first and last name.</p></div>
           </div>
-          <div class="form-group">
-            <label class="form-lbl" for="fLastName">Last Name <span class="req">*</span></label>
-            <input type="text" class="form-inp" id="fLastName" placeholder="Dela Cruz" required />
-            <span class="form-err" id="errLastName"></span>
-          </div>
-          <div class="form-group form-full">
-            <label class="form-lbl" for="fEmail">Email Address <span class="req">*</span></label>
-            <input type="email" class="form-inp" id="fEmail" placeholder="juan@animua.org" required />
-            <span class="form-err" id="errEmail"></span>
-          </div>
-          <div class="form-group">
-            <label class="form-lbl" for="fRole">Role <span class="req">*</span></label>
-            <select class="form-inp" id="fRole" required>
-              <option value="">Select role…</option>
-              <option value="Admin">Administrator</option>
-              <option value="Staff">Staff</option>
-              <option value="Veterinarian">Veterinarian</option>
-            </select>
-            <span class="form-err" id="errRole"></span>
-          </div>
-          <div class="form-group">
-            <label class="form-lbl" for="fStatus">Status <span class="req">*</span></label>
-            <select class="form-inp" id="fStatus">
-              <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
-            </select>
-          </div>
-          <div class="form-group" id="passwordGroup">
-            <label class="form-lbl" for="fPassword">Password <span class="req">*</span></label>
-            <div class="input-eye-wrap">
-              <input type="password" class="form-inp" id="fPassword" placeholder="Min. 8 characters" />
-              <button type="button" class="eye-btn" id="togglePassword"><i class="bi bi-eye"></i></button>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-lbl" for="fFirstName">First Name <span class="req">*</span></label>
+              <input type="text" class="form-inp" id="fFirstName" placeholder="Juan" required />
+              <span class="form-err" id="errFirstName"></span>
             </div>
-            <span class="form-err" id="errPassword"></span>
-          </div>
-          <div class="form-group" id="confirmPasswordGroup">
-            <label class="form-lbl" for="fConfirmPassword">Confirm Password <span class="req">*</span></label>
-            <div class="input-eye-wrap">
-              <input type="password" class="form-inp" id="fConfirmPassword" placeholder="Repeat password" />
-              <button type="button" class="eye-btn" id="toggleConfirm"><i class="bi bi-eye"></i></button>
+            <div class="form-group">
+              <label class="form-lbl" for="fLastName">Last Name <span class="req">*</span></label>
+              <input type="text" class="form-inp" id="fLastName" placeholder="Dela Cruz" required />
+              <span class="form-err" id="errLastName"></span>
             </div>
-            <span class="form-err" id="errConfirmPassword"></span>
+            <div class="form-group form-full">
+              <label class="form-lbl" for="fEmail">Email Address <span class="req">*</span></label>
+              <input type="email" class="form-inp" id="fEmail" placeholder="juan@animua.org" required />
+              <span class="form-err" id="errEmail"></span>
+            </div>
           </div>
-        </div>
-        <div class="permissions-section" id="permissionsSection">
-          <div class="perm-section-title">
-            <i class="bi bi-key-fill"></i> Role Permissions
-            <span class="perm-hint">Permissions are automatically assigned based on the selected role.</span>
+        </section>
+        <section class="user-form-section">
+          <div class="user-form-section-title"><i class="bi bi-shield-lock"></i><span>Access and security</span></div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-lbl" for="fRole">Role <span class="req">*</span></label>
+              <select class="form-inp" id="fRole" required>
+                <option value="">Select role…</option>
+                <option value="Admin">Administrator</option>
+                <option value="Staff">Staff</option>
+                <option value="Veterinarian">Veterinarian</option>
+              </select>
+              <span class="form-err" id="errRole"></span>
+            </div>
+            <div class="form-group">
+              <label class="form-lbl" for="fStatus">Status <span class="req">*</span></label>
+              <select class="form-inp" id="fStatus">
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+            </div>
+            <div class="form-group" id="passwordGroup">
+              <label class="form-lbl" for="fPassword">Password <span class="req">*</span></label>
+              <div class="input-eye-wrap">
+                <input type="password" class="form-inp" id="fPassword" placeholder="Min. 8 characters" />
+                <button type="button" class="eye-btn" id="togglePassword" aria-label="Show password" aria-pressed="false" title="Show password"><i class="bi bi-eye"></i></button>
+              </div>
+              <span class="form-err" id="errPassword"></span>
+            </div>
+            <div class="form-group" id="confirmPasswordGroup">
+              <label class="form-lbl" for="fConfirmPassword">Confirm Password <span class="req">*</span></label>
+              <div class="input-eye-wrap">
+                <input type="password" class="form-inp" id="fConfirmPassword" placeholder="Repeat password" />
+                <button type="button" class="eye-btn" id="toggleConfirm" aria-label="Show password" aria-pressed="false" title="Show password"><i class="bi bi-eye"></i></button>
+              </div>
+              <span class="form-err" id="errConfirmPassword"></span>
+            </div>
           </div>
-          <div class="perm-grid" id="permGrid"></div>
-        </div>
+          <div class="permissions-section" id="permissionsSection">
+            <div class="perm-section-title">
+              <i class="bi bi-key-fill"></i> Role Permissions
+              <span class="perm-hint">Automatically assigned from the selected role.</span>
+            </div>
+            <div class="perm-grid" id="permGrid"></div>
+          </div>
+        </section>
       </form>
     </div>
     <div class="um-modal-footer">
@@ -211,7 +222,7 @@
   <div class="um-modal um-modal-sm" role="dialog" aria-modal="true">
     <div class="um-modal-header">
       <h2>User Details</h2>
-      <button class="modal-close-btn" id="viewModalCloseBtn"><i class="bi bi-x-lg"></i></button>
+      <button class="modal-close-btn" id="viewModalCloseBtn" type="button" aria-label="Close account details"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="um-modal-body" id="viewModalBody"></div>
     <div class="um-modal-footer">
@@ -228,7 +239,7 @@
   <div class="um-modal um-modal-xs" role="dialog" aria-modal="true">
     <div class="um-modal-header">
       <h2 id="deactivateTitle">Deactivate User</h2>
-      <button class="modal-close-btn" id="deactivateCloseBtn"><i class="bi bi-x-lg"></i></button>
+      <button class="modal-close-btn" id="deactivateCloseBtn" type="button" aria-label="Close account status confirmation"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="um-modal-body">
       <div class="confirm-body">

@@ -69,14 +69,14 @@
             <div class="inv-category-strip">
               <div class="inv-category-label"><i class="bi bi-tags-fill"></i> Categories</div>
               <div class="inv-tabs" id="categoryTabs" role="tablist" aria-label="Inventory categories">
-              <button class="inv-tab active" data-tab="all">All</button>
-              <button class="inv-tab" data-tab="Antibiotic">Antibiotic</button>
-              <button class="inv-tab" data-tab="Antiparasitic">Antiparasitic</button>
-              <button class="inv-tab" data-tab="Consumable">Consumable</button>
-              <button class="inv-tab" data-tab="Disinfectant">Disinfectant</button>
-              <button class="inv-tab" data-tab="Equipment">Equipment</button>
-              <button class="inv-tab" data-tab="Supplement">Supplement</button>
-              <button class="inv-tab" data-tab="Vaccine">Vaccine</button>
+              <button class="inv-tab active" type="button" role="tab" aria-selected="true" data-tab="all"><i class="bi bi-collection"></i>All</button>
+              <button class="inv-tab" type="button" role="tab" aria-selected="false" data-tab="Antibiotic"><i class="bi bi-capsule"></i>Antibiotic</button>
+              <button class="inv-tab" type="button" role="tab" aria-selected="false" data-tab="Antiparasitic"><i class="bi bi-shield-plus"></i>Antiparasitic</button>
+              <button class="inv-tab" type="button" role="tab" aria-selected="false" data-tab="Consumable"><i class="bi bi-bandaid"></i>Consumable</button>
+              <button class="inv-tab" type="button" role="tab" aria-selected="false" data-tab="Disinfectant"><i class="bi bi-droplet"></i>Disinfectant</button>
+              <button class="inv-tab" type="button" role="tab" aria-selected="false" data-tab="Equipment"><i class="bi bi-tools"></i>Equipment</button>
+              <button class="inv-tab" type="button" role="tab" aria-selected="false" data-tab="Supplement"><i class="bi bi-heart-pulse"></i>Supplement</button>
+              <button class="inv-tab" type="button" role="tab" aria-selected="false" data-tab="Vaccine"><i class="bi bi-eyedropper"></i>Vaccine</button>
               </div>
             </div>
 
@@ -221,7 +221,7 @@
         <h2 id="stockInTitle">Stock In</h2>
         <p class="modal-subtitle">Record incoming stock for an item.</p>
       </div>
-      <button class="modal-close-btn" id="stockInClose"><i class="bi bi-x-lg"></i></button>
+      <button class="modal-close-btn" id="stockInClose" type="button" aria-label="Close stock-in form"><i class="bi bi-x-lg"></i></button>
     </div>
 
     <div class="um-modal-body">
@@ -327,7 +327,7 @@
   <div class="um-modal inv-modal intake-modal management-side-modal" role="dialog" aria-modal="true">
     <div class="um-modal-header">
       <div><h2>Record Usage</h2><p class="modal-subtitle" id="stockOutSubtitle">Deduct stock used on an animal.</p></div>
-      <button class="modal-close-btn" id="stockOutClose"><i class="bi bi-x-lg"></i></button>
+      <button class="modal-close-btn" id="stockOutClose" type="button" aria-label="Close stock usage form"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="um-modal-body">
       <form id="stockOutForm" novalidate>
@@ -414,7 +414,7 @@
   <div class="um-modal inv-modal intake-modal management-side-modal" role="dialog" aria-modal="true">
     <div class="um-modal-header">
       <h2 id="itemModalTitle">Add New Item</h2>
-      <button class="modal-close-btn" id="itemModalClose"><i class="bi bi-x-lg"></i></button>
+      <button class="modal-close-btn" id="itemModalClose" type="button" aria-label="Close inventory item form"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="um-modal-body">
       <form id="itemForm" novalidate>

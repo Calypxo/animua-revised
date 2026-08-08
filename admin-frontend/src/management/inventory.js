@@ -565,7 +565,7 @@ function renderTable() {
           <td>
             <div class="table-actions">
               <button
-                class="tbl-action-btn"
+                class="tbl-action-btn action-view"
                 title="View"
                 data-action="view"
                 data-id="${item.id}"
@@ -1764,11 +1764,22 @@ function buildCategoryTabs() {
     store.map((i) => (i.category || "").trim()).filter(Boolean)
   )].sort((a, b) => a.localeCompare(b));
   const categories = ["all", ...categoryNames];
+  const categoryIcons = {
+    all: "bi-collection",
+    antibiotic: "bi-capsule",
+    antiparasitic: "bi-shield-plus",
+    consumable: "bi-bandaid",
+    disinfectant: "bi-droplet",
+    equipment: "bi-tools",
+    supplement: "bi-heart-pulse",
+    vaccine: "bi-eyedropper",
+  };
 
   container.innerHTML = categories
     .map(
       (c) =>
         `<button class="inv-tab ${c === activeTab ? "active" : ""}" data-tab="${c}" role="tab" aria-selected="${c === activeTab}">
+          <i class="bi ${categoryIcons[c.toLowerCase()] || "bi-box-seam"}"></i>
           <span>${c === "all" ? "All" : c}</span>
           <small>${c === "all" ? store.length : store.filter((item) => item.category === c).length}</small>
         </button>`

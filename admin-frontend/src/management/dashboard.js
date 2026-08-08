@@ -14,6 +14,7 @@ let activities = [];
 let intakeChart;
 let speciesChart;
 let stayChart;
+let dashboardData;
 
 const MANAGEMENT_SEARCH_TARGETS = [
   { module: "animals", label: "Animal Profiles", detail: "Browse and manage animal records", href: "/pages/animalProfiling.html", icon: "bi-heart-pulse", keywords: "animals pets records profiles breed" },
@@ -96,33 +97,78 @@ function chart(canvasId, previous, config) {
   return new Chart(canvas, config);
 }
 
-function renderCharts(data) {
+function renderIntakeChart(data, range = "ytd") {
+  const currentMonth = new Date().getMonth();
+  const start = range === "6m" ? Math.max(0, currentMonth - 5) : 0;
+  const end = range === "full" ? 12 : currentMonth + 1;
   intakeChart = chart("intakeAdoptionChart", intakeChart, {
     type: "bar",
     data: {
-      labels: data.monthlyData.labels,
+      labels: data.monthlyData.labels.slice(start, end),
       datasets: [
-        { label: "Intake", data: data.monthlyData.intake, backgroundColor: "rgba(120, 1, 22,.15)", borderColor: "#780116", borderWidth: 2, borderRadius: 6 },
-        { label: "Adoptions", data: data.monthlyData.adoptions, backgroundColor: "rgba(24,101,52,.16)", borderColor: "#186534", borderWidth: 2, borderRadius: 6 },
+        { label: "Intake", data: data.monthlyData.intake.slice(start, end), backgroundColor: "rgba(120, 1, 22,.14)", borderColor: "#780116", borderWidth: 2, borderRadius: 7, borderSkipped: false },
+        { label: "Adoptions", data: data.monthlyData.adoptions.slice(start, end), backgroundColor: "rgba(24,101,52,.14)", borderColor: "#186534", borderWidth: 2, borderRadius: 7, borderSkipped: false },
       ],
     },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: "#2D2322", padding: 11, usePointStyle: true } },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: "#81746D", font: { family: "Poppins", size: 10 } } },
+        y: { beginAtZero: true, ticks: { precision: 0, color: "#81746D", font: { family: "Poppins", size: 10 } }, grid: { color: "rgba(120,1,22,.06)" } },
+      },
+    },
   });
+}
+
+function renderCharts(data) {
+  renderIntakeChart(data);
   const species = data.species || [];
+  const speciesTotal = species.reduce((sum, item) => sum + item.count, 0);
+  const centerLabel = {
+    id: "populationCenterLabel",
+    afterDraw(instance) {
+      const { ctx, chartArea } = instance;
+      if (!chartArea) return;
+      const x = (chartArea.left + chartArea.right) / 2;
+      const y = (chartArea.top + chartArea.bottom) / 2;
+      ctx.save();
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#2D2322";
+      ctx.font = "800 22px Poppins";
+      ctx.fillText(String(speciesTotal), x, y - 2);
+      ctx.fillStyle = "#81746D";
+      ctx.font = "600 10px Poppins";
+      ctx.fillText("animals", x, y + 15);
+      ctx.restore();
+    },
+  };
   speciesChart = chart("speciesChart", speciesChart, {
     type: "doughnut",
     data: { labels: species.map((item) => item.label), datasets: [{ data: species.map((item) => item.count), backgroundColor: species.map((item) => item.color), borderColor: "#FFFFFF", borderWidth: 3 }] },
-    options: { responsive: true, maintainAspectRatio: false, cutout: "70%", plugins: { legend: { display: false } } },
+    plugins: [centerLabel],
+    options: { responsive: true, maintainAspectRatio: false, cutout: "70%", plugins: { legend: { display: false }, tooltip: { backgroundColor: "#2D2322", padding: 11 } } },
   });
-  const total = species.reduce((sum, item) => sum + item.count, 0);
   document.getElementById("speciesLegend").innerHTML = species.length
-    ? species.map((item) => '<div class="sp-legend-item"><div class="sp-legend-dot" style="background:' + item.color + '"></div><span><span class="sp-legend-name">' + escapeHtml(item.label) + "</span> " + item.count + " (" + Math.round((item.count / total) * 100) + "%)</span></div>").join("")
+    ? species.map((item) => '<div class="sp-legend-item"><div class="sp-legend-dot" style="background:' + item.color + '"></div><span><span class="sp-legend-name">' + escapeHtml(item.label) + "</span> " + item.count + " (" + Math.round((item.count / speciesTotal) * 100) + "%)</span></div>").join("")
     : '<p class="text-muted">No current animal records.</p>';
   stayChart = chart("stayChart", stayChart, {
     type: "bar",
     data: { labels: data.stayDistribution.labels, datasets: [{ label: "Animals", data: data.stayDistribution.data, backgroundColor: ["#186534","#2558a8","#ffb91e","#780116","#780116"], borderRadius: 8 }] },
-    options: { indexAxis: "y", responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { precision: 0 } } } },
+    options: { indexAxis: "y", responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: "#2D2322", padding: 11, displayColors: false } }, scales: { x: { beginAtZero: true, ticks: { precision: 0, color: "#81746D", font: { family: "Poppins", size: 10 } }, grid: { color: "rgba(120,1,22,.06)" } }, y: { grid: { display: false }, ticks: { color: "#594D48", font: { family: "Poppins", size: 10, weight: "600" } } } } },
   });
+  const analytics = data.analytics || {};
+  const flow = Number(analytics.yearlyIntakes || 0) - Number(analytics.yearlyAdoptions || 0);
+  setCounter("chartYearIntakes", analytics.yearlyIntakes);
+  setCounter("chartYearAdoptions", analytics.yearlyAdoptions);
+  document.getElementById("chartNetFlow").textContent = `${flow > 0 ? "+" : ""}${flow}`;
+  document.getElementById("chartNetFlow").classList.toggle("is-pressure", flow > 0);
+  document.getElementById("chartPlacementRate").textContent = `${Number(analytics.placementRate || 0)}%`;
+  document.getElementById("staySummary").innerHTML = analytics.longStayCount
+    ? `<i class="bi bi-exclamation-circle-fill"></i><strong>${analytics.longStayCount}</strong> animal${analytics.longStayCount === 1 ? "" : "s"} (${analytics.longStayRate}%) have stayed over 60 days.`
+    : '<i class="bi bi-check-circle-fill"></i>No animals are currently beyond the 60-day stay threshold.';
 }
 
 function renderActivities(filter = "all") {
@@ -225,6 +271,7 @@ async function init() {
     loadSidebar();
     renderPageHeader(PAGE_HEADER_CONFIGS.dashboard);
     const data = await apiFetch("/dashboard/stats");
+    dashboardData = data;
     document.getElementById("live-date").textContent = new Date().toLocaleDateString("en-PH", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
     const name = localStorage.getItem("user_name") || "Admin";
     document.getElementById("welcomeName").textContent = name.split(" ")[0];
@@ -237,6 +284,7 @@ async function init() {
     renderAlerts(data.alerts || []);
     renderQueues(data);
     bindGlobalSearch();
+    document.getElementById("chartRange")?.addEventListener("change", (event) => renderIntakeChart(dashboardData, event.target.value));
     document.getElementById("activityFilter")?.addEventListener("change", (event) => renderActivities(event.target.value));
     document.getElementById("animalSearch")?.addEventListener("input", (event) => renderAnimals(event.target.value));
   } catch (error) {

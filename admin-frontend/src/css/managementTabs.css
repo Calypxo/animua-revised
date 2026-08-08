@@ -1,0 +1,285 @@
+/* Shared segmented tabs — based on the Archive workspace reference. */
+html body.management-consistent-ui :is(
+  .intake-tabs,
+  .aa-tabs,
+  .sr-tabs,
+  .archive-tabs,
+  .ap-tabs,
+  .um-tabs,
+  .inv-tabs,
+  .audit-view-switch,
+  .profile-tabs-bar
+) {
+  width: max-content !important;
+  max-width: 100% !important;
+  min-height: 56px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 5px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  border: 1px solid #d8c8ad !important;
+  border-radius: 16px !important;
+  color: #413832 !important;
+  background: #efe5d2 !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.48) !important;
+  scrollbar-width: none !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+html body.management-consistent-ui :is(
+  .intake-tabs,
+  .aa-tabs,
+  .sr-tabs,
+  .archive-tabs,
+  .ap-tabs,
+  .um-tabs,
+  .inv-tabs,
+  .audit-view-switch,
+  .profile-tabs-bar
+)::-webkit-scrollbar { display: none !important; }
+
+html body.management-consistent-ui :is(
+  .intake-tab,
+  .aa-tab,
+  .sr-tab,
+  .archive-tab,
+  .ap-tab,
+  .um-tab,
+  .inv-tab,
+  .audit-view-btn,
+  .profile-tab
+) {
+  position: relative !important;
+  min-width: max-content !important;
+  min-height: 44px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  flex: 0 0 auto !important;
+  padding: 0 15px !important;
+  border: 1px solid transparent !important;
+  border-radius: 11px !important;
+  color: #413832 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font: 750 .76rem/1 "Poppins", sans-serif !important;
+  letter-spacing: 0 !important;
+  text-decoration: none !important;
+  white-space: nowrap !important;
+  cursor: pointer !important;
+  transition: color .17s ease, background-color .17s ease, border-color .17s ease, box-shadow .17s ease, transform .17s ease !important;
+}
+
+html body.management-consistent-ui :is(
+  .intake-tab,
+  .aa-tab,
+  .sr-tab,
+  .archive-tab,
+  .ap-tab,
+  .um-tab,
+  .inv-tab,
+  .audit-view-btn,
+  .profile-tab
+)::before,
+html body.management-consistent-ui :is(
+  .intake-tab,
+  .aa-tab,
+  .sr-tab,
+  .archive-tab,
+  .ap-tab,
+  .um-tab,
+  .inv-tab,
+  .audit-view-btn,
+  .profile-tab
+)::after { display: none !important; }
+
+html body.management-consistent-ui :is(
+  .intake-tab,
+  .aa-tab,
+  .sr-tab,
+  .archive-tab,
+  .ap-tab,
+  .um-tab,
+  .inv-tab,
+  .audit-view-btn,
+  .profile-tab
+) > i {
+  width: auto !important;
+  height: auto !important;
+  display: inline-block !important;
+  flex: 0 0 auto !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  color: #62584f !important;
+  background: transparent !important;
+  font-size: .84rem !important;
+  line-height: 1 !important;
+}
+
+html body.management-consistent-ui :is(
+  .intake-tab,
+  .aa-tab,
+  .sr-tab,
+  .archive-tab,
+  .ap-tab,
+  .um-tab,
+  .inv-tab,
+  .audit-view-btn,
+  .profile-tab
+):hover:not(.active) {
+  border-color: rgba(120,1,22,.08) !important;
+  color: #2d2322 !important;
+  background: rgba(255,255,255,.64) !important;
+}
+
+html body.management-consistent-ui :is(
+  .intake-tab,
+  .aa-tab,
+  .sr-tab,
+  .archive-tab,
+  .ap-tab,
+  .um-tab,
+  .inv-tab,
+  .audit-view-btn,
+  .profile-tab
+).active,
+html body.management-consistent-ui :is(
+  .intake-tab,
+  .aa-tab,
+  .sr-tab,
+  .archive-tab,
+  .ap-tab,
+  .um-tab,
+  .inv-tab,
+  .audit-view-btn,
+  .profile-tab
+)[aria-selected="true"] {
+  border-color: #f7b538 !important;
+  color: #392400 !important;
+  background: #f7b538 !important;
+  box-shadow: 0 7px 16px rgba(247,181,56,.24) !important;
+  transform: none !important;
+}
+
+html body.management-consistent-ui :is(
+  .intake-tab,
+  .aa-tab,
+  .sr-tab,
+  .archive-tab,
+  .ap-tab,
+  .um-tab,
+  .inv-tab,
+  .audit-view-btn,
+  .profile-tab
+).active > i,
+html body.management-consistent-ui :is(
+  .intake-tab,
+  .aa-tab,
+  .sr-tab,
+  .archive-tab,
+  .ap-tab,
+  .um-tab,
+  .inv-tab,
+  .audit-view-btn,
+  .profile-tab
+)[aria-selected="true"] > i { color: #392400 !important; }
+
+/* Count badges remain legible without competing with the active tab. */
+html body.management-consistent-ui :is(.ap-tab, .um-tab) > span,
+html body.management-consistent-ui .inv-tab > small {
+  min-width: 20px !important;
+  height: 20px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  padding: 0 6px !important;
+  border-radius: 999px !important;
+  color: #675b52 !important;
+  background: rgba(255,255,255,.68) !important;
+  font: 800 .57rem/1 "Poppins", sans-serif !important;
+}
+
+html body.management-consistent-ui .inv-tab > span {
+  min-width: auto !important;
+  height: auto !important;
+  display: inline !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  color: inherit !important;
+  background: transparent !important;
+  font: inherit !important;
+}
+
+html body.management-consistent-ui :is(.ap-tab, .um-tab).active > span,
+html body.management-consistent-ui :is(.ap-tab, .um-tab)[aria-selected="true"] > span,
+html body.management-consistent-ui .inv-tab.active > small,
+html body.management-consistent-ui .inv-tab[aria-selected="true"] > small {
+  color: #392400 !important;
+  background: rgba(255,255,255,.55) !important;
+}
+
+/* Reports use the same segmented language while retaining dataset counts. */
+html body.management-consistent-ui .report-tabs {
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 5px !important;
+  overflow-x: auto !important;
+  border: 1px solid #d8c8ad !important;
+  border-radius: 16px !important;
+  background: #efe5d2 !important;
+  scrollbar-width: none !important;
+}
+html body.management-consistent-ui .report-tabs::-webkit-scrollbar { display: none !important; }
+html body.management-consistent-ui .report-tab {
+  min-width: max-content !important;
+  min-height: 48px !important;
+  display: inline-grid !important;
+  grid-template-columns: 28px auto auto !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex: 0 0 auto !important;
+  padding: 5px 11px !important;
+  border: 1px solid transparent !important;
+  border-radius: 11px !important;
+  color: #413832 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+html body.management-consistent-ui .report-tab:hover:not(.active) { border-color: rgba(120,1,22,.08) !important; background: rgba(255,255,255,.64) !important; }
+html body.management-consistent-ui .report-tab.active { border-color: #f7b538 !important; color: #392400 !important; background: #f7b538 !important; box-shadow: 0 7px 16px rgba(247,181,56,.24) !important; }
+html body.management-consistent-ui .report-tab-icon { width: 28px !important; height: 28px !important; border-radius: 8px !important; color: #5f534b !important; background: rgba(255,255,255,.62) !important; font-size: .75rem !important; }
+html body.management-consistent-ui .report-tab-copy strong { color: inherit !important; font-size: .68rem !important; white-space: nowrap !important; }
+html body.management-consistent-ui .report-tab-copy small { display: none !important; }
+html body.management-consistent-ui .report-tab-count { min-width: 22px !important; height: 22px !important; padding: 0 6px !important; border-radius: 999px !important; color: #675b52 !important; background: rgba(255,255,255,.68) !important; font-size: .57rem !important; }
+html body.management-consistent-ui .report-tab.active .report-tab-count { color: #392400 !important; background: rgba(255,255,255,.55) !important; }
+
+@media (max-width: 700px) {
+  html body.management-consistent-ui :is(
+    .intake-tabs,
+    .aa-tabs,
+    .sr-tabs,
+    .archive-tabs,
+    .ap-tabs,
+    .um-tabs,
+    .inv-tabs,
+    .audit-view-switch,
+    .profile-tabs-bar
+  ) { width: 100% !important; }
+
+  html body.management-consistent-ui :is(
+    .intake-tab,
+    .aa-tab,
+    .sr-tab,
+    .archive-tab,
+    .ap-tab,
+    .um-tab,
+    .inv-tab,
+    .audit-view-btn,
+    .profile-tab
+  ) { min-height: 42px !important; padding-inline: 13px !important; font-size: .7rem !important; }
+}

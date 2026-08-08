@@ -1,19 +1,191 @@
-const {db}=require("../config/firebase");
-const {buildShelterLabel}=require("../utils/animalIdentity");
-const dt=v=>{if(!v)return"";const d=typeof v.toDate==="function"?v.toDate():new Date((v._seconds??v.seconds)?(v._seconds??v.seconds)*1000:v);return isNaN(d)?"":d.toISOString().slice(0,10)};
-const ok=(v,q)=>(!q.from||dt(v)>=q.from)&&(!q.to||dt(v)<=q.to);
-const stockStatus=i=>{const current=Number(i.currentStock??i.quantity??i.stock??0),reorder=Number(i.reorderPoint??i.minimumStock??i.minStock??0),critical=Number(i.criticalPoint??Math.max(1,Math.floor(reorder/2)));return current<=critical?"Critical":reorder&&current<=reorder?"Low":"OK"};
-exports.getReports=async(req,res)=>{try{
- const ss=await Promise.all(["intakeRecords","animals","adoptions","surrenderRequests","inventoryItems"].map(n=>db.collection(n).get()));
- const [ins,ans,ads,srs,inv]=ss.map(s=>s.docs.map(d=>({id:d.id,...d.data()}))), im=new Map(inv.map(x=>[x.id,x]));
- const reports={
- intake:ins.filter(x=>ok(x.intakeDate||x.createdAt,req.query)).map(x=>({date:dt(x.intakeDate||x.createdAt),id:x.id,animal:buildShelterLabel(x,x.id),source:x.source,species:x.species,status:x.status,conversion:x.animalProfileId?"Converted":"Not converted",location:x.location})),
- status:ans.filter(x=>ok(x.intakeDate||x.createdAt,req.query)).map(x=>({date:dt(x.intakeDate||x.createdAt),id:x.id,animal:buildShelterLabel(x,x.id),species:x.species,status:x.status,clearance:x.quarantineClearance||"N/A",assessment:x.behavioralAssessment?"Complete":"Pending"})),
- adoption:ads.filter(x=>ok(x.submittedAt||x.createdAt,req.query)).map(x=>({date:dt(x.submittedAt||x.createdAt),id:x.applicationId||x.id,animalId:x.pet_id,animal:x.pet_label||x.pet_name,applicant:x.applicant?.full_name,contact:x.applicant?.contact_number,status:x.status,source:x.compatibility?"Quiz":"Browse",adoptionDate:dt(x.adoptionDate),adoptedName:x.adoptedName||""})),
- medical:[],inventory:[],
- surrender:srs.filter(x=>ok(x.createdAt||x.submittedAt,req.query)).map(x=>({date:dt(x.createdAt||x.submittedAt),id:x.id,owner:x.owner?.name,barangay:x.owner?.barangay,animal:x.pet?.colorMarkings||x.pet?.name,species:x.pet?.species,status:x.status,category:x.nlp?.category||x.nlp?.classification||"",urgency:x.nlp?.urgency||x.nlp?.urgencyLevel||""}))
- };
- ans.forEach(a=>(a.medicalRecords||[]).forEach(m=>{if(!ok(m.date,req.query))return;const i=im.get(m.inventoryItemId)||{},r={date:dt(m.date),animalId:a.id,animal:buildShelterLabel(a,a.id),type:m.type,veterinarian:m.vet,diagnosis:m.diagnosis,treatment:m.treatment,inventoryItem:m.inventoryItemName||i.name||i.itemDescription||"",quantityUsed:Number(m.quantityUsed||0),unit:m.inventoryUnit||i.unit||"",clearance:m.clearance||"N/A"};reports.medical.push(r);if(r.quantityUsed)reports.inventory.push({...r,remainingStock:Number(i.currentStock??i.quantity??i.stock??0),stockStatus:stockStatus(i)});}));
- const roles={Admin:["intake","status","adoption","medical","inventory","surrender"],Staff:["intake","status","adoption","surrender"],Veterinarian:["status","medical","inventory"]},available=roles[req.user.role]||[];
- res.json({generatedAt:new Date().toISOString(),available,reports:Object.fromEntries(available.map(k=>[k,reports[k]]))});
-}catch(e){console.error("[reports]",e);res.status(500).json({message:"Failed to generate live reports."})}};
+const { db } = require("../config/firebase");
+const { buildShelterLabel } = require("../utils/animalIdentity");
+
+const ANGELES_BARANGAYS = [
+  "Agapito del Rosario", "Amsic", "Anunas", "Balibago", "Capaya", "Claro M. Recto",
+  "Cuayan", "Cutcut", "Cutud", "Lourdes Norte", "Lourdes Sur", "Lourdes Sur East",
+  "Malabanias", "Margot", "Mining", "Ninoy Aquino", "Pampang", "Pandan", "Plaridel",
+  "Pulung Cacutud", "Pulung Maragul", "Pulungbulu", "Salapungan", "San Jose",
+  "San Nicolas", "Santa Teresita", "Santa Trinidad", "Santo Cristo", "Santo Domingo",
+  "Santo Rosario", "Sapalibutad", "Sapangbato", "Sergio Bernal", "Silangan",
+  "Tabun", "Virgen Delos Remedios",
+];
+
+const dateText = (value) => {
+  if (!value) return "";
+  const date = typeof value.toDate === "function"
+    ? value.toDate()
+    : new Date((value._seconds ?? value.seconds)
+      ? (value._seconds ?? value.seconds) * 1000
+      : value);
+  return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 10);
+};
+
+const withinPeriod = (value, query) =>
+  (!query.from || dateText(value) >= query.from) &&
+  (!query.to || dateText(value) <= query.to);
+
+const stockStatus = (item) => {
+  const current = Number(item.currentStock ?? item.quantity ?? item.stock ?? 0);
+  const reorder = Number(item.reorderPoint ?? item.minimumStock ?? item.minStock ?? 0);
+  const critical = Number(item.criticalPoint ?? Math.max(1, Math.floor(reorder / 2)));
+  return current <= critical ? "Critical" : reorder && current <= reorder ? "Low" : "OK";
+};
+
+const barangayFromLocation = (location) => {
+  const normalized = String(location || "").trim().toLowerCase();
+  if (!normalized) return "";
+  return [...ANGELES_BARANGAYS]
+    .sort((left, right) => right.length - left.length)
+    .find((barangay) => normalized.includes(barangay.toLowerCase())) || "";
+};
+
+const barangayOf = (record = {}) => {
+  const structured =
+    record.barangayDetails?.barangayName ||
+    record.owner?.barangay ||
+    record.barangay ||
+    "";
+  if (structured) return structured;
+  return ["Barangay Impound", "Rescue"].includes(record.source)
+    ? barangayFromLocation(record.location || record.intakeLocation)
+    : "";
+};
+
+exports.getReports = async (req, res) => {
+  try {
+    const snapshots = await Promise.all(
+      ["intakeRecords", "animals", "adoptions", "surrenderRequests", "inventoryItems"]
+        .map((name) => db.collection(name).get())
+    );
+    const [intakes, animals, adoptions, surrenders, inventory] = snapshots.map(
+      (snapshot) => snapshot.docs.map((document) => ({ id: document.id, ...document.data() }))
+    );
+    const inventoryById = new Map(inventory.map((item) => [item.id, item]));
+    const animalsById = new Map(animals.map((animal) => [animal.id, animal]));
+
+    const reports = {
+      intake: intakes
+        .filter((record) => withinPeriod(record.intakeDate || record.createdAt, req.query))
+        .map((record) => ({
+          date: dateText(record.intakeDate || record.createdAt),
+          id: record.id,
+          animal: buildShelterLabel(record, record.id),
+          source: record.source,
+          barangay: barangayOf(record),
+          species: record.species,
+          status: record.status,
+          conversion: record.animalProfileId ? "Converted" : "Not converted",
+          location: record.location,
+        })),
+      status: animals
+        .filter((animal) => withinPeriod(animal.intakeDate || animal.createdAt, req.query))
+        .map((animal) => ({
+          date: dateText(animal.intakeDate || animal.createdAt),
+          id: animal.id,
+          animal: buildShelterLabel(animal, animal.id),
+          barangay: barangayOf(animal),
+          species: animal.species,
+          status: animal.status,
+          clearance: animal.quarantineClearance || "N/A",
+          assessment: animal.behavioralAssessment ? "Complete" : "Pending",
+        })),
+      adoption: adoptions
+        .filter((application) => withinPeriod(application.submittedAt || application.createdAt, req.query))
+        .map((application) => {
+          const animal = animalsById.get(application.pet_id) || {};
+          return {
+            date: dateText(application.submittedAt || application.createdAt),
+            id: application.applicationId || application.id,
+            animalId: application.pet_id,
+            animal: application.pet_label || application.pet_name,
+            applicant: application.applicant?.full_name,
+            contact: application.applicant?.contact_number,
+            barangay: barangayOf(animal),
+            location: animal.location || animal.intakeLocation || "",
+            status: application.status,
+            source: application.compatibility ? "Quiz" : "Browse",
+            adoptionDate: dateText(application.adoptionDate),
+            adoptedName: application.adoptedName || "",
+          };
+        }),
+      medical: [],
+      inventory: [],
+      surrender: surrenders
+        .filter((request) => withinPeriod(request.createdAt || request.submittedAt, req.query))
+        .map((request) => ({
+          date: dateText(request.createdAt || request.submittedAt),
+          id: request.id,
+          owner: request.owner?.name,
+          barangay: barangayOf(request),
+          animal: request.pet?.colorMarkings || request.pet?.name,
+          species: request.pet?.species,
+          status: request.status,
+          category: request.nlp?.category || request.nlp?.classification || "",
+          urgency: request.nlp?.urgency || request.nlp?.urgencyLevel || "",
+        })),
+      barangay: intakes
+        .filter((record) =>
+          withinPeriod(record.intakeDate || record.createdAt, req.query) &&
+          ["Barangay Impound", "Rescue"].includes(record.source) &&
+          barangayOf(record)
+        )
+        .map((record) => ({
+          date: dateText(record.intakeDate || record.createdAt),
+          id: record.id,
+          barangay: barangayOf(record),
+          animal: buildShelterLabel(record, record.id),
+          species: record.species,
+          condition: record.condition || "Not recorded",
+          status: record.status,
+          location: record.location,
+          officer: record.barangayDetails?.officerName || "Not recorded",
+        })),
+    };
+
+    animals.forEach((animal) => {
+      (animal.medicalRecords || []).forEach((medicalRecord) => {
+        if (!withinPeriod(medicalRecord.date, req.query)) return;
+        const item = inventoryById.get(medicalRecord.inventoryItemId) || {};
+        const reportRow = {
+          date: dateText(medicalRecord.date),
+          animalId: animal.id,
+          animal: buildShelterLabel(animal, animal.id),
+          barangay: barangayOf(animal),
+          type: medicalRecord.type,
+          veterinarian: medicalRecord.vet,
+          diagnosis: medicalRecord.diagnosis,
+          treatment: medicalRecord.treatment,
+          inventoryItem: medicalRecord.inventoryItemName || item.name || item.itemDescription || "",
+          quantityUsed: Number(medicalRecord.quantityUsed || 0),
+          unit: medicalRecord.inventoryUnit || item.unit || "",
+          clearance: medicalRecord.clearance || "N/A",
+        };
+        reports.medical.push(reportRow);
+        if (reportRow.quantityUsed) {
+          reports.inventory.push({
+            ...reportRow,
+            remainingStock: Number(item.currentStock ?? item.quantity ?? item.stock ?? 0),
+            stockStatus: stockStatus(item),
+          });
+        }
+      });
+    });
+
+    const reportsByRole = {
+      Admin: ["intake", "barangay", "status", "adoption", "medical", "inventory", "surrender"],
+      Staff: ["intake", "barangay", "status", "adoption", "surrender"],
+      Veterinarian: ["status", "medical", "inventory"],
+    };
+    const available = reportsByRole[req.user.role] || [];
+
+    return res.json({
+      generatedAt: new Date().toISOString(),
+      available,
+      reports: Object.fromEntries(available.map((key) => [key, reports[key]])),
+    });
+  } catch (error) {
+    console.error("[reports]", error);
+    return res.status(500).json({ message: "Failed to generate live reports." });
+  }
+};

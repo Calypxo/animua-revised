@@ -333,6 +333,14 @@ exports.getDashboardStats = async (req, res) => {
     const longStayCount = currentAnimals.filter(
       (animal) => daysSince(animal.intakeDate || animal.createdAt) > 60
     ).length;
+    const yearlyIntakes = monthlyData.intake.reduce(
+      (total, count) => total + count,
+      0
+    );
+    const yearlyAdoptions = monthlyData.adoptions.reduce(
+      (total, count) => total + count,
+      0
+    );
     if (longStayCount) {
       alerts.push({
         type: "red",
@@ -355,6 +363,23 @@ exports.getDashboardStats = async (req, res) => {
       monthlyData,
       species,
       stayDistribution,
+      analytics: {
+        currentPopulation: currentAnimals.length,
+        yearlyIntakes,
+        yearlyAdoptions,
+        placementRate: yearlyIntakes
+          ? Math.round((yearlyAdoptions / yearlyIntakes) * 100)
+          : 0,
+        readyRate: currentAnimals.length
+          ? Math.round((countStatus("Ready") / currentAnimals.length) * 100)
+          : 0,
+        longStayCount,
+        longStayRate: currentAnimals.length
+          ? Math.round((longStayCount / currentAnimals.length) * 100)
+          : 0,
+        criticalStockCount: lowStockItems.filter((item) => item.level === "Critical").length,
+        pendingAssessments: currentAnimals.filter((animal) => !animal.behavioralAssessment).length,
+      },
       lowStockItems,
       alerts,
       recentAnimals: [...animals]

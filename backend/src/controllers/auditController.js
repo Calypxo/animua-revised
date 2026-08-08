@@ -1,5 +1,6 @@
 // backend/src/controllers/auditController.js
 const { db } = require("../config/firebase");
+const { writeAuditEvent } = require("../services/auditLogService");
 
 const AUDIT_COL = "auditLogs";
 const USER_COL = "users";
@@ -21,6 +22,43 @@ const ACTION_LABELS = {
   "intake.approved": "Approved",
   "intake.rejected": "Rejected",
   "intake.converted": "Converted",
+  "adoption.created": "Submitted",
+  "adoption.approved": "Approved",
+  "adoption.rejected": "Rejected",
+  "adoption.finalized": "Finalized",
+  "adoption.scheduled": "Scheduled",
+  "adoption.reschedule_approved": "Reschedule Approved",
+  "adoption.reschedule_rejected": "Reschedule Rejected",
+  "adoption.deadline_extended": "Deadline Extended",
+  "adoption.deadline_restored": "Deadline Restored",
+  "adoption.arrival_confirmed": "Arrival Confirmed",
+  "adoption.no_show_recorded": "No-show Recorded",
+  "announcement.created": "Created",
+  "announcement.updated": "Updated",
+  "announcement.deleted": "Deleted",
+  "announcement.image_updated": "Cover Updated",
+  "announcement.image_removed": "Cover Removed",
+  "surrender.created": "Submitted",
+  "surrender.updated": "Updated",
+  "surrender.approved": "Approved",
+  "surrender.rejected": "Rejected",
+  "surrender.scheduled": "Scheduled",
+  "surrender.availability_updated": "Availability Updated",
+  "surrender.reschedule_approved": "Reschedule Approved",
+  "surrender.reschedule_rejected": "Reschedule Rejected",
+  "surrender.deadline_extended": "Deadline Extended",
+  "surrender.deadline_restored": "Deadline Restored",
+  "surrender.arrival_confirmed": "Arrival Confirmed",
+  "surrender.no_show_recorded": "No-show Recorded",
+  "contact.created": "Submitted",
+  "contact.follow_up_added": "Follow-up Added",
+  "contact.replied": "Replied",
+  "notification.marked_read": "Marked Read",
+  "auth.profile_updated": "Profile Updated",
+  "inventory.created": "Item Created",
+  "inventory.updated": "Item Updated",
+  "inventory.stock_in": "Stock Added",
+  "inventory.stock_out": "Stock Used",
 };
 
 const SENSITIVE_KEY_PATTERN =
@@ -379,5 +417,31 @@ exports.getAuditLogs = async (
       message:
         "Failed to fetch audit logs.",
     });
+  }
+};
+
+exports.createAuditEvent = async (req, res) => {
+  try {
+    const module = String(req.body?.module || "").trim();
+    const action = String(req.body?.action || "").trim();
+    const allowedModules = new Set(["Inventory"]);
+    if (!allowedModules.has(module) || !/^inventory\.[a-z0-9_]+$/i.test(action)) {
+      return res.status(400).json({ message: "Invalid audit event." });
+    }
+    await writeAuditEvent({
+      module,
+      action,
+      targetId: req.body?.targetId,
+      targetName: req.body?.targetName,
+      user: req.user,
+      before: req.body?.before,
+      after: req.body?.after,
+      details: req.body?.details,
+      ipAddress: String(req.headers["x-forwarded-for"] || req.ip || "Not recorded").split(",")[0].trim(),
+    });
+    return res.status(201).json({ message: "Audit event recorded." });
+  } catch (error) {
+    console.error("[createAuditEvent]", error);
+    return res.status(500).json({ message: "Failed to record audit event." });
   }
 };

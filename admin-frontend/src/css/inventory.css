@@ -2249,7 +2249,7 @@
 .inventory-page .inventory-smart-table .col-forecast { width: 12%; }
 .inventory-page .inventory-smart-table .col-movement { width: 12%; }
 .inventory-page .inventory-smart-table .col-status { width: 12%; }
-.inventory-page .inventory-smart-table .col-actions { width: 12%; }
+.inventory-page .inventory-smart-table .col-actions { width: 140px !important; }
 
 .management-consistent-ui.inventory-page .inventory-smart-table thead th {
   padding: 13px 12px !important;
@@ -2336,25 +2336,74 @@
 }
 
 .inventory-page .table-actions {
-  width: 100%;
-  justify-content: flex-end;
-  gap: 5px;
+  width: auto;
+  min-width: 114px;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-wrap: nowrap !important;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  white-space: nowrap;
 }
 
 .inventory-page .table-actions .tbl-action-btn {
-  width: 32px !important;
-  height: 32px !important;
-  flex: 0 0 32px;
-  border: 1px solid #EADFD4 !important;
-  border-radius: 9px !important;
+  width: 34px !important;
+  height: 34px !important;
+  flex: 0 0 34px !important;
+  flex-direction: row !important;
+  padding: 0 !important;
+  border: 1px solid #e4d7cc !important;
+  border-radius: 10px !important;
   color: #780116 !important;
-  background: #FFF8EE !important;
+  background: #FFFFFF !important;
+  box-shadow: none !important;
+  line-height: 1 !important;
 }
 
-.inventory-page .table-actions .tbl-action-btn:hover {
+.inventory-page .table-actions .tbl-action-btn.action-view {
+  color: #780116 !important;
+  border-color: rgba(120, 1, 22, .2) !important;
+  background: rgba(120, 1, 22, .04) !important;
+}
+
+.inventory-page .table-actions .tbl-action-btn.action-view:hover {
+  transform: translateY(-2px) !important;
   border-color: #780116 !important;
   color: #FFFFFF !important;
   background: #780116 !important;
+  box-shadow: 0 6px 14px rgba(120, 1, 22, .18) !important;
+}
+
+.inventory-page .table-actions .tbl-action-btn.stock-in {
+  color: #23734c !important;
+  border-color: rgba(35, 115, 76, .22) !important;
+  background: rgba(35, 115, 76, .05) !important;
+}
+
+.inventory-page .table-actions .tbl-action-btn.stock-in:hover {
+  transform: translateY(-2px) !important;
+  border-color: #23734c !important;
+  color: #FFFFFF !important;
+  background: #23734c !important;
+  box-shadow: 0 6px 14px rgba(35, 115, 76, .18) !important;
+}
+
+.inventory-page .table-actions .tbl-action-btn.use {
+  color: #9b6300 !important;
+  border-color: rgba(155, 99, 0, .24) !important;
+  background: rgba(155, 99, 0, .05) !important;
+}
+
+.inventory-page .table-actions .tbl-action-btn.use:hover {
+  transform: translateY(-2px) !important;
+  border-color: #9b6300 !important;
+  color: #FFFFFF !important;
+  background: #9b6300 !important;
+  box-shadow: 0 6px 14px rgba(155, 99, 0, .18) !important;
 }
 
 @media (max-width: 1200px) {

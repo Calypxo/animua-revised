@@ -56,13 +56,13 @@
             </div>
             <div class="aa-toolbar-layout">
               <!-- Type tabs -->
-              <div class="aa-tabs">
-                <button class="aa-tab active" data-tab="all">All</button>
-                <button class="aa-tab" data-tab="Pending">Pending</button>
-                <button class="aa-tab" data-tab="Approved">Approved</button>
-                <button class="aa-tab" data-tab="Finalized">Finalized</button>
-                <button class="aa-tab" data-tab="Rejected">Rejected</button>
-                <button class="aa-tab" data-tab="Expired">Expired</button>
+              <div class="aa-tabs" role="tablist" aria-label="Adoption application status">
+                <button class="aa-tab active" type="button" role="tab" aria-selected="true" data-tab="all"><i class="bi bi-collection"></i>All</button>
+                <button class="aa-tab" type="button" role="tab" aria-selected="false" data-tab="Pending"><i class="bi bi-clock-history"></i>Pending</button>
+                <button class="aa-tab" type="button" role="tab" aria-selected="false" data-tab="Approved"><i class="bi bi-check-circle"></i>Approved</button>
+                <button class="aa-tab" type="button" role="tab" aria-selected="false" data-tab="Finalized"><i class="bi bi-house-check"></i>Finalized</button>
+                <button class="aa-tab" type="button" role="tab" aria-selected="false" data-tab="Rejected"><i class="bi bi-x-circle"></i>Rejected</button>
+                <button class="aa-tab" type="button" role="tab" aria-selected="false" data-tab="Expired"><i class="bi bi-calendar-x"></i>Expired</button>
               </div>
               <!-- Filters -->
               <div class="aa-filter-toolbar">
@@ -81,7 +81,7 @@
           </div>
 
           <div class="reference-table-section-head">
-            <div><span>Application register</span><h3>Submitted adoption applications</h3></div>
+            <div><span>Application register</span><h3>Adoption applications</h3></div>
             <strong id="adoptionResultLabel">0 records</strong>
           </div>
 
@@ -94,13 +94,12 @@
                   <th>Animal</th>
                   <th>Type</th>
                   <th>Match</th>
-                  <th>Submitted</th>
                   <th>Status</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody id="appsTableBody">
-                <tr><td colspan="8" class="text-center py-5"><div class="um-spinner"></div></td></tr>
+                <tr><td colspan="7" class="text-center py-5"><div class="um-spinner"></div></td></tr>
               </tbody>
             </table>
           </div>
@@ -126,7 +125,7 @@
   <div class="um-modal um-modal-xs" role="dialog" aria-modal="true">
     <div class="um-modal-header">
       <h2>Reject Application</h2>
-      <button class="modal-close-btn" id="rejectModalClose"><i class="bi bi-x-lg"></i></button>
+      <button class="modal-close-btn" id="rejectModalClose" type="button" aria-label="Close rejection form"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="um-modal-body">
       <div class="confirm-body">
@@ -156,7 +155,7 @@
   <div class="um-modal um-modal-xs" role="dialog" aria-modal="true">
     <div class="um-modal-header">
       <h2>Finalize Adoption</h2>
-      <button class="modal-close-btn" id="finalizeModalClose"><i class="bi bi-x-lg"></i></button>
+      <button class="modal-close-btn" id="finalizeModalClose" type="button" aria-label="Close adoption finalization form"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="um-modal-body">
       <div class="confirm-body">
