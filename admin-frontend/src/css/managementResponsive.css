@@ -351,3 +351,123 @@ body.management-consistent-ui :is(
     padding-block: 12px !important;
   }
 }
+
+/* PWA/mobile responsive guardrails for installed admin pages. */
+html {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+body.management-consistent-ui {
+  padding-top: env(safe-area-inset-top);
+  overflow-x: hidden;
+}
+
+body.management-consistent-ui :is(
+  .kpi-strip, .ap-stats, .sr-stats, .aa-stats,
+  .intake-stats, .um-stats, .report-summary-grid,
+  .dashboard-grid, .analytics-grid, .records-grid,
+  .profile-grid, .settings-grid, .inventory-grid,
+  .announcement-grid, .archive-grid, .audit-grid
+) {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)) !important;
+}
+
+body.management-consistent-ui :is(
+  .system-page-hero, .system-hero-operations,
+  .records-workspace, .cm-workspace, .rpt-workspace,
+  .profile-workspace, .inventory-workspace,
+  .announcement-workspace, .archive-workspace
+) {
+  min-width: 0;
+}
+
+body.management-consistent-ui :is(
+  .system-hero-operations, .panel-actions, .records-actions,
+  .table-actions, .drawer-actions, .quick-actions,
+  .feed-filters, .topbar-right
+) {
+  flex-wrap: wrap;
+}
+
+body.management-consistent-ui :is(.chart-card, .chart-wrap, .canvas-wrap) {
+  min-width: 0;
+  overflow: hidden;
+}
+
+body.management-consistent-ui canvas {
+  max-width: 100% !important;
+}
+
+body.management-consistent-ui :is(
+  .sidebar, .topbar, .management-side-modal,
+  .modal-content, .swal2-popup
+) {
+  max-width: 100dvw;
+}
+
+@media (max-width: 1024px) {
+  body.management-consistent-ui :is(
+    .system-page-hero, .records-workspace, .cm-workspace,
+    .rpt-workspace, .profile-workspace, .inventory-workspace
+  ) {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  body.management-consistent-ui .system-hero-operations {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 768px) {
+  body.management-consistent-ui :is(.shell, .stage) {
+    width: 100dvw;
+    overflow-x: hidden;
+  }
+
+  body.management-consistent-ui .topbar {
+    padding-left: max(64px, calc(56px + env(safe-area-inset-left))) !important;
+  }
+
+  body.management-consistent-ui :is(
+    .system-header-action, .panel-action, .records-action,
+    .filter-action, .modal-actions button, .drawer-footer button
+  ) {
+    min-height: 44px;
+  }
+
+  body.management-consistent-ui :is(
+    .filter-toolbar, .aa-filter-toolbar, .ap-filter-toolbar,
+    .um-filter-bar, .inventory-filter-toolbar,
+    .inventory-filter-controls, .report-filter-grid,
+    .archive-filter-grid, .audit-filter-grid, .cq-toolbar,
+    .feed-filters
+  ) {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  body.management-consistent-ui :is(
+    .system-hero-operations, .panel-actions, .records-actions,
+    .table-actions, .drawer-actions, .quick-actions
+  ) > :is(button, a, .btn, .system-header-action) {
+    flex: 1 1 auto;
+  }
+}
+
+@media (max-width: 560px) {
+  body.management-consistent-ui :is(
+    .system-hero-operations, .panel-actions, .records-actions,
+    .table-actions, .drawer-actions, .quick-actions
+  ) > :is(button, a, .btn, .system-header-action) {
+    width: 100%;
+  }
+
+  body.management-consistent-ui :is(.system-page-hero, .panel, .records-panel, .table-card) {
+    padding-inline: 14px !important;
+  }
+
+  body.management-consistent-ui :is(.topbar-title, .system-hero-copy p) {
+    overflow-wrap: anywhere;
+  }
+}

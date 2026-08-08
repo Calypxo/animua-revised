@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#780116">
+  <title>ANIMUA Admin Offline</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: grid;
+      place-items: center;
+      margin: 0;
+      padding: 24px;
+      background: #fff8ee;
+      color: #2b1719;
+      font-family: Poppins, Arial, sans-serif;
+    }
+    main {
+      width: min(100%, 460px);
+      padding: 28px;
+      border: 1px solid rgba(120, 1, 22, 0.12);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 16px 38px rgba(29, 18, 18, 0.08);
+    }
+    h1 {
+      margin: 0 0 10px;
+      color: #780116;
+      font-size: clamp(1.75rem, 8vw, 2.4rem);
+      line-height: 1.05;
+    }
+    p {
+      margin: 0;
+      color: #756367;
+      line-height: 1.55;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Admin is offline</h1>
+    <p>Reconnect to sign in, update records, or sync live management data.</p>
+  </main>
+  <script type="module" src="/src/management/pwa-register.js"></script>
+</body>
+</html>

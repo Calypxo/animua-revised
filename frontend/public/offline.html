@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#8E2A20">
+  <title>ANIMUA Offline</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: grid;
+      place-items: center;
+      margin: 0;
+      padding: 24px;
+      background: #f7f2e8;
+      color: #20303a;
+      font-family: Inter, Arial, sans-serif;
+    }
+    main {
+      width: min(100%, 460px);
+      padding: 28px;
+      border: 1px solid rgba(107, 79, 63, 0.16);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 14px 32px rgba(75, 43, 33, 0.1);
+    }
+    h1 {
+      margin: 0 0 10px;
+      color: #8e2a20;
+      font-size: clamp(1.8rem, 9vw, 2.5rem);
+      line-height: 1;
+    }
+    p {
+      margin: 0;
+      color: #5f5854;
+      line-height: 1.55;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>You are offline</h1>
+    <p>ANIMUA can show saved pages when available. Please reconnect to submit forms, sign in, or load live records.</p>
+  </main>
+  <script type="module" src="/src/public/js/pwa-register.js"></script>
+</body>
+</html>
