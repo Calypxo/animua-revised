@@ -149,10 +149,12 @@ function bindPasswordToggles() {
   document.querySelectorAll(".password-toggle").forEach((button) => {
     button.addEventListener("click", () => {
       const input = document.getElementById(button.dataset.target);
-      const visible = input.type === "text";
-      input.type = visible ? "password" : "text";
-      button.querySelector("i").className = "bi " + (visible ? "bi-eye" : "bi-eye-slash");
-      button.setAttribute("aria-label", (visible ? "Show " : "Hide ") + "password");
+      const show = input.type === "password";
+      input.type = show ? "text" : "password";
+      button.querySelector("i").className = "bi " + (show ? "bi-eye-slash" : "bi-eye");
+      button.setAttribute("aria-label", show ? "Hide password" : "Show password");
+      button.setAttribute("aria-pressed", String(show));
+      button.title = show ? "Hide password" : "Show password";
     });
   });
 }

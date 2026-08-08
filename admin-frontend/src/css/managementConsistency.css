@@ -32,3 +32,90 @@
 .management-consistent-ui .system-summary-icon[data-tone],
 .management-consistent-ui .system-summary-icon{border-radius:14px!important}
 .management-consistent-ui .system-summary-metric[data-tone="clay"] .system-summary-icon{color:var(--animua-red)!important;background:var(--animua-red-soft)!important}
+
+/* Shared interaction and hierarchy rules for every management workspace. */
+html body.management-consistent-ui {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+html body.management-consistent-ui .stage > :is(.page-body, .main-content, .contact-message-page-body) {
+  max-width: 1680px !important;
+  margin-inline: auto !important;
+}
+
+html body.management-consistent-ui :is(
+  .filter-field > span,
+  .ap-filter-field > span,
+  .um-select-field > span,
+  .report-filter-grid label > span
+) {
+  color: #5f514c !important;
+  font: 700 .66rem/1.25 "Poppins", sans-serif !important;
+  letter-spacing: .02em !important;
+}
+
+html body.management-consistent-ui :is(
+  .reference-clear-filters,
+  .ap-clear-btn,
+  .um-clear-filters,
+  .aa-clear-filters
+) {
+  min-height: 42px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  padding: 0 15px !important;
+  border: 1px solid #dfd3cb !important;
+  border-radius: 12px !important;
+  color: var(--animua-red) !important;
+  background: #FFFFFF !important;
+  font: 700 .72rem/1 "Poppins", sans-serif !important;
+  white-space: nowrap !important;
+}
+
+html body.management-consistent-ui :is(
+  .reference-clear-filters,
+  .ap-clear-btn,
+  .um-clear-filters,
+  .aa-clear-filters
+):hover {
+  border-color: #f7b538 !important;
+  color: #392400 !important;
+  background: #fff1cf !important;
+}
+
+html body.management-consistent-ui .report-clear-btn {
+  width: 42px !important;
+  min-width: 42px !important;
+  height: 42px !important;
+  padding: 0 !important;
+  border-radius: 12px !important;
+}
+
+html body.management-consistent-ui .management-data-table :is(.management-actions-heading, .management-actions-cell) {
+  text-align: center !important;
+}
+
+html body.management-consistent-ui .management-data-table .management-actions-cell {
+  min-width: 58px !important;
+  white-space: nowrap !important;
+}
+
+html body.management-consistent-ui :is(
+  .tbl-action-btn,
+  .detail-btn,
+  .view-btn,
+  .audit-review-btn,
+  .modal-close-btn,
+  .drawer-close-btn
+) i {
+  margin: 0 !important;
+  color: inherit !important;
+  line-height: 1 !important;
+}
+
+html body.management-consistent-ui :is(button, [role="button"]):disabled {
+  cursor: not-allowed !important;
+}

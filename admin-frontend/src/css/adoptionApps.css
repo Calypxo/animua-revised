@@ -1080,7 +1080,7 @@
   background: #FFF8EE !important;
 }
 
-.management-consistent-ui.adoption-applications-page :is(.app-id-cell,.shelter-table tbody td:nth-child(6)) {
+.management-consistent-ui.adoption-applications-page .app-id-cell {
   color: #786d68 !important;
   font-family: "Poppins", monospace !important;
   font-size: .69rem !important;

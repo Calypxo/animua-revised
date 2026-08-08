@@ -73,13 +73,13 @@
                 <p>Find retained records and review their archive history before restoring eligible profiles.</p>
               </div>
             </div>
-            <div class="archive-tabs" id="archiveTabs">
-              <button class="archive-tab active" data-tab="all"><i class="bi bi-collection"></i> All</button>
-              <button class="archive-tab" data-tab="Animal Management"><i class="bi bi-heart-pulse"></i> Animals</button>
-              <button class="archive-tab" data-tab="Adoption Management"><i class="bi bi-house-heart"></i> Adoptions</button>
-              <button class="archive-tab" data-tab="Post Adoption"><i class="bi bi-clipboard2-heart"></i> Post Adoption</button>
-              <button class="archive-tab" data-tab="Inventory"><i class="bi bi-box-seam"></i> Inventory</button>
-              <button class="archive-tab" data-tab="User Management"><i class="bi bi-people"></i> Users</button>
+            <div class="archive-tabs" id="archiveTabs" role="tablist" aria-label="Archived record modules">
+              <button class="archive-tab active" type="button" role="tab" aria-selected="true" data-tab="all"><i class="bi bi-collection"></i> All</button>
+              <button class="archive-tab" type="button" role="tab" aria-selected="false" data-tab="Animal Management"><i class="bi bi-heart-pulse"></i> Animals</button>
+              <button class="archive-tab" type="button" role="tab" aria-selected="false" data-tab="Adoption Management"><i class="bi bi-house-heart"></i> Adoptions</button>
+              <button class="archive-tab" type="button" role="tab" aria-selected="false" data-tab="Post Adoption"><i class="bi bi-clipboard2-heart"></i> Post Adoption</button>
+              <button class="archive-tab" type="button" role="tab" aria-selected="false" data-tab="Inventory"><i class="bi bi-box-seam"></i> Inventory</button>
+              <button class="archive-tab" type="button" role="tab" aria-selected="false" data-tab="User Management"><i class="bi bi-people"></i> Users</button>
             </div>
           </div>
 
@@ -166,7 +166,7 @@
           <h2>Archived Record Details</h2>
           <p class="modal-subtitle">Review the archived item information</p>
         </div>
-        <button class="modal-close-btn" id="viewArchiveClose">
+        <button class="modal-close-btn" id="viewArchiveClose" type="button" aria-label="Close archived record details">
           <i class="bi bi-x-lg"></i>
         </button>
       </div>
@@ -176,8 +176,8 @@
       </div>
 
       <div class="um-modal-footer">
-        <button class="btn-outline-add" id="viewArchiveCloseFooter">Close</button>
-        <button class="btn-primary-clay" id="modalRestoreBtn">
+        <button class="btn-outline-add" id="viewArchiveCloseFooter" type="button">Close</button>
+        <button class="btn-primary-clay" id="modalRestoreBtn" type="button">
           <i class="bi bi-arrow-clockwise"></i> Restore Record
         </button>
       </div>

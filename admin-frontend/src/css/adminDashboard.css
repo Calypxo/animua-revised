@@ -272,6 +272,13 @@ button { font: inherit; cursor: pointer; border: none; background: none; }
 .page-body::-webkit-scrollbar { width: 5px; }
 .page-body::-webkit-scrollbar-thumb { background: var(--stone-3); border-radius: 999px; }
 
+.dashboard-page .page-body > #pageHeaderMount,
+.dashboard-page .page-body > .row {
+  width: min(100%, 1600px);
+  margin-left: auto;
+  margin-right: auto;
+}
+
 /* ── Hero ───────────────────────────────────────────── */
 .hero {
   background: #FFFFFF;
@@ -504,6 +511,74 @@ button { font: inherit; cursor: pointer; border: none; background: none; }
   gap: 6px;
   font-size: 0.76rem;
   color: var(--stone);
+}
+
+.chart-range-select {
+  min-width: 126px;
+  background: #FFFFFF;
+}
+
+.chart-stat-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 17px;
+  padding-top: 15px;
+  border-top: 1px solid var(--border);
+}
+
+.chart-stat-row > div {
+  min-width: 0;
+  padding: 9px 11px;
+  border-radius: 11px;
+  background: var(--cream);
+}
+
+.chart-stat-row span,
+.chart-stat-row strong {
+  display: block;
+}
+
+.chart-stat-row span {
+  overflow: hidden;
+  color: var(--stone);
+  font-size: .64rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chart-stat-row strong {
+  margin-top: 4px;
+  color: var(--ink);
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.chart-stat-row strong.is-pressure {
+  color: var(--clay);
+}
+
+.stay-summary {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 14px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  color: var(--stone);
+  background: var(--cream);
+  font-size: .7rem;
+  line-height: 1.45;
+}
+
+.stay-summary i {
+  color: var(--clay);
+}
+
+.stay-summary strong {
+  color: var(--ink);
 }
 
 .legend-dot {
@@ -944,6 +1019,7 @@ button { font: inherit; cursor: pointer; border: none; background: none; }
   .user-meta { display: none; }
   .page-body { padding: 14px 14px 28px; }
   .action-grid { grid-template-columns: repeat(3, 1fr); }
+  .chart-stat-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 480px) {

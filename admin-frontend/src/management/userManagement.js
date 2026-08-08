@@ -96,18 +96,12 @@ const ALL_PERMISSIONS = [
   },
 ];
 
-const AVATAR_COLORS = [
-  "#780116",
-  "#2558a8",
-  "#186534",
-  "#b86a00",
-  "#0d6e6e",
-  "#780116",
-  "#3d2b8a",
-  "#1a6b5a",
-  "#7a3b00",
-  "#1a4e7a",
-];
+const ROLE_AVATAR_COLORS = Object.freeze({
+  Admin: "#780116",
+  Staff: "#17695f",
+  Veterinarian: "#315b87",
+  Public: "#7b4c6c",
+});
 
 let pageSize = 10;
 
@@ -125,7 +119,7 @@ let removeMenuDismissListener = null;
 /* ── Helpers ─────────────────────────────────────────── */
 const initials  = u => `${(u.firstName||u.fullName||"?")[0]}${(u.lastName||"")[0]||""}`.toUpperCase();
 const labelPerm = k => ALL_PERMISSIONS.find(p => p.key === k)?.label || k;
-const rndColor  = () => AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)];
+const avatarColor = role => ROLE_AVATAR_COLORS[getDisplayRole(role)] || ROLE_AVATAR_COLORS.Staff;
 
 function formatLastLogin(ts) {
   if (!ts) return "Never";
@@ -435,7 +429,7 @@ function renderTable() {
 
     return `
       <article class="animal-record-card user-record-card ${isPublic ? "public-row" : ""}" data-id="${u.id}" role="listitem" tabindex="0" aria-label="Open account details for ${dname}">
-        <div class="animal-record-media user-record-media" style="--user-avatar-color:${u.color || rndColor()}">
+        <div class="animal-record-media user-record-media" style="--user-avatar-color:${avatarColor(u.role)}">
           <div class="animal-record-fallback user-record-avatar"><span>${initials(u)}</span><small>${rc.label}</small></div>
           <span class="animal-record-id"><i class="bi bi-envelope"></i>${email}</span>
         </div>
@@ -594,12 +588,13 @@ function openAddModal() {
 
   document.getElementById("modalTitle").textContent =
     "Add Management User";
+  document.getElementById("userModalSubtitle").textContent = "Create a secure shelter account and assign its access role.";
 
   document.getElementById("userForm").reset();
+  resetPasswordVisibility();
   document.getElementById("formUserId").value = "";
   document.getElementById("avatarPreview").textContent = "?";
-  document.getElementById("avatarPreview").style.background =
-    "var(--clay)";
+  document.getElementById("avatarPreview").style.setProperty("--avatar-color", avatarColor("Staff"));
 
   document.getElementById("passwordGroup").style.display = "";
   document.getElementById("confirmPasswordGroup").style.display = "";
@@ -630,6 +625,7 @@ function openEditModal(id) {
 
   editingId = id;
   document.getElementById("modalTitle").textContent = "Edit User";
+  document.getElementById("userModalSubtitle").textContent = "Update this account’s identity, role, status, and assigned access.";
   document.getElementById("formUserId").value  = id;
   document.getElementById("fFirstName").value  = u.firstName || u.fullName?.split(" ")[0] || "";
   document.getElementById("fLastName").value   = u.lastName  || u.fullName?.split(" ").slice(1).join(" ") || "";
@@ -639,6 +635,7 @@ function openEditModal(id) {
   document.getElementById("fStatus").value     = u.status || "Active";
   document.getElementById("passwordGroup").style.display        = "none";
   document.getElementById("confirmPasswordGroup").style.display = "none";
+  resetPasswordVisibility();
   updateAvatarPreview();
   clearFormErrors();
   renderPermGrid(getPermissionsForRole(normalizedRole));
@@ -691,11 +688,11 @@ if (!can(requiredPermission)) {
     const permissions = getPermissionsForRole(role);
 
     if (editingId) {
-      await updateUser(editingId, { firstName, lastName, role, status, permissions });
+      await updateUser(editingId, { firstName, lastName, role, status, permissions, color: avatarColor(role) });
       showToast("success", "User updated successfully.");
     } else {
       const password = document.getElementById("fPassword").value;
-      await createUser({ firstName, lastName, email, password, role, status, permissions, color: rndColor() });
+      await createUser({ firstName, lastName, email, password, role, status, permissions, color: avatarColor(role) });
       showToast("success", "User created successfully.");
     }
     closeModal("userModalBackdrop");
@@ -718,7 +715,7 @@ function openViewModal(id) {
 
   const normalizedRole = getDisplayRole(u.role);
   const ini = initials(u);
-  const color = u.color || rndColor();
+  const color = avatarColor(u.role);
   const dname = displayName(u);
   const isPublic = normalizedRole === "Public";
   const assignedPermissions = isPublic ? [] : getPermissionsForRole(normalizedRole);
@@ -737,7 +734,7 @@ function openViewModal(id) {
 
   document.getElementById("viewModalBody").innerHTML = `
     <div class="view-user-card">
-      <div class="view-avatar" style="background:${color}">${ini}</div>
+      <div class="view-avatar" style="--avatar-color:${color}">${ini}</div>
       <div>
         <div class="view-name">${dname}</div>
         <div class="view-email">${u.email||u.id}</div>
@@ -866,6 +863,7 @@ function updateAvatarPreview() {
   const el=document.getElementById("avatarPreview");
   if (!el) return;
   el.textContent=(f||l)?`${(f?.[0]||"").toUpperCase()}${(l?.[0]||"").toUpperCase()}`:"?";
+  el.style.setProperty("--avatar-color", avatarColor(document.getElementById("fRole")?.value || "Staff"));
 }
 
 function onRoleChange() {
@@ -878,6 +876,7 @@ function onRoleChange() {
 
   const permissions = getPermissionsForRole(role);
   renderPermGrid(permissions);
+  updateAvatarPreview();
 }
 
 /* ── Modal Helpers ───────────────────────────────────── */
@@ -898,10 +897,29 @@ function showToast(type, msg) {
 /* ── Eye Toggle ──────────────────────────────────────── */
 function bindEye(btnId, inputId) {
   document.getElementById(btnId)?.addEventListener("click",()=>{
-    const i=document.getElementById(inputId), ic=document.querySelector(`#${btnId} i`);
-    if(!i||!ic) return;
-    const show=i.type==="password"; i.type=show?"text":"password";
-    ic.className=show?"bi bi-eye-slash":"bi bi-eye";
+    const input=document.getElementById(inputId), button=document.getElementById(btnId), icon=button?.querySelector("i");
+    if(!input||!button||!icon) return;
+    const show=input.type==="password";
+    input.type=show?"text":"password";
+    icon.className=show?"bi bi-eye-slash":"bi bi-eye";
+    button.setAttribute("aria-label", show ? "Hide password" : "Show password");
+    button.setAttribute("aria-pressed", String(show));
+    button.title=show?"Hide password":"Show password";
+  });
+}
+
+function resetPasswordVisibility() {
+  [["fPassword", "togglePassword"], ["fConfirmPassword", "toggleConfirm"]].forEach(([inputId, buttonId]) => {
+    const input = document.getElementById(inputId);
+    const button = document.getElementById(buttonId);
+    const icon = button?.querySelector("i");
+    if (input) input.type = "password";
+    if (icon) icon.className = "bi bi-eye";
+    if (button) {
+      button.setAttribute("aria-label", "Show password");
+      button.setAttribute("aria-pressed", "false");
+      button.title = "Show password";
+    }
   });
 }
 

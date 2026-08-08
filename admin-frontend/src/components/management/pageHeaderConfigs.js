@@ -239,13 +239,13 @@ export const PAGE_HEADER_CONFIGS = Object.freeze({
     watermarkIcon: "bi-bar-chart-fill",
     highlights: [
       { icon: "bi-database-check", label: "Live records" },
-      { icon: "bi-funnel", label: "Focused filters" },
+      { icon: "bi-geo-alt-fill", label: "Barangay intelligence" },
       { icon: "bi-file-earmark-arrow-down", label: "Ready to export" }
     ],
     queue: { liveLabel: "Reporting service active", label: "Current report", title: "Records in the selected view", valueId: "heroReportCount", unit: "records" },
     actions: [
       { id: "btnPrint", icon: "bi-printer-fill", label: "Print / PDF" },
-      { id: "btnCsv", icon: "bi-filetype-csv", label: "Export CSV", variant: "secondary" }
+      { id: "btnExcel", icon: "bi-file-earmark-excel-fill", label: "Export Excel", variant: "secondary" }
     ],
     summaryLabel: "Reporting snapshot",
     metrics: [

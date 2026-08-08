@@ -1,7 +1,7 @@
-import "../css/auditTrail.css";
 import "../css/recordsWorkspace.css";
 import "../css/managementTables.css";
 import "../css/recordsPanelReference.css";
+import "../css/auditTrail.css";
 
 import { protectPageByModule } from "../auth/authGuard.js";
 import { renderTopbarUser } from "../components/management/topbarUser.js";
@@ -64,55 +64,25 @@ function escapeHtml(value = "") {
 }
 
 function getActionClass(action) {
-  const normalized =
-    normalize(action);
-
-  const positiveActions = [
-    "created",
-    "approved",
-    "converted",
-    "scheduled",
-    "marked ready",
-  ];
-
-  const updateActions = [
-    "updated",
-    "logged in",
-    "behavioral assessment",
-    "sent to quarantine",
-  ];
-
-  const destructiveActions = [
-    "deleted",
-    "archived",
-    "rejected",
-  ];
-
-  if (
-    positiveActions.includes(
-      normalized
-    )
-  ) {
-    return "action-created";
-  }
-
-  if (
-    destructiveActions.includes(
-      normalized
-    )
-  ) {
-    return "action-deleted";
-  }
-
-  if (
-    updateActions.includes(
-      normalized
-    )
-  ) {
-    return "action-updated";
-  }
-
+  const value = normalize(action);
+  if (/delete|archive|reject|removed|no-show/.test(value)) return "action-deleted";
+  if (/create|submit|approve|convert|final|schedule|ready|arrival|added|restore/.test(value)) return "action-created";
+  if (/password|security|login|auth/.test(value)) return "action-security";
   return "action-updated";
+}
+
+function getActionIcon(action) {
+  const value = normalize(action);
+  if (/create|submit/.test(value)) return "bi-plus-circle";
+  if (/approve|ready|arrival|final|convert/.test(value)) return "bi-check2-circle";
+  if (/reject|delete|removed/.test(value)) return "bi-x-circle";
+  if (/archive/.test(value)) return "bi-archive";
+  if (/schedule|deadline|reschedule/.test(value)) return "bi-calendar-check";
+  if (/stock added/.test(value)) return "bi-box-arrow-in-down";
+  if (/stock used|returned/.test(value)) return "bi-box-arrow-up";
+  if (/password|security|login|auth/.test(value)) return "bi-shield-lock";
+  if (/reply|follow-up/.test(value)) return "bi-reply";
+  return "bi-pencil-square";
 }
 
 function getStatusClass(status) {
@@ -129,11 +99,35 @@ function getInitials(name = "") {
 function getModuleIcon(module = "") {
   const value = normalize(module);
   if (value.includes("animal")) return "bi-heart-pulse";
+  if (value.includes("intake")) return "bi-box-arrow-in-down";
   if (value.includes("adoption")) return "bi-house-heart";
   if (value.includes("inventory")) return "bi-box-seam";
+  if (value.includes("surrender")) return "bi-file-earmark-heart";
+  if (value.includes("announcement")) return "bi-megaphone";
+  if (value.includes("contact")) return "bi-envelope-paper";
+  if (value.includes("compatibility")) return "bi-stars";
+  if (value.includes("notification")) return "bi-bell";
   if (value.includes("user")) return "bi-people";
   if (value.includes("auth")) return "bi-shield-lock";
-  return "bi-grid";
+  return "bi-grid-1x2";
+}
+
+function getModuleTone(module = "") {
+  const value = normalize(module);
+  if (value.includes("animal") || value.includes("intake")) return "tone-burgundy";
+  if (value.includes("adoption") || value.includes("surrender")) return "tone-amber";
+  if (value.includes("inventory") || value.includes("announcement")) return "tone-teal";
+  if (value.includes("user") || value.includes("auth")) return "tone-blue";
+  if (value.includes("contact") || value.includes("compatibility")) return "tone-plum";
+  return "tone-stone";
+}
+
+function getActorTone(role = "") {
+  const value = normalize(role);
+  if (value.includes("admin")) return "is-admin";
+  if (value.includes("vet")) return "is-vet";
+  if (value.includes("staff")) return "is-staff";
+  return "is-system";
 }
 
 function applyFilters() {
@@ -270,7 +264,7 @@ function renderTable() {
   }
 
   tbody.innerHTML = rows.map((log) => `
-    <tr class="audit-row">
+    <tr class="audit-row ${getStatusClass(log.status)}">
       <td>
         <div class="event-time-cell">
           <span class="event-dot ${getStatusClass(log.status)}"><i class="bi ${log.status === "Success" ? "bi-check-lg" : log.status === "Warning" ? "bi-exclamation-lg" : "bi-x-lg"}"></i></span>
@@ -278,24 +272,24 @@ function renderTable() {
         </div>
       </td>
       <td>
-        <div class="actor-cell"><span class="actor-avatar">${escapeHtml(getInitials(log.actor))}</span><span><strong>${escapeHtml(log.actor)}</strong><small>${escapeHtml(log.role)}</small></span></div>
+        <div class="actor-cell"><span class="actor-avatar ${getActorTone(log.role)}">${escapeHtml(getInitials(log.actor))}</span><span><strong>${escapeHtml(log.actor)}</strong><small>${escapeHtml(log.role)}</small></span></div>
       </td>
-      <td><span class="module-cell"><i class="bi ${getModuleIcon(log.module)}"></i>${escapeHtml(log.module)}</span></td>
+      <td><span class="module-cell ${getModuleTone(log.module)}"><i class="bi ${getModuleIcon(log.module)}"></i><span>${escapeHtml(log.module)}</span></span></td>
       <td>
         <span class="action-badge ${getActionClass(log.action)}">
-          ${escapeHtml(log.action)}
+          <i class="bi ${getActionIcon(log.action)}"></i>${escapeHtml(log.action)}
         </span>
       </td>
       <td>
-        <span class="record-name">${escapeHtml(log.record)}</span>
+        <span class="audit-record-cell"><strong>${escapeHtml(log.targetName || log.record)}</strong><small>${escapeHtml(log.record)}</small></span>
       </td>
       <td>
         <span class="status-badge ${getStatusClass(log.status)}">
-          ${escapeHtml(log.status)}
+          <i class="bi ${log.status === "Success" ? "bi-check-circle-fill" : log.status === "Warning" ? "bi-exclamation-triangle-fill" : "bi-x-octagon-fill"}"></i>${escapeHtml(log.status)}
         </span>
       </td>
       <td>
-        <button class="tbl-action-btn" data-view-id="${escapeHtml(log.id)}" title="View details" aria-label="View ${escapeHtml(log.record)} details"><i class="bi bi-eye"></i></button>
+        <button class="audit-review-btn" type="button" data-view-id="${escapeHtml(log.id)}" title="View event details" aria-label="View ${escapeHtml(log.record)} event details"><i class="bi bi-eye"></i></button>
       </td>
     </tr>
   `).join("");
