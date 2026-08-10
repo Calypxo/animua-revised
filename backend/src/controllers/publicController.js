@@ -151,6 +151,77 @@ const isPublishedEvent = (event = {}) => {
   return published && !unpublished && !archived;
 };
 
+const normalizeAnimalStatus = (value = "") =>
+  String(value || "").trim().toLowerCase().replace(/[_-]+/g, " ");
+
+const isPublicReadyAnimal = (animal = {}) => {
+  const status = normalizeAnimalStatus(animal.status);
+  const currentStage = normalizeAnimalStatus(animal.currentStage);
+  const adoptionStatus = normalizeAnimalStatus(animal.adoptionStatus);
+  const visibility = normalizeAnimalStatus(animal.visibility || animal.publicStatus);
+
+  const blocked =
+    animal.archived === true ||
+    animal.isArchived === true ||
+    animal.isPublic === false ||
+    animal.public === false ||
+    [status, currentStage, adoptionStatus, visibility].some((value) =>
+      value.includes("archive") ||
+      value.includes("adopted") ||
+      value.includes("unavailable") ||
+      value.includes("reserved") ||
+      value.includes("hidden") ||
+      value.includes("private")
+    );
+
+  if (blocked) return false;
+
+  return (
+    status === "ready" ||
+    status.includes("ready for adoption") ||
+    status.includes("adoption ready") ||
+    currentStage === "adoption" ||
+    adoptionStatus === "ready" ||
+    adoptionStatus.includes("ready for adoption") ||
+    animal.readyForAdoption === true ||
+    animal.availableForAdoption === true
+  );
+};
+
+const serializePublicPet = (doc) => {
+  const data = doc.data();
+  const displayLabel = buildShelterLabel(data, doc.id);
+
+  return {
+    id: doc.id,
+    name: data.adoptedName || "",
+    displayLabel,
+    shelterLabel: displayLabel,
+    identifyingDescription:
+      data.identifyingDescription || displayLabel,
+    species: data.species || "",
+    breed: data.breed || "",
+    sex: data.sex || "Unknown",
+    ageEstimate: data.ageEstimate || "",
+    color: data.color || "",
+    colorMarkings: data.colorMarkings || data.color || "",
+    photoURL: data.photoURL || "",
+    source: data.source || "",
+    intakeDate: data.intakeDate || "",
+    readyForAdoptionAt: data.readyForAdoptionAt || "",
+    createdAt: data.createdAt || "",
+    updatedAt: data.updatedAt || "",
+    intakeLocation: data.intakeLocation || "",
+    initialCondition: data.initialCondition || "",
+    conditionNotes: data.conditionNotes || "",
+    vaccinated: data.vaccinated || "Unknown",
+    alteredStatus: data.alteredStatus || "Unknown",
+    visibleDefects: data.visibleDefects || "",
+    behavioralAssessment: data.behavioralAssessment || null,
+    status: data.status || "Ready",
+  };
+};
+
 /**
  * GET /api/public/pets
  * Public-facing list of adoptable animals
@@ -163,46 +234,13 @@ const isPublishedEvent = (event = {}) => {
 exports.getPublicPets = async (req, res) => {
   try {
     const { species, sex, search } = req.query;
+    res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
 
-    // Current system flow:
-    // Only animals already marked "Ready" are shown publicly.
-    let query = db.collection(ANIMAL_COL).where("status", "==", "Ready");
+    const snapshot = await db.collection(ANIMAL_COL).get();
 
-    const snapshot = await query.get();
-
-    let pets = snapshot.docs.map((doc) => {
-      const data = doc.data();
-      const displayLabel = buildShelterLabel(data, doc.id);
-
-      return {
-        id: doc.id,
-        name: data.adoptedName || "",
-        displayLabel,
-        shelterLabel: displayLabel,
-        identifyingDescription:
-          data.identifyingDescription || displayLabel,
-        species: data.species || "",
-        breed: data.breed || "",
-        sex: data.sex || "Unknown",
-        ageEstimate: data.ageEstimate || "",
-        color: data.color || "",
-        colorMarkings: data.colorMarkings || data.color || "",
-        photoURL: data.photoURL || "",
-        source: data.source || "",
-        intakeDate: data.intakeDate || "",
-        readyForAdoptionAt: data.readyForAdoptionAt || "",
-        createdAt: data.createdAt || "",
-        updatedAt: data.updatedAt || "",
-        intakeLocation: data.intakeLocation || "",
-        initialCondition: data.initialCondition || "",
-        conditionNotes: data.conditionNotes || "",
-        vaccinated: data.vaccinated || "Unknown",
-        alteredStatus: data.alteredStatus || "Unknown",
-        visibleDefects: data.visibleDefects || "",
-        behavioralAssessment: data.behavioralAssessment || null,
-        status: data.status || "Ready",
-      };
-    });
+    let pets = snapshot.docs
+      .filter((doc) => isPublicReadyAnimal(doc.data() || {}))
+      .map(serializePublicPet);
 
     // Optional frontend filters
     if (species) {
@@ -247,6 +285,7 @@ exports.getPublicPets = async (req, res) => {
 exports.getPublicPetById = async (req, res) => {
   try {
     const { id } = req.params;
+    res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
 
     const doc = await db.collection(ANIMAL_COL).doc(id).get();
 
@@ -257,43 +296,15 @@ exports.getPublicPetById = async (req, res) => {
     }
 
     const data = doc.data();
-    const displayLabel = buildShelterLabel(data, doc.id);
 
-    // Only allow public access to Ready animals
-    if (data.status !== "Ready") {
+    // Only allow public access to adoption-ready animals.
+    if (!isPublicReadyAnimal(data)) {
       return res.status(404).json({
         message: "Pet not found.",
       });
     }
 
-    const pet = {
-      id: doc.id,
-      name: data.adoptedName || "",
-      displayLabel,
-      shelterLabel: displayLabel,
-      identifyingDescription:
-        data.identifyingDescription || displayLabel,
-      species: data.species || "",
-      breed: data.breed || "",
-      sex: data.sex || "Unknown",
-      ageEstimate: data.ageEstimate || "",
-      color: data.color || "",
-      colorMarkings: data.colorMarkings || data.color || "",
-      photoURL: data.photoURL || "",
-      source: data.source || "",
-      intakeDate: data.intakeDate || "",
-      readyForAdoptionAt: data.readyForAdoptionAt || "",
-      createdAt: data.createdAt || "",
-      updatedAt: data.updatedAt || "",
-      intakeLocation: data.intakeLocation || "",
-      initialCondition: data.initialCondition || "",
-      conditionNotes: data.conditionNotes || "",
-      vaccinated: data.vaccinated || "Unknown",
-      alteredStatus: data.alteredStatus || "Unknown",
-      visibleDefects: data.visibleDefects || "",
-      behavioralAssessment: data.behavioralAssessment || null,
-      status: data.status || "Ready",
-    };
+    const pet = serializePublicPet(doc);
 
     res.status(200).json({ pet });
   } catch (error) {

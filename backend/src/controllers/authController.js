@@ -1279,13 +1279,15 @@ exports.requestForgotPasswordOtp = async (req, res) => {
       createdAt: admin.firestore.FieldValue.serverTimestamp()
     });
 
-    await sendForgotPasswordOtp({
+    sendForgotPasswordOtp({
       email,
       fullName: validation.userData.fullName,
       otp
+    }).catch((error) => {
+      console.error("[Forgot Password OTP Email Error]", error.message);
     });
 
-    return res.status(200).json({ message: "We sent a six-digit OTP to your email." });
+    return res.status(200).json({ message: "We are sending a six-digit OTP to your email." });
   } catch (error) {
     console.error("[Request Forgot Password OTP Error]", error.message);
     return res.status(500).json({ message: "Internal server error." });

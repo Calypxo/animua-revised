@@ -878,7 +878,7 @@ function mapPetFromBackend(pet) {
 async function loadPublicPets() {
   try {
     console.log("Loading public pets...");
-    const res = await fetch(`${API_BASE_URL}/public/pets`);
+    const res = await fetch(`${API_BASE_URL}/public/pets`, { cache: "no-store" });
     console.log("Response status:", res.status);
 
     if (!res.ok) {

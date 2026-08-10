@@ -14641,7 +14641,7 @@ button#chatbotSend.chatbot-input-send i {
   gap: 8px;
   margin: 0;
   padding: 0 18px;
-  border-radius: 999px;
+  border-radius: 8px;
   font-family: "Poppins", sans-serif;
   font-size: 0.9rem;
   font-weight: 600;
@@ -14927,20 +14927,84 @@ button#chatbotSend.chatbot-input-send i {
 }
 
 .forgot-password-popup {
-  width: min(500px, calc(100% - 28px)) !important;
-  padding: 22px 24px 24px !important;
+  width: min(420px, calc(100% - 28px)) !important;
+  padding: 20px 22px 22px !important;
 }
 
 .forgot-password-popup .change-password-modal p {
-  max-width: 330px;
+  max-width: 280px;
+}
+
+.forgot-password-popup .change-password-title-row {
+  grid-template-columns: 46px minmax(0, 1fr);
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.forgot-password-popup .change-password-modal h2 {
+  font-size: 1.3rem;
 }
 
 .forgot-password-popup .change-password-reminder {
-  padding: 11px 12px;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 11px;
+  margin-bottom: 14px;
+  padding: 10px 12px;
+}
+
+.forgot-password-popup .change-password-field {
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 11px;
+  margin-bottom: 10px;
+}
+
+.forgot-password-popup .change-password-field-icon,
+.forgot-password-popup .change-password-field > .change-password-field-icon {
+  width: 34px !important;
+  height: 34px !important;
+  margin-top: 17px !important;
+}
+
+.forgot-password-popup .change-password-input-wrap input {
+  min-height: 36px;
+}
+
+.forgot-password-popup .change-password-actions,
+.forgot-password-popup .change-password-actions.swal2-actions {
+  gap: 12px !important;
+  margin-top: 12px !important;
+}
+
+.forgot-password-popup.swal2-loading .change-password-actions,
+.forgot-password-popup.swal2-loading .swal2-actions,
+.forgot-password-popup.change-password-popup--loading .change-password-actions,
+.forgot-password-popup.change-password-popup--loading .swal2-actions {
+  width: 100% !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  justify-content: stretch !important;
+}
+
+.forgot-password-popup.swal2-loading .change-password-confirm,
+.forgot-password-popup.change-password-popup--loading .change-password-confirm {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+}
+
+.forgot-password-popup.change-password-popup--otp .change-password-actions,
+.forgot-password-popup.change-password-popup--otp .swal2-actions,
+.forgot-password-popup:has(.password-otp-modal) .change-password-actions,
+.forgot-password-popup:has(.password-otp-modal) .swal2-actions {
+  display: none !important;
 }
 
 .forgot-password-popup:has(.password-otp-modal) {
   width: min(430px, calc(100% - 24px)) !important;
+}
+
+.forgot-password-popup .password-change-otp-screen .password-otp-cancel,
+.forgot-password-popup .password-change-otp-screen #confirm-password-change-otp-btn.auth-submit-btn {
+  border-radius: 8px !important;
 }
 
 @media (max-width: 560px) {
@@ -15895,61 +15959,153 @@ button#chatbotSend.chatbot-input-send i {
   }
 }
 
+/* Compact profile modal pass. */
+#profileModal .profile-modal-card {
+  width: min(640px, calc(100vw - 64px)) !important;
+  max-width: 640px !important;
+  padding: 14px 16px 16px !important;
+}
+
+#profileModal .profile-modal-shell {
+  gap: 10px !important;
+}
+
+#profileModal .profile-summary-card {
+  min-height: 76px !important;
+  padding: 12px 16px !important;
+}
+
+#profileModal .profile-summary-main {
+  gap: 12px !important;
+}
+
+#profileModal .profile-summary-avatar {
+  width: 52px !important;
+  height: 52px !important;
+}
+
+#profileModal .profile-outline-btn {
+  min-height: 32px !important;
+  padding: 0 12px !important;
+}
+
+#profileModal .profile-info-card {
+  padding: 12px 16px !important;
+}
+
+#profileModal .profile-info-row,
+#profileModal .profile-settings-row {
+  min-height: 46px !important;
+  padding: 6px 0 !important;
+}
+
+#profileModal .profile-info-row > i,
+#profileModal .profile-settings-row > i:first-child {
+  width: 32px !important;
+  height: 32px !important;
+}
+
+#profileModal .profile-save-btn {
+  min-height: 38px !important;
+}
+
 /* Make notification settings narrower and a little taller. */
 .notification-settings-popup {
   width: min(500px, calc(100% - 24px)) !important;
-  padding: 28px 30px 30px !important;
+  padding: 18px 24px 20px !important;
+  max-height: calc(100dvh - 28px) !important;
 }
 
 .notification-settings-head {
-  grid-template-columns: 54px minmax(0, 1fr);
-  gap: 16px;
-  margin-bottom: 22px;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 12px;
+  margin-bottom: 14px;
 }
 
 .notification-settings-title-icon {
-  width: 54px;
-  height: 54px;
+  width: 44px;
+  height: 44px;
 }
 
 .notification-settings-reminder {
-  grid-template-columns: 34px minmax(0, 1fr);
-  gap: 13px;
-  margin-bottom: 20px;
-  padding: 15px 16px;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 9px 12px;
 }
 
 .notification-settings-reminder > span {
-  width: 34px;
-  height: 34px;
+  width: 28px;
+  height: 28px;
 }
 
 .notification-settings-card {
-  padding: 18px 18px;
+  padding: 10px 14px;
 }
 
 .notification-settings-row {
-  grid-template-columns: 44px minmax(0, 1fr) 54px;
-  gap: 13px;
-  min-height: 86px;
+  grid-template-columns: 34px minmax(0, 1fr) 48px;
+  gap: 10px;
+  min-height: 58px;
 }
 
 .notification-settings-row + .notification-settings-row {
-  padding-top: 18px;
+  padding-top: 10px;
 }
 
 .notification-settings-copy small {
   max-width: 280px;
 }
 
+/* Final compact notification settings sizing. */
+.notification-settings-popup .notification-settings-modal h2 {
+  font-size: 1.42rem !important;
+}
+
+.notification-settings-popup .notification-settings-modal p,
+.notification-settings-popup .notification-settings-reminder p {
+  font-size: 0.7rem !important;
+  line-height: 1.22 !important;
+}
+
+.notification-settings-popup .notification-settings-icon {
+  width: 34px !important;
+  height: 34px !important;
+  font-size: 0.92rem !important;
+}
+
+.notification-settings-popup .notification-settings-copy strong {
+  font-size: 0.9rem !important;
+  line-height: 1.08 !important;
+}
+
+.notification-settings-popup .notification-settings-copy small {
+  font-size: 0.64rem !important;
+  line-height: 1.16 !important;
+}
+
+.notification-settings-popup .notification-settings-slider {
+  width: 48px !important;
+  height: 28px !important;
+}
+
+.notification-settings-popup .notification-settings-slider::after {
+  width: 22px !important;
+  height: 22px !important;
+}
+
+.notification-settings-popup .notification-settings-switch input:checked + .notification-settings-slider::after {
+  transform: translateX(20px) !important;
+}
+
 .notification-settings-actions {
   gap: 12px !important;
-  margin-top: 24px !important;
+  margin-top: 14px !important;
 }
 
 .notification-settings-cancel,
 .notification-settings-confirm {
-  min-height: 42px !important;
+  min-height: 36px !important;
 }
 
 /* Keep the login forgot-password link aligned with the old remember-device text. */
@@ -16524,5 +16680,2083 @@ textarea {
   .login-btn,
   .menu-toggle {
     min-height: 44px;
+  }
+}
+
+/* Final ANIMUA terms/privacy modal: match the burgundy reference design. */
+#auth-policy-modal-terms-privacy.auth-policy-modal-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 10000 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 34px 18px !important;
+  background: rgba(23, 22, 22, 0.62) !important;
+  backdrop-filter: blur(8px) saturate(0.85) !important;
+}
+
+#auth-policy-modal-terms-privacy.auth-policy-modal-overlay.hidden {
+  display: none !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-modal {
+  width: min(780px, calc(100vw - 36px)) !important;
+  max-height: min(92dvh, 980px) !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(255, 255, 255, 0.62) !important;
+  border-radius: 18px !important;
+  background: #fffdf9 !important;
+  box-shadow: 0 28px 70px rgba(22, 18, 16, 0.34) !important;
+  color: #1f2933 !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-modal-head {
+  position: relative !important;
+  min-height: 172px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  padding: 21px 58px 31px !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  background:
+    linear-gradient(0deg, rgba(120, 1, 22, 0.88), rgba(120, 1, 22, 0.88)),
+    url("../assets/images/policy-dog-banner.jpg") center 42% / cover no-repeat !important;
+  text-align: center !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-modal-head::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  background:
+    radial-gradient(circle at 18% 8%, rgba(255, 255, 255, 0.08), transparent 30%),
+    linear-gradient(90deg, rgba(67, 0, 12, 0.3), transparent 52%, rgba(67, 0, 12, 0.18)) !important;
+  pointer-events: none !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-modal-head::after {
+  content: "" !important;
+  position: absolute !important;
+  left: -4% !important;
+  right: -4% !important;
+  bottom: -1px !important;
+  height: 26px !important;
+  background: #fffdf9 !important;
+  clip-path: ellipse(58% 60% at 50% 100%) !important;
+  pointer-events: none !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-brand,
+#auth-policy-modal-terms-privacy .auth-policy-modal-head h2,
+#auth-policy-modal-terms-privacy .auth-policy-modal-head p,
+#auth-policy-modal-terms-privacy .auth-policy-modal-close {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-brand {
+  display: grid !important;
+  grid-template-columns: 58px auto !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin: 0 0 13px !important;
+  color: #fffdf9 !important;
+  text-align: left !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-brand-mark {
+  width: 58px !important;
+  height: 50px !important;
+  display: block !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: url("../assets/images/animua-logo-transparent.png") center / contain no-repeat !important;
+  box-shadow: none !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-brand-mark i {
+  display: none !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-brand strong {
+  display: block !important;
+  color: #fffdf9 !important;
+  font-family: "Inter", "League Spartan", sans-serif !important;
+  font-size: 1.54rem !important;
+  font-weight: 900 !important;
+  line-height: 0.92 !important;
+  letter-spacing: 0.01em !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-brand small {
+  display: block !important;
+  margin-top: 5px !important;
+  color: #f4c247 !important;
+  font-family: "Inter", "League Spartan", sans-serif !important;
+  font-size: 0.5rem !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  letter-spacing: 0.02em !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-modal-head h2 {
+  margin: 0 !important;
+  color: #fffdf9 !important;
+  font-family: "Inter", "League Spartan", sans-serif !important;
+  font-size: clamp(1.55rem, 2.7vw, 2rem) !important;
+  font-weight: 900 !important;
+  line-height: 1.02 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-modal-head h2 span {
+  color: inherit !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-modal-head p {
+  max-width: 620px !important;
+  margin: 12px auto 0 !important;
+  color: #fffdf9 !important;
+  font-family: "Inter", "League Spartan", sans-serif !important;
+  font-size: 0.78rem !important;
+  font-weight: 500 !important;
+  line-height: 1.35 !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-modal-close {
+  position: absolute !important;
+  top: 22px !important;
+  right: 22px !important;
+  width: 46px !important;
+  height: 46px !important;
+  min-height: 46px !important;
+  display: grid !important;
+  place-items: center !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  color: #780116 !important;
+  background: #fffdf9 !important;
+  box-shadow: 0 12px 24px rgba(34, 10, 8, 0.2) !important;
+  font-size: 1.08rem !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-modal-body {
+  max-height: none !important;
+  overflow: visible !important;
+  padding: 28px 24px 0 !important;
+  background: #fffdf9 !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-card-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 18px !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-section {
+  min-height: 448px !important;
+  display: grid !important;
+  grid-template-columns: 60px minmax(0, 1fr) !important;
+  align-items: start !important;
+  gap: 16px !important;
+  padding: 24px 22px !important;
+  border: 1px solid rgba(120, 1, 22, 0.18) !important;
+  border-radius: 14px !important;
+  background: #fffdf9 !important;
+  box-shadow: none !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-section + .auth-policy-section {
+  border-left: 1px solid rgba(120, 1, 22, 0.18) !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-section-icon {
+  width: 56px !important;
+  height: 56px !important;
+  display: grid !important;
+  place-items: center !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  color: #fffdf9 !important;
+  background: #8d1421 !important;
+  box-shadow: none !important;
+  font-size: 1.25rem !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-section-copy {
+  min-width: 0 !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-modal-body h3 {
+  margin: 12px 0 24px !important;
+  color: #780116 !important;
+  font-family: "Inter", "League Spartan", sans-serif !important;
+  font-size: 1.24rem !important;
+  font-weight: 900 !important;
+  line-height: 1.05 !important;
+  letter-spacing: 0 !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-modal-body h3::after {
+  content: "" !important;
+  display: block !important;
+  width: 42px !important;
+  height: 3px !important;
+  margin-top: 12px !important;
+  border-radius: 999px !important;
+  background: #d99a2b !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-section ul {
+  display: grid !important;
+  gap: 17px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  list-style: none !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-section li {
+  position: relative !important;
+  min-height: 18px !important;
+  margin: 0 !important;
+  padding: 0 0 0 34px !important;
+  color: #1f2933 !important;
+  font-family: "Inter", "League Spartan", sans-serif !important;
+  font-size: 0.74rem !important;
+  font-weight: 500 !important;
+  line-height: 1.32 !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-section li::before {
+  content: "\f00c" !important;
+  position: absolute !important;
+  left: 0 !important;
+  top: 1px !important;
+  width: 16px !important;
+  height: 16px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 50% !important;
+  color: #fffdf9 !important;
+  background: #d99a2b !important;
+  font: var(--fa-font-solid) !important;
+  font-size: 0.48rem !important;
+  line-height: 1 !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-section li + li {
+  margin-top: 0 !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-privacy-note {
+  position: relative !important;
+  min-height: 70px !important;
+  display: grid !important;
+  grid-template-columns: 52px minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 14px !important;
+  margin: 24px 0 18px !important;
+  padding: 12px 22px !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(217, 154, 43, 0.76) !important;
+  border-radius: 12px !important;
+  background: #fff4d8 !important;
+  box-shadow: none !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-privacy-note::after {
+  content: "\f1b0" !important;
+  position: absolute !important;
+  right: 22px !important;
+  bottom: 6px !important;
+  color: rgba(217, 154, 43, 0.18) !important;
+  font: var(--fa-font-solid) !important;
+  font-size: 3.1rem !important;
+  line-height: 1 !important;
+  transform: rotate(-10deg) !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-ack-icon {
+  width: 40px !important;
+  height: 40px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 12px !important;
+  color: #fffdf9 !important;
+  background: #d39a22 !important;
+  font-size: 1rem !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-privacy-note p {
+  position: relative !important;
+  z-index: 1 !important;
+  max-width: 520px !important;
+  margin: 0 !important;
+  color: #1f2933 !important;
+  font-family: "Inter", "League Spartan", sans-serif !important;
+  font-size: 0.88rem !important;
+  font-weight: 600 !important;
+  line-height: 1.35 !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-modal-actions {
+  display: grid !important;
+  gap: 18px !important;
+  padding: 0 24px 30px !important;
+  border: 0 !important;
+  background: #fffdf9 !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-consent {
+  min-height: 56px !important;
+  display: grid !important;
+  grid-template-columns: 24px minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 18px !important;
+  margin: 0 !important;
+  padding: 14px 26px !important;
+  border: 1px solid rgba(120, 1, 22, 0.18) !important;
+  border-radius: 12px !important;
+  background: #fffdf9 !important;
+  color: #1f2933 !important;
+  font-family: "Inter", "League Spartan", sans-serif !important;
+  font-size: 0.83rem !important;
+  font-weight: 500 !important;
+  line-height: 1.25 !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-consent input {
+  position: absolute !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-consent-box {
+  width: 22px !important;
+  height: 22px !important;
+  display: grid !important;
+  place-items: center !important;
+  border: 2px solid #8d1421 !important;
+  border-radius: 4px !important;
+  background: #fffdf9 !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-consent input:checked + .auth-policy-consent-box {
+  border-color: #8d1421 !important;
+  background: #8d1421 !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-consent input:checked + .auth-policy-consent-box::after {
+  content: "\f00c" !important;
+  color: #fffdf9 !important;
+  font: var(--fa-font-solid) !important;
+  font-size: 0.72rem !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-consent strong {
+  color: #780116 !important;
+  font-weight: 900 !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-action-row {
+  display: grid !important;
+  grid-template-columns: 0.62fr 1fr !important;
+  gap: 18px !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-action {
+  min-height: 54px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  padding: 0 24px !important;
+  border-radius: 12px !important;
+  font-family: "Inter", "League Spartan", sans-serif !important;
+  font-size: 0.88rem !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-action-secondary {
+  border: 1px solid #8d1421 !important;
+  color: #780116 !important;
+  background: #fffdf9 !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-action-primary {
+  border: 1px solid #970015 !important;
+  color: #fffdf9 !important;
+  background: linear-gradient(135deg, #9f0019, #780116) !important;
+  box-shadow: 0 16px 30px rgba(120, 1, 22, 0.2) !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-action-primary i {
+  color: #fffdf9 !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-action:hover,
+#auth-policy-modal-terms-privacy .auth-policy-action:focus-visible,
+#auth-policy-modal-terms-privacy .auth-policy-modal-close:hover,
+#auth-policy-modal-terms-privacy .auth-policy-modal-close:focus-visible {
+  transform: translateY(-1px) !important;
+}
+
+@media (max-width: 760px) {
+  #auth-policy-modal-terms-privacy.auth-policy-modal-overlay {
+    align-items: flex-start !important;
+    padding: 16px 12px !important;
+    overflow-y: auto !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal {
+    width: min(100%, 560px) !important;
+    max-height: none !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal-head {
+    min-height: 160px !important;
+    padding: 22px 52px 30px 22px !important;
+    align-items: flex-start !important;
+    text-align: left !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal-close {
+    top: 16px !important;
+    right: 16px !important;
+    width: 40px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-card-grid,
+  #auth-policy-modal-terms-privacy .auth-policy-action-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-section {
+    min-height: 0 !important;
+  }
+}
+
+@media (max-width: 480px) {
+  #auth-policy-modal-terms-privacy .auth-policy-modal-body,
+  #auth-policy-modal-terms-privacy .auth-policy-modal-actions {
+    padding-inline: 16px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-section {
+    grid-template-columns: 44px minmax(0, 1fr) !important;
+    gap: 12px !important;
+    padding: 18px 16px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-section-icon {
+    width: 42px !important;
+    height: 42px !important;
+    font-size: 1rem !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-brand {
+    grid-template-columns: 46px auto !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-brand-mark {
+    width: 46px !important;
+    height: 40px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-consent {
+    padding-inline: 16px !important;
+  }
+}
+
+/* Reference lock: final exact desktop shape for Terms & Privacy modal. */
+@media (min-width: 761px) {
+  #auth-policy-modal-terms-privacy.auth-policy-modal-overlay {
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 24px !important;
+    background: rgba(18, 17, 16, 0.62) !important;
+    backdrop-filter: blur(8px) saturate(0.82) !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal {
+    width: 780px !important;
+    max-width: 780px !important;
+    max-height: calc(100dvh - 48px) !important;
+    overflow-y: auto !important;
+    border-radius: 18px !important;
+    background: #fffdf9 !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal-head {
+    min-height: 174px !important;
+    padding: 20px 60px 31px !important;
+    background:
+      linear-gradient(0deg, rgba(120, 1, 22, 0.82), rgba(120, 1, 22, 0.82)),
+      url("/images/terms-privacy-vet-office.png") center 54% / cover no-repeat !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-brand {
+    grid-template-columns: 58px auto !important;
+    margin-bottom: 12px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-brand-mark {
+    width: 58px !important;
+    height: 50px !important;
+    background: url("/pwa-512.png") center / contain no-repeat !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-brand-mark i,
+  #auth-policy-modal-terms-privacy .auth-policy-brand-mark::before,
+  #auth-policy-modal-terms-privacy .auth-policy-brand-mark::after {
+    display: none !important;
+    content: none !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal-body {
+    padding: 26px 24px 0 !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-card-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 18px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-card-grid .auth-policy-section,
+  #auth-policy-modal-terms-privacy .auth-policy-section {
+    min-height: 392px !important;
+    grid-template-columns: 56px minmax(0, 1fr) !important;
+    gap: 15px !important;
+    padding: 20px 22px !important;
+    border: 1px solid rgba(120, 1, 22, 0.18) !important;
+    border-radius: 14px !important;
+    background: #fffdf9 !important;
+    box-shadow: none !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-section-icon {
+    width: 54px !important;
+    height: 54px !important;
+    border-radius: 50% !important;
+    background: #8d1421 !important;
+    color: #fffdf9 !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal-body h3 {
+    margin: 12px 0 21px !important;
+    color: #780116 !important;
+    font-size: 1.18rem !important;
+    font-weight: 900 !important;
+    text-transform: none !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-section ul {
+    gap: 15px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-section li {
+    padding-left: 32px !important;
+    color: #17212b !important;
+    font-size: 0.68rem !important;
+    font-weight: 500 !important;
+    line-height: 1.3 !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-privacy-note {
+    min-height: 68px !important;
+    margin: 22px 0 18px !important;
+    padding: 12px 22px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal-actions {
+    gap: 17px !important;
+    padding: 0 24px 28px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-consent {
+    min-height: 56px !important;
+    padding: 13px 26px !important;
+    font-size: 0.82rem !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-action-row {
+    display: grid !important;
+    grid-template-columns: 0.62fr 1fr !important;
+    gap: 18px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-action {
+    min-height: 54px !important;
+  }
+}
+
+/* Modal brand assets: use PWA logo and the Angeles veterinary office photo. */
+#auth-policy-modal-terms-privacy .auth-policy-modal-head {
+  background:
+    linear-gradient(0deg, rgba(120, 1, 22, 0.82), rgba(120, 1, 22, 0.82)),
+    url("/images/terms-privacy-vet-office.png") center 54% / cover no-repeat !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-brand-mark {
+  background: url("/pwa-512.png") center / contain no-repeat !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-brand-mark i,
+#auth-policy-modal-terms-privacy .auth-policy-brand-mark::before,
+#auth-policy-modal-terms-privacy .auth-policy-brand-mark::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* Compact legal modal: shorter copy, no sticky footer, no oversized cards. */
+#auth-policy-modal-terms-privacy .auth-policy-modal {
+  width: min(720px, calc(100vw - 36px)) !important;
+  max-width: 720px !important;
+  max-height: calc(100dvh - 56px) !important;
+  overflow-y: auto !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-modal-head {
+  min-height: 142px !important;
+  padding: 18px 58px 24px !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-brand {
+  grid-template-columns: 48px auto !important;
+  gap: 10px !important;
+  margin-bottom: 10px !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-brand-mark {
+  width: 48px !important;
+  height: 42px !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-brand strong {
+  font-size: 1.36rem !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-brand small {
+  font-size: 0.46rem !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-modal-head h2 {
+  font-size: clamp(1.42rem, 2.3vw, 1.72rem) !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-modal-head p {
+  margin-top: 9px !important;
+  font-size: 0.72rem !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-modal-close {
+  top: 18px !important;
+  right: 18px !important;
+  width: 40px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-modal-body {
+  display: block !important;
+  padding: 22px 22px 0 !important;
+  overflow: visible !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-card-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 16px !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-section {
+  display: block !important;
+  min-height: 278px !important;
+  padding: 18px 20px !important;
+  overflow: visible !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-section-icon {
+  width: 46px !important;
+  height: 46px !important;
+  float: left !important;
+  margin: 0 14px 10px 0 !important;
+  font-size: 1.05rem !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-modal-body h3 {
+  margin: 8px 0 18px !important;
+  padding-top: 8px !important;
+  font-size: 1.04rem !important;
+  line-height: 1.05 !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-modal-body h3::after {
+  width: 34px !important;
+  height: 3px !important;
+  margin-top: 9px !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-section ul {
+  clear: both !important;
+  display: grid !important;
+  gap: 12px !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-section li {
+  display: block !important;
+  padding-left: 30px !important;
+  font-size: 0.68rem !important;
+  line-height: 1.32 !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-privacy-note {
+  min-height: 58px !important;
+  margin: 18px 0 16px !important;
+  padding: 10px 18px !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-ack-icon {
+  width: 34px !important;
+  height: 34px !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-privacy-note p {
+  font-size: 0.76rem !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-modal-actions {
+  position: static !important;
+  inset: auto !important;
+  display: grid !important;
+  gap: 14px !important;
+  padding: 0 22px 24px !important;
+  margin: 0 !important;
+  border: 0 !important;
+  background: #fffdf9 !important;
+  transform: none !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-consent {
+  position: static !important;
+  min-height: 48px !important;
+  padding: 11px 20px !important;
+  font-size: 0.76rem !important;
+  transform: none !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-action-row {
+  position: static !important;
+  display: grid !important;
+  grid-template-columns: 0.62fr 1fr !important;
+  gap: 14px !important;
+  transform: none !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-action {
+  min-height: 46px !important;
+  border-radius: 10px !important;
+  font-size: 0.78rem !important;
+}
+
+@media (max-width: 760px) {
+  #auth-policy-modal-terms-privacy .auth-policy-card-grid,
+  #auth-policy-modal-terms-privacy .auth-policy-action-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-section {
+    min-height: 0 !important;
+  }
+}
+
+/* Repair policy modal text flow after older grid rules. */
+@media (min-width: 761px) {
+  #auth-policy-modal-terms-privacy .auth-policy-modal {
+    overflow-y: auto !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal-body {
+    overflow: visible !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-section {
+    display: block !important;
+    min-height: 360px !important;
+    padding: 20px 22px 22px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-section-icon {
+    float: left !important;
+    margin: 0 16px 14px 0 !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-section-copy {
+    display: block !important;
+    min-width: 0 !important;
+    width: auto !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal-body h3 {
+    padding-top: 12px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-section ul {
+    clear: both !important;
+    display: grid !important;
+    gap: 14px !important;
+    width: 100% !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-section li {
+    display: block !important;
+    grid-template-columns: none !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 0 0 0 32px !important;
+    white-space: normal !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+    hyphens: manual !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal-actions {
+    position: static !important;
+    inset: auto !important;
+    transform: none !important;
+    margin: 0 !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-consent,
+  #auth-policy-modal-terms-privacy .auth-policy-action-row {
+    position: static !important;
+    transform: none !important;
+  }
+}
+
+/* Final bottom cleanup: no note overlap, compact cards, normal footer flow. */
+#auth-policy-modal-terms-privacy .auth-policy-modal {
+  display: block !important;
+  width: min(690px, calc(100vw - 36px)) !important;
+  max-width: 690px !important;
+  overflow-y: auto !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-modal-body {
+  display: block !important;
+  padding: 20px 22px 0 !important;
+  overflow: visible !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-privacy-note {
+  display: none !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-card-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 15px !important;
+  margin: 0 !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-section {
+  min-height: 248px !important;
+  height: auto !important;
+  padding: 17px 18px !important;
+  overflow: visible !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-section ul {
+  gap: 10px !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-section li {
+  font-size: 0.64rem !important;
+  line-height: 1.28 !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-modal-actions {
+  position: static !important;
+  z-index: auto !important;
+  display: grid !important;
+  gap: 12px !important;
+  margin: 0 !important;
+  padding: 16px 22px 22px !important;
+  background: #fffdf9 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-consent {
+  position: static !important;
+  z-index: auto !important;
+  min-height: 46px !important;
+  margin: 0 !important;
+  transform: none !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-action-row {
+  position: static !important;
+  z-index: auto !important;
+  margin: 0 !important;
+  transform: none !important;
+}
+
+@media (max-width: 760px) {
+  #auth-policy-modal-terms-privacy .auth-policy-card-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Final compact scale with privacy note restored in normal flow. */
+#auth-policy-modal-terms-privacy .auth-policy-modal {
+  width: min(640px, calc(100vw - 36px)) !important;
+  max-width: 640px !important;
+  max-height: calc(100dvh - 42px) !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-modal-head {
+  min-height: 128px !important;
+  padding: 14px 50px 20px !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-brand {
+  grid-template-columns: 40px auto !important;
+  gap: 8px !important;
+  margin-bottom: 8px !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-brand-mark {
+  width: 40px !important;
+  height: 35px !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-brand strong {
+  font-size: 1.12rem !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-brand small {
+  font-size: 0.4rem !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-modal-head h2 {
+  font-size: clamp(1.22rem, 2vw, 1.48rem) !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-modal-head p {
+  margin-top: 7px !important;
+  font-size: 0.64rem !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-modal-close {
+  width: 34px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  top: 14px !important;
+  right: 14px !important;
+  font-size: 0.92rem !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-modal-body {
+  padding: 18px 20px 0 !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-card-grid {
+  gap: 14px !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-section {
+  min-height: 0 !important;
+  height: auto !important;
+  padding: 15px 16px 16px !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-section-icon {
+  width: 38px !important;
+  height: 38px !important;
+  margin: 0 12px 8px 0 !important;
+  font-size: 0.9rem !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-modal-body h3 {
+  margin: 6px 0 14px !important;
+  padding-top: 6px !important;
+  font-size: 0.92rem !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-modal-body h3::after {
+  width: 28px !important;
+  margin-top: 7px !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-section ul {
+  gap: 9px !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-section li {
+  padding-left: 25px !important;
+  font-size: 0.58rem !important;
+  line-height: 1.24 !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-section li::before {
+  width: 13px !important;
+  height: 13px !important;
+  font-size: 0.38rem !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-privacy-note {
+  min-height: 44px !important;
+  display: grid !important;
+  grid-template-columns: 30px minmax(0, 1fr) !important;
+  gap: 10px !important;
+  margin: 14px 0 12px !important;
+  padding: 8px 14px !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-ack-icon {
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 9px !important;
+  font-size: 0.8rem !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-privacy-note p {
+  max-width: none !important;
+  font-size: 0.64rem !important;
+  line-height: 1.28 !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-modal-actions {
+  gap: 10px !important;
+  padding: 0 20px 18px !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-consent {
+  min-height: 40px !important;
+  gap: 12px !important;
+  padding: 9px 16px !important;
+  font-size: 0.66rem !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-consent-box {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-action-row {
+  gap: 12px !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-action {
+  min-height: 40px !important;
+  font-size: 0.68rem !important;
+}
+
+/* No-scroll desktop policy modal: compact enough to fit in one view. */
+@media (min-width: 761px) {
+  #auth-policy-modal-terms-privacy .auth-policy-modal {
+    width: 620px !important;
+    max-width: 620px !important;
+    max-height: calc(100dvh - 40px) !important;
+    overflow: hidden !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal-head {
+    min-height: 108px !important;
+    padding: 11px 46px 16px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-brand {
+    grid-template-columns: 34px auto !important;
+    gap: 7px !important;
+    margin-bottom: 6px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-brand-mark {
+    width: 34px !important;
+    height: 30px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-brand strong {
+    font-size: 1rem !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-brand small {
+    font-size: 0.35rem !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal-head h2 {
+    font-size: 1.26rem !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal-head p {
+    margin-top: 5px !important;
+    font-size: 0.56rem !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal-close {
+    width: 30px !important;
+    height: 30px !important;
+    min-height: 30px !important;
+    top: 12px !important;
+    right: 12px !important;
+    font-size: 0.82rem !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal-body {
+    padding: 14px 18px 0 !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-card-grid {
+    align-items: start !important;
+    gap: 12px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-section {
+    min-height: 0 !important;
+    max-height: none !important;
+    align-self: start !important;
+    padding: 13px 14px !important;
+    border-radius: 10px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-section-icon {
+    width: 32px !important;
+    height: 32px !important;
+    margin: 0 10px 6px 0 !important;
+    font-size: 0.78rem !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal-body h3 {
+    margin: 4px 0 10px !important;
+    padding-top: 5px !important;
+    font-size: 0.82rem !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal-body h3::after {
+    width: 24px !important;
+    height: 2px !important;
+    margin-top: 6px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-section ul {
+    gap: 7px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-section li {
+    padding-left: 21px !important;
+    font-size: 0.51rem !important;
+    line-height: 1.2 !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-section li::before {
+    width: 11px !important;
+    height: 11px !important;
+    top: 1px !important;
+    font-size: 0.32rem !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-privacy-note {
+    min-height: 36px !important;
+    grid-template-columns: 24px minmax(0, 1fr) !important;
+    gap: 8px !important;
+    margin: 10px 0 9px !important;
+    padding: 7px 11px !important;
+    border-radius: 9px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-ack-icon {
+    width: 22px !important;
+    height: 22px !important;
+    border-radius: 7px !important;
+    font-size: 0.62rem !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-privacy-note p {
+    font-size: 0.53rem !important;
+    line-height: 1.2 !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal-actions {
+    gap: 8px !important;
+    padding: 0 18px 15px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-consent {
+    min-height: 34px !important;
+    gap: 10px !important;
+    padding: 7px 13px !important;
+    border-radius: 9px !important;
+    font-size: 0.56rem !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-consent-box {
+    width: 15px !important;
+    height: 15px !important;
+    border-width: 1.5px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-action-row {
+    gap: 10px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-action {
+    min-height: 34px !important;
+    border-radius: 8px !important;
+    font-size: 0.58rem !important;
+  }
+}
+
+/* Keep the gold section accent under each heading, not under the icon. */
+#auth-policy-modal-terms-privacy .auth-policy-section {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) !important;
+  align-items: start !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-section-icon {
+  float: none !important;
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-section-copy {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  min-width: 0 !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-section-copy h3 {
+  display: block !important;
+  width: fit-content !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-section-copy h3::after {
+  content: "" !important;
+  display: block !important;
+  width: 28px !important;
+  height: 2px !important;
+  margin-top: 6px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: #d1a33e !important;
+}
+
+/* Slightly larger policy card copy for better readability. */
+@media (min-width: 761px) {
+  #auth-policy-modal-terms-privacy .auth-policy-section-copy h3 {
+    font-size: 1rem !important;
+    line-height: 1.08 !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-section li {
+    font-size: 0.62rem !important;
+    line-height: 1.18 !important;
+  }
+}
+
+/* Balance the policy modal: shorter cards, taller supporting rows. */
+@media (min-width: 761px) {
+  #auth-policy-modal-terms-privacy .auth-policy-card-grid {
+    align-items: start !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-section {
+    min-height: 270px !important;
+    height: auto !important;
+    max-height: 320px !important;
+    align-self: start !important;
+    padding: 22px 24px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-section ul {
+    gap: 12px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-privacy-note {
+    min-height: 58px !important;
+    padding: 14px 18px !important;
+    margin: 14px 0 12px !important;
+    align-items: center !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-privacy-note p {
+    font-size: 0.66rem !important;
+    line-height: 1.25 !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-ack-icon {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 9px !important;
+    font-size: 0.82rem !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-consent {
+    min-height: 54px !important;
+    padding: 13px 18px !important;
+    align-items: center !important;
+    font-size: 0.7rem !important;
+    line-height: 1.25 !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-consent-box {
+    width: 22px !important;
+    height: 22px !important;
+  }
+}
+
+/* Final polish: remove empty card height and tighten card content alignment. */
+@media (min-width: 761px) {
+  #auth-policy-modal-terms-privacy .auth-policy-section {
+    min-height: 235px !important;
+    max-height: 255px !important;
+    padding: 20px 22px !important;
+    grid-template-columns: 44px minmax(0, 1fr) !important;
+    column-gap: 14px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-section-copy h3 {
+    margin-top: 4px !important;
+    margin-bottom: 12px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-section ul {
+    gap: 10px !important;
+    margin-left: -4px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-section li {
+    padding-left: 18px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-section li::before {
+    left: 0 !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-privacy-note {
+    grid-template-columns: 34px minmax(0, 1fr) !important;
+    gap: 14px !important;
+  }
+}
+
+/* Latest modal card sizing: compact cards with larger readable text. */
+@media (min-width: 761px) {
+  #auth-policy-modal-terms-privacy .auth-policy-card-grid {
+    align-items: start !important;
+    gap: 14px !important;
+    margin-bottom: 12px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-card-grid > .auth-policy-section {
+    height: 292px !important;
+    min-height: 292px !important;
+    max-height: 292px !important;
+    grid-template-columns: 46px minmax(0, 1fr) !important;
+    column-gap: 10px !important;
+    padding: 22px 22px !important;
+    overflow: hidden !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-card-grid > .auth-policy-section .auth-policy-section-icon {
+    width: 42px !important;
+    height: 42px !important;
+    margin: 0 !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-section-copy h3 {
+    margin-top: 2px !important;
+    margin-bottom: 14px !important;
+    font-size: 1.08rem !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-section-copy h3::after {
+    margin-top: 7px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-section ul {
+    gap: 11px !important;
+    margin-left: -2px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-section li {
+    font-size: 0.68rem !important;
+    line-height: 1.18 !important;
+    padding-left: 20px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-section li::before {
+    width: 12px !important;
+    height: 12px !important;
+    top: 1px !important;
+  }
+}
+
+/* Terms & Privacy modal polish: same design, tighter laptop layout. */
+@media (min-width: 761px) {
+  #auth-policy-modal-terms-privacy .auth-policy-modal {
+    width: min(860px, calc(100vw - 72px)) !important;
+    max-width: 860px !important;
+    max-height: calc(100dvh - 34px) !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal-head {
+    min-height: 150px !important;
+    padding: 18px 64px 24px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal-head h2 {
+    margin-top: 8px !important;
+    font-size: 1.92rem !important;
+    line-height: 1.02 !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal-head p {
+    margin-top: 9px !important;
+    font-size: 0.82rem !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal-body {
+    padding: 18px 26px 0 !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 18px !important;
+    margin-bottom: 14px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-card-grid > .auth-policy-section {
+    height: auto !important;
+    min-height: 300px !important;
+    max-height: 315px !important;
+    grid-template-columns: 44px minmax(0, 1fr) !important;
+    column-gap: 12px !important;
+    padding: 24px 24px 22px !important;
+    align-content: start !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-card-grid > .auth-policy-section .auth-policy-section-icon {
+    width: 42px !important;
+    height: 42px !important;
+    font-size: 1rem !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-section-copy h3 {
+    margin: 3px 0 14px !important;
+    font-size: 1.12rem !important;
+    line-height: 1.05 !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-section-copy h3::after {
+    width: 34px !important;
+    height: 2px !important;
+    margin-top: 8px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-section ul {
+    gap: 12px !important;
+    margin-left: -2px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-section li {
+    font-size: 0.72rem !important;
+    line-height: 1.2 !important;
+    padding-left: 20px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-privacy-note {
+    min-height: 60px !important;
+    margin: 0 0 12px !important;
+    padding: 14px 18px !important;
+    grid-template-columns: 36px minmax(0, 1fr) !important;
+    gap: 14px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-privacy-note p {
+    font-size: 0.72rem !important;
+    line-height: 1.22 !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal-actions {
+    gap: 12px !important;
+    padding: 0 26px 20px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-consent {
+    min-height: 58px !important;
+    padding: 14px 18px !important;
+    font-size: 0.76rem !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-action {
+    min-height: 48px !important;
+    font-size: 0.74rem !important;
+  }
+}
+
+/* Narrower, centered header polish for the current Terms & Privacy modal. */
+@media (min-width: 761px) {
+  #auth-policy-modal-terms-privacy .auth-policy-modal {
+    width: min(780px, calc(100vw - 84px)) !important;
+    max-width: 780px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal-head {
+    text-align: center !important;
+    background:
+      linear-gradient(0deg, rgba(93, 12, 20, 0.82), rgba(93, 12, 20, 0.82)),
+      url("/images/terms-privacy-vet-office.png") center / cover no-repeat !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-brand {
+    justify-content: center !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal-head h2,
+  #auth-policy-modal-terms-privacy .auth-policy-modal-head p {
+    margin-left: auto !important;
+    margin-right: auto !important;
+    text-align: center !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal-head h2 {
+    max-width: 620px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal-head p {
+    max-width: 640px !important;
+  }
+}
+
+/* Narrower desktop modal pass while preserving the existing two-column layout. */
+@media (min-width: 761px) {
+  #auth-policy-modal-terms-privacy .auth-policy-modal {
+    width: min(700px, calc(100vw - 96px)) !important;
+    max-width: 700px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal-head {
+    padding-inline: 50px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal-head h2 {
+    font-size: 1.72rem !important;
+    max-width: 560px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal-head p {
+    max-width: 560px !important;
+    font-size: 0.76rem !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal-body {
+    padding-inline: 22px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-card-grid {
+    gap: 14px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-card-grid > .auth-policy-section {
+    grid-template-columns: 38px minmax(0, 1fr) !important;
+    column-gap: 10px !important;
+    padding: 20px 18px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-card-grid > .auth-policy-section .auth-policy-section-icon {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 0.9rem !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-section-copy h3 {
+    font-size: 1rem !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-section li {
+    font-size: 0.66rem !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal-actions {
+    padding-inline: 22px !important;
+  }
+}
+
+/* Extra narrow desktop pass for the current Terms & Privacy modal. */
+@media (min-width: 761px) {
+  #auth-policy-modal-terms-privacy .auth-policy-modal {
+    width: min(620px, calc(100vw - 110px)) !important;
+    max-width: 620px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal-head {
+    min-height: 138px !important;
+    padding: 16px 44px 22px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal-head h2 {
+    font-size: 1.5rem !important;
+    max-width: 500px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal-head p {
+    font-size: 0.68rem !important;
+    max-width: 500px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal-body {
+    padding-inline: 18px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-card-grid {
+    gap: 12px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-card-grid > .auth-policy-section {
+    grid-template-columns: 34px minmax(0, 1fr) !important;
+    column-gap: 9px !important;
+    padding: 18px 16px !important;
+    min-height: 286px !important;
+    max-height: 286px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-card-grid > .auth-policy-section .auth-policy-section-icon {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 0.82rem !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-section-copy h3 {
+    font-size: 0.9rem !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-section li {
+    font-size: 0.58rem !important;
+    line-height: 1.18 !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-privacy-note p,
+  #auth-policy-modal-terms-privacy .auth-policy-consent {
+    font-size: 0.64rem !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal-actions {
+    padding-inline: 18px !important;
+  }
+}
+
+/* Proportion tweak: shorter header, taller cards for less loose body whitespace. */
+@media (min-width: 761px) {
+  #auth-policy-modal-terms-privacy .auth-policy-modal-head {
+    min-height: 118px !important;
+    padding: 12px 42px 16px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-brand {
+    margin-bottom: 5px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-brand-mark {
+    width: 32px !important;
+    height: 28px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-brand strong {
+    font-size: 0.96rem !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-brand small {
+    font-size: 0.38rem !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal-head h2 {
+    margin-top: 4px !important;
+    font-size: 1.38rem !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-modal-head p {
+    margin-top: 6px !important;
+    font-size: 0.64rem !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-card-grid > .auth-policy-section {
+    min-height: 330px !important;
+    max-height: 330px !important;
+  }
+}
+
+/* Match the consent checkbox checked state to the modal burgundy. */
+#auth-policy-modal-terms-privacy .auth-policy-consent input:checked + .auth-policy-consent-box,
+#auth-policy-modal-terms-privacy .auth-policy-consent.is-checked .auth-policy-consent-box {
+  background: #780116 !important;
+  border-color: #780116 !important;
+  color: #ffffff !important;
+}
+
+#auth-policy-modal-terms-privacy .auth-policy-consent input:checked + .auth-policy-consent-box::after,
+#auth-policy-modal-terms-privacy .auth-policy-consent.is-checked .auth-policy-consent-box::after {
+  color: #ffffff !important;
+  border-color: #ffffff !important;
+}
+
+/* Increase only the Terms/Privacy bullet copy at the current modal size. */
+@media (min-width: 761px) {
+  #auth-policy-modal-terms-privacy .auth-policy-card-grid > .auth-policy-section li {
+    font-size: 0.72rem !important;
+    line-height: 1.22 !important;
+  }
+}
+
+/* Reduce card empty space and keep modal action buttons equal width. */
+@media (min-width: 761px) {
+  #auth-policy-modal-terms-privacy .auth-policy-card-grid > .auth-policy-section {
+    min-height: 278px !important;
+    height: 278px !important;
+    max-height: 278px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-section ul {
+    gap: 13px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-action-row {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  #auth-policy-modal-terms-privacy .auth-policy-action {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+}
+
+/* Register form terms checkbox should match ANIMUA burgundy. */
+.auth-terms-check input[type="checkbox"],
+#register-section .auth-terms-check input[type="checkbox"],
+#reg-terms {
+  accent-color: #780116 !important;
+}
+
+.auth-terms-check input[type="checkbox"]:checked,
+#register-section .auth-terms-check input[type="checkbox"]:checked,
+#reg-terms:checked {
+  background-color: #780116 !important;
+  border-color: #780116 !important;
+}
+
+.auth-terms-check input[type="checkbox"]:hover,
+.auth-terms-check input[type="checkbox"]:focus,
+.auth-terms-check input[type="checkbox"]:focus-visible,
+#register-section .auth-terms-check input[type="checkbox"]:hover,
+#register-section .auth-terms-check input[type="checkbox"]:focus,
+#register-section .auth-terms-check input[type="checkbox"]:focus-visible,
+#reg-terms:hover,
+#reg-terms:focus,
+#reg-terms:focus-visible {
+  accent-color: #780116 !important;
+  border-color: #780116 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.auth-terms-check input[type="checkbox"]:not(:checked):hover,
+.auth-terms-check input[type="checkbox"]:not(:checked):focus,
+.auth-terms-check input[type="checkbox"]:not(:checked):focus-visible,
+#register-section .auth-terms-check input[type="checkbox"]:not(:checked):hover,
+#register-section .auth-terms-check input[type="checkbox"]:not(:checked):focus,
+#register-section .auth-terms-check input[type="checkbox"]:not(:checked):focus-visible,
+#reg-terms:not(:checked):hover,
+#reg-terms:not(:checked):focus,
+#reg-terms:not(:checked):focus-visible {
+  background-color: transparent !important;
+}
+
+.auth-terms-check input[type="checkbox"]:checked:hover,
+.auth-terms-check input[type="checkbox"]:checked:focus,
+.auth-terms-check input[type="checkbox"]:checked:focus-visible,
+#register-section .auth-terms-check input[type="checkbox"]:checked:hover,
+#register-section .auth-terms-check input[type="checkbox"]:checked:focus,
+#register-section .auth-terms-check input[type="checkbox"]:checked:focus-visible,
+#reg-terms:checked:hover,
+#reg-terms:checked:focus,
+#reg-terms:checked:focus-visible {
+  background-color: #780116 !important;
+}
+
+/* Use a custom register terms checkbox so Chrome cannot add hover tint. */
+.auth-terms-check input[type="checkbox"],
+#register-section .auth-terms-check input[type="checkbox"],
+#reg-terms {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  width: 18px !important;
+  height: 18px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  flex: 0 0 18px !important;
+  margin: 0 !important;
+  border: 2px solid #780116 !important;
+  border-radius: 4px !important;
+  background: transparent !important;
+  cursor: pointer !important;
+}
+
+.auth-terms-check input[type="checkbox"]::before,
+#register-section .auth-terms-check input[type="checkbox"]::before,
+#reg-terms::before {
+  content: "" !important;
+  width: 5px !important;
+  height: 10px !important;
+  border: solid #ffffff !important;
+  border-width: 0 2px 2px 0 !important;
+  opacity: 0 !important;
+  transform: rotate(45deg) translate(-1px, -1px) !important;
+}
+
+.auth-terms-check input[type="checkbox"]:checked,
+#register-section .auth-terms-check input[type="checkbox"]:checked,
+#reg-terms:checked,
+.auth-terms-check input[type="checkbox"]:checked:hover,
+#register-section .auth-terms-check input[type="checkbox"]:checked:hover,
+#reg-terms:checked:hover {
+  border-color: #780116 !important;
+  background: #780116 !important;
+}
+
+.auth-terms-check input[type="checkbox"]:checked::before,
+#register-section .auth-terms-check input[type="checkbox"]:checked::before,
+#reg-terms:checked::before {
+  opacity: 1 !important;
+}
+
+.auth-terms-check input[type="checkbox"]:not(:checked):hover,
+#register-section .auth-terms-check input[type="checkbox"]:not(:checked):hover,
+#reg-terms:not(:checked):hover {
+  border-color: #780116 !important;
+  background: transparent !important;
+}
+
+/* Shared public navbar logo scale: smaller on every public page. */
+.header .nav-shell > .logo {
+  min-height: 50px !important;
+  gap: 6px !important;
+}
+
+.header .nav-shell > .logo .navbar-logo-img {
+  width: 50px !important;
+  height: 50px !important;
+  min-width: 50px !important;
+  max-width: 50px !important;
+  flex-basis: 50px !important;
+  object-fit: contain !important;
+}
+
+.header .nav-shell > .logo .navbar-brand-copy {
+  line-height: 1 !important;
+}
+
+.header .nav-shell > .logo .navbar-brand-tagline {
+  font-size: 0.53rem !important;
+  line-height: 1 !important;
+}
+
+.header .nav-shell > .logo .navbar-brand-name {
+  font-size: 1.3rem !important;
+  line-height: 0.88 !important;
+}
+
+@media (max-width: 760px) {
+  .header .nav-shell > .logo {
+    min-height: 40px !important;
+    gap: 5px !important;
+  }
+
+  .header .nav-shell > .logo .navbar-logo-img {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    max-width: 38px !important;
+    flex-basis: 38px !important;
+  }
+
+  .header .nav-shell > .logo .navbar-brand-tagline {
+    font-size: 0.43rem !important;
+  }
+
+  .header .nav-shell > .logo .navbar-brand-name {
+    font-size: 1rem !important;
+  }
+}
+
+/* Final override: keep My Profile compact after shared modal width rules. */
+body #profileModal.profile-modal-overlay .profile-modal-card,
+body #profileModal.profile-modal-overlay .profile-modal-card.profile-modal-card--compact {
+  --modal-max-width: 640px !important;
+  width: min(640px, calc(100vw - 64px)) !important;
+  max-width: 640px !important;
+}
+
+/* Final PWA responsive pass: keep installed views and small screens tight. */
+@media (display-mode: standalone), (display-mode: minimal-ui) {
+  body {
+    padding-top: env(safe-area-inset-top) !important;
+    padding-right: env(safe-area-inset-right) !important;
+    padding-bottom: env(safe-area-inset-bottom) !important;
+    padding-left: env(safe-area-inset-left) !important;
+    background-color: #f7f2e8 !important;
+  }
+
+  .header,
+  .main-nav-wrap {
+    top: env(safe-area-inset-top) !important;
+  }
+
+  .auth-modal-overlay,
+  .profile-modal-overlay,
+  .swal2-container {
+    padding-top: max(12px, env(safe-area-inset-top)) !important;
+    padding-bottom: max(12px, env(safe-area-inset-bottom)) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  html,
+  body {
+    overflow-x: hidden !important;
+  }
+
+  .container,
+  .public-page-container,
+  .finder-shell,
+  .home-page .container,
+  body.furbabies-page .container {
+    width: min(100% - 24px, 1180px) !important;
+    max-width: calc(100vw - 24px) !important;
+    margin-inline: auto !important;
+  }
+
+  .main-nav-wrap,
+  body.home-page .main-nav-wrap {
+    padding-inline: 0 !important;
+  }
+
+  .nav-shell,
+  body.home-page .nav-shell {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-inline: 12px !important;
+  }
+
+  .navbar.show,
+  .navbar.is-open,
+  body.menu-open .navbar {
+    left: 12px !important;
+    right: 12px !important;
+    width: auto !important;
+    max-width: calc(100vw - 24px) !important;
+  }
+
+  .auth-modal-card,
+  .auth-modal-overlay.register-mode .auth-modal-card,
+  .profile-modal-card,
+  .redesigned-profile-modal,
+  .notification-settings-popup,
+  .swal2-popup {
+    width: min(100%, calc(100vw - 24px)) !important;
+    max-width: calc(100vw - 24px) !important;
+    max-height: calc(100dvh - 24px) !important;
+  }
+
+  .profile-modal-card,
+  body #profileModal.profile-modal-overlay .profile-modal-card,
+  body #profileModal.profile-modal-overlay .profile-modal-card.profile-modal-card--compact {
+    width: min(100%, calc(100vw - 24px)) !important;
+    max-width: calc(100vw - 24px) !important;
+  }
+
+  .pets-grid,
+  body.furbabies-page .pets-grid,
+  .featured-furbabies-grid,
+  .home-highlights-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  .pet-card,
+  .featured-furbaby-card,
+  .announcement-card,
+  .contact-method-card,
+  .surrender-notice-card {
+    min-width: 0 !important;
+  }
+
+  .finder-controls,
+  .finder-filter-row,
+  .finder-actions,
+  .pet-actions,
+  .profile-summary-actions,
+  .redesigned-profile-actions,
+  .notification-settings-actions {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+  }
+
+  .finder-search,
+  .finder-sort,
+  .finder-filter-tabs,
+  .pet-actions > *,
+  .notification-settings-actions > * {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+}
+
+@media (min-width: 761px) and (max-width: 1180px) {
+  .container,
+  .public-page-container,
+  .finder-shell,
+  body.furbabies-page .container {
+    width: min(100% - 40px, 1040px) !important;
+  }
+
+  .pets-grid,
+  body.furbabies-page .pets-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .auth-modal-card,
+  .profile-modal-card,
+  .notification-settings-popup,
+  .swal2-popup {
+    border-radius: 14px !important;
+  }
+
+  .auth-modal-left,
+  .auth-modal-right,
+  .profile-modal-card,
+  .notification-settings-modal {
+    padding-inline: 14px !important;
+  }
+
+  .notification-settings-row {
+    grid-template-columns: 34px minmax(0, 1fr) auto !important;
+    gap: 10px !important;
   }
 }

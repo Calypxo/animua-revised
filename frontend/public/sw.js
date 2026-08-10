@@ -1,4 +1,4 @@
-const CACHE_VERSION = "animua-public-v2";
+const CACHE_VERSION = "animua-public-v9";
 const APP_SHELL = [
   "/",
   "/index.html",
@@ -21,6 +21,32 @@ const APP_SHELL = [
   "/pages/public/verify-success.html"
 ];
 
+const LIVE_DATA_HOSTS = new Set([
+  "animua-backend.onrender.com",
+  "localhost",
+  "127.0.0.1"
+]);
+
+const isLiveDataRequest = (requestUrl) => (
+  requestUrl.pathname.startsWith("/api/") ||
+  LIVE_DATA_HOSTS.has(requestUrl.hostname)
+);
+
+const isFreshAssetRequest = (request) => (
+  request.destination === "style" ||
+  request.destination === "script" ||
+  request.destination === "worker" ||
+  request.destination === "document"
+);
+
+const cacheFreshResponse = (request, response) => {
+  if (response && response.ok) {
+    const copy = response.clone();
+    caches.open(CACHE_VERSION).then((cache) => cache.put(request, copy));
+  }
+  return response;
+};
+
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_VERSION)
@@ -39,11 +65,23 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
+});
+
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   if (request.method !== "GET") return;
 
   const requestUrl = new URL(request.url);
+
+  if (isLiveDataRequest(requestUrl)) {
+    event.respondWith(fetch(request));
+    return;
+  }
+
   if (requestUrl.origin !== self.location.origin) {
     event.respondWith(
       caches.match(request).then((cached) => cached || fetch(request).then((response) => {
@@ -58,23 +96,24 @@ self.addEventListener("fetch", (event) => {
   if (request.mode === "navigate") {
     event.respondWith(
       fetch(request)
-        .then((response) => {
-          const copy = response.clone();
-          caches.open(CACHE_VERSION).then((cache) => cache.put(request, copy));
-          return response;
-        })
+        .then((response) => cacheFreshResponse(request, response))
         .catch(() => caches.match(request).then((cached) => cached || caches.match("/offline.html")))
+    );
+    return;
+  }
+
+  if (isFreshAssetRequest(request)) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => cacheFreshResponse(request, response))
+        .catch(() => caches.match(request))
     );
     return;
   }
 
   event.respondWith(
     caches.match(request).then((cached) => cached || fetch(request).then((response) => {
-      if (response.ok) {
-        const copy = response.clone();
-        caches.open(CACHE_VERSION).then((cache) => cache.put(request, copy));
-      }
-      return response;
+      return cacheFreshResponse(request, response);
     }))
   );
 });

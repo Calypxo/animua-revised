@@ -18,8 +18,8 @@
   <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="stylesheet" href="../../src/css/public/home.css">
-  <link rel="stylesheet" href="../../src/css/global.css">
-  <link rel="stylesheet" href="../../src/css/public/furbabies.css">
+  <link rel="stylesheet" href="../../src/css/global.css?v=pwa-responsive-20260810">
+  <link rel="stylesheet" href="../../src/css/public/furbabies.css?v=pwa-responsive-20260810">
 </head>
 <body class="home-page furbabies-page">
 
@@ -128,11 +128,12 @@
 
   <!-- MAIN BANNER -->
 <section class="furbabies-hero">
+  <img class="public-page-hero-image" src="/images/find-furbabies-header.png?v=header-20260809" alt="" aria-hidden="true">
   <div class="container">
     <div class="finder-shell reveal">
       <div class="finder-left">
         <h1>Meet adoptable pets ready for a <span>fresh start.</span></h1>
-        <p>
+        <p class="finder-hero-copy">
           Browse adoptable dogs and cats, search by name, filter by type,
           and discover a companion that matches your lifestyle.
         </p>
@@ -726,11 +727,6 @@
           </div>
           <small class="auth-error" id="login-password-error"></small>
 
-          <div class="auth-recaptcha-row login-captcha-row hidden" id="login-captcha-row">
-            <div id="login-recaptcha" class="auth-recaptcha"></div>
-          </div>
-          <small class="auth-error auth-captcha-error" id="login-captcha-error"></small>
-
           <div class="auth-extra-row">
             <label class="auth-check">
               <input type="checkbox">
@@ -738,6 +734,11 @@
             </label>
             <a href="#" class="auth-muted-link">Forgot password?</a>
           </div>
+
+          <div class="auth-recaptcha-row login-captcha-row hidden" id="login-captcha-row">
+            <div id="login-recaptcha" class="auth-recaptcha"></div>
+          </div>
+          <small class="auth-error auth-captcha-error" id="login-captcha-error"></small>
 
           <button type="submit" class="auth-submit-btn">Log In</button>
         </form>
@@ -829,7 +830,7 @@
   </div>
 </div>
 
-<script type="module" src="../../src/public/js/public-ui.js"></script>
+<script type="module" src="../../src/public/js/public-ui.js?v=pwa-responsive-20260810"></script>
   <script type="module" src="../../src/public/js/find-furbabies.js"></script>
 <script type="module" src="../../src/auth/authModal.js"></script>
 
