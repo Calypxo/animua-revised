@@ -1,9 +1,12 @@
 import Swal from "sweetalert2";
 import { API_BASE_URL } from "../../utils/api.js";
+import {
+  mergeSubmissionResults,
+  submissionLoadErrorMessage,
+} from "./mySubmissionsState.js";
 
 const DOG_IMAGE = new URL("../../assets/images/dog.jpg", import.meta.url).href;
 const CAT_IMAGE = new URL("../../assets/images/cat.jpg", import.meta.url).href;
-const SHELTER_DOG_IMAGE = new URL("../../assets/images/homepage-shelter-dog.png", import.meta.url).href;
 const SURRENDER_IMAGE = new URL("../../assets/images/surrender.jpg", import.meta.url).href;
 
 const submissionsList = document.getElementById("submissionsList");
@@ -68,112 +71,8 @@ compatibilityAccountBody?.addEventListener("click", (event) => {
   if (button) showSavedAnimalDetails(button);
 });
 
-const DEMO_SUBMISSIONS = [
-  {
-    id: "demo-adp-gray",
-    type: "adoption",
-    name: "Gray",
-    species: "Cat",
-    sex: "Female",
-    age: "1 year old",
-    submittedAt: "2026-07-20",
-    reference: "ADP-2026-0041",
-    status: "Approved",
-    image: CAT_IMAGE,
-    isDemo: true,
-  },
-  {
-    id: "demo-adp-bingo",
-    type: "adoption",
-    name: "Bingo",
-    species: "Dog",
-    sex: "Male",
-    age: "2 years old",
-    submittedAt: "2026-07-12",
-    reference: "ADP-2026-0035",
-    status: "Approved",
-    image: DOG_IMAGE,
-    isDemo: true,
-  },
-  {
-    id: "demo-sur-bruno",
-    type: "surrender",
-    name: "Bruno",
-    species: "Dog",
-    sex: "Male",
-    age: "3 years old",
-    submittedAt: "2026-07-22",
-    reference: "SUR-2026-0018",
-    status: "Approved",
-    image: SHELTER_DOG_IMAGE,
-    isDemo: true,
-    details: {
-      id: "SUR-2026-0018",
-      owner: {
-        name: "Demo User",
-        email: "demo@example.com",
-        contact: "+63 900 000 0000",
-        address: "Angeles City",
-        barangay: "Balibago",
-      },
-      pet: {
-        name: "Bruno",
-        species: "Dog",
-        breed: "Mixed Breed",
-        age: "3 years old",
-        sex: "Male",
-        colorMarkings: "Brown and black coat",
-        status: ["Healthy"],
-        vaccinationHistory: "Up to date",
-      },
-      surrenderReason: "Moving to a place that does not allow pets.",
-      agreement: {
-        agreedToTerms: true,
-      },
-      submittedAt: "2026-07-22",
-    },
-  },
-  {
-    id: "demo-sur-ming",
-    type: "surrender",
-    name: "Ming",
-    species: "Cat",
-    sex: "Female",
-    age: "8 months old",
-    submittedAt: "2026-07-15",
-    reference: "SUR-2026-0015",
-    status: "Received",
-    image: CAT_IMAGE,
-    isDemo: true,
-    details: {
-      id: "SUR-2026-0015",
-      owner: {
-        name: "Demo User",
-        email: "demo@example.com",
-        contact: "+63 900 000 0000",
-        address: "Angeles City",
-        barangay: "Amsic",
-      },
-      pet: {
-        name: "Ming",
-        species: "Cat",
-        breed: "Domestic Shorthair",
-        age: "8 months old",
-        sex: "Female",
-        colorMarkings: "Tabby coat",
-        status: ["Healthy"],
-        vaccinationHistory: "Not provided",
-      },
-      surrenderReason: "Owner can no longer provide care.",
-      agreement: {
-        agreedToTerms: true,
-      },
-      submittedAt: "2026-07-15",
-    },
-  },
-];
-
 let allSubmissions = [];
+let submissionsLoadError = "";
 let currentFilter = "all";
 let currentSort = "newest";
 
@@ -333,6 +232,8 @@ async function fetchJson(url) {
 }
 
 async function loadSubmissions() {
+  submissionsLoadError = "";
+
   try {
     const [adoptionData, surrenderData] = await Promise.all([
       fetchJson(`${API_BASE_URL}/adoptions/my-applications`),
@@ -342,14 +243,11 @@ async function loadSubmissions() {
     const adoptionItems = (adoptionData?.adoptions || []).map(normalizeAdoption);
     const surrenderItems = (surrenderData?.requests || []).map(normalizeSurrender);
 
-    allSubmissions = [...adoptionItems, ...surrenderItems];
-
-    if (!allSubmissions.length) {
-      allSubmissions = DEMO_SUBMISSIONS;
-    }
+    allSubmissions = mergeSubmissionResults(adoptionItems, surrenderItems);
   } catch (error) {
     console.error("Failed to load submissions:", error);
-    allSubmissions = DEMO_SUBMISSIONS;
+    allSubmissions = [];
+    submissionsLoadError = submissionLoadErrorMessage(error);
   }
 
   updateTabs();
@@ -385,6 +283,19 @@ function updateTabs() {
 }
 
 function renderSubmissions() {
+  if (submissionsLoadError) {
+    submissionsList.innerHTML = `
+      <article class="submission-empty submission-error" role="alert">
+        <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+        <strong>We could not load your submissions.</strong>
+        <span>${escapeHtml(submissionsLoadError)}</span>
+        <button type="button" id="retrySubmissionsBtn">Try again</button>
+      </article>
+    `;
+    document.getElementById("retrySubmissionsBtn")?.addEventListener("click", loadSubmissions);
+    return;
+  }
+
   const filteredItems =
     currentFilter === "all"
       ? allSubmissions
@@ -1250,71 +1161,7 @@ async function saveSchedule(item, kind) {
     return;
   }
 
-  const currentDetails = item.details || {};
   const isSurrender = kind === "surrender";
-  const existingSchedule = isSurrender
-    ? hasScheduleValue(currentDetails.surrenderAppointment || {})
-    : hasScheduleValue(currentDetails.pickupSchedule || {});
-
-  if (item.isDemo) {
-    if (isSurrender && existingSchedule) {
-      const previousSchedule = item.details.surrenderAppointment || {};
-      if (hasUsedReschedule(previousSchedule)) {
-        throw new Error("Surrender appointment can only be rescheduled once.");
-      }
-      item.details = {
-        ...item.details,
-        surrenderAppointment: {
-          ...schedule,
-          location: "Angeles City Veterinary Office, Brgy. Pampang, Angeles City",
-          scheduledAt: previousSchedule.scheduledAt || new Date().toISOString(),
-          rescheduledAt: new Date().toISOString(),
-          rescheduleCount: Number(previousSchedule.rescheduleCount || 0) + 1,
-          previousSchedule,
-        },
-        surrenderRescheduleRequest: null,
-        dropoffDate: schedule.date,
-      };
-    } else if (!isSurrender && existingSchedule) {
-      const previousSchedule = item.details.pickupSchedule || {};
-      if (hasUsedReschedule(previousSchedule)) {
-        throw new Error("Pickup can only be rescheduled once.");
-      }
-      item.details = {
-        ...item.details,
-        pickupSchedule: {
-          ...schedule,
-          location: "Angeles City Veterinary Office, Brgy. Pampang, Angeles City",
-          scheduledAt: previousSchedule.scheduledAt || new Date().toISOString(),
-          rescheduledAt: new Date().toISOString(),
-          rescheduleCount: Number(previousSchedule.rescheduleCount || 0) + 1,
-          previousSchedule,
-        },
-        pickupRescheduleRequest: null,
-      };
-    } else if (isSurrender) {
-      item.details = {
-        ...item.details,
-        surrenderAppointment: {
-          ...schedule,
-          location: "Angeles City Veterinary Office, Brgy. Pampang, Angeles City",
-        },
-        dropoffDate: schedule.date,
-      };
-    } else {
-      item.details = {
-        ...item.details,
-        pickupSchedule: {
-          ...schedule,
-          location: "Angeles City Veterinary Office, Brgy. Pampang, Angeles City",
-        },
-      };
-    }
-
-    item.scheduleFeedback = getScheduleSavedFeedback(kind);
-    showSubmissionDetails(item);
-    return;
-  }
 
   const endpoint = kind === "surrender"
     ? `${API_BASE_URL}/surrenders/my-requests/${encodeURIComponent(item.id)}/appointment`

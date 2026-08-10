@@ -44,7 +44,13 @@ function getBearerToken(req) {
     return "";
   }
 
-  const [scheme, token] = authHeader.split(" ");
+  const parts = authHeader.split(" ");
+
+  if (parts.length !== 2) {
+    return "";
+  }
+
+  const [scheme, token] = parts;
 
   if (
     scheme !== "Bearer" ||
@@ -195,3 +201,5 @@ async function authenticateToken(
 }
 
 module.exports = authenticateToken;
+module.exports.normalizeRole = normalizeRole;
+module.exports.getBearerToken = getBearerToken;

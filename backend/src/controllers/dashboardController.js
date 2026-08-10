@@ -1,6 +1,9 @@
 const { db } = require("../config/firebase");
 const { buildShelterLabel } = require("../utils/animalIdentity");
 const { reconcileRequestDeadlines } = require("../services/requestDeadlineService");
+const {
+  getCurrentAnimalProfiles,
+} = require("../services/dashboardMetricsService");
 
 const ATTENTION_CACHE_TTL_MS = Math.max(
   60_000,
@@ -243,9 +246,7 @@ exports.getDashboardStats = async (req, res) => {
         return left.level === "Critical" ? -1 : 1;
       });
 
-    const currentAnimals = animals.filter(
-      (animal) => !["Adopted", "Archived"].includes(animal.status)
-    );
+    const currentAnimals = getCurrentAnimalProfiles(animals);
     const currentYear = new Date().getFullYear();
     const monthlyData = {
       labels: [
@@ -351,7 +352,7 @@ exports.getDashboardStats = async (req, res) => {
     }
 
     return res.json({
-      totalPets: animals.length + activeIntakes.length,
+      totalPets: currentAnimals.length,
       intake: activeIntakes.length,
       profiling: countStatus("Profiling"),
       quarantine: countStatus("Quarantine"),

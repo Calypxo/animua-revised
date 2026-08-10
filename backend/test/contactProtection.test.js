@@ -91,7 +91,10 @@ test("filled honeypot returns neutral success without continuing", () => {
 
   assert.equal(continued, false);
   assert.equal(res.statusCode, 201);
-  assert.equal(res.payload.accepted, true);
+  assert.deepEqual(res.payload, {
+    message: "Your message has been received by the ANIMUA team.",
+    accepted: true,
+  });
 });
 
 test("empty honeypot allows a real contact submission", () => {

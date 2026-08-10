@@ -13,6 +13,9 @@ const {
   validateScheduleDate,
 } = require("../services/requestDeadlineService");
 const { createUserNotification } = require("../services/notificationService");
+const {
+  getAdoptionFinalizationError,
+} = require("../services/adoptionWorkflowService");
 
 exports.createAdoption = async (req, res) => {
   try {
@@ -848,9 +851,10 @@ exports.finalizeAdoption = async (req, res) => {
 
     const adoptionData = adoptionDoc.data();
 
-    if (adoptionData.status !== "Approved") {
+    const finalizationError = getAdoptionFinalizationError(adoptionData);
+    if (finalizationError) {
       return res.status(400).json({
-        message: "Only approved applications can be finalized.",
+        message: finalizationError,
       });
     }
 
@@ -878,8 +882,6 @@ exports.finalizeAdoption = async (req, res) => {
 
     batch.update(adoptionRef, {
       status: "Finalized",
-      arrivalConfirmedAt: adoptionData.arrivalConfirmedAt || new Date().toISOString(),
-      arrivalConfirmedBy: adoptionData.arrivalConfirmedBy || finalProcessedBy,
       deadlineStatus: "Completed",
       deadlineReminderStage: "Completed",
       noShowRisk: false,

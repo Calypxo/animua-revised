@@ -5,16 +5,8 @@ const authenticateToken = require("../middleware/authMiddleware");
 const authorizeRole = require("../middleware/roleMiddleware");
 const deadlines = require("../controllers/requestDeadlineController");
 
-function optionalAuthenticateToken(req, res, next) {
-  if (!req.headers.authorization) {
-    return next();
-  }
-
-  return authenticateToken(req, res, next);
-}
-
-// Public submit
-router.post("/", optionalAuthenticateToken, ctrl.createAdoption);
+// Public users must be logged in before submitting an adoption application.
+router.post("/", authenticateToken, ctrl.createAdoption);
 
 // Public logged-in user tracking
 router.get("/my-applications", authenticateToken, ctrl.getMyAdoptions);

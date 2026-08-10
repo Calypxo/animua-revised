@@ -10,6 +10,11 @@ function getSurrenderConversionError(record = {}) {
   return "";
 }
 
+function isDirectSurrenderStatusAllowed(status) {
+  return ["Pending", "Approved", "Rejected"].includes(String(status || ""));
+}
+
 module.exports = {
   getSurrenderConversionError,
+  isDirectSurrenderStatusAllowed,
 };

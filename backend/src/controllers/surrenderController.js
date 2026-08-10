@@ -7,7 +7,7 @@ const {
 } = require("../services/requestDeadlineService");
 const { createUserNotification } = require("../services/notificationService");
 const {
-  getSurrenderConversionError,
+  isDirectSurrenderStatusAllowed,
 } = require("../services/surrenderWorkflowService");
 
 const COLLECTION_NAME = "surrenderRequests";
@@ -352,11 +352,9 @@ async function updateSurrenderStatus(req, res) {
     }
 
     const { id } = req.params;
-    const { status, reviewNotes, rejectedReason, dropoffDate, intakeId } = req.body;
+    const { status, reviewNotes, rejectedReason, dropoffDate } = req.body;
 
-    const allowedStatuses = ["Pending", "Approved", "Rejected", "Converted"];
-
-    if (!allowedStatuses.includes(status)) {
+    if (!isDirectSurrenderStatusAllowed(status)) {
       return res.status(400).json({
         message: "Invalid surrender request status.",
       });
@@ -385,13 +383,6 @@ async function updateSurrenderStatus(req, res) {
       });
     }
 
-    if (status === "Converted") {
-      const conversionError = getSurrenderConversionError(current);
-      if (conversionError) {
-        return res.status(400).json({ message: conversionError });
-      }
-    }
-
     const updateData = {
       status,
       updatedAt: new Date().toISOString(),
@@ -413,15 +404,6 @@ async function updateSurrenderStatus(req, res) {
 
     if (dropoffDate) {
       updateData.dropoffDate = dropoffDate;
-    }
-
-    if (status === "Converted") {
-      updateData.deadlineStatus = "Completed";
-      updateData.deadlineReminderStage = "Completed";
-      updateData.noShowRisk = false;
-      const year = new Date().getFullYear();
-      updateData.intakeId =
-        intakeId || `INT-${year}-${Date.now().toString().slice(-6)}`;
     }
 
     await requestRef.update(updateData);

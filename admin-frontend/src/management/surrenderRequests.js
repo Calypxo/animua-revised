@@ -12,6 +12,7 @@ import { renderTopbarUser }      from "../components/management/topbarUser.js";
 import { loadSidebar, navigateManagementPage } from "../components/management/sidebarLoader.js";
 import { getUserName }           from "../utils/storage.js";
 import { API_BASE_URL }          from "../utils/api.js";
+import { compareSurrenderUrgency } from "./surrenderRequestSorting.js";
 
 renderPageHeader(PAGE_HEADER_CONFIGS.surrenders);
 
@@ -353,13 +354,8 @@ function applyFilters() {
     return true;
   });
 
-  // Sort: Critical first, then High, then by date desc
-  const urgOrder = { Critical:0, High:1, Medium:2, Low:3 };
-  filtered.sort((a,b) => {
-    const ud = (urgOrder[a.nlp.urgencyLabel]||3) - (urgOrder[b.nlp.urgencyLabel]||3);
-    if (ud !== 0) return ud;
-    return new Date(b.submittedAt) - new Date(a.submittedAt);
-  });
+  // Sort: Critical, High, Medium, Low, then newest first within each level.
+  filtered.sort(compareSurrenderUrgency);
 
   const resultLabel = document.getElementById("surrenderResultLabel");
   if (resultLabel) resultLabel.textContent = `${filtered.length} record${filtered.length === 1 ? "" : "s"}`;

@@ -3,7 +3,15 @@ const assert = require("node:assert/strict");
 
 const {
   getSurrenderConversionError,
+  isDirectSurrenderStatusAllowed,
 } = require("../src/services/surrenderWorkflowService");
+
+test("generic surrender status changes cannot mark a request Converted", () => {
+  assert.equal(isDirectSurrenderStatusAllowed("Pending"), true);
+  assert.equal(isDirectSurrenderStatusAllowed("Approved"), true);
+  assert.equal(isDirectSurrenderStatusAllowed("Rejected"), true);
+  assert.equal(isDirectSurrenderStatusAllowed("Converted"), false);
+});
 
 test("surrender conversion requires an approved request", () => {
   assert.match(
