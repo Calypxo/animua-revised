@@ -117,6 +117,18 @@ def score_pet(user_vector: List[float], pet_vector: List[float]) -> Dict[str, fl
         "matchPercent": round(final_score * 100, 2),
     }
 
+@app.get("/")
+def root():
+    return {
+        "status": "online",
+        "message": "ANIMUA Python compatibility matcher is up and running.",
+        "service": "Animua Python Matcher",
+        "health": "/health",
+        "documentation": "/docs",
+        "scoreEndpoint": "/score",
+    }
+
+
 @app.get("/health")
 def health():
     return {"ok": True}

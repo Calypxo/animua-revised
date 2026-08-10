@@ -5,6 +5,7 @@ from app import (
     RAW_QUESTION_KEYS,
     SCORING_DIMENSIONS,
     build_user_profile,
+    root,
     score_matches,
     validate_preferences,
 )
@@ -25,6 +26,12 @@ def animal(identifier, value=3):
 
 
 class CompatibilityScoringTests(unittest.TestCase):
+    def test_root_reports_that_the_matcher_is_running(self):
+        status = root()
+        self.assertEqual(status["status"], "online")
+        self.assertIn("up and running", status["message"])
+        self.assertEqual(status["scoreEndpoint"], "/score")
+
     def test_minimum_and_maximum_values_are_valid(self):
         self.assertEqual(validate_preferences(preferences(1)), preferences(1))
         self.assertEqual(validate_preferences(preferences(5)), preferences(5))
