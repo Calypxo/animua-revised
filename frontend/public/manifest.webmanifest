@@ -1,24 +1,71 @@
 {
+  "id": "/pages/public/home.html",
   "name": "ANIMUA",
   "short_name": "ANIMUA",
   "description": "Animal adoption and shelter services platform.",
   "start_url": "/pages/public/home.html",
   "scope": "/",
+  "lang": "en",
+  "dir": "ltr",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui", "browser"],
   "orientation": "portrait-primary",
   "background_color": "#F7F2E8",
   "theme_color": "#8E2A20",
   "categories": ["lifestyle", "utilities"],
+  "shortcuts": [
+    {
+      "name": "Find Furbabies",
+      "short_name": "Furbabies",
+      "description": "Browse adoptable animals.",
+      "url": "/pages/public/find-furbabies.html",
+      "icons": [
+        {
+          "src": "/pwa-192.png?v=02cfed39065d",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Announcements",
+      "short_name": "Updates",
+      "description": "Read shelter news and events.",
+      "url": "/pages/public/announcements.html",
+      "icons": [
+        {
+          "src": "/pwa-192.png?v=02cfed39065d",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Surrender Request",
+      "short_name": "Surrender",
+      "description": "Start a surrender request.",
+      "url": "/pages/public/surrender.html",
+      "icons": [
+        {
+          "src": "/pwa-192.png?v=02cfed39065d",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
   "icons": [
     {
       "src": "/pwa-192.png?v=02cfed39065d",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/pwa-512.png?v=02cfed39065d",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/pwa-512-maskable.png?v=02cfed39065d",

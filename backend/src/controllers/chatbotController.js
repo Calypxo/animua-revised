@@ -66,7 +66,9 @@ function normalizeIntentText(value = "") {
     .replace(/\b(adapting|adpoting)\b/g, "adopting")
     .replace(/\b(adaption|adaptation|adoptation|adapation)\b/g, "adoption")
     .replace(/\b(aadapt|aadapt)\b/g, "aadopt")
-    .replace(/\b(iadapt|iadapt)\b/g, "iadopt");
+    .replace(/\b(iadapt|iadapt)\b/g, "iadopt")
+    .replace(/\b(inadapt|inadopt)\b/g, "inadopt")
+    .replace(/\b(aapprove|maapprove|ma-aapprove)\b/g, "approve");
 }
 
 function cleanHistory(history = []) {
@@ -96,6 +98,8 @@ function hasTaglishSignal(text = "") {
     "singil",
     "libre",
     "paano",
+    "kailan",
+    "sino",
     "pwede",
     "pwedeng",
     "puwede",
@@ -127,9 +131,12 @@ function hasTaglishSignal(text = "") {
 }
 
 function resolveReplyLanguage(value = "", message = "") {
-  const selectedLanguage = normalizeLanguage(value);
-  if (selectedLanguage === "tagalog") return "tagalog";
-  return hasTaglishSignal(message) ? "tagalog" : selectedLanguage;
+  const rawValue = String(value || "").trim().toLowerCase();
+  if (rawValue === "english" || rawValue === "tagalog") {
+    return rawValue;
+  }
+
+  return hasTaglishSignal(message) ? "tagalog" : "english";
 }
 
 function localizedReply(language, english, tagalog) {
@@ -294,6 +301,18 @@ function formatDate(value) {
   });
 }
 
+function formatTime(value = "") {
+  const match = String(value || "").match(/^(\d{1,2}):(\d{2})$/);
+  if (!match) return String(value || "").trim();
+
+  const hour = Number(match[1]);
+  if (Number.isNaN(hour)) return String(value || "").trim();
+
+  const suffix = hour >= 12 ? "PM" : "AM";
+  const displayHour = hour % 12 || 12;
+  return `${displayHour}:${match[2]} ${suffix}`;
+}
+
 function formatPet(pet = {}) {
   const details = [
     pet.species,
@@ -338,7 +357,7 @@ function hasApplicationIntent(text = "") {
 }
 
 function hasMultipleIntent(text = "") {
-  return includesAnyWord(text, ["two", "2", "multiple", "many", "another", "several"]) ||
+  return includesAnyWord(text, ["two", "2", "three", "3", "multiple", "many", "another", "several", "dalawa", "dalawang", "tatlo", "tatlong", "marami", "ibang"]) ||
     includesAnyPhrase(text, ["more than one"]);
 }
 
@@ -420,13 +439,17 @@ function hasFeeIntent(text = "") {
 
 function hasAdoptionMentionIntent(text = "") {
   return text.includes("adopt") ||
-    includesAnyWord(text, ["adoption", "adopter", "iadopt", "aadopt", "ampon", "umampon"]) ||
+    includesAnyWord(text, ["adoption", "adopter", "iadopt", "iadapt", "aadopt", "aadapt", "inadopt", "inadapt", "ampon", "umampon"]) ||
     includesAnyPhrase(text, [
       "pag adopt",
+      "pag adapt",
       "mag adopt",
+      "mag adapt",
       "mag aadopt",
+      "mag aadapt",
       "mag aadop",
       "pa adopt",
+      "pa adapt",
       "pag ampon"
     ]);
 }
@@ -437,6 +460,7 @@ function hasAdoptionFeeIntent(text = "") {
 
 function hasAdoptionMotivationIntent(text = "") {
   if (!hasAdoptionMentionIntent(text)) return false;
+  if (hasApplicationIntent(text)) return false;
 
   return includesAnyWord(text, [
     "why",
@@ -514,12 +538,31 @@ function hasAnimalListIntent(text = "") {
 
 function hasAnimalAvailabilityIntent(text = "") {
   const mentionsAnimal = hasAnimalMentionIntent(text) || includesAnyPhrase(text, ["find furbabies"]);
+  const asksWhoCanBeAdopted =
+    hasAdoptionMentionIntent(text) &&
+    (
+      includesAnyWord(text, ["who", "which", "sino", "alin"]) ||
+      includesAnyPhrase(text, [
+        "sino ang mga",
+        "sino pwede",
+        "sino pwedeng",
+        "sino puwede",
+        "sino puwedeng",
+        "pwede iadopt",
+        "pwedeng iadopt",
+        "puwede iadopt",
+        "puwedeng iadopt",
+        "can be adopted"
+      ])
+    );
+
+  if (asksWhoCanBeAdopted) return true;
   if (!mentionsAnimal) return false;
 
   const tokens = getMessageTokens(text);
   const asksAvailability =
-    includesAnyWord(text, ["available", "adoptable", "ready", "browse", "find", "show", "list", "view", "see", "want", "looking"]) ||
-    includesAnyPhrase(text, ["find furbabies", "ready for adoption", "for adoption", "looking for"]);
+    includesAnyWord(text, ["available", "adoptable", "ready", "browse", "find", "show", "list", "view", "see", "want", "looking", "pwede", "pwedeng", "puwede", "puwedeng"]) ||
+    includesAnyPhrase(text, ["find furbabies", "ready for adoption", "for adoption", "looking for", "pwede iadopt", "pwedeng iadopt", "puwede iadopt", "puwedeng iadopt"]);
   const shortAnimalOnly = tokens.length <= 3 && mentionsAnimal;
 
   return asksAvailability || shortAnimalOnly;
@@ -560,12 +603,294 @@ function hasAccountTroubleIntent(text = "") {
 
 function hasEventIntent(text = "") {
   return includesAnyWord(text, ["event", "events", "schedule", "activity", "activities"]) ||
-    includesAnyPhrase(text, ["vaccination drive", "vaccination event", "upcoming vaccination", "adoption campaign", "community veterinary"]);
+    includesAnyPhrase(text, ["vaccination drive", "vaccination event", "upcoming vaccination", "adoption campaign", "community veterinary"]) ||
+    hasVaccinationScheduleIntent(text);
+}
+
+function hasVaccinationIntent(text = "") {
+  return text.includes("vaccine") ||
+    text.includes("vaccin") ||
+    includesAnyWord(text, ["bakuna", "rabies"]) ||
+    includesAnyPhrase(text, ["na vaccine", "na-vaccine", "may bakuna"]);
+}
+
+function hasVaccinationScheduleIntent(text = "") {
+  const mentionsVaccination = hasVaccinationIntent(text);
+  if (!mentionsVaccination) return false;
+
+  return includesAnyWord(text, ["when", "kailan", "schedule", "event", "drive", "happen", "date", "time", "where", "saan", "oras"]) ||
+    includesAnyPhrase(text, [
+      "when will",
+      "when is",
+      "when are",
+      "vaccine happen",
+      "vaccination happen",
+      "vaccination schedule",
+      "vaccine schedule",
+      "vaccination drive",
+      "vaccine drive",
+      "upcoming vaccination",
+      "free vaccine",
+      "free vaccination",
+      "libreng bakuna",
+      "kailan ang bakuna",
+      "kailan may bakuna",
+      "saan ang bakuna",
+      "saan may bakuna"
+    ]);
+}
+
+function hasVetVisitScheduleIntent(text = "") {
+  const mentionsVet = includesAnyWord(text, ["vet", "veterinarian", "clinic"]) ||
+    includesAnyPhrase(text, ["veterinary office", "city vet", "cityvet"]);
+
+  return mentionsVet && (
+    includesAnyWord(text, ["when", "kailan", "schedule", "appointment", "visit", "pupunta", "punta", "open", "hours", "oras"]) ||
+    includesAnyPhrase(text, [
+      "when should i go",
+      "when can i go",
+      "when to visit",
+      "kailan pupunta",
+      "kailan ako pupunta",
+      "anong oras",
+      "ano oras"
+    ])
+  );
+}
+
+async function getMyAdoptionContext(email = "") {
+  const normalizedEmail = String(email || "").trim().toLowerCase();
+  if (!normalizedEmail) return { adoptions: [] };
+
+  const snapshot = await db.collection("adoptions").get();
+  const adoptions = snapshot.docs
+    .map((doc) => ({ id: doc.id, ...(doc.data() || {}) }))
+    .filter((item) => {
+      const applicantEmail = String(
+        item.account?.email ||
+        item.applicant?.email ||
+        item.userEmail ||
+        ""
+      ).trim().toLowerCase();
+
+      return applicantEmail === normalizedEmail;
+    })
+    .map((item) => ({
+      id: item.id,
+      applicationId: item.applicationId || item.id,
+      petName: item.pet_label || item.pet_name || item.selected_pet?.name || "your selected animal",
+      status: item.status || "Pending",
+      approvedAt: item.approvedAt || null,
+      adoptionDate: item.adoptionDate || "",
+      pickupSchedule: item.pickupSchedule || null,
+      pickupRescheduleRequest: item.pickupRescheduleRequest || null,
+      attendanceDeadlineAt: item.attendanceDeadlineAt || null,
+      deadlineStatus: item.deadlineStatus || "",
+      arrivalConfirmedAt: item.arrivalConfirmedAt || null,
+      submittedAt: item.submittedAt || null,
+      updatedAt: item.updatedAt || null
+    }));
+
+  adoptions.sort((a, b) => getSortableDate(b).getTime() - getSortableDate(a).getTime());
+  return { adoptions };
+}
+
+function getSortableDate(item = {}) {
+  return parseAnyDate(item.updatedAt) ||
+    parseAnyDate(item.submittedAt) ||
+    parseAnyDate(item.approvedAt) ||
+    new Date(0);
+}
+
+function parseAnyDate(value) {
+  if (!value) return null;
+  if (value?.toDate) return value.toDate();
+  if (value?._seconds) return new Date(value._seconds * 1000);
+  if (value?.seconds) return new Date(value.seconds * 1000);
+
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+async function getMyAdoptionContextSafely(req) {
+  if (!req.user?.email) return { adoptions: [] };
+
+  return getMyAdoptionContext(req.user.email).catch((error) => {
+    console.warn("[Chatbot User Adoption Context Warning]", error.message);
+    return { adoptions: [] };
+  });
+}
+
+function selectRelevantAdoption(adoptions = []) {
+  return adoptions.find((item) => hasScheduleValue(item.pickupSchedule)) ||
+    adoptions.find((item) => isApprovedStatus(item.status)) ||
+    adoptions[0] ||
+    null;
+}
+
+function hasScheduleValue(schedule = {}) {
+  return Boolean(schedule?.date || schedule?.time);
+}
+
+function isApprovedStatus(status = "") {
+  const lower = String(status || "").toLowerCase();
+  return lower.includes("approved") || lower.includes("finalized");
+}
+
+function isPendingStatus(status = "") {
+  const lower = String(status || "").toLowerCase();
+  return lower.includes("pending") || lower.includes("review");
+}
+
+function getPendingPickupReschedule(adoption = {}) {
+  const request = adoption.pickupRescheduleRequest || {};
+  return String(request.status || "").toLowerCase() === "pending" ? request : null;
+}
+
+function getScheduledPickupReply(adoption, language = "english") {
+  if (!adoption) {
+    return localizedReply(
+      language,
+      "I cannot see an adoption application under your signed-in account yet. Please open My Applications to confirm your records, or sign in with the account you used for the application.",
+      "Wala pa akong nakikitang adoption application sa signed-in account mo. Buksan ang My Applications para i-check ang records mo, o mag-sign in gamit ang account na ginamit mo sa application."
+    );
+  }
+
+  const schedule = adoption.pickupSchedule || {};
+  const pendingReschedule = getPendingPickupReschedule(adoption);
+  const scheduleDate = schedule.date || adoption.adoptionDate || "";
+  const scheduleTime = formatTime(schedule.time);
+  const scheduleText = [formatDate(scheduleDate), scheduleTime].filter(Boolean).join(" at ");
+  const deadlineText = formatDate(adoption.attendanceDeadlineAt);
+  const petName = adoption.petName || "your selected animal";
+  const reference = adoption.applicationId ? ` (${adoption.applicationId})` : "";
+
+  if (scheduleText) {
+    return localizedReply(
+      language,
+      `Your pickup schedule for ${petName}${reference} is ${scheduleText}. Please go to the Angeles City Veterinary Office on that schedule and bring the required documents shown in My Applications.${pendingReschedule ? " Your reschedule request is still pending staff approval." : ""}`,
+      `Ang pickup schedule mo para kay ${petName}${reference} ay ${scheduleText}. Pumunta sa Angeles City Veterinary Office sa schedule na iyon at dalhin ang required documents na nakalagay sa My Applications.${pendingReschedule ? " Pending pa ang reschedule request mo at kailangan pang i-approve ng staff." : ""}`
+    );
+  }
+
+  if (isApprovedStatus(adoption.status)) {
+    return localizedReply(
+      language,
+      `Your application for ${petName}${reference} is approved, but I do not see a pickup schedule yet. Please open My Applications and use Schedule Pickup. ${deadlineText ? `Choose a date on or before ${deadlineText}.` : "Please schedule within the allowed attendance deadline shown there."}`,
+      `Approved na ang application mo para kay ${petName}${reference}, pero wala pa akong nakikitang pickup schedule. Buksan ang My Applications at gamitin ang Schedule Pickup. ${deadlineText ? `Pumili ng petsa hanggang ${deadlineText}.` : "Mag-schedule sa loob ng attendance deadline na nakalagay doon."}`
+    );
+  }
+
+  if (isPendingStatus(adoption.status)) {
+    return localizedReply(
+      language,
+      `Your application for ${petName}${reference} is still ${adoption.status}. A pickup schedule will only appear after the Angeles City Veterinary Office approves the application.`,
+      `Ang application mo para kay ${petName}${reference} ay ${adoption.status} pa. Lalabas lang ang pickup schedule kapag approved na ng Angeles City Veterinary Office ang application.`
+    );
+  }
+
+  return localizedReply(
+    language,
+    `Your latest adoption application for ${petName}${reference} is marked ${adoption.status}. Please open My Applications for the full details and next steps.`,
+    `Ang latest adoption application mo para kay ${petName}${reference} ay marked ${adoption.status}. Buksan ang My Applications para sa buong details at next steps.`
+  );
 }
 
 function hasContactIntent(text = "") {
   return includesAnyWord(text, ["contact", "office", "location", "address", "phone", "help", "hours", "saan", "oras", "tawag"]) ||
     includesAnyPhrase(text, ["office email", "contact email", "email address", "send an email"]);
+}
+
+function hasPublicAccountLimitIntent(text = "") {
+  return (
+    includesAnyWord(text, ["guest", "public", "without", "account", "login", "signin", "sign-in", "anonymous", "visitor", "walang"]) ||
+    includesAnyPhrase(text, ["not logged in", "without logging in", "without an account", "walang account", "hindi naka login", "di naka login"])
+  ) && (
+    includesAnyWord(text, ["animua"]) ||
+    hasAdoptionMentionIntent(text) ||
+    hasSurrenderIntent(text) ||
+    hasApplicationIntent(text) ||
+    includesAnyWord(text, ["status", "schedule", "pickup", "apply", "submit"])
+  );
+}
+
+function hasApplicationEditIntent(text = "") {
+  return hasApplicationIntent(text) && (
+    includesAnyWord(text, ["edit", "change", "update", "correct", "wrong", "mistake", "revise", "modify", "palit", "baguhin", "mali", "ayusin"]) ||
+    includesAnyPhrase(text, ["change my application", "edit my application", "wrong information", "maling information", "maling details"])
+  );
+}
+
+function hasApplicationRejectedIntent(text = "") {
+  return hasApplicationIntent(text) && (
+    includesAnyWord(text, ["rejected", "declined", "denied", "failed", "reject", "bakit", "why"]) ||
+    includesAnyPhrase(text, ["not approved", "hindi approved", "hindi na approve", "na reject", "na-reject"])
+  );
+}
+
+function hasApplicationWithdrawIntent(text = "") {
+  return hasApplicationIntent(text) && (
+    includesAnyWord(text, ["cancel", "cancelled", "canceled", "withdraw", "remove", "delete", "stop", "bawiin", "icancel"]) ||
+    includesAnyPhrase(text, ["cancel my application", "withdraw my application", "i-cancel application", "icancel application"])
+  );
+}
+
+function hasPickupMissedIntent(text = "") {
+  const mentionsPickup = hasAdoptionPickupIntent(text) || includesAnyWord(text, ["pickup", "late", "missed", "absent", "no-show", "nalate", "nahuli"]);
+
+  return mentionsPickup && (
+    includesAnyWord(text, ["late", "missed", "miss", "absent", "no-show", "noshow", "huli", "late", "nalate", "nahuli", "hindi"]) ||
+    includesAnyPhrase(text, ["miss my pickup", "missed my pickup", "late for pickup", "hindi nakapunta", "di nakapunta", "na miss ko"])
+  );
+}
+
+function hasAdoptionScheduleLocationIntent(text = "") {
+  return (
+    hasApplicationIntent(text) ||
+    hasAdoptionMentionIntent(text) ||
+    includesAnyWord(text, ["pickup", "schedule", "appointment", "release", "date", "time", "oras", "kailan", "iskedyul"])
+  ) && (
+    includesAnyWord(text, ["where", "see", "view", "find", "check", "saan", "makikita", "tingnan"]) ||
+    includesAnyPhrase(text, ["where can i see", "where do i see", "saan makikita", "saan ko makikita", "my applications"])
+  ) && (
+    includesAnyWord(text, ["schedule", "appointment", "pickup", "release", "date", "time", "oras", "iskedyul"]) ||
+    includesAnyPhrase(text, ["my applications"])
+  );
+}
+
+function hasReservationIntent(text = "") {
+  return (
+    hasAnimalMentionIntent(text) ||
+    hasAdoptionMentionIntent(text)
+  ) && (
+    includesAnyWord(text, ["reserve", "reservation", "hold", "reserved", "ipareserve", "ireserve", "pareserve"]) ||
+    includesAnyPhrase(text, ["can i reserve", "hold the animal", "hold the pet", "pa reserve", "pa-reserve"])
+  );
+}
+
+function hasLostPetIntent(text = "") {
+  return includesAnyWord(text, ["lost", "missing", "nawala", "hinahanap"]) ||
+    includesAnyPhrase(text, ["lost my dog", "lost my cat", "lost my pet", "nawala aso", "nawala pusa", "nawala ang aso", "nawala ang pusa"]);
+}
+
+function hasAgeRequirementIntent(text = "") {
+  return (
+    hasAdoptionMentionIntent(text) ||
+    hasApplicationIntent(text)
+  ) && (
+    includesAnyWord(text, ["age", "minor", "adult", "student", "underage", "edad", "bata"]) ||
+    includesAnyPhrase(text, ["how old", "ilang taon", "legal age"])
+  );
+}
+
+function hasAnimalDetailsQuestionIntent(text = "") {
+  return (
+    hasAnimalMentionIntent(text) ||
+    includesAnyPhrase(text, ["find furbabies"])
+  ) && (
+    includesAnyWord(text, ["photo", "photos", "picture", "details", "breed", "age", "sex", "gender", "temperament", "behavior", "size", "weight", "history", "medical", "vaccination", "larawan", "detalye", "edad", "lahi"]) ||
+    includesAnyPhrase(text, ["more info", "more information", "animal profile", "pet profile"])
+  );
 }
 
 function hasUrgentMedicalIntent(text = "") {
@@ -847,6 +1172,61 @@ function hasSurrenderConsequenceIntent(text = "") {
   );
 }
 
+function hasSurrenderAvailabilityIntent(text = "") {
+  return hasSurrenderIntent(text) && (
+    includesAnyWord(text, ["available", "accepting", "open", "closed", "pause", "paused", "full", "cage", "cages", "space", "slot", "slots"]) ||
+    includesAnyPhrase(text, [
+      "can i submit",
+      "are you accepting",
+      "accept surrender",
+      "shelter full",
+      "may space",
+      "may cage",
+      "may cages",
+      "open ba",
+      "tumatanggap ba",
+      "pwede ba magsurrender",
+      "puwede ba magsurrender"
+    ])
+  );
+}
+
+function hasSurrenderDocumentIntent(text = "") {
+  return hasSurrenderIntent(text) && (
+    includesAnyWord(text, ["requirement", "requirements", "document", "documents", "bring", "prepare", "id", "proof", "record", "records", "vaccination", "kailangan", "dala", "dalhin"]) ||
+    includesAnyPhrase(text, [
+      "what to bring",
+      "what should i bring",
+      "what do i need",
+      "ano kailangan",
+      "ano ang kailangan",
+      "anong kailangan",
+      "ano dadalhin",
+      "valid id",
+      "vaccination record",
+      "proof of residence"
+    ])
+  );
+}
+
+function hasSurrenderAppointmentIntent(text = "") {
+  return hasSurrenderIntent(text) && (
+    includesAnyWord(text, ["appointment", "schedule", "dropoff", "drop-off", "bring", "deliver", "date", "time", "reschedule", "pupunta", "punta", "dalhin"]) ||
+    includesAnyPhrase(text, [
+      "when can i bring",
+      "when do i bring",
+      "bring my pet",
+      "bring the animal",
+      "drop off",
+      "schedule surrender",
+      "surrender appointment",
+      "kailan dadalhin",
+      "kailan ko dadalhin",
+      "kailan pupunta"
+    ])
+  );
+}
+
 function getMentionedAnimalLabel(text = "", language = "english") {
   if (includesAnyWord(text, ["cat", "cats", "pusa"])) {
     return language === "tagalog" ? "cat" : "cat";
@@ -865,9 +1245,19 @@ function hasOutsideAngelesIntent(text = "") {
       includesAnyWord(text, ["outside"]) &&
       includesAnyWord(text, ["angeles"])
     ) ||
+    (
+      includesAnyWord(text, ["not", "hindi", "di"]) &&
+      (includesAnyWord(text, ["from", "froma", "taga", "resident"]) || includesAnyPhrase(text, ["from a"])) &&
+      includesAnyWord(text, ["angeles"])
+    ) ||
+    hasNonAngelesTagaIntent(text) ||
     includesAnyPhrase(text, [
       "not from angeles",
       "not from angeles city",
+      "not froma angeles",
+      "not froma angeles city",
+      "not from a angeles",
+      "not from a angeles city",
       "outside angeles",
       "outside angeles city",
       "outside of angeles",
@@ -880,6 +1270,36 @@ function hasOutsideAngelesIntent(text = "") {
       "taga ibang city",
       "ibang city"
     ]);
+}
+
+function hasNonAngelesTagaIntent(text = "") {
+  if (!hasNonAngelesResidenceMention(text)) {
+    return false;
+  }
+
+  return hasSurrenderIntent(text) ||
+    includesAnyWord(text, ["resident", "residence", "city", "municipality", "barangay", "pampanga"]);
+}
+
+function hasNonAngelesResidenceMention(text = "") {
+  const normalized = ` ${String(text || "").toLowerCase().replace(/[^a-z0-9]+/g, " ")} `;
+  const match =
+    normalized.match(/\b(taga|from)\s+([a-z0-9]+)/) ||
+    normalized.match(/\b(live|lives|living|reside|resides|residing)\s+in\s+([a-z0-9]+)/) ||
+    normalized.match(/\bresident\s+of\s+([a-z0-9]+)/);
+
+  if (!match) {
+    return false;
+  }
+
+  const place = match[2] || match[1];
+  const nonPlaceWords = new Set(["a", "an", "my", "the", "this", "that", "your", "our", "pet", "dog", "cat", "animal", "shelter", "office", "you", "here", "there"]);
+
+  if (place === "angeles" || nonPlaceWords.has(place)) {
+    return false;
+  }
+
+  return true;
 }
 
 function hasNavigationIntent(text = "") {
@@ -927,7 +1347,7 @@ function hasPetCareIntent(text = "") {
     "neutering",
     "quarantine",
     "rabies"
-  ]);
+  ]) || hasVaccinationIntent(text);
 
   const hasGeneralCareTopic = includesAnyWord(text, [
     "food",
@@ -998,7 +1418,7 @@ function hasAdoptionQuantityIntent(text = "") {
   return (
     (text.includes("adopt") || includesAnyWord(text, ["application", "apply"])) &&
     (
-      includesAnyWord(text, ["two", "2", "multiple", "several", "limit", "maximum", "max", "number", "ilan", "dami"]) ||
+      includesAnyWord(text, ["two", "2", "three", "3", "multiple", "several", "limit", "maximum", "max", "number", "ilan", "dami", "dalawa", "dalawang", "tatlo", "tatlong", "marami"]) ||
       includesAnyPhrase(text, ["how many", "more than one", "ilang pet", "ilang pets", "ilang aso", "ilang pusa"])
     )
   );
@@ -1028,24 +1448,139 @@ function hasOfflineAdoptionIntent(text = "") {
 }
 
 function hasAdoptionProcessIntent(text = "") {
+  if (
+    hasAdoptionMentionIntent(text) &&
+    (
+      includesAnyWord(text, ["who", "which", "sino", "alin"]) ||
+      includesAnyPhrase(text, ["sino ang mga", "sino pwede", "sino pwedeng", "sino puwede", "sino puwedeng", "can be adopted"])
+    )
+  ) {
+    return false;
+  }
+
   return (
     text.includes("adopt") ||
     includesAnyWord(text, ["adoption", "adopter", "ampon", "umampon", "iadopt"]) ||
     includesAnyPhrase(text, ["i want a dog", "i want a cat", "i want a pet", "get a pet"])
   ) && (
-    includesAnyWord(text, ["how", "guide", "process", "steps", "procedure", "start", "begin", "pwede", "pwedeng", "puwede", "puwedeng", "paano", "puppy", "kitten", "senior", "adult"]) ||
-    includesAnyPhrase(text, ["how do i", "how can i", "can i adopt", "pwede ba", "puwede ba"])
+    includesAnyWord(text, ["how", "guide", "process", "steps", "procedure", "start", "begin", "need", "needs", "do", "pwede", "pwedeng", "puwede", "puwedeng", "paano", "ano", "gagawin", "puppy", "kitten", "senior", "adult"]) ||
+    includesAnyPhrase(text, ["how do i", "how can i", "what do i need to do", "what should i do", "what do i do", "can i adopt", "pwede ba", "puwede ba", "ano gagawin", "anong gagawin"])
   );
 }
 
 function hasPostAdoptionIntent(text = "") {
   const mentionsAdoption =
     text.includes("adopt") ||
-    includesAnyWord(text, ["adoption", "adopter"]);
+    includesAnyWord(text, ["adoption", "adopter", "inadopt", "iadopt"]);
 
   return mentionsAdoption && (
     includesAnyWord(text, ["approved", "approval", "after", "monitoring", "followup", "follow-up"]) ||
     includesAnyPhrase(text, ["after approval", "after adoption", "post adoption", "post-adoption", "follow up", "what happens after"])
+  );
+}
+
+function hasAdoptionPickupIntent(text = "") {
+  const mentionsAdoption =
+    text.includes("adopt") ||
+    includesAnyWord(text, ["adoption", "adopter", "inadopt", "iadopt", "ampon"]) ||
+    hasAnimalMentionIntent(text);
+
+  return mentionsAdoption && (
+    includesAnyWord(text, ["pickup", "pick-up", "claim", "release", "kunin", "kuha", "makukuha"]) ||
+    includesAnyPhrase(text, [
+      "pick up",
+      "get the pet",
+      "get my pet",
+      "get the animal",
+      "get my animal",
+      "kunin ang",
+      "kunin yung",
+      "kunin ko",
+      "pwede kunin",
+      "pwedeng kunin",
+      "puwede kunin",
+      "puwedeng kunin"
+    ])
+  );
+}
+
+function hasAdoptionPickupDocumentIntent(text = "") {
+  const mentionsAdoptionPickup =
+    hasAdoptionPickupIntent(text) ||
+    includesAnyPhrase(text, ["pick up"]) ||
+    includesAnyWord(text, ["pickup", "release", "kunin", "kuha"]) ||
+    (hasAdoptionMentionIntent(text) && includesAnyWord(text, ["pickup", "release", "kunin", "kuha"]));
+
+  return mentionsAdoptionPickup && (
+    includesAnyWord(text, ["bring", "document", "documents", "requirement", "requirements", "id", "prepare", "dala", "dalhin", "kailangan"]) ||
+    includesAnyPhrase(text, [
+      "what to bring",
+      "what should i bring",
+      "what do i bring",
+      "ano dadalhin",
+      "ano ang dadalhin",
+      "anong dadalhin",
+      "valid id",
+      "adoption agreement"
+    ])
+  );
+}
+
+function hasAdoptionPickupRescheduleIntent(text = "") {
+  const mentionsPickup =
+    hasAdoptionPickupIntent(text) ||
+    includesAnyWord(text, ["pickup", "release", "kunin"]);
+
+  return mentionsPickup && (
+    includesAnyWord(text, ["reschedule", "resched", "change", "move", "cancel", "reschedule", "palit", "lipat", "ilipat", "ililipat", "iba"]) ||
+    includesAnyPhrase(text, [
+      "change pickup",
+      "change my pickup",
+      "move pickup",
+      "request resched",
+      "request re sched",
+      "request re-sched",
+      "palit schedule",
+      "lipat schedule",
+      "ilipat schedule",
+      "ibang schedule"
+    ])
+  );
+}
+
+function hasAdoptionApprovalTimingIntent(text = "") {
+  const mentionsApplication =
+    hasApplicationIntent(text) ||
+    includesAnyWord(text, ["application", "apply", "submitted"]);
+  const mentionsApproval =
+    includesAnyWord(text, ["approve", "approved", "approval"]) ||
+    includesAnyPhrase(text, ["ma approve", "ma-approve", "ma aapprove", "ma-aapprove"]);
+
+  return mentionsApplication && mentionsApproval && (
+    includesAnyWord(text, ["when", "kailan", "time", "date", "days", "hours", "long"]) ||
+    includesAnyPhrase(text, ["how long", "gaano katagal"])
+  );
+}
+
+function hasAdoptionHomePreparationIntent(text = "") {
+  if (includesAnyWord(text, ["meet", "visit", "walk-in", "walkin"]) ||
+    includesAnyPhrase(text, ["meet the animal", "meet the pet", "visit the animal", "visit the pet"])) {
+    return false;
+  }
+
+  return hasAdoptionMentionIntent(text) && (
+    includesAnyWord(text, ["prepare", "ready", "home", "house", "before", "needs", "supplies", "gamit", "handa", "bahay", "iuwi", "iuuwi"]) ||
+    includesAnyPhrase(text, [
+      "before bringing",
+      "before adoption",
+      "prepare my home",
+      "ready my home",
+      "ano ihahanda",
+      "anong ihahanda",
+      "ihanda sa bahay",
+      "bago iuwi",
+      "bago iuuwi"
+    ])
   );
 }
 
@@ -1054,18 +1589,32 @@ function hasAdoptionEligibilityIntent(text = "") {
     text.includes("adopt") ||
     includesAnyWord(text, ["adopter", "application", "apply", "eligible", "qualify"])
   ) && (
+    hasNonAngelesResidenceMention(text) ||
     includesAnyWord(text, ["student", "students", "renter", "renters", "family", "families", "household", "outside", "existing", "resident", "nonresident", "angeles"]) ||
     includesAnyPhrase(text, ["outside angeles", "outside angeles city", "not from angeles", "existing pets", "may alaga", "nangungupahan"])
   );
 }
 
 function hasVisitAnimalIntent(text = "") {
+  if (hasApplicationIntent(text) || hasStatusIntent(text)) {
+    return false;
+  }
+
   return (
     hasAnimalMentionIntent(text) ||
     text.includes("adopt")
   ) && (
-    includesAnyWord(text, ["visit", "meet", "see", "appointment", "walk-in", "walkin"]) ||
-    includesAnyPhrase(text, ["meet the animal", "visit the animal", "see the pet"])
+    includesAnyWord(text, ["visit", "meet", "appointment", "walk-in", "walkin"]) ||
+    includesAnyPhrase(text, [
+      "meet the animal",
+      "meet the pet",
+      "visit the animal",
+      "visit the pet",
+      "see the animal",
+      "see the pet",
+      "see the dog",
+      "see the cat"
+    ])
   );
 }
 
@@ -1156,6 +1705,9 @@ function isOnTopic(message = "") {
     "event",
     "events",
     "vaccination",
+    "vaccine",
+    "vaccinated",
+    "navaccine",
     "bakuna",
     "rabies",
     "hours",
@@ -1175,7 +1727,12 @@ function isOnTopic(message = "") {
     "cancelled",
     "completed",
     "available",
-    "browse"
+    "browse",
+    "kailan",
+    "sino",
+    "kunin",
+    "pickup",
+    "release"
   ];
 
   return includesAnyWord(normalizedMessage, topicWords) ||
@@ -1185,6 +1742,16 @@ function isOnTopic(message = "") {
     hasStrayIntent(normalizedMessage) ||
     hasSurrenderIntent(normalizedMessage) ||
     hasDonationIntent(normalizedMessage) ||
+    hasPublicAccountLimitIntent(normalizedMessage) ||
+    hasApplicationEditIntent(normalizedMessage) ||
+    hasApplicationRejectedIntent(normalizedMessage) ||
+    hasApplicationWithdrawIntent(normalizedMessage) ||
+    hasAdoptionScheduleLocationIntent(normalizedMessage) ||
+    hasPickupMissedIntent(normalizedMessage) ||
+    hasAgeRequirementIntent(normalizedMessage) ||
+    hasReservationIntent(normalizedMessage) ||
+    hasAnimalDetailsQuestionIntent(normalizedMessage) ||
+    hasLostPetIntent(normalizedMessage) ||
     hasAccountTroubleIntent(normalizedMessage) ||
     hasStatusExplanationIntent(normalizedMessage) ||
     hasPetCareIntent(normalizedMessage) ||
@@ -1229,13 +1796,26 @@ function shouldUseLocalReply(message = "") {
     hasStrayIntent(lower) ||
     hasDonationIntent(lower) ||
     hasGeneralAnimuaIntent(lower) ||
+    hasPublicAccountLimitIntent(lower) ||
+    hasApplicationEditIntent(lower) ||
+    hasApplicationRejectedIntent(lower) ||
+    hasApplicationWithdrawIntent(lower) ||
     hasApplicationIntent(lower) ||
     hasAdoptionMotivationIntent(lower) ||
     hasAdoptionFeeIntent(lower) ||
     hasOfflineAdoptionIntent(lower) ||
+    hasAdoptionScheduleLocationIntent(lower) ||
+    hasAdoptionPickupIntent(lower) ||
+    hasAdoptionPickupDocumentIntent(lower) ||
+    hasAdoptionPickupRescheduleIntent(lower) ||
+    hasPickupMissedIntent(lower) ||
+    hasAdoptionApprovalTimingIntent(lower) ||
+    hasAdoptionHomePreparationIntent(lower) ||
     hasPostAdoptionIntent(lower) ||
     hasAdoptionProcessIntent(lower) ||
     hasAdoptionEligibilityIntent(lower) ||
+    hasAgeRequirementIntent(lower) ||
+    hasReservationIntent(lower) ||
     hasVisitAnimalIntent(lower) ||
     hasRequirementIntent(lower) ||
     hasFeeIntent(lower) ||
@@ -1245,6 +1825,7 @@ function shouldUseLocalReply(message = "") {
     hasAccountIntent(lower) ||
     hasStatusExplanationIntent(lower) ||
     hasEventIntent(lower) ||
+    hasVetVisitScheduleIntent(lower) ||
     hasContactIntent(lower) ||
     hasUrgentMedicalIntent(lower) ||
     hasNavigationIntent(lower) ||
@@ -1253,6 +1834,8 @@ function shouldUseLocalReply(message = "") {
     hasPetCareIntent(lower) ||
     hasLiveCommunicationIntent(lower) ||
     hasAnimalProfileIntent(lower) ||
+    hasAnimalDetailsQuestionIntent(lower) ||
+    hasLostPetIntent(lower) ||
     hasAdoptionQuantityIntent(lower) ||
     hasAnimalAvailabilityIntent(lower) ||
     (lower.includes("adopt") && !includesAny(lower, ["why", "should", "best", "recommend", "compare"]))
@@ -1261,6 +1844,18 @@ function shouldUseLocalReply(message = "") {
 
 function needsPublicContext(message = "") {
   const lower = normalizeIntentText(message);
+
+  if (hasAdoptionProcessIntent(lower)) {
+    return false;
+  }
+
+  if (hasAnimalAvailabilityIntent(lower)) {
+    return true;
+  }
+
+  if (hasVaccinationScheduleIntent(lower)) {
+    return true;
+  }
 
   if (
     hasStrayIntent(lower) ||
@@ -1276,6 +1871,12 @@ function needsPublicContext(message = "") {
     hasRequirementIntent(lower) ||
     hasAdoptionFeeIntent(lower) ||
     hasFeeIntent(lower) ||
+    hasAdoptionPickupIntent(lower) ||
+    hasAdoptionPickupDocumentIntent(lower) ||
+    hasAdoptionPickupRescheduleIntent(lower) ||
+    hasAdoptionApprovalTimingIntent(lower) ||
+    hasAdoptionHomePreparationIntent(lower) ||
+    hasVetVisitScheduleIntent(lower) ||
     hasPetCareIntent(lower) ||
     hasTermsPrivacyIntent(lower) ||
     hasLiveCommunicationIntent(lower) ||
@@ -1285,10 +1886,16 @@ function needsPublicContext(message = "") {
     return false;
   }
 
-  return (
-    hasAnimalAvailabilityIntent(lower) ||
-    hasEventIntent(lower)
-  );
+  return hasEventIntent(lower);
+}
+
+function needsUserAdoptionContext(message = "") {
+  const lower = normalizeIntentText(message);
+  return hasAdoptionPickupIntent(lower) ||
+    hasAdoptionPickupDocumentIntent(lower) ||
+    hasAdoptionPickupRescheduleIntent(lower) ||
+    hasAdoptionApprovalTimingIntent(lower) ||
+    hasPostAdoptionIntent(lower);
 }
 
 function buildSystemPrompt(context = {}, language = "english") {
@@ -1299,7 +1906,7 @@ function buildSystemPrompt(context = {}, language = "english") {
       : "Answer in English.",
     "Help users with adoption browsing, compatibility matching, surrender requests, account registration, email OTP verification, login, and general shelter service navigation.",
     "ANIMUA means Animal Unified Approach. It is one system for shelter operations and public services managed through the Angeles City Veterinary Office. Never invent a different expansion of ANIMUA.",
-    "Be concise, friendly, and practical. Use simple instructions and ask one follow-up question when needed.",
+    "Be concise, warm, and practical. Sound like a helpful shelter front desk, not a formal policy notice. Do not use markdown formatting, bullets, or bold markers. Do not add a generic follow-up question unless the user needs to choose a next step.",
     "ANIMUA no longer has a stray animal reporting feature or stray reporting page. Never tell users to submit stray reports through ANIMUA. For stray or abandoned animals, direct users to the Angeles City Dog Pound or Angeles City Veterinary Office.",
     "Adoption through ANIMUA has no adoption fee. Do not invent other fees or payment requirements.",
     "ANIMUA does not process online donation payments, GCash, bank, card, or payment gateway transactions. For donations, direct users to the Angeles City Veterinary Office for official procedures and current needs.",
@@ -1311,6 +1918,23 @@ function buildSystemPrompt(context = {}, language = "english") {
     "If asked about private account data, tell users to sign in and use the correct page instead of asking for passwords or OTP codes.",
     "Never ask for passwords, OTP codes, or sensitive documents in chat.",
     "Known public pages: Home, Find Furbabies, Match Quiz, Surrender, Contact Us.",
+    "Official FAQ rules to follow:",
+    "If the user asks how to adopt or what to do to adopt, explain the steps: open Find Furbabies, open an animal profile, review details, submit the adoption application from that profile, then wait for Angeles City Veterinary Office review. Do not list ready animals unless the user asks who/which animals are available.",
+    "If the user asks who or which animals can be adopted, list only animals currently marked Ready in the provided public context. If none are provided, tell them to check Find Furbabies or contact the office.",
+    "If the user asks about adoption fees, say adoption through ANIMUA has no adoption fee, but application review is still required.",
+    "If the user asks about adoption status, approval timing, pickup schedule, pickup requirements, or rescheduling, tell them to sign in and check My Applications. Never invent a date, time, approval result, or private status.",
+    "If the user is logged in and adoption context is provided, use that context for pickup schedule or latest application status. If no private context is provided, do not pretend to know their record.",
+    "If the user asks what to bring for pickup, say the official list is shown in the adoption application details in My Applications and may include valid ID, adoption agreement, and office instructions.",
+    "If the user asks about multiple applications, say they may submit more than one application for different animals, but each is reviewed separately and approval is not guaranteed.",
+    "If the user asks about surrender eligibility, say only qualified Angeles City residents may submit surrender requests through ANIMUA. Users from other cities or municipalities should contact their local city or municipal veterinary office, animal welfare office, or nearest shelter.",
+    "If the user asks how to surrender, explain the Surrender page form, required truthful owner/contact/barangay/animal/vaccination/reason details, review by the office, and that submission does not guarantee acceptance.",
+    "If the user asks about bringing an animal to the shelter, say not to bring it unless the office has approved or confirmed the next step.",
+    "If the user asks about animal vaccination records, medical history, age, sex, breed, photos, or behavior, direct them to the animal profile in Find Furbabies and to contact the office if details are missing or unclear.",
+    "If the user asks when vaccination, anti-rabies, spay/neuter, or other public service events happen, direct them to the Home page event section and Contact Us for official confirmation. Do not treat event schedules as an individual animal vaccination record.",
+    "If the user asks about lost, stray, found, or abandoned animals, say ANIMUA has no stray/lost reporting feature and direct them to Angeles City Dog Pound or the Angeles City Veterinary Office.",
+    "If the user asks what can be done without an account, say public pages can be browsed without signing in, but applications, surrender requests, private statuses, and schedules require an account.",
+    "If the user asks about reservations, say ANIMUA does not guarantee pet reservations through chat; they should submit an adoption application from the animal profile if available.",
+    "If the user asks in Tagalog or Taglish, answer in natural Tagalog or Taglish. If the selected language is English, answer in English even if the user writes Taglish.",
     `Ready animals shown publicly right now: ${context.pets?.length ? context.pets.map(formatPet).join("; ") : "No live animal list available in context."}`,
     `Published or recent events in context: ${context.events?.length ? context.events.map(formatEvent).join("; ") : "No event list available in context."}`
   ].join("\n");
@@ -1320,6 +1944,7 @@ function getLocalReply(message, context = {}, language = "english") {
   const lower = normalizeIntentText(message);
   const pets = Array.isArray(context.pets) ? context.pets : [];
   const events = Array.isArray(context.events) ? context.events : [];
+  const userAdoptions = Array.isArray(context.userAdoptions) ? context.userAdoptions : [];
 
   if (hasGreetingIntent(lower)) {
     return localizedReply(
@@ -1369,6 +1994,14 @@ function getLocalReply(message, context = {}, language = "english") {
     );
   }
 
+  if (hasLostPetIntent(lower)) {
+    return localizedReply(
+      language,
+      `For a lost pet, ANIMUA does not have a lost-pet posting or tracking feature. Please contact or visit the Angeles City Dog Pound and ${OFFICE_INFO.name}, and prepare clear photos, last-seen location, date and time, color or markings, collar or tag details, and your contact number.`,
+      `Para sa nawawalang pet, walang lost-pet posting o tracking feature ang ANIMUA. Makipag-ugnayan o bumisita sa Angeles City Dog Pound at ${OFFICE_INFO.name}, at maghanda ng malinaw na photos, last-seen location, date at time, kulay o markings, collar o tag details, at contact number mo.`
+    );
+  }
+
   if (hasStrayIntent(lower)) {
     return localizedReply(
       language,
@@ -1393,12 +2026,44 @@ function getLocalReply(message, context = {}, language = "english") {
     );
   }
 
+  if (hasPublicAccountLimitIntent(lower)) {
+    return localizedReply(
+      language,
+      "You can browse public ANIMUA pages without signing in, such as Home, Find Furbabies, Match Quiz, Surrender information, and Contact Us. To submit an adoption application, submit a surrender request, view My Applications, see private status updates, or manage pickup schedules, you need to sign in or create an account.",
+      "Maaari mong tingnan ang public ANIMUA pages kahit hindi naka-sign in, tulad ng Home, Find Furbabies, Match Quiz, Surrender information, at Contact Us. Para mag-submit ng adoption application, mag-submit ng surrender request, makita ang My Applications, makita ang private status updates, o i-manage ang pickup schedules, kailangan mong mag-sign in o gumawa ng account."
+    );
+  }
+
   if (hasSurrenderIntent(lower)) {
     if (hasOutsideAngelesIntent(lower)) {
       return localizedReply(
         language,
-        "No. ANIMUA surrender requests are only for qualified Angeles City residents. If you are not from Angeles City, ANIMUA will not process the surrender request; please contact your local city or municipal veterinary office, animal welfare office, or nearest shelter for the correct procedure. Do not bring the animal to the Angeles City shelter unless the office confirms a next step.",
-        "Hindi. Ang surrender requests sa ANIMUA ay para lamang sa qualified Angeles City residents. Kung hindi ka taga-Angeles City, hindi ipo-process ng ANIMUA ang surrender request; makipag-ugnayan sa inyong local city o municipal veterinary office, animal welfare office, o pinakamalapit na shelter para sa tamang proseso. Huwag dalhin ang animal sa Angeles City shelter hangga't walang confirmation mula sa office."
+        "No. ANIMUA surrender requests are only for qualified Angeles City residents. If you are from another city or municipality, ANIMUA cannot process the surrender request. Please contact your local city or municipal veterinary office, animal welfare office, or nearest shelter for the correct process. Do not bring the animal to the Angeles City shelter unless the office confirms a next step.",
+        "Hindi. Para lang sa qualified Angeles City residents ang surrender request sa ANIMUA. Kung taga-ibang lungsod o munisipyo ka, hindi ipo-process ng ANIMUA ang surrender request. Makipag-ugnayan sa inyong local city o municipal veterinary office, animal welfare office, o pinakamalapit na shelter para sa tamang proseso. Huwag dalhin ang animal sa Angeles City shelter hangga't walang confirmation mula sa office."
+      );
+    }
+
+    if (hasSurrenderAvailabilityIntent(lower)) {
+      return localizedReply(
+        language,
+        "Only qualified Angeles City residents may submit surrender requests through ANIMUA. If the Surrender page shows that requests are paused or the shelter is not accepting new requests, please contact the Angeles City Veterinary Office for guidance instead of bringing the animal directly to the shelter.",
+        "Qualified Angeles City residents lang ang maaaring magsumite ng surrender request sa ANIMUA. Kung naka-pause o hindi tumatanggap ng new requests ang Surrender page, kontakin muna ang Angeles City Veterinary Office para sa guidance sa halip na dalhin agad ang animal sa shelter."
+      );
+    }
+
+    if (hasSurrenderAppointmentIntent(lower)) {
+      return localizedReply(
+        language,
+        "Do not bring the animal to the shelter unless the Angeles City Veterinary Office has approved the surrender request and given appointment or drop-off instructions. If approved, use the schedule option shown in My Applications or follow the official instructions from the office.",
+        "Huwag dalhin agad ang animal sa shelter hangga't hindi approved ng Angeles City Veterinary Office ang surrender request at wala pang appointment o drop-off instructions. Kapag approved, gamitin ang schedule option sa My Applications o sundin ang official instructions ng office."
+      );
+    }
+
+    if (hasSurrenderDocumentIntent(lower)) {
+      return localizedReply(
+        language,
+        "For a surrender request, prepare accurate owner and contact details, Angeles City barangay/address information, animal details, vaccination or medical records if available, photos or supporting details, and an honest reason for surrender. The office still reviews every request, so submission is not automatic acceptance.",
+        "Para sa surrender request, ihanda ang tamang owner at contact details, Angeles City barangay/address information, animal details, vaccination o medical records kung meron, photos o supporting details, at tapat na reason for surrender. Ire-review pa rin ng office ang bawat request, kaya hindi automatic acceptance ang submission."
       );
     }
 
@@ -1451,6 +2116,14 @@ function getLocalReply(message, context = {}, language = "english") {
     );
   }
 
+  if (hasAdoptionHomePreparationIntent(lower)) {
+    return localizedReply(
+      language,
+      "Before bringing an adopted pet home, prepare food and clean water, a safe sleeping area, basic hygiene supplies, a collar or carrier if needed, time for adjustment, and a plan for veterinary care. Keep the first days calm and follow any care notes shown in the animal profile or given by the office.",
+      "Bago iuwi ang adopted pet, maghanda ng pagkain at malinis na tubig, ligtas na tulugan, basic hygiene supplies, collar o carrier kung kailangan, oras para maka-adjust, at plano para sa veterinary care. Panatilihing kalmado ang unang mga araw at sundin ang care notes sa animal profile o instructions ng office."
+    );
+  }
+
   if (hasAdoptionMotivationIntent(lower)) {
     return localizedReply(
       language,
@@ -1491,11 +2164,35 @@ function getLocalReply(message, context = {}, language = "english") {
     );
   }
 
+  if (hasAgeRequirementIntent(lower)) {
+    return localizedReply(
+      language,
+      "Adoption applications should be submitted by someone who can legally and responsibly commit to the animal's care. If you are a student, minor, or dependent on your household, include truthful household and guardian or family support details in the application. The Angeles City Veterinary Office reviews readiness and consent before approval.",
+      "Ang adoption application ay dapat manggaling sa taong kayang legal at responsableng mag-commit sa pag-aalaga ng animal. Kung student, minor, o dependent ka sa household mo, ilagay nang tapat ang household at guardian o family support details sa application. Ire-review ng Angeles City Veterinary Office ang readiness at consent bago mag-approve."
+    );
+  }
+
   if (hasAdoptionEligibilityIntent(lower)) {
     return localizedReply(
       language,
-      "Applicants from inside or outside Angeles City may submit an adoption application, but every application is evaluated by the Angeles City Veterinary Office. Students, renters, families, and people with existing pets should provide honest details about consent, housing, schedule, resources, and pet-care readiness.",
-      "Maaaring magsumite ng adoption application ang applicants mula sa loob o labas ng Angeles City, pero bawat application ay ie-evaluate ng Angeles City Veterinary Office. Kung student, renter, family, o may existing pets, magbigay ng tapat na detalye tungkol sa consent, tirahan, schedule, kakayahan, at readiness sa pet care."
+      "Yes. Applicants from inside or outside Angeles City may submit an adoption application, but every application is evaluated by the Angeles City Veterinary Office. Students, renters, families, and people with existing pets should provide honest details about consent, housing, schedule, resources, and pet-care readiness.",
+      "Oo. Maaaring magsumite ng adoption application ang applicants mula sa loob o labas ng Angeles City, pero bawat application ay ie-evaluate ng Angeles City Veterinary Office. Kung student, renter, family, o may existing pets, magbigay ng tapat na detalye tungkol sa consent, tirahan, schedule, kakayahan, at readiness sa pet care."
+    );
+  }
+
+  if (hasReservationIntent(lower)) {
+    return localizedReply(
+      language,
+      "ANIMUA does not guarantee pet reservations through chat. If an animal is available, open its Find Furbabies profile and submit an adoption application. The office reviews applications and animal availability can change, so applying or asking to reserve does not guarantee approval or holding the animal.",
+      "Hindi naggagarantiya ang ANIMUA ng pet reservation through chat. Kung available ang animal, buksan ang profile nito sa Find Furbabies at magsumite ng adoption application. Ire-review pa rin ng office ang applications at maaaring magbago ang availability, kaya hindi garantiya ng approval o pag-hold ng animal ang pag-apply o pagpa-reserve."
+    );
+  }
+
+  if (hasAnimalDetailsQuestionIntent(lower)) {
+    return localizedReply(
+      language,
+      "Open the animal's profile in Find Furbabies to see the details available in ANIMUA, such as photos, species, age, sex, breed, temperament, behavior notes, medical or vaccination details, and care needs. If a detail is missing or unclear, contact the Angeles City Veterinary Office before applying.",
+      "Buksan ang animal profile sa Find Furbabies para makita ang available details sa ANIMUA, tulad ng photos, species, age, sex, breed, temperament, behavior notes, medical o vaccination details, at care needs. Kung may kulang o hindi malinaw na detalye, kontakin ang Angeles City Veterinary Office bago mag-apply."
     );
   }
 
@@ -1507,11 +2204,103 @@ function getLocalReply(message, context = {}, language = "english") {
     );
   }
 
+  if (hasAdoptionScheduleLocationIntent(lower)) {
+    return localizedReply(
+      language,
+      "For adoption schedules and private application updates, sign in and open My Applications. Pickup dates, pickup requirements, reschedule options, and official next steps are shown there when the Angeles City Veterinary Office has added them.",
+      "Para sa adoption schedules at private application updates, mag-sign in at buksan ang My Applications. Makikita doon ang pickup dates, pickup requirements, reschedule options, at official next steps kapag nailagay na ng Angeles City Veterinary Office."
+    );
+  }
+
+  if (hasAdoptionPickupDocumentIntent(lower)) {
+    return localizedReply(
+      language,
+      "You can see what to bring in your adoption application details in My Applications. Follow the documents and reminders shown there, such as valid ID, adoption agreement, and any office instructions. If you already have a pickup schedule, attend on that date and time.",
+      "Makikita mo ang mga kailangan dalhin sa adoption application details sa My Applications. Sundin ang documents at reminders na nakalagay doon, tulad ng valid ID, adoption agreement, at anumang office instructions. Kung may pickup schedule ka na, pumunta sa nakatakdang date at time."
+    );
+  }
+
+  if (hasPickupMissedIntent(lower)) {
+    return localizedReply(
+      language,
+      "If you are late or missed your adoption pickup schedule, contact the Angeles City Veterinary Office as soon as possible and check My Applications for any available action. Do not assume the animal will still be released or that the schedule is automatically extended; the office must confirm the next step.",
+      "Kung na-late ka o hindi ka nakapunta sa adoption pickup schedule, kontakin agad ang Angeles City Veterinary Office at tingnan ang My Applications kung may available action. Huwag mag-assume na ire-release pa rin ang animal o automatic na extended ang schedule; kailangan munang kumpirmahin ng office ang next step."
+    );
+  }
+
+  if (hasAdoptionPickupRescheduleIntent(lower)) {
+    return localizedReply(
+      language,
+      "If you already have a pickup schedule, open My Applications and use Request Re-sched if the option is available. Pickup can only be rescheduled once and the request needs staff approval. If the option is not shown, contact the Angeles City Veterinary Office before missing your schedule.",
+      "Kung may pickup schedule ka na, buksan ang My Applications at gamitin ang Request Re-sched kung available ang option. Isang beses lang puwedeng mag-request ng reschedule at kailangan pa itong i-approve ng staff. Kung walang option, kontakin ang Angeles City Veterinary Office bago ma-miss ang schedule."
+    );
+  }
+
+  if (hasAdoptionPickupIntent(lower)) {
+    if (userAdoptions.length) {
+      return getScheduledPickupReply(selectRelevantAdoption(userAdoptions), language);
+    }
+
+    return localizedReply(
+      language,
+      "You can pick up or receive an adopted animal only after the Angeles City Veterinary Office approves the adoption and gives official release or pickup instructions. Please sign in to ANIMUA and check your application updates, or contact the office if no pickup schedule or next step is shown.",
+      "Makukuha o mapipick up mo lang ang adopted animal kapag approved na ng Angeles City Veterinary Office ang adoption at may official release o pickup instructions na. Mag-sign in sa ANIMUA at tingnan ang application updates, o kontakin ang office kung walang pickup schedule o next step na nakalagay."
+    );
+  }
+
+  if (hasAdoptionApprovalTimingIntent(lower)) {
+    if (userAdoptions.length) {
+      return getScheduledPickupReply(selectRelevantAdoption(userAdoptions), language);
+    }
+
+    return localizedReply(
+      language,
+      "There is no guaranteed approval time for adoption applications. The Angeles City Veterinary Office reviews each application based on your details, home readiness, and the animal's welfare needs. Sign in to ANIMUA to check official status updates, or contact the office if you need confirmation.",
+      "Walang guaranteed na oras o araw kung kailan maa-approve ang adoption application. Nire-review ng Angeles City Veterinary Office ang bawat application batay sa iyong details, home readiness, at welfare needs ng animal. Mag-sign in sa ANIMUA para tingnan ang official status updates, o kontakin ang office kung kailangan mo ng confirmation."
+    );
+  }
+
   if (hasPostAdoptionIntent(lower)) {
+    if (userAdoptions.length) {
+      return getScheduledPickupReply(selectRelevantAdoption(userAdoptions), language);
+    }
+
     return localizedReply(
       language,
       "After an adoption is approved, follow the official instructions shown in ANIMUA or provided by the Angeles City Veterinary Office. The office may give pickup, release, care, or post-adoption monitoring and follow-up instructions. Approval still comes from the office, and the chatbot cannot confirm private records or final decisions.",
       "Kapag approved ang adoption, sundin ang official instructions na ipinapakita sa ANIMUA o ibibigay ng Angeles City Veterinary Office. Maaaring may pickup, release, care, o post-adoption monitoring at follow-up instructions mula sa office. Office pa rin ang final approval, at hindi kayang kumpirmahin ng chatbot ang private records o final decisions."
+    );
+  }
+
+  if (hasAdoptionQuantityIntent(lower)) {
+    return localizedReply(
+      language,
+      "Yes, you may submit more than one adoption application. For example, you can apply for two or more different animals. Each application is reviewed separately by the Angeles City Veterinary Office, so submitting multiple applications does not guarantee approval.",
+      "Oo, maaari kang magsumite ng higit sa isang adoption application. Halimbawa, puwede kang mag-apply para sa dalawa o higit pang magkaibang animal. Bawat application ay hiwalay na nire-review ng Angeles City Veterinary Office, kaya hindi garantiya ng approval ang pagsumite ng maraming application."
+    );
+  }
+
+  if (hasApplicationEditIntent(lower)) {
+    return localizedReply(
+      language,
+      "To correct or update an adoption application, sign in and open My Applications. Use any edit or action button shown by ANIMUA. If the application is already under review or there is no edit option, contact the Angeles City Veterinary Office and explain what needs to be corrected. Do not submit false or duplicate details just to replace a mistake.",
+      "Para itama o i-update ang adoption application, mag-sign in at buksan ang My Applications. Gamitin ang edit o action button kung ipinapakita ng ANIMUA. Kung under review na ang application o walang edit option, kontakin ang Angeles City Veterinary Office at ipaliwanag kung ano ang kailangang itama. Huwag magsumite ng maling o duplicate details para lang palitan ang mistake."
+    );
+  }
+
+  if (hasApplicationRejectedIntent(lower)) {
+    return localizedReply(
+      language,
+      "If your adoption application was rejected or not approved, check My Applications for the official status or remarks. You may apply again for another animal if the system allows it, but approval is still not guaranteed. Improve the next application by giving truthful details about your home, schedule, resources, consent, and readiness for the animal's needs.",
+      "Kung rejected o hindi na-approve ang adoption application mo, tingnan ang My Applications para sa official status o remarks. Maaari kang mag-apply ulit para sa ibang animal kung pinapayagan ng system, pero hindi pa rin guaranteed ang approval. Mas pagandahin ang next application sa pamamagitan ng tapat na details tungkol sa bahay, schedule, resources, consent, at readiness mo sa needs ng animal."
+    );
+  }
+
+  if (hasApplicationWithdrawIntent(lower)) {
+    return localizedReply(
+      language,
+      "To cancel or withdraw an adoption application, sign in and open My Applications, then use any cancel or withdraw action shown by ANIMUA. If no option appears, contact the Angeles City Veterinary Office. The chatbot cannot cancel private applications from chat.",
+      "Para i-cancel o i-withdraw ang adoption application, mag-sign in at buksan ang My Applications, pagkatapos gamitin ang cancel o withdraw action kung ipinapakita ng ANIMUA. Kung walang option, kontakin ang Angeles City Veterinary Office. Hindi kayang i-cancel ng chatbot ang private applications mula sa chat."
     );
   }
 
@@ -1527,8 +2316,8 @@ function getLocalReply(message, context = {}, language = "english") {
     if (hasMultipleIntent(lower)) {
       return localizedReply(
         language,
-        "You may submit more than one adoption application, but each application is reviewed separately by the Angeles City Veterinary Office. Submitting two applications does not guarantee approval, and the office may prioritize the best match based on your home, readiness, and the animal's welfare.",
-        "Maaari kang magsumite ng higit sa isang adoption application, pero bawat application ay hiwalay na nire-review ng Angeles City Veterinary Office. Ang pagsumite ng dalawang application ay hindi garantiya ng approval, at maaaring unahin ng office ang pinakaangkop batay sa iyong tahanan, kahandaan, at kapakanan ng animal."
+        "Yes, you may submit more than one adoption application. For example, you can apply for two or more different animals. Each application is reviewed separately by the Angeles City Veterinary Office, so submitting multiple applications does not guarantee approval.",
+        "Oo, maaari kang magsumite ng higit sa isang adoption application. Halimbawa, puwede kang mag-apply para sa dalawa o higit pang magkaibang animal. Bawat application ay hiwalay na nire-review ng Angeles City Veterinary Office, kaya hindi garantiya ng approval ang pagsumite ng maraming application."
       );
     }
 
@@ -1539,20 +2328,48 @@ function getLocalReply(message, context = {}, language = "english") {
     );
   }
 
-  if (hasAdoptionQuantityIntent(lower)) {
-    return localizedReply(
-      language,
-      "You may submit more than one adoption application, including for more than one dog, but each application is reviewed separately by the Angeles City Veterinary Office. There is no automatic guaranteed number of approvals; the office decides based on your readiness, home setup, and the animal's welfare.",
-      "Maaari kang magsumite ng higit sa isang adoption application, kahit para sa higit sa isang dog, pero bawat application ay hiwalay na nire-review ng Angeles City Veterinary Office. Walang automatic na guaranteed number ng maa-approve; magdedesisyon ang office batay sa iyong kahandaan, home setup, at kapakanan ng animal."
-    );
-  }
-
   if (hasAdoptionProcessIntent(lower)) {
     return localizedReply(
       language,
-      "To adopt, go to Find Furbabies, open an animal profile, review the details, then submit the adoption application. Adoption through ANIMUA has no adoption fee. The Angeles City Veterinary Office reviews your home readiness and the animal's welfare needs before approval, so submitting an application does not guarantee approval.",
-      "Para mag-adopt, pumunta sa Find Furbabies, buksan ang animal profile, basahin ang details, pagkatapos isumite ang adoption application. Walang adoption fee sa ANIMUA. Ire-review ng Angeles City Veterinary Office ang iyong home readiness at welfare needs ng animal bago ang approval, kaya hindi garantiya ng approval ang submission."
+      "To adopt a dog or cat through ANIMUA, go to Find Furbabies, open the animal's profile, review the details, then submit the adoption application from that profile. There is no adoption fee. The Angeles City Veterinary Office reviews your home readiness and the animal's welfare needs before approval, so submitting an application does not guarantee approval.",
+      "Para mag-adopt ng aso o pusa through ANIMUA, pumunta sa Find Furbabies, buksan ang animal profile, basahin ang details, pagkatapos isumite ang adoption application mula sa profile na iyon. Walang adoption fee. Ire-review ng Angeles City Veterinary Office ang home readiness mo at welfare needs ng animal bago ang approval, kaya hindi garantiya ng approval ang submission."
     );
+  }
+
+  if (hasAnimalAvailabilityIntent(lower)) {
+    const speciesFilter = includesAnyWord(lower, ["dog", "dogs", "aso"])
+      ? "dog"
+      : includesAnyWord(lower, ["cat", "cats", "pusa"])
+        ? "cat"
+        : "";
+
+    const visiblePets = speciesFilter
+      ? pets.filter((pet) => String(pet.species).toLowerCase().includes(speciesFilter))
+      : pets;
+
+    if (!visiblePets.length) {
+      if (language === "tagalog") {
+        return speciesFilter
+          ? `Wala akong nakikitang ready ${speciesFilter}s sa live public list ngayon. Pakitingnan muli ang Find Furbabies mamaya o kontakin ang Angeles City Veterinary Office para sa updates.`
+          : "Wala akong nakikitang ready animals sa live public list ngayon. Buksan ang Find Furbabies o kontakin ang Angeles City Veterinary Office para sa pinakabagong availability.";
+      }
+
+      return speciesFilter
+        ? `I do not see any ready ${speciesFilter}s in the live public list right now. Please check Find Furbabies again later or contact the Angeles City Veterinary Office for updates.`
+        : "I cannot see ready animals in the live public list right now. Please open Find Furbabies or contact the Angeles City Veterinary Office for the latest availability.";
+    }
+
+    return language === "tagalog"
+      ? [
+          "Narito ang animals na kasalukuyang marked Ready sa ANIMUA:",
+          ...visiblePets.slice(0, 5).map((pet) => `- ${formatPet(pet)}`),
+          "Buksan ang Find Furbabies para makita ang photos, details, at adoption actions. Kailangan pa rin ng shelter review bago ma-approve ang adoption."
+        ].join("\n")
+      : [
+          `Here are animals currently marked Ready in ANIMUA:`,
+          ...visiblePets.slice(0, 5).map((pet) => `- ${formatPet(pet)}`),
+          "Open Find Furbabies to view photos, details, and adoption actions. Shelter review is still required before adoption approval."
+        ].join("\n");
   }
 
   if (hasUserProfileIntent(lower)) {
@@ -1657,6 +2474,14 @@ function getLocalReply(message, context = {}, language = "english") {
         ].join("\n");
   }
 
+  if (hasVetVisitScheduleIntent(lower)) {
+    return localizedReply(
+      language,
+      `For visits to the vet office, please contact ${OFFICE_INFO.name} first so they can confirm the right day, time, and whether you need an appointment. The office details in ANIMUA are: ${OFFICE_INFO.address}; phone ${OFFICE_INFO.phone}; hours ${OFFICE_INFO.hours}.`,
+      `Para sa pagpunta sa vet office, mas mabuting kontakin muna ang ${OFFICE_INFO.name} para makumpirma ang tamang araw, oras, at kung kailangan ng appointment. Details sa ANIMUA: ${OFFICE_INFO.address}; phone ${OFFICE_INFO.phone}; office hours ${OFFICE_INFO.hours}.`
+    );
+  }
+
   if (hasContactIntent(lower)) {
     return localizedReply(
       language,
@@ -1690,11 +2515,11 @@ function getLocalReply(message, context = {}, language = "english") {
       );
     }
 
-    if (includesAnyWord(lower, ["vaccination", "vaccinations", "vaccine", "bakuna"])) {
+    if (hasVaccinationIntent(lower)) {
       return localizedReply(
         language,
-        "Vaccination helps protect pets from certain preventable diseases. For the correct vaccine type, timing, records, and any public vaccination activity, follow the Angeles City Veterinary Office or a licensed veterinarian. I cannot confirm schedules or whether a service is free unless it appears in published event details.",
-        "Ang vaccination o bakuna ay tumutulong protektahan ang pets laban sa ilang maiiwasang sakit. Para sa tamang vaccine type, schedule, records, at public vaccination activity, sundin ang Angeles City Veterinary Office o licensed veterinarian. Hindi ako magko-confirm ng schedule o kung libre ang service maliban kung nasa published event details."
+        "For each adoptable dog or cat, check the animal profile in Find Furbabies for any vaccination or health details shown there. If the record is missing or unclear, contact the Angeles City Veterinary Office before adopting. I cannot guarantee that all animals are vaccinated or confirm private medical records from chat.",
+        "Para sa bawat adoptable dog o cat, tingnan ang animal profile sa Find Furbabies kung may vaccination o health details na nakalagay. Kung kulang o hindi malinaw ang record, kontakin ang Angeles City Veterinary Office bago mag-adopt. Hindi ko magagarantiya na vaccinated lahat ng animals o makukumpirma ang private medical records sa chat."
       );
     }
 
@@ -1742,49 +2567,26 @@ function getLocalReply(message, context = {}, language = "english") {
     );
   }
 
-  if (
-    hasAnimalAvailabilityIntent(lower)
-  ) {
-    const speciesFilter = includesAnyWord(lower, ["dog", "dogs", "aso"])
-      ? "dog"
-      : includesAnyWord(lower, ["cat", "cats", "pusa"])
-        ? "cat"
-        : "";
-
-    const visiblePets = speciesFilter
-      ? pets.filter((pet) => String(pet.species).toLowerCase().includes(speciesFilter))
-      : pets;
-
-    if (!visiblePets.length) {
-      if (language === "tagalog") {
-        return speciesFilter
-          ? `Wala akong nakikitang ready ${speciesFilter}s sa live public list ngayon. Pakitingnan muli ang Find Furbabies mamaya o kontakin ang Angeles City Veterinary Office para sa updates.`
-          : "Wala akong nakikitang ready animals sa live public list ngayon. Buksan ang Find Furbabies o kontakin ang Angeles City Veterinary Office para sa pinakabagong availability.";
-      }
-
-      return speciesFilter
-        ? `I do not see any ready ${speciesFilter}s in the live public list right now. Please check Find Furbabies again later or contact the Angeles City Veterinary Office for updates.`
-        : "I cannot see ready animals in the live public list right now. Please open Find Furbabies or contact the Angeles City Veterinary Office for the latest availability.";
-    }
-
-    return language === "tagalog"
-      ? [
-          "Narito ang animals na kasalukuyang marked Ready sa ANIMUA:",
-          ...visiblePets.slice(0, 5).map((pet) => `- ${formatPet(pet)}`),
-          "Buksan ang Find Furbabies para makita ang photos, details, at adoption actions. Kailangan pa rin ng shelter review bago ma-approve ang adoption."
-        ].join("\n")
-      : [
-          `Here are animals currently marked Ready in ANIMUA:`,
-          ...visiblePets.slice(0, 5).map((pet) => `- ${formatPet(pet)}`),
-          "Open Find Furbabies to view photos, details, and adoption actions. Shelter review is still required before adoption approval."
-        ].join("\n");
-  }
-
   return localizedReply(
     language,
     "I can help with ANIMUA registration, email verification, browsing adoptable animals, the Match Quiz, adoption applications, surrender requests, donations, stray concerns, events, basic pet-care reminders, and contact information. What would you like to do?",
     "Makakatulong ako sa ANIMUA registration, email verification, pag-browse ng adoptable animals, Match Quiz, adoption applications, surrender requests, donations, stray concerns, events, basic pet-care reminders, at contact information. Ano ang gusto mong gawin?"
   );
+}
+
+async function getOfficialFaqReply(req, message, language = "english") {
+  if (!shouldUseLocalReply(message)) {
+    return "";
+  }
+
+  const context = needsPublicContext(message)
+    ? await getPublicContextSafely("Context")
+    : getEmptyPublicContext();
+  const userContext = needsUserAdoptionContext(message)
+    ? await getMyAdoptionContextSafely(req)
+    : { adoptions: [] };
+
+  return getLocalReply(message, { ...context, userAdoptions: userContext.adoptions }, language);
 }
 
 async function requestProviderReply({ message, history, context, language }) {
@@ -1940,13 +2742,10 @@ exports.sendChatbotMessage = async (req, res) => {
       });
     }
 
-    if (shouldUseLocalReply(message)) {
-      const context = needsPublicContext(message)
-        ? await getPublicContextSafely("Context")
-        : getEmptyPublicContext();
-
+    const officialFaqReply = await getOfficialFaqReply(req, message, language);
+    if (officialFaqReply) {
       return res.status(200).json({
-        reply: getLocalReply(message, context, language),
+        reply: officialFaqReply,
         mode: "local"
       });
     }
@@ -1980,4 +2779,29 @@ exports.sendChatbotMessage = async (req, res) => {
       mode: "fallback"
     });
   }
+};
+
+exports._test = {
+  buildSystemPrompt,
+  getOfficialFaqReply,
+  getLocalReply,
+  hasAdoptionProcessIntent,
+  hasAnimalAvailabilityIntent,
+  hasAdoptionApprovalTimingIntent,
+  hasAdoptionHomePreparationIntent,
+  hasAdoptionPickupIntent,
+  hasAdoptionPickupDocumentIntent,
+  hasAdoptionPickupRescheduleIntent,
+  hasOutsideAngelesIntent,
+  hasPetCareIntent,
+  hasSurrenderAppointmentIntent,
+  hasSurrenderAvailabilityIntent,
+  hasSurrenderDocumentIntent,
+  hasVisitAnimalIntent,
+  hasVaccinationScheduleIntent,
+  hasVetVisitScheduleIntent,
+  needsPublicContext,
+  needsUserAdoptionContext,
+  resolveReplyLanguage,
+  shouldUseLocalReply
 };

@@ -17,8 +17,8 @@
   <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="stylesheet" href="../../src/css/public/home.css">
-  <link rel="stylesheet" href="../../src/css/global.css">
-  <link rel="stylesheet" href="../../src/css/public/announcements.css">
+  <link rel="stylesheet" href="../../src/css/global.css?v=pwa-responsive-20260810">
+  <link rel="stylesheet" href="../../src/css/public/announcements.css?v=header-20260810same">
 </head>
 <body class="home-page announcements-page">
   <!-- Header -->
@@ -122,6 +122,7 @@
   </header>
   <main>
     <section class="community-cover" aria-labelledby="communityTitle">
+      <img class="public-page-hero-image" src="/images/announcements-header.png?v=header-20260809" alt="" aria-hidden="true">
       <div class="container community-cover-inner">
         <div class="community-cover-copy">
           <h1 id="communityTitle">
@@ -364,11 +365,6 @@
           </div>
           <small class="auth-error" id="login-password-error"></small>
 
-          <div class="auth-recaptcha-row login-captcha-row hidden" id="login-captcha-row">
-            <div id="login-recaptcha" class="auth-recaptcha"></div>
-          </div>
-          <small class="auth-error auth-captcha-error" id="login-captcha-error"></small>
-
           <div class="auth-extra-row">
             <label class="auth-check">
               <input type="checkbox">
@@ -376,6 +372,11 @@
             </label>
             <a href="#" class="auth-muted-link">Forgot password?</a>
           </div>
+
+          <div class="auth-recaptcha-row login-captcha-row hidden" id="login-captcha-row">
+            <div id="login-recaptcha" class="auth-recaptcha"></div>
+          </div>
+          <small class="auth-error auth-captcha-error" id="login-captcha-error"></small>
 
           <button type="submit" class="auth-submit-btn">Log In</button>
         </form>
@@ -467,7 +468,7 @@
   </div>
 </div>
 
-  <script type="module" src="../../src/public/js/public-ui.js"></script>
+  <script type="module" src="../../src/public/js/public-ui.js?v=pwa-responsive-20260810"></script>
   <script type="module" src="../../src/auth/authModal.js"></script>
   <script type="module" src="../../src/public/js/announcements.js"></script>
 

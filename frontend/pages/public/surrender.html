@@ -18,8 +18,8 @@
   <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="stylesheet" href="../../src/css/public/home.css">
-  <link rel="stylesheet" href="../../src/css/global.css">
-  <link rel="stylesheet" href="../../src/css/public/surrender.css">
+  <link rel="stylesheet" href="../../src/css/global.css?v=pwa-responsive-20260810">
+  <link rel="stylesheet" href="../../src/css/public/surrender.css?v=header-20260810warm">
 </head>
 <body class="home-page surrender-page">
 
@@ -125,6 +125,7 @@
 
   <!-- Surrender Hero -->
   <section class="surrender-page-hero" aria-labelledby="surrenderPageTitle">
+    <img class="public-page-hero-image" src="/images/surrender-header.png?v=header-20260809" alt="" aria-hidden="true">
     <div class="container surrender-page-hero-grid">
       <div class="surrender-page-text reveal">
         <h1 id="surrenderPageTitle">Surrender with <span>care and compassion.</span></h1>
@@ -138,6 +139,14 @@
             <span>Start a Surrender Request</span>
             <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
           </a>
+          <a class="btn surrender-hero-outline-btn" href="#surrenderProcess">
+            <span>How it works</span>
+            <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="surrender-hero-care-note" role="note">
+          <i class="fa-solid fa-shield-heart" aria-hidden="true"></i>
+          <span>Every request is reviewed with care for the safety and well-being of your animal.</span>
         </div>
       </div>
     </div>
@@ -147,7 +156,7 @@
   <section class="surrender-notice-section">
     <div class="container">
       <div class="surrender-notice-box reveal">
-        <div class="surrender-notice-heading">
+        <div class="surrender-notice-heading" id="surrenderProcess">
           <span class="section-label">Before you begin</span>
           <h2>What happens after you submit</h2>
           <p>Your request moves through a clear review process. Shelter space and the animal's current needs are considered before a decision is made.</p>
@@ -180,7 +189,7 @@
   <!-- Surrender Form -->
   <section class="surrender-form-section" id="surrenderRequestWorkspace">
     <div class="container">
-      <section class="request-status-panel reveal" id="mySurrenderRequests" aria-labelledby="requestStatusTitle">
+      <section class="request-status-panel" id="mySurrenderRequests" aria-labelledby="requestStatusTitle">
         <div class="request-status-heading">
           <span class="request-status-icon"><i class="fa-solid fa-file-lines" aria-hidden="true"></i></span>
           <div>
@@ -535,11 +544,6 @@
           </div>
           <small class="auth-error" id="login-password-error"></small>
 
-          <div class="auth-recaptcha-row login-captcha-row hidden" id="login-captcha-row">
-            <div id="login-recaptcha" class="auth-recaptcha"></div>
-          </div>
-          <small class="auth-error auth-captcha-error" id="login-captcha-error"></small>
-
           <div class="auth-extra-row">
             <label class="auth-check">
               <input type="checkbox">
@@ -547,6 +551,11 @@
             </label>
             <a href="#" class="auth-muted-link">Forgot password?</a>
           </div>
+
+          <div class="auth-recaptcha-row login-captcha-row hidden" id="login-captcha-row">
+            <div id="login-recaptcha" class="auth-recaptcha"></div>
+          </div>
+          <small class="auth-error auth-captcha-error" id="login-captcha-error"></small>
 
           <button type="submit" class="auth-submit-btn">Log In</button>
         </form>
@@ -638,7 +647,7 @@
   </div>
 </div>
 
-<script type="module" src="../../src/public/js/public-ui.js"></script>
+<script type="module" src="../../src/public/js/public-ui.js?v=pwa-responsive-20260810"></script>
 <script type="module" src="../../src/auth/authModal.js"></script>
 <script type="module" src="../../src/public/js/surrenderForm.js"></script>
 

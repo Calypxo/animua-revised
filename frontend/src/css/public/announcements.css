@@ -2023,3 +2023,108 @@ body.announcements-page .animua-chatbot-toggle {
   font-size: 0.68rem !important;
   line-height: 1 !important;
 }
+
+/* Final public header image: keep Announcement, Find Furbabies, and Surrender heroes equal. */
+body.announcements-page .community-cover {
+  position: relative !important;
+  height: 600px !important;
+  min-height: 0 !important;
+  max-height: 600px !important;
+  overflow: hidden !important;
+  background: #2b1719 !important;
+}
+
+body.announcements-page .community-cover-inner {
+  position: relative !important;
+  z-index: 2 !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  padding-block: 64px !important;
+}
+
+body.announcements-page .public-page-hero-image {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+  pointer-events: none !important;
+}
+
+body.announcements-page .community-cover::before,
+body.announcements-page .community-cover::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* Match the public hero typography and spacing to the homepage. */
+body.announcements-page .community-cover-inner {
+  display: flex !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+  padding: 104px 0 44px !important;
+}
+
+body.announcements-page .community-cover-copy {
+  width: min(620px, 100%) !important;
+  max-width: 620px !important;
+  margin: clamp(-68px, -6vh, -42px) 0 0 !important;
+}
+
+body.announcements-page .community-cover :is(h1, p, span, a, button, strong) {
+  font-family: "Inter", "League Spartan", sans-serif !important;
+}
+
+body.announcements-page .community-cover h1 {
+  max-width: 650px !important;
+  margin: 0 0 12px !important;
+  color: #ffffff !important;
+  font-family: "Inter", "League Spartan", sans-serif !important;
+  font-size: clamp(46px, 4.05vw, 76px) !important;
+  font-weight: 900 !important;
+  line-height: 1.05 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+body.announcements-page .community-cover h1 span {
+  display: block !important;
+  color: inherit !important;
+}
+
+body.announcements-page .community-cover h1 .community-title-accent {
+  color: #f1c045 !important;
+}
+
+body.announcements-page .community-cover-copy p {
+  max-width: 560px !important;
+  margin: 0 !important;
+  color: #ffffff !important;
+  font-family: "Inter", "League Spartan", sans-serif !important;
+  font-size: clamp(15px, 0.95vw, 17px) !important;
+  font-weight: 400 !important;
+  line-height: 1.45 !important;
+  letter-spacing: 0 !important;
+}
+
+@media (max-width: 720px) {
+  body.announcements-page .community-cover-inner {
+    padding: 96px 0 34px !important;
+  }
+
+  body.announcements-page .community-cover h1 {
+    font-size: clamp(36px, 11vw, 52px) !important;
+  }
+}
+
+@media (max-width: 720px) {
+  body.announcements-page .community-cover {
+    height: 360px !important;
+    min-height: 0 !important;
+    max-height: 360px !important;
+    background-position: center center !important;
+  }
+}

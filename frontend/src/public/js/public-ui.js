@@ -4,6 +4,7 @@ import { handleLogin } from "../../auth/login.js";
 import { handleRegistration } from "../../auth/register.js";
 import { API_BASE_URL } from "../../utils/api.js";
 import { db } from "../../utils/firebase.js";
+import { getToken } from "../../utils/storage.js";
 
 const CHATBOT_MIN_TYPING_MS = 1000;
 const PASSWORD_OTP_RESEND_SECONDS = 60;
@@ -229,7 +230,7 @@ function getAccountProfileModalMarkup() {
   return `
     <section class="profile-modal-overlay hidden" id="profileModal" aria-hidden="true" aria-labelledby="profileModalTitle">
       <button type="button" class="profile-modal-backdrop" data-profile-close aria-label="Close profile"></button>
-      <article class="profile-modal-card" role="dialog" aria-modal="true" tabindex="-1">
+      <article class="profile-modal-card profile-modal-card--compact" role="dialog" aria-modal="true" tabindex="-1" style="width: min(640px, calc(100vw - 64px)); max-width: 640px;">
         <button type="button" class="profile-modal-close" data-profile-close aria-label="Close profile">
           <i class="fa-solid fa-xmark" aria-hidden="true"></i>
         </button>
@@ -325,6 +326,7 @@ function getAccountProfileModalMarkup() {
 function refreshProfileModalElements() {
   profileModal = document.querySelector("#profileModal.profile-modal-overlay");
   profileModalCard = profileModal?.querySelector(".profile-modal-card");
+  profileModalCard?.classList.add("profile-modal-card--compact");
   profileCloseButtons = document.querySelectorAll("[data-profile-close]");
   profileForm = document.getElementById("profileForm");
   profileEditBtn = document.getElementById("profileEditBtn");
@@ -342,6 +344,13 @@ function ensureAccountProfileModal() {
   }
   refreshProfileModalElements();
   return profileModal;
+}
+
+function lockCompactProfileModalSize() {
+  if (!profileModalCard) return;
+  profileModalCard.classList.add("profile-modal-card--compact");
+  profileModalCard.style.setProperty("width", "min(640px, calc(100vw - 64px))", "important");
+  profileModalCard.style.setProperty("max-width", "640px", "important");
 }
 
 function showLoginView() {
@@ -930,7 +939,7 @@ function setupHomeStories() {
     animalsLoaded = true;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/public/pets`);
+      const response = await fetch(`${API_BASE_URL}/public/pets`, { cache: "no-store" });
       if (!response.ok) throw new Error("Failed to load public pets");
 
       newestPets = normalizePets(await response.json());
@@ -1651,7 +1660,7 @@ function setupFeaturedFurbabies() {
     });
   };
 
-  fetch(`${API_BASE_URL}/public/pets`)
+  fetch(`${API_BASE_URL}/public/pets`, { cache: "no-store" })
     .then((response) => {
       if (!response.ok) throw new Error("Failed to load featured pets");
       return response.json();
@@ -2212,6 +2221,7 @@ async function openProfileModal(trigger = null) {
   }
 
   lastProfileTrigger = trigger;
+  lockCompactProfileModalSize();
   profileModal.classList.remove("hidden");
   profileModal.setAttribute("aria-hidden", "false");
   document.body.classList.add("modal-open");
@@ -2998,7 +3008,7 @@ async function showForgotPasswordDialog() {
       </div>
     `,
     showCancelButton: true,
-    showCloseButton: true,
+    showCloseButton: false,
     confirmButtonText: "Send OTP",
     cancelButtonText: "Cancel",
     reverseButtons: true,
@@ -3050,18 +3060,11 @@ async function handleForgotPasswordSendOtp() {
 }
 
 function showForgotPasswordOtpStep() {
-  const popup = Swal.getPopup();
   const safeMaskedEmail = escapeHtmlText(maskProfileEmail(pendingForgotPassword?.email || ""));
 
-  Swal.hideLoading();
+  Swal.close();
 
-  if (popup) {
-    popup.dataset.forgotPasswordOtpStep = "true";
-    popup.classList.add("change-password-popup--otp");
-    popup.classList.remove("change-password-popup--loading");
-  }
-
-  Swal.update({
+  return Swal.fire({
     html: `
       <div class="change-password-modal password-otp-modal">
         <button type="button" class="change-password-back password-change-otp-back" aria-label="Back">
@@ -3093,18 +3096,36 @@ function showForgotPasswordOtpStep() {
         </div>
       </div>
     `,
+    showCloseButton: false,
     showConfirmButton: false,
-    showCancelButton: false
-  });
+    showCancelButton: false,
+    allowOutsideClick: true,
+    allowEscapeKey: true,
+    customClass: {
+      popup: "animua-popup change-password-popup forgot-password-popup change-password-popup--otp",
+      htmlContainer: "change-password-html",
+      actions: "change-password-actions",
+      confirmButton: "change-password-confirm",
+      cancelButton: "change-password-cancel"
+    },
+    buttonsStyling: false,
+    didOpen: () => {
+      const popup = Swal.getPopup();
+      if (popup) popup.dataset.forgotPasswordOtpStep = "true";
 
-  setupPasswordOtpInput();
-  startPasswordOtpCooldown();
-  document.getElementById("confirm-password-change-otp-btn")?.addEventListener("click", handleForgotPasswordOtpConfirm);
-  document.getElementById("resend-password-change-otp-btn")?.addEventListener("click", handleForgotPasswordOtpResend);
-  document.querySelector(".password-otp-cancel")?.addEventListener("click", () => Swal.close());
-  document.querySelector(".password-change-otp-back")?.addEventListener("click", () => {
-    Swal.close();
-    window.setTimeout(showForgotPasswordDialog, 0);
+      removePasswordOtpSwalActions();
+      stylePasswordOtpActionButtons();
+      setupPasswordOtpInput();
+      startPasswordOtpCooldown();
+      document.getElementById("confirm-password-change-otp-btn")?.addEventListener("click", handleForgotPasswordOtpConfirm);
+      document.getElementById("resend-password-change-otp-btn")?.addEventListener("click", handleForgotPasswordOtpResend);
+      document.querySelector(".password-otp-cancel")?.addEventListener("click", () => Swal.close());
+      document.querySelector(".password-change-otp-back")?.addEventListener("click", () => {
+        Swal.close();
+        window.setTimeout(showForgotPasswordDialog, 0);
+      });
+    },
+    willClose: stopPasswordOtpCooldown
   });
 }
 
@@ -3164,6 +3185,8 @@ async function handleForgotPasswordOtpResend() {
 function showForgotPasswordNewPasswordStep() {
   const popup = Swal.getPopup();
   const safeMaskedEmail = escapeHtmlText(maskProfileEmail(pendingForgotPassword?.email || ""));
+
+  setPasswordOtpSwalActionsHidden(false);
 
   if (popup) {
     popup.dataset.forgotPasswordNewPasswordStep = "true";
@@ -3348,10 +3371,12 @@ function showPasswordOtpStep() {
         </div>
       </div>
     `,
+    confirmButtonText: "Verify OTP",
     showConfirmButton: false,
     showCancelButton: false
   });
 
+  setPasswordOtpSwalActionsHidden(true);
   setupPasswordOtpInput();
   startPasswordOtpCooldown();
   document.getElementById("confirm-password-change-otp-btn")?.addEventListener("click", handlePasswordOtpConfirm);
@@ -3395,6 +3420,40 @@ function setupPasswordOtpInput() {
 
   input.focus();
   syncBoxes();
+}
+
+function setPasswordOtpSwalActionsHidden(hidden) {
+  const displayValue = hidden ? "none" : "";
+  const applyDisplay = () => {
+    const actions = Swal.getActions();
+    const confirmButton = Swal.getConfirmButton();
+    const cancelButton = Swal.getCancelButton();
+
+    if (actions) actions.style.display = displayValue;
+    if (confirmButton) confirmButton.style.display = displayValue;
+    if (cancelButton) cancelButton.style.display = displayValue;
+  };
+
+  applyDisplay();
+  window.requestAnimationFrame(applyDisplay);
+}
+
+function removePasswordOtpSwalActions() {
+  const removeActions = () => {
+    const popup = Swal.getPopup();
+    popup?.querySelectorAll(".swal2-actions").forEach((actions) => actions.remove());
+  };
+
+  removeActions();
+  window.requestAnimationFrame(removeActions);
+  window.setTimeout(removeActions, 50);
+}
+
+function stylePasswordOtpActionButtons() {
+  document.querySelectorAll(".password-change-otp-screen .password-otp-cancel, .password-change-otp-screen #confirm-password-change-otp-btn")
+    .forEach((button) => {
+      button.style.borderRadius = "8px";
+    });
 }
 
 async function handlePasswordOtpConfirm() {
@@ -3536,6 +3595,7 @@ function formatPasswordOtpResendTime(seconds = 0) {
 function showChangePasswordSuccess() {
   const popup = Swal.getPopup();
   Swal.hideLoading();
+  setPasswordOtpSwalActionsHidden(false);
 
   if (popup) {
     popup.dataset.passwordUpdated = "true";
@@ -3563,6 +3623,7 @@ function showChangePasswordSuccess() {
 function showForgotPasswordSuccess() {
   const popup = Swal.getPopup();
   Swal.hideLoading();
+  setPasswordOtpSwalActionsHidden(false);
 
   if (popup) {
     popup.dataset.passwordUpdated = "true";
@@ -4291,7 +4352,7 @@ function initChatbotWidget() {
     try {
       const response = await fetch(`${API_BASE_URL}/chatbot/message`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getChatbotRequestHeaders(),
         body: JSON.stringify({
           message,
           language: selectedLanguage,
@@ -4324,6 +4385,16 @@ function initChatbotWidget() {
   });
 }
 
+function getChatbotRequestHeaders() {
+  const headers = { "Content-Type": "application/json" };
+  const token = getToken();
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  return headers;
+}
+
 function appendChatMessage(container, type, text) {
   if (!container) return null;
 
@@ -4331,7 +4402,7 @@ function appendChatMessage(container, type, text) {
   item.className = `chatbot-message ${type}`;
 
   const paragraph = document.createElement("p");
-  paragraph.textContent = text;
+  paragraph.textContent = type === "bot" ? cleanChatbotReplyText(text) : text;
   item.appendChild(paragraph);
 
   if (type === "bot") {
@@ -4353,6 +4424,15 @@ function appendChatMessage(container, type, text) {
 
   container.scrollTop = container.scrollHeight;
   return item;
+}
+
+function cleanChatbotReplyText(value = "") {
+  return String(value)
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/\*([^*\n]+)\*/g, "$1")
+    .replace(/__([^_]+)__/g, "$1")
+    .replace(/`([^`]+)`/g, "$1")
+    .trim();
 }
 
 function renderChatbotQuickActions(container, language = "english") {

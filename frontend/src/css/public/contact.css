@@ -49,10 +49,12 @@ body.contact-page .contact-hero {
 .contact-hero p {
   max-width: 420px;
   margin: 0;
-  color: rgba(255, 255, 255, 0.88);
-  font-size: 1.06rem;
-  font-weight: 600;
-  line-height: 1.42;
+  color: #ffffff;
+  font-family: "Inter", "League Spartan", sans-serif;
+  font-size: clamp(15px, 0.95vw, 17px);
+  font-weight: 400;
+  line-height: 1.45;
+  letter-spacing: 0;
 }
 
 .contact-hero-line {

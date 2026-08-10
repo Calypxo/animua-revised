@@ -838,14 +838,10 @@ function ensurePolicyModals() {
                 <div class="auth-policy-section-copy">
                   <h3>Terms of Use</h3>
                   <ul>
-                    <li>Users must provide accurate information.</li>
-                    <li>Users must protect their login credentials.</li>
-                    <li>Users must not impersonate others or misuse the system.</li>
-                    <li>False adoption or surrender information is prohibited.</li>
-                    <li>Adoption applications do not guarantee approval.</li>
-                    <li>Surrender requests do not guarantee acceptance.</li>
-                    <li>Final decisions are made by the Angeles City Veterinary Office.</li>
-                    <li>Accounts may be suspended for misuse or policy violations.</li>
+                    <li>Provide accurate account and request details.</li>
+                    <li>Keep your login credentials secure.</li>
+                    <li>Do not submit false, abusive, or misleading requests.</li>
+                    <li>Applications and surrender requests are reviewed before approval.</li>
                   </ul>
                 </div>
               </section>
@@ -854,12 +850,10 @@ function ensurePolicyModals() {
                 <div class="auth-policy-section-copy">
                   <h3>Privacy Notice</h3>
                   <ul>
-                    <li>Information collected may include full name, email, mobile number, compatibility responses, adoption applications, surrender requests, and uploaded documents.</li>
-                    <li>Information is used for account management, compatibility matching, application processing, request updates, and service improvement.</li>
-                    <li>Authentication credentials are handled securely by the existing authentication service.</li>
-                    <li>Personal information is accessible only to authorized personnel.</li>
-                    <li>Information is not sold and is only shared when required by law, necessary for shelter services, or authorized by the user.</li>
-                    <li>Users may request access, correction, or deletion subject to applicable record-retention requirements.</li>
+                    <li>We collect contact details, request forms, quiz answers, and uploaded documents.</li>
+                    <li>Your data is used to manage accounts, matches, applications, and shelter updates.</li>
+                    <li>Only authorized personnel can access your information.</li>
+                    <li>We share data only when required by law, shelter service needs, or your consent.</li>
                   </ul>
                 </div>
               </section>
@@ -875,6 +869,13 @@ function ensurePolicyModals() {
               <span class="auth-policy-consent-box" aria-hidden="true"></span>
               <span>I have read, understood, and agree to the <strong>Terms &amp; Privacy Notice.</strong></span>
             </label>
+            <div class="auth-policy-action-row">
+              <button type="button" class="auth-policy-action auth-policy-action-secondary" data-policy-close>Cancel</button>
+              <button type="button" class="auth-policy-action auth-policy-action-primary" data-policy-accept>
+                <i class="fa-solid fa-paw" aria-hidden="true"></i>
+                <span>Agree &amp; Continue</span>
+              </button>
+            </div>
           </footer>
         </section>
       </div>
@@ -888,6 +889,23 @@ function ensurePolicyModals() {
 
     modal.querySelectorAll("[data-policy-close]").forEach((button) => {
       button.addEventListener("click", closePolicyModal);
+    });
+
+    modal.querySelectorAll("[data-policy-accept]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const modalConsent = document.getElementById("auth-policy-modal-consent");
+        const termsInput = document.getElementById("reg-terms");
+        const termsError = document.getElementById("reg-terms-error");
+
+        if (modalConsent) modalConsent.checked = true;
+        if (termsInput) {
+          termsInput.checked = true;
+          termsInput.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+        if (termsError) termsError.textContent = "";
+
+        closePolicyModal();
+      });
     });
   });
 
