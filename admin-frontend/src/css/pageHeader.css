@@ -394,3 +394,89 @@
 @media (prefers-reduced-motion: reduce) {
   .system-page-header *, .system-page-header *::before, .system-page-header *::after { transition-duration: .01ms !important; }
 }
+
+/* Summary cards wrap as a complete grid on compact workspaces. Horizontal
+   metric rails made the dashboard snapshot look cut in half on phones. */
+@media (max-width: 900px) {
+  .system-summary {
+    height: auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-flow: row;
+    grid-auto-columns: auto;
+    overflow: visible;
+    scroll-snap-type: none;
+  }
+
+  .system-summary-metric {
+    min-width: 0;
+    border-right: 0;
+    border-bottom: 1px solid var(--header-border);
+  }
+
+  .system-summary-metric:nth-of-type(odd) {
+    border-right: 1px solid var(--header-border);
+  }
+
+  .system-summary:is([data-count="4"], [data-count="6"]) .system-summary-metric:nth-last-of-type(-n + 2) {
+    border-bottom: 0;
+  }
+
+  .system-summary:is([data-count="3"], [data-count="5"], [data-count="7"]) .system-summary-metric:last-child {
+    grid-column: 1 / -1;
+    border-right: 0;
+    border-bottom: 0;
+  }
+}
+
+@media (max-width: 520px) {
+  .system-summary {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .system-summary-metric,
+  .system-summary-metric:nth-of-type(odd),
+  .system-summary:is([data-count="4"], [data-count="6"]) .system-summary-metric:nth-last-of-type(-n + 2) {
+    border-right: 0;
+    border-bottom: 1px solid var(--header-border);
+  }
+
+  .system-summary-metric:last-child {
+    border-bottom: 0;
+  }
+}
+
+@container management-workspace (max-width: 900px) {
+  .system-summary {
+    height: auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-flow: row;
+    grid-auto-columns: auto;
+    overflow: visible;
+    scroll-snap-type: none;
+  }
+
+  .system-summary-metric {
+    min-width: 0;
+    border-right: 0;
+    border-bottom: 1px solid var(--header-border);
+  }
+
+  .system-summary-metric:nth-of-type(odd) { border-right: 1px solid var(--header-border); }
+  .system-summary:is([data-count="4"], [data-count="6"]) .system-summary-metric:nth-last-of-type(-n + 2) { border-bottom: 0; }
+  .system-summary:is([data-count="3"], [data-count="5"], [data-count="7"]) .system-summary-metric:last-child {
+    grid-column: 1 / -1;
+    border-right: 0;
+    border-bottom: 0;
+  }
+}
+
+@container management-workspace (max-width: 520px) {
+  .system-summary { grid-template-columns: minmax(0, 1fr); }
+  .system-summary-metric,
+  .system-summary-metric:nth-of-type(odd),
+  .system-summary:is([data-count="4"], [data-count="6"]) .system-summary-metric:nth-last-of-type(-n + 2) {
+    border-right: 0;
+    border-bottom: 1px solid var(--header-border);
+  }
+  .system-summary-metric:last-child { border-bottom: 0; }
+}

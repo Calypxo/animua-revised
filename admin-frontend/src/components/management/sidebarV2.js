@@ -23,6 +23,21 @@ const normalizePath = (path = "") => path.split("?")[0].split("#")[0].replace(/\
 const EMBED_PARAM = "animuaShell";
 const WORKSPACE_FRAME_NAME = "animua-management-workspace";
 
+function ensureCompactTopbarBrand() {
+  const topbarLeft = document.querySelector(".topbar-left");
+  const toggle = document.getElementById("sidebarToggle");
+  if (!topbarLeft || !toggle || topbarLeft.querySelector(".compact-topbar-brand")) return;
+
+  const brand = document.createElement("a");
+  brand.className = "compact-topbar-brand";
+  brand.href = "/pages/dashboard.html";
+  brand.setAttribute("aria-label", "ANIMUA dashboard");
+  brand.innerHTML = `
+    <img src="/images/animua_logo1.svg" alt="" aria-hidden="true">
+    <span>nimua</span>`;
+  toggle.insertAdjacentElement("afterend", brand);
+}
+
 function isEmbeddedView() {
   if (window.self === window.top) return false;
   if (window.name === WORKSPACE_FRAME_NAME) return true;
@@ -401,6 +416,7 @@ export function loadSidebar() {
 
   initializeManagementModals();
   initializeManagementConsistency();
+  ensureCompactTopbarBrand();
 
   const role = normalizeRole(getUserRole());
   if (!role) {

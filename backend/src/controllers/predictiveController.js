@@ -26,7 +26,33 @@ async function getItems(req, res) {
   }
 }
 
+async function predictLiveItems(req, res) {
+  try {
+    const items = req.body?.items;
+    if (!Array.isArray(items)) {
+      return res.status(400).json({
+        success: false,
+        message: "items must be an array of live inventory records.",
+      });
+    }
+    if (items.length > 500) {
+      return res.status(400).json({
+        success: false,
+        message: "A maximum of 500 inventory items can be predicted at once.",
+      });
+    }
+    return res.json(predictiveService.predictLiveInventoryItems(items));
+  } catch (error) {
+    const statusCode = error.code === "MODEL_NOT_TRAINED" ? 503 : 500;
+    return res.status(statusCode).json({
+      success: false,
+      message: error.message,
+    });
+  }
+}
+
 module.exports = {
   getStatus,
-  getItems
+  getItems,
+  predictLiveItems,
 };

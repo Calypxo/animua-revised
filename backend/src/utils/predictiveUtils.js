@@ -25,6 +25,9 @@ function cleanText(value) {
 }
 
 function toNumber(value) {
+  if (value === null || value === undefined || String(value).trim() === "") {
+    return null;
+  }
   const num = Number(value);
   return Number.isFinite(num) ? num : null;
 }
@@ -139,6 +142,89 @@ function buildPredictionRowFromExcelRow(row) {
   return sample;
 }
 
+function firstValue(item, keys) {
+  for (const key of keys) {
+    if (
+      item[key] !== undefined &&
+      item[key] !== null &&
+      String(item[key]).trim() !== ""
+    ) return item[key];
+  }
+  return null;
+}
+
+function buildPredictionInputFromLiveItem(item) {
+  if (!item || typeof item !== "object" || Array.isArray(item)) {
+    const error = new Error("Inventory item must be an object.");
+    error.code = "INVALID_LIVE_ITEM";
+    throw error;
+  }
+
+  const itemId = cleanText(firstValue(item, ["id", "docId", "itemId"]));
+  if (!itemId) {
+    const error = new Error("A stable inventory item id is required.");
+    error.code = "INVALID_LIVE_ITEM";
+    error.missingFeatures = ["Item ID"];
+    throw error;
+  }
+
+  const raw = {
+    category: firstValue(item, ["category", "Category"]),
+    currentStock: firstValue(item, ["currentStock", "quantity", "stock", "onHand"]),
+    averageInventory: firstValue(item, ["averageInventory"]),
+    avgMonthlyUsage: firstValue(item, ["avgMonthlyUsage"]),
+    recencyDays: firstValue(item, ["recencyDays"]),
+    leadTimeDays: firstValue(item, ["leadTimeDays", "leadTime"]),
+    stockoutFrequency: firstValue(item, ["stockoutFrequency"]),
+    monthlyTurnoverRatio: firstValue(item, ["monthlyTurnoverRatio"]),
+  };
+  const derivedFeatures = [];
+
+  if (toNumber(raw.monthlyTurnoverRatio) === null) {
+    const usage = toNumber(raw.avgMonthlyUsage);
+    const average = toNumber(raw.averageInventory);
+    if (usage !== null && average !== null && average > 0) {
+      raw.monthlyTurnoverRatio = Number((usage / average).toFixed(4));
+      derivedFeatures.push("Monthly Turnover Ratio");
+    }
+  }
+
+  const missingFeatures = [];
+  if (!cleanText(raw.category)) missingFeatures.push("Category");
+  const numericMapping = [
+    ["Current Stock", raw.currentStock],
+    ["Average Inventory", raw.averageInventory],
+    ["Avg Monthly Usage", raw.avgMonthlyUsage],
+    ["Recency (Days)", raw.recencyDays],
+    ["Lead Time (Days)", raw.leadTimeDays],
+    ["Stockout Frequency", raw.stockoutFrequency],
+    ["Monthly Turnover Ratio", raw.monthlyTurnoverRatio],
+  ];
+  for (const [feature, value] of numericMapping) {
+    if (toNumber(value) === null) missingFeatures.push(feature);
+  }
+
+  if (missingFeatures.length) {
+    const error = new Error(
+      `Missing or invalid model features: ${missingFeatures.join(", ")}.`
+    );
+    error.code = "INVALID_LIVE_ITEM";
+    error.itemId = itemId;
+    error.missingFeatures = missingFeatures;
+    throw error;
+  }
+
+  return {
+    itemId,
+    itemDescription: cleanText(
+      firstValue(item, ["name", "itemDescription", "description"])
+    ),
+    unit: cleanText(firstValue(item, ["unit"])),
+    row: buildPredictionRow(raw),
+    derivedFeatures,
+  };
+}
+
 function computeStockoutMetrics(currentStock, avgMonthlyUsage) {
   const stock = toNumber(currentStock) ?? 0;
   const monthlyUsage = toNumber(avgMonthlyUsage) ?? 0;
@@ -174,5 +260,6 @@ module.exports = {
   prepareTrainingRows,
   buildPredictionRow,
   buildPredictionRowFromExcelRow,
+  buildPredictionInputFromLiveItem,
   computeStockoutMetrics
 };

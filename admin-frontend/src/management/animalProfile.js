@@ -28,6 +28,15 @@ import {
 import {
   getInventoryItems,
 } from "../services/inventoryFirestore.service.js";
+import {
+  saveFormDraft,
+  restoreFormDraft,
+  clearFormDraft,
+} from "./formDrafts.js";
+import {
+  shouldShowAddMedical,
+  buildQuarantineDecisionPayload,
+} from "./animalProfileWorkflow.js";
 
 const TRAITS = [
   { key: "energyLevel", label: "Energy Level", desc: "Overall energy of the animal" },
@@ -60,6 +69,35 @@ let editingMedId = null;
 let currentRole = "";
 let currentUser = null;
 let medicalInventoryItems = [];
+
+function formDraftKey(scope) {
+  return `animua_animal_form_draft:${animal?.id || "unknown"}:${scope}`;
+}
+
+function setDraftStatus(id, message) {
+  const status = document.getElementById(id);
+  if (status) status.textContent = message;
+}
+
+function saveLocalFormDraft(formId, scope, statusId) {
+  const form = document.getElementById(formId);
+  if (!form) return;
+  saveFormDraft(localStorage, formDraftKey(scope), form);
+  setDraftStatus(statusId, "Draft saved on this device");
+  showToast("info", "Draft saved locally.");
+}
+
+function restoreLocalFormDraft(formId, scope, statusId) {
+  const form = document.getElementById(formId);
+  const restored = form && restoreFormDraft(localStorage, formDraftKey(scope), form);
+  setDraftStatus(statusId, restored ? "Local draft restored" : "");
+  return Boolean(restored);
+}
+
+function clearLocalFormDraft(scope, statusId) {
+  clearFormDraft(localStorage, formDraftKey(scope));
+  setDraftStatus(statusId, "");
+}
 
 function signedInUserName() {
   return String(
@@ -157,6 +195,128 @@ async function loadMedicalInventoryItems() {
   medicalInventoryItems = items
     .map(mapInventoryItem)
     .filter(isMedicalInventoryItem);
+}
+
+function closeMedicalInventoryOptions() {
+  const options = document.getElementById("medicalInventoryOptions");
+  const search = document.getElementById("fMedInventorySearch");
+  if (options) options.hidden = true;
+  search?.setAttribute("aria-expanded", "false");
+}
+
+function selectedMedicalInventoryItem() {
+  const id = document.getElementById("fMedInventoryItem")?.value || "";
+  return medicalInventoryItems.find((item) => item.docId === id || item.itemId === id) || null;
+}
+
+function syncMedicalInventoryPicker() {
+  const hidden = document.getElementById("fMedInventoryItem");
+  const search = document.getElementById("fMedInventorySearch");
+  const hint = document.getElementById("medicalInventorySelectionHint");
+  const selected = selectedMedicalInventoryItem();
+
+  if (!selected && hidden) hidden.value = "";
+  if (search) search.value = selected?.name?.trim() || "";
+  if (hint) {
+    hint.textContent = selected
+      ? `${selected.currentStock} ${selected.unit || "pcs"} available · ${selected.category}`
+      : "No inventory item selected.";
+    hint.classList.toggle("is-selected", Boolean(selected));
+  }
+}
+
+function selectMedicalInventoryItem(id = "") {
+  const hidden = document.getElementById("fMedInventoryItem");
+  if (hidden) hidden.value = id;
+  syncMedicalInventoryPicker();
+  closeMedicalInventoryOptions();
+}
+
+function renderMedicalInventoryOptions(query = "") {
+  const options = document.getElementById("medicalInventoryOptions");
+  const search = document.getElementById("fMedInventorySearch");
+  if (!options || !search) return;
+
+  const normalized = query.toLowerCase().trim();
+  const matches = medicalInventoryItems.filter((item) => {
+    const haystack = `${item.name} ${item.category} ${item.itemId || ""}`.toLowerCase();
+    return !normalized || haystack.includes(normalized);
+  }).slice(0, 12);
+
+  options.replaceChildren();
+  if (!matches.length) {
+    const empty = document.createElement("div");
+    empty.className = "medical-inventory-empty";
+    empty.innerHTML = '<i class="bi bi-search"></i><span>No matching medicine or supply</span>';
+    options.append(empty);
+  } else {
+    matches.forEach((item) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "medical-inventory-option";
+      button.setAttribute("role", "option");
+      button.setAttribute("aria-selected", String(selectedMedicalInventoryItem()?.docId === item.docId));
+
+      const icon = document.createElement("span");
+      icon.className = "medical-inventory-option-icon";
+      icon.innerHTML = '<i class="bi bi-capsule-pill" aria-hidden="true"></i>';
+
+      const copy = document.createElement("span");
+      copy.className = "medical-inventory-option-copy";
+      const name = document.createElement("strong");
+      name.textContent = item.name.trim();
+      const category = document.createElement("small");
+      category.textContent = item.category;
+      copy.append(name, category);
+
+      const stock = document.createElement("span");
+      stock.className = "medical-inventory-option-stock";
+      stock.textContent = `${item.currentStock} ${item.unit || "pcs"}`;
+
+      button.append(icon, copy, stock);
+      button.addEventListener("click", () => selectMedicalInventoryItem(item.docId));
+      options.append(button);
+    });
+  }
+
+  options.hidden = false;
+  search.setAttribute("aria-expanded", "true");
+}
+
+function bindMedicalInventoryPicker() {
+  const picker = document.getElementById("medicalInventoryPicker");
+  const search = document.getElementById("fMedInventorySearch");
+  const clear = document.getElementById("clearMedicalInventory");
+  if (!picker || !search || picker.dataset.bound === "true") return;
+  picker.dataset.bound = "true";
+
+  search.addEventListener("focus", () => renderMedicalInventoryOptions(search.value));
+  search.addEventListener("input", () => {
+    const hidden = document.getElementById("fMedInventoryItem");
+    if (hidden) hidden.value = "";
+    renderMedicalInventoryOptions(search.value);
+  });
+  search.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeMedicalInventoryOptions();
+      return;
+    }
+    if (event.key === "Enter") {
+      const first = document.querySelector("#medicalInventoryOptions .medical-inventory-option");
+      if (first) {
+        event.preventDefault();
+        first.click();
+      }
+    }
+  });
+  clear?.addEventListener("click", () => {
+    selectMedicalInventoryItem("");
+    search.focus();
+    renderMedicalInventoryOptions("");
+  });
+  document.addEventListener("click", (event) => {
+    if (!picker.contains(event.target)) closeMedicalInventoryOptions();
+  });
 }
 
 function parseDateValue(d) {
@@ -406,14 +566,14 @@ function renderMedicalTab() {
 
 if (addMedicalButton) {
   addMedicalButton.style.display =
-    animal.status === "Quarantine" &&
-    can("add_medical")
+    shouldShowAddMedical(animal.status, can("add_medical"))
       ? ""
       : "none";
 }
 
   const list = document.getElementById("medicalRecordsList");
   const recs = animal.medicalRecords || [];
+  const clinicalRecords = recs.filter((record) => record.type !== "Quarantine Clearance");
 
   if (animal.status === "Profiling") {
   list.innerHTML = `
@@ -426,7 +586,7 @@ if (addMedicalButton) {
       </p>
     </div>
   `;
-} else if (!recs.length) {
+} else if (!clinicalRecords.length) {
   list.innerHTML = `
     <div class="behavioral-empty">
       <i class="bi bi-clipboard2-x"></i>
@@ -434,7 +594,7 @@ if (addMedicalButton) {
     </div>
   `;
 } else {
-    list.innerHTML = recs.slice().reverse().map(r => {
+    list.innerHTML = clinicalRecords.slice().reverse().map(r => {
       const tc = medTypeCfg[r.type] || medTypeCfg.Checkup;
       const cc = clearanceCfg[r.clearance] || clearanceCfg.Pending;
       return `
@@ -456,7 +616,7 @@ if (addMedicalButton) {
               <span class="med-card-date">${formatDate(r.date)}</span>
               <span class="med-card-vet"><i class="bi bi-person-fill me-1"></i>${r.vet || "—"}</span>
               ${
-              animal.status === "Quarantine" && can("edit_medical")
+              animal.status === "Quarantine" && can("edit_medical") && r.type !== "Quarantine Clearance"
                 ? `
                   <button
                     class="tbl-action-btn"
@@ -500,13 +660,12 @@ if (addMedicalButton) {
 
   const quarantineCard = document.getElementById("quarantineCard");
   const behaviorComplete = Boolean(animal.behavioralAssessment);
-  const latestClearanceRecord = getLatestClearanceRecord();
   quarantineCard.innerHTML = `
     <div class="qs-title"><i class="bi bi-shield-plus"></i> Care readiness</div>
     <p class="quarantine-workflow-help">Medical visits document care. A single <strong>Quarantine Review</strong> records the final decision; update that review if the decision changes.</p>
     <div class="care-workflow" aria-label="Animal care readiness workflow">
       <div class="care-workflow-step is-complete"><i class="bi bi-check-lg"></i><span><strong>In quarantine</strong><small>Care tracking active</small></span></div>
-      <div class="care-workflow-step ${recs.length ? "is-complete" : "is-current"}"><i class="bi ${recs.length ? "bi-check-lg" : "bi-clipboard2-pulse"}"></i><span><strong>Medical care</strong><small>${recs.length} record${recs.length === 1 ? "" : "s"}</small></span></div>
+      <div class="care-workflow-step ${clinicalRecords.length ? "is-complete" : "is-current"}"><i class="bi ${clinicalRecords.length ? "bi-check-lg" : "bi-clipboard2-pulse"}"></i><span><strong>Medical care</strong><small>${clinicalRecords.length} record${clinicalRecords.length === 1 ? "" : "s"}</small></span></div>
       <div class="care-workflow-step ${clearStatus === "Cleared" ? "is-complete" : "is-current"}"><i class="bi ${clearStatus === "Cleared" ? "bi-check-lg" : "bi-shield-check"}"></i><span><strong>Quarantine decision</strong><small>${cc.label}</small></span></div>
       <div class="care-workflow-step ${behaviorComplete ? "is-complete" : ""}"><i class="bi ${behaviorComplete ? "bi-check-lg" : "bi-sliders"}"></i><span><strong>Behavior assessment</strong><small>${behaviorComplete ? "Complete" : "Pending"}</small></span></div>
     </div>
@@ -514,7 +673,7 @@ if (addMedicalButton) {
       <div class="qs-item"><div class="qs-lbl">Quarantine decision</div>
         <div class="qs-val"><span class="clearance-badge ${cc.cls}">${cc.label}</span></div>
       </div>
-      <div class="qs-item"><div class="qs-lbl">Total Records</div><div class="qs-val">${recs.length}</div></div>
+      <div class="qs-item"><div class="qs-lbl">Clinical Records</div><div class="qs-val">${clinicalRecords.length}</div></div>
       <div class="qs-item">
   <div class="qs-lbl">Last Visit</div>
   <div class="qs-val">
@@ -526,10 +685,18 @@ if (addMedicalButton) {
   </div>
 </div>
     </div>
-    ${animal.status === "Quarantine" && can("set_clearance") ? `<button type="button" class="btn-primary-clay quarantine-decision-btn" id="btnRecordQuarantineDecision"><i class="bi bi-shield-check"></i>${latestClearanceRecord ? "Update quarantine decision" : "Record quarantine decision"}</button>` : ""}`;
+    ${animal.status === "Quarantine" && can("set_clearance") ? `
+      <div class="quarantine-decision-panel">
+        <div><strong>Set quarantine decision</strong><small>Choose the animal's current clinical clearance. This is separate from medical visit records.</small></div>
+        <div class="quarantine-decision-actions${clearStatus === "Cleared" ? " is-cleared" : ""}" role="group" aria-label="Quarantine decision">
+          <button type="button" data-clearance-decision="Pending" class="${clearStatus === "Cleared" ? "clearance-undo" : ""}" aria-pressed="${String(clearStatus === "Pending")}"><i class="bi ${clearStatus === "Cleared" ? "bi-arrow-counterclockwise" : "bi-clock"}"></i> ${clearStatus === "Cleared" ? "Undo clearance" : "Pending"}</button>
+          <button type="button" data-clearance-decision="Hold" aria-pressed="${String(clearStatus === "Hold")}"><i class="bi bi-pause-circle"></i> Keep on hold</button>
+          <button type="button" data-clearance-decision="Cleared" aria-pressed="${String(clearStatus === "Cleared")}"><i class="bi bi-check-circle"></i> Clear quarantine</button>
+        </div>
+      </div>` : ""}`;
 
-  quarantineCard.querySelector("#btnRecordQuarantineDecision")?.addEventListener("click", () => {
-    openMedicalModal(latestClearanceRecord?.id || null, "Quarantine Clearance");
+  quarantineCard.querySelectorAll("[data-clearance-decision]").forEach((button) => {
+    button.addEventListener("click", () => saveQuarantineDecision(button.dataset.clearanceDecision));
   });
 }
 
@@ -858,6 +1025,17 @@ function openBehavioralModal() {
     });
   });
 
+  if (restoreLocalFormDraft("behavioralForm", "behavioral", "behavioralDraftStatus")) {
+    TRAITS.forEach(({ key }) => {
+      const score = document.getElementById(`slider-${key}`)?.value;
+      grid.querySelectorAll(`[data-trait-key="${key}"]`).forEach((button) => {
+        const selected = button.dataset.score === score;
+        button.classList.toggle("is-selected", selected);
+        button.setAttribute("aria-pressed", String(selected));
+      });
+    });
+  }
+
   openModal("behavioralModalBackdrop");
 }
 
@@ -893,6 +1071,7 @@ async function saveBehavioralAssessment() {
     await saveBehavioralAssessmentApi(animal.id, { traits, notes, assessor });
     await refreshAnimal();
 
+    clearLocalFormDraft("behavioral", "behavioralDraftStatus");
     closeModal("behavioralModalBackdrop");
     renderAllTabs();
     showToast("success", "Behavioral assessment saved.");
@@ -902,7 +1081,43 @@ async function saveBehavioralAssessment() {
   }
 }
 
-function openMedicalModal(medId = null, defaultType = "") {
+async function saveQuarantineDecision(clearance) {
+  if (!can("set_clearance") || animal.status !== "Quarantine") {
+    showToast("error", "You do not have permission to change quarantine clearance.");
+    return;
+  }
+  const existing = getLatestClearanceRecord();
+  const isUndoingClearance = existing?.clearance === "Cleared" && clearance === "Pending";
+  if (existing?.clearance === clearance) {
+    showToast("info", `Quarantine is already ${clearance.toLowerCase()}.`);
+    return;
+  }
+
+  const buttons = document.querySelectorAll("[data-clearance-decision]");
+  buttons.forEach((button) => { button.disabled = true; });
+  const today = new Date().toISOString().split("T")[0];
+  const payload = buildQuarantineDecisionPayload(existing, clearance, today);
+
+  try {
+    if (existing?.id) await updateMedicalRecordApi(animal.id, existing.id, payload);
+    else await addMedicalRecordApi(animal.id, payload);
+    await refreshAnimal();
+    renderAllTabs();
+    showToast(
+      "success",
+      isUndoingClearance
+        ? "Quarantine clearance undone. The decision is Pending again."
+        : `Quarantine decision set to ${clearance === "Hold" ? "On Hold" : clearance}.`
+    );
+  } catch (error) {
+    console.error("[saveQuarantineDecision]", error);
+    showToast("error", error.message || "Unable to update quarantine clearance.");
+  } finally {
+    buttons.forEach((button) => { button.disabled = false; });
+  }
+}
+
+function openMedicalModal(medId = null) {
   const requiredPermission =
   medId
     ? "edit_medical"
@@ -928,39 +1143,22 @@ if (!can(requiredPermission)) {
   const editingRecord = medId
     ? (animal.medicalRecords || []).find((item) => item.id === medId)
     : null;
-  const isQuarantineReview =
-    defaultType === "Quarantine Clearance" ||
-    editingRecord?.type === "Quarantine Clearance";
+  if (editingRecord?.type === "Quarantine Clearance") {
+    showToast("info", "Use the quarantine decision buttons to update clearance.");
+    return;
+  }
 
   document.getElementById("medicalModalTitle").textContent =
-    isQuarantineReview
-      ? medId ? "Update Quarantine Review" : "Record Quarantine Review"
-      : medId ? "Edit Medical Record" : "Add Medical Record";
+    medId ? "Edit Medical Record" : "Add Medical Record";
   document.getElementById("medicalModalSubtitle").textContent =
-    isQuarantineReview
-      ? "Review the animal and record one clear quarantine decision."
-      : "Record a clinical visit, treatment, vaccination, or procedure.";
+    "Record the visit first; add care details and inventory only when applicable.";
 
   document.getElementById("medicalForm").reset();
   document.getElementById("fMedVet").value = signedInUserName();
+  const inventoryDetails = document.querySelector(".medical-optional-section");
+  if (inventoryDetails) inventoryDetails.open = false;
 
-  const inventorySelect =
-  document.getElementById("fMedInventoryItem");
-
-if (inventorySelect) {
-  inventorySelect.innerHTML = `
-    <option value="">No inventory item used</option>
-    ${medicalInventoryItems
-      .map(
-        (item) => `
-          <option value="${item.docId}">
-            ${item.name.trim()} - ${item.currentStock} ${item.unit || "pcs"} available
-          </option>
-        `
-      )
-      .join("")}
-  `;
-}
+  selectMedicalInventoryItem("");
 
 const quantityInput =
   document.getElementById("fMedQuantityUsed");
@@ -987,51 +1185,7 @@ if (qtyErr) {
     new Date().toISOString().split("T")[0];
 
   const typeSelect = document.getElementById("fMedType");
-const clearanceField =
-  document.getElementById("medClearanceGroup") ||
-  document.getElementById("fMedClearance")?.parentElement;
-
-const clearanceOption =
-  typeSelect?.querySelector(
-    'option[value="Quarantine Clearance"]'
-  );
-
-if (clearanceOption) {
-  const existingClearanceRecord = getLatestClearanceRecord();
-  clearanceOption.disabled =
-    !can("set_clearance") || Boolean(existingClearanceRecord && existingClearanceRecord.id !== medId);
-}
-
-const updateClearanceVisibility = () => {
-  const selectedType = typeSelect?.value;
-
-  if (!clearanceField) {
-    return;
-  }
-
-  const isClearanceRecord =
-    selectedType === "Quarantine Clearance";
-
-  clearanceField.style.display =
-    isClearanceRecord ? "" : "none";
-
-  const clearanceSelect =
-    document.getElementById("fMedClearance");
-
-  if (clearanceSelect) {
-    clearanceSelect.disabled =
-      isClearanceRecord &&
-      !can("set_clearance");
-  }
-};
-
-if (typeSelect) {
-  typeSelect.disabled = false;
-  typeSelect.onchange =
-    updateClearanceVisibility;
-  if (!medId && defaultType) typeSelect.value = defaultType;
-  if (isQuarantineReview) typeSelect.disabled = true;
-}
+  if (typeSelect) typeSelect.disabled = false;
 
   if (medId) {
     const record = editingRecord;
@@ -1055,9 +1209,6 @@ if (typeSelect) {
       document.getElementById("fMedNotes").value =
         record.notes || "";
 
-      document.getElementById("fMedClearance").value =
-        record.clearance || "Pending";
-
       document.getElementById("fMedWeight").value =
         record.weight || "";
 
@@ -1073,6 +1224,7 @@ if (typeSelect) {
         );
       medInventoryInput.value =
         linkedInventoryItem?.docId || "";
+      syncMedicalInventoryPicker();
     }
 
     const medQuantityInput =
@@ -1082,10 +1234,17 @@ if (typeSelect) {
       medQuantityInput.value =
         record.quantityUsed || "";
     }
+    if (inventoryDetails && record.inventoryItemId) inventoryDetails.open = true;
     }
   }
 
-  updateClearanceVisibility();
+  restoreLocalFormDraft(
+    "medicalForm",
+    medId ? `medical:${medId}` : "medical:new",
+    "medicalDraftStatus"
+  );
+  syncMedicalInventoryPicker();
+  if (inventoryDetails && document.getElementById("fMedInventoryItem")?.value) inventoryDetails.open = true;
   openModal("medicalModalBackdrop");
 }
 
@@ -1132,18 +1291,6 @@ async function saveMedicalRecord() {
     return;
   }
 
-  if (
-    type === "Quarantine Clearance" &&
-    !can("set_clearance")
-  ) {
-    showToast(
-      "error",
-      "You do not have permission to set quarantine clearance."
-    );
-
-    return;
-  }
-
   const inventoryItemId =
     document.getElementById(
       "fMedInventoryItem"
@@ -1175,15 +1322,6 @@ async function saveMedicalRecord() {
     return;
   }
 
-  const selectedClearance =
-    document.getElementById("fMedClearance").value ||
-    "Pending";
-
-  const clearance =
-    type === "Quarantine Clearance"
-      ? selectedClearance
-      : null;
-
   const payload = {
   type,
   date,
@@ -1212,7 +1350,7 @@ async function saveMedicalRecord() {
       .value
       .trim(),
 
-  clearance,
+  clearance: null,
 
   weight:
     parseFloat(
@@ -1260,6 +1398,10 @@ async function saveMedicalRecord() {
 
     await refreshAnimal();
 
+    clearLocalFormDraft(
+      editingMedId ? `medical:${editingMedId}` : "medical:new",
+      "medicalDraftStatus"
+    );
     closeModal("medicalModalBackdrop");
     renderAllTabs();
   } catch (err) {
@@ -1476,6 +1618,7 @@ function openEditModal() {
   document.getElementById("eHousingType").value =
     animal.housingType || "Unassigned";
 
+  restoreLocalFormDraft("editProfileForm", "profile", "editDraftStatus");
   openModal("editModalBackdrop");
 }
 
@@ -1535,6 +1678,7 @@ async function saveEditProfile() {
 
     await refreshAnimal();
 
+    clearLocalFormDraft("profile", "editDraftStatus");
     closeModal("editModalBackdrop");
     renderAllTabs();
 
@@ -1671,9 +1815,10 @@ if (behavioralButton) {
 }
 
   if (addMedicalButton) {
-    const canShowMedical =
-      animal.status === "Quarantine" &&
-      can("add_medical");
+    const canShowMedical = shouldShowAddMedical(
+      animal.status,
+      can("add_medical")
+    );
 
     addMedicalButton.style.display =
       canShowMedical ? "" : "none";
@@ -1701,6 +1846,7 @@ async function init() {
     await loadSidebar();
     await loadAnimal();
     await loadMedicalInventoryItems();
+    bindMedicalInventoryPicker();
 
     renderAllTabs();
 
@@ -1710,17 +1856,20 @@ async function init() {
     document.getElementById("editModalClose")?.addEventListener("click", () => closeModal("editModalBackdrop"));
     document.getElementById("editModalCancel")?.addEventListener("click", () => closeModal("editModalBackdrop"));
     document.getElementById("editModalSave")?.addEventListener("click", saveEditProfile);
+    document.getElementById("editModalDraft")?.addEventListener("click", () => saveLocalFormDraft("editProfileForm", "profile", "editDraftStatus"));
 
     document.getElementById("btnEditBehavioral")?.addEventListener("click", openBehavioralModal);
     document.getElementById("behavioralModalClose")?.addEventListener("click", () => closeModal("behavioralModalBackdrop"));
     document.getElementById("behavioralModalCancel")?.addEventListener("click", () => closeModal("behavioralModalBackdrop"));
     document.getElementById("behavioralModalSave")?.addEventListener("click", saveBehavioralAssessment);
+    document.getElementById("behavioralModalDraft")?.addEventListener("click", () => saveLocalFormDraft("behavioralForm", "behavioral", "behavioralDraftStatus"));
 
     document.getElementById("btnAddMedical")?.addEventListener("click", () => openMedicalModal());
     document.getElementById("btnMarkReady")?.addEventListener("click", markReadyForAdoption);
     document.getElementById("medicalModalClose")?.addEventListener("click", () => closeModal("medicalModalBackdrop"));
     document.getElementById("medicalModalCancel")?.addEventListener("click", () => closeModal("medicalModalBackdrop"));
     document.getElementById("medicalModalSave")?.addEventListener("click", saveMedicalRecord);
+    document.getElementById("medicalModalDraft")?.addEventListener("click", () => saveLocalFormDraft("medicalForm", editingMedId ? `medical:${editingMedId}` : "medical:new", "medicalDraftStatus"));
 
     document
   .getElementById("ddArchive")

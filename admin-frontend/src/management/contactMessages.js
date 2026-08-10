@@ -13,6 +13,12 @@ import { renderPageHeader } from "../components/management/pageHeader.js";
 import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.js";
 import { cacheContactMessageCount } from "../components/management/contactMessageBadge.js";
 import { apiFetch } from "../utils/api.js";
+import {
+  shouldSendReplyOnKeydown,
+  getReplyDraft,
+  saveReplyDraft,
+  clearReplyDraft,
+} from "./contactReplyComposer.js";
 
 window.Swal = Swal;
 renderPageHeader(PAGE_HEADER_CONFIGS.contactMessages);
@@ -377,7 +383,8 @@ function renderDetail() {
   );
 
   const replyBox = el("replyMessage");
-  if (replyBox) replyBox.value = selected.replyMessage || "";
+  if (replyBox) replyBox.value = getReplyDraft(localStorage, selected.id);
+  setText("replyDraftStatus", replyBox?.value ? "Draft restored" : "Enter to send · Shift+Enter for a new line");
 
   const sendBtn = el("sendReplyBtn");
   if (sendBtn) sendBtn.disabled = !can("reply");
@@ -456,6 +463,9 @@ async function loadMessages() {
 async function sendReply(event) {
   event.preventDefault();
 
+  const sendBtn = el("sendReplyBtn");
+  if (sendBtn?.dataset.sending === "true") return;
+
   const selected = getSelectedMessage();
   const replyMessage = el("replyMessage")?.value.trim();
   if (!selected || !replyMessage) {
@@ -463,23 +473,6 @@ async function sendReply(event) {
     return;
   }
 
-  const confirm = await Swal.fire({
-    icon: "question",
-    title: "Send ANIMUA reply?",
-    text: `This will save the reply to ${selected.fullName || selected.email || "the user's"} ANIMUA account.`,
-    showCancelButton: true,
-    confirmButtonText: "Send reply",
-    cancelButtonText: "Cancel",
-    customClass: {
-      popup: "animua-popup",
-      confirmButton: "animua-confirm",
-      cancelButton: "animua-cancel",
-    },
-    buttonsStyling: false,
-  });
-  if (!confirm.isConfirmed) return;
-
-  const sendBtn = el("sendReplyBtn");
   sendBtn.disabled = true;
   sendBtn.dataset.sending = "true";
   sendBtn.setAttribute("aria-busy", "true");
@@ -490,6 +483,10 @@ async function sendReply(event) {
       method: "POST",
       body: JSON.stringify({ replyMessage }),
     });
+
+    clearReplyDraft(localStorage, selected.id);
+    if (el("replyMessage")) el("replyMessage").value = "";
+    setText("replyDraftStatus", "Sent · Enter to send another reply");
 
     await Swal.fire({
       icon: "success",
@@ -548,6 +545,22 @@ function bindEvents() {
   });
   el("backToUsersBtn")?.addEventListener("click", closeConversation);
   el("replyForm")?.addEventListener("submit", sendReply);
+  el("replyMessage")?.addEventListener("input", (event) => {
+    const selected = getSelectedMessage();
+    if (!selected) return;
+    saveReplyDraft(localStorage, selected.id, event.target.value);
+    setText(
+      "replyDraftStatus",
+      event.target.value.trim()
+        ? "Draft saved locally"
+        : "Enter to send · Shift+Enter for a new line"
+    );
+  });
+  el("replyMessage")?.addEventListener("keydown", (event) => {
+    if (!shouldSendReplyOnKeydown(event)) return;
+    event.preventDefault();
+    el("replyForm")?.requestSubmit();
+  });
 }
 
 document.addEventListener("DOMContentLoaded", async () => {

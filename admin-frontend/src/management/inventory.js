@@ -18,8 +18,13 @@ import {
   updateInventoryItem,
   createInventoryItem,
   addInventoryTransaction,
-  getItemTransactions
+  getItemTransactions,
+  getLiveInventoryPredictions
 } from "../services/inventoryFirestore.service.js";
+import {
+  mergeInventoryPredictions,
+  markInventoryPredictionsUnavailable,
+} from "./inventoryPredictionMerge.js";
 
 renderPageHeader(PAGE_HEADER_CONFIGS.inventory);
 
@@ -143,11 +148,12 @@ function mapPredictiveItem(item, index = 0) {
 
   const leadTimeDays = Number(item.leadTimeDays ?? item.leadTime ?? 7);
 
-  const movementRaw = String(
-    item.predictedMovement ?? item.movementLabel ?? item.movement ?? "Slow"
-  ).toLowerCase();
-
-  const movement = movementRaw.includes("fast") ? "Fast" : "Slow";
+  const ruleBasedMovement = rfClassify({
+    ...item,
+    currentStock,
+    avgMonthlyUsage,
+    leadTimeDays,
+  }).movement;
 
   const reorderPoint = Math.max(
     1,
@@ -175,8 +181,11 @@ function mapPredictiveItem(item, index = 0) {
     leadTimeDays,
     stockoutFrequency: Number(item.stockoutFrequency ?? 0),
     monthlyTurnoverRatio: Number(item.monthlyTurnoverRatio ?? 0),
-    movementLabel: movement,
-    movement,
+    ruleBasedMovement,
+    predictedMovement: null,
+    predictionAvailable: false,
+    predictionStatus: "loading",
+    predictionMessage: "Waiting for the Random Forest service.",
     reorderRisk: item.reorderRisk || "OK",
     daysUntilStockout,
     daysToRestock: Math.max(0, daysUntilStockout - leadTimeDays),
@@ -224,13 +233,36 @@ function renderStats() {
 
   const critical = store.filter((i) => i.stockStatus === "Critical").length;
   const low = store.filter((i) => i.stockStatus === "Low").length;
-  const fast = store.filter((i) => i.movement === "Fast").length;
+  const fast = store.filter((i) => i.predictedMovement === "Fast").length;
 
   set("statTotal", store.length);
   set("statCritical", critical);
   set("heroCriticalCount", critical);
   set("statLow", low);
   set("statFast", fast);
+}
+
+function renderPredictionStatus(state, details = "") {
+  const banner = document.getElementById("predictiveStatus");
+  if (!banner) return;
+  const states = {
+    loading: ["bi-arrow-repeat", "Loading live Random Forest predictions…"],
+    ready: ["bi-cpu-fill", "Random Forest movement uses current Firestore inventory."],
+    partial: ["bi-exclamation-circle", "Some items lack the model features required for prediction."],
+    unavailable: ["bi-cloud-slash", "Random Forest predictions are unavailable. Inventory controls remain active."],
+  };
+  const [icon, label] = states[state] || states.unavailable;
+  banner.className = `predictive-status predictive-${state}`;
+  banner.innerHTML = `<i class="bi ${icon}"></i><span><strong>${label}</strong>${details ? `<small>${details}</small>` : ""}</span>`;
+}
+
+function movementBadge(item, compact = false) {
+  if (!item.predictionAvailable || !item.predictedMovement) {
+    const label = item.predictionStatus === "loading" ? "Loading" : "Unavailable";
+    return `<span class="movement-badge movement-unavailable${compact ? " is-compact" : ""}" title="${item.predictionMessage || label}"><i class="bi bi-dash-circle"></i>${label}</span>`;
+  }
+  const movement = item.predictedMovement;
+  return `<span class="movement-badge movement-${movement.toLowerCase()}${compact ? " is-compact" : ""}" title="Random Forest prediction"><i class="bi ${movement === "Fast" ? "bi-lightning-charge-fill" : "bi-hourglass-split"}"></i>${compact ? movement : `${movement} Moving`}</span>`;
 }
 
 /* ── Alerts ─────────────────────────────────────────── */
@@ -290,10 +322,12 @@ function applyFilters() {
   const movement = document.getElementById("filterMovement")?.value || "";
   const risk = document.getElementById("filterRisk")?.value || "";
   const stockStatus = document.getElementById("filterStockStatus")?.value || "";
+  activeTab = document.getElementById("filterCategory")?.value.trim() || "all";
+  const categoryQuery = activeTab === "all" ? "" : activeTab.toLowerCase();
 
   filtered = store.filter((item) => {
-    if (activeTab !== "all" && item.category !== activeTab) return false;
-    if (movement && item.movement !== movement) return false;
+    if (categoryQuery && !item.category.toLowerCase().includes(categoryQuery)) return false;
+    if (movement && item.predictedMovement !== movement) return false;
     if (risk && item.reorderRisk !== risk) return false;
     if (stockStatus && item.stockStatus !== stockStatus) return false;
     if (
@@ -339,11 +373,8 @@ function clearInventoryFilters() {
     if (control) control.value = "";
   });
 
-  document.querySelectorAll("#categoryTabs .inv-tab").forEach((tab) => {
-    const isAll = tab.dataset.tab === "all";
-    tab.classList.toggle("active", isAll);
-    tab.setAttribute("aria-selected", String(isAll));
-  });
+  const category = document.getElementById("filterCategory");
+  if (category) category.value = "";
   applyFilters();
 }
 
@@ -544,15 +575,7 @@ function renderTable() {
           </td>
 
           <td>
-            <span class="movement-badge movement-${item.movement.toLowerCase()}">
-              <i class="bi ${
-                item.movement === "Fast"
-                  ? "bi-lightning-charge-fill"
-                  : "bi-hourglass-split"
-              }"></i>
-
-              ${item.movement === "Fast" ? "Fast Moving" : "Slow Moving"}
-            </span>
+            ${movementBadge(item)}
           </td>
 
           <td>
@@ -689,9 +712,7 @@ function renderCards() {
           </div>
         </div>
         <div class="inv-card-meta">
-          <span class="movement-badge movement-${item.movement.toLowerCase()}" style="font-size:0.65rem;padding:2px 7px">
-            <i class="bi ${item.movement === "Fast" ? "bi-lightning-charge-fill" : "bi-hourglass"}"></i>${item.movement}
-          </span>
+          ${movementBadge(item, true)}
           ${daysBadge(item)}
         </div>
         <div class="inv-card-footer">
@@ -884,29 +905,28 @@ function renderDrawer(item) {
         <div class="drawer-section-title"><i class="bi bi-diagram-3-fill"></i> Inventory Insight</div>
         <div class="rf-pred-card">
           <div class="rf-pred-header">
-            <span class="rf-chip"><i class="bi bi-graph-up-arrow"></i> Prediction Result</span>
-            <span class="movement-badge movement-${item.movement.toLowerCase()}">
-              <i class="bi ${item.movement === "Fast" ? "bi-lightning-charge-fill" : "bi-hourglass"}"></i>
-              ${item.movement}-Moving
-            </span>
+            <span class="rf-chip"><i class="bi bi-graph-up-arrow"></i> Random Forest Movement</span>
+            ${movementBadge(item)}
           </div>
 
           <div class="rf-pred-metrics">
             <div class="rf-metric">
               <div class="rf-metric-val">${item.daysUntilStockout >= 999 ? "—" : `${item.daysUntilStockout}d`}</div>
-              <div class="rf-metric-lbl">Days Until Stockout</div>
+              <div class="rf-metric-lbl">Rule-based Days Until Stockout</div>
             </div>
 
             <div class="rf-metric">
               <div class="rf-metric-val">${item.reorderRisk}</div>
-              <div class="rf-metric-lbl">Reorder Risk</div>
+              <div class="rf-metric-lbl">Rule-based Reorder Risk</div>
             </div>
           </div>
 
           <div style="margin-top:10px;font-size:0.75rem;color:var(--teal);display:flex;align-items:center;gap:5px">
             <i class="bi bi-info-circle"></i>
             <span>${
-              item.reorderRisk === "Review"
+              !item.predictionAvailable
+                ? item.predictionMessage
+                : item.reorderRisk === "Review"
                 ? `⚠ Restock recommended${
                     item.daysToRestock <= 0
                       ? " now"
@@ -997,6 +1017,7 @@ async function loadInventory() {
       throw new Error("No inventory items found.");
     }
 
+    renderPredictionStatus("loading");
     store = await Promise.all(
       items.map(async (item, index) => {
         const mapped = mapPredictiveItem(item, index);
@@ -1009,7 +1030,28 @@ async function loadInventory() {
     filtered = [...store];
     renderStats();
     renderAlerts();
-    buildCategoryTabs();
+    buildCategoryFilter();
+    applyFilters();
+
+    try {
+      const predictions = await getLiveInventoryPredictions(items);
+      store = mergeInventoryPredictions(store, predictions);
+      const unavailable = Number(predictions.unavailableCount || 0);
+      renderPredictionStatus(
+        unavailable ? "partial" : "ready",
+        unavailable
+          ? `${predictions.predictedCount || 0} predicted; ${unavailable} unavailable due to missing or invalid fields.`
+          : `${predictions.predictedCount || store.length} live items predicted.`
+      );
+    } catch (predictionError) {
+      console.warn("[loadInventory predictions]", predictionError);
+      store = markInventoryPredictionsUnavailable(store, predictionError.message);
+      renderPredictionStatus("unavailable", predictionError.message);
+    }
+
+    filtered = [...store];
+    renderStats();
+    renderAlerts();
     applyFilters();
   } catch (error) {
     console.error("[loadInventory]", error);
@@ -1062,8 +1104,7 @@ window.addEventListener("animua:stockDeduct", async (e) => {
       recencyDays: updatedLocal.recencyDays,
       stockoutFrequency: updatedLocal.stockoutFrequency,
       monthlyTurnoverRatio: updatedLocal.monthlyTurnoverRatio,
-      movementLabel: updatedLocal.movement,
-      movement: updatedLocal.movement,
+      ruleBasedMovement: updatedLocal.movement,
       reorderRisk: updatedLocal.reorderRisk,
       reorderPoint: updatedLocal.reorderPoint,
       daysUntilStockout: updatedLocal.daysUntilStockout,
@@ -1292,8 +1333,7 @@ async function saveBatchStockIn() {
 
       await updateInventoryItem(id, {
         currentStock: updatedLocal.currentStock,
-        movementLabel: updatedLocal.movement,
-        movement: updatedLocal.movement,
+        ruleBasedMovement: updatedLocal.movement,
         reorderRisk: updatedLocal.reorderRisk,
         reorderPoint: updatedLocal.reorderPoint,
         daysUntilStockout: updatedLocal.daysUntilStockout,
@@ -1385,8 +1425,7 @@ async function saveBatchStockOut() {
         recencyDays: updatedLocal.recencyDays,
         stockoutFrequency: updatedLocal.stockoutFrequency,
         monthlyTurnoverRatio: updatedLocal.monthlyTurnoverRatio,
-        movementLabel: updatedLocal.movement,
-        movement: updatedLocal.movement,
+        ruleBasedMovement: updatedLocal.movement,
         reorderRisk: updatedLocal.reorderRisk,
         reorderPoint: updatedLocal.reorderPoint,
         daysUntilStockout: updatedLocal.daysUntilStockout,
@@ -1479,8 +1518,7 @@ async function saveStockIn() {
 
     await updateInventoryItem(id, {
       currentStock: updatedLocal.currentStock,
-      movementLabel: updatedLocal.movement,
-      movement: updatedLocal.movement,
+      ruleBasedMovement: updatedLocal.movement,
       reorderRisk: updatedLocal.reorderRisk,
       reorderPoint: updatedLocal.reorderPoint,
       daysUntilStockout: updatedLocal.daysUntilStockout,
@@ -1588,8 +1626,7 @@ async function saveStockOut() {
       recencyDays: updatedLocal.recencyDays,
       stockoutFrequency: updatedLocal.stockoutFrequency,
       monthlyTurnoverRatio: updatedLocal.monthlyTurnoverRatio,
-      movementLabel: updatedLocal.movement,
-      movement: updatedLocal.movement,
+      ruleBasedMovement: updatedLocal.movement,
       reorderRisk: updatedLocal.reorderRisk,
       reorderPoint: updatedLocal.reorderPoint,
       daysUntilStockout: updatedLocal.daysUntilStockout,
@@ -1731,12 +1768,11 @@ if (!can(requiredPermission)) {
       transactions: [],
     };
 
-    const computed = rfClassify(baseItem);
+    const { movement: ruleBasedMovement, ...computedIndicators } = rfClassify(baseItem);
     const finalItem = {
       ...baseItem,
-      ...computed,
-      movementLabel: computed.movement,
-      movement: computed.movement,
+      ...computedIndicators,
+      ruleBasedMovement,
     };
 
     if (editingItemId) {
@@ -1756,46 +1792,25 @@ if (!can(requiredPermission)) {
 }
 
 /* ── Category tabs ──────────────────────────────────── */
-function buildCategoryTabs() {
-  const container = document.getElementById("categoryTabs");
-  if (!container) return;
+function buildCategoryFilter() {
+  const input = document.getElementById("filterCategory");
+  const options = document.getElementById("inventoryCategoryOptions");
+  if (!input || !options) return;
 
   const categoryNames = [...new Set(
     store.map((i) => (i.category || "").trim()).filter(Boolean)
   )].sort((a, b) => a.localeCompare(b));
-  const categories = ["all", ...categoryNames];
-  const categoryIcons = {
-    all: "bi-collection",
-    antibiotic: "bi-capsule",
-    antiparasitic: "bi-shield-plus",
-    consumable: "bi-bandaid",
-    disinfectant: "bi-droplet",
-    equipment: "bi-tools",
-    supplement: "bi-heart-pulse",
-    vaccine: "bi-eyedropper",
-  };
+  if (activeTab !== "all" && !categoryNames.includes(activeTab)) activeTab = "all";
 
-  container.innerHTML = categories
-    .map(
-      (c) =>
-        `<button class="inv-tab ${c === activeTab ? "active" : ""}" data-tab="${c}" role="tab" aria-selected="${c === activeTab}">
-          <i class="bi ${categoryIcons[c.toLowerCase()] || "bi-box-seam"}"></i>
-          <span>${c === "all" ? "All" : c}</span>
-          <small>${c === "all" ? store.length : store.filter((item) => item.category === c).length}</small>
-        </button>`
-    )
-    .join("");
-
-  container.querySelectorAll(".inv-tab").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      container.querySelectorAll(".inv-tab").forEach((t) => t.classList.remove("active"));
-      btn.classList.add("active");
-      container.querySelectorAll(".inv-tab").forEach((tab) => tab.setAttribute("aria-selected", String(tab === btn)));
-      activeTab = btn.dataset.tab;
-      applyFilters();
-      btn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
-    });
-  });
+  options.replaceChildren(
+    ...categoryNames.map((category) => {
+      const option = document.createElement("option");
+      option.value = category;
+      option.textContent = category;
+      return option;
+    })
+  );
+  input.value = activeTab === "all" ? "" : activeTab;
 }
 
 /* ── Modals / Toast ─────────────────────────────────── */
@@ -1837,6 +1852,10 @@ async function init() {
     await loadInventory();
 
     document.getElementById("searchInventory")?.addEventListener("input", () => {
+      applyFilters();
+    });
+
+    document.getElementById("filterCategory")?.addEventListener("input", () => {
       applyFilters();
     });
 

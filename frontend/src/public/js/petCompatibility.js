@@ -101,11 +101,11 @@ const PHASES = [
     questions: [
       { key:"noiseLevel",        label:"Noise Tolerance",      text:"How much noise can you comfortably handle from a pet?",      hint:"Gaano karaming ingay mula sa pet ang kaya mong tanggapin?", scale:["Very little","Low","Moderate","High","Very high"] },
       { key:"spaceNeeds",        label:"Living Space",         text:"How much living space can you provide?",                     hint:"Gaano kalaking living space ang kaya mong ibigay?", scale:["Very small (studio)","Small","Average","Large","Very large with yard"] },
-      { key:"climateTolerance",  label:"Climate Readiness",    text:"Can you care for a pet in Angeles City's warm climate?",     hint:"Kaya mo bang alagaan ang pet sa mainit na klima ng Angeles City?", scale:["Not ready","Slightly ready","Moderately ready","Ready","Fully prepared"] },
-      { key:"groomingNeeds",     label:"Grooming Commitment",  text:"How willing are you to groom your pet regularly?",           hint:"Gaano ka kahandang mag-groom ng pet nang regular?", scale:["Not willing","Slightly willing","Moderate effort","Willing","Very willing"] },
-      { key:"sheddingLevel",     label:"Shedding Tolerance",   text:"How comfortable are you with pet fur around the house?",     hint:"Gaano ka kakomportable sa balahibo ng pet sa bahay?", scale:["Not at all","Slightly OK","Neutral","Comfortable","No problem at all"] },
+      { key:"climateTolerance",  label:"Climate Readiness",    text:"Can you care for a pet in Angeles City's warm climate?",     hint:"Kaya mo bang alagaan ang pet sa mainit na klima ng Angeles City?", scoring:false, scoringNote:"Care-readiness context only — saved with your result, but not used for ranking because animal profiles do not record climate suitability.", scale:["Not ready","Slightly ready","Moderately ready","Ready","Fully prepared"] },
+      { key:"groomingNeeds",     label:"Grooming Commitment",  text:"How willing are you to groom your pet regularly?",           hint:"Gaano ka kahandang mag-groom ng pet nang regular?", scoreTarget:"attentionNeeds", scoringNote:"Combined equally with daily attention capacity when matching the animal's attention needs.", scale:["Not willing","Slightly willing","Moderate effort","Willing","Very willing"] },
+      { key:"sheddingLevel",     label:"Shedding Tolerance",   text:"How comfortable are you with pet fur around the house?",     hint:"Gaano ka kakomportable sa balahibo ng pet sa bahay?", scoring:false, scoringNote:"Care-readiness context only — saved with your result, but not used for ranking because animal profiles do not record shedding.", scale:["Not at all","Slightly OK","Neutral","Comfortable","No problem at all"] },
       { key:"trainingDifficulty",label:"Training Commitment",  text:"How much training difficulty can you handle?",               hint:"Gaano kahirap na training ang kaya mong hawakan?", scale:["Very easy only","Low difficulty","Moderate","Can handle difficult","Very experienced trainer"] },
-      { key:"healthRiskLevel",   label:"Vet Budget",           text:"How prepared are you for veterinary costs?",                 hint:"Gaano ka kahanda sa gastusing veterinary?", scale:["Not prepared","Slightly prepared","Somewhat prepared","Prepared","Fully prepared"] },
+      { key:"healthRiskLevel",   label:"Vet Budget",           text:"How prepared are you for veterinary costs?",                 hint:"Gaano ka kahanda sa gastusing veterinary?", scoreTarget:"specialNeeds", scoringNote:"Compared with the animal's assessed special-care needs; the separate special-needs filter still controls eligibility.", scale:["Not prepared","Slightly prepared","Somewhat prepared","Prepared","Fully prepared"] },
     ]
   },
   {
@@ -255,6 +255,7 @@ function renderPhase(phaseIdx) {
           <div class="q-num">Question ${globalIdx}</div>
           <div class="q-text">${q.text}</div>
           <div class="q-hint">${q.hint}</div>
+          ${q.scoringNote ? `<div class="q-scoring-note"><i class="bi bi-info-circle"></i>${q.scoringNote}</div>` : ""}
           <div class="option-group">
             ${q.scale.map((lbl, val) => `
               <button class="option-btn ${answers[q.key]===(val+1)?"selected":""}"
@@ -437,6 +438,14 @@ async function handleSubmit() {
     submitButton.innerHTML = `<i class="bi bi-arrow-repeat"></i> Finding matches...`;
   }
 
+  const preferences = PHASES
+    .flatMap((phase) => phase.questions)
+    .filter((question) => !question.isFilter)
+    .reduce((payload, question) => {
+      payload[question.key] = answers[question.key];
+      return payload;
+    }, {});
+
   const quizData = {
     filters: {
       preferredSpecies:    answers.preferredSpecies    || "Any",
@@ -445,27 +454,7 @@ async function handleSubmit() {
       acceptAggressive:    answers.acceptAggressive    || "yes",
       acceptSpecialNeeds:  answers.acceptSpecialNeeds  || "yes",
     },
-    preferences: {
-      energyLevel:          answers.energyLevel          || 3,
-      exerciseNeeds:        answers.exerciseNeeds        || 3,
-      independenceLevel:    answers.independenceLevel   || 3,
-      attentionNeeds:       answers.attentionNeeds      || 3,
-      playfulness:          answers.playfulness         || 3,
-      friendlinessToHumans: answers.friendlinessToHumans || 3,
-      goodWithKids:         answers.goodWithKids        || 3,
-      goodWithOtherPets:    answers.goodWithOtherPets   || 3,
-      strangerTolerance:    answers.strangerTolerance   || 3,
-      noiseLevel:           answers.noiseLevel          || 3,
-      spaceNeeds:           answers.spaceNeeds          || 3,
-      adaptability:         answers.adaptability        || 3,
-      climateTolerance:     answers.climateTolerance    || 3,
-      groomingNeeds:        answers.groomingNeeds       || 3,
-      sheddingLevel:        answers.sheddingLevel       || 3,
-      trainingDifficulty:   answers.trainingDifficulty  || 3,
-      healthRiskLevel:      answers.healthRiskLevel     || 3,
-      affectionLevel:       answers.affectionLevel      || 3,
-      separationAnxiety:    answers.separationAnxiety   || 3,
-    }
+    preferences
   };
 
   try {
@@ -547,7 +536,15 @@ async function initializeQuiz() {
       const nextDate = info.nextRetakeAt ? new Date(info.nextRetakeAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "To be announced";
       const completedDate = info.lastCompletedAt ? new Date(info.lastCompletedAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "Saved to your account";
       const safe = (value) => String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
-      const traitLabels = { energyLevel:"Energy", exerciseNeeds:"Exercise", independenceLevel:"Independence", attentionNeeds:"Attention", playfulness:"Playfulness", friendlinessToHumans:"Friendliness", goodWithKids:"Kids", goodWithOtherPets:"Other pets", strangerTolerance:"Strangers", noiseLevel:"Noise" };
+      const traitLabels = {
+        energyLevel:"Energy", exerciseNeeds:"Exercise", independenceLevel:"Independence",
+        attentionNeeds:"Attention", playfulness:"Playfulness", adaptability:"Routine stability",
+        friendlinessToHumans:"Friendliness", goodWithKids:"Kids", goodWithOtherPets:"Other pets",
+        strangerTolerance:"Strangers", noiseLevel:"Noise", spaceNeeds:"Living space",
+        climateTolerance:"Climate readiness", groomingNeeds:"Grooming commitment",
+        sheddingLevel:"Shedding tolerance", trainingDifficulty:"Training commitment",
+        healthRiskLevel:"Vet budget", affectionLevel:"Affection", separationAnxiety:"Clinginess tolerance"
+      };
       const traits = Object.entries(result.preferences || {}).map(([key, value]) => `<div class="saved-trait"><span>${safe(traitLabels[key] || key)}</span><div><i style="width:${Math.max(0, Math.min(100, Number(value) * 20))}%"></i></div><b>${safe(value)}/5</b></div>`).join("");
       if (info.reason === "QUIZ_DISABLED") {
         access.innerHTML = `<section class="saved-result-state is-disabled"><div class="saved-state-icon"><i class="bi bi-pause-circle"></i></div><span class="saved-state-kicker">Compatibility matching</span><h1>Quiz temporarily unavailable</h1><p>The shelter has paused new compatibility attempts. Your previous results remain safely stored in your account.</p><div class="saved-result-actions"><a href="/pages/public/my-submissions.html"><i class="bi bi-person-circle"></i>View my account</a><a class="is-secondary" href="/pages/public/home.html">Return home</a></div></section>`;

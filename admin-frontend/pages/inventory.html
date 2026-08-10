@@ -57,6 +57,11 @@
         </div>
       </div>
 
+      <div id="predictiveStatus" class="predictive-status predictive-loading" role="status" aria-live="polite">
+        <i class="bi bi-arrow-repeat"></i>
+        <span><strong>Loading live Random Forest predictions…</strong></span>
+      </div>
+
       <!-- Layout -->
       <div class="inv-layout" id="invLayout">
         <div class="panel inv-table-panel">
@@ -73,32 +78,25 @@
           </div>
           <div class="panel-head flex-column gap-3">
 
-            <!-- Category tabs -->
-            <div class="inv-category-strip">
-              <div class="inv-category-label"><i class="bi bi-tags-fill"></i> Categories</div>
-              <div class="inv-tabs" id="categoryTabs" role="tablist" aria-label="Inventory categories">
-              <button class="inv-tab active" type="button" role="tab" aria-selected="true" data-tab="all"><i class="bi bi-collection"></i>All</button>
-              <button class="inv-tab" type="button" role="tab" aria-selected="false" data-tab="Antibiotic"><i class="bi bi-capsule"></i>Antibiotic</button>
-              <button class="inv-tab" type="button" role="tab" aria-selected="false" data-tab="Antiparasitic"><i class="bi bi-shield-plus"></i>Antiparasitic</button>
-              <button class="inv-tab" type="button" role="tab" aria-selected="false" data-tab="Consumable"><i class="bi bi-bandaid"></i>Consumable</button>
-              <button class="inv-tab" type="button" role="tab" aria-selected="false" data-tab="Disinfectant"><i class="bi bi-droplet"></i>Disinfectant</button>
-              <button class="inv-tab" type="button" role="tab" aria-selected="false" data-tab="Equipment"><i class="bi bi-tools"></i>Equipment</button>
-              <button class="inv-tab" type="button" role="tab" aria-selected="false" data-tab="Supplement"><i class="bi bi-heart-pulse"></i>Supplement</button>
-              <button class="inv-tab" type="button" role="tab" aria-selected="false" data-tab="Vaccine"><i class="bi bi-eyedropper"></i>Vaccine</button>
-              </div>
-            </div>
-
             <div class="inventory-filter-toolbar">
               <div class="inventory-filter-controls">
                 <label class="inventory-reference-field inventory-reference-search">
                   <span>Search inventory</span>
-                  <div class="search-pill-sm inventory-search">
+                  <div class="search-pill-sm inventory-search inventory-filter-search">
                   <i class="bi bi-search"></i>
                   <input type="text" id="searchInventory" placeholder="Search item, ID, category…" autocomplete="off" />
                   </div>
                 </label>
-                <label class="inventory-reference-field"><span>Movement</span><select class="filter-select" id="filterMovement" aria-label="Filter by movement">
-                  <option value="">All movement</option>
+                <label class="inventory-reference-field inventory-reference-category">
+                  <span>Category</span>
+                  <div class="search-pill-sm inventory-search inventory-filter-search">
+                    <i class="bi bi-tag"></i>
+                    <input type="search" id="filterCategory" list="inventoryCategoryOptions" placeholder="All categories" autocomplete="off" aria-label="Search or select an inventory category" />
+                    <datalist id="inventoryCategoryOptions"></datalist>
+                  </div>
+                </label>
+                <label class="inventory-reference-field"><span>RF movement</span><select class="filter-select" id="filterMovement" aria-label="Filter by Random Forest movement">
+                  <option value="">All RF movement</option>
                   <option value="Fast">Fast Moving</option>
                   <option value="Slow">Slow Moving</option>
                 </select></label>
@@ -176,7 +174,7 @@
           <th>
             <span class="table-heading">
               <i class="bi bi-activity"></i>
-              Movement
+              RF Movement
             </span>
           </th>
 

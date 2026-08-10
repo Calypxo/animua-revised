@@ -483,13 +483,14 @@ button.cm-chat-bubble.active {
 }
 
 .contact-messages-page .cm-chat-composer {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 12px;
   min-height: 54px;
   flex: 0 0 auto;
-  margin: 10px 12px 12px;
+  margin: 10px 12px 28px;
   padding: 6px 9px 6px 14px;
   border: 1px solid #d9d6d3;
   border-radius: 9px;
@@ -523,6 +524,15 @@ button.cm-chat-bubble.active {
   display: flex;
   align-items: center;
   gap: 3px;
+}
+
+.contact-messages-page .cm-compose-status {
+  position: absolute;
+  left: 14px;
+  bottom: -18px;
+  color: var(--ap-muted);
+  font-size: 0.58rem;
+  font-weight: 600;
 }
 
 .contact-messages-page .cm-compose-send {

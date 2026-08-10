@@ -1665,3 +1665,42 @@
     text-align: left;
   }
 }
+
+/* Force a true full-width record-card layout on phones. Table layout engines
+   otherwise retain column sizing and leave only the field labels visible. */
+@media (max-width: 720px) {
+  html body.management-consistent-ui.surrender-requests-page .page-body .sr-table-panel .table-responsive {
+    width: 100% !important;
+    margin-inline: 0 !important;
+    overflow: hidden !important;
+  }
+
+  html body.management-consistent-ui.surrender-requests-page .page-body .sr-table-panel .shelter-table {
+    width: 100% !important;
+    min-width: 0 !important;
+    display: block !important;
+    table-layout: auto !important;
+  }
+
+  html body.management-consistent-ui.surrender-requests-page .page-body .sr-table-panel .shelter-table thead {
+    display: none !important;
+  }
+
+  html body.management-consistent-ui.surrender-requests-page .page-body .sr-table-panel .shelter-table tbody {
+    width: 100% !important;
+    display: grid !important;
+    gap: 12px !important;
+    padding: 12px !important;
+  }
+
+  html body.management-consistent-ui.surrender-requests-page .page-body .sr-table-panel .shelter-table tbody tr[data-id] {
+    width: 100% !important;
+    display: block !important;
+  }
+
+  html body.management-consistent-ui.surrender-requests-page .page-body .sr-table-panel .shelter-table tbody tr[data-id] td {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: 88px minmax(0, 1fr) !important;
+  }
+}

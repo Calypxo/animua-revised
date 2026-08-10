@@ -156,9 +156,26 @@ body.management-consistent-ui :is(
   }
 
   body.management-consistent-ui .user-chip {
-    min-width: 0 !important;
-    min-height: 42px !important;
-    padding: 4px !important;
+    width: 44px !important;
+    min-width: 44px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    flex: 0 0 44px !important;
+    aspect-ratio: 1;
+    justify-content: center !important;
+    padding: 3px !important;
+    border-radius: 50% !important;
+    overflow: hidden;
+  }
+
+  body.management-consistent-ui .user-chip .user-meta { display: none !important; }
+
+  body.management-consistent-ui .user-chip .user-avatar {
+    width: 34px !important;
+    min-width: 34px !important;
+    height: 34px !important;
+    flex: 0 0 34px !important;
+    border-radius: 50% !important;
   }
 
   body.management-consistent-ui .user-chip .caret {
@@ -292,11 +309,172 @@ body.management-consistent-ui :is(
   }
 }
 
-@media (max-width: 420px) {
-  body.management-consistent-ui .topbar-right .notif-btn {
+/* Clean document output for management pages. The Reports Center has its own
+   richer multi-page report stylesheet, so it remains intentionally excluded. */
+@media print {
+  @page { size: A4 landscape; margin: 12mm; }
+
+  html,
+  body.management-consistent-ui:not(.reports-page),
+  body.management-consistent-ui:not(.reports-page) .shell,
+  body.management-consistent-ui:not(.reports-page) .stage,
+  body.management-consistent-ui:not(.reports-page) :is(.page-body, .main-content) {
+    width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    color: #281f1e !important;
+    background: #FFFFFF !important;
+  }
+
+  body.management-consistent-ui:not(.reports-page) {
+    display: block !important;
+    padding: 0 !important;
+    font-family: "Poppins", sans-serif;
+  }
+
+  body.management-consistent-ui:not(.reports-page)::before {
+    content: "ANIMUA\A SHELTER MANAGEMENT RECORD";
+    display: block;
+    margin-bottom: 7mm;
+    padding-bottom: 4mm;
+    border-bottom: 2px solid #780116;
+    color: #780116;
+    font-size: 18pt;
+    font-weight: 900;
+    letter-spacing: .05em;
+    line-height: 1.1;
+    white-space: pre;
+  }
+
+  body.management-consistent-ui:not(.reports-page)::after {
+    content: "ANIMUA Shelter Management · Internal record";
+    display: block;
+    margin-top: 7mm;
+    padding-top: 3mm;
+    border-top: 1px solid #d3c7bf;
+    color: #81746d;
+    font-size: 7pt;
+  }
+
+  body.management-consistent-ui:not(.reports-page) :is(
+    #sidebar-container, .topbar, .sidebar-overlay,
+    .system-hero-operations, .system-hero-highlights, .system-hero-watermark,
+    .system-header-actions, .filter-toolbar, .aa-filter-toolbar,
+    .inventory-filter-toolbar, .um-pagination, .drawer-backdrop,
+    .aa-drawer-backdrop, .management-side-modal, .um-modal-backdrop,
+    .inventory-records-tip, .records-legend, .aa-panel-tip,
+    button, [role="button"]
+  ) {
     display: none !important;
   }
 
+  body.management-consistent-ui:not(.reports-page) :is(.page-body, .main-content) {
+    padding: 0 !important;
+  }
+
+  body.management-consistent-ui:not(.reports-page) .system-page-header {
+    margin: 0 0 7mm !important;
+  }
+
+  body.management-consistent-ui:not(.reports-page) .system-page-hero {
+    min-height: 0 !important;
+    display: block !important;
+    padding: 0 0 5mm !important;
+    border: 0 !important;
+    border-bottom: 1px solid #d3c7bf !important;
+    border-radius: 0 !important;
+    color: #281f1e !important;
+    background: #FFFFFF !important;
+    box-shadow: none !important;
+  }
+
+  body.management-consistent-ui:not(.reports-page) .system-hero-eyebrow {
+    margin-bottom: 2mm !important;
+    color: #780116 !important;
+    font-size: 7pt !important;
+  }
+
+  body.management-consistent-ui:not(.reports-page) .system-hero-copy h1 {
+    color: #281f1e !important;
+    font-size: 22pt !important;
+  }
+
+  body.management-consistent-ui:not(.reports-page) .system-hero-copy > p {
+    max-width: none !important;
+    margin-top: 2mm !important;
+    color: #675c56 !important;
+    font-size: 8pt !important;
+  }
+
+  body.management-consistent-ui:not(.reports-page) .system-summary {
+    width: 100% !important;
+    min-height: 0 !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    grid-auto-flow: row !important;
+    gap: 2mm !important;
+    margin: 4mm 0 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  body.management-consistent-ui:not(.reports-page) .system-summary-label { display: none !important; }
+  body.management-consistent-ui:not(.reports-page) .system-summary-metric {
+    min-height: 14mm !important;
+    padding: 3mm !important;
+    border: 1px solid #d3c7bf !important;
+    border-radius: 2mm !important;
+    break-inside: avoid;
+  }
+  body.management-consistent-ui:not(.reports-page) .system-summary-icon { display: none !important; }
+  body.management-consistent-ui:not(.reports-page) .system-summary-copy strong { font-size: 13pt !important; }
+  body.management-consistent-ui:not(.reports-page) .system-summary-copy small { font-size: 6.5pt !important; }
+
+  body.management-consistent-ui:not(.reports-page) :is(.panel, .records-panel, .table-card, .rpt-card) {
+    border: 1px solid #d3c7bf !important;
+    border-radius: 2mm !important;
+    background: #FFFFFF !important;
+    box-shadow: none !important;
+    break-inside: auto;
+  }
+
+  body.management-consistent-ui:not(.reports-page) :is(.table-responsive, .records-table-wrap, .inventory-table-wrap) {
+    width: 100% !important;
+    margin: 0 !important;
+    overflow: visible !important;
+  }
+
+  body.management-consistent-ui:not(.reports-page) table {
+    width: 100% !important;
+    min-width: 0 !important;
+    display: table !important;
+    border-collapse: collapse !important;
+    table-layout: auto !important;
+    font-size: 7pt !important;
+  }
+
+  body.management-consistent-ui:not(.reports-page) table thead { display: table-header-group !important; }
+  body.management-consistent-ui:not(.reports-page) table tbody { display: table-row-group !important; }
+  body.management-consistent-ui:not(.reports-page) table tr { display: table-row !important; break-inside: avoid; }
+  body.management-consistent-ui:not(.reports-page) table :is(th, td) {
+    display: table-cell !important;
+    padding: 2mm !important;
+    border: 1px solid #d3c7bf !important;
+    color: #281f1e !important;
+    background: #FFFFFF !important;
+  }
+  body.management-consistent-ui:not(.reports-page) table th {
+    color: #780116 !important;
+    background: #efe5d2 !important;
+    print-color-adjust: exact;
+  }
+  body.management-consistent-ui:not(.reports-page) table td::before { display: none !important; }
+}
+
+@media (max-width: 420px) {
   body.management-consistent-ui :is(
     .kpi-strip, .ap-stats, .sr-stats, .aa-stats,
     .intake-stats, .um-stats, .report-summary-grid
@@ -427,7 +605,7 @@ body.management-consistent-ui :is(
   }
 
   body.management-consistent-ui .topbar {
-    padding-left: max(64px, calc(56px + env(safe-area-inset-left))) !important;
+    padding-left: max(10px, env(safe-area-inset-left)) !important;
   }
 
   body.management-consistent-ui :is(

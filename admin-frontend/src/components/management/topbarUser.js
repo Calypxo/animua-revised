@@ -122,6 +122,18 @@ function attentionItems(data, role) {
     });
   }
 
+  if (canAccessModule(role, "contact")) {
+    add({
+      id: "contact",
+      count: data.newContactMessages,
+      tone: "blue",
+      icon: "bi-envelope-paper-fill",
+      title: "New contact messages",
+      detail: `${Number(data.newContactMessages || 0)} public ${Number(data.newContactMessages || 0) === 1 ? "inquiry awaits" : "inquiries await"} a reply.`,
+      href: "/pages/contactMessages.html",
+    });
+  }
+
   return items;
 }
 
@@ -137,18 +149,6 @@ function readCachedAttentionSummary() {
     return cached.data;
   } catch (_) {
     return null;
-  }
-
-  if (canAccessModule(role, "contact")) {
-    add({
-      id: "contact",
-      count: data.newContactMessages,
-      tone: "blue",
-      icon: "bi-envelope-paper-fill",
-      title: "New contact messages",
-      detail: `${Number(data.newContactMessages || 0)} public ${Number(data.newContactMessages || 0) === 1 ? "inquiry awaits" : "inquiries await"} a reply.`,
-      href: "/pages/contactMessages.html",
-    });
   }
 }
 
@@ -316,6 +316,9 @@ function bindAttentionCenter(button, role) {
 
   const cached = readCachedAttentionSummary();
   if (cached) renderAttentionCenter(panel, button, cached, role);
+  void loadAttentionCenter(panel, button, role, {
+    showLoading: false,
+  });
 }
 
 function ensureAccountMenu(chip, name, role, initials) {
