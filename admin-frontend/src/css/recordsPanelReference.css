@@ -611,7 +611,7 @@
 }
 
 .inventory-page .inventory-filter-controls {
-  grid-template-columns: minmax(260px, 1.3fr) repeat(3, minmax(145px, .7fr)) auto !important;
+  grid-template-columns: repeat(2, minmax(220px, 1fr)) repeat(3, minmax(135px, .65fr)) auto !important;
 }
 
 :is(.aa-reference-field, .inventory-reference-field) {
@@ -1112,8 +1112,7 @@ body.management-consistent-ui :is(
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 
-  .records-panel .search-filter,
-  .inventory-reference-search {
+  .records-panel .search-filter {
     grid-column: 1 / -1 !important;
   }
 
@@ -1154,8 +1153,7 @@ body.management-consistent-ui :is(
     grid-template-columns: 1fr !important;
   }
 
-  .records-panel .search-filter,
-  .inventory-reference-search {
+  .records-panel .search-filter {
     grid-column: auto !important;
   }
 

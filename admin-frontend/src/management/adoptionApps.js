@@ -68,6 +68,7 @@ function mapAdoptionFromBackend(a) {
       species: a.animal?.species || "Unknown",
       breed: a.animal?.breed || "Unknown",
       status: a.animal?.status || "",
+      photoURL: a.animal?.photoURL || a.animal?.photo || "",
       vector: a.animal?.compatibilityVector || [],
     },
 
@@ -272,8 +273,8 @@ function renderTable() {
 
   tbody.innerHTML = page.map(a => `
     <tr data-id="${a.id}" class="${a.id===activeAppId?"row-active":""}">
-      <td class="app-id-cell">${a.applicationId}</td>
-      <td>
+      <td class="app-id-cell" data-label="Application">${a.applicationId}</td>
+      <td data-label="Applicant">
         <div class="applicant-cell">
           <div class="applicant-avatar">${a.adopter.initials}</div>
           <div>
@@ -282,23 +283,23 @@ function renderTable() {
           </div>
         </div>
       </td>
-      <td>
+      <td data-label="Animal">
         <div class="animal-mini">
-          <div class="animal-mini-thumb ${thumbCls(a.animal.species)}">${emoji(a.animal.species)}</div>
+          <div class="animal-mini-thumb ${thumbCls(a.animal.species)}">${a.animal.photoURL ? `<img src="${a.animal.photoURL}" alt="">` : '<i class="bi bi-heart-pulse-fill" aria-hidden="true"></i>'}</div>
           <div>
             <div class="animal-mini-name">${a.animal.name}</div>
             <div class="animal-mini-breed">${a.animal.breed}</div>
           </div>
         </div>
       </td>
-      <td>
+      <td data-label="Type">
         <span class="app-type-badge ${a.type==="Quiz Match"?"type-quiz":"type-direct"}">
           <i class="bi ${a.type==="Quiz Match"?"bi-cpu":"bi-cursor"}"></i>${a.type}
         </span>
       </td>
-      <td>${compatPill(a.compatScore, a.type)}</td>
-      <td>${statusBadge(a.status)}</td>
-      <td>
+      <td data-label="Match">${compatPill(a.compatScore, a.type)}</td>
+      <td data-label="Status">${statusBadge(a.status)}</td>
+      <td data-label="Actions">
         <button class="tbl-action-btn" data-action="view" data-id="${a.id}" title="View details" aria-label="View adoption application details">
           <i class="bi bi-eye"></i>
         </button>

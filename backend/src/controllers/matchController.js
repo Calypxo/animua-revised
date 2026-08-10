@@ -1,12 +1,15 @@
 const crypto = require("crypto");
 const { admin, db } = require("../config/firebase");
 const { buildShelterLabel } = require("../utils/animalIdentity");
+const {
+  validatePreferences,
+  scoreMatches,
+  applyFilters,
+} = require("../services/compatibilityScoringService");
 
-const PYTHON_MATCHER_URL = process.env.PYTHON_MATCHER_URL || "http://127.0.0.1:8001/score";
 const RESULTS = "compatibilityResults";
 const SETTINGS = db.collection("quizSettings").doc("compatibilityQuiz");
 const DEFAULTS = { quizEnabled: true, retakeCooldownDays: 30, quizVersion: 1 };
-const SCORE_KEYS = ["energyLevel", "exerciseNeeds", "independenceLevel", "attentionNeeds", "playfulness", "friendlinessToHumans", "goodWithKids", "goodWithOtherPets", "strangerTolerance", "noiseLevel"];
 const FILTERS = { preferredSpecies: ["Any", "Dog", "Cat"], preferredSex: ["Any", "Male", "Female"], needAllergyFriendly: ["no", "yes"], acceptAggressive: ["yes", "no"], acceptSpecialNeeds: ["yes", "no"] };
 
 function toDate(value) {
@@ -24,13 +27,9 @@ function json(value) {
   return value;
 }
 function validate(body = {}) {
-  if (!body.preferences || typeof body.preferences !== "object") return { error: "All compatibility preferences are required." };
-  const preferences = {};
-  for (const key of SCORE_KEYS) {
-    const value = Number(body.preferences[key]);
-    if (!Number.isInteger(value) || value < 1 || value > 5) return { error: `${key} must be a whole number from 1 to 5.` };
-    preferences[key] = value;
-  }
+  const validated = validatePreferences(body.preferences);
+  if (validated.error) return validated;
+  const preferences = validated.preferences;
   const filters = {};
   for (const [key, allowed] of Object.entries(FILTERS)) {
     const value = body.filters?.[key] ?? allowed[0];
@@ -142,17 +141,3 @@ exports.removeRetakeOverride = async (req, res) => {
   try { const ref = db.collection("users").doc(req.params.userId); const snap = await ref.get(); if (!snap.exists) return res.status(404).json({ message: "User not found." }); const old = json(snap.data().quizRetakeOverrideAt || null); await ref.set({ quizRetakeOverrideAt: null }, { merge: true }); await audit(req, "compatibility.retake_override_removed", snap.id, snap.data().fullName || snap.id, { quizRetakeOverrideAt: old }, { quizRetakeOverrideAt: null }); return res.json({ message: "Retake override removed." }); }
   catch (error) { console.error("[removeRetakeOverride]", error); return res.status(500).json({ message: "Unable to remove the retake override." }); }
 };
-
-async function scoreMatches(preferences, animals, topK) {
-  try { const response = await fetch(PYTHON_MATCHER_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ preferences, animals, top_k: topK }) }); if (!response.ok) throw new Error(`Matcher returned ${response.status}`); return await response.json(); }
-  catch (error) { console.warn(`[matchPets] Python matcher unavailable. Using fallback. Reason: ${error.message}`); return scoreMatchesLocally(preferences, animals, topK); }
-}
-function vector(data) { return SCORE_KEYS.map((key) => Number.isFinite(Number(data[key])) ? Number(data[key]) : 3); }
-function scoreMatchesLocally(preferences, animals, topK) {
-  const user = vector(preferences); const mag = (items) => Math.sqrt(items.reduce((sum, value) => sum + value * value, 0));
-  const matches = animals.map((animal) => { const assessment = animal.behavioralAssessment || {}; const pet = vector(assessment); const cosine = user.reduce((sum, value, index) => sum + value * pet[index], 0) / (mag(user) * mag(pet)); const diff = user.reduce((sum, value, index) => sum + Math.abs(value - pet[index]), 0); const final = cosine * (1 - diff / 40); return { id: animal.id, petId: animal.petId, name: animal.name, species: animal.species, breed: animal.breed, sex: animal.sex, size: animal.size, status: animal.status, photoURL: animal.photoURL, photoUrl: animal.photoUrl || animal.photoURL, ageEstimate: animal.ageEstimate, age: animal.age || animal.ageEstimate, allergyFriendly: animal.allergyFriendly, specialNeeds: assessment.specialNeeds ?? animal.specialNeeds, aggressive: assessment.aggressive ?? animal.aggressive, ...assessment, matchScore: Math.round(final * 10000) / 10000, matchPercent: Math.round(final * 10000) / 100 };
-  }).sort((a, b) => b.matchScore - a.matchScore).slice(0, topK); return { matches };
-}
-function applyFilters(animals, filters) {
-  return animals.filter((animal) => { if (!["Ready", "Ready for Adoption"].includes(animal.status)) return false; if (filters.preferredSpecies !== "Any" && String(animal.species || "").toLowerCase() !== filters.preferredSpecies.toLowerCase()) return false; if (filters.preferredSex !== "Any" && animal.sex !== "Unknown" && String(animal.sex || "").toLowerCase() !== filters.preferredSex.toLowerCase()) return false; if (filters.needAllergyFriendly === "yes" && animal.allergyFriendly !== undefined && animal.allergyFriendly !== true) return false; if (filters.acceptAggressive === "no" && Number(animal.behavioralAssessment?.aggressive ?? animal.aggressive ?? 0) >= 5) return false; return !(filters.acceptSpecialNeeds === "no" && Number(animal.behavioralAssessment?.specialNeeds ?? animal.specialNeeds ?? 0) >= 4); });
-}

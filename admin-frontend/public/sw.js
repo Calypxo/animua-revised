@@ -1,4 +1,4 @@
-const CACHE_VERSION = "animua-admin-v2";
+const CACHE_VERSION = "animua-admin-v3";
 const APP_SHELL = [
   "/",
   "/index.html",
@@ -73,13 +73,17 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  // Management code changes must be visible on a normal reload. Use the
+  // cached asset only as an offline fallback instead of serving stale JS/CSS.
   event.respondWith(
-    caches.match(request).then((cached) => cached || fetch(request).then((response) => {
-      if (response.ok) {
-        const copy = response.clone();
-        caches.open(CACHE_VERSION).then((cache) => cache.put(request, copy));
-      }
-      return response;
-    }))
+    fetch(request)
+      .then((response) => {
+        if (response.ok) {
+          const copy = response.clone();
+          caches.open(CACHE_VERSION).then((cache) => cache.put(request, copy));
+        }
+        return response;
+      })
+      .catch(() => caches.match(request))
   );
 });

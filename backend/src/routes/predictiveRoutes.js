@@ -1,8 +1,10 @@
-const express = require("express");
-const router = express.Router();
 const predictiveController = require("../controllers/predictiveController");
+const authenticateToken = require("../middleware/authMiddleware");
+const authorizeRole = require("../middleware/roleMiddleware");
+const { createPredictiveRouter } = require("./predictiveRouterFactory");
 
-router.get("/status", predictiveController.getStatus);
-router.get("/items", predictiveController.getItems);
-
-module.exports = router;
+module.exports = createPredictiveRouter({
+  authenticate: authenticateToken,
+  authorize: authorizeRole,
+  controller: predictiveController,
+});

@@ -234,6 +234,8 @@
       </form>
     </div>
     <div class="um-modal-footer">
+      <span class="modal-draft-status" id="editDraftStatus"></span>
+      <button class="btn-ghost-clay" type="button" id="editModalDraft"><i class="bi bi-file-earmark-text"></i> Save Draft</button>
       <button class="btn-ghost-clay" id="editModalCancel">Cancel</button>
       <button class="btn-primary-clay" id="editModalSave"><i class="bi bi-floppy-fill"></i> Save Changes</button>
     </div>
@@ -271,7 +273,8 @@
       </form>
     </div>
     <div class="um-modal-footer">
-      <span class="modal-save-hint"><i class="bi bi-shield-check"></i> Scores remain editable until adoption or archive.</span>
+      <span class="modal-draft-status" id="behavioralDraftStatus"><i class="bi bi-shield-check"></i> Scores remain editable until adoption or archive.</span>
+      <button class="btn-ghost-clay" type="button" id="behavioralModalDraft"><i class="bi bi-file-earmark-text"></i> Save Draft</button>
       <button class="btn-ghost-clay" type="button" id="behavioralModalCancel">Cancel</button>
       <button class="btn-primary-clay" type="button" id="behavioralModalSave">
         <i class="bi bi-floppy-fill"></i> Save Assessment
@@ -286,12 +289,13 @@
   <div class="um-modal-backdrop" id="medicalModalBackdrop">
    <div class="um-modal ap-modal medical-modal" role="dialog" aria-modal="true" aria-labelledby="medicalModalTitle">
     <div class="um-modal-header">
-      <div><span class="modal-kicker">Quarantine care</span><h2 id="medicalModalTitle">Add Medical Record</h2><p class="modal-subtitle" id="medicalModalSubtitle">Record a visit, treatment, or quarantine review.</p></div>
+      <div><span class="modal-kicker">Clinical care</span><h2 id="medicalModalTitle">Add Medical Record</h2><p class="modal-subtitle" id="medicalModalSubtitle">Record the visit first; add care details and inventory only when applicable.</p></div>
       <button class="modal-close-btn" id="medicalModalClose" type="button" aria-label="Close medical record form"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="um-modal-body">
       <form id="medicalForm" novalidate>
         <input type="hidden" id="fMedicalId" />
+        <div class="medical-form-intro"><i class="bi bi-info-circle"></i><span><strong>Start with the visit type and date.</strong> Findings and care notes should be short and actionable.</span></div>
         <div class="form-grid">
           <div class="form-group">
             <label class="form-lbl" for="fMedType">Record Type <span class="req">*</span></label>
@@ -302,7 +306,6 @@
               <option value="Treatment">Treatment</option>
               <option value="Surgery">Surgery</option>
               <option value="Deworming">Deworming</option>
-                <option value="Quarantine Clearance" hidden>Quarantine Review</option>
             </select>
             <span class="form-err" id="errMedType"></span>
           </div>
@@ -311,26 +314,40 @@
             <input type="date" class="form-inp" id="fMedDate" />
             <span class="form-err" id="errMedDate"></span>
           </div>
+          <div class="form-group">
+            <label class="form-lbl" for="fMedWeight">Weight at Visit (kg)</label>
+            <input type="number" class="form-inp" id="fMedWeight" min="0" step="0.1" placeholder="Optional" />
+          </div>
           <div class="form-group form-full">
             <label class="form-lbl" for="fMedVet">Recorded by</label>
             <input type="text" class="form-inp account-linked-field" id="fMedVet" readonly aria-readonly="true" />
             <small class="account-linked-hint"><i class="bi bi-person-check-fill"></i> Automatically linked to the signed-in account.</small>
           </div>
           <div class="form-group form-full">
-            <label class="form-lbl" for="fMedDiagnosis">Diagnosis / Findings</label>
+            <label class="form-lbl" for="fMedDiagnosis">Findings or diagnosis</label>
             <textarea class="form-inp form-textarea" id="fMedDiagnosis" rows="2"
               placeholder="Describe findings, diagnosis, or reason for visit…"></textarea>
           </div>
           <div class="form-group form-full">
-            <label class="form-lbl" for="fMedTreatment">Treatment / Medications</label>
+            <label class="form-lbl" for="fMedTreatment">Care given</label>
             <textarea class="form-inp form-textarea" id="fMedTreatment" rows="2"
               placeholder="Medications given, dosage, procedures done…"></textarea>
           </div>
+          <details class="medical-optional-section form-full">
+            <summary><span><i class="bi bi-box-seam"></i> Inventory used</span><small>Optional</small></summary>
+            <div class="form-grid medical-optional-fields">
           <div class="form-group">
-          <label class="form-lbl" for="fMedInventoryItem">Medicine / Medical Supply Used</label>
-          <select class="form-inp" id="fMedInventoryItem">
-            <option value="">No inventory item used</option>
-          </select>
+          <label class="form-lbl" for="fMedInventorySearch">Medicine / Medical Supply Used</label>
+          <div class="medical-inventory-picker" id="medicalInventoryPicker">
+            <div class="medical-inventory-search">
+              <i class="bi bi-search" aria-hidden="true"></i>
+              <input class="form-inp" type="search" id="fMedInventorySearch" role="combobox" aria-autocomplete="list" aria-controls="medicalInventoryOptions" aria-expanded="false" autocomplete="off" placeholder="Search medicine or supply…" />
+              <button id="clearMedicalInventory" type="button" aria-label="Clear selected inventory item" title="Clear selection"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <input type="hidden" id="fMedInventoryItem" />
+            <div class="medical-inventory-options" id="medicalInventoryOptions" role="listbox" hidden></div>
+            <small class="medical-inventory-hint" id="medicalInventorySelectionHint">No inventory item selected.</small>
+          </div>
           <span class="form-err" id="errMedInventoryItem"></span>
         </div>
 
@@ -346,12 +363,14 @@
           />
           <span class="form-err" id="errMedQuantityUsed"></span>
         </div>
+            </div>
+          </details>
           <div class="form-group form-full">
-            <label class="form-lbl" for="fMedNotes">Notes / Follow-up</label>
+            <label class="form-lbl" for="fMedNotes">Follow-up instructions</label>
             <textarea class="form-inp form-textarea" id="fMedNotes" rows="2"
               placeholder="Next checkup date, restrictions, special care instructions…"></textarea>
           </div>
-          <div class="form-group" id="medClearanceGroup">
+          <div class="form-group" id="medClearanceGroup" hidden>
               <label class="form-lbl" for="fMedClearance">Quarantine decision</label>
               <select class="form-inp" id="fMedClearance">
               <option value="Pending">Pending</option>
@@ -360,14 +379,12 @@
               </select>
               <small class="form-help">Choose one outcome for this quarantine review. “Cleared” completes the medical requirement.</small>
           </div>
-          <div class="form-group">
-            <label class="form-lbl" for="fMedWeight">Weight at Visit (kg)</label>
-            <input type="number" class="form-inp" id="fMedWeight" min="0" step="0.1" />
-          </div>
         </div>
       </form>
     </div>
     <div class="um-modal-footer">
+      <span class="modal-draft-status" id="medicalDraftStatus"></span>
+      <button class="btn-ghost-clay" type="button" id="medicalModalDraft"><i class="bi bi-file-earmark-text"></i> Save Draft</button>
       <button class="btn-ghost-clay" id="medicalModalCancel">Cancel</button>
       <button class="btn-primary-clay" id="medicalModalSave">
         <i class="bi bi-floppy-fill"></i> Save Record
