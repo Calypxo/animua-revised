@@ -1406,10 +1406,10 @@ if (adoptionForm) {
       syncIssuedDateFields();
       const quizData = JSON.parse(localStorage.getItem("animua_quiz_data") || "{}");
       const matchResults = JSON.parse(localStorage.getItem("animua_match_results") || "[]");
-      const selectedPetId = currentPetForAdoption?.id;
+      const selectedPetRecordId = currentPetForAdoption?.id;
 
       const selectedMatch = matchResults.find(
-        (pet) => String(pet.id || pet.petId) === String(selectedPetId)
+        (pet) => String(pet.id || pet.petId) === String(selectedPetRecordId)
       );
 
       const compatibilityData = selectedMatch
