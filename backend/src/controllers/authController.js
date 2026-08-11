@@ -39,13 +39,61 @@ async function writeAccountAuditLog({
 }
 
 // EMAIL TRANSPORTER
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
+function getEmailCredentials(env = process.env) {
+  const user = String(env.EMAIL_USER || env.SMTP_USER || "").trim();
+  const pass = String(
+    env.EMAIL_PASS || env.EMAIL_APP_PASSWORD || env.SMTP_PASS || ""
+  ).replace(/\s+/g, "");
+
+  return { user, pass };
+}
+
+const emailCredentials = getEmailCredentials();
+const transporter = emailCredentials.user && emailCredentials.pass
+  ? nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: emailCredentials.user,
+        pass: emailCredentials.pass,
+      },
+    })
+  : null;
+
+function createOtpEmailError(code, message, cause = null) {
+  const error = new Error(message);
+  error.code = code;
+  if (cause) error.cause = cause;
+  return error;
+}
+
+function sendOtpEmailErrorResponse(res, error) {
+  if (error?.code === "OTP_EMAIL_NOT_CONFIGURED") {
+    return res.status(503).json({
+      message: "Email delivery is not configured. Please contact the administrator.",
+    });
   }
-});
+
+  if (error?.code === "OTP_EMAIL_DELIVERY_FAILED") {
+    return res.status(502).json({
+      message: "The verification email could not be sent. Please try again.",
+    });
+  }
+
+  return null;
+}
+
+async function storeAndSendOtp({ otpRef, otpData, send }) {
+  await otpRef.set(otpData);
+
+  try {
+    await send();
+  } catch (error) {
+    await otpRef.delete().catch((cleanupError) => {
+      console.warn("[OTP Cleanup Failed]", cleanupError.message);
+    });
+    throw error;
+  }
+}
 
 function escapeHtml(value = "") {
   return String(value).replace(/[&<>"']/g, (character) => ({
@@ -195,6 +243,13 @@ async function sendEmailVerificationOtp({
   heading = "Verify your email address",
   introHtml = "Thank you for creating an ANIMUA account.<br>Use the verification code below to confirm your email address."
 }) {
+  if (!transporter) {
+    throw createOtpEmailError(
+      "OTP_EMAIL_NOT_CONFIGURED",
+      "EMAIL_USER and an email app password are required."
+    );
+  }
+
   const safeFullName = escapeHtml(fullName || "ANIMUA user");
   const formattedOtp = formatOtpForEmail(otp);
   const heroImageSrc = escapeHtml(getEmailHeroImageSrc());
@@ -203,7 +258,7 @@ async function sendEmailVerificationOtp({
   const safeHeading = escapeHtml(heading);
 
   const mailOptions = {
-    from: `"ANIMUA" <${process.env.EMAIL_USER}>`,
+    from: `"ANIMUA" <${emailCredentials.user}>`,
     to: email,
     subject: safeSubject,
     html: `
@@ -322,7 +377,15 @@ async function sendEmailVerificationOtp({
       : []
   };
 
-  await transporter.sendMail(mailOptions);
+  try {
+    await transporter.sendMail(mailOptions);
+  } catch (error) {
+    throw createOtpEmailError(
+      "OTP_EMAIL_DELIVERY_FAILED",
+      "The email provider rejected the OTP message.",
+      error
+    );
+  }
 }
 
 async function sendPasswordChangeOtp({ email, fullName, otp }) {
@@ -626,7 +689,8 @@ exports.requestEmailVerificationOtp = async (req, res) => {
       return res.status(404).json({ message: "User profile not found." });
     }
 
-    const existingOtpDoc = await db.collection("emailVerificationOtps").doc(email).get();
+    const otpRef = db.collection("emailVerificationOtps").doc(email);
+    const existingOtpDoc = await otpRef.get();
     if (existingOtpDoc.exists) {
       const existing = existingOtpDoc.data();
       const createdAt = existing.createdAt?.toDate ? existing.createdAt.toDate() : null;
@@ -641,24 +705,28 @@ exports.requestEmailVerificationOtp = async (req, res) => {
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
     const userData = userDoc.data();
 
-    await db.collection("emailVerificationOtps").doc(email).set({
-      email,
-      firebaseUid: firebaseUser.uid,
-      otpHash,
-      attempts: 0,
-      expiresAt,
-      createdAt: admin.firestore.FieldValue.serverTimestamp()
-    });
-
-    await sendEmailVerificationOtp({
-      email,
-      fullName: userData.fullName,
-      otp
+    await storeAndSendOtp({
+      otpRef,
+      otpData: {
+        email,
+        firebaseUid: firebaseUser.uid,
+        otpHash,
+        attempts: 0,
+        expiresAt,
+        createdAt: admin.firestore.FieldValue.serverTimestamp()
+      },
+      send: () => sendEmailVerificationOtp({
+        email,
+        fullName: userData.fullName,
+        otp
+      })
     });
 
     return res.status(200).json({ message: "We sent a six-digit OTP to your email." });
   } catch (error) {
     console.error("[Request Email Verification OTP Error]", error.message);
+    const emailErrorResponse = sendOtpEmailErrorResponse(res, error);
+    if (emailErrorResponse) return emailErrorResponse;
     return res.status(500).json({ message: "Internal server error." });
   }
 };
@@ -1157,23 +1225,27 @@ exports.requestPasswordChangeOtp = async (req, res) => {
     const otpHash = await bcrypt.hash(otp, 10);
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
-    await otpRef.set({
-      email,
-      otpHash,
-      attempts: 0,
-      expiresAt,
-      createdAt: admin.firestore.FieldValue.serverTimestamp()
-    });
-
-    await sendPasswordChangeOtp({
-      email,
-      fullName: validation.userData.fullName,
-      otp
+    await storeAndSendOtp({
+      otpRef,
+      otpData: {
+        email,
+        otpHash,
+        attempts: 0,
+        expiresAt,
+        createdAt: admin.firestore.FieldValue.serverTimestamp()
+      },
+      send: () => sendPasswordChangeOtp({
+        email,
+        fullName: validation.userData.fullName,
+        otp
+      })
     });
 
     return res.status(200).json({ message: "We sent a six-digit OTP to your email." });
   } catch (error) {
     console.error("[Request Password Change OTP Error]", error.message);
+    const emailErrorResponse = sendOtpEmailErrorResponse(res, error);
+    if (emailErrorResponse) return emailErrorResponse;
     return res.status(500).json({ message: "Internal server error." });
   }
 };
@@ -1271,25 +1343,27 @@ exports.requestForgotPasswordOtp = async (req, res) => {
     const otpHash = await bcrypt.hash(otp, 10);
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
-    await otpRef.set({
-      email,
-      otpHash,
-      attempts: 0,
-      expiresAt,
-      createdAt: admin.firestore.FieldValue.serverTimestamp()
+    await storeAndSendOtp({
+      otpRef,
+      otpData: {
+        email,
+        otpHash,
+        attempts: 0,
+        expiresAt,
+        createdAt: admin.firestore.FieldValue.serverTimestamp()
+      },
+      send: () => sendForgotPasswordOtp({
+        email,
+        fullName: validation.userData.fullName,
+        otp
+      })
     });
 
-    sendForgotPasswordOtp({
-      email,
-      fullName: validation.userData.fullName,
-      otp
-    }).catch((error) => {
-      console.error("[Forgot Password OTP Email Error]", error.message);
-    });
-
-    return res.status(200).json({ message: "We are sending a six-digit OTP to your email." });
+    return res.status(200).json({ message: "We sent a six-digit OTP to your email." });
   } catch (error) {
     console.error("[Request Forgot Password OTP Error]", error.message);
+    const emailErrorResponse = sendOtpEmailErrorResponse(res, error);
+    if (emailErrorResponse) return emailErrorResponse;
     return res.status(500).json({ message: "Internal server error." });
   }
 };
@@ -1400,3 +1474,5 @@ exports.changePassword = async (req, res) => {
 };
 
 exports.validateNewPasswordValue = validateNewPasswordValue;
+exports.getEmailCredentials = getEmailCredentials;
+exports.storeAndSendOtp = storeAndSendOtp;

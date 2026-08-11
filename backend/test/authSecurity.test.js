@@ -24,6 +24,8 @@ function loadAuthHelpersWithoutFirebase() {
       normalizeRole: middleware.normalizeRole,
       getBearerToken: middleware.getBearerToken,
       validateNewPasswordValue: controller.validateNewPasswordValue,
+      getEmailCredentials: controller.getEmailCredentials,
+      storeAndSendOtp: controller.storeAndSendOtp,
     };
   } finally {
     delete require.cache[middlewarePath];
@@ -37,6 +39,8 @@ const {
   normalizeRole,
   getBearerToken,
   validateNewPasswordValue,
+  getEmailCredentials,
+  storeAndSendOtp,
 } = loadAuthHelpersWithoutFirebase();
 
 test("UT-001 normalizeRole recognizes only canonical ANIMUA roles", () => {
@@ -87,4 +91,71 @@ test("UT-003 validateNewPasswordValue enforces the implemented password policy",
     "password over 128 characters"
   );
   assert.equal(validateNewPasswordValue("ValidPass1!"), null, "valid password");
+});
+
+test("email credentials accept deployment aliases and normalize Gmail app passwords", () => {
+  assert.deepEqual(
+    getEmailCredentials({
+      SMTP_USER: "  mailer@animua.test ",
+      EMAIL_APP_PASSWORD: "abcd efgh ijkl mnop",
+    }),
+    {
+      user: "mailer@animua.test",
+      pass: "abcdefghijklmnop",
+    }
+  );
+});
+
+test("failed OTP delivery removes the unusable stored code", async () => {
+  const calls = [];
+  const otpRef = {
+    async set(data) {
+      calls.push(["set", data]);
+    },
+    async delete() {
+      calls.push(["delete"]);
+    },
+  };
+  const deliveryError = new Error("provider unavailable");
+
+  await assert.rejects(
+    storeAndSendOtp({
+      otpRef,
+      otpData: { otpHash: "hash" },
+      send: async () => {
+        calls.push(["send"]);
+        throw deliveryError;
+      },
+    }),
+    deliveryError
+  );
+
+  assert.deepEqual(calls, [
+    ["set", { otpHash: "hash" }],
+    ["send"],
+    ["delete"],
+  ]);
+});
+
+test("successful OTP delivery keeps the stored code", async () => {
+  const calls = [];
+  const otpRef = {
+    async set(data) {
+      calls.push(["set", data]);
+    },
+    async delete() {
+      calls.push(["delete"]);
+    },
+  };
+
+  await storeAndSendOtp({
+    otpRef,
+    otpData: { otpHash: "hash" },
+    send: async () => calls.push(["send"]),
+  });
+
+  assert.deepEqual(calls, [
+    ["set", { otpHash: "hash" }],
+    ["send"],
+  ]);
 });

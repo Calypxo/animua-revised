@@ -1,4 +1,6 @@
 import { API_BASE_URL } from "../utils/api.js";
+import { clearUserSession } from "../utils/storage.js";
+import { normalizeRole } from "../auth/permissions.js";
  
 // ── HELPERS ────────────────────────────────────────────
 function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
@@ -75,7 +77,7 @@ async function handleAdminLogin(e) {
       return;
     }
  
-    const role     = data.role     || "";
+    const role     = normalizeRole(data.role);
     const fullName = data.fullName || "User";
     const token    = data.token    || "";
  
@@ -144,18 +146,43 @@ async function handleAdminLogin(e) {
 })();
  
 // ── INIT ───────────────────────────────────────────────
-(function init() {
+(async function init() {
   const token = localStorage.getItem("animua_token");
-  const role  = localStorage.getItem("user_role");
+  const role  = normalizeRole(localStorage.getItem("user_role"));
+
   if (
     token &&
     MANAGEMENT_ROLES.includes(role)
   ) {
-    window.location.replace(
-      "/pages/dashboard.html"
-    );
+    try {
+      const response = await fetch(`${API_BASE_URL}/protected`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        cache: "no-store",
+      });
 
-    return;
+      if (response.ok) {
+        const data = await response.json();
+        const serverRole = normalizeRole(data.user?.role);
+
+        if (serverRole === role && MANAGEMENT_ROLES.includes(serverRole)) {
+          window.location.replace("/pages/dashboard.html");
+          return;
+        }
+      }
+
+      if (response.status === 401 || response.status === 403) {
+        clearUserSession();
+      }
+    } catch (error) {
+      console.warn("[Admin Session Restore] Backend validation unavailable:", error.message);
+    }
+  } else if (token || role) {
+    clearUserSession();
   }
+
   document.getElementById("login-form")?.addEventListener("submit", handleAdminLogin);
 })();
