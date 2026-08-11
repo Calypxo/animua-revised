@@ -156,7 +156,9 @@ async function scoreMatches(
       body: JSON.stringify({ preferences, animals, top_k: topK }),
     });
     if (!response.ok) throw new Error(`Matcher returned ${response.status}`);
-    return await response.json();
+    const result = await response.json();
+    logger.info("[matchPets] Python matcher used successfully.");
+    return result;
   } catch (error) {
     logger.warn(
       `[matchPets] Python matcher unavailable. Using fallback. Reason: ${error.message}`
