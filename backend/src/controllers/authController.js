@@ -80,11 +80,17 @@ function getEmailCredentials(env = process.env) {
 const emailCredentials = getEmailCredentials();
 const transporter = emailCredentials.user && emailCredentials.pass
   ? nodemailer.createTransport({
-      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false,
+      requireTLS: true,
       auth: {
         user: emailCredentials.user,
         pass: emailCredentials.pass,
       },
+      connectionTimeout: 15000,
+      greetingTimeout: 10000,
+      socketTimeout: 25000,
     })
   : null;
 
@@ -965,7 +971,9 @@ if (!userData.emailVerified && !userData.phoneVerified) {
 
     if (!firebaseUser.emailVerified && !firebaseUser.phoneNumber) {
       return res.status(403).json({
-        message: "Please verify your email or phone number before logging in."
+        message: "Please verify your email or phone number before logging in.",
+        verificationRequired: true,
+        verificationMethod: "email"
       });
     }
 

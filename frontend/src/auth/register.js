@@ -408,7 +408,7 @@ function setSubmitLoading(button, isLoading, loadingText = "Please wait...") {
   delete button.dataset.originalText;
 }
 
-async function showEmailVerificationScreen(email) {
+export async function showEmailVerificationScreen(email) {
   const registerSection = document.getElementById("register-section");
   if (!registerSection) return;
 
@@ -448,6 +448,7 @@ async function showEmailVerificationScreen(email) {
     if (message) message.textContent = "We sent a six-digit OTP to your email.";
     startResendCooldown();
   } catch (error) {
+    console.error("[Email OTP Request Error]", error);
     if (message) message.textContent = error.message || "Unable to send email OTP. Please try again.";
   }
 }
@@ -465,7 +466,7 @@ function renderEmailVerificationStep(email) {
       </span>
     </div>
     <h2>Verify your email</h2>
-    <p class="email-verification-copy">We've sent a 6-digit verification code to</p>
+    <p class="email-verification-copy">We'll send a 6-digit verification code to</p>
     <div class="email-verification-email-pill">${safeMaskedEmail}</div>
     <label class="auth-field-label email-verification-label" for="email-verification-code">Email OTP</label>
     <input type="text" id="email-verification-code" class="email-verification-hidden-input" inputmode="numeric" maxlength="6" autocomplete="one-time-code" aria-label="Six-digit email OTP">

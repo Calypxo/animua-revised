@@ -3,6 +3,7 @@ import { auth, db } from "../utils/firebase.js";
 import { API_BASE_URL } from "../utils/api.js";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { doc, updateDoc } from "firebase/firestore";
+import { showEmailVerificationScreen } from "./register.js";
 
 const RECAPTCHA_SITE_KEY =
   import.meta.env?.VITE_RECAPTCHA_SITE_KEY ||
@@ -111,6 +112,32 @@ export async function handleLogin(event) {
     const data = await response.json();
 
     if (!response.ok) {
+      if (response.status === 403 && data.verificationRequired === true) {
+        try {
+          await signInWithEmailAndPassword(auth, email, password);
+          clearFailedLogin(email);
+          resetLoginCaptcha();
+          hideLoginCaptcha();
+          showRegistrationVerificationView(authModal);
+          await showEmailVerificationScreen(email);
+        } catch (verificationError) {
+          console.error("[Resume Email Verification Error]", verificationError);
+          recordFailedLogin(email);
+          await Swal.fire({
+            icon: "error",
+            title: "Unable to Resume Verification",
+            text: getFirebaseLoginErrorMessage(verificationError),
+            confirmButtonText: "OK",
+            customClass: {
+              popup: "animua-popup animua-auth-feedback-popup",
+              confirmButton: "animua-confirm"
+            },
+            buttonsStyling: false
+          });
+        }
+        return;
+      }
+
       recordFailedLogin(email);
       if (shouldShowLoginCaptcha(email, response.status, data)) {
         showLoginCaptcha();
@@ -252,6 +279,33 @@ export async function handleLogin(event) {
   } finally {
     setSubmitLoading(submitButton, false);
   }
+}
+
+function showRegistrationVerificationView(authModal) {
+  const loginSection = document.getElementById("login-section");
+  const registerSection = document.getElementById("register-section");
+
+  loginSection?.classList.add("hidden");
+  registerSection?.classList.remove("hidden");
+  authModal?.classList.remove("hidden");
+  authModal?.classList.add("register-mode");
+  document.body.classList.add("modal-open", "auth-open");
+}
+
+function getFirebaseLoginErrorMessage(error) {
+  if (
+    error?.code === "auth/invalid-credential" ||
+    error?.code === "auth/wrong-password" ||
+    error?.code === "auth/user-not-found"
+  ) {
+    return "The email or password is incorrect. Use the password originally entered for this account.";
+  }
+
+  if (error?.code === "auth/too-many-requests") {
+    return "Firebase temporarily blocked repeated attempts. Please wait a few minutes and try again.";
+  }
+
+  return error?.message || "Firebase could not restore this account verification session.";
 }
 
 function closeModal(authModal) {
