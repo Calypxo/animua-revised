@@ -328,9 +328,8 @@ function hideLoginCaptcha() {
 
 function renderLoginCaptcha() {
   const container = document.getElementById("login-recaptcha");
-  if (!container || loginCaptchaWidgetId !== null) {
-    return loginCaptchaRenderPromise || Promise.resolve();
-  }
+  if (!container || loginCaptchaWidgetId !== null) return Promise.resolve();
+  if (loginCaptchaRenderPromise) return loginCaptchaRenderPromise;
 
   if (!RECAPTCHA_SITE_KEY) {
     console.error("[Login Captcha Error] Missing reCAPTCHA site key.");
@@ -351,6 +350,7 @@ function renderLoginCaptcha() {
     .catch((error) => {
       console.error("[Login Captcha Error]", error);
       setLoginCaptchaError(LOGIN_CAPTCHA_MESSAGE);
+      loginCaptchaRenderPromise = null;
     });
 
   return loginCaptchaRenderPromise;

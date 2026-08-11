@@ -74,8 +74,11 @@ function sendOtpEmailErrorResponse(res, error) {
   }
 
   if (error?.code === "OTP_EMAIL_DELIVERY_FAILED") {
+    const authenticationFailed = error.providerCode === "EAUTH" || error.providerResponseCode === 535;
     return res.status(502).json({
-      message: "The verification email could not be sent. Please try again.",
+      message: authenticationFailed
+        ? "The email service rejected its credentials. The administrator must replace the Gmail app password."
+        : "The verification email could not be sent. Please try again.",
     });
   }
 
@@ -380,11 +383,21 @@ async function sendEmailVerificationOtp({
   try {
     await transporter.sendMail(mailOptions);
   } catch (error) {
-    throw createOtpEmailError(
+    console.error("[OTP Email Provider Error]", {
+      code: error.code || "unknown",
+      responseCode: error.responseCode || null,
+      command: error.command || "unknown",
+      message: error.message || "Email delivery failed",
+    });
+
+    const deliveryError = createOtpEmailError(
       "OTP_EMAIL_DELIVERY_FAILED",
       "The email provider rejected the OTP message.",
       error
     );
+    deliveryError.providerCode = error.code || "";
+    deliveryError.providerResponseCode = error.responseCode || null;
+    throw deliveryError;
   }
 }
 

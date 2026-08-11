@@ -23,6 +23,7 @@ const { reconcileRequestDeadlines } = require("./src/services/requestDeadlineSer
 const auditRoutes = require("./src/routes/auditRoutes");
 const reportRoutes = require("./src/routes/reportRoutes");
 const notificationRoutes = require("./src/routes/notificationRoutes");
+const { getPublicEvents } = require("./src/controllers/publicController");
 
 const authenticateToken = require("./src/middleware/authMiddleware");
 const authorizeRole = require("./src/middleware/roleMiddleware");
@@ -111,6 +112,9 @@ app.use("/api", matchRoutes);
 app.use("/api/audit", auditRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/notifications", notificationRoutes);
+
+// Backward-compatible alias for older deployed public bundles.
+app.get("/api/events", getPublicEvents);
 
 app.get("/", (req, res) => {
   res.send("ANIMUA Backend is Live!");

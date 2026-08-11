@@ -1037,9 +1037,8 @@ export function setupRegisterCaptcha() {
 
 function renderRegisterCaptcha() {
   const container = document.getElementById("register-recaptcha");
-  if (!container || registerCaptchaWidgetId !== null) {
-    return registerCaptchaRenderPromise || Promise.resolve();
-  }
+  if (!container || registerCaptchaWidgetId !== null) return Promise.resolve();
+  if (registerCaptchaRenderPromise) return registerCaptchaRenderPromise;
 
   if (!RECAPTCHA_SITE_KEY) {
     console.error("[Register Captcha Error] Missing reCAPTCHA site key.");
@@ -1058,6 +1057,7 @@ function renderRegisterCaptcha() {
     })
     .catch((error) => {
       console.error("[Register Captcha Error]", error);
+      registerCaptchaRenderPromise = null;
     });
 
   return registerCaptchaRenderPromise;

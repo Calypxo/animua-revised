@@ -1036,36 +1036,18 @@ function setupHomeStories() {
     if (eventsLoaded) return upcomingEvents;
     eventsLoaded = true;
 
-    const endpoints = ["/public/events", "/events"];
-
-    for (const endpoint of endpoints) {
-      try {
-        const response = await fetch(`${API_BASE_URL}${endpoint}`);
-        if (!response.ok) continue;
-
-        const events = normalizeEvents(await response.json());
-        if (events.length) {
-          upcomingEvents = events;
-          return upcomingEvents;
-        }
-      } catch (error) {
-        console.warn(`Homepage events load skipped for ${endpoint}:`, error);
-      }
-    }
-
     try {
-      const snapshot = await getDocs(collection(db, "events"));
-      upcomingEvents = normalizeEvents(
-        snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data()
-        }))
-      );
+      const response = await fetch(`${API_BASE_URL}/public/events`, { cache: "no-store" });
+      if (!response.ok) {
+        throw new Error(`Events request failed with status ${response.status}.`);
+      }
+
+      upcomingEvents = normalizeEvents(await response.json());
       if (upcomingEvents.length) {
         return upcomingEvents;
       }
     } catch (error) {
-      console.warn("Homepage Firestore events load skipped:", error);
+      console.warn("Homepage events API load skipped:", error);
     }
 
     upcomingEvents = [getDemoUpcomingEvent()];
