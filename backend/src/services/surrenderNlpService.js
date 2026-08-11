@@ -87,6 +87,7 @@ async function analyzeSurrenderReason(reason, fetchImpl = globalThis.fetch) {
     if (!isValidAnalysis(result)) {
       throw new Error("Tagalog sentiment service returned an invalid response.");
     }
+    console.info("[surrenderNlp] Python sentiment service used successfully.");
     return result;
   } catch (error) {
     console.warn(

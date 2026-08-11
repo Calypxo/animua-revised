@@ -1,0 +1,24 @@
+.gcloudignore
+.git/
+.gitignore
+.venv/
+.python/
+**/__pycache__/
+**/*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Fine-tuned weights are fetched from the private bucket by Cloud Build.
+models/
+
+*.csv
+surrender_requests.json
+test_*.py
+train_model.py
+train_roberta_model.py
+combine_training_data.py
+requirements-training.txt
+ROBERTA_UPGRADE.md

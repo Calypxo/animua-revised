@@ -1,0 +1,35 @@
+steps:
+  - id: fetch-fine-tuned-models
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: bash
+    args:
+      - -ceu
+      - |
+        mkdir -p models/roberta/sentiment models/roberta/category
+        gcloud storage rsync --recursive \
+          "gs://${_MODEL_BUCKET}/animua-sentiment/roberta/${_MODEL_VERSION}/sentiment" \
+          models/roberta/sentiment
+        gcloud storage rsync --recursive \
+          "gs://${_MODEL_BUCKET}/animua-sentiment/roberta/${_MODEL_VERSION}/category" \
+          models/roberta/category
+        sha256sum --check model-manifest.sha256
+
+  - id: build-image
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - --tag
+      - ${_IMAGE}
+      - .
+
+images:
+  - ${_IMAGE}
+
+substitutions:
+  _MODEL_BUCKET: ${PROJECT_ID}-animua-private-models
+  _MODEL_VERSION: roberta-tagalog-finetuned-2026-08-11-v1
+  _IMAGE: asia-southeast1-docker.pkg.dev/${PROJECT_ID}/animua/sentiment-service:roberta-2026-08-11-v1
+
+options:
+  dynamicSubstitutions: true
+  logging: CLOUD_LOGGING_ONLY

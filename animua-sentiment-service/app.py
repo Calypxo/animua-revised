@@ -2,8 +2,8 @@ import json
 
 import joblib
 
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 try:
@@ -24,65 +24,54 @@ from model_config import (
 )
 
 
-app = FastAPI(title="ANIMUA Surrender Sentiment Service")
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:5175",
-        "http://127.0.0.1:5175",
-        "http://localhost:5176",
-        "http://127.0.0.1:5176",
-        "http://localhost:5500",
-        "http://127.0.0.1:5500",
-        "https://animua-angelescity.web.app",
-        "https://animua-admin.web.app",
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+app = FastAPI(
+    title="ANIMUA Surrender Sentiment Service",
+    docs_url=None,
+    redoc_url=None,
+    openapi_url=None,
 )
-
 
 sentiment_model = joblib.load(SERVICE_DIR / "sentiment_model.pkl")
 category_model = joblib.load(SERVICE_DIR / "category_model.pkl")
 transformer_models = {}
 
-REQUESTS_FILE = SERVICE_DIR / "surrender_requests.json"
-
-ANGELES_BARANGAYS = [
-    "Agapito del Rosario", "Amsic", "Anunas", "Balibago", "Capaya", "Claro M. Recto",
-    "Cuayan", "Cutcut", "Cutud", "Lourdes Norte", "Lourdes Sur", "Lourdes Sur Este",
-    "Malabanias", "Margot", "Mining", "Ninoy Aquino", "Pampang", "Pandan", "Plaridel",
-    "Pulung Cacutud", "Pulung Maragul", "Pulungbulu", "Salapungan", "San Jose",
-    "San Nicolas", "Santa Teresita", "Santa Trinidad", "Santo Cristo", "Santo Domingo",
-    "Santo Rosario", "Sapalibutad", "Sapangbato", "Sergio Bernal", "Silangan",
-    "Tabun", "Virgen Delos Remedios",
-]
+REQUIRED_TRANSFORMER_ASSETS = (
+    "config.json",
+    "labels.json",
+    "merges.txt",
+    "model.safetensors",
+    "special_tokens_map.json",
+    "tokenizer.json",
+    "tokenizer_config.json",
+    "vocab.json",
+)
 
 
 class SentimentRequest(BaseModel):
     reason: str
 
 
-class SurrenderRequest(BaseModel):
-    id: str
-    status: str
-    submittedAt: str
-    account: dict | None = None
-    owner: dict
-    pet: dict
-    surrenderReason: str
-    agreement: dict | None = None
-    nlp: dict | None = None
+def missing_transformer_assets(task_name):
+    task_dir = TRANSFORMER_MODEL_DIR / task_name
+    return [
+        filename
+        for filename in REQUIRED_TRANSFORMER_ASSETS
+        if not (task_dir / filename).is_file()
+    ]
 
 
 def load_transformer_task(task_name):
     task_dir = TRANSFORMER_MODEL_DIR / task_name
 
-    if not task_dir.exists() or not torch or not AutoTokenizer or not AutoModelForSequenceClassification:
+    missing_assets = missing_transformer_assets(task_name)
+    if missing_assets:
+        print(
+            f"Unable to load Tagalog RoBERTa {task_name} model: "
+            f"missing required assets {missing_assets}"
+        )
+        return None
+
+    if not torch or not AutoTokenizer or not AutoModelForSequenceClassification:
         return None
 
     try:
@@ -134,20 +123,21 @@ def load_transformer_models():
 transformer_models = load_transformer_models()
 
 
-def load_requests():
-    if not REQUESTS_FILE.exists():
-        return []
+def transformer_status():
+    tasks = {}
+    for task_name in EXPECTED_TASK_LABELS:
+        missing_assets = missing_transformer_assets(task_name)
+        tasks[task_name] = {
+            "modelLoaded": transformer_models.get(task_name) is not None,
+            "assetsAvailable": not missing_assets,
+            "missingAssets": missing_assets,
+        }
 
-    try:
-        with open(REQUESTS_FILE, "r", encoding="utf-8") as file:
-            return json.load(file)
-    except json.JSONDecodeError:
-        return []
-
-
-def save_requests(requests):
-    with open(REQUESTS_FILE, "w", encoding="utf-8") as file:
-        json.dump(requests, file, indent=2, ensure_ascii=False)
+    ready = all(
+        task["modelLoaded"] and task["assetsAvailable"]
+        for task in tasks.values()
+    )
+    return ready, tasks
 
 
 def get_prediction_with_confidence(model, text):
@@ -361,65 +351,38 @@ def analyze_reason(reason):
 
 @app.get("/")
 def home():
+    ready, tasks = transformer_status()
     return {
         "message": "ANIMUA surrender sentiment service is running.",
         "configuredModel": MODEL_NAME,
-        "transformerReady": all(transformer_models.values()),
+        "transformerReady": ready,
         "loadedTasks": {
-            task_name: model is not None
-            for task_name, model in transformer_models.items()
+            task_name: task["modelLoaded"]
+            for task_name, task in tasks.items()
         },
+        "modelAssets": tasks,
         "activeSource": (
             MODEL_SOURCE_LABEL
-            if all(transformer_models.values())
+            if ready
             else FALLBACK_SOURCE_LABEL
         ),
     }
 
 
+@app.get("/health")
+def health():
+    ready, tasks = transformer_status()
+    payload = {
+        "ok": ready,
+        "transformerReady": ready,
+        "tasks": tasks,
+        "activeSource": MODEL_SOURCE_LABEL if ready else FALLBACK_SOURCE_LABEL,
+    }
+    if not ready:
+        return JSONResponse(status_code=503, content=payload)
+    return payload
+
+
 @app.post("/analyze-surrender-sentiment")
 def analyze_surrender_sentiment(data: SentimentRequest):
     return analyze_reason(data.reason)
-
-
-@app.post("/submit-surrender-request")
-def submit_surrender_request(data: SurrenderRequest):
-    request_data = data.model_dump()
-
-    owner = request_data.get("owner", {})
-    barangay = owner.get("barangay", "")
-    city = owner.get("city", "")
-
-    if barangay not in ANGELES_BARANGAYS or city != "Angeles City":
-        raise HTTPException(
-            status_code=403,
-            detail="Only residents of Angeles City can submit a surrender request."
-        )
-
-    agreement = request_data.get("agreement", {})
-
-    if not agreement.get("agreedToTerms"):
-        raise HTTPException(
-            status_code=400,
-            detail="User must agree to the surrender terms before submitting."
-        )
-
-    request_data["nlp"] = analyze_reason(request_data["surrenderReason"])
-    request_data["source"] = "Public Form"
-
-    requests = load_requests()
-    requests.append(request_data)
-    save_requests(requests)
-
-    return {
-        "message": "Surrender request submitted successfully.",
-        "request": request_data
-    }
-
-
-
-@app.get("/surrender-requests")
-def get_surrender_requests():
-    return {
-        "requests": load_requests()
-    }
