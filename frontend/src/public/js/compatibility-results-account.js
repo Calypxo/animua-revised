@@ -51,8 +51,8 @@ const answerSections = [
     title: "Home Environment",
     icon: "fa-house",
     items: [
-      { source: "filters", key: "preferredSpecies", label: "Preferred species" },
-      { source: "filters", key: "preferredSex", label: "Preferred sex" },
+      { source: "filters", key: "preferredSpecies", label: "Preferred species", options: { any: "No preference", dog: "Dog", cat: "Cat" } },
+      { source: "filters", key: "preferredSex", label: "Preferred sex", options: { any: "No preference", male: "Male", female: "Female" } },
       { source: "preferences", key: "spaceNeeds", label: "Living space", scale: ["Very small (studio)", "Small", "Average", "Large", "Very large with yard"] },
       { source: "preferences", key: "goodWithKids", label: "Kids at home", scale: ["Never", "Rarely", "Sometimes", "Often", "Daily - it's a must"] },
       { source: "preferences", key: "goodWithOtherPets", label: "Other pets", scale: ["No other pets", "Rare contact", "Sometimes", "Often", "Yes, definitely"] },
@@ -68,7 +68,7 @@ const answerSections = [
       { source: "preferences", key: "healthRiskLevel", label: "Vet budget", scale: ["Not prepared", "Slightly prepared", "Somewhat prepared", "Prepared", "Fully prepared"] },
       { source: "preferences", key: "affectionLevel", label: "Affection preference", scale: ["Very independent", "Not very affectionate", "Balanced", "Affectionate", "Very cuddly"] },
       { source: "preferences", key: "noiseLevel", label: "Noise tolerance", scale: ["Very little", "Low", "Moderate", "High", "Very high"] },
-      { source: "filters", key: "acceptSpecialNeeds", label: "Special-needs pets", options: { yes: "Open to special-needs pets", no: "Not at this time" } },
+      { source: "filters", key: "acceptSpecialNeeds", label: "Significant special-care needs", options: { yes: "Include pets rated 4-5/5", no: "Exclude pets rated 4-5/5" } },
     ],
   },
 ];

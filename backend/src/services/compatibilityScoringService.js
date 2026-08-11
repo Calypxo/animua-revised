@@ -13,7 +13,6 @@ const RAW_QUESTION_KEYS = [
   "spaceNeeds",
   "climateTolerance",
   "groomingNeeds",
-  "sheddingLevel",
   "trainingDifficulty",
   "healthRiskLevel",
   "affectionLevel",
@@ -45,8 +44,6 @@ const SCORING_DIMENSIONS = [
 const INFORMATIONAL_QUESTIONS = {
   climateTolerance:
     "The animal assessment does not record heat or climate suitability, so using this answer for ranking would fabricate animal data.",
-  sheddingLevel:
-    "The animal assessment does not record shedding. Allergy-friendly eligibility remains a separate explicit filter.",
 };
 
 function validatePreferences(input) {
@@ -177,18 +174,15 @@ function applyFilters(animals, filters) {
     ) return false;
     if (
       filters.preferredSex !== "Any" &&
-      animal.sex !== "Unknown" &&
       String(animal.sex || "").toLowerCase() !== filters.preferredSex.toLowerCase()
     ) return false;
     if (
       filters.needAllergyFriendly === "yes" &&
-      animal.allergyFriendly !== undefined &&
-      animal.allergyFriendly !== true
+      (animal.allergyFriendly ?? animal.flags?.allergyFriendly) !== true
     ) return false;
-    if (
-      filters.acceptAggressive === "no" &&
-      Number(animal.behavioralAssessment?.aggressive ?? animal.aggressive ?? 0) >= 5
-    ) return false;
+    if (Number(animal.behavioralAssessment?.aggressive ?? animal.aggressive ?? 0) >= 5) {
+      return false;
+    }
     return !(
       filters.acceptSpecialNeeds === "no" &&
       Number(

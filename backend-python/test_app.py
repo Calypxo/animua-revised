@@ -38,8 +38,8 @@ class CompatibilityScoringTests(unittest.TestCase):
 
     def test_missing_and_invalid_values_are_rejected(self):
         missing = preferences()
-        del missing["sheddingLevel"]
-        with self.assertRaisesRegex(ValueError, "sheddingLevel"):
+        del missing["climateTolerance"]
+        with self.assertRaisesRegex(ValueError, "climateTolerance"):
             validate_preferences(missing)
 
         invalid = preferences()
@@ -56,7 +56,6 @@ class CompatibilityScoringTests(unittest.TestCase):
         self.assertEqual(profile["attentionNeeds"], 3)
         self.assertEqual(profile["specialNeeds"], 4)
         self.assertNotIn("climateTolerance", profile)
-        self.assertNotIn("sheddingLevel", profile)
 
     def test_exact_and_poor_matches_have_equivalent_ranking(self):
         payload = MatchRequest(

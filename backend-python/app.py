@@ -21,7 +21,6 @@ RAW_QUESTION_KEYS = [
     "spaceNeeds",
     "climateTolerance",
     "groomingNeeds",
-    "sheddingLevel",
     "trainingDifficulty",
     "healthRiskLevel",
     "affectionLevel",
@@ -29,8 +28,8 @@ RAW_QUESTION_KEYS = [
 ]
 
 # Keep this ordered contract mathematically equivalent to the Node fallback.
-# climateTolerance and sheddingLevel are retained as questionnaire context but
-# are not scored because the live animal assessment has no matching traits.
+# climateTolerance is retained as questionnaire context but is not scored
+# because the live animal assessment has no matching trait.
 SCORING_DIMENSIONS = [
     ("energyLevel", ["energyLevel"]),
     ("exerciseNeeds", ["exerciseNeeds"]),

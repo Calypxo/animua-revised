@@ -3,66 +3,46 @@ import { getToken } from "/src/utils/storage.js";
 
 /* ══════════════════════════════════════════════════════
    QUIZ DEFINITION
-   Phase 0: Filters (5 questions — select tiles)
-   Phases 1-4: Lifestyle / Social / Home / Affection (19 questions — 1-5 scale)
+   Phase 0: Filters (3 questions — select tiles)
+   Phases 1-4: Lifestyle / Social / Home / Affection (18 questions — 1-5 scale)
 ══════════════════════════════════════════════════════ */
 const PHASES = [
   {
-    id: 0, key: "filters", label: "Basic Filters",
+    id: 0, key: "filters", label: "Matching Preferences",
     icon: "bi-funnel-fill", iconBg: "#fdf0f0", iconColor: "var(--clay)",
-    kicker: "Step 1 of 5", title: "Set your filters",
-    desc: "Itakda ang iyong mga filter.",
+    kicker: "Step 1 of 5", title: "Set your matching preferences",
+    desc: "Piliin kung aling pets ang dapat isama sa matching.",
     questions: [
       {
         key: "preferredSpecies", label: "Preferred Species", isFilter: true,
-        text: "What species are you interested in?",
-        hint: "Anong uri ng alagang hayop ang interesado ka?",
+        text: "Anong type of pet ang gusto mong makita sa matches?",
+        hint: "Choose Dog, Cat, or No preference.",
         type: "tiles",
         options: [
-          { label:"Any", value:"Any", icon:"bi-grid-3x3-gap-fill" },
+          { label:"No preference", value:"Any", icon:"bi-grid-3x3-gap-fill" },
           { label:"Dog", value:"Dog", icon:"dog" },
           { label:"Cat", value:"Cat", icon:"cat" },
         ]
       },
       {
         key: "preferredSex", label: "Preferred Sex", isFilter: true,
-        text: "Do you have a sex preference?",
-        hint: "May gusto ka bang kasarian ng pet?",
+        text: "May preferred sex ka ba for your pet?",
+        hint: "Kapag Male or Female ang pinili, exact matches lang ang isasama.",
         type: "tiles",
         options: [
-          { label:"Any", value:"Any", icon:"bi-grid-3x3-gap-fill" },
+          { label:"No preference", value:"Any", icon:"bi-grid-3x3-gap-fill" },
           { label:"Male", value:"Male", icon:"bi-gender-male" },
           { label:"Female", value:"Female", icon:"bi-gender-female" },
         ]
       },
       {
-        key: "needAllergyFriendly", label: "Allergy-Friendly", isFilter: true,
-        text: "Does anyone in your household have pet allergies?",
-        hint: "May allergy ba sa pet ang sinuman sa inyong bahay?",
+        key: "acceptSpecialNeeds", label: "Significant Special-Care Needs", isFilter: true,
+        text: "Open ka ba sa pets with significant special-care needs (rated 4-5/5)?",
+        hint: "Pets rated 1-3 remain eligible; this filter applies only to ratings 4-5.",
         type: "toggle",
         options: [
-          { label:"No, no allergies", value:"no", icon:"bi-x-circle" },
-          { label:"Yes, need allergy-friendly", value:"yes", icon:"bi-shield-check" },
-        ]
-      },
-      {
-        key: "acceptAggressive", label: "Behavioral Challenges", isFilter: true,
-        text: "Can you handle a pet with behavioral challenges?",
-        hint: "Kaya mo bang alagaan ang pet na may behavioral challenges?",
-        type: "toggle",
-        options: [
-          { label:"No, I prefer easy-going", value:"no", icon:"bi-emoji-smile" },
-          { label:"Yes, I'm experienced", value:"yes", icon:"bi-award" },
-        ]
-      },
-      {
-        key: "acceptSpecialNeeds", label: "Special Needs", isFilter: true,
-        text: "Are you open to adopting a special-needs pet?",
-        hint: "Bukas ka ba sa pag-ampon ng special-needs pet?",
-        type: "toggle",
-        options: [
-          { label:"Not at this time", value:"no", icon:"bi-x-circle" },
-          { label:"Yes, open to it", value:"yes", icon:"bi-heart-fill" },
+          { label:"Hindi", value:"no", icon:"bi-x-circle" },
+          { label:"Oo", value:"yes", icon:"bi-heart-fill" },
         ]
       },
     ]
@@ -101,11 +81,10 @@ const PHASES = [
     questions: [
       { key:"noiseLevel",        label:"Noise Tolerance",      text:"How much noise can you comfortably handle from a pet?",      hint:"Gaano karaming ingay mula sa pet ang kaya mong tanggapin?", scale:["Very little","Low","Moderate","High","Very high"] },
       { key:"spaceNeeds",        label:"Living Space",         text:"How much living space can you provide?",                     hint:"Gaano kalaking living space ang kaya mong ibigay?", scale:["Very small (studio)","Small","Average","Large","Very large with yard"] },
-      { key:"climateTolerance",  label:"Climate Readiness",    text:"Can you care for a pet in Angeles City's warm climate?",     hint:"Kaya mo bang alagaan ang pet sa mainit na klima ng Angeles City?", scoring:false, scoringNote:"Care-readiness context only — saved with your result, but not used for ranking because animal profiles do not record climate suitability.", scale:["Not ready","Slightly ready","Moderately ready","Ready","Fully prepared"] },
-      { key:"groomingNeeds",     label:"Grooming Commitment",  text:"How willing are you to groom your pet regularly?",           hint:"Gaano ka kahandang mag-groom ng pet nang regular?", scoreTarget:"attentionNeeds", scoringNote:"Combined equally with daily attention capacity when matching the animal's attention needs.", scale:["Not willing","Slightly willing","Moderate effort","Willing","Very willing"] },
-      { key:"sheddingLevel",     label:"Shedding Tolerance",   text:"How comfortable are you with pet fur around the house?",     hint:"Gaano ka kakomportable sa balahibo ng pet sa bahay?", scoring:false, scoringNote:"Care-readiness context only — saved with your result, but not used for ranking because animal profiles do not record shedding.", scale:["Not at all","Slightly OK","Neutral","Comfortable","No problem at all"] },
+      { key:"climateTolerance",  label:"Climate Readiness",    text:"Can you care for a pet in Angeles City's warm climate?",     hint:"Kaya mo bang alagaan ang pet sa mainit na klima ng Angeles City?", scale:["Not ready","Slightly ready","Moderately ready","Ready","Fully prepared"] },
+      { key:"groomingNeeds",     label:"Grooming Commitment",  text:"How willing are you to groom your pet regularly?",           hint:"Gaano ka kahandang mag-groom ng pet nang regular?", scale:["Not willing","Slightly willing","Moderate effort","Willing","Very willing"] },
       { key:"trainingDifficulty",label:"Training Commitment",  text:"How much training difficulty can you handle?",               hint:"Gaano kahirap na training ang kaya mong hawakan?", scale:["Very easy only","Low difficulty","Moderate","Can handle difficult","Very experienced trainer"] },
-      { key:"healthRiskLevel",   label:"Vet Budget",           text:"How prepared are you for veterinary costs?",                 hint:"Gaano ka kahanda sa gastusing veterinary?", scoreTarget:"specialNeeds", scoringNote:"Compared with the animal's assessed special-care needs; the separate special-needs filter still controls eligibility.", scale:["Not prepared","Slightly prepared","Somewhat prepared","Prepared","Fully prepared"] },
+      { key:"healthRiskLevel",   label:"Vet Budget",           text:"How prepared are you for veterinary costs?",                 hint:"Gaano ka kahanda sa gastusing veterinary?", scale:["Not prepared","Slightly prepared","Somewhat prepared","Prepared","Fully prepared"] },
     ]
   },
   {
@@ -121,7 +100,7 @@ const PHASES = [
 ];
 
 const PHASE_TIPS = [
-  "Sinasala ng filters ang pet pool para mas tumugma ang recommendations.",
+  "Inaalis ng choices dito ang pets na hindi pasok bago i-calculate ang compatibility score.",
   "Maging tapat sa tunay mong routine, hindi sa ideal version nito.",
   "Isaalang-alang ang buong household - bata, kasama sa bahay, at ibang pets.",
   "Isipin ang kasalukuyang bahay at setup mo, hindi future plan lang.",
@@ -255,7 +234,6 @@ function renderPhase(phaseIdx) {
           <div class="q-num">Question ${globalIdx}</div>
           <div class="q-text">${q.text}</div>
           <div class="q-hint">${q.hint}</div>
-          ${q.scoringNote ? `<div class="q-scoring-note"><i class="bi bi-info-circle"></i>${q.scoringNote}</div>` : ""}
           <div class="option-group">
             ${q.scale.map((lbl, val) => `
               <button class="option-btn ${answers[q.key]===(val+1)?"selected":""}"
@@ -451,7 +429,6 @@ async function handleSubmit() {
       preferredSpecies:    answers.preferredSpecies    || "Any",
       preferredSex:        answers.preferredSex        || "Any",
       needAllergyFriendly: answers.needAllergyFriendly || "no",
-      acceptAggressive:    answers.acceptAggressive    || "yes",
       acceptSpecialNeeds:  answers.acceptSpecialNeeds  || "yes",
     },
     preferences
@@ -542,7 +519,7 @@ async function initializeQuiz() {
         friendlinessToHumans:"Friendliness", goodWithKids:"Kids", goodWithOtherPets:"Other pets",
         strangerTolerance:"Strangers", noiseLevel:"Noise", spaceNeeds:"Living space",
         climateTolerance:"Climate readiness", groomingNeeds:"Grooming commitment",
-        sheddingLevel:"Shedding tolerance", trainingDifficulty:"Training commitment",
+        trainingDifficulty:"Training commitment",
         healthRiskLevel:"Vet budget", affectionLevel:"Affection", separationAnxiety:"Clinginess tolerance"
       };
       const traits = Object.entries(result.preferences || {}).map(([key, value]) => `<div class="saved-trait"><span>${safe(traitLabels[key] || key)}</span><div><i style="width:${Math.max(0, Math.min(100, Number(value) * 20))}%"></i></div><b>${safe(value)}/5</b></div>`).join("");

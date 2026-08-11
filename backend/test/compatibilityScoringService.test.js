@@ -38,8 +38,8 @@ test("accepts inclusive minimum and maximum questionnaire values", () => {
 
 test("rejects missing, fractional, and out-of-range answers", () => {
   const missing = preferences();
-  delete missing.sheddingLevel;
-  assert.match(validatePreferences(missing).error, /sheddingLevel/);
+  delete missing.climateTolerance;
+  assert.match(validatePreferences(missing).error, /climateTolerance/);
 
   const fractional = preferences();
   fractional.energyLevel = 2.5;
@@ -85,7 +85,6 @@ test("daily attention and grooming commitment are averaged deterministically", (
   assert.equal(profile.attentionNeeds, 3);
   assert.equal(profile.specialNeeds, 4);
   assert.equal(profile.climateTolerance, undefined);
-  assert.equal(profile.sheddingLevel, undefined);
 });
 
 test("Python transport failure uses the equivalent local ranking", async () => {
@@ -124,4 +123,62 @@ test("eligibility filters run independently before compatibility ranking", () =>
   const eligible = applyFilters([exactButExcluded, eligiblePoorMatch], filters);
   assert.deepEqual(eligible.map(({ id }) => id), ["eligible"]);
   assert.equal(scoreMatchesLocally(preferences(3), eligible, 5).matches[0].id, "eligible");
+});
+
+test("a specific sex preference excludes animals with unknown sex", () => {
+  const filters = {
+    preferredSpecies: "Any",
+    preferredSex: "Male",
+    needAllergyFriendly: "no",
+    acceptAggressive: "yes",
+    acceptSpecialNeeds: "yes",
+  };
+  const eligible = applyFilters([
+    animal("male", 3, { sex: "Male" }),
+    animal("female", 3, { sex: "Female" }),
+    animal("unknown", 3, { sex: "Unknown" }),
+  ], filters);
+
+  assert.deepEqual(eligible.map(({ id }) => id), ["male"]);
+});
+
+test("an allergy-friendly requirement accepts only explicitly verified animals", () => {
+  const filters = {
+    preferredSpecies: "Any",
+    preferredSex: "Any",
+    needAllergyFriendly: "yes",
+    acceptAggressive: "yes",
+    acceptSpecialNeeds: "yes",
+  };
+  const eligible = applyFilters([
+    animal("verified", 3, { allergyFriendly: true }),
+    animal("legacy-verified", 3, { flags: { allergyFriendly: true } }),
+    animal("not-friendly", 3, { allergyFriendly: false }),
+    animal("unknown", 3),
+  ], filters);
+
+  assert.deepEqual(eligible.map(({ id }) => id), ["verified", "legacy-verified"]);
+});
+
+test("severe aggression is always excluded and the special-needs threshold remains explicit", () => {
+  const filters = {
+    preferredSpecies: "Any",
+    preferredSex: "Any",
+    needAllergyFriendly: "no",
+    acceptAggressive: "yes",
+    acceptSpecialNeeds: "no",
+  };
+  const eligible = applyFilters([
+    animal("below-thresholds", 3, {
+      behavioralAssessment: { ...assessment(3), aggressive: 4, specialNeeds: 3 },
+    }),
+    animal("severe-aggression", 3, {
+      behavioralAssessment: { ...assessment(3), aggressive: 5, specialNeeds: 3 },
+    }),
+    animal("significant-special-needs", 3, {
+      behavioralAssessment: { ...assessment(3), aggressive: 4, specialNeeds: 4 },
+    }),
+  ], filters);
+
+  assert.deepEqual(eligible.map(({ id }) => id), ["below-thresholds"]);
 });

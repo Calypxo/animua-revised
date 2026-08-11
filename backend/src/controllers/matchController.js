@@ -10,7 +10,7 @@ const {
 const RESULTS = "compatibilityResults";
 const SETTINGS = db.collection("quizSettings").doc("compatibilityQuiz");
 const DEFAULTS = { quizEnabled: true, retakeCooldownDays: 30, quizVersion: 1 };
-const FILTERS = { preferredSpecies: ["Any", "Dog", "Cat"], preferredSex: ["Any", "Male", "Female"], needAllergyFriendly: ["no", "yes"], acceptAggressive: ["yes", "no"], acceptSpecialNeeds: ["yes", "no"] };
+const FILTERS = { preferredSpecies: ["Any", "Dog", "Cat"], preferredSex: ["Any", "Male", "Female"], needAllergyFriendly: ["no", "yes"], acceptSpecialNeeds: ["yes", "no"] };
 
 function toDate(value) {
   if (!value) return null;
