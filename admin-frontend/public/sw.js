@@ -1,4 +1,5 @@
-const CACHE_VERSION = "animua-admin-v3";
+const CACHE_VERSION = "animua-admin-v4";
+const RENDER_API_ORIGIN = "https://animua-backend.onrender.com";
 const APP_SHELL = [
   "/",
   "/index.html",
@@ -49,6 +50,19 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
 
   const requestUrl = new URL(request.url);
+  const isRenderApiRequest = requestUrl.origin === RENDER_API_ORIGIN
+    && (requestUrl.pathname === "/api" || requestUrl.pathname.startsWith("/api/"));
+  const isAuthenticationRequest = requestUrl.pathname === "/api/auth"
+    || requestUrl.pathname.startsWith("/api/auth/");
+  const hasAuthorizationHeader = request.headers.has("Authorization");
+
+  // API and authenticated requests must always reach the backend and must
+  // never be read from or written to Cache Storage.
+  if (isRenderApiRequest || isAuthenticationRequest || hasAuthorizationHeader) {
+    event.respondWith(fetch(request));
+    return;
+  }
+
   if (requestUrl.origin !== self.location.origin) {
     event.respondWith(
       caches.match(request).then((cached) => cached || fetch(request).then((response) => {
