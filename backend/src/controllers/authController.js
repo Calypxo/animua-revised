@@ -1,6 +1,7 @@
 // backend/src/controllers/authController.js
 const { db, admin } = require("../config/firebase");
 const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const https = require("https");
@@ -14,6 +15,34 @@ const RECAPTCHA_SECRET_KEY =
 const CURRENT_POLICY_VERSION = "1.0";
 const EMAIL_HERO_IMAGE_PATH = path.join(__dirname, "../assets/animua-services-email-banner.png");
 const EMAIL_HERO_IMAGE_CID = "animua-cityvet-banner";
+
+function isBcryptHash(value) {
+  return typeof value === "string" && /^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$/.test(value);
+}
+
+async function verifyStoredPassword(password, storedPassword) {
+  if (typeof password !== "string" || typeof storedPassword !== "string") {
+    return { isMatch: false, needsRehash: false };
+  }
+
+  if (isBcryptHash(storedPassword)) {
+    return {
+      isMatch: await bcrypt.compare(password, storedPassword),
+      needsRehash: false,
+    };
+  }
+
+  // Some management accounts predate bcrypt and were saved as plaintext.
+  // Compare their legacy value without an early-exit string comparison, then
+  // replace it with a bcrypt hash immediately after a successful login.
+  const suppliedDigest = crypto.createHash("sha256").update(password).digest();
+  const storedDigest = crypto.createHash("sha256").update(storedPassword).digest();
+
+  return {
+    isMatch: crypto.timingSafeEqual(suppliedDigest, storedDigest),
+    needsRehash: true,
+  };
+}
 
 async function writeAccountAuditLog({
   action,
@@ -477,12 +506,21 @@ async function validatePasswordChangeInput({ email, oldPassword, newPassword }) 
   }
 
   const userData = userDoc.data();
-  const isMatch = IS_INSECURE_MODE
-    ? oldPassword === userData.password
-    : await bcrypt.compare(oldPassword, userData.password);
+  const passwordCheck = IS_INSECURE_MODE
+    ? { isMatch: oldPassword === userData.password, needsRehash: false }
+    : await verifyStoredPassword(oldPassword, userData.password);
 
-  if (!isMatch) {
+  if (!passwordCheck.isMatch) {
     return { status: 401, message: "Current password is incorrect." };
+  }
+
+  if (passwordCheck.needsRehash) {
+    const passwordHash = await bcrypt.hash(oldPassword, 12);
+    await userRef.update({
+      password: passwordHash,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+    userData.password = passwordHash;
   }
 
   return { userRef, userData };
@@ -877,15 +915,21 @@ exports.login = async (req, res) => {
       });
     }
 
-    let isMatch = false;
-    if (IS_INSECURE_MODE) {
-      isMatch = password === userData.password;
-    } else {
-      isMatch = await bcrypt.compare(password, userData.password);
+    const passwordCheck = IS_INSECURE_MODE
+      ? { isMatch: password === userData.password, needsRehash: false }
+      : await verifyStoredPassword(password, userData.password);
+
+    if (!passwordCheck.isMatch) {
+      return res.status(401).json({ message: "Invalid email or password." });
     }
 
-    if (!isMatch) {
-      return res.status(401).json({ message: "Invalid email or password." });
+    if (passwordCheck.needsRehash) {
+      const passwordHash = await bcrypt.hash(password, 12);
+      await db.collection("users").doc(email).update({
+        password: passwordHash,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+      userData.password = passwordHash;
     }
 
     const managementRoles = ["Admin", "Staff", "Veterinarian"];
@@ -1487,5 +1531,7 @@ exports.changePassword = async (req, res) => {
 };
 
 exports.validateNewPasswordValue = validateNewPasswordValue;
+exports.isBcryptHash = isBcryptHash;
+exports.verifyStoredPassword = verifyStoredPassword;
 exports.getEmailCredentials = getEmailCredentials;
 exports.storeAndSendOtp = storeAndSendOtp;

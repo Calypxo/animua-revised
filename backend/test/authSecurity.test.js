@@ -24,6 +24,8 @@ function loadAuthHelpersWithoutFirebase() {
       normalizeRole: middleware.normalizeRole,
       getBearerToken: middleware.getBearerToken,
       validateNewPasswordValue: controller.validateNewPasswordValue,
+      isBcryptHash: controller.isBcryptHash,
+      verifyStoredPassword: controller.verifyStoredPassword,
       getEmailCredentials: controller.getEmailCredentials,
       storeAndSendOtp: controller.storeAndSendOtp,
     };
@@ -39,6 +41,8 @@ const {
   normalizeRole,
   getBearerToken,
   validateNewPasswordValue,
+  isBcryptHash,
+  verifyStoredPassword,
   getEmailCredentials,
   storeAndSendOtp,
 } = loadAuthHelpersWithoutFirebase();
@@ -91,6 +95,31 @@ test("UT-003 validateNewPasswordValue enforces the implemented password policy",
     "password over 128 characters"
   );
   assert.equal(validateNewPasswordValue("ValidPass1!"), null, "valid password");
+});
+
+test("management login accepts and identifies legacy plaintext passwords for migration", async () => {
+  const result = await verifyStoredPassword("LegacyPass1!", "LegacyPass1!");
+
+  assert.deepEqual(result, { isMatch: true, needsRehash: true });
+  assert.deepEqual(
+    await verifyStoredPassword("wrong-password", "LegacyPass1!"),
+    { isMatch: false, needsRehash: true }
+  );
+});
+
+test("management login verifies bcrypt passwords without requesting migration", async () => {
+  const bcrypt = require("bcryptjs");
+  const passwordHash = await bcrypt.hash("SecurePass1!", 4);
+
+  assert.equal(isBcryptHash(passwordHash), true);
+  assert.deepEqual(
+    await verifyStoredPassword("SecurePass1!", passwordHash),
+    { isMatch: true, needsRehash: false }
+  );
+  assert.deepEqual(
+    await verifyStoredPassword("wrong-password", passwordHash),
+    { isMatch: false, needsRehash: false }
+  );
 });
 
 test("email credentials accept deployment aliases and normalize Gmail app passwords", () => {
