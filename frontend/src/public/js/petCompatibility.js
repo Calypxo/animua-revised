@@ -1,6 +1,9 @@
 import { API_BASE_URL } from "/src/utils/api.js";
 import { getToken } from "/src/utils/storage.js";
 
+const DEFAULT_DOG_IMAGE = new URL("../../assets/images/dog.jpg", import.meta.url).href;
+const DEFAULT_CAT_IMAGE = new URL("../../assets/images/cat.jpg", import.meta.url).href;
+
 /* ══════════════════════════════════════════════════════
    QUIZ DEFINITION
    Phase 0: Filters (3 questions — select tiles)
@@ -42,7 +45,7 @@ const PHASES = [
         type: "toggle",
         options: [
           { label:"Hindi", value:"no", icon:"bi-x-circle" },
-          { label:"Oo", value:"yes", icon:"bi-heart-fill" },
+          { label:"Oo", value:"yes", icon:"bi-heart-pulse" },
         ]
       },
     ]
@@ -107,6 +110,256 @@ const PHASE_TIPS = [
   "Mahalaga rin ang bond na gusto mo, hindi lang practical needs.",
 ];
 
+const QUIZ_LANGUAGE_KEY = "animua_quiz_language";
+let quizLanguage = localStorage.getItem(QUIZ_LANGUAGE_KEY) === "tagalog" ? "tagalog" : "english";
+
+const PHASE_COPY = {
+  english: {
+    filters: {
+      kicker: "Step 1 of 5",
+      title: "Set your filters",
+      desc: "Tell us what you're looking for so we can find the best matches."
+    },
+    lifestyle: {
+      kicker: "Step 2 of 5",
+      title: "Lifestyle & activity",
+      desc: "Tell us about your daily routine and activity level."
+    },
+    social: {
+      kicker: "Step 3 of 5",
+      title: "Social environment",
+      desc: "Share who your future pet will meet at home."
+    },
+    care: {
+      kicker: "Step 4 of 5",
+      title: "Home, care & maintenance",
+      desc: "Help us understand your space, care capacity, and budget readiness."
+    },
+    affection: {
+      kicker: "Step 5 of 5",
+      title: "Affection & attachment",
+      desc: "Tell us what kind of bond feels right for you."
+    }
+  },
+  tagalog: {
+    filters: {
+      kicker: "Hakbang 1 ng 5",
+      title: "Itakda ang iyong filters",
+      desc: "Sabihin kung anong pet ang hinahanap mo para makahanap kami ng best matches."
+    },
+    lifestyle: {
+      kicker: "Hakbang 2 ng 5",
+      title: "Lifestyle at activity",
+      desc: "Ibahagi ang iyong daily routine at activity level."
+    },
+    social: {
+      kicker: "Hakbang 3 ng 5",
+      title: "Social environment",
+      desc: "Sabihin kung sino ang makakasalamuha ng future pet mo sa bahay."
+    },
+    care: {
+      kicker: "Hakbang 4 ng 5",
+      title: "Bahay, alaga, at maintenance",
+      desc: "Tulungan kaming maintindihan ang space, care capacity, at budget readiness mo."
+    },
+    affection: {
+      kicker: "Hakbang 5 ng 5",
+      title: "Lambing at attachment",
+      desc: "Sabihin kung anong klase ng bond ang bagay sa iyo."
+    }
+  }
+};
+
+const QUESTION_COPY = {
+  english: {
+    preferredSpecies: {
+      text: "What species are you interested in?",
+      hint: "Choose Any, Dog, or Cat.",
+      options: { Any: "Any", Dog: "Dog", Cat: "Cat" }
+    },
+    preferredSex: {
+      text: "Do you have a preferred sex for your pet?",
+      hint: "Choose Any if male or female pets are both okay.",
+      options: { Any: "Any", Male: "Male", Female: "Female" }
+    },
+    acceptSpecialNeeds: {
+      text: "Are you open to pets with significant special-care needs?",
+      hint: "This only affects pets with higher care needs.",
+      options: { no: "No", yes: "Yes" }
+    },
+    energyLevel: { hint: "Choose the energy level that fits your home." },
+    exerciseNeeds: { hint: "Choose the amount of daily exercise you can realistically provide." },
+    independenceLevel: { hint: "Choose how independent your pet should be." },
+    attentionNeeds: { hint: "Choose how much daily attention you can give." },
+    playfulness: { hint: "Choose how playful you want your pet to be." },
+    adaptability: { hint: "Choose how stable or changing your routine is." },
+    friendlinessToHumans: { hint: "Choose how social your household is." },
+    goodWithKids: { hint: "Choose how often the pet will interact with children." },
+    goodWithOtherPets: { hint: "Choose whether the pet will live with or meet other pets." },
+    strangerTolerance: { hint: "Choose how comfortable your pet should be with visitors." },
+    noiseLevel: { hint: "Choose how much pet noise you can comfortably handle." },
+    spaceNeeds: { hint: "Choose the living space you can provide." },
+    climateTolerance: { hint: "Choose how ready you are to care for a pet in Angeles City's warm climate." },
+    groomingNeeds: { hint: "Choose how willing you are to groom regularly." },
+    trainingDifficulty: { hint: "Choose how much training difficulty you can handle." },
+    healthRiskLevel: { hint: "Choose how prepared you are for veterinary costs." },
+    affectionLevel: { hint: "Choose how affectionate you want your pet to be." },
+    separationAnxiety: { hint: "Choose how comfortable you are with a clingy pet." }
+  },
+  tagalog: {
+    preferredSpecies: {
+      text: "Anong uri ng pet ang interesado ka?",
+      hint: "Pumili ng kahit ano, aso, o pusa.",
+      options: { Any: "Kahit ano", Dog: "Aso", Cat: "Pusa" }
+    },
+    preferredSex: {
+      text: "May gusto ka bang kasarian para sa pet mo?",
+      hint: "Piliin ang kahit ano kung okay lang sa iyo ang lalaki o babae.",
+      options: { Any: "Kahit ano", Male: "Lalaki", Female: "Babae" }
+    },
+    acceptSpecialNeeds: {
+      text: "Handa ka ba sa pets na may mas mataas na special-care needs?",
+      hint: "Para lang ito sa pets na nangangailangan ng mas mataas na alaga.",
+      options: { no: "Hindi", yes: "Oo" }
+    },
+    energyLevel: {
+      text: "Gaano ka-energetic ang pet na gusto mo?",
+      hint: "Piliin ang energy level na bagay sa bahay mo.",
+      scale: ["Sobrang kalmado", "Mababa ang energy", "Katamtaman", "Aktibo", "Sobrang energetic"]
+    },
+    exerciseNeeds: {
+      text: "Gaano karaming daily exercise ang kaya mong ibigay?",
+      hint: "Piliin ang dami ng exercise na realistic mong maibibigay araw-araw.",
+      scale: ["Kaunti lang", "Medyo kaunti", "Katamtaman", "Marami", "Napakarami"]
+    },
+    independenceLevel: {
+      text: "Gaano ka-independent dapat ang pet mo?",
+      hint: "Piliin kung gaano ka-independent ang bagay sa routine mo.",
+      scale: ["Laging kailangan ng kasama", "Hindi masyadong independent", "Balanced", "Medyo independent", "Sobrang independent"]
+    },
+    attentionNeeds: {
+      text: "Gaano karaming attention ang kaya mong ibigay araw-araw?",
+      hint: "Piliin kung gaano karaming oras at attention ang kaya mong ibigay.",
+      scale: ["Kaunti lang", "Medyo kaunti", "Katamtaman", "Marami", "Napakarami"]
+    },
+    playfulness: {
+      text: "Gaano ka-playful ang pet na gusto mo?",
+      hint: "Piliin kung gaano kalikot o kalaro ang gusto mong pet.",
+      scale: ["Sobrang kalmado", "Medyo playful", "Balanced", "Playful", "Sobrang playful"]
+    },
+    adaptability: {
+      text: "Gaano kadalas nagbabago ang daily routine mo?",
+      hint: "Piliin kung gaano ka-stable o pabago-bago ang routine mo.",
+      scale: ["Sobrang stable", "Bahagyang nagbabago", "Katamtamang pagbabago", "Madalas magbago", "Sobrang pabago-bago"]
+    },
+    friendlinessToHumans: {
+      text: "Gaano kasocial ang household ninyo?",
+      hint: "Piliin kung gaano kadalas may tao at interaction sa bahay.",
+      scale: ["Sobrang tahimik", "Medyo social", "Katamtaman", "Social", "Sobrang social"]
+    },
+    goodWithKids: {
+      text: "Gaano kadalas makakasalamuha ng pet ang mga bata?",
+      hint: "Piliin kung gaano kadalas magkakaroon ng interaction sa children.",
+      scale: ["Hindi kailanman", "Bihira", "Minsan", "Madalas", "Araw-araw"]
+    },
+    goodWithOtherPets: {
+      text: "Makakasama ba ng pet ang ibang pets?",
+      hint: "Piliin kung may ibang hayop sa bahay o madalas makakasalamuha.",
+      scale: ["Walang ibang pets", "Bihirang contact", "Minsan", "Madalas", "Oo, siguradong may kasama"]
+    },
+    strangerTolerance: {
+      text: "Gaano dapat kakomportable ang pet sa bisita o strangers?",
+      hint: "Piliin kung gaano kadalas at ka-comfortable dapat sa visitors.",
+      scale: ["Sobrang maingat", "Reserved", "Balanced", "Friendly", "Sobrang welcoming"]
+    },
+    noiseLevel: {
+      text: "Gaano karaming ingay mula sa pet ang kaya mong tanggapin?",
+      hint: "Piliin ang noise level na komportable sa bahay mo.",
+      scale: ["Kaunti lang", "Mababa", "Katamtaman", "Mataas", "Sobrang taas"]
+    },
+    spaceNeeds: {
+      text: "Gaano kalaking living space ang kaya mong ibigay?",
+      hint: "Piliin ang space na available sa bahay mo.",
+      scale: ["Maliit na studio", "Maliit", "Katamtaman", "Malaki", "Malaki na may bakuran"]
+    },
+    climateTolerance: {
+      text: "Kaya mo bang mag-alaga ng pet sa mainit na klima ng Angeles City?",
+      hint: "Piliin kung gaano ka kahanda sa init at climate care.",
+      scale: ["Hindi pa handa", "Medyo handa", "Katamtamang handa", "Handa", "Sobrang handa"]
+    },
+    groomingNeeds: {
+      text: "Gaano ka kahandang mag-groom ng pet nang regular?",
+      hint: "Piliin ang grooming effort na kaya mong panindigan.",
+      scale: ["Hindi handa", "Medyo handa", "Katamtaman", "Handa", "Sobrang handa"]
+    },
+    trainingDifficulty: {
+      text: "Gaano kahirap na training ang kaya mong hawakan?",
+      hint: "Piliin ang training difficulty na kaya mong suportahan.",
+      scale: ["Madali lang", "Mababang difficulty", "Katamtaman", "Kaya ang mahirap", "May malawak na experience"]
+    },
+    healthRiskLevel: {
+      text: "Gaano ka kahanda sa veterinary costs?",
+      hint: "Piliin kung gaano ka kahanda sa posibleng gastos sa vet.",
+      scale: ["Hindi handa", "Medyo handa", "May konting handa", "Handa", "Sobrang handa"]
+    },
+    affectionLevel: {
+      text: "Gaano kalambing ang pet na gusto mo?",
+      hint: "Piliin kung gaano ka-affectionate ang bagay sa iyo.",
+      scale: ["Sobrang independent", "Hindi masyadong malambing", "Balanced", "Malambing", "Sobrang lambing"]
+    },
+    separationAnxiety: {
+      text: "Gaano ka kakomportable sa clingy na pet?",
+      hint: "Piliin kung gaano ka okay sa pet na laging gusto ng kasama.",
+      scale: ["Hindi komportable", "Medyo okay", "Neutral", "Komportable", "Sobrang okay"]
+    }
+  }
+};
+
+const UI_COPY = {
+  english: {
+    question: "Question",
+    of: "of",
+    previous: "Previous",
+    next: "Next",
+    submit: "Find My Matches",
+    submitting: "Finding Matches...",
+    sidebarNoteTime: "Takes 3-5 minutes",
+    sidebarNoteReview: "Shelter-reviewed recommendations",
+    headerIntro: "Answer a few simple questions to get matched with animals who may be the perfect fit for you.",
+    validation: "Please answer all questions in this section before continuing.",
+    retakeTitle: "Retake available",
+    retakeText: "Your previous result remains in your account history. Answer the quiz again below to update your matches.",
+    steps: [
+      ["Basic Filters", "Set your preferences"],
+      ["Lifestyle", "Your daily routine"],
+      ["Social", "People and other pets"],
+      ["Home & Care", "Living environment"],
+      ["Affection", "Bonding preferences"],
+    ]
+  },
+  tagalog: {
+    question: "Tanong",
+    of: "ng",
+    previous: "Bumalik",
+    next: "Susunod",
+    submit: "Hanapin ang Matches",
+    submitting: "Hinahanap ang Matches...",
+    sidebarNoteTime: "Tumatagal ng 3-5 minuto",
+    sidebarNoteReview: "Shelter-reviewed recommendations",
+    headerIntro: "Sagutan ang ilang simpleng tanong para ma-match ka sa hayop na maaaring bagay sa iyo.",
+    validation: "Sagutan muna ang lahat ng tanong sa section na ito bago magpatuloy.",
+    retakeTitle: "Pwede nang ulitin",
+    retakeText: "Nasa account history mo pa rin ang dating resulta. Sagutan muli ang quiz sa ibaba para ma-update ang matches mo.",
+    steps: [
+      ["Basic Filters", "Itakda ang preferences"],
+      ["Lifestyle", "Daily routine mo"],
+      ["Social", "Tao at ibang pets"],
+      ["Home & Care", "Kapaligiran sa bahay"],
+      ["Affection", "Bonding preferences"],
+    ]
+  }
+};
+
 /* ══════════════════════════════════════════════════════
    STATE
 ══════════════════════════════════════════════════════ */
@@ -123,19 +376,76 @@ function getUnansweredQuestions(phaseIdx = currentPhase) {
   return PHASES[phaseIdx].questions.filter((q) => answers[q.key] === undefined);
 }
 
+function getPhaseCopy(phase) {
+  return PHASE_COPY[quizLanguage]?.[phase.key] || phase;
+}
+
+function getQuestionCopy(question) {
+  return QUESTION_COPY[quizLanguage]?.[question.key] || {};
+}
+
+function getOptionLabel(question, option) {
+  return getQuestionCopy(question).options?.[option.value] || option.label;
+}
+
+function getScaleLabels(question) {
+  return getQuestionCopy(question).scale || question.scale || [];
+}
+
+function getUiCopy(key) {
+  return UI_COPY[quizLanguage]?.[key] || UI_COPY.english[key] || key;
+}
+
+function getStepCopy(index) {
+  return UI_COPY[quizLanguage]?.steps?.[index] || UI_COPY.english.steps[index];
+}
+
+function updateRetakeNote() {
+  const access = document.getElementById("quizAccessCard");
+  if (!access?.classList.contains("quiz-retake-note")) return;
+  access.innerHTML = `<strong>${getUiCopy("retakeTitle")}</strong><span>${getUiCopy("retakeText")}</span>`;
+}
+
+function updateSidebarNote() {
+  const note = document.querySelector(".quiz-sidebar-note");
+  if (!note) return;
+  note.innerHTML = `
+    <i class="bi bi-shield-check" aria-hidden="true"></i>
+    <span>${getUiCopy("sidebarNoteTime")}</span>
+    <b aria-hidden="true">•</b>
+    <span>${getUiCopy("sidebarNoteReview")}</span>`;
+}
+
+function updateLanguageToggle() {
+  document.body.classList.toggle("quiz-lang-tagalog", quizLanguage === "tagalog");
+  document.body.classList.toggle("quiz-lang-english", quizLanguage === "english");
+  const headerIntro = document.getElementById("quizHeaderIntro");
+  if (headerIntro) {
+    headerIntro.textContent = getUiCopy("headerIntro");
+  }
+  updateRetakeNote();
+  updateSidebarNote();
+  document.querySelectorAll("[data-quiz-language]").forEach((button) => {
+    const isActive = button.dataset.quizLanguage === quizLanguage;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-pressed", String(isActive));
+  });
+}
+
 function getTileIcon(opt) {
   const key = String(opt.value || opt.label || "").toLowerCase();
   const animalIcons = {
     dog: `
       <svg class="select-tile-animal" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
-        <path d="M7.5 16.6c0-5.4 3.5-9.2 8.5-9.2s8.5 3.8 8.5 9.2v6.1"/>
-        <path d="M10.7 18.9v3.5c0 2 1.6 3.6 3.6 3.6h3.4c2 0 3.6-1.6 3.6-3.6v-3.5"/>
-        <circle cx="12.4" cy="15.2" r="1.3"/>
-        <circle cx="19.6" cy="15.2" r="1.3"/>
-        <path d="M14.6 19.1h2.8"/>
-        <path d="M16 19.1v2.1"/>
-        <path d="M10.7 22.3c1.4 2.5 4.4 2.3 5.3-.4"/>
-        <path d="M21.3 22.3c-1.4 2.5-4.4 2.3-5.3-.4"/>
+        <path d="M8 15.2c0-5 3.4-8.4 8-8.4s8 3.4 8 8.4v6.3"/>
+        <path d="M8 15.2v5.9"/>
+        <path d="M10.9 18.9v3.2c0 2.2 1.8 4 4 4h2.2c2.2 0 4-1.8 4-4v-3.2"/>
+        <circle cx="12.5" cy="15.5" r="1.2"/>
+        <circle cx="19.5" cy="15.5" r="1.2"/>
+        <path d="M14.5 19.4h3"/>
+        <path d="M16 19.4v2.1"/>
+        <path d="M12.2 22.1c1.4 2.2 3.1 2.2 3.8 0"/>
+        <path d="M19.8 22.1c-1.4 2.2-3.1 2.2-3.8 0"/>
       </svg>`,
     cat: `
       <svg class="select-tile-animal" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
@@ -147,6 +457,9 @@ function getTileIcon(opt) {
   };
   if (animalIcons[key]) {
     return animalIcons[key];
+  }
+  if (opt.icon?.startsWith("bi-")) {
+    return `<i class="bi ${opt.icon}" aria-hidden="true"></i>`;
   }
   const icons = {
     any: "bi-grid-3x3-gap-fill",
@@ -162,6 +475,7 @@ function getTileIcon(opt) {
 ══════════════════════════════════════════════════════ */
 function renderPhase(phaseIdx) {
   const phase = PHASES[phaseIdx];
+  const phaseCopy = getPhaseCopy(phase);
   const area  = document.getElementById("questionArea");
 
   // Update sidebar tip
@@ -173,6 +487,12 @@ function renderPhase(phaseIdx) {
     el.classList.remove("active","done");
     if (i < phaseIdx)  el.classList.add("done");
     if (i === phaseIdx) el.classList.add("active");
+    const stepText = el.querySelector("span");
+    const stepCopy = getStepCopy(i);
+    if (stepText && stepCopy) {
+      stepText.textContent = stepCopy[0];
+      stepText.dataset.stepDescription = stepCopy[1];
+    }
     // update dot icon
     const dot = el.querySelector(".phase-step-dot");
     if (dot) {
@@ -188,42 +508,43 @@ function renderPhase(phaseIdx) {
         <i class="bi ${phase.icon}"></i>
       </div>
       <div>
-        <div class="phase-intro-kicker">${phase.kicker}</div>
-        <div class="phase-intro-title">${phase.title}</div>
-        <div class="phase-intro-desc">${phase.desc}</div>
+        <div class="phase-intro-kicker">${phaseCopy.kicker || phase.kicker}</div>
+        <div class="phase-intro-title">${phaseCopy.title}</div>
+        <div class="phase-intro-desc">${phaseCopy.desc}</div>
       </div>
     </div>`;
 
   phase.questions.forEach((q, qi) => {
+    const questionCopy = getQuestionCopy(q);
     const globalIdx = PHASES.slice(0, phaseIdx).reduce((s,p) => s+p.questions.length,0) + qi + 1;
     const answered  = answers[q.key] !== undefined;
 
     if (q.type === "tiles") {
       html += `
         <div class="filter-section slide-in ${answered?"answered":""}" data-key="${q.key}" style="animation-delay:${qi*40}ms">
-          <div class="q-num">Question ${globalIdx}</div>
-          <div class="q-text">${q.text}</div>
-          <div class="q-hint">${q.hint}</div>
+          <div class="q-num">${getUiCopy("question")} ${globalIdx}</div>
+          <div class="q-text">${questionCopy.text || q.text}</div>
+          <div class="q-hint">${questionCopy.hint || q.hint}</div>
           <div class="select-tiles">
             ${q.options.map(opt => `
               <div class="select-tile ${answers[q.key]===opt.value?"selected":""}"
                    data-key="${q.key}" data-value="${opt.value}">
                 <div class="select-tile-icon">${getTileIcon(opt)}</div>
-                <div class="select-tile-label">${opt.label}</div>
+                <div class="select-tile-label">${getOptionLabel(q, opt)}</div>
               </div>`).join("")}
           </div>
         </div>`;
     } else if (q.type === "toggle") {
       html += `
         <div class="filter-section slide-in ${answered?"answered":""}" data-key="${q.key}" style="animation-delay:${qi*40}ms">
-          <div class="q-num">Question ${globalIdx}</div>
-          <div class="q-text">${q.text}</div>
-          <div class="q-hint">${q.hint}</div>
+          <div class="q-num">${getUiCopy("question")} ${globalIdx}</div>
+          <div class="q-text">${questionCopy.text || q.text}</div>
+          <div class="q-hint">${questionCopy.hint || q.hint}</div>
           <div class="toggle-group">
             ${q.options.map(opt => `
               <div class="toggle-tile ${answers[q.key]===opt.value?(opt.value==="yes"?"selected-yes":"selected-no"):""}"
                    data-key="${q.key}" data-value="${opt.value}">
-                <i class="bi ${opt.icon}"></i>${opt.label}
+                <span class="toggle-icon">${getTileIcon(opt)}</span>${getOptionLabel(q, opt)}
               </div>`).join("")}
           </div>
         </div>`;
@@ -231,11 +552,11 @@ function renderPhase(phaseIdx) {
       // 1-5 scale
       html += `
         <div class="question-card slide-in ${answered?"answered":""}" data-key="${q.key}" style="animation-delay:${qi*40}ms">
-          <div class="q-num">Question ${globalIdx}</div>
-          <div class="q-text">${q.text}</div>
-          <div class="q-hint">${q.hint}</div>
+          <div class="q-num">${getUiCopy("question")} ${globalIdx}</div>
+          <div class="q-text">${questionCopy.text || q.text}</div>
+          <div class="q-hint">${questionCopy.hint || q.hint}</div>
           <div class="option-group">
-            ${q.scale.map((lbl, val) => `
+            ${getScaleLabels(q).map((lbl, val) => `
               <button class="option-btn ${answers[q.key]===(val+1)?"selected":""}"
                       data-key="${q.key}" data-value="${val+1}" type="button">
                 <span class="option-num">${val+1}</span>
@@ -251,23 +572,24 @@ function renderPhase(phaseIdx) {
   html += `
     <div class="quiz-validation-message" id="quizValidationMessage" role="alert" hidden>
       <i class="bi bi-exclamation-circle"></i>
-      <span>Please answer all questions in this section before continuing.</span>
+      <span>${getUiCopy("validation")}</span>
     </div>
     <div class="quiz-nav slide-in" style="animation-delay:${phase.questions.length*40+40}ms">
       <button class="btn-prev" id="btnPrev" ${phaseIdx===0?"disabled":""}>
-        <i class="bi bi-arrow-left"></i> Previous
+        <i class="bi bi-arrow-left"></i> ${getUiCopy("previous")}
       </button>
       ${isLast
         ? `<button class="btn-submit" id="btnSubmit" type="button">
-             <i class="bi bi-stars"></i> Find My Matches
+             <i class="bi bi-stars"></i> ${getUiCopy("submit")}
            </button>`
         : `<button class="btn-next" id="btnNext" type="button">
-             Next <i class="bi bi-arrow-right"></i>
+             ${getUiCopy("next")} <i class="bi bi-arrow-right"></i>
            </button>`
       }
     </div>`;
 
   area.innerHTML = html;
+  updateLanguageToggle();
   updateNavState();
 
   // Bind events
@@ -336,7 +658,12 @@ function updateProgress() {
   let done = 0, total = 0;
   PHASES.forEach(p => { p.questions.forEach(() => total++); });
   Object.keys(answers).forEach(() => done++);
-  document.getElementById("progressLabel").textContent = `Question ${Math.min(done, total)} of ${total}`;
+  const currentQuestion = total ? Math.min(done, total) : 0;
+  document.getElementById("progressLabel").textContent = `${getUiCopy("question")} ${currentQuestion}\u00a0${getUiCopy("of")}\u00a0${total}`;
+  const progressPercentLabel = document.getElementById("progressPercentLabel");
+  if (progressPercentLabel) {
+    progressPercentLabel.textContent = `${pct}% complete`;
+  }
 }
 
 function updateNavState() {
@@ -413,7 +740,7 @@ async function handleSubmit() {
   const submitButton = document.getElementById("btnSubmit");
   if (submitButton) {
     submitButton.disabled = true;
-    submitButton.innerHTML = `<i class="bi bi-arrow-repeat"></i> Finding matches...`;
+    submitButton.innerHTML = `<i class="bi bi-arrow-repeat"></i> ${getUiCopy("submitting")}`;
   }
 
   const preferences = PHASES
@@ -451,8 +778,9 @@ async function handleSubmit() {
     localStorage.setItem("animua_quiz_data", JSON.stringify(quizData));
     localStorage.setItem("animua_match_results", JSON.stringify(matched));
     localStorage.setItem("animua_match_metadata", JSON.stringify({ resultId: result.resultId, completedAt: result.completedAt, nextRetakeAt: result.nextRetakeAt }));
+    localStorage.setItem("animua_match_fresh", "1");
 
-    window.location.href = "/pages/public/compatibilityResults.html";
+    window.location.href = "/pages/public/compatibilityResults.html?source=quiz";
   } catch (err) {
     console.error("Matching failed:", err);
     localStorage.setItem("animua_quiz_data", JSON.stringify(quizData));
@@ -481,7 +809,7 @@ async function handleSubmit() {
   } finally {
     if (submitButton) {
       submitButton.disabled = false;
-      submitButton.innerHTML = `<i class="bi bi-stars"></i> Find My Matches`;
+      submitButton.innerHTML = `<i class="bi bi-stars"></i> ${getUiCopy("submit")}`;
     }
     isSubmitting = false;
   }
@@ -489,10 +817,60 @@ async function handleSubmit() {
 
 
 
+function getAnimalPhotoUrl(animal) {
+  if (!animal || typeof animal !== "object") return "";
+  const candidates = [
+    animal.photoURL,
+    animal.imageUrl,
+    animal.imageURL,
+    animal.image,
+    animal.photo,
+    animal.thumbnailUrl,
+    animal.primaryPhotoUrl,
+    animal.animalPhotoUrl,
+    animal.pet?.photoURL,
+    animal.pet?.imageUrl,
+    animal.animal?.photoURL,
+    animal.animal?.imageUrl,
+    ...(Array.isArray(animal.photos) ? animal.photos : []),
+    ...(Array.isArray(animal.pet?.photos) ? animal.pet.photos : []),
+    ...(Array.isArray(animal.animal?.photos) ? animal.animal.photos : []),
+  ];
+  return candidates.find((value) => typeof value === "string" && value.trim()) || "";
+}
+
+function getAnimalFallbackPhoto(animal) {
+  const species = String(animal?.species || animal?.type || animal?.animalSpecies || "").toLowerCase();
+  return species.includes("cat") ? DEFAULT_CAT_IMAGE : DEFAULT_DOG_IMAGE;
+}
+
+async function resolveTopMatchPhoto(match) {
+  const directPhoto = getAnimalPhotoUrl(match);
+  if (directPhoto) return directPhoto;
+
+  const animalId = match?.animalId || match?.petId || match?.id;
+  if (animalId) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/public/pets/${encodeURIComponent(animalId)}`);
+      if (response.ok) {
+        const data = await response.json().catch(() => ({}));
+        const pet = data.pet || data.animal || data;
+        return getAnimalPhotoUrl(pet) || getAnimalFallbackPhoto(pet);
+      }
+    } catch (error) {
+      console.warn("Unable to load top match photo:", error);
+    }
+  }
+
+  return getAnimalFallbackPhoto(match);
+}
+
 /* ── Init ─────────────────────────────────────────── */
 async function initializeQuiz() {
   const token = getToken();
   const access = document.getElementById("quizAccessCard");
+  document.body.classList.remove("quiz-locked-result");
+  access?.classList.remove("quiz-retake-note");
   if (!token) {
     document.getElementById("questionArea").hidden = true;
     document.querySelector(".quiz-phase-nav")?.setAttribute("hidden", "");
@@ -505,11 +883,13 @@ async function initializeQuiz() {
     const info = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(info.message || "Please log in again.");
     if (!info.canTakeQuiz) {
+      document.body.classList.add("quiz-locked-result");
       document.getElementById("questionArea").hidden = true;
       document.querySelector(".quiz-phase-nav")?.setAttribute("hidden", "");
       access.hidden = false;
       const result = info.latestResult || {};
       const top = result.matches?.[0] || {};
+      const topPhoto = await resolveTopMatchPhoto(top);
       const nextDate = info.nextRetakeAt ? new Date(info.nextRetakeAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "To be announced";
       const completedDate = info.lastCompletedAt ? new Date(info.lastCompletedAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "Saved to your account";
       const safe = (value) => String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
@@ -522,20 +902,40 @@ async function initializeQuiz() {
         trainingDifficulty:"Training commitment",
         healthRiskLevel:"Vet budget", affectionLevel:"Affection", separationAnxiety:"Clinginess tolerance"
       };
-      const traits = Object.entries(result.preferences || {}).map(([key, value]) => `<div class="saved-trait"><span>${safe(traitLabels[key] || key)}</span><div><i style="width:${Math.max(0, Math.min(100, Number(value) * 20))}%"></i></div><b>${safe(value)}/5</b></div>`).join("");
-      if (info.reason === "QUIZ_DISABLED") {
-        access.innerHTML = `<section class="saved-result-state is-disabled"><div class="saved-state-icon"><i class="bi bi-pause-circle"></i></div><span class="saved-state-kicker">Compatibility matching</span><h1>Quiz temporarily unavailable</h1><p>The shelter has paused new compatibility attempts. Your previous results remain safely stored in your account.</p><div class="saved-result-actions"><a href="/pages/public/my-submissions.html"><i class="bi bi-person-circle"></i>View my account</a><a class="is-secondary" href="/pages/public/home.html">Return home</a></div></section>`;
+      const preferences = result.preferences || {};
+      const traitPercent = (value) => Math.max(0, Math.min(100, Number(value) * 20));
+      const renderTrait = (key) => {
+        if (preferences[key] === undefined || preferences[key] === null || preferences[key] === "") return "";
+        return `<div class="saved-trait"><span>${safe(traitLabels[key] || key)}</span><div><i style="width:${traitPercent(preferences[key])}%"></i></div><b>${safe(preferences[key])}/5</b></div>`;
+      };
+      const traitGroups = [
+        { title: "Lifestyle", icon: "bi-house-door", keys: ["energyLevel", "exerciseNeeds", "independenceLevel", "adaptability", "climateTolerance"] },
+        { title: "Social & Behavior", icon: "bi-people", keys: ["friendlinessToHumans", "goodWithKids", "goodWithOtherPets", "strangerTolerance", "noiseLevel", "affectionLevel", "separationAnxiety", "playfulness"] },
+        { title: "Care & Resources", icon: "bi-shield-check", keys: ["attentionNeeds", "spaceNeeds", "groomingNeeds", "trainingDifficulty", "healthRiskLevel"] }
+      ];
+      const traitCards = traitGroups.map((group) => {
+        const rows = group.keys.map(renderTrait).join("");
+        return rows ? `<article class="saved-trait-card"><h4><i class="bi ${group.icon}"></i>${safe(group.title)}</h4>${rows}</article>` : "";
+      }).join("");
+      const hasSavedResult = Boolean(result.matches?.length || Object.keys(preferences).length);
+      const remainingDays = Number(info.remainingDays || 0);
+      const remainingPercent = Math.max(0, Math.min(100, (remainingDays / 30) * 100));
+      const scoreValue = Math.max(0, Math.min(100, Number(top.compatibilityPercent || top.matchPercent || top.score || 0)));
+      const score = scoreValue.toFixed(1);
+      if (info.reason === "QUIZ_DISABLED" && !hasSavedResult) {
+        access.innerHTML = `<section class="saved-result-state is-disabled"><a class="locked-result-home-link" href="/pages/public/home.html"><i class="bi bi-house-door"></i>Back to home</a><div class="saved-state-icon"><i class="bi bi-pause-circle"></i></div><span class="saved-state-kicker">Compatibility matching</span><h1>Quiz temporarily unavailable</h1><p>The shelter has paused new compatibility attempts. Please check again later.</p><div class="saved-result-actions"><a href="/pages/public/my-submissions.html"><i class="bi bi-person-circle"></i>View my account</a></div></section>`;
       } else {
-        access.innerHTML = `<section class="saved-result-state"><header><div><span class="saved-state-kicker">Compatibility result saved</span><h1>Your best matches are waiting.</h1><p>Your recommendation is stored securely in your ANIMUA account until your next quiz attempt.</p></div><span class="saved-lock-badge"><i class="bi bi-shield-check"></i>Saved & protected</span></header><div class="saved-result-overview"><article class="saved-top-match"><span class="saved-match-label"><i class="bi bi-stars"></i>Top recommendation</span><div class="saved-match-body"><span class="saved-pet-mark"><i class="bi bi-heart-fill"></i></span><div><small>Best match</small><h2>${safe(top.animalName || "Your saved shelter match")}</h2><p>Based on your lifestyle and care preferences</p></div><strong>${Number(top.compatibilityPercent || 0).toFixed(1)}<small>%</small></strong></div></article><aside class="saved-date-stack"><article><span><i class="bi bi-check2-circle"></i></span><div><small>Completed</small><strong>${safe(completedDate)}</strong></div></article><article><span><i class="bi bi-calendar2-week"></i></span><div><small>Next allowed retake</small><strong>${safe(nextDate)}</strong></div></article><p><i class="bi bi-clock-history"></i>${info.remainingDays || 0} day${info.remainingDays === 1 ? "" : "s"} remaining</p></aside></div>${traits ? `<section class="saved-trait-profile"><div><span class="saved-state-kicker">Your profile</span><h3>Compatibility trait summary</h3></div><div class="saved-trait-grid">${traits}</div></section>` : ""}<div class="saved-result-actions"><a href="/pages/public/compatibilityResults.html"><i class="bi bi-stars"></i>View full results</a><a class="is-secondary" href="/pages/public/my-submissions.html"><i class="bi bi-person-circle"></i>Open my account</a></div><footer><i class="bi bi-info-circle"></i>You can take the quiz again beginning ${safe(nextDate)}.</footer></section>`;
+        access.innerHTML = `<section class="saved-result-state ${info.reason === "QUIZ_DISABLED" ? "is-break" : ""}"><header><div><span class="saved-state-kicker">Compatibility result saved</span><h1>Your best matches are waiting.</h1><p>Your recommendation is stored securely in your ANIMUA account until your next quiz attempt.</p></div><a class="locked-result-home-link" href="/pages/public/home.html"><i class="bi bi-house-door"></i>Back to home</a></header><div class="saved-result-dashboard"><aside class="saved-date-stack"><article><span><i class="bi bi-check2-circle"></i></span><div><small>Completed</small><strong>${safe(completedDate)}</strong></div></article><article><span><i class="bi bi-calendar2-week"></i></span><div><small>Next allowed retake</small><strong>${safe(nextDate)}</strong></div></article><p><i class="bi bi-clock-history"></i><b>${remainingDays} day${remainingDays === 1 ? "" : "s"} remaining</b><em><i style="width:${remainingPercent}%"></i></em></p><div class="saved-result-actions"><a href="/pages/public/compatibilityResults.html"><i class="bi bi-stars"></i>View full results</a><a class="is-secondary" href="/pages/public/find-furbabies.html"><i class="bi bi-heart"></i>Adopt now</a></div></aside><main class="saved-result-main"><article class="saved-top-match"><span class="saved-match-label"><i class="bi bi-award"></i>Top recommendation</span><div class="saved-match-body"><img class="saved-match-photo" src="${safe(topPhoto)}" alt="${safe(top.animalName || "Recommended animal")}"><div><small>Best match</small><h2>${safe(top.animalName || "Your saved shelter match")}</h2><p>Based on your lifestyle and care preferences</p></div><strong style="--score-percent:${scoreValue}">${score}<small>%</small></strong></div></article>${traitCards ? `<section class="saved-trait-profile"><div class="saved-profile-heading"><span><i class="bi bi-person-circle"></i></span><div><span class="saved-state-kicker">Your profile</span><h3>Compatibility analysis based on your quiz responses.</h3></div></div><div class="saved-trait-grid">${traitCards}</div></section>` : ""}<footer><i class="bi bi-calendar-event"></i>You can take the quiz again beginning <strong>${safe(nextDate)}</strong>.</footer></main></div></section>`;
       }
       if (info.latestResult) localStorage.setItem("animua_saved_result", JSON.stringify(info.latestResult));
       return;
     }
     if (info.hasPreviousResult) {
       access.hidden = false;
-      access.innerHTML = `<strong>Retake available</strong><span>Your previous result remains in your account history.</span><button type="button" id="beginRetake">Retake Compatibility Quiz</button>`;
-      document.getElementById("questionArea").hidden = true;
-      document.getElementById("beginRetake").addEventListener("click", () => { access.hidden = true; document.getElementById("questionArea").hidden = false; });
+      access.classList.add("quiz-retake-note");
+      access.innerHTML = `<strong>${getUiCopy("retakeTitle")}</strong><span>${getUiCopy("retakeText")}</span>`;
+      document.getElementById("questionArea").hidden = false;
+      document.querySelector(".quiz-phase-nav")?.removeAttribute("hidden");
     }
     renderPhase(0); updateProgress();
   } catch (error) {
@@ -543,7 +943,22 @@ async function initializeQuiz() {
     access.innerHTML = `<h2>Unable to open the quiz</h2><p>${error.message}</p><a href="/pages/public/home.html#login">Log in again</a>`;
   }
 }
+updateLanguageToggle();
 initializeQuiz();
+
+document.querySelectorAll("[data-quiz-language]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const nextLanguage = button.dataset.quizLanguage === "tagalog" ? "tagalog" : "english";
+    if (quizLanguage === nextLanguage) return;
+    quizLanguage = nextLanguage;
+    localStorage.setItem(QUIZ_LANGUAGE_KEY, quizLanguage);
+    updateLanguageToggle();
+    if (!document.getElementById("questionArea")?.hidden) {
+      renderPhase(currentPhase);
+      updateProgress();
+    }
+  });
+});
 
 function openConfirmModal(id) {
   const modal = document.getElementById(id);

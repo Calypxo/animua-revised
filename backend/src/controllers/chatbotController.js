@@ -17,6 +17,8 @@ const GEMINI_API_URL =
 const MAX_MESSAGE_LENGTH = 700;
 const MAX_HISTORY_ITEMS = 8;
 const PUBLIC_CONTEXT_TIMEOUT_MS = 3500;
+const PUBLIC_PET_FETCH_LIMIT = 50;
+const PUBLIC_EVENT_FETCH_LIMIT = 4;
 const rateLimitStore = new Map();
 let publicContextCache = {
   expiresAt: 0,
@@ -29,6 +31,19 @@ const OFFICE_INFO = {
   phone: "(045) 322-0485",
   hours: "Monday to Friday, 8:00 AM to 5:00 PM"
 };
+
+const ANIMAL_COLOR_KEYWORDS = [
+  { id: "black", english: "black", tagalog: "black/itim", terms: ["black", "itim", "maitim"] },
+  { id: "white", english: "white", tagalog: "white/puti", terms: ["white", "puti", "maputi"] },
+  { id: "brown", english: "brown", tagalog: "brown/kayumanggi", terms: ["brown", "kayumanggi", "tsokolate", "chocolate"] },
+  { id: "gray", english: "gray", tagalog: "gray/abo", terms: ["gray", "grey", "abo", "kulay abo"] },
+  { id: "orange", english: "orange", tagalog: "orange", terms: ["orange", "ginger"] },
+  { id: "cream", english: "cream", tagalog: "cream", terms: ["cream", "beige"] },
+  { id: "tan", english: "tan", tagalog: "tan", terms: ["tan"] },
+  { id: "gold", english: "gold", tagalog: "gold/golden", terms: ["gold", "golden"] },
+  { id: "tabby", english: "tabby", tagalog: "tabby", terms: ["tabby"] },
+  { id: "calico", english: "calico", tagalog: "calico", terms: ["calico"] }
+];
 
 function getClientKey(req) {
   return req?.ip || req?.headers?.["x-forwarded-for"] || "unknown";
@@ -119,7 +134,11 @@ function hasTaglishSignal(text = "") {
     "po",
     "opo",
     "hindi",
-    "wala"
+    "wala",
+    "gusto",
+    "hanap",
+    "itim",
+    "puti"
   ]) || includesAnyPhrase(lower, [
     "pag adopt",
     "mag adopt",
@@ -158,14 +177,14 @@ async function getPublicContext() {
   }
 
   const [petsSnapshot, eventsSnapshot] = await Promise.all([
-    db.collection("animals").where("status", "==", "Ready").limit(6).get(),
-    db.collection("events").limit(4).get()
+    db.collection("animals").where("status", "==", "Ready").limit(PUBLIC_PET_FETCH_LIMIT).get(),
+    db.collection("events").get()
   ]);
 
   const pets = petsSnapshot.docs.map((doc) => normalizePet(doc.id, doc.data()));
-  const events = eventsSnapshot.docs
+  const events = selectPublicEvents(eventsSnapshot.docs
     .map((doc) => normalizeEvent(doc.id, doc.data()))
-    .filter((event) => !event.isArchived && !event.isDraft);
+    .filter(isPublishedPublicEvent));
 
   publicContextCache = {
     expiresAt: now + 2 * 60 * 1000,
@@ -187,7 +206,8 @@ async function getPublicContextForAi() {
       species: pet.species,
       breed: pet.breed,
       sex: pet.sex,
-      age: pet.age
+      age: pet.age,
+      color: pet.color || pet.colorMarkings || ""
     })),
     events: context.events.slice(0, 2).map((event) => ({
       title: event.title,
@@ -255,6 +275,8 @@ function normalizePet(id, pet = {}) {
     sex: pet.sex || "Unknown",
     age: pet.ageEstimate || pet.age || "",
     color: pet.color || "",
+    colorMarkings: pet.colorMarkings || pet.markings || pet.color || "",
+    description: pet.description || pet.notes || "",
     source: pet.source || "",
     condition: pet.initialCondition || pet.conditionNotes || "",
     status: pet.status || "Ready"
@@ -271,6 +293,9 @@ function normalizeEvent(id, event = {}) {
     time: event.time || event.eventTime || event.startTime || "",
     location: event.location || event.venue || event.address || "",
     description: event.summary || event.shortDescription || event.description || "",
+    published: event.published,
+    isPublished: event.isPublished,
+    isPublic: event.isPublic,
     isArchived: event.archived === true || event.isArchived === true || status.includes("archive"),
     isDraft:
       event.published === false ||
@@ -279,6 +304,53 @@ function normalizeEvent(id, event = {}) {
       status.includes("unpublish") ||
       status.includes("private")
   };
+}
+
+function getEventDateValue(event = {}) {
+  const value = event.date || event.eventDate || event.startDate || event.startsAt || event.startAt || "";
+  if (value?.toDate) return value.toDate().getTime();
+  if (value?._seconds) return value._seconds * 1000;
+  if (value?.seconds) return value.seconds * 1000;
+  if (typeof value === "number") return value;
+
+  const parsed = Date.parse(value);
+  return Number.isNaN(parsed) ? 0 : parsed;
+}
+
+function isPublishedPublicEvent(event = {}) {
+  const status = String(event.status || event.state || event.publishStatus || "").toLowerCase();
+  const archived = event.isArchived === true || event.archived === true || status.includes("archive");
+  const unpublished =
+    event.isDraft === true ||
+    event.published === false ||
+    event.isPublished === false ||
+    status.includes("draft") ||
+    status.includes("unpublish") ||
+    status.includes("private");
+  const published =
+    event.published === true ||
+    event.isPublished === true ||
+    event.isPublic === true ||
+    status.includes("publish") ||
+    status.includes("upcoming") ||
+    status.includes("active") ||
+    status.includes("live");
+
+  return published && !unpublished && !archived && Boolean(getEventDateValue(event));
+}
+
+function selectPublicEvents(events = []) {
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+
+  const upcomingEvents = events
+    .filter((event) => getEventDateValue(event) >= now.getTime())
+    .sort((a, b) => getEventDateValue(a) - getEventDateValue(b));
+  const recentEvents = events
+    .filter((event) => getEventDateValue(event) < now.getTime())
+    .sort((a, b) => getEventDateValue(b) - getEventDateValue(a));
+
+  return (upcomingEvents.length ? upcomingEvents : recentEvents).slice(0, PUBLIC_EVENT_FETCH_LIMIT);
 }
 
 function serializeDate(value) {
@@ -314,14 +386,70 @@ function formatTime(value = "") {
 }
 
 function formatPet(pet = {}) {
+  const color = pet.colorMarkings || pet.color || "";
   const details = [
     pet.species,
     pet.breed,
     pet.sex,
-    pet.age
+    pet.age,
+    color
   ].filter(Boolean);
 
   return `${pet.name}${details.length ? ` (${details.join(", ")})` : ""}`;
+}
+
+function getRequestedAnimalSpecies(text = "") {
+  if (includesAnyWord(text, ["dog", "dogs", "aso"])) return "dog";
+  if (includesAnyWord(text, ["cat", "cats", "pusa"])) return "cat";
+  return "";
+}
+
+function getRequestedAnimalColor(text = "") {
+  return ANIMAL_COLOR_KEYWORDS.find((color) => includesAnyPhrase(text, color.terms)) || null;
+}
+
+function hasAnimalAttributeSearchIntent(text = "") {
+  return hasAnimalMentionIntent(text) && Boolean(getRequestedAnimalColor(text));
+}
+
+function getPetColorText(pet = "") {
+  return [pet.color, pet.colorMarkings, pet.description, pet.breed].filter(Boolean).join(" ");
+}
+
+function petMatchesAnimalSearch(pet = {}, filters = {}) {
+  const speciesMatch = !filters.species ||
+    String(pet.species || "").toLowerCase().includes(filters.species);
+
+  if (!speciesMatch) return false;
+  if (!filters.color) return true;
+
+  const colorText = normalizeIntentText(getPetColorText(pet));
+  return filters.color.terms.some((term) => includesAnyPhrase(colorText, [term]));
+}
+
+function filterPetsForMessage(pets = [], text = "") {
+  const filters = {
+    species: getRequestedAnimalSpecies(text),
+    color: getRequestedAnimalColor(text)
+  };
+
+  return {
+    filters,
+    pets: pets.filter((pet) => petMatchesAnimalSearch(pet, filters))
+  };
+}
+
+function describeAnimalSearch(filters = {}, language = "english") {
+  const species = filters.species
+    ? language === "tagalog"
+      ? filters.species === "dog" ? "aso" : "pusa"
+      : filters.species
+    : language === "tagalog"
+      ? "animal"
+      : "animal";
+  const color = filters.color ? filters.color[language] : "";
+
+  return [color, species].filter(Boolean).join(" ");
 }
 
 function formatEvent(event = {}) {
@@ -332,6 +460,45 @@ function formatEvent(event = {}) {
   ].filter(Boolean);
 
   return `${event.title}${details.length ? ` - ${details.join(", ")}` : ""}`;
+}
+
+function getEventSearchText(event = {}) {
+  return normalizeIntentText([
+    event.title,
+    event.name,
+    event.description,
+    event.summary,
+    event.shortDescription,
+    event.location,
+    event.venue
+  ].filter(Boolean).join(" "));
+}
+
+function eventMatchesVaccination(event = {}) {
+  const text = getEventSearchText(event);
+  return text.includes("vaccin") ||
+    includesAnyWord(text, ["vaccine", "bakuna", "rabies"]) ||
+    includesAnyPhrase(text, ["anti rabies", "anti-rabies"]);
+}
+
+function eventMentionsFreeService(event = {}) {
+  const text = getEventSearchText(event);
+  return includesAnyWord(text, ["free", "libre"]) ||
+    includesAnyPhrase(text, ["walang bayad", "no fee"]);
+}
+
+function asksFreeService(text = "") {
+  return includesAnyWord(text, ["free", "libre"]) ||
+    includesAnyPhrase(text, ["walang bayad", "no fee"]);
+}
+
+function getMatchingVaccinationEvents(events = [], text = "") {
+  const vaccinationEvents = events.filter(eventMatchesVaccination);
+
+  if (!asksFreeService(text)) return vaccinationEvents;
+
+  const freeVaccinationEvents = vaccinationEvents.filter(eventMentionsFreeService);
+  return freeVaccinationEvents.length ? freeVaccinationEvents : vaccinationEvents;
 }
 
 function includesAny(text, words = []) {
@@ -489,18 +656,27 @@ function hasDonationIntent(text = "") {
     "donate",
     "donation",
     "donations",
+    "magdonate",
+    "mag-donate",
+    "donating",
     "gcash",
     "bank",
     "card",
     "money",
     "donasyon"
   ]) || includesAnyPhrase(text, [
+    "mag donate",
+    "mag-donate",
     "send money",
     "online payment",
     "in kind",
     "in-kind",
     "do you accept food",
     "donate food",
+    "donate dog food",
+    "donate cat food",
+    "dog and cat food",
+    "cat and dog food",
     "donate medicine",
     "donate supplies",
     "donate blankets",
@@ -537,6 +713,8 @@ function hasAnimalListIntent(text = "") {
 }
 
 function hasAnimalAvailabilityIntent(text = "") {
+  if (hasAnimalAttributeSearchIntent(text)) return true;
+
   const mentionsAnimal = hasAnimalMentionIntent(text) || includesAnyPhrase(text, ["find furbabies"]);
   const asksWhoCanBeAdopted =
     hasAdoptionMentionIntent(text) &&
@@ -561,8 +739,32 @@ function hasAnimalAvailabilityIntent(text = "") {
 
   const tokens = getMessageTokens(text);
   const asksAvailability =
-    includesAnyWord(text, ["available", "adoptable", "ready", "browse", "find", "show", "list", "view", "see", "want", "looking", "pwede", "pwedeng", "puwede", "puwedeng"]) ||
-    includesAnyPhrase(text, ["find furbabies", "ready for adoption", "for adoption", "looking for", "pwede iadopt", "pwedeng iadopt", "puwede iadopt", "puwedeng iadopt"]);
+    includesAnyWord(text, ["available", "adoptable", "ready", "browse", "find", "show", "list", "view", "see", "want", "looking", "gusto", "hanap", "meron", "pwede", "pwedeng", "puwede", "puwedeng"]) ||
+    includesAnyPhrase(text, [
+      "find furbabies",
+      "ready for adoption",
+      "for adoption",
+      "looking for",
+      "may aso",
+      "may mga aso",
+      "may pusa",
+      "may mga pusa",
+      "may pet",
+      "may pets",
+      "may animal",
+      "may animals",
+      "may furbaby",
+      "may furbabies",
+      "meron aso",
+      "merong aso",
+      "meron pusa",
+      "merong pusa",
+      "available pa",
+      "pwede iadopt",
+      "pwedeng iadopt",
+      "puwede iadopt",
+      "puwedeng iadopt"
+    ]);
   const shortAnimalOnly = tokens.length <= 3 && mentionsAnimal;
 
   return asksAvailability || shortAnimalOnly;
@@ -638,6 +840,31 @@ function hasVaccinationScheduleIntent(text = "") {
       "saan ang bakuna",
       "saan may bakuna"
     ]);
+}
+
+function hasCheckupRequestIntent(text = "") {
+  const mentionsAnimalOrVet =
+    hasAnimalMentionIntent(text) ||
+    includesAnyWord(text, ["vet", "veterinarian", "clinic"]) ||
+    includesAnyPhrase(text, ["veterinary office", "city vet", "cityvet"]);
+  const asksCheckup =
+    includesAnyWord(text, ["checkup", "pacheck", "pacheckup", "consult", "consultation"]) ||
+    includesAnyPhrase(text, [
+      "check up",
+      "pa check",
+      "pa check up",
+      "pacheck up",
+      "medical check",
+      "medical check up",
+      "health check",
+      "health check up",
+      "vet check",
+      "vet check up",
+      "veterinary check",
+      "veterinary check up"
+    ]);
+
+  return mentionsAnimalOrVet && asksCheckup;
 }
 
 function hasVetVisitScheduleIntent(text = "") {
@@ -1211,13 +1438,19 @@ function hasSurrenderDocumentIntent(text = "") {
 
 function hasSurrenderAppointmentIntent(text = "") {
   return hasSurrenderIntent(text) && (
-    includesAnyWord(text, ["appointment", "schedule", "dropoff", "drop-off", "bring", "deliver", "date", "time", "reschedule", "pupunta", "punta", "dalhin"]) ||
+    includesAnyWord(text, ["appointment", "schedule", "dropoff", "drop-off", "bring", "deliver", "date", "time", "reschedule", "walkin", "pupunta", "punta", "dalhin"]) ||
     includesAnyPhrase(text, [
       "when can i bring",
       "when do i bring",
       "bring my pet",
       "bring the animal",
       "drop off",
+      "walk in",
+      "walk-in",
+      "walk in surrender",
+      "walk-in surrender",
+      "walk in yung surrender",
+      "walk-in yung surrender",
       "schedule surrender",
       "surrender appointment",
       "kailan dadalhin",
@@ -1419,7 +1652,19 @@ function hasAdoptionQuantityIntent(text = "") {
     (text.includes("adopt") || includesAnyWord(text, ["application", "apply"])) &&
     (
       includesAnyWord(text, ["two", "2", "three", "3", "multiple", "several", "limit", "maximum", "max", "number", "ilan", "dami", "dalawa", "dalawang", "tatlo", "tatlong", "marami"]) ||
-      includesAnyPhrase(text, ["how many", "more than one", "ilang pet", "ilang pets", "ilang aso", "ilang pusa"])
+      includesAnyPhrase(text, [
+        "how many",
+        "more than one",
+        "higit sa isa",
+        "higit sa isang",
+        "higit sa isang pet",
+        "higit sa isang animal",
+        "more than 1",
+        "ilang pet",
+        "ilang pets",
+        "ilang aso",
+        "ilang pusa"
+      ])
     )
   );
 }
@@ -1825,6 +2070,7 @@ function shouldUseLocalReply(message = "") {
     hasAccountIntent(lower) ||
     hasStatusExplanationIntent(lower) ||
     hasEventIntent(lower) ||
+    hasCheckupRequestIntent(lower) ||
     hasVetVisitScheduleIntent(lower) ||
     hasContactIntent(lower) ||
     hasUrgentMedicalIntent(lower) ||
@@ -1849,6 +2095,10 @@ function needsPublicContext(message = "") {
     return false;
   }
 
+  if (hasCheckupRequestIntent(lower)) {
+    return false;
+  }
+
   if (hasAnimalAvailabilityIntent(lower)) {
     return true;
   }
@@ -1861,6 +2111,7 @@ function needsPublicContext(message = "") {
     hasStrayIntent(lower) ||
     hasDonationIntent(lower) ||
     hasUrgentMedicalIntent(lower) ||
+    hasCheckupRequestIntent(lower) ||
     hasSurrenderIntent(lower) ||
     hasAdoptionProcessIntent(lower) ||
     hasAdoptionMotivationIntent(lower) ||
@@ -2013,8 +2264,8 @@ function getLocalReply(message, context = {}, language = "english") {
   if (hasDonationIntent(lower)) {
     return localizedReply(
       language,
-      `Donations may be coordinated with ${OFFICE_INFO.name}, but ANIMUA does not process online donation payments. Please do not send money through chat; there is no ANIMUA GCash, bank, card, or payment gateway here. For food, approved medicine, cleaning supplies, cages, towels, blankets, or monetary donations, contact the office first to confirm current needs and official procedures.`,
-      `Maaaring i-coordinate ang donations sa ${OFFICE_INFO.name}, pero hindi nagpo-process ang ANIMUA ng online donation payments. Huwag magpadala ng pera sa chat; walang ANIMUA GCash, bank, card, o payment gateway dito. Para sa food, approved medicine, cleaning supplies, cages, towels, blankets, o monetary donations, kontakin muna ang office para sa current needs at official procedures.`
+      `Yes. For dog food, cat food, or other donations, please message the staff through Contact Us so they can coordinate current needs, drop-off details, and official procedures. ANIMUA does not process donation payments through chat.`,
+      `Oo. Para sa dog food, cat food, o ibang donations, paki-message ang staff sa Contact Us para ma-coordinate ang current needs, drop-off details, at official procedures. Hindi nagpo-process ang ANIMUA ng donation payments sa chat.`
     );
   }
 
@@ -2054,8 +2305,8 @@ function getLocalReply(message, context = {}, language = "english") {
     if (hasSurrenderAppointmentIntent(lower)) {
       return localizedReply(
         language,
-        "Do not bring the animal to the shelter unless the Angeles City Veterinary Office has approved the surrender request and given appointment or drop-off instructions. If approved, use the schedule option shown in My Applications or follow the official instructions from the office.",
-        "Huwag dalhin agad ang animal sa shelter hangga't hindi approved ng Angeles City Veterinary Office ang surrender request at wala pang appointment o drop-off instructions. Kapag approved, gamitin ang schedule option sa My Applications o sundin ang official instructions ng office."
+        "No. Do not walk in or bring the animal for surrender unless the Angeles City Veterinary Office has approved the surrender request and given appointment or drop-off instructions. Submit the Surrender form first, then wait for the official next step.",
+        "Hindi. Huwag mag-walk in o dalhin ang animal for surrender hangga't hindi approved ng Angeles City Veterinary Office ang surrender request at wala pang appointment o drop-off instructions. Mag-submit muna sa Surrender form, pagkatapos hintayin ang official next step."
       );
     }
 
@@ -2151,8 +2402,8 @@ function getLocalReply(message, context = {}, language = "english") {
   if (hasQuizIntent(lower)) {
     return localizedReply(
       language,
-      "The Match Quiz can give useful compatibility suggestions, but it is not a guaranteed or final measure of accuracy. Its result depends on your answers, available animal data, and the matching factors in ANIMUA. Use it as a guide only; it does not approve or reject an adoption, does not guarantee availability, and the Angeles City Veterinary Office still makes the final decision. If your preferred pet is not recommended, it may not match your answers or may no longer be available. You may retake the quiz if your situation or preferences changed.",
-      "Makakatulong ang Match Quiz sa compatibility suggestions, pero hindi ito guaranteed o final measure ng accuracy. Nakadepende ang result sa sagot mo, available animal data, at matching factors sa ANIMUA. Gamitin ito bilang guide lang; hindi nito ina-approve o nire-reject ang adoption, hindi nito ginagarantiya ang availability, at Angeles City Veterinary Office pa rin ang final decision. Kung hindi lumabas ang preferred pet mo, maaaring hindi ito tugma sa sagot mo o hindi na available. Maaari mong ulitin ang quiz kung nagbago ang sitwasyon o preferences mo."
+      "The Match Quiz gives compatibility suggestions based on your answers and available animal data. Use it as a guide only; it does not guarantee approval or availability. The Angeles City Veterinary Office still makes the final decision.",
+      "Ang Match Quiz ay nagbibigay ng compatibility suggestions batay sa sagot mo at available animal data. Guide lang ito; hindi nito ginagarantiya ang approval o availability. Angeles City Veterinary Office pa rin ang final decision."
     );
   }
 
@@ -2275,8 +2526,8 @@ function getLocalReply(message, context = {}, language = "english") {
   if (hasAdoptionQuantityIntent(lower)) {
     return localizedReply(
       language,
-      "Yes, you may submit more than one adoption application. For example, you can apply for two or more different animals. Each application is reviewed separately by the Angeles City Veterinary Office, so submitting multiple applications does not guarantee approval.",
-      "Oo, maaari kang magsumite ng higit sa isang adoption application. Halimbawa, puwede kang mag-apply para sa dalawa o higit pang magkaibang animal. Bawat application ay hiwalay na nire-review ng Angeles City Veterinary Office, kaya hindi garantiya ng approval ang pagsumite ng maraming application."
+      "Yes. You may apply for more than one pet by submitting separate adoption applications. Each application will be reviewed by the shelter or Angeles City Veterinary Office, so applying for multiple pets does not guarantee approval.",
+      "Oo. Maaari kang mag-apply para sa higit sa isang pet sa pamamagitan ng hiwalay na adoption applications. Bawat application ay ire-review ng shelter o Angeles City Veterinary Office, kaya hindi guaranteed ang approval kahit higit sa isang pet ang applyan."
     );
   }
 
@@ -2316,8 +2567,8 @@ function getLocalReply(message, context = {}, language = "english") {
     if (hasMultipleIntent(lower)) {
       return localizedReply(
         language,
-        "Yes, you may submit more than one adoption application. For example, you can apply for two or more different animals. Each application is reviewed separately by the Angeles City Veterinary Office, so submitting multiple applications does not guarantee approval.",
-        "Oo, maaari kang magsumite ng higit sa isang adoption application. Halimbawa, puwede kang mag-apply para sa dalawa o higit pang magkaibang animal. Bawat application ay hiwalay na nire-review ng Angeles City Veterinary Office, kaya hindi garantiya ng approval ang pagsumite ng maraming application."
+        "Yes. You may apply for more than one pet by submitting separate adoption applications. Each application will be reviewed by the shelter or Angeles City Veterinary Office, so applying for multiple pets does not guarantee approval.",
+        "Oo. Maaari kang mag-apply para sa higit sa isang pet sa pamamagitan ng hiwalay na adoption applications. Bawat application ay ire-review ng shelter o Angeles City Veterinary Office, kaya hindi guaranteed ang approval kahit higit sa isang pet ang applyan."
       );
     }
 
@@ -2336,37 +2587,42 @@ function getLocalReply(message, context = {}, language = "english") {
     );
   }
 
-  if (hasAnimalAvailabilityIntent(lower)) {
-    const speciesFilter = includesAnyWord(lower, ["dog", "dogs", "aso"])
-      ? "dog"
-      : includesAnyWord(lower, ["cat", "cats", "pusa"])
-        ? "cat"
-        : "";
+  if (hasCheckupRequestIntent(lower)) {
+    return localizedReply(
+      language,
+      "ANIMUA does not have a pet check-up booking feature in the system. Please message the staff through Contact Us or contact the Angeles City Veterinary Office directly so they can confirm if check-up service is available, what schedule to follow, and what details to bring. For urgent symptoms, contact a licensed veterinarian immediately.",
+      "Walang pet check-up booking feature sa ANIMUA system. Paki-message ang staff sa Contact Us o direktang kontakin ang Angeles City Veterinary Office para makumpirma kung available ang check-up service, anong schedule ang susundin, at anong details ang kailangan dalhin. Kung urgent ang symptoms, agad na kumontak sa licensed veterinarian."
+    );
+  }
 
-    const visiblePets = speciesFilter
-      ? pets.filter((pet) => String(pet.species).toLowerCase().includes(speciesFilter))
-      : pets;
+  if (hasAnimalAvailabilityIntent(lower)) {
+    const { filters, pets: visiblePets } = filterPetsForMessage(pets, lower);
+    const searchDescription = describeAnimalSearch(filters, language);
 
     if (!visiblePets.length) {
       if (language === "tagalog") {
-        return speciesFilter
-          ? `Wala akong nakikitang ready ${speciesFilter}s sa live public list ngayon. Pakitingnan muli ang Find Furbabies mamaya o kontakin ang Angeles City Veterinary Office para sa updates.`
+        return searchDescription !== "animal"
+          ? `Wala akong nakikitang Ready na ${searchDescription} sa live Find Furbabies list ngayon. Pakitingnan muli ang Find Furbabies mamaya o kontakin ang Angeles City Veterinary Office para sa updates.`
           : "Wala akong nakikitang ready animals sa live public list ngayon. Buksan ang Find Furbabies o kontakin ang Angeles City Veterinary Office para sa pinakabagong availability.";
       }
 
-      return speciesFilter
-        ? `I do not see any ready ${speciesFilter}s in the live public list right now. Please check Find Furbabies again later or contact the Angeles City Veterinary Office for updates.`
+      return searchDescription !== "animal"
+        ? `I do not see any Ready ${searchDescription}s in the live Find Furbabies list right now. Please check Find Furbabies again later or contact the Angeles City Veterinary Office for updates.`
         : "I cannot see ready animals in the live public list right now. Please open Find Furbabies or contact the Angeles City Veterinary Office for the latest availability.";
     }
 
     return language === "tagalog"
       ? [
-          "Narito ang animals na kasalukuyang marked Ready sa ANIMUA:",
+          filters.color || filters.species
+            ? `Narito ang animals sa Find Furbabies na tumutugma sa hinahanap mo (${searchDescription}):`
+            : "Narito ang animals na kasalukuyang marked Ready sa ANIMUA:",
           ...visiblePets.slice(0, 5).map((pet) => `- ${formatPet(pet)}`),
           "Buksan ang Find Furbabies para makita ang photos, details, at adoption actions. Kailangan pa rin ng shelter review bago ma-approve ang adoption."
         ].join("\n")
       : [
-          `Here are animals currently marked Ready in ANIMUA:`,
+          filters.color || filters.species
+            ? `Here are Find Furbabies animals that match your search (${searchDescription}):`
+            : `Here are animals currently marked Ready in ANIMUA:`,
           ...visiblePets.slice(0, 5).map((pet) => `- ${formatPet(pet)}`),
           "Open Find Furbabies to view photos, details, and adoption actions. Shelter review is still required before adoption approval."
         ].join("\n");
@@ -2453,6 +2709,34 @@ function getLocalReply(message, context = {}, language = "english") {
   }
 
   if (hasEventIntent(lower)) {
+    if (hasVaccinationScheduleIntent(lower)) {
+      const matchingEvents = getMatchingVaccinationEvents(events, lower);
+
+      if (matchingEvents.length) {
+        return language === "tagalog"
+          ? [
+              "Oo. May nakikita akong vaccination event sa Home page events:",
+              ...matchingEvents.slice(0, 3).map((event) => `- ${formatEvent(event)}`),
+              asksFreeService(lower) && matchingEvents.every(eventMentionsFreeService)
+                ? "Marked free/libre ito batay sa event details. Tingnan ang Home page event section para sa buong requirements at updates."
+                : "Tingnan ang Home page event section para makumpirma ang buong details, requirements, at kung libre ang service."
+            ].join("\n")
+          : [
+              "Yes. I can see this vaccination event in the Home page events:",
+              ...matchingEvents.slice(0, 3).map((event) => `- ${formatEvent(event)}`),
+              asksFreeService(lower) && matchingEvents.every(eventMentionsFreeService)
+                ? "It is marked free based on the event details. Check the Home page event section for full requirements and updates."
+                : "Check the Home page event section to confirm the full details, requirements, and whether the service is free."
+            ].join("\n");
+      }
+
+      return localizedReply(
+        language,
+        "I do not see a published vaccination or free-vaccine event in the Home page events right now. Please check the Home page again later or contact the Angeles City Veterinary Office for official confirmation.",
+        "Wala akong nakikitang published vaccination o free-vaccine event sa Home page events ngayon. Pakitingnan muli ang Home page mamaya o kontakin ang Angeles City Veterinary Office para sa official confirmation."
+      );
+    }
+
     if (!events.length) {
       return localizedReply(
         language,
@@ -2787,6 +3071,8 @@ exports._test = {
   getLocalReply,
   hasAdoptionProcessIntent,
   hasAnimalAvailabilityIntent,
+  hasCheckupRequestIntent,
+  hasAdoptionQuantityIntent,
   hasAdoptionApprovalTimingIntent,
   hasAdoptionHomePreparationIntent,
   hasAdoptionPickupIntent,

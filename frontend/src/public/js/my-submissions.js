@@ -176,6 +176,15 @@ function iconForStatus(status) {
 function normalizeAdoption(item) {
   const animal = item.animal || {};
   const species = animal.species || item.species || "";
+  const image =
+    animal.imageUrl ||
+    animal.photoURL ||
+    animal.photoUrl ||
+    animal.profileImageUrl ||
+    item.selected_pet?.imageUrl ||
+    item.selected_pet?.photoURL ||
+    item.selected_pet?.photoUrl ||
+    "";
 
   return {
     id: item.id || item.applicationId,
@@ -187,7 +196,7 @@ function normalizeAdoption(item) {
     submittedAt: item.submittedAt || item.updatedAt,
     reference: item.applicationId || item.id || "ADP",
     status: cleanStatus(item.status, "adoption"),
-    image: animal.imageUrl || (String(species).toLowerCase().includes("cat") ? CAT_IMAGE : DOG_IMAGE),
+    image: image || (String(species).toLowerCase().includes("cat") ? CAT_IMAGE : DOG_IMAGE),
     details: item,
   };
 }
@@ -195,6 +204,7 @@ function normalizeAdoption(item) {
 function normalizeSurrender(item) {
   const pet = item.pet || {};
   const species = pet.species || "";
+  const image = collectSurrenderPhotos(item)[0] || "";
 
   return {
     id: item.id || item.requestId,
@@ -206,7 +216,7 @@ function normalizeSurrender(item) {
     submittedAt: item.submittedAt || item.createdAt || item.updatedAt,
     reference: item.id || item.requestId || "SUR",
     status: cleanStatus(item.status, "surrender"),
-    image: String(species).toLowerCase().includes("cat") ? CAT_IMAGE : SURRENDER_IMAGE,
+    image: image || (String(species).toLowerCase().includes("cat") ? CAT_IMAGE : SURRENDER_IMAGE),
     details: item,
   };
 }
@@ -764,7 +774,10 @@ function renderAcceptedSurrenderNextSteps(item) {
 function collectSurrenderPhotos(details, fallbackImage) {
   const pet = details?.pet || {};
   const possiblePhotos = [
+    pet.photoDataUrl,
+    pet.photoURL,
     pet.imageUrl,
+    pet.imageURL,
     pet.photoUrl,
     pet.profileImageUrl,
     ...(Array.isArray(pet.photos) ? pet.photos : []),

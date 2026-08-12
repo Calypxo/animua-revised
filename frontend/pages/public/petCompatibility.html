@@ -29,20 +29,20 @@
 
 <div class="quiz-shell">
 
+  <aside class="quiz-sidebar" aria-label="Compatibility quiz progress">
   <!-- Header -->
   <header class="quiz-header">
     <div class="header-brand">
       <span>Compatibility Quiz</span>
     </div>
-    <div class="header-progress">
-      <div class="progress-label">
-        <span id="progressLabel">Question 0 of 24</span>
-      </div>
-      <div class="progress-track">
-        <div class="progress-fill" id="progressFill" style="width:0%"></div>
-      </div>
-    </div>
+    <p class="quiz-header-intro" id="quizHeaderIntro">
+      Answer a few simple questions to get matched with animals who may be the perfect fit for you.
+    </p>
     <div class="header-meta">
+      <div class="quiz-language-toggle" aria-label="Quiz language">
+        <button type="button" data-quiz-language="english" class="is-active">English</button>
+        <button type="button" data-quiz-language="tagalog">Tagalog</button>
+      </div>
       <a href="/pages/public/home.html" class="exit-quiz-link" id="exitQuizLink">
         <i class="bi bi-box-arrow-right"></i>
         <span>Exit quiz</span>
@@ -73,7 +73,23 @@
         <span>Affection</span>
       </div>
     </div>
+    <div class="header-progress">
+      <div class="progress-label">
+        <span id="progressLabel">Question 0 of 24</span>
+        <span id="progressPercentLabel">0% complete</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill" style="width:0%"></div>
+      </div>
+    </div>
+    <div class="quiz-sidebar-note">
+      <i class="bi bi-shield-check"></i>
+      <span>Takes 3-5 minutes</span>
+      <b aria-hidden="true">•</b>
+      <span>Shelter-reviewed recommendations</span>
+    </div>
   </nav>
+  </aside>
 
   <!-- Quiz Main -->
   <div class="quiz-main" id="quizMain">

@@ -34,7 +34,8 @@ const selectedPetName = document.getElementById("selectedPetName");
 const selectedPetImage = document.getElementById("selectedPetImage");
 const selectedPetMeta = document.getElementById("selectedPetMeta");
 const selectedPetStatus = document.getElementById("selectedPetStatus");
-const selectedPetId = document.getElementById("selectedPetId");
+const selectedPetIdLabel = document.getElementById("selectedPetId");
+const petIdField = document.getElementById("petIdField");
 const petNameField = document.getElementById("petNameField");
 const adoptionForm = document.getElementById("adoptionForm");
 const formMessage = document.getElementById("formMessage");
@@ -499,6 +500,31 @@ function syncIssuedDateFields() {
   if (getField("applicationReference") && !getValue("applicationReference")) {
     getField("applicationReference").value = generateLocalApplicationReference();
   }
+}
+
+function findPetById(petId) {
+  const normalizedId = String(petId || "").trim();
+  if (!normalizedId) return null;
+  return pets.find((pet) => String(pet.id || pet.petId || "").trim() === normalizedId) || null;
+}
+
+function syncSelectedPetFields(pet) {
+  if (!pet) return;
+  currentPetForAdoption = pet;
+  if (petIdField) petIdField.value = pet.id || pet.petId || "";
+  if (petNameField) petNameField.value = pet.name || "";
+}
+
+function getSelectedPetForAdoption() {
+  if (currentPetForAdoption?.id || currentPetForAdoption?.petId) return currentPetForAdoption;
+
+  const selectedPet = findPetById(getValue("petIdField"));
+  if (selectedPet) {
+    currentPetForAdoption = selectedPet;
+    return selectedPet;
+  }
+
+  return null;
 }
 
 function setGroupStep(id, step) {
@@ -1178,15 +1204,15 @@ function openProfileModal(pet) {
 }
 
 function openSelectedPetFromResults() {
-  const selectedPetId = localStorage.getItem("animua_selected_pet_id");
+  const selectedPetRecordId = localStorage.getItem("animua_selected_pet_id");
   const selectedAction = localStorage.getItem("animua_selected_pet_action");
   const selectedSource = localStorage.getItem("animua_selected_pet_source");
   const selectedAt = Number(localStorage.getItem("animua_selected_pet_timestamp") || 0);
   const token = localStorage.getItem("animua_token");
 
-  if (!selectedPetId || !pets.length) return;
+  if (!selectedPetRecordId || !pets.length) return;
 
-  const selectedPet = pets.find((pet) => String(pet.id) === String(selectedPetId));
+  const selectedPet = pets.find((pet) => String(pet.id) === String(selectedPetRecordId));
   if (!selectedPet) return;
 
   if (selectedAction === "view") {
@@ -1225,7 +1251,7 @@ function openSelectedPetFromResults() {
 function showAdoptModalForPet(pet) {
   if (!adoptModal) return;
 
-  currentPetForAdoption = pet;
+  syncSelectedPetFields(pet);
   const petTypeLabel = pet.type === "dog" ? "Dog" : pet.type === "cat" ? "Cat" : "Pet";
   selectedPetName.textContent = pet.name;
   if (selectedPetMeta) {
@@ -1234,14 +1260,13 @@ function showAdoptModalForPet(pet) {
   if (selectedPetStatus) {
     selectedPetStatus.textContent = pet.status || "Ready for Adoption";
   }
-  if (selectedPetId) {
-    selectedPetId.textContent = `Animal ID: ${pet.id}`;
+  if (selectedPetIdLabel) {
+    selectedPetIdLabel.textContent = `Animal ID: ${pet.id}`;
   }
   if (selectedPetImage) {
     selectedPetImage.src = pet.image;
     selectedPetImage.alt = pet.name;
   }
-  petNameField.value = pet.name;
   prefillApplicantFromAccount();
   syncIssuedDateFields();
   setAdoptionStep(1);
@@ -1386,7 +1411,11 @@ if (adoptionForm) {
   adoptionForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    if (!currentPetForAdoption?.id) {
+    const selectedPet = getSelectedPetForAdoption();
+
+    const selectedPetRecordId = selectedPet?.id || selectedPet?.petId || "";
+
+    if (!selectedPetRecordId) {
       formMessage.textContent = "No pet selected for adoption.";
       formMessage.style.color = "red";
       return;
@@ -1406,7 +1435,6 @@ if (adoptionForm) {
       syncIssuedDateFields();
       const quizData = JSON.parse(localStorage.getItem("animua_quiz_data") || "{}");
       const matchResults = JSON.parse(localStorage.getItem("animua_match_results") || "[]");
-      const selectedPetRecordId = currentPetForAdoption?.id;
 
       const selectedMatch = matchResults.find(
         (pet) => String(pet.id || pet.petId) === String(selectedPetRecordId)
@@ -1423,12 +1451,12 @@ if (adoptionForm) {
         : null;
 
       const formData = {
-        pet_id: currentPetForAdoption?.id,
-        pet_name: currentPetForAdoption?.name,
-        pet_age: currentPetForAdoption?.age || "",
-        pet_sex: currentPetForAdoption?.sex || "",
-        pet_type: currentPetForAdoption?.type || "",
-        pet_status: currentPetForAdoption?.status || "",
+        pet_id: selectedPetRecordId,
+        pet_name: selectedPet.name,
+        pet_age: selectedPet.age || "",
+        pet_sex: selectedPet.sex || "",
+        pet_type: selectedPet.type || "",
+        pet_status: selectedPet.status || "",
         application_reference: getValue("applicationReference"),
         submission_timestamp: getValue("submissionTimestamp"),
         applicant_account_id: getValue("applicantAccountId"),
@@ -1502,8 +1530,9 @@ if (adoptionForm) {
       selectedPetName.textContent = "";
       if (selectedPetMeta) selectedPetMeta.textContent = "";
       if (selectedPetStatus) selectedPetStatus.textContent = "";
-      if (selectedPetId) selectedPetId.textContent = "";
-      petNameField.value = "";
+      if (selectedPetIdLabel) selectedPetIdLabel.textContent = "";
+      if (petIdField) petIdField.value = "";
+      if (petNameField) petNameField.value = "";
       idFrontFileData = null;
       idBackFileData = null;
       renderUploadPreview(idFrontPreview, null, idFrontUpload);
