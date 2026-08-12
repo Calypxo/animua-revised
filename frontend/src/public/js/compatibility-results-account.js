@@ -11,6 +11,7 @@ const compatibilityCompletedDate = document.getElementById("compatibilityComplet
 const compatibilityRetakeDate = document.getElementById("compatibilityRetakeDate");
 let nextAllowedRetakeDate = null;
 let loadedResults = [];
+let currentResultsMode = "saved";
 
 const traitLabels = {
   energyLevel: "Energy level",
@@ -150,6 +151,21 @@ function setAccountHeader(mode = "results") {
     return;
   }
 
+  if (mode === "fresh") {
+    compatibilityAccountTitle.innerHTML = `
+      <span class="compatibility-account-icon"><i class="fa-solid fa-paw"></i></span>
+      <div>
+        <span>Best matches</span>
+        <h2>Your Recommended Animals</h2>
+        <p>Ranked from the quiz answers you just submitted.</p>
+      </div>
+    `;
+    compatibilityAccountAction.innerHTML = `<i class="fa-regular fa-pen-to-square"></i>Review Quiz Answers`;
+    compatibilityAccountAction.dataset.reviewAnswers = "true";
+    delete compatibilityAccountAction.dataset.viewResults;
+    return;
+  }
+
   compatibilityAccountTitle.innerHTML = `
     <span class="compatibility-account-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
     <div>
@@ -161,6 +177,33 @@ function setAccountHeader(mode = "results") {
   compatibilityAccountAction.innerHTML = `<i class="fa-regular fa-pen-to-square"></i>Review Quiz Answers`;
   compatibilityAccountAction.dataset.reviewAnswers = "true";
   delete compatibilityAccountAction.dataset.viewResults;
+}
+
+function getFreshQuizResult() {
+  const params = new URLSearchParams(window.location.search);
+  const shouldUseFresh = params.get("source") === "quiz" || localStorage.getItem("animua_match_fresh") === "1";
+  if (!shouldUseFresh) return null;
+
+  try {
+    const matches = JSON.parse(localStorage.getItem("animua_match_results") || "[]");
+    const quizData = JSON.parse(localStorage.getItem("animua_quiz_data") || "{}");
+    const metadata = JSON.parse(localStorage.getItem("animua_match_metadata") || "{}");
+    if (!Array.isArray(matches)) return null;
+
+    return {
+      resultId: metadata.resultId || "latest-quiz",
+      completedAt: metadata.completedAt || new Date().toISOString(),
+      nextRetakeAt: metadata.nextRetakeAt || null,
+      filters: quizData.filters || {},
+      preferences: quizData.preferences || {},
+      matches,
+      isLatest: true,
+      source: "fresh",
+    };
+  } catch (error) {
+    console.warn("[fresh compatibility result]", error.message);
+    return null;
+  }
 }
 
 function formatQuizAnswer(item, latest) {
@@ -232,9 +275,10 @@ function renderEmpty(message, actionText = "Take the quiz") {
   `;
 }
 
-function renderResults(results) {
+function renderResults(results, mode = "saved") {
   loadedResults = results;
-  setAccountHeader("results");
+  currentResultsMode = mode;
+  setAccountHeader(mode === "fresh" ? "fresh" : "results");
   const latest = results.find((item) => item.isLatest) || results[0];
   if (compatibilityCompletedDate) compatibilityCompletedDate.textContent = formatDate(latest.completedAt);
   if (compatibilityRetakeDate) compatibilityRetakeDate.textContent = formatDate(latest.nextRetakeAt);
@@ -257,17 +301,30 @@ function renderResults(results) {
   const matches = (latest.matches || [])
     .slice(0, 5)
     .map((match, index) => {
-      const score = Number(match.compatibilityPercent || 0);
+      const score = Number(match.compatibilityPercent ?? match.matchPercent ?? match.score ?? 0);
+      const animalId = match.animalId || match.petId || match.id || "";
+      const animalName =
+        match.animalName ||
+        match.displayLabel ||
+        match.shelterLabel ||
+        match.identifyingDescription ||
+        match.name ||
+        "Shelter animal";
+      const subtitle = index === 0
+        ? "Best match for your profile"
+        : mode === "fresh"
+          ? "Recommended match"
+          : "Saved recommendation";
       return `
         <li class="${index === 0 ? "is-top-match" : ""}">
           <span class="compatibility-rank">${index + 1}</span>
           <span class="compatibility-pet-icon"><i class="fa-solid fa-paw"></i></span>
           <div>
-            <strong>${escapeHtml(match.animalName || "Shelter animal")}</strong>
-            <small>${index === 0 ? "Best match for your profile" : "Saved recommendation"}</small>
+            <strong>${escapeHtml(animalName)}</strong>
+            <small>${escapeHtml(subtitle)}</small>
           </div>
           <span class="compatibility-score">${score.toFixed(1)}%</span>
-          <button class="compatibility-view-pet" type="button" data-saved-animal-id="${escapeHtml(match.animalId || "")}" data-saved-animal-name="${escapeHtml(match.animalName || "Shelter animal")}" data-saved-animal-score="${score.toFixed(1)}">
+          <button class="compatibility-view-pet" type="button" data-saved-animal-id="${escapeHtml(animalId)}" data-saved-animal-name="${escapeHtml(animalName)}" data-saved-animal-score="${score.toFixed(1)}">
             <i class="fa-regular fa-eye"></i>
             <span>Details</span>
           </button>
@@ -386,6 +443,13 @@ async function showSavedAnimalDetails(button) {
 }
 
 async function loadCompatibilityAccount() {
+  const freshResult = getFreshQuizResult();
+  if (freshResult) {
+    renderResults([freshResult], "fresh");
+    localStorage.removeItem("animua_match_fresh");
+    return;
+  }
+
   const token = getToken();
   if (!token) {
     renderEmpty("Log in to view your saved compatibility result.", "Go to login");
@@ -406,7 +470,7 @@ async function loadCompatibilityAccount() {
     }
 
     loadedResults = results;
-    renderResults(results);
+    renderResults(results, "saved");
   } catch (error) {
     renderEmpty(error.message || "Unable to load compatibility results.", "Try the quiz");
   }
@@ -417,14 +481,14 @@ compatibilityAccountBody?.addEventListener("click", (event) => {
   if (button) showSavedAnimalDetails(button);
 
   if (event.target.closest("[data-view-results]")) {
-    renderResults(loadedResults);
+    renderResults(loadedResults, currentResultsMode);
   }
 });
 
 compatibilityAccountAction?.addEventListener("click", (event) => {
   event.preventDefault();
   if (event.currentTarget.dataset.viewResults) {
-    renderResults(loadedResults);
+    renderResults(loadedResults, currentResultsMode);
     return;
   }
   renderQuizAnswers(loadedResults);

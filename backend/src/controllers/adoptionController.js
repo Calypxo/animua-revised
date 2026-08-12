@@ -383,6 +383,13 @@ exports.getMyAdoptions = async (req, res) => {
                   age: animalData.age || "",
                   imageUrl:
                     animalData.imageUrl ||
+                    animalData.photoURL ||
+                    animalData.profileImageUrl ||
+                    animalData.photoUrl ||
+                    "",
+                  photoURL:
+                    animalData.photoURL ||
+                    animalData.imageUrl ||
                     animalData.profileImageUrl ||
                     animalData.photoUrl ||
                     "",
