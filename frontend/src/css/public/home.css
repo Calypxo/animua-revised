@@ -14053,6 +14053,43 @@ body.home-page .about-shelter-card span::before {
     grid-column: 1 / -1;
     grid-row: 1;
   }
+
+  body.home-page .about-shelter-vet-card {
+    grid-column: 1 / -1 !important;
+  }
+
+  body.home-page .about-shelter-vet-card img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center 54% !important;
+  }
+}
+
+@media (max-width: 430px) {
+  body.home-page .nav-shell {
+    min-height: 58px !important;
+    padding-inline: 10px !important;
+  }
+
+  body.home-page .menu-toggle {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    max-width: 40px !important;
+    flex-basis: 40px !important;
+  }
+
+  body.home-page .navbar {
+    width: min(280px, calc(100vw - 20px)) !important;
+    max-width: calc(100vw - 20px) !important;
+  }
+}
+
+@media (max-width: 340px) {
+  body.home-page .navbar {
+    width: calc(100vw - 18px) !important;
+  }
 }
 
 /* Shorter About ANIMUA section. */
@@ -15546,5 +15583,284 @@ body.home-page .quiz-intro-steps::before,
 body.home-page .quiz-intro-steps::after {
   content: none !important;
   display: none !important;
+}
+
+/* Mobile overflow fix for the home Match Quiz section. */
+body.home-page .home-match-quiz-copy,
+body.home-page .home-match-quiz-points article > div {
+  min-width: 0 !important;
+}
+
+body.home-page .home-match-quiz-points h3,
+body.home-page .home-match-quiz-points p,
+body.home-page .home-match-quiz-primary,
+body.home-page .home-match-quiz-secondary {
+  overflow-wrap: anywhere !important;
+}
+
+@media (max-width: 760px) {
+  body.home-page .home-match-quiz-section {
+    overflow-x: hidden !important;
+  }
+
+  body.home-page .home-match-quiz-layout {
+    width: min(100% - 24px, 1280px) !important;
+    max-width: calc(100vw - 24px) !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    margin-inline: auto !important;
+    padding-inline: 0 !important;
+  }
+
+  body.home-page .home-match-quiz-copy {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  body.home-page .home-match-quiz-copy .section-label {
+    max-width: 100% !important;
+    white-space: normal !important;
+    line-height: 1.25 !important;
+  }
+
+  body.home-page .home-match-quiz-points article {
+    grid-template-columns: 44px minmax(0, 1fr) !important;
+    gap: 12px !important;
+    align-items: start !important;
+  }
+
+  body.home-page .home-match-quiz-points article > span {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+    aspect-ratio: 1 / 1 !important;
+    align-self: start !important;
+    flex: 0 0 44px !important;
+  }
+
+  body.home-page .home-match-quiz-actions {
+    width: 100% !important;
+    max-width: 100% !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  body.home-page .home-match-quiz-primary,
+  body.home-page .home-match-quiz-secondary {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    min-height: 52px !important;
+    padding: 0 16px !important;
+    white-space: normal !important;
+    line-height: 1.15 !important;
+    text-align: center !important;
+  }
+
+  body.home-page .home-match-quiz-media {
+    width: min(100%, 330px) !important;
+    max-width: 100% !important;
+    display: block !important;
+    order: 2 !important;
+    justify-self: center !important;
+    margin: 8px auto 0 !important;
+    overflow: visible !important;
+  }
+
+  body.home-page .home-match-quiz-media::before {
+    inset: 14% 2% auto 9% !important;
+    height: 62% !important;
+    transform: rotate(-3deg) !important;
+  }
+
+  body.home-page .home-match-quiz-media img {
+    width: 100% !important;
+    height: clamp(220px, 72vw, 330px) !important;
+    max-height: 330px !important;
+    object-fit: contain !important;
+  }
+}
+
+/* Keep mobile circular icons from compressing into ovals. */
+@media (max-width: 760px) {
+  body.home-page .process-icon,
+  body.home-page .quiz-intro-close,
+  body.home-page .quiz-intro-steps article > span,
+  body.home-page .quiz-intro-steps article > i,
+  body.home-page .quiz-intro-reminder i,
+  body.home-page .featured-furbaby-favorite,
+  body.home-page .featured-furbaby-arrow {
+    aspect-ratio: 1 / 1 !important;
+    flex-shrink: 0 !important;
+    align-self: center !important;
+  }
+
+  body.home-page .process-icon {
+    width: 72px !important;
+    height: 72px !important;
+    min-width: 72px !important;
+    max-width: 72px !important;
+    min-height: 72px !important;
+    max-height: 72px !important;
+  }
+
+  body.home-page .quiz-intro-steps article > span {
+    min-width: 36px !important;
+    max-width: 36px !important;
+    min-height: 36px !important;
+    max-height: 36px !important;
+  }
+
+  body.home-page .quiz-intro-steps article > i,
+  body.home-page .quiz-intro-reminder i {
+    min-width: 56px !important;
+    max-width: 56px !important;
+    min-height: 56px !important;
+    max-height: 56px !important;
+  }
+}
+
+@media (max-width: 420px) {
+  body.home-page .home-match-quiz-layout {
+    width: min(100% - 18px, 1280px) !important;
+    max-width: calc(100vw - 18px) !important;
+  }
+
+  body.home-page .home-match-quiz-copy h2 {
+    font-size: clamp(28px, 9.5vw, 36px) !important;
+  }
+
+  body.home-page .home-match-quiz-copy > p,
+  body.home-page .home-match-quiz-points p {
+    font-size: 0.86rem !important;
+  }
+}
+
+/* Final mobile-only nav and shelter-gallery overrides. */
+@media (max-width: 900px) {
+  body.home-page .header {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 1200 !important;
+  }
+
+  body.home-page .nav-shell {
+    position: relative !important;
+    overflow: visible !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    grid-template-rows: auto !important;
+  }
+
+  body.home-page .logo {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+  }
+
+  body.home-page .nav-actions {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    justify-self: end !important;
+  }
+
+  body.home-page .navbar {
+    position: absolute !important;
+    top: calc(100% + 8px) !important;
+    right: 10px !important;
+    left: auto !important;
+    z-index: 1250 !important;
+    width: min(300px, calc(100vw - 24px)) !important;
+    max-width: calc(100vw - 24px) !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    border-color: transparent !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: none !important;
+  }
+
+  body.home-page .navbar.show {
+    max-height: calc(100dvh - 86px) !important;
+    overflow-y: auto !important;
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+    border-color: rgba(35, 45, 53, 0.08) !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: none !important;
+  }
+
+  body.home-page .menu-toggle {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
+    flex: 0 0 44px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    padding: 0 11px !important;
+    border-radius: 50% !important;
+  }
+
+  body.home-page .menu-toggle span {
+    width: 18px !important;
+    height: 2px !important;
+  }
+}
+
+@media (max-width: 720px) {
+  body.home-page .about-shelter-gallery {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+    grid-template-rows: minmax(210px, 1.25fr) repeat(2, minmax(140px, 0.85fr)) !important;
+    height: auto !important;
+    background: transparent !important;
+  }
+
+  body.home-page .about-shelter-vet-card {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+  }
+
+  body.home-page .about-shelter-vet-card img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center 54% !important;
+  }
+}
+
+@media (max-width: 430px) {
+  body.home-page .nav-shell {
+    min-height: 58px !important;
+    padding-inline: 10px !important;
+  }
+
+  body.home-page .navbar {
+    width: min(280px, calc(100vw - 20px)) !important;
+    max-width: calc(100vw - 20px) !important;
+  }
+
+  body.home-page .menu-toggle {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    max-width: 40px !important;
+    flex-basis: 40px !important;
+  }
+}
+
+@media (max-width: 340px) {
+  body.home-page .navbar {
+    width: calc(100vw - 18px) !important;
+  }
 }
 

@@ -649,3 +649,206 @@ body.management-consistent-ui :is(
     overflow-wrap: anywhere;
   }
 }
+
+/* Final management modal mobile hardening. Desktop/tablet modal styling is unchanged. */
+@media (max-width: 760px) {
+  html body.management-consistent-ui :is(
+    .um-modal-backdrop,
+    .modal-backdrop-custom,
+    .modal-backdrop,
+    .management-modal-backdrop,
+    .drawer-backdrop,
+    .swal2-container
+  ) {
+    padding: max(10px, env(safe-area-inset-top)) 10px max(10px, env(safe-area-inset-bottom)) !important;
+    overflow-x: hidden !important;
+  }
+
+  html body.management-consistent-ui :is(
+    .um-modal,
+    .modal,
+    .modal-panel,
+    .modal-content,
+    .announcement-modal,
+    .management-modal,
+    .management-side-modal,
+    .drawer-panel,
+    .animua-management-swal,
+    .animua-swal-popup,
+    .swal2-popup
+  ) {
+    width: min(100%, calc(100vw - 20px)) !important;
+    max-width: calc(100vw - 20px) !important;
+    max-height: calc(100dvh - 20px) !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    box-sizing: border-box !important;
+  }
+
+  html body.management-consistent-ui :is(
+    .um-modal,
+    .modal,
+    .modal-panel,
+    .modal-content,
+    .announcement-modal,
+    .management-modal,
+    .management-side-modal,
+    .drawer-panel,
+    .animua-management-swal,
+    .animua-swal-popup,
+    .swal2-popup
+  ) * {
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  html body.management-consistent-ui :is(
+    .um-modal,
+    .modal,
+    .modal-panel,
+    .modal-content,
+    .announcement-modal,
+    .management-modal,
+    .management-side-modal,
+    .drawer-panel,
+    .animua-management-swal,
+    .animua-swal-popup,
+    .swal2-popup
+  ) :is(h1, h2, h3, h4, p, a, button, span, strong, small, label, li, dt, dd, th, td) {
+    max-width: 100% !important;
+    overflow-wrap: break-word !important;
+    word-break: normal !important;
+    hyphens: auto !important;
+  }
+
+  html body.management-consistent-ui :is(
+    .um-modal,
+    .modal,
+    .modal-panel,
+    .modal-content,
+    .announcement-modal,
+    .management-modal,
+    .management-side-modal,
+    .drawer-panel,
+    .swal2-popup
+  ) :is(input, select, textarea, .form-inp, .form-select, .filter-select, .swal2-input, .swal2-select, .swal2-textarea) {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  html body.management-consistent-ui :is(
+    .um-modal-header,
+    .modal-head,
+    .modal-header,
+    .drawer-header
+  ) {
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  html body.management-consistent-ui :is(
+    .um-modal-body,
+    .modal-body,
+    .drawer-body,
+    .swal2-html-container
+  ) {
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+
+  html body.management-consistent-ui :is(
+    .um-modal-footer,
+    .modal-actions,
+    .modal-footer,
+    .drawer-footer,
+    .swal2-actions
+  ) {
+    width: 100% !important;
+    max-width: 100% !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  html body.management-consistent-ui :is(
+    .um-modal-footer,
+    .modal-actions,
+    .modal-footer,
+    .drawer-footer,
+    .swal2-actions
+  ) > :is(button, a, .btn, .btn-primary-clay, .btn-ghost-clay, .swal2-confirm, .swal2-cancel, .swal2-deny) {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    justify-content: center !important;
+  }
+
+  html body.management-consistent-ui :is(
+    .modal-close-btn,
+    .close-btn,
+    .btn-close,
+    .drawer-close,
+    .icon-btn,
+    .swal2-close,
+    .user-avatar,
+    .applicant-avatar,
+    .animal-mini-thumb,
+    .system-summary-icon,
+    .report-tab-count
+  ) {
+    aspect-ratio: 1 / 1 !important;
+    flex: 0 0 auto !important;
+  }
+
+  html body.management-consistent-ui :is(
+    .form-grid,
+    .modal-grid,
+    .review-grid,
+    .detail-grid,
+    .announcement-form-grid,
+    .inventory-form-grid,
+    .intake-form-grid,
+    .medical-form-grid,
+    .behavioral-grid,
+    .profile-form-grid,
+    .cq-editor-grid,
+    .swal2-html-container dl
+  ) {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  html body.management-consistent-ui :is(
+    .adoption-stepper,
+    .application-stepper,
+    .phase-steps,
+    .workflow-steps,
+    .wizard-steps,
+    .cq-options-list
+  ) {
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+}
+
+@media (max-width: 380px) {
+  html body.management-consistent-ui :is(
+    .um-modal,
+    .modal,
+    .modal-panel,
+    .modal-content,
+    .announcement-modal,
+    .management-modal,
+    .management-side-modal,
+    .drawer-panel,
+    .animua-management-swal,
+    .animua-swal-popup,
+    .swal2-popup
+  ) {
+    width: min(100%, calc(100vw - 16px)) !important;
+    max-width: calc(100vw - 16px) !important;
+  }
+}

@@ -16009,6 +16009,56 @@ button#chatbotSend.chatbot-input-send i {
   min-height: 38px !important;
 }
 
+/* Final profile modal circle lock: prevent mobile grid/flex squeeze from making icons oval. */
+#profileModal .profile-summary-avatar {
+  width: 52px !important;
+  min-width: 52px !important;
+  max-width: 52px !important;
+  height: 52px !important;
+  min-height: 52px !important;
+  max-height: 52px !important;
+  aspect-ratio: 1 / 1 !important;
+  flex: 0 0 52px !important;
+  border-radius: 50% !important;
+}
+
+#profileModal .profile-avatar-camera {
+  width: 22px !important;
+  min-width: 22px !important;
+  max-width: 22px !important;
+  height: 22px !important;
+  min-height: 22px !important;
+  max-height: 22px !important;
+  aspect-ratio: 1 / 1 !important;
+  flex: 0 0 22px !important;
+  border-radius: 50% !important;
+}
+
+#profileModal .profile-modal-title .profile-title-icon,
+#profileModal .profile-info-card h3 > i,
+#profileModal .profile-info-row > i:first-child,
+#profileModal .profile-settings-row > i:first-child {
+  width: 32px !important;
+  min-width: 32px !important;
+  max-width: 32px !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  max-height: 32px !important;
+  aspect-ratio: 1 / 1 !important;
+  flex: 0 0 32px !important;
+  border-radius: 50% !important;
+}
+
+#profileModal .profile-info-card h3 > i {
+  width: 22px !important;
+  min-width: 22px !important;
+  max-width: 22px !important;
+  height: 22px !important;
+  min-height: 22px !important;
+  max-height: 22px !important;
+  flex-basis: 22px !important;
+}
+
 /* Make notification settings narrower and a little taller. */
 .notification-settings-popup {
   width: min(500px, calc(100% - 24px)) !important;
@@ -18758,5 +18808,966 @@ body #profileModal.profile-modal-overlay .profile-modal-card.profile-modal-card-
   .notification-settings-row {
     grid-template-columns: 34px minmax(0, 1fr) auto !important;
     gap: 10px !important;
+  }
+}
+
+/* System-wide mobile overflow guard. Keeps controls inside phone viewports. */
+@media (max-width: 640px) {
+  *,
+  *::before,
+  *::after {
+    min-width: 0;
+  }
+
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden !important;
+  }
+
+  main,
+  section,
+  article,
+  aside,
+  header,
+  footer,
+  form,
+  fieldset,
+  nav,
+  div {
+    max-width: 100%;
+  }
+
+  img,
+  video,
+  canvas,
+  svg,
+  iframe {
+    max-width: 100%;
+  }
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  table {
+    max-width: 100%;
+  }
+
+  :is(.table-wrap, .table-container, .records-table-wrap, .compatibility-table-wrap, .finder-results, .applications-table-wrap) {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  :is(.btn, .primary-btn, .secondary-btn, .yellow-btn, .light-btn, .auth-submit-btn, .quiz-intro-primary, .quiz-intro-secondary, .home-match-quiz-primary, .home-match-quiz-secondary, .compatibility-retake-btn, .profile-filled-btn, .profile-outline-btn, .profile-save-btn, .profile-home-btn) {
+    max-width: 100%;
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  :is(.btn, .primary-btn, .secondary-btn, .yellow-btn, .light-btn, .auth-submit-btn, .quiz-intro-primary, .quiz-intro-secondary, .home-match-quiz-primary, .home-match-quiz-secondary, .compatibility-retake-btn) {
+    width: 100%;
+  }
+
+  :is(.nav-actions, .user-actions-wrap, .hero-actions, .home-hero-actions, .home-match-quiz-actions, .quiz-intro-actions, .compatibility-hero-actions, .finder-actions, .finder-filter-row, .finder-controls, .pet-actions, .profile-summary-actions, .auth-policy-action-row, .swal2-actions) {
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    justify-content: stretch;
+    gap: 10px;
+  }
+
+  :is(.hero-actions, .home-hero-actions, .home-match-quiz-actions, .quiz-intro-actions, .compatibility-hero-actions, .finder-actions, .finder-filter-row, .finder-controls, .pet-actions, .profile-summary-actions, .auth-policy-action-row, .swal2-actions) > * {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  :is(.notification-btn, .login-btn, .menu-toggle, .chatbot-btn, .profile-modal-close, .auth-close-btn, .btn-icon, .icon-btn) {
+    width: 42px;
+    min-width: 42px;
+    max-width: 42px;
+    flex: 0 0 42px;
+  }
+
+  .user-pill {
+    max-width: calc(100vw - 120px);
+  }
+
+  .user-menu-btn {
+    max-width: 100%;
+  }
+
+  .user-dropdown,
+  .notification-popup {
+    right: 0 !important;
+    width: min(100vw - 24px, 320px) !important;
+    max-width: calc(100vw - 24px) !important;
+  }
+
+  .swal2-actions {
+    padding-inline: 0 !important;
+  }
+
+  .swal2-actions :is(button, .swal2-confirm, .swal2-cancel, .swal2-deny) {
+    width: 100% !important;
+    margin-inline: 0 !important;
+    white-space: normal !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .container,
+  .public-page-container,
+  .finder-shell,
+  .home-page .container,
+  body.furbabies-page .container {
+    width: min(100% - 18px, 1180px) !important;
+    max-width: calc(100vw - 18px) !important;
+  }
+
+  .nav-shell,
+  body.home-page .nav-shell {
+    padding-inline: 9px !important;
+  }
+
+  :is(.btn, .primary-btn, .secondary-btn, .yellow-btn, .light-btn, .auth-submit-btn, .quiz-intro-primary, .quiz-intro-secondary, .home-match-quiz-primary, .home-match-quiz-secondary, .compatibility-retake-btn) {
+    padding-inline: 14px !important;
+    font-size: 0.86rem;
+  }
+}
+
+/* Cross-page responsive hardening without changing the visual design. */
+@media (max-width: 1180px) {
+  :is(.hero-layout, .home-hero-layout, .about-grid, .surrender-grid, .contact-info-hero-inner, .surrender-page-hero-inner, .compatibility-result-grid, .compatibility-how-grid, .my-submissions-grid, .finder-layout, .quiz-intro-grid, .footer-grid) {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  :is(.home-match-quiz-layout, .about-animua-showcase, .how-animua-works-layout, .featured-furbabies-layout) {
+    max-width: calc(100vw - 32px) !important;
+  }
+}
+
+@media (max-width: 900px) {
+  :is(.hero-layout, .home-hero-layout, .home-match-quiz-layout, .about-animua-showcase, .how-animua-works-layout, .featured-furbabies-layout, .finder-hero, .contact-info-hero-inner, .surrender-page-hero-inner) {
+    width: min(100% - 24px, 1180px) !important;
+    max-width: calc(100vw - 24px) !important;
+    margin-inline: auto !important;
+    padding-inline: 0 !important;
+  }
+
+  :is(.features-grid, .feature-grid, .services-grid, .pets-grid, .announcements-grid, .contact-methods-grid, .compatibility-traits, .quiz-answer-grid, .saved-trait-grid, .submissions-grid, .footer-grid) {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)) !important;
+  }
+
+  :is(.auth-modal-card, .profile-modal-card, .quiz-intro-card, .quiz-page-card, .announcement-modal-card, .saved-animal-popup, .swal2-popup) {
+    width: min(100%, calc(100vw - 24px)) !important;
+    max-width: calc(100vw - 24px) !important;
+    max-height: calc(100dvh - 24px) !important;
+    overflow: auto !important;
+  }
+}
+
+@media (max-width: 760px) {
+  :is(
+    .logo-icon,
+    .notification-btn,
+    .login-btn,
+    .menu-toggle,
+    .chatbot-btn,
+    .user-avatar-mini,
+    .user-dropdown-avatar,
+    .profile-summary-avatar,
+    .profile-avatar-camera,
+    .section-icon,
+    .feature-icon,
+    .contact-method-icon,
+    .compatibility-account-icon,
+    .compatibility-pet-icon,
+    .saved-state-icon,
+    .saved-match-photo,
+    .quiz-intro-details i,
+    .quiz-intro-steps article > span,
+    .quiz-intro-steps article > i
+  ) {
+    aspect-ratio: 1 / 1 !important;
+    flex: 0 0 auto !important;
+    border-radius: 50%;
+  }
+
+  :is(.profile-summary-avatar img, .user-dropdown-avatar img, .user-avatar-mini img, .saved-match-photo img) {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+
+  :is(.hero-actions, .home-hero-actions, .home-match-quiz-actions, .quiz-intro-actions, .compatibility-hero-actions, .finder-actions, .form-actions, .results-actions, .profile-summary-actions, .modal-actions, .auth-policy-action-row) {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  :is(.section-label, .tagline, .hero-badge-top, .quiz-intro-label, .quiz-intro-section-label) {
+    max-width: 100% !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    line-height: 1.25 !important;
+  }
+
+  :is(h1, h2, h3, p, a, button, span, strong, small, label) {
+    overflow-wrap: anywhere;
+  }
+
+  :is(.hero-right, .home-hero-media, .about-animal-center, .home-match-quiz-media, .finder-hero-media, .contact-info-hero-media, .surrender-page-hero-media) {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+}
+
+@media (max-width: 520px) {
+  :is(.auth-modal-overlay, .profile-modal-overlay, .quiz-intro-modal, .quiz-page-modal, .swal2-container) {
+    padding: max(10px, env(safe-area-inset-top)) 10px max(10px, env(safe-area-inset-bottom)) !important;
+  }
+
+  :is(.auth-modal-card, .profile-modal-card, .quiz-intro-card, .quiz-page-card, .announcement-modal-card, .swal2-popup) {
+    width: calc(100vw - 20px) !important;
+    max-width: calc(100vw - 20px) !important;
+    border-radius: 14px !important;
+  }
+}
+
+/* Homepage keeps its transparent hero navbar on mobile. */
+@media (max-width: 900px) {
+  body.home-page .header {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  body.home-page .header.scrolled {
+    background: rgba(255, 253, 252, 0.94) !important;
+    box-shadow: 0 8px 24px rgba(20, 24, 28, 0.08) !important;
+  }
+
+  body.home-page .navbar {
+    position: absolute !important;
+    top: calc(100% + 8px) !important;
+    right: 10px !important;
+    left: auto !important;
+    width: min(300px, calc(100vw - 24px)) !important;
+    max-width: calc(100vw - 24px) !important;
+    transform: none !important;
+  }
+
+  body.home-page.menu-open .hero-left {
+    margin-top: clamp(124px, 22vw, 142px) !important;
+  }
+}
+
+@media (max-width: 430px) {
+  body.home-page .navbar {
+    right: 10px !important;
+    left: auto !important;
+    width: min(280px, calc(100vw - 20px)) !important;
+    max-width: calc(100vw - 20px) !important;
+  }
+}
+
+/* Homepage phone polish: compact profile trigger, round footer icons, compact quiz modal. */
+@media (max-width: 760px) {
+  body.home-page .nav-actions,
+  body.home-page .user-actions-wrap {
+    width: auto !important;
+    max-width: none !important;
+    display: inline-flex !important;
+    flex: 0 0 auto !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    align-self: center !important;
+    gap: 8px !important;
+  }
+
+  body.home-page .nav-actions {
+    min-height: 44px !important;
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    justify-self: end !important;
+  }
+
+  body.home-page #userLoggedInBox.user-pill {
+    width: auto !important;
+    max-width: calc(100vw - 118px) !important;
+    flex: 0 0 auto !important;
+    align-self: center !important;
+  }
+
+  body.home-page .user-menu-btn {
+    width: auto !important;
+    min-width: 60px !important;
+    max-width: 68px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    padding: 3px 7px 3px 3px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    align-self: center !important;
+    gap: 4px !important;
+    border-radius: 999px !important;
+  }
+
+  body.home-page .menu-toggle {
+    align-self: center !important;
+    margin: 0 !important;
+  }
+
+  body.home-page .user-avatar-mini {
+    width: 34px !important;
+    min-width: 34px !important;
+    max-width: 34px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    max-height: 34px !important;
+    flex: 0 0 34px !important;
+    aspect-ratio: 1 / 1 !important;
+  }
+
+  body.home-page .user-pill-name {
+    display: none !important;
+  }
+
+  body.home-page .user-menu-chevron {
+    width: 12px !important;
+    height: 12px !important;
+    min-width: 12px !important;
+    display: inline-grid !important;
+    place-items: center !important;
+    color: currentColor !important;
+    font-size: 0.64rem !important;
+    line-height: 1 !important;
+  }
+
+  body.home-page > .footer .footer-social {
+    align-items: center !important;
+  }
+
+  body.home-page > .footer .footer-social a {
+    width: 48px !important;
+    min-width: 48px !important;
+    max-width: 48px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+    flex: 0 0 48px !important;
+    aspect-ratio: 1 / 1 !important;
+    border-radius: 50% !important;
+  }
+}
+
+@media (max-width: 560px) {
+  body.home-page .quiz-intro-modal:not(.hidden) {
+    align-items: center !important;
+    padding: 10px !important;
+  }
+
+  body.home-page .quiz-intro-card {
+    width: min(100%, calc(100vw - 20px)) !important;
+    max-width: calc(100vw - 20px) !important;
+    max-height: calc(100dvh - 20px) !important;
+    padding: 58px 16px 18px !important;
+    border-radius: 18px !important;
+    overflow-y: auto !important;
+  }
+
+  body.home-page .quiz-intro-card::before {
+    width: 52% !important;
+    height: 72px !important;
+    border-top-right-radius: 18px !important;
+  }
+
+  body.home-page .quiz-intro-card::after {
+    top: 86px !important;
+    right: 26px !important;
+    font-size: 58px !important;
+  }
+
+  body.home-page .quiz-intro-close {
+    top: 14px !important;
+    right: 14px !important;
+    width: 38px !important;
+    min-width: 38px !important;
+    max-width: 38px !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    max-height: 38px !important;
+    font-size: 0.9rem !important;
+  }
+
+  body.home-page .quiz-intro-label {
+    gap: 10px !important;
+    margin: 0 58px 10px 0 !important;
+    font-size: 0.62rem !important;
+    letter-spacing: 0.16em !important;
+    line-height: 1.1 !important;
+  }
+
+  body.home-page .quiz-intro-label::before {
+    width: 28px !important;
+  }
+
+  body.home-page .quiz-intro-label::after {
+    display: none !important;
+  }
+
+  body.home-page .quiz-intro-copy h2 {
+    max-width: 100% !important;
+    font-size: clamp(2rem, 10.5vw, 2.85rem) !important;
+    line-height: 0.98 !important;
+  }
+
+  body.home-page .quiz-intro-copy > p {
+    margin: 12px 0 14px !important;
+    font-size: 0.88rem !important;
+    line-height: 1.35 !important;
+  }
+
+  body.home-page .quiz-intro-details {
+    margin-bottom: 14px !important;
+  }
+
+  body.home-page .quiz-intro-details span,
+  body.home-page .quiz-intro-details span:first-child,
+  body.home-page .quiz-intro-details span:last-child {
+    min-height: 48px !important;
+    gap: 10px !important;
+    padding: 10px 12px !important;
+    font-size: 0.82rem !important;
+  }
+
+  body.home-page .quiz-intro-details i {
+    width: 24px !important;
+    min-width: 24px !important;
+    height: 24px !important;
+    flex-basis: 24px !important;
+    font-size: 1rem !important;
+  }
+
+  body.home-page .quiz-intro-how {
+    margin-bottom: 14px !important;
+  }
+
+  body.home-page .quiz-intro-section-label {
+    margin-bottom: 10px !important;
+    font-size: 0.68rem !important;
+    letter-spacing: 0.14em !important;
+  }
+
+  body.home-page .quiz-intro-steps {
+    gap: 8px !important;
+  }
+
+  body.home-page .quiz-intro-steps article {
+    min-height: 66px !important;
+    grid-template-columns: 34px minmax(0, 1fr) !important;
+    gap: 8px 10px !important;
+    padding: 10px !important;
+  }
+
+  body.home-page .quiz-intro-steps article > span {
+    width: 32px !important;
+    min-width: 32px !important;
+    max-width: 32px !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    max-height: 32px !important;
+  }
+
+  body.home-page .quiz-intro-steps h3 {
+    margin-bottom: 3px !important;
+    font-size: 0.9rem !important;
+  }
+
+  body.home-page .quiz-intro-steps p {
+    font-size: 0.76rem !important;
+    line-height: 1.25 !important;
+  }
+
+  body.home-page .quiz-intro-reminder {
+    min-height: 0 !important;
+    grid-template-columns: 40px minmax(0, 1fr) !important;
+    gap: 0 10px !important;
+    margin: 10px 0 12px !important;
+    padding: 10px 12px !important;
+  }
+
+  body.home-page .quiz-intro-reminder i {
+    width: 38px !important;
+    min-width: 38px !important;
+    max-width: 38px !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    max-height: 38px !important;
+    grid-row: span 2 !important;
+    font-size: 1rem !important;
+  }
+
+  body.home-page .quiz-intro-reminder strong {
+    font-size: 0.9rem !important;
+  }
+
+  body.home-page .quiz-intro-reminder span {
+    font-size: 0.74rem !important;
+  }
+
+  body.home-page .quiz-intro-primary {
+    min-height: 46px !important;
+    padding: 0 18px !important;
+    font-size: 0.9rem !important;
+  }
+}
+
+/* Homepage footer mobile rhythm: avoid shared grid hardening creating tall gaps. */
+@media (max-width: 720px) {
+  body.home-page > .footer {
+    padding-top: 34px !important;
+  }
+
+  body.home-page > .footer .footer-grid {
+    width: min(100% - 48px, 1180px) !important;
+    max-width: calc(100vw - 48px) !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 26px !important;
+    align-items: start !important;
+    padding: 0 0 28px !important;
+  }
+
+  body.home-page > .footer .footer-brand,
+  body.home-page > .footer .footer-links,
+  body.home-page > .footer .footer-contact {
+    grid-column: auto !important;
+    width: 100% !important;
+    padding-right: 0 !important;
+    border-right: 0 !important;
+  }
+
+  body.home-page > .footer .footer-logo {
+    margin-bottom: 12px !important;
+  }
+
+  body.home-page > .footer .footer-brand p {
+    max-width: 100% !important;
+    margin-bottom: 16px !important;
+    line-height: 1.45 !important;
+  }
+
+  body.home-page > .footer .footer-social {
+    gap: 10px !important;
+    margin-bottom: 0 !important;
+  }
+
+  body.home-page > .footer .footer-links h4 {
+    margin: 0 0 10px !important;
+    line-height: 1.1 !important;
+  }
+
+  body.home-page > .footer .footer-links a {
+    width: fit-content !important;
+    min-height: 0 !important;
+    margin: 0 0 9px !important;
+    padding: 0 !important;
+    line-height: 1.35 !important;
+  }
+
+  body.home-page > .footer .footer-links a:last-child {
+    margin-bottom: 0 !important;
+  }
+
+  body.home-page > .footer .footer-contact p,
+  body.home-page > .footer .footer-contact a {
+    margin-bottom: 9px !important;
+    line-height: 1.4 !important;
+  }
+
+  body.home-page > .footer .footer-bottom-inner {
+    width: min(100% - 48px, 1180px) !important;
+    max-width: calc(100vw - 48px) !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 8px !important;
+    padding: 16px 0 !important;
+  }
+}
+
+@media (max-width: 380px) {
+  body.home-page > .footer .footer-grid,
+  body.home-page > .footer .footer-bottom-inner {
+    width: min(100% - 36px, 1180px) !important;
+    max-width: calc(100vw - 36px) !important;
+  }
+}
+
+/* Homepage mobile process alignment: keep each How ANIMUA step on one center axis. */
+@media (max-width: 720px) {
+  body.home-page .how-animua-process {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    justify-items: center !important;
+    gap: 34px !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  body.home-page .how-animua-process::before,
+  body.home-page .how-animua-process::after,
+  body.home-page .how-animua-step::before,
+  body.home-page .how-animua-number::after {
+    content: none !important;
+    display: none !important;
+  }
+
+  body.home-page .how-animua-step {
+    width: min(100%, 310px) !important;
+    max-width: 310px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    justify-self: center !important;
+    margin-inline: auto !important;
+    padding: 0 !important;
+    text-align: center !important;
+  }
+
+  body.home-page .how-animua-number {
+    position: static !important;
+    width: 34px !important;
+    min-width: 34px !important;
+    max-width: 34px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    max-height: 34px !important;
+    margin: 0 auto 18px !important;
+    aspect-ratio: 1 / 1 !important;
+    align-self: center !important;
+    transform: none !important;
+  }
+
+  body.home-page .how-animua-step > div,
+  body.home-page .how-animua-step:nth-child(odd) > div,
+  body.home-page .how-animua-step:nth-child(even) > div {
+    width: 100% !important;
+    max-width: 310px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    text-align: center !important;
+    transform: none !important;
+  }
+
+  body.home-page .process-icon,
+  body.home-page .how-animua-visual {
+    align-self: center !important;
+    margin: 0 auto 12px !important;
+    transform: none !important;
+  }
+
+  body.home-page .how-animua-step h3,
+  body.home-page .how-animua-step p {
+    width: 100% !important;
+    max-width: 260px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    text-align: center !important;
+  }
+
+  body.home-page .how-animua-actions {
+    width: min(100%, 408px) !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    justify-items: stretch !important;
+    gap: 12px !important;
+    margin: 28px auto 0 !important;
+  }
+
+  body.home-page .how-animua-primary,
+  body.home-page .how-animua-secondary {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+}
+
+/* Final public modal mobile hardening. Desktop and tablet rules remain unchanged. */
+@media (max-width: 760px) {
+  :is(
+    .auth-modal-overlay,
+    .profile-modal-overlay,
+    .quiz-intro-modal,
+    .quiz-confirm-overlay,
+    .modal-overlay,
+    .modal-backdrop,
+    .adoption-modal,
+    .pet-profile-modal,
+    .about-photo-lightbox,
+    .swal2-container
+  ) {
+    padding: max(10px, env(safe-area-inset-top)) 10px max(10px, env(safe-area-inset-bottom)) !important;
+    overflow-x: hidden !important;
+  }
+
+  :is(
+    .auth-modal-card,
+    .profile-modal-card,
+    .quiz-intro-card,
+    .quiz-confirm-card,
+    .modal-card,
+    .modal-content,
+    .adoption-wizard-modal,
+    .pet-profile-card,
+    .redesigned-profile-modal,
+    .about-photo-lightbox-panel,
+    .notification-settings-popup,
+    .saved-animal-popup,
+    .announcement-detail-popup,
+    .announcement-photo-popup,
+    .application-detail-popup,
+    .schedule-picker-popup,
+    .animua-popup,
+    .swal2-popup
+  ) {
+    width: min(100%, calc(100vw - 20px)) !important;
+    max-width: calc(100vw - 20px) !important;
+    max-height: calc(100dvh - 20px) !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    box-sizing: border-box !important;
+  }
+
+  :is(
+    .auth-modal-card,
+    .profile-modal-card,
+    .quiz-intro-card,
+    .quiz-confirm-card,
+    .modal-card,
+    .modal-content,
+    .adoption-wizard-modal,
+    .pet-profile-card,
+    .redesigned-profile-modal,
+    .about-photo-lightbox-panel,
+    .saved-animal-popup,
+    .announcement-detail-popup,
+    .application-detail-popup,
+    .schedule-picker-popup,
+    .animua-popup,
+    .swal2-popup
+  ) :is(h1, h2, h3, h4, p, a, button, span, strong, small, label, li, dt, dd) {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow-wrap: break-word !important;
+    word-break: normal !important;
+    hyphens: auto !important;
+  }
+
+  :is(
+    .auth-modal-card,
+    .profile-modal-card,
+    .quiz-intro-card,
+    .quiz-confirm-card,
+    .modal-card,
+    .modal-content,
+    .adoption-wizard-modal,
+    .pet-profile-card,
+    .redesigned-profile-modal,
+    .saved-animal-popup,
+    .announcement-detail-popup,
+    .application-detail-popup,
+    .schedule-picker-popup,
+    .animua-popup,
+    .swal2-popup
+  ) :is(input, select, textarea) {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  :is(
+    .auth-modal-card,
+    .profile-modal-card,
+    .quiz-confirm-card,
+    .modal-card,
+    .modal-content,
+    .adoption-wizard-modal,
+    .pet-profile-card,
+    .redesigned-profile-modal,
+    .saved-animal-popup,
+    .announcement-detail-popup,
+    .application-detail-popup,
+    .schedule-picker-popup,
+    .animua-popup,
+    .swal2-popup
+  ) :is(.modal-actions, .auth-actions, .auth-submit-row, .profile-modal-actions, .profile-summary-actions, .quiz-confirm-actions, .adoption-modal-actions, .adoption-step-actions, .wizard-actions, footer, .swal2-actions) {
+    width: 100% !important;
+    max-width: 100% !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  :is(
+    .auth-modal-card,
+    .profile-modal-card,
+    .quiz-confirm-card,
+    .modal-card,
+    .modal-content,
+    .adoption-wizard-modal,
+    .pet-profile-card,
+    .redesigned-profile-modal,
+    .saved-animal-popup,
+    .announcement-detail-popup,
+    .application-detail-popup,
+    .schedule-picker-popup,
+    .animua-popup,
+    .swal2-popup
+  ) :is(.modal-actions, .auth-actions, .auth-submit-row, .profile-modal-actions, .profile-summary-actions, .quiz-confirm-actions, .adoption-modal-actions, .adoption-step-actions, .wizard-actions, footer, .swal2-actions) > * {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  :is(
+    .auth-close-btn,
+    .profile-modal-close,
+    .quiz-intro-close,
+    .quiz-confirm-close,
+    .modal-close,
+    .modal-close-btn,
+    .application-detail-x,
+    .about-photo-lightbox-close,
+    [data-close-saved-animal],
+    [data-announcement-detail-close],
+    [data-announcement-photo-close]
+  ) {
+    aspect-ratio: 1 / 1 !important;
+    flex: 0 0 auto !important;
+    min-width: 36px !important;
+    max-width: 44px !important;
+    min-height: 36px !important;
+    max-height: 44px !important;
+  }
+
+  :is(
+    .profile-summary-avatar,
+    .profile-avatar-camera,
+    .profile-title-icon,
+    .profile-info-row > i:first-child,
+    .profile-settings-row > i:first-child,
+    .quiz-intro-details i,
+    .quiz-intro-steps article > span,
+    .quiz-intro-steps article > i,
+    .saved-animal-status i,
+    .application-step::before,
+    .application-step span,
+    .schedule-summary-icon,
+    .announcement-detail-icon
+  ) {
+    aspect-ratio: 1 / 1 !important;
+    flex: 0 0 auto !important;
+    border-radius: 50% !important;
+  }
+
+  :is(.adoption-progress, .adoption-steps, .adoption-stepper, .phase-steps, .application-timeline, .application-steps) {
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  :is(.adoption-form-grid, .adoption-bottom-grid, .adoption-review-grid, .profile-info-grid, .profile-meta-grid, .profile-body-sections, .profile-hero, .saved-animal-hero, .saved-animal-copy dl, .application-modal-grid, .schedule-picker-grid, .announcement-detail-grid) {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .adoption-wizard-modal {
+    left: auto !important;
+    right: auto !important;
+    margin-inline: auto !important;
+    padding-inline: 16px !important;
+  }
+
+  .adoption-wizard-modal :is(.adoption-grid, .adoption-bottom-grid, .adoption-review-grid, .selected-pet-preview) {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .adoption-wizard-modal .selected-pet-preview > div {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .adoption-wizard-modal .selected-pet-preview :is(strong, span, em, small) {
+    width: fit-content !important;
+    max-width: 100% !important;
+    white-space: normal !important;
+    overflow-wrap: break-word !important;
+  }
+
+  .adoption-wizard-modal :is(.form-group, .date-picker-field, .adoption-select, .custom-adoption-select, .adoption-select-control) {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .adoption-wizard-modal .adoption-stepper {
+    display: flex !important;
+    gap: 8px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    padding-bottom: 4px !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .adoption-wizard-modal .adoption-stepper-item {
+    flex: 0 0 min(76vw, 220px) !important;
+    min-width: 0 !important;
+    white-space: normal !important;
+  }
+}
+
+@media (max-width: 380px) {
+  :is(
+    .auth-modal-card,
+    .profile-modal-card,
+    .quiz-intro-card,
+    .quiz-confirm-card,
+    .modal-card,
+    .modal-content,
+    .adoption-wizard-modal,
+    .pet-profile-card,
+    .redesigned-profile-modal,
+    .saved-animal-popup,
+    .announcement-detail-popup,
+    .application-detail-popup,
+    .schedule-picker-popup,
+    .animua-popup,
+    .swal2-popup
+  ) {
+    width: min(100%, calc(100vw - 16px)) !important;
+    max-width: calc(100vw - 16px) !important;
   }
 }

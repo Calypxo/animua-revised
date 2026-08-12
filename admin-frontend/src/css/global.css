@@ -863,3 +863,324 @@ body.auth-open {
 .logout-icon-btn i {
   font-size: 15px;
 }
+
+/* System-wide mobile overflow guard. Keeps management controls inside phone viewports. */
+@media (max-width: 760px) {
+  *,
+  *::before,
+  *::after {
+    min-width: 0;
+  }
+
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden !important;
+  }
+
+  main,
+  section,
+  article,
+  aside,
+  header,
+  footer,
+  form,
+  fieldset,
+  nav,
+  div {
+    max-width: 100%;
+  }
+
+  img,
+  video,
+  canvas,
+  svg,
+  iframe {
+    max-width: 100%;
+  }
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .container,
+  .page-body,
+  .content,
+  .main-content,
+  .management-page,
+  .system-page,
+  .management-workspace {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  :is(.table-wrap, .table-container, .records-table-wrap, .aa-table-panel, .inv-table-wrap, .cq-table-wrap, .um-table-wrap, .audit-table-wrap, .archive-table-wrap, .contact-table-wrap, .reports-table-wrap) {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table {
+    max-width: 100%;
+  }
+
+  :is(.toolbar, .filter-toolbar, .filters-panel, .page-actions, .system-page-actions, .system-page-header, .modal-footer, .um-modal-footer, .account-form-actions, .detail-actions, .cq-toolbar, .aa-toolbar, .inv-toolbar, .audit-filter-grid, .archive-filter-grid, .um-filter-bar, .report-actions, .swal2-actions) {
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    justify-content: stretch;
+    gap: 10px;
+  }
+
+  :is(.filter-toolbar, .filters-panel, .cq-toolbar, .aa-toolbar, .inv-toolbar, .audit-filter-grid, .archive-filter-grid, .um-filter-bar) > * {
+    flex: 1 1 100%;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  :is(.btn, .primary-btn, .secondary-btn, .btn-primary, .btn-primary-clay, .btn-outline-add, .btn-ghost-clay, .btn-export, .btn-finalize, .system-primary-action, .account-primary-button, .report-secondary-btn, .cm-refresh-btn, .detail-actions button, .swal2-actions button) {
+    max-width: 100%;
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  :is(.btn, .primary-btn, .secondary-btn, .btn-primary, .btn-primary-clay, .btn-outline-add, .btn-ghost-clay, .btn-export, .btn-finalize, .system-primary-action, .account-primary-button, .report-secondary-btn, .cm-refresh-btn) {
+    width: 100%;
+  }
+
+  :is(.topbar .icon-btn, .topbar-quick-action, .tbl-action-btn, .btn-act, .pg-btn, .page-btn, .modal-close-btn, .user-action-btn, .user-menu-trigger, .logout-icon-btn) {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  :is(.modal, .modal-panel, .um-modal, .announcement-modal, .swal2-popup, .login-card) {
+    width: min(100%, calc(100vw - 24px)) !important;
+    max-width: calc(100vw - 24px) !important;
+    max-height: calc(100dvh - 24px) !important;
+  }
+
+  .swal2-actions {
+    padding-inline: 0 !important;
+  }
+
+  .swal2-actions :is(button, .swal2-confirm, .swal2-cancel, .swal2-deny) {
+    width: 100% !important;
+    margin-inline: 0 !important;
+    white-space: normal !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .page-body,
+  .content,
+  .main-content,
+  .management-page,
+  .system-page {
+    padding-inline: 10px !important;
+  }
+
+  :is(.btn, .primary-btn, .secondary-btn, .btn-primary, .btn-primary-clay, .btn-outline-add, .btn-ghost-clay, .btn-export, .btn-finalize, .system-primary-action, .account-primary-button, .report-secondary-btn, .cm-refresh-btn) {
+    padding-inline: 14px !important;
+    font-size: 0.78rem;
+  }
+}
+
+/* Cross-page responsive hardening for management views. */
+@media (max-width: 1280px) {
+  :is(.dashboard-grid, .settings-workspace, .audit-signal-layout, .archive-signal-layout, .surrender-hero, .um-command-hero, .ap-command-hero, .inventory-hero, .intake-hero, .rpt-command-hero, .cq-workspace, .contact-workspace) {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  :is(.page-body, .main-content, .management-page, .system-page, .management-workspace) {
+    max-width: 100% !important;
+  }
+}
+
+@media (max-width: 980px) {
+  :is(.system-page-header, .records-toolbar, .table-section-head, .um-directory-toolbar, .account-profile-summary, .account-card-heading, .modal-header, .um-modal-header) {
+    align-items: stretch !important;
+    flex-wrap: wrap !important;
+  }
+
+  :is(.system-page-header, .records-toolbar, .table-section-head, .account-profile-summary, .account-card-heading) {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  :is(.stats-grid, .sr-stats, .ap-stats, .um-role-grid, .dashboard-kpi-grid, .report-kpi-grid, .cq-summary-grid, .animal-record-facts, .account-metrics-grid, .password-rules) {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)) !important;
+  }
+
+  :is(.filter-toolbar, .filters-panel, .audit-filter-grid, .archive-filter-grid, .um-filter-bar, .cq-filter-grid, .report-filter-grid, .inv-filter-grid, .aa-filter-grid) {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  :is(
+    .topbar .icon-btn,
+    .topbar-quick-action,
+    .user-chip-avatar,
+    .actor-avatar,
+    .record-icon,
+    .event-dot,
+    .signal-icon,
+    .integrity-icon,
+    .retention-icon,
+    .records-heading-icon,
+    .account-card-icon,
+    .account-avatar,
+    .user-thumb,
+    .user-record-avatar span,
+    .animal-record-photo,
+    .animal-record-fallback,
+    .pet-mini-thumb,
+    .doc-icon,
+    .tbl-action-btn,
+    .btn-act,
+    .page-btn,
+    .pg-btn,
+    .modal-close-btn,
+    .user-action-btn,
+    .user-menu-trigger,
+    .logout-icon-btn
+  ) {
+    aspect-ratio: 1 / 1 !important;
+    flex: 0 0 auto !important;
+  }
+
+  :is(.account-avatar, .user-thumb, .user-record-avatar span, .animal-record-photo, .animal-record-fallback) {
+    border-radius: 50% !important;
+    overflow: hidden !important;
+  }
+
+  :is(.topbar, .system-page-header, .records-toolbar, .table-section-head, .modal-footer, .um-modal-footer, .account-form-actions, .detail-actions, .report-actions) {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  :is(.topbar .search-pill, .search-pill, .search-pill-sm, .filter-select, .filter-field, .um-page-size-field, .page-size-field) {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  :is(h1, h2, h3, p, a, button, span, strong, small, label, td, th) {
+    overflow-wrap: anywhere;
+  }
+
+  :is(.modal, .modal-panel, .um-modal, .announcement-modal, .management-modal, .drawer-panel, .swal2-popup) {
+    width: min(100%, calc(100vw - 24px)) !important;
+    max-width: calc(100vw - 24px) !important;
+    max-height: calc(100dvh - 24px) !important;
+    overflow: auto !important;
+  }
+}
+
+@media (max-width: 520px) {
+  :is(.modal-backdrop, .um-modal-backdrop, .announcement-modal-backdrop, .management-modal-backdrop, .swal2-container) {
+    padding: max(10px, env(safe-area-inset-top)) 10px max(10px, env(safe-area-inset-bottom)) !important;
+  }
+
+  :is(.modal, .modal-panel, .um-modal, .announcement-modal, .management-modal, .drawer-panel, .swal2-popup) {
+    width: calc(100vw - 20px) !important;
+    max-width: calc(100vw - 20px) !important;
+    border-radius: 14px !important;
+  }
+}
+
+/* Final management modal mobile hardening. Desktop/tablet designs are untouched. */
+@media (max-width: 760px) {
+  :is(.modal-backdrop, .um-modal-backdrop, .announcement-modal-backdrop, .management-modal-backdrop, .drawer-backdrop, .swal2-container) {
+    padding: max(10px, env(safe-area-inset-top)) 10px max(10px, env(safe-area-inset-bottom)) !important;
+    overflow-x: hidden !important;
+  }
+
+  :is(.modal, .modal-panel, .um-modal, .announcement-modal, .management-modal, .drawer-panel, .swal2-popup, .animua-management-swal, .animua-swal-popup) {
+    width: min(100%, calc(100vw - 20px)) !important;
+    max-width: calc(100vw - 20px) !important;
+    max-height: calc(100dvh - 20px) !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    box-sizing: border-box !important;
+  }
+
+  :is(.modal, .modal-panel, .um-modal, .announcement-modal, .management-modal, .drawer-panel, .swal2-popup, .animua-management-swal, .animua-swal-popup) :is(h1, h2, h3, h4, p, a, button, span, strong, small, label, li, dt, dd, td, th) {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow-wrap: break-word !important;
+    word-break: normal !important;
+    hyphens: auto !important;
+  }
+
+  :is(.modal, .modal-panel, .um-modal, .announcement-modal, .management-modal, .drawer-panel, .swal2-popup, .animua-management-swal, .animua-swal-popup) :is(input, select, textarea) {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  :is(.modal-header, .um-modal-header, .management-modal-header, .drawer-header) {
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
+
+  :is(.modal-body, .um-modal-body, .management-modal-body, .drawer-body) {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+
+  :is(.modal-footer, .um-modal-footer, .management-modal-footer, .drawer-footer, .swal2-actions) {
+    width: 100% !important;
+    max-width: 100% !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  :is(.modal-footer, .um-modal-footer, .management-modal-footer, .drawer-footer, .swal2-actions) > * {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  :is(.modal-close-btn, .drawer-close-btn, .btn-icon, .icon-btn, .user-menu-trigger, .tbl-action-btn, .btn-act, .page-btn, .pg-btn) {
+    aspect-ratio: 1 / 1 !important;
+    flex: 0 0 auto !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
+  }
+
+  :is(.avatar-preview-circle, .user-thumb, .user-record-avatar span, .animal-record-photo, .animal-record-fallback, .modal-icon, .workflow-modal-icon, .user-form-section-title i, .doc-icon, .pet-mini-thumb, .record-icon, .signal-icon) {
+    aspect-ratio: 1 / 1 !important;
+    flex: 0 0 auto !important;
+    border-radius: 50% !important;
+    overflow: hidden !important;
+  }
+
+  :is(.form-grid, .perm-grid, .detail-grid, .trait-grid, .medical-grid, .intake-grid, .workflow-grid, .drawer-grid, .modal-grid) {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  :is(.workflow-steps, .stepper, .progress-steps, .modal-stepper) {
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+}
+
+@media (max-width: 380px) {
+  :is(.modal, .modal-panel, .um-modal, .announcement-modal, .management-modal, .drawer-panel, .swal2-popup, .animua-management-swal, .animua-swal-popup) {
+    width: min(100%, calc(100vw - 16px)) !important;
+    max-width: calc(100vw - 16px) !important;
+  }
+}

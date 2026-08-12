@@ -22,9 +22,14 @@ const FILTERS = { preferredSpecies: ["Any", "Dog", "Cat"], preferredSex: ["Any",
 function toDate(value) {
   if (!value) return null;
   if (typeof value.toDate === "function") return value.toDate();
+  if (typeof value.seconds === "number") return new Date(value.seconds * 1000);
   if (typeof value._seconds === "number") return new Date(value._seconds * 1000);
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? null : date;
+}
+function addDays(date, days) {
+  if (!date || !Number.isInteger(days)) return null;
+  return new Date(date.getTime() + days * 86400000);
 }
 function json(value) {
   if (value == null) return value ?? null;
@@ -73,7 +78,10 @@ async function getResults(userId, tx) {
 }
 function eligibility(settings, user, results) {
   const latest = results.find((item) => item.isLatest) || results[0] || null;
-  const allowedAt = toDate(user?.quizRetakeOverrideAt) || toDate(latest?.nextRetakeAt);
+  const fallbackRetakeAt = latest
+    ? addDays(toDate(latest.completedAt), settings.retakeCooldownDays)
+    : null;
+  const allowedAt = toDate(user?.quizRetakeOverrideAt) || toDate(latest?.nextRetakeAt) || fallbackRetakeAt;
   const now = new Date();
   let canTakeQuiz = true;
   let reason = latest ? "RETAKE_AVAILABLE" : "FIRST_ATTEMPT";
