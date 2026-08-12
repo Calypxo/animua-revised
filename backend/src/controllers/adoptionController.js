@@ -12,7 +12,7 @@ const {
   reconcileRequestDeadlines,
   validateScheduleDate,
 } = require("../services/requestDeadlineService");
-const { createUserNotification } = require("../services/notificationService");
+const { createUserNotification, createManagementNotification } = require("../services/notificationService");
 const {
   getAdoptionFinalizationError,
 } = require("../services/adoptionWorkflowService");
@@ -206,6 +206,14 @@ exports.createAdoption = async (req, res) => {
     };
 
     const docRef = await db.collection("adoptions").add(adoptionData);
+    await createManagementNotification({
+      type: "adoption_application_created",
+      resourceType: "adoption_application",
+      relatedResourceId: docRef.id,
+      title: "New adoption application received",
+      message: `${full_name || "A public user"} applied to adopt ${petLabel}.`,
+      metadata: { applicationId, animalId: pet_id },
+    }).catch((error) => console.warn("[createAdoption notification]", error.message));
 
     res.status(201).json({
       message: "Adoption request submitted successfully.",

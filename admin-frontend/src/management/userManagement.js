@@ -431,7 +431,6 @@ function renderTable() {
       <article class="animal-record-card user-record-card ${isPublic ? "public-row" : ""}" data-id="${u.id}" role="listitem" tabindex="0" aria-label="Open account details for ${dname}">
         <div class="animal-record-media user-record-media" style="--user-avatar-color:${avatarColor(u.role)}">
           <div class="animal-record-fallback user-record-avatar"><span>${initials(u)}</span><small>${rc.label}</small></div>
-          <span class="animal-record-id"><i class="bi bi-envelope"></i>${email}</span>
         </div>
         <div class="animal-record-content">
           <div class="animal-record-badges"><span class="animal-type-badge role-badge ${rc.cls}"><i class="bi ${rc.icon}"></i>${rc.label}</span><span class="status-badge ${isActive ? "badge-active" : "badge-inactive"}"><i class="bi bi-circle-fill"></i>${isActive ? "Active" : "Inactive"}</span></div>

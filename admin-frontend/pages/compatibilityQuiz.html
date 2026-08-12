@@ -15,12 +15,36 @@
 </head><body class="loading ap-list-page compatibility-management-page"><div class="shell"><div id="sidebar-container"></div><div class="stage">
 <header class="topbar"><div class="topbar-left"><button id="sidebarToggle" class="icon-btn" type="button"><i class="bi bi-list"></i></button><nav class="d-flex align-items-center"><span class="breadcrumb-link">Adoption Management</span><i class="bi bi-chevron-right breadcrumb-sep"></i><span class="breadcrumb-current">Compatibility Quiz</span></nav></div><div class="topbar-right"><button class="icon-btn notif-btn" type="button"><i class="bi bi-bell-fill"></i><span class="notif-dot"></span></button><div class="user-chip"><div class="user-avatar" id="topbar-initials">AU</div><div class="user-meta"><span id="display-name">Management User</span><small id="display-role">Role</small></div><i class="bi bi-chevron-down caret"></i></div></div></header>
 <main class="page-body"><div id="pageHeaderMount"></div>
+<div class="cq-workspace-nav">
+  <nav class="archive-tabs" aria-label="Compatibility quiz sections" role="tablist">
+    <button type="button" class="archive-tab active" data-cq-tab="records" role="tab" aria-selected="true"><i class="bi bi-people"></i>User records</button>
+    <button type="button" class="archive-tab" data-cq-tab="questions" role="tab" aria-selected="false"><i class="bi bi-ui-checks-grid"></i>Quiz questions</button>
+    <button type="button" class="archive-tab" data-cq-tab="settings" role="tab" aria-selected="false"><i class="bi bi-sliders2"></i>Settings</button>
+  </nav>
+</div>
+<section class="cq-workspace-panel" data-cq-panel="settings" hidden>
 <section class="cq-layout"><article class="cq-card cq-settings" id="settingsCard"><div class="cq-card-head"><span class="cq-card-icon"><i class="bi bi-sliders2"></i></span><div><small>Configuration</small><h2>Quiz settings</h2><p>Control public access, cooldown timing, and result versioning.</p></div><span class="cq-role-badge" id="settingsRole">Admin control</span></div><form id="settingsForm">
 <label class="cq-setting-row"><span class="cq-setting-icon"><i class="bi bi-power"></i></span><span><strong>Public quiz access</strong><small>Allow Public users to complete the quiz</small></span><input id="quizEnabled" type="checkbox"><i class="cq-switch"></i></label>
 <label class="cq-setting-row"><span class="cq-setting-icon amber"><i class="bi bi-calendar2-week"></i></span><span><strong>Retake cooldown</strong><small>Days required between attempts</small></span><span class="cq-input-unit"><input id="cooldownDays" type="number" min="1" max="365" required><b>days</b></span></label>
 <label class="cq-setting-row"><span class="cq-setting-icon blue"><i class="bi bi-diagram-3"></i></span><span><strong>Quiz version</strong><small>Version attached to new results</small></span><span class="cq-input-unit"><b>v</b><input id="quizVersion" type="number" min="1" required></span></label>
 <div class="cq-form-foot"><p><i class="bi bi-shield-check"></i>All changes are written to the audit trail.</p><button type="submit"><i class="bi bi-check2-circle"></i>Save settings</button></div></form></article>
-<aside class="cq-health"><small>Matching health</small><h2>Protected recommendation flow</h2><div><span><i class="bi bi-person-check"></i></span><p><strong>Authenticated</strong><small>Public account required</small></p><i class="bi bi-check-circle-fill"></i></div><div><span><i class="bi bi-ui-checks-grid"></i></span><p><strong>Validated</strong><small>Ten scored traits</small></p><i class="bi bi-check-circle-fill"></i></div><div><span><i class="bi bi-database-check"></i></span><p><strong>Saved</strong><small>Account history retained</small></p><i class="bi bi-check-circle-fill"></i></div><div><span><i class="bi bi-clock-history"></i></span><p><strong>Protected</strong><small>Server-enforced retakes</small></p><i class="bi bi-check-circle-fill"></i></div></aside></section>
+<aside class="cq-health"><small>Matching health</small><h2>Protected recommendation flow</h2><div><span><i class="bi bi-person-check"></i></span><p><strong>Authenticated</strong><small>Public account required</small></p><i class="bi bi-check-circle-fill"></i></div><div><span><i class="bi bi-ui-checks-grid"></i></span><p><strong>Validated</strong><small>Protected score mapping</small></p><i class="bi bi-check-circle-fill"></i></div><div><span><i class="bi bi-database-check"></i></span><p><strong>Saved</strong><small>Account history retained</small></p><i class="bi bi-check-circle-fill"></i></div><div><span><i class="bi bi-clock-history"></i></span><p><strong>Protected</strong><small>Server-enforced retakes</small></p><i class="bi bi-check-circle-fill"></i></div></aside></section>
+</section>
+<section class="cq-workspace-panel" data-cq-panel="questions" hidden>
+<section class="cq-card cq-question-config" id="questionConfigSection">
+  <div class="cq-question-config-head">
+    <div class="cq-card-head"><span class="cq-card-icon"><i class="bi bi-ui-checks-grid"></i></span><div><small>Quiz content</small><h2>Quiz questions</h2><p>Review the list, then edit one question at a time.</p></div></div>
+    <div class="cq-question-actions" id="questionActions">
+      <button type="button" class="cq-btn-primary" id="addQuestionBtn"><i class="bi bi-plus-lg"></i>Add question</button>
+    </div>
+  </div>
+  <div class="cq-question-summary"><div><strong id="activeQuestionCount">0</strong><span>Active questions</span></div><p><i class="bi bi-shield-check"></i>Scores remain protected. Inactive questions are hidden from public users.</p></div>
+  <div class="cq-config-error" id="questionConfigError" role="alert" hidden></div>
+  <div class="cq-draft-bar" id="questionDraftBar" hidden><div><i class="bi bi-pencil-square"></i><span><strong>Unpublished changes</strong><small>Publish when the question list is ready.</small></span></div><div><button type="button" class="cq-btn-secondary" id="cancelQuestionsBtn">Discard</button><button type="button" class="cq-btn-primary" id="saveQuestionsBtn"><i class="bi bi-cloud-arrow-up"></i>Publish changes</button></div></div>
+  <div class="cq-question-list" id="questionList"><div class="cq-question-loading"><span class="um-spinner"></span>Loading quiz questions…</div></div>
+</section>
+</section>
+<section class="cq-workspace-panel" data-cq-panel="records">
 <section class="cq-card cq-records">
   <div class="cq-record-head">
     <div class="cq-card-head"><span class="cq-card-icon"><i class="bi bi-stars"></i></span><div><small>Saved recommendations</small><h2>User quiz results</h2><p>Search and review saved compatibility attempts.</p></div></div>
@@ -38,6 +62,7 @@
   </div>
   <div class="cq-table-wrap"><table class="management-data-table"><thead><tr><th>User account</th><th>Completed</th><th>Next retake</th><th>Top recommendation</th><th>Match</th><th>Version</th><th>Actions</th></tr></thead><tbody id="resultsBody"><tr><td colspan="7" class="text-center py-5"><div class="um-spinner"></div></td></tr></tbody></table></div>
 </section>
+</section>
 </main></div></div>
 <div class="um-modal-backdrop" id="resultDialog" aria-hidden="true">
   <div class="um-modal intake-modal cq-result-modal management-side-modal" role="dialog" aria-modal="true" aria-labelledby="resultDialogTitle">
@@ -52,6 +77,23 @@
     <div class="um-modal-footer">
       <button class="cq-modal-done btn-ghost-clay" type="button" data-close>Close</button>
     </div>
+  </div>
+</div>
+<div class="um-modal-backdrop" id="questionEditorDialog" aria-hidden="true">
+  <div class="um-modal cq-question-modal management-side-modal" role="dialog" aria-modal="true" aria-labelledby="questionEditorTitle">
+    <div class="um-modal-header"><div><span class="cq-modal-kicker">Quiz question</span><h2 id="questionEditorTitle">Edit question</h2><p class="modal-subtitle">Change one question without leaving the list.</p></div><button class="modal-close-btn" type="button" data-question-close aria-label="Close question editor"><i class="bi bi-x-lg"></i></button></div>
+    <div class="um-modal-body">
+      <div class="cq-editor-error" id="questionEditorError" role="alert" hidden></div>
+      <div class="cq-focused-form">
+        <label class="cq-field-wide"><span>Question shown to users</span><textarea id="editorQuestionText" maxlength="300" rows="3"></textarea></label>
+        <label><span>Short label</span><input id="editorQuestionLabel" maxlength="100"></label>
+        <label><span>Quiz section</span><select id="editorQuestionPhase"><option value="lifestyle">Lifestyle</option><option value="social">Social environment</option><option value="care">Home & care</option><option value="affection">Affection</option></select></label>
+        <label><span>Scoring trait</span><select id="editorQuestionTrait"></select><small id="editorTraitHelp">Protected while the question is active.</small></label>
+        <label><span>Helper text <em>Optional</em></span><input id="editorQuestionHint" maxlength="300"></label>
+      </div>
+      <div class="cq-focused-choices"><header><div><strong>Answer choices</strong><small>Use a score from 1 to 5 for each answer.</small></div><button type="button" id="editorAddChoice"><i class="bi bi-plus-lg"></i>Add answer</button></header><div id="editorChoiceList"></div></div>
+    </div>
+    <div class="um-modal-footer cq-editor-footer"><button class="cq-btn-secondary" type="button" data-question-close>Cancel</button><button class="cq-btn-primary" type="button" id="applyQuestionEdit"><i class="bi bi-check2"></i>Apply to draft</button></div>
   </div>
 </div>
 <div id="cqToast" role="status"><i class="bi bi-check-circle-fill"></i><span></span></div><script type="module" src="/src/management/compatibilityQuiz.js"></script>

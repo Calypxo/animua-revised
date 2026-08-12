@@ -572,6 +572,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     loadSidebar();
     bindEvents();
     await loadMessages();
+    const requestedId = new URLSearchParams(window.location.search).get("id");
+    const requestedMessage = state.messages.find((message) => message.id === requestedId);
+    if (requestedMessage) {
+      selectUser(messageUserKey(requestedMessage));
+      selectMessage(requestedMessage.id);
+    }
   } catch (error) {
     console.error("[contact messages init]", error);
   } finally {

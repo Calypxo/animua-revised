@@ -1646,6 +1646,10 @@ async function saveStockOut() {
 
     closeModal("stockOutModalBackdrop");
     await loadInventory();
+    const requestedId = new URLSearchParams(window.location.search).get("id");
+    if (requestedId && store.some((item) => item.id === requestedId)) {
+      openDrawer(requestedId);
+    }
 
     if (updatedLocal.stockStatus === "Critical") {
       showToast(

@@ -209,17 +209,6 @@
   text-transform: uppercase;
 }
 
-.ap-list-page.user-management-page .animal-record-id {
-  right: 12px;
-  bottom: 12px;
-  left: 12px;
-  max-width: calc(100% - 24px);
-  border: 1px solid #eadfd4;
-  color: #655a54;
-  background: rgba(255,255,255,.94);
-  box-shadow: 0 7px 18px rgba(58,37,28,.08);
-}
-
 .ap-list-page.user-management-page .animal-type-badge.role-admin { color: #780116; background: #FFF8EE; border-color: #EADFD4; }
 .ap-list-page.user-management-page .animal-type-badge.role-staff { color: #17695f; background: #e2f2ef; border-color: #cde6e1; }
 .ap-list-page.user-management-page .animal-type-badge.role-veterinarian { color: #315b87; background: #e7eff8; border-color: #d3e1ef; }

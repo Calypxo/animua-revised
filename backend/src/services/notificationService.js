@@ -87,8 +87,43 @@ async function createNotificationForUsersBySetting(notification, settingKey) {
   await Promise.allSettled(writes);
 }
 
+async function createManagementNotification({
+  roles = ["Admin", "Staff"],
+  type,
+  resourceType,
+  relatedResourceId,
+  title,
+  message = "",
+  metadata = {},
+}) {
+  const allowedRoles = new Set(roles);
+  const snapshot = await db.collection(USERS_COL).get();
+  const recipients = snapshot.docs
+    .map((doc) => ({ id: doc.id, ...doc.data() }))
+    .filter((user) => allowedRoles.has(user.role) && user.status !== "Inactive")
+    .map((user) => normalizeEmail(user.email || user.id))
+    .filter(Boolean);
+
+  await Promise.allSettled(recipients.map((userEmail) => createUserNotification({
+    userEmail,
+    category: "management",
+    type,
+    title,
+    message,
+    referenceId: relatedResourceId,
+    metadata: {
+      ...metadata,
+      resourceType,
+      relatedResourceId: String(relatedResourceId || ""),
+    },
+    respectSettings: false,
+  })));
+  return recipients.length;
+}
+
 module.exports = {
   createUserNotification,
   createNotificationForUsersBySetting,
+  createManagementNotification,
   normalizeNotificationSettings: normalizeSettings,
 };

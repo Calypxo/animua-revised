@@ -107,12 +107,51 @@ const PHASE_TIPS = [
   "Mahalaga rin ang bond na gusto mo, hindi lang practical needs.",
 ];
 
+const escapeQuizText = (value) => String(value ?? "")
+  .replaceAll("&", "&amp;")
+  .replaceAll("<", "&lt;")
+  .replaceAll(">", "&gt;")
+  .replaceAll('"', "&quot;");
+
+async function loadQuestionConfiguration(token) {
+  const response = await fetch(`${API_BASE_URL}/match/questions`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.message || "Unable to load quiz questions.");
+  if (!Array.isArray(data.questions) || !data.questions.length) throw new Error("The quiz question configuration is incomplete.");
+
+  const configuredByPhase = new Map();
+  data.questions
+    .slice()
+    .sort((a, b) => Number(a.order || 0) - Number(b.order || 0))
+    .forEach((question) => {
+      const list = configuredByPhase.get(question.phaseKey) || [];
+      list.push({
+        id: question.id,
+        key: question.traitKey,
+        label: question.label,
+        text: question.text,
+        hint: question.hint || "Select the answer that best reflects your situation.",
+        choices: (question.choices || []).slice().sort((a, b) => Number(a.order || 0) - Number(b.order || 0)),
+      });
+      configuredByPhase.set(question.phaseKey, list);
+    });
+
+  PHASES.filter((phase) => phase.id > 0).forEach((phase) => {
+    const configured = configuredByPhase.get(phase.key);
+    phase.questions = configured || [];
+  });
+  totalQ = PHASES.reduce((sum, phase) => sum + phase.questions.length, 0);
+}
+
 /* ══════════════════════════════════════════════════════
    STATE
 ══════════════════════════════════════════════════════ */
 let answers     = {};
+let selectedChoices = {};
 let currentPhase= 0;
-const totalQ    = PHASES.reduce((s,p) => s+p.questions.length, 0);
+let totalQ    = PHASES.reduce((s,p) => s+p.questions.length, 0);
 let isSubmitting = false;
 
 function isPhaseComplete(phaseIdx = currentPhase) {
@@ -202,14 +241,14 @@ function renderPhase(phaseIdx) {
       html += `
         <div class="filter-section slide-in ${answered?"answered":""}" data-key="${q.key}" style="animation-delay:${qi*40}ms">
           <div class="q-num">Question ${globalIdx}</div>
-          <div class="q-text">${q.text}</div>
-          <div class="q-hint">${q.hint}</div>
+          <div class="q-text">${escapeQuizText(q.text)}</div>
+          <div class="q-hint">${escapeQuizText(q.hint)}</div>
           <div class="select-tiles">
             ${q.options.map(opt => `
               <div class="select-tile ${answers[q.key]===opt.value?"selected":""}"
                    data-key="${q.key}" data-value="${opt.value}">
                 <div class="select-tile-icon">${getTileIcon(opt)}</div>
-                <div class="select-tile-label">${opt.label}</div>
+                 <div class="select-tile-label">${escapeQuizText(opt.label)}</div>
               </div>`).join("")}
           </div>
         </div>`;
@@ -217,8 +256,8 @@ function renderPhase(phaseIdx) {
       html += `
         <div class="filter-section slide-in ${answered?"answered":""}" data-key="${q.key}" style="animation-delay:${qi*40}ms">
           <div class="q-num">Question ${globalIdx}</div>
-          <div class="q-text">${q.text}</div>
-          <div class="q-hint">${q.hint}</div>
+          <div class="q-text">${escapeQuizText(q.text)}</div>
+          <div class="q-hint">${escapeQuizText(q.hint)}</div>
           <div class="toggle-group">
             ${q.options.map(opt => `
               <div class="toggle-tile ${answers[q.key]===opt.value?(opt.value==="yes"?"selected-yes":"selected-no"):""}"
@@ -232,14 +271,14 @@ function renderPhase(phaseIdx) {
       html += `
         <div class="question-card slide-in ${answered?"answered":""}" data-key="${q.key}" style="animation-delay:${qi*40}ms">
           <div class="q-num">Question ${globalIdx}</div>
-          <div class="q-text">${q.text}</div>
-          <div class="q-hint">${q.hint}</div>
+          <div class="q-text">${escapeQuizText(q.text)}</div>
+          <div class="q-hint">${escapeQuizText(q.hint)}</div>
           <div class="option-group">
-            ${q.scale.map((lbl, val) => `
-              <button class="option-btn ${answers[q.key]===(val+1)?"selected":""}"
-                      data-key="${q.key}" data-value="${val+1}" type="button">
-                <span class="option-num">${val+1}</span>
-                <span class="option-label">${lbl}</span>
+            ${(q.choices || q.scale.map((text, index) => ({ text, value: index + 1 }))).map((choice) => `
+              <button class="option-btn ${(selectedChoices[q.key]?selectedChoices[q.key]===choice.id:answers[q.key]===Number(choice.value))?"selected":""}"
+                      data-key="${q.key}" data-value="${Number(choice.value)}" data-choice-id="${escapeQuizText(choice.id || "")}" type="button">
+                <span class="option-num">${Number(choice.value)}</span>
+                <span class="option-label">${escapeQuizText(choice.text)}</span>
               </button>`).join("")}
           </div>
         </div>`;
@@ -272,7 +311,7 @@ function renderPhase(phaseIdx) {
 
   // Bind events
   area.querySelectorAll(".option-btn, .select-tile, .toggle-tile").forEach(el => {
-    el.addEventListener("click", () => handleAnswer(el.dataset.key, el.dataset.value));
+    el.addEventListener("click", () => handleAnswer(el.dataset.key, el.dataset.value, el.dataset.choiceId));
   });
 
   document.getElementById("btnPrev")?.addEventListener("click", () => {
@@ -296,9 +335,10 @@ function renderPhase(phaseIdx) {
 
 }
 
-function handleAnswer(key, value, silent = false) {
+function handleAnswer(key, value, choiceId = "", silent = false) {
   const wasAnswered = answers[key] !== undefined;
   answers[key] = isNaN(value) ? value : Number(value);
+  if (choiceId) selectedChoices[key] = choiceId;
 
   if (!silent) {
     // Update the clicked element visually
@@ -312,7 +352,9 @@ function handleAnswer(key, value, silent = false) {
     });
 
     // Select clicked
-    const clicked = document.querySelector(`[data-key="${key}"][data-value="${value}"]`);
+    const clicked = choiceId
+      ? document.querySelector(`[data-key="${key}"][data-choice-id="${choiceId}"]`)
+      : document.querySelector(`[data-key="${key}"][data-value="${value}"]`);
     if (clicked) {
       if (clicked.classList.contains("toggle-tile")) {
         clicked.classList.add(value==="yes"?"selected-yes":"selected-no");
@@ -402,7 +444,7 @@ function updateAnswerChips() {
     // Find label
     let label = k;
     PHASES.forEach(p => p.questions.forEach(q => { if (q.key===k) label = q.label; }));
-    return `<div class="answer-chip"><span class="answer-chip-key">${label}</span><span class="answer-chip-val">${v}</span></div>`;
+    return `<div class="answer-chip"><span class="answer-chip-key">${escapeQuizText(label)}</span><span class="answer-chip-val">${v}</span></div>`;
   }).join("");
 }
 
@@ -431,7 +473,8 @@ async function handleSubmit() {
       needAllergyFriendly: answers.needAllergyFriendly || "no",
       acceptSpecialNeeds:  answers.acceptSpecialNeeds  || "yes",
     },
-    preferences
+    preferences,
+    answerSelections: selectedChoices,
   };
 
   try {
@@ -501,7 +544,10 @@ async function initializeQuiz() {
     return;
   }
   try {
-    const response = await fetch(`${API_BASE_URL}/match/eligibility`, { headers: { Authorization: `Bearer ${token}` } });
+    const [response] = await Promise.all([
+      fetch(`${API_BASE_URL}/match/eligibility`, { headers: { Authorization: `Bearer ${token}` } }),
+      loadQuestionConfiguration(token),
+    ]);
     const info = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(info.message || "Please log in again.");
     if (!info.canTakeQuiz) {

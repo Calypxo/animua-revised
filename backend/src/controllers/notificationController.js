@@ -68,7 +68,8 @@ exports.getMyNotifications = async (req, res) => {
       .map((doc) => ({ id: doc.id, ...doc.data(), createdAt: serializeDate(doc.data().createdAt) }))
       .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
 
-    const eventNotices = settings.announcementsEvents ? await getEventNotices() : [];
+    const managementUser = ["Admin", "Staff", "Veterinarian"].includes(req.user?.role);
+    const eventNotices = !managementUser && settings.announcementsEvents ? await getEventNotices() : [];
     const notifications = [...stored, ...eventNotices]
       .sort((a, b) => new Date(b.createdAt || b.eventDate || 0) - new Date(a.createdAt || a.eventDate || 0))
       .slice(0, 20);
@@ -81,6 +82,29 @@ exports.getMyNotifications = async (req, res) => {
   } catch (error) {
     console.error("[getMyNotifications]", error.message);
     return res.status(500).json({ message: "Failed to load notifications." });
+  }
+};
+
+exports.markMyNotificationRead = async (req, res) => {
+  try {
+    const email = normalizeEmail(req.user?.email);
+    if (!email) return res.status(401).json({ message: "Please log in to update notifications." });
+    const ref = db.collection(NOTIFICATION_COL).doc(String(req.params.id || ""));
+    const snap = await ref.get();
+    if (!snap.exists || normalizeEmail(snap.data().userEmail) !== email) {
+      return res.status(404).json({ message: "Notification not found." });
+    }
+    if (snap.data().read !== true) {
+      await ref.update({ read: true, readAt: admin.firestore.FieldValue.serverTimestamp() });
+    }
+    const unread = await db.collection(NOTIFICATION_COL)
+      .where("userEmail", "==", email)
+      .where("read", "==", false)
+      .get();
+    return res.json({ message: "Notification marked as read.", unreadCount: unread.size });
+  } catch (error) {
+    console.error("[markMyNotificationRead]", error.message);
+    return res.status(500).json({ message: "Failed to update the notification." });
   }
 };
 

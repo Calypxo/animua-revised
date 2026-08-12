@@ -1205,6 +1205,11 @@ await loadIntakeRecords();
 
 const params = new URLSearchParams(window.location.search);
 
+const requestedIntakeId = params.get("id");
+if (requestedIntakeId && intakeRecords.some((record) => record.id === requestedIntakeId)) {
+  openViewModal(requestedIntakeId);
+}
+
 if (params.get("source") === "surrender") {
   openApprovedSurrenderIntakeModal();
 }

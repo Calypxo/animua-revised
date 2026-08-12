@@ -3,11 +3,13 @@ const authenticateToken = require("../middleware/authMiddleware");
 const {
   getMyNotifications,
   markMyNotificationsRead,
+  markMyNotificationRead,
 } = require("../controllers/notificationController");
 
 const router = express.Router();
 
 router.get("/", authenticateToken, getMyNotifications);
 router.patch("/read", authenticateToken, markMyNotificationsRead);
+router.patch("/:id/read", authenticateToken, markMyNotificationRead);
 
 module.exports = router;

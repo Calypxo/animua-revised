@@ -7,7 +7,7 @@ const {
 const {
   invalidateAttentionCache,
 } = require("./dashboardController");
-const { createUserNotification } = require("../services/notificationService");
+const { createUserNotification, createManagementNotification } = require("../services/notificationService");
 
 const ANIMAL_COL = "animals";
 const EVENT_COL = "events";
@@ -529,6 +529,13 @@ exports.submitContactMessage = async (req, res) => {
 
     const saved = await db.collection(CONTACT_COL).add(contactMessage);
     invalidateAttentionCache();
+    await createManagementNotification({
+      type: "contact_message_created",
+      resourceType: "contact_message",
+      relatedResourceId: saved.id,
+      title: "New contact inquiry received",
+      message: `${fullName} sent an inquiry about ${subject}.`,
+    }).catch((error) => console.warn("[submitContactMessage notification]", error.message));
     const emailConfigured = Boolean(
       process.env.EMAIL_USER && process.env.EMAIL_PASS
     );

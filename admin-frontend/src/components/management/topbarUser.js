@@ -1,13 +1,9 @@
 import "../../css/topbarAlerts.css";
 import Swal from "sweetalert2";
 import { clearUserSession, getUserName, getUserRole } from "../../utils/storage.js";
-import { canAccessModule, normalizeRole } from "../../auth/permissions.js";
 import { apiFetch } from "../../utils/api.js";
-import { cacheContactMessageCount } from "./contactMessageBadge.js";
+import { getManagementNotificationDestination } from "./notificationNavigation.js";
 
-const ATTENTION_SEEN_KEY = "animua_attention_seen";
-const ATTENTION_CACHE_KEY = "animua_attention_summary";
-const ATTENTION_CLIENT_CACHE_TTL_MS = 15 * 60_000;
 const managementSwalClasses = {
   popup: "animua-management-swal",
   confirmButton: "animua-management-swal-confirm",
@@ -21,145 +17,6 @@ const escapeHtml = (value) => String(value ?? "")
   .replaceAll('"', "&quot;")
   .replaceAll("'", "&#039;");
 
-function attentionItems(data, role) {
-  const items = [];
-  const add = (item) => {
-    if (Number(item.count || 0) > 0) items.push(item);
-  };
-
-  if (canAccessModule(role, "intake")) {
-    add({
-      id: "intake",
-      count: data.intake,
-      tone: "red",
-      icon: "bi-box-arrow-in-down",
-      title: "Intake records need review",
-      detail: `${Number(data.intake || 0)} active record(s) await review or conversion.`,
-      href: "/pages/intakeList.html",
-    });
-  }
-
-  if (canAccessModule(role, "adoption")) {
-    add({
-      id: "adoption",
-      count: data.pendingAdoptions,
-      tone: "amber",
-      icon: "bi-house-heart-fill",
-      title: "Adoption applications pending",
-      detail: `${Number(data.pendingAdoptions || 0)} application(s) are waiting for a decision.`,
-      href: "/pages/adoptionApplications.html",
-    });
-    add({
-      id: "adoption-no-show",
-      count: data.adoptionNoShowRisk,
-      tone: "red",
-      icon: "bi-calendar-x-fill",
-      title: "Adoption attendance at risk",
-      detail: `${Number(data.adoptionNoShowRisk || 0)} approved adoption(s) need deadline or no-show review.`,
-      href: "/pages/adoptionApplications.html",
-    });
-  }
-
-  if (canAccessModule(role, "surrender")) {
-    add({
-      id: "surrender",
-      count: data.pendingSurrenders,
-      tone: "amber",
-      icon: "bi-file-earmark-text-fill",
-      title: "Surrender requests pending",
-      detail: `${Number(data.pendingSurrenders || 0)} request(s) require management review.`,
-      href: "/pages/surrenders.html",
-    });
-    add({
-      id: "surrender-no-show",
-      count: data.surrenderNoShowRisk,
-      tone: "red",
-      icon: "bi-calendar-x-fill",
-      title: "Surrender attendance at risk",
-      detail: `${Number(data.surrenderNoShowRisk || 0)} approved surrender request(s) need deadline or no-show review.`,
-      href: "/pages/surrenders.html",
-    });
-  }
-
-  if (canAccessModule(role, "inventory")) {
-    const lowStockCount = Number(data.lowStockCount || 0);
-    const critical = Number(data.criticalStockCount || 0);
-    add({
-      id: "inventory",
-      count: lowStockCount,
-      tone: critical ? "red" : "amber",
-      icon: "bi-box-seam-fill",
-      title: critical ? "Critical inventory attention" : "Low-stock inventory",
-      detail: critical
-        ? `${critical} critical and ${Math.max(0, lowStockCount - critical)} low-stock item(s).`
-        : `${lowStockCount} item(s) should be restocked soon.`,
-      href: "/pages/inventory.html",
-    });
-  }
-
-  if (canAccessModule(role, "animals")) {
-    const longStayCount = Number(data.longStayCount || 0);
-    add({
-      id: "long-stay",
-      count: longStayCount,
-      tone: "red",
-      icon: "bi-clock-history",
-      title: "Long-stay animals need review",
-      detail: `${longStayCount} animal(s) have been in shelter care for over 60 days.`,
-      href: "/pages/animalProfiling.html",
-    });
-  }
-
-  if (normalizeRole(role) === "Veterinarian") {
-    add({
-      id: "quarantine",
-      count: data.quarantine,
-      tone: "amber",
-      icon: "bi-shield-plus",
-      title: "Animals under veterinary care",
-      detail: `${Number(data.quarantine || 0)} animal(s) are currently in quarantine.`,
-      href: "/pages/animalProfiling.html",
-    });
-  }
-
-  if (canAccessModule(role, "contact")) {
-    add({
-      id: "contact",
-      count: data.newContactMessages,
-      tone: "blue",
-      icon: "bi-envelope-paper-fill",
-      title: "New contact messages",
-      detail: `${Number(data.newContactMessages || 0)} public ${Number(data.newContactMessages || 0) === 1 ? "inquiry awaits" : "inquiries await"} a reply.`,
-      href: "/pages/contactMessages.html",
-    });
-  }
-
-  return items;
-}
-
-function readCachedAttentionSummary() {
-  try {
-    const cached = JSON.parse(localStorage.getItem(ATTENTION_CACHE_KEY) || "null");
-    if (
-      !cached?.data ||
-      Date.now() - Number(cached.savedAt || 0) > ATTENTION_CLIENT_CACHE_TTL_MS
-    ) {
-      return null;
-    }
-    return cached.data;
-  } catch (_) {
-    return null;
-  }
-}
-
-function cacheAttentionSummary(data) {
-  localStorage.setItem(ATTENTION_CACHE_KEY, JSON.stringify({
-    savedAt: Date.now(),
-    data,
-  }));
-  cacheContactMessageCount(data.newContactMessages);
-}
-
 function ensureAttentionPanel() {
   let panel = document.getElementById("managementAttentionCenter");
   if (panel) return panel;
@@ -172,8 +29,8 @@ function ensureAttentionPanel() {
   panel.innerHTML = `
     <header class="attention-center-head">
       <div>
-        <span>Attention center</span>
-        <strong id="attentionSummary">Checking operational queues...</strong>
+        <span>Notifications</span>
+        <strong id="attentionSummary">Checking unread updates...</strong>
       </div>
       <button class="attention-refresh" id="attentionRefresh" type="button" aria-label="Refresh alerts" title="Refresh alerts">
         <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>
@@ -185,56 +42,56 @@ function ensureAttentionPanel() {
       </div>
     </div>
     <footer class="attention-center-footer">
-      <button id="attentionMarkSeen" type="button"><i class="bi bi-check2-all"></i> Mark as seen</button>
+      <button id="attentionMarkSeen" type="button"><i class="bi bi-check2-all"></i> Mark all as read</button>
       <a href="/pages/dashboard.html">Open dashboard <i class="bi bi-arrow-right"></i></a>
     </footer>`;
   document.body.append(panel);
   return panel;
 }
 
-function renderAttentionCenter(panel, button, data, role) {
-  const items = attentionItems(data, role);
-  const total = items.reduce((sum, item) => sum + Number(item.count || 0), 0);
-  const signature = items.map((item) => `${item.id}:${item.count}`).join("|");
-  const savedSignature = localStorage.getItem(ATTENTION_SEEN_KEY) || "";
+function renderAttentionCenter(panel, button, data) {
+  const items = (data.notifications || []).filter((item) => item.read !== true);
+  const total = Number(data.unreadCount ?? items.length);
   const badge = button.querySelector(".attention-badge");
   const summary = panel.querySelector("#attentionSummary");
   const list = panel.querySelector("#attentionList");
   const markSeen = panel.querySelector("#attentionMarkSeen");
+  panel.dataset.unreadCount = String(total);
 
-  panel.dataset.signature = signature;
   if (summary) {
     summary.textContent = total
-      ? `${total} record${total === 1 ? "" : "s"} across ${items.length} area${items.length === 1 ? "" : "s"}`
-      : "No records currently need attention";
+      ? `${total} unread notification${total === 1 ? "" : "s"}`
+      : "No unread notifications";
   }
 
   if (badge) {
     badge.textContent = total > 99 ? "99+" : String(total);
-    badge.hidden = !total || signature === savedSignature;
+    badge.hidden = !total;
   }
-  button.classList.toggle("has-attention", Boolean(total && signature !== savedSignature));
-  button.title = total ? `${total} management alert${total === 1 ? "" : "s"}` : "No current alerts";
+  button.classList.toggle("has-attention", Boolean(total));
+  button.title = total ? `${total} unread notification${total === 1 ? "" : "s"}` : "No unread notifications";
 
-  if (markSeen) markSeen.disabled = !total || signature === savedSignature;
+  if (markSeen) markSeen.disabled = !total;
   if (!list) return;
 
   list.innerHTML = items.length
-    ? items.map((item) => `
-      <a class="attention-item attention-${escapeHtml(item.tone)}" href="${escapeHtml(item.href)}">
-        <span class="attention-item-icon"><i class="bi ${escapeHtml(item.icon)}" aria-hidden="true"></i></span>
+    ? items.map((item) => {
+      const destination = getManagementNotificationDestination(item);
+      return `
+      <a class="attention-item attention-blue" href="${escapeHtml(destination)}" data-notification-id="${escapeHtml(item.id)}">
+        <span class="attention-item-icon"><i class="bi bi-bell-fill" aria-hidden="true"></i></span>
         <span class="attention-item-copy">
           <strong>${escapeHtml(item.title)}</strong>
-          <small>${escapeHtml(item.detail)}</small>
+          <small>${escapeHtml(item.message || "Open the related management record.")}</small>
         </span>
-        <span class="attention-item-count">${Number(item.count || 0)}</span>
         <i class="bi bi-chevron-right attention-item-arrow" aria-hidden="true"></i>
-      </a>`).join("")
+      </a>`;
+    }).join("")
     : `
       <div class="attention-empty">
         <span><i class="bi bi-check2-circle"></i></span>
-        <strong>Everything is up to date</strong>
-        <small>No pending requests or operational risks need attention.</small>
+        <strong>You're all caught up</strong>
+        <small>New management updates will appear here.</small>
       </div>`;
 }
 
@@ -244,11 +101,8 @@ async function loadAttentionCenter(panel, button, role, options = {}) {
   if (showLoading) panel.classList.add("is-refreshing");
   refresh?.setAttribute("aria-busy", "true");
   try {
-    const data = await apiFetch(
-      `/dashboard/attention${forceRefresh ? "?refresh=1" : ""}`
-    );
-    cacheAttentionSummary(data);
-    renderAttentionCenter(panel, button, data, role);
+    const data = await apiFetch("/notifications");
+    renderAttentionCenter(panel, button, data);
   } catch (error) {
     const summary = panel.querySelector("#attentionSummary");
     const list = panel.querySelector("#attentionList");
@@ -286,7 +140,7 @@ function bindAttentionCenter(button, role) {
       if (accountMenu) accountMenu.hidden = true;
       accountTrigger?.setAttribute("aria-expanded", "false");
       await loadAttentionCenter(panel, button, role, {
-        showLoading: !readCachedAttentionSummary(),
+        showLoading: true,
       });
     }
   };
@@ -295,7 +149,38 @@ function bindAttentionCenter(button, role) {
     event.stopPropagation();
     void toggle();
   });
-  panel.addEventListener("click", (event) => event.stopPropagation());
+  panel.addEventListener("click", async (event) => {
+    event.stopPropagation();
+    const item = event.target.closest("[data-notification-id]");
+    if (!item) return;
+    event.preventDefault();
+    if (item.dataset.navigating === "true") return;
+    item.dataset.navigating = "true";
+    const destination = item.href;
+    const notificationId = item.dataset.notificationId;
+    item.remove();
+    const remaining = Math.max(0, Number(panel.dataset.unreadCount || 1) - 1);
+    panel.dataset.unreadCount = String(remaining);
+    const badge = button.querySelector(".attention-badge");
+    if (badge) {
+      badge.textContent = String(remaining);
+      badge.hidden = remaining === 0;
+    }
+    button.classList.toggle("has-attention", remaining > 0);
+    const summary = panel.querySelector("#attentionSummary");
+    if (summary) summary.textContent = remaining ? `${remaining} unread notification${remaining === 1 ? "" : "s"}` : "No unread notifications";
+    if (!panel.querySelector("[data-notification-id]") && !remaining) panel.querySelector("#attentionList").innerHTML = `<div class="attention-empty"><span><i class="bi bi-check2-circle"></i></span><strong>You're all caught up</strong><small>New management updates will appear here.</small></div>`;
+    try {
+      await Promise.race([
+        apiFetch(`/notifications/${encodeURIComponent(notificationId)}/read`, { method: "PATCH", keepalive: true }),
+        new Promise((resolve) => setTimeout(resolve, 900)),
+      ]);
+    } catch (error) {
+      console.warn("Unable to mark management notification as read:", error.message);
+    } finally {
+      window.location.assign(destination);
+    }
+  });
   document.addEventListener("click", close);
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") close();
@@ -306,16 +191,19 @@ function bindAttentionCenter(button, role) {
       showLoading: true,
     });
   });
-  panel.querySelector("#attentionMarkSeen")?.addEventListener("click", () => {
-    localStorage.setItem(ATTENTION_SEEN_KEY, panel.dataset.signature || "");
-    const badge = button.querySelector(".attention-badge");
-    if (badge) badge.hidden = true;
-    button.classList.remove("has-attention");
-    panel.querySelector("#attentionMarkSeen").disabled = true;
+  panel.querySelector("#attentionMarkSeen")?.addEventListener("click", async () => {
+    const markButton = panel.querySelector("#attentionMarkSeen");
+    if (markButton.disabled) return;
+    markButton.disabled = true;
+    try {
+      await apiFetch("/notifications/read", { method: "PATCH" });
+      await loadAttentionCenter(panel, button, role);
+    } catch (error) {
+      markButton.disabled = false;
+      console.warn("Unable to mark management notifications as read:", error.message);
+    }
   });
 
-  const cached = readCachedAttentionSummary();
-  if (cached) renderAttentionCenter(panel, button, cached, role);
   void loadAttentionCenter(panel, button, role, {
     showLoading: false,
   });

@@ -897,9 +897,13 @@ async function init() {
     loadSidebar();
     await loadAdoptions();
 
-    // URL param: open drawer to specific animal's apps
-    const urlAnimalId = new URLSearchParams(window.location.search).get("animalId");
-    if (urlAnimalId) {
+    // URL params: notification links target one application; animal links retain the existing filter.
+    const urlParams = new URLSearchParams(window.location.search);
+    const applicationId = urlParams.get("id");
+    const urlAnimalId = urlParams.get("animalId");
+    if (applicationId && adoptionApps.some((application) => application.id === applicationId)) {
+      setTimeout(() => openDrawer(applicationId), 100);
+    } else if (urlAnimalId) {
       const first = adoptionApps.find(a => a.pet_id === urlAnimalId);
       if (first) setTimeout(() => openDrawer(first.id), 200);
     }

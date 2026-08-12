@@ -1285,6 +1285,10 @@ async function init() {
 
     renderStats();
     applyFilters();
+    const requestedId = new URLSearchParams(window.location.search).get("id");
+    if (requestedId && allRequests.some((request) => request.id === requestedId)) {
+      openDrawer(requestedId);
+    }
 
     // Tabs
     document.querySelectorAll(".sr-tab").forEach(btn => {

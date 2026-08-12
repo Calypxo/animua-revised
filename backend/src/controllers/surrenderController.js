@@ -5,7 +5,7 @@ const {
   reconcileRequestDeadlines,
   validateScheduleDate,
 } = require("../services/requestDeadlineService");
-const { createUserNotification } = require("../services/notificationService");
+const { createUserNotification, createManagementNotification } = require("../services/notificationService");
 const {
   isDirectSurrenderStatusAllowed,
 } = require("../services/surrenderWorkflowService");
@@ -275,6 +275,13 @@ async function createSurrenderRequest(req, res) {
       .collection(COLLECTION_NAME)
       .doc(requestId)
       .set(surrenderRequest);
+    await createManagementNotification({
+      type: "surrender_request_created",
+      resourceType: "surrender_request",
+      relatedResourceId: requestId,
+      title: "New surrender request received",
+      message: `${surrenderRequest.owner.name} submitted a surrender request for ${surrenderRequest.pet.name || "an animal"}.`,
+    }).catch((error) => console.warn("[createSurrenderRequest notification]", error.message));
 
     return res.status(201).json({
       message: "Surrender request submitted successfully.",

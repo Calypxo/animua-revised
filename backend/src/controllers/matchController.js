@@ -1,14 +1,21 @@
 const crypto = require("crypto");
 const { admin, db } = require("../config/firebase");
 const { buildShelterLabel } = require("../utils/animalIdentity");
+const { createManagementNotification } = require("../services/notificationService");
 const {
-  validatePreferences,
   scoreMatches,
   applyFilters,
 } = require("../services/compatibilityScoringService");
+const {
+  DEFAULT_QUESTIONS,
+  validateAndNormalizeQuestions,
+  validateConfiguredPreferences,
+  buildQuestionSnapshot,
+} = require("../services/quizQuestionService");
 
 const RESULTS = "compatibilityResults";
 const SETTINGS = db.collection("quizSettings").doc("compatibilityQuiz");
+const QUESTION_CONFIG = db.collection("quizQuestionConfigs").doc("compatibilityQuiz");
 const DEFAULTS = { quizEnabled: true, retakeCooldownDays: 30, quizVersion: 1 };
 const FILTERS = { preferredSpecies: ["Any", "Dog", "Cat"], preferredSex: ["Any", "Male", "Female"], needAllergyFriendly: ["no", "yes"], acceptSpecialNeeds: ["yes", "no"] };
 
@@ -26,8 +33,8 @@ function json(value) {
   if (typeof value === "object") return Object.fromEntries(Object.entries(value).filter(([key]) => key !== "ref").map(([key, item]) => [key, json(item)]));
   return value;
 }
-function validate(body = {}) {
-  const validated = validatePreferences(body.preferences);
+function validate(body = {}, questions = DEFAULT_QUESTIONS) {
+  const validated = validateConfiguredPreferences(body.preferences, questions);
   if (validated.error) return validated;
   const preferences = validated.preferences;
   const filters = {};
@@ -36,12 +43,28 @@ function validate(body = {}) {
     if (!allowed.includes(value)) return { error: `Invalid ${key} filter.` };
     filters[key] = value;
   }
-  return { preferences, filters };
+  return { preferences, scoringPreferences: validated.scoringPreferences, filters };
 }
 async function getSettings(tx) {
   const snap = tx ? await tx.get(SETTINGS) : await SETTINGS.get();
   const data = snap.exists ? snap.data() : {};
   return { quizEnabled: typeof data.quizEnabled === "boolean" ? data.quizEnabled : true, retakeCooldownDays: Number.isInteger(data.retakeCooldownDays) ? data.retakeCooldownDays : 30, quizVersion: Number.isInteger(data.quizVersion) ? data.quizVersion : 1, updatedAt: data.updatedAt || null, updatedBy: data.updatedBy || null };
+}
+async function getQuestionConfiguration() {
+  const snap = await QUESTION_CONFIG.get();
+  if (!snap.exists) return { questions: DEFAULT_QUESTIONS, persisted: false };
+  const validated = validateAndNormalizeQuestions(snap.data().questions);
+  if (validated.error) {
+    console.error("[quizQuestionConfig] Stored configuration is invalid:", validated.error);
+    return { questions: DEFAULT_QUESTIONS, persisted: false, recoveryReason: validated.error };
+  }
+  return {
+    questions: validated.questions,
+    persisted: true,
+    updatedAt: snap.data().updatedAt || null,
+    updatedBy: snap.data().updatedBy || null,
+    version: snap.data().version || null,
+  };
 }
 async function getResults(userId, tx) {
   const query = db.collection(RESULTS).where("userId", "==", userId);
@@ -86,14 +109,15 @@ exports.getMyResults = async (req, res) => {
 
 exports.matchPets = async (req, res) => {
   try {
-    const input = validate(req.body);
+    const questionConfig = await getQuestionConfiguration();
+    const input = validate(req.body, questionConfig.questions);
     if (input.error) return res.status(400).json({ success: false, message: input.error });
     const beforeMatch = await context(req.user.id);
     if (!beforeMatch.eligibility.canTakeQuiz) return res.status(403).json({ success: false, message: blocked(beforeMatch.eligibility), eligibility: beforeMatch.eligibility });
     const snap = await db.collection("animals").get();
     let animals = snap.docs.map((doc) => { const data = doc.data(); const name = buildShelterLabel(data, doc.id); return { id: doc.id, ...data, name, displayLabel: name, shelterLabel: name, photoUrl: data.photoURL || data.photoUrl || "", age: data.ageEstimate || data.age || "" }; });
     animals = applyFilters(animals, input.filters);
-    const scored = animals.length ? await scoreMatches(input.preferences, animals, 5) : { matches: [] };
+    const scored = animals.length ? await scoreMatches(input.scoringPreferences, animals, 5) : { matches: [] };
     const saved = await db.runTransaction(async (tx) => {
       const current = await context(req.user.id, tx);
       if (!current.eligibility.canTakeQuiz) { const error = new Error("NOT_ELIGIBLE"); error.info = current.eligibility; throw error; }
@@ -101,10 +125,18 @@ exports.matchPets = async (req, res) => {
       const nextRetakeAt = new Date(completedAt.getTime() + current.settings.retakeCooldownDays * 86400000);
       current.results.forEach((item) => tx.update(item.ref, { isLatest: false }));
       const id = makeResultId();
-      tx.create(db.collection(RESULTS).doc(id), { resultId: id, userId: req.user.id, userEmail: req.user.email, userName: req.user.fullName || req.user.email, preferences: input.preferences, filters: input.filters, matches: scored.matches.slice(0, 5).map((match) => ({ animalId: String(match.id || match.petId || ""), animalName: String(match.name || "Shelter animal"), compatibilityScore: Number(match.matchScore || 0), compatibilityPercent: Number(match.matchPercent || 0) })), quizVersion: current.settings.quizVersion, completedAt: admin.firestore.Timestamp.fromDate(completedAt), nextRetakeAt: admin.firestore.Timestamp.fromDate(nextRetakeAt), isLatest: true });
+      tx.create(db.collection(RESULTS).doc(id), { resultId: id, userId: req.user.id, userEmail: req.user.email, userName: req.user.fullName || req.user.email, preferences: input.preferences, filters: input.filters, questionSnapshot: buildQuestionSnapshot(questionConfig.questions, input.preferences, req.body.answerSelections), matches: scored.matches.slice(0, 5).map((match) => ({ animalId: String(match.id || match.petId || ""), animalName: String(match.name || "Shelter animal"), compatibilityScore: Number(match.matchScore || 0), compatibilityPercent: Number(match.matchPercent || 0) })), quizVersion: current.settings.quizVersion, completedAt: admin.firestore.Timestamp.fromDate(completedAt), nextRetakeAt: admin.firestore.Timestamp.fromDate(nextRetakeAt), isLatest: true });
       tx.set(db.collection("users").doc(req.user.id), { quizRetakeOverrideAt: null }, { merge: true });
       return { id, completedAt, nextRetakeAt };
     });
+    await createManagementNotification({
+      roles: ["Admin", "Staff", "Veterinarian"],
+      type: "compatibility_quiz_completed",
+      resourceType: "compatibility_result",
+      relatedResourceId: saved.id,
+      title: "Compatibility quiz completed",
+      message: `${req.user.fullName || req.user.email} completed the compatibility quiz.`,
+    }).catch((notificationError) => console.warn("[matchPets notification]", notificationError.message));
     return res.json({ ...scored, success: true, resultId: saved.id, completedAt: saved.completedAt.toISOString(), nextRetakeAt: saved.nextRetakeAt.toISOString() });
   } catch (error) {
     if (error.message === "NOT_ELIGIBLE") return res.status(403).json({ success: false, message: blocked(error.info), eligibility: error.info });
@@ -116,6 +148,54 @@ async function audit(req, action, targetId, targetName, before, after) {
   await db.collection("auditLogs").add({ action, module: "Compatibility Quiz", targetId, targetName, performedBy: req.user.email, performedByName: req.user.fullName, role: req.user.role, before, after, status: "Success", timestamp: admin.firestore.FieldValue.serverTimestamp() });
 }
 exports.getAdminSettings = async (_req, res) => { try { return res.json({ settings: json(await getSettings()) }); } catch (error) { console.error("[getAdminSettings]", error); return res.status(500).json({ message: "Unable to load quiz settings." }); } };
+exports.getQuizQuestions = async (_req, res) => {
+  try {
+    const config = await getQuestionConfiguration();
+    return res.json({
+      questions: json(config.questions.filter((question) => question.active)),
+      version: config.version || (await getSettings()).quizVersion,
+    });
+  } catch (error) {
+    console.error("[getQuizQuestions]", error);
+    return res.status(500).json({ message: "Unable to load compatibility quiz questions." });
+  }
+};
+exports.getAdminQuestions = async (_req, res) => {
+  try {
+    const [config, settings] = await Promise.all([getQuestionConfiguration(), getSettings()]);
+    return res.json({ questions: json(config.questions), version: config.version || settings.quizVersion, persisted: config.persisted });
+  } catch (error) {
+    console.error("[getAdminQuestions]", error);
+    return res.status(500).json({ message: "Unable to load quiz question configuration." });
+  }
+};
+exports.replaceAdminQuestions = async (req, res) => {
+  try {
+    const validated = validateAndNormalizeQuestions(req.body?.questions);
+    if (validated.error) return res.status(400).json({ message: validated.error });
+    const [previousConfig, settings] = await Promise.all([getQuestionConfiguration(), getSettings()]);
+    const version = settings.quizVersion + 1;
+    const updatedBy = { id: req.user.id, email: req.user.email, name: req.user.fullName };
+    const batch = db.batch();
+    batch.set(QUESTION_CONFIG, {
+      questions: validated.questions,
+      version,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedBy,
+    });
+    batch.set(SETTINGS, {
+      quizVersion: version,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedBy,
+    }, { merge: true });
+    await batch.commit();
+    await audit(req, "compatibility.questions_updated", QUESTION_CONFIG.id, "Compatibility Quiz Questions", { version: settings.quizVersion, questionCount: previousConfig.questions.length }, { version, questionCount: validated.questions.length });
+    return res.json({ message: "Quiz questions saved.", questions: validated.questions, version });
+  } catch (error) {
+    console.error("[replaceAdminQuestions]", error);
+    return res.status(500).json({ message: "Unable to save quiz questions." });
+  }
+};
 exports.updateAdminSettings = async (req, res) => {
   try {
     const previous = await getSettings(); const cooldown = Number(req.body.retakeCooldownDays); const version = Number(req.body.quizVersion ?? previous.quizVersion);
