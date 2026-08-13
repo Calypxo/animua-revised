@@ -1,8 +1,24 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
 
+const deferFindFurbabiesSharedCss = () => ({
+  name: 'defer-find-furbabies-shared-css',
+  transformIndexHtml: {
+    order: 'post',
+    handler(html, ctx) {
+      if (!ctx.filename?.endsWith('pages/public/find-furbabies.html')) return html;
+
+      return html.replace(
+        /<link rel="stylesheet" crossorigin href="(\/assets\/public-ui-[^"]+\.css)">/g,
+        '<link rel="preload" as="style" crossorigin href="$1" onload="this.onload=null;this.rel=\'stylesheet\'"><noscript><link rel="stylesheet" crossorigin href="$1"></noscript>'
+      );
+    },
+  },
+});
+
 export default defineConfig({
   root: '.',
+  plugins: [deferFindFurbabiesSharedCss()],
   build: {
     outDir: 'dist',
     rollupOptions: {
