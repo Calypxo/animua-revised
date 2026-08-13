@@ -8842,3 +8842,9 @@ body.furbabies-page #profileModal.profile-modal-overlay .profile-modal-card.prof
     width: 64px !important;
   }
 }
+
+/* The visible hero art is the absolute <img>; keep CSS from fetching a duplicate copy. */
+body.furbabies-page .furbabies-hero {
+  background: #2b1719 !important;
+  background-image: none !important;
+}

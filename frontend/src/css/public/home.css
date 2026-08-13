@@ -64,6 +64,7 @@
 .fa-bell::before { content: "\f0f3"; }
 .fa-bullhorn::before { content: "\f0a1"; }
 .fa-calendar::before { content: "\f133"; }
+.fa-calendar-days::before { content: "\f073"; }
 .fa-camera::before { content: "\f030"; }
 .fa-caret-down::before { content: "\f0d7"; }
 .fa-cat::before { content: "\f6be"; }
@@ -72,6 +73,9 @@
 .fa-chevron-down::before { content: "\f078"; }
 .fa-chevron-left::before { content: "\f053"; }
 .fa-chevron-right::before { content: "\f054"; }
+.fa-chevron-up::before { content: "\f077"; }
+.fa-circle::before { content: "\f111"; }
+.fa-circle-check::before { content: "\f058"; }
 .fa-circle-info::before { content: "\f05a"; }
 .fa-circle-question::before { content: "\f059"; }
 .fa-circle-user::before { content: "\f2bd"; }
@@ -79,10 +83,13 @@
 .fa-clock::before { content: "\f017"; }
 .fa-comments::before { content: "\f086"; }
 .fa-dog::before { content: "\f6d3"; }
+.fa-droplet::before { content: "\f043"; }
 .fa-envelope::before { content: "\f0e0"; }
 .fa-eye::before { content: "\f06e"; }
 .fa-eye-slash::before { content: "\f070"; }
+.fa-face-sad-tear::before { content: "\f5b4"; }
 .fa-facebook-f::before { content: "\f39e"; }
+.fa-file-pdf::before { content: "\f1c1"; }
 .fa-file-circle-check::before { content: "\e5a0"; }
 .fa-file-lines::before { content: "\f15c"; }
 .fa-floppy-disk::before { content: "\f0c7"; }
@@ -90,13 +97,17 @@
 .fa-globe::before { content: "\f0ac"; }
 .fa-hand-holding-heart::before { content: "\f4be"; }
 .fa-heart::before { content: "\f004"; }
+.fa-heart-circle-check::before { content: "\e4fd"; }
 .fa-house::before { content: "\f015"; }
+.fa-house-chimney::before { content: "\e3af"; }
 .fa-house-chimney-medical::before { content: "\e3b2"; }
 .fa-image::before { content: "\f03e"; }
 .fa-key::before { content: "\f084"; }
 .fa-location-dot::before { content: "\f3c5"; }
 .fa-lock::before { content: "\f023"; }
 .fa-magnifying-glass::before { content: "\f002"; }
+.fa-mars::before { content: "\f222"; }
+.fa-palette::before { content: "\f53f"; }
 .fa-paper-plane::before { content: "\f1d8"; }
 .fa-paw::before { content: "\f1b0"; }
 .fa-pen::before { content: "\f304"; }
@@ -108,8 +119,11 @@
 .fa-shield::before { content: "\f132"; }
 .fa-shield-halved::before { content: "\f3ed"; }
 .fa-shield-heart::before { content: "\e574"; }
+.fa-sliders::before { content: "\f1de"; }
 .fa-spinner::before { content: "\f110"; }
+.fa-triangle-exclamation::before { content: "\f071"; }
 .fa-user::before { content: "\f007"; }
+.fa-venus::before { content: "\f221"; }
 .fa-xmark::before { content: "\f00d"; }
 .fa-youtube::before { content: "\f167"; }
 

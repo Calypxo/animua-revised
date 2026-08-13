@@ -1,6 +1,6 @@
 import { API_BASE_URL } from "../../utils/api.js";
-import dogFallbackImage from "../../assets/images/dog.jpg";
-import catFallbackImage from "../../assets/images/cat.jpg";
+import dogFallbackImage from "../../assets/images/optimized/home/hero-shelter-dog-kennel-768.webp";
+import catFallbackImage from "../../assets/images/optimized/home/highlight-new-furbabies-cat-360.webp";
 
 const petsGrid = document.getElementById("petsGrid");
 const resultsCount = document.getElementById("resultsCount");
@@ -962,7 +962,7 @@ function renderPets(list) {
     ];
     card.innerHTML = `
       <div class="pet-card-image">
-        <img src="${escapeHtml(pet.image)}" alt="${escapeHtml(pet.name)}" data-fallback-src="${escapeHtml(fallbackImageForPet(pet.type))}">
+        <img src="${escapeHtml(pet.image)}" alt="${escapeHtml(pet.name)}" data-fallback-src="${escapeHtml(fallbackImageForPet(pet.type))}" width="720" height="540" loading="lazy" decoding="async">
         <span class="pet-badge">${petType}</span>
         <span class="pet-ready-badge"><i class="fa-solid fa-circle" aria-hidden="true"></i> Ready</span>
       </div>
