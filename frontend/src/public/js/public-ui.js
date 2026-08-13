@@ -25,15 +25,15 @@ const NEWS_NEPO_STRAY_CATS_STORY_IMAGE = new URL(
   import.meta.url
 ).href;
 const HIGHLIGHT_NEWS_ALERT_IMAGE = new URL(
-  "../../assets/images/highlight-news-alert-palit-an.png",
+  "../../assets/images/optimized/home/highlight-news-alert-palit-an-720.webp",
   import.meta.url
 ).href;
 const HIGHLIGHT_SUCCESS_STORY_IMAGE = new URL(
-  "../../assets/images/success-stories.jpg",
+  "../../assets/images/optimized/home/success-stories-688.webp",
   import.meta.url
 ).href;
 const HIGHLIGHT_UPCOMING_EVENT_IMAGE = new URL(
-  "../../assets/images/highlight-upcoming-event.jpg",
+  "../../assets/images/optimized/home/highlight-upcoming-event-720.webp",
   import.meta.url
 ).href;
 const SUCCESS_ZACH_ADOPTION_IMAGE = new URL(
@@ -802,7 +802,7 @@ function setupHomeStories() {
     "new-furbabies": {
       tag: "Available Animals",
       title: "Meet Our Newest Furbabies",
-      image: "../../src/assets/images/highlight-new-furbabies-cat.JPG",
+      image: "../../src/assets/images/optimized/home/highlight-new-furbabies-cat-720.webp",
       intro:
         "Discover the newest animals currently available for adoption at the Angeles City Veterinary Office. View their profiles to learn about their age, temperament, health information, and care needs.",
       primary: { label: "View All Furbabies", href: "find-furbabies.html" }
@@ -1563,8 +1563,8 @@ function setupFeaturedFurbabies() {
 
   const fallbackPetImage = (pet = {}) => {
     const species = String(pet.species || "").toLowerCase();
-    if (species.includes("cat")) return "../../src/assets/images/cat.jpg";
-    return "../../src/assets/images/dog.jpg";
+    if (species.includes("cat")) return "../../src/assets/images/optimized/home/highlight-new-furbabies-cat-360.webp";
+    return "../../src/assets/images/optimized/home/hero-shelter-dog-kennel-768.webp";
   };
 
   const openPetProfile = (petId) => {
@@ -1591,7 +1591,7 @@ function setupFeaturedFurbabies() {
         .join("");
       return `
         <button type="button" class="featured-furbaby-card ${index === 0 ? "is-featured" : ""}" data-pet-id="${escapeHtml(pet.id || "")}" aria-label="View profile for ${escapeHtml(name)}">
-          <img src="${escapeHtml(pet.photoURL || fallbackPetImage(pet))}" alt="${escapeHtml(name)} available for adoption">
+          <img src="${escapeHtml(pet.photoURL || fallbackPetImage(pet))}" alt="${escapeHtml(name)} available for adoption" width="720" height="540" loading="lazy" decoding="async">
           <span class="featured-furbaby-card-copy">
             <strong>${escapeHtml(name)}</strong>
             <em><i class="fa-solid ${typeIcon}" aria-hidden="true"></i>${facts}</em>

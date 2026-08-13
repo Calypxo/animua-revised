@@ -22,6 +22,97 @@
   src: url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/webfonts/fa-brands-400.woff2") format("woff2");
 }
 
+.fa-solid,
+.fa-regular,
+.fa-brands {
+  display: var(--fa-display, inline-block);
+  font-style: normal;
+  font-variant: normal;
+  line-height: 1;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.fa-solid {
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+}
+
+.fa-regular {
+  font-family: "Font Awesome 6 Free";
+  font-weight: 400;
+}
+
+.fa-brands {
+  font-family: "Font Awesome 6 Brands";
+  font-weight: 400;
+}
+
+.fa-spin {
+  animation: fa-spin 2s infinite linear;
+}
+
+@keyframes fa-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.fa-arrow-left::before { content: "\f060"; }
+.fa-arrow-right::before { content: "\f061"; }
+.fa-bell::before { content: "\f0f3"; }
+.fa-bullhorn::before { content: "\f0a1"; }
+.fa-calendar::before { content: "\f133"; }
+.fa-camera::before { content: "\f030"; }
+.fa-caret-down::before { content: "\f0d7"; }
+.fa-cat::before { content: "\f6be"; }
+.fa-chart-simple::before { content: "\e473"; }
+.fa-check::before { content: "\f00c"; }
+.fa-chevron-down::before { content: "\f078"; }
+.fa-chevron-left::before { content: "\f053"; }
+.fa-chevron-right::before { content: "\f054"; }
+.fa-circle-info::before { content: "\f05a"; }
+.fa-circle-question::before { content: "\f059"; }
+.fa-circle-user::before { content: "\f2bd"; }
+.fa-clipboard-check::before { content: "\f46c"; }
+.fa-clock::before { content: "\f017"; }
+.fa-comments::before { content: "\f086"; }
+.fa-dog::before { content: "\f6d3"; }
+.fa-envelope::before { content: "\f0e0"; }
+.fa-eye::before { content: "\f06e"; }
+.fa-eye-slash::before { content: "\f070"; }
+.fa-facebook-f::before { content: "\f39e"; }
+.fa-file-circle-check::before { content: "\e5a0"; }
+.fa-file-lines::before { content: "\f15c"; }
+.fa-floppy-disk::before { content: "\f0c7"; }
+.fa-gear::before { content: "\f013"; }
+.fa-globe::before { content: "\f0ac"; }
+.fa-hand-holding-heart::before { content: "\f4be"; }
+.fa-heart::before { content: "\f004"; }
+.fa-house::before { content: "\f015"; }
+.fa-house-chimney-medical::before { content: "\e3b2"; }
+.fa-image::before { content: "\f03e"; }
+.fa-key::before { content: "\f084"; }
+.fa-location-dot::before { content: "\f3c5"; }
+.fa-lock::before { content: "\f023"; }
+.fa-magnifying-glass::before { content: "\f002"; }
+.fa-paper-plane::before { content: "\f1d8"; }
+.fa-paw::before { content: "\f1b0"; }
+.fa-pen::before { content: "\f304"; }
+.fa-people-arrows::before { content: "\e068"; }
+.fa-people-group::before { content: "\e533"; }
+.fa-phone::before { content: "\f095"; }
+.fa-puzzle-piece::before { content: "\f12e"; }
+.fa-right-from-bracket::before { content: "\f2f5"; }
+.fa-shield::before { content: "\f132"; }
+.fa-shield-halved::before { content: "\f3ed"; }
+.fa-shield-heart::before { content: "\e574"; }
+.fa-spinner::before { content: "\f110"; }
+.fa-user::before { content: "\f007"; }
+.fa-xmark::before { content: "\f00d"; }
+.fa-youtube::before { content: "\f167"; }
+
 .hero-left h1,
 .about-animua-copy h1,
 .section-heading h2,
@@ -4814,8 +4905,7 @@ body.home-page .hero::before {
   display: block !important;
   background-image: image-set(
     url("../../assets/images/optimized/home/hero-shelter-dog-kennel-1109.avif") type("image/avif"),
-    url("../../assets/images/optimized/home/hero-shelter-dog-kennel-1109.webp") type("image/webp"),
-    url("../../assets/images/hero-shelter-dog-kennel.png") type("image/png")
+    url("../../assets/images/optimized/home/hero-shelter-dog-kennel-1109.webp") type("image/webp")
   ) !important;
   background-position: 56% 34% !important;
   background-size: cover !important;
@@ -4843,8 +4933,7 @@ body.home-page .hero::after {
   body.home-page .hero::before {
     background-image: image-set(
       url("../../assets/images/optimized/home/hero-shelter-dog-kennel-768.avif") type("image/avif"),
-      url("../../assets/images/optimized/home/hero-shelter-dog-kennel-768.webp") type("image/webp"),
-      url("../../assets/images/hero-shelter-dog-kennel.png") type("image/png")
+      url("../../assets/images/optimized/home/hero-shelter-dog-kennel-768.webp") type("image/webp")
     ) !important;
   }
 }
