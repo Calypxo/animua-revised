@@ -1,24 +1,8 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
 
-const asyncHomepageCss = () => ({
-  name: 'async-homepage-css',
-  transformIndexHtml: {
-    order: 'post',
-    handler(html, ctx) {
-      if (!ctx.filename?.endsWith('pages/public/home.html')) return html;
-
-      return html.replace(
-        /<link rel="stylesheet" crossorigin href="(\/assets\/(?:public-ui|home)-[^"]+\.css)">/g,
-        '<link rel="preload" as="style" crossorigin href="$1" onload="this.onload=null;this.rel=\'stylesheet\'"><noscript><link rel="stylesheet" crossorigin href="$1"></noscript>'
-      );
-    },
-  },
-});
-
 export default defineConfig({
   root: '.',
-  plugins: [asyncHomepageCss()],
   build: {
     outDir: 'dist',
     rollupOptions: {
