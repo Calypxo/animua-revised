@@ -1,12 +1,20 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
 
-const deferFindFurbabiesSharedCss = () => ({
-  name: 'defer-find-furbabies-shared-css',
+const DEFER_SHARED_CSS_PAGES = [
+  'pages/public/find-furbabies.html',
+  'pages/public/announcements.html',
+  'pages/public/surrender.html',
+];
+
+const deferPublicSharedCss = () => ({
+  name: 'defer-public-shared-css',
   transformIndexHtml: {
     order: 'post',
     handler(html, ctx) {
-      if (!ctx.filename?.endsWith('pages/public/find-furbabies.html')) return html;
+      const filename = ctx.filename?.replace(/\\/g, '/');
+
+      if (!filename || !DEFER_SHARED_CSS_PAGES.some((page) => filename.endsWith(page))) return html;
 
       return html.replace(
         /<link rel="stylesheet" crossorigin href="(\/assets\/public-ui-[^"]+\.css)">/g,
@@ -18,7 +26,7 @@ const deferFindFurbabiesSharedCss = () => ({
 
 export default defineConfig({
   root: '.',
-  plugins: [deferFindFurbabiesSharedCss()],
+  plugins: [deferPublicSharedCss()],
   build: {
     outDir: 'dist',
     rollupOptions: {

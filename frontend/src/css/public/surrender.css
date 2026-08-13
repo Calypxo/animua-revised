@@ -544,7 +544,7 @@ body.surrender-page .surrender-page-hero {
   margin-top: calc(var(--nav-height, 84px) * -1);
   padding: calc(var(--nav-height, 84px) + 54px) 0 54px !important;
   overflow: hidden;
-  background: url("../../assets/images/surrender-hero-bg.png") center top / cover no-repeat;
+  background: url("../../assets/images/optimized/surrender/surrender-header-1280.jpg") center top / cover no-repeat;
 }
 
 body.surrender-page .surrender-page-hero-grid {
@@ -3139,7 +3139,7 @@ body.surrender-page .animal-photo-upload:hover {
 body.surrender-page .surrender-page-hero {
   background:
     linear-gradient(90deg, rgba(114, 27, 20, 0.92) 0%, rgba(114, 27, 20, 0.68) 38%, rgba(114, 27, 20, 0.18) 68%),
-    url("../../assets/images/surrender-hero-bg.png") center top / cover no-repeat !important;
+    url("../../assets/images/optimized/surrender/surrender-header-1280.jpg") center top / cover no-repeat !important;
 }
 
 body.surrender-page .surrender-page-hero-grid {
@@ -3279,6 +3279,12 @@ body.surrender-page .public-page-hero-image {
   object-fit: cover !important;
   object-position: center center !important;
   pointer-events: none !important;
+}
+
+/* The visible hero art is the absolute <img>; keep CSS from fetching a duplicate copy. */
+body.surrender-page .surrender-page-hero,
+body.surrender-page .surrender-hero {
+  background-image: none !important;
 }
 
 body.surrender-page .surrender-page-hero::before,
@@ -4095,4 +4101,8 @@ body.home-page.surrender-page #mySurrenderRequests > .request-status-card .statu
 
 body.home-page.surrender-page #mySurrenderRequests > .request-history-content {
   display: none !important;
+}
+
+body.surrender-page .surrender-page-hero {
+  background-image: none !important;
 }
