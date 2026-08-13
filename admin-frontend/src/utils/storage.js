@@ -19,6 +19,7 @@ export function clearUserSession() {
   localStorage.removeItem("user_role");
   localStorage.removeItem("user_name");
   localStorage.removeItem("user_email");
+  localStorage.removeItem("is_logged_in");
   localStorage.removeItem("show_welcome_toast");
   localStorage.removeItem("sidebar_collapsed");
 }
