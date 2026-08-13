@@ -15,8 +15,12 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="preload" as="image" href="../../src/assets/images/hero-shelter-dog-kennel.png" fetchpriority="high">
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"></noscript>
   <link rel="stylesheet" href="../../src/css/public/home.css">
   <link rel="stylesheet" href="../../src/css/global.css?v=pwa-responsive-20260810">
 </head>
@@ -27,7 +31,7 @@
     <div class="main-nav-wrap">
       <div class="container nav-shell">
         <a href="#home" class="logo">
-          <img src="/images/animua_logo1.svg" alt="" class="navbar-logo-img" aria-hidden="true">
+          <img src="/images/animua_logo1.svg" alt="" class="navbar-logo-img" aria-hidden="true" width="240" height="216" decoding="async">
           <span class="navbar-brand-copy">
             <span class="navbar-brand-tagline">Connect. Learn. Adopt.</span>
             <span class="navbar-brand-name">NIMUA</span>
@@ -160,7 +164,7 @@
         data-highlight-key="new-furbabies"
       >
         <span class="highlight-cover">
-          <img src="../../src/assets/images/highlight-new-furbabies-cat.JPG" alt="Cat ready for adoption">
+          <img src="../../src/assets/images/highlight-new-furbabies-cat.JPG" alt="Cat ready for adoption" width="4032" height="3024" decoding="async">
         </span>
         <span>New Furbabies</span>
       </button>
@@ -171,7 +175,7 @@
         data-highlight-key="news-alerts"
       >
         <span class="highlight-cover">
-          <img src="../../src/assets/images/highlight-news-alert-palit-an.png" alt="Rescued cats inside a pet carrier">
+          <img src="../../src/assets/images/highlight-news-alert-palit-an.png" alt="Rescued cats inside a pet carrier" width="1254" height="1254" decoding="async">
         </span>
         <span>News &amp; Alerts</span>
       </button>
@@ -182,7 +186,7 @@
         data-highlight-key="success-stories"
       >
         <span class="highlight-cover">
-          <img src="../../src/assets/images/success-stories.jpg" alt="Adopter with cats in a carrier">
+          <img src="../../src/assets/images/success-stories.jpg" alt="Adopter with cats in a carrier" width="688" height="680" decoding="async">
         </span>
         <span>Success Stories</span>
       </button>
@@ -193,7 +197,7 @@
         data-highlight-key="events"
       >
         <span class="highlight-cover">
-          <img src="../../src/assets/images/highlight-upcoming-event.jpg" alt="Angeles City Veterinary Office speaking at a community event">
+          <img src="../../src/assets/images/highlight-upcoming-event.jpg" alt="Angeles City Veterinary Office speaking at a community event" width="1440" height="960" decoding="async">
         </span>
         <span>Upcoming Events</span>
       </button>
@@ -210,7 +214,7 @@
       </div>
       <div class="story-modal-brand">
         <span class="story-modal-avatar" aria-hidden="true">
-          <img src="../../src/assets/images/highlight-new-furbabies-cat.JPG" alt="" id="storyModalAvatar">
+          <img src="../../src/assets/images/highlight-new-furbabies-cat.JPG" alt="" id="storyModalAvatar" width="4032" height="3024" loading="lazy" decoding="async">
           <i class="fa-solid fa-paw"></i>
         </span>
         <span class="story-modal-brand-copy">
@@ -229,7 +233,7 @@
         <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
       </button>
       <div class="story-modal-image">
-        <img src="../../src/assets/images/about-shelter-house.png" alt="" id="storyModalImage">
+        <img src="../../src/assets/images/about-shelter-house.png" alt="" id="storyModalImage" width="1448" height="1086" loading="lazy" decoding="async">
       </div>
       <div class="story-modal-copy">
         <span id="storyModalTag">Featured Story</span>
@@ -298,7 +302,7 @@
       </div>
 
       <figure class="home-match-quiz-media">
-        <img src="../../src/assets/images/match-quiz-form-showcase.png" alt="City Veterinarian adoption application form preview">
+        <img src="../../src/assets/images/match-quiz-form-showcase.png" alt="City Veterinarian adoption application form preview" width="994" height="1384" loading="lazy" decoding="async">
       </figure>
     </div>
   </section>
@@ -324,27 +328,27 @@
 
       <div class="about-shelter-gallery reveal" aria-label="Shelter facilities">
         <button type="button" class="about-shelter-card about-shelter-card-large">
-          <img src="../../src/assets/images/about-shelter-house.png" alt="City Veterinary Office and dog pound building">
+          <img src="../../src/assets/images/about-shelter-house.png" alt="City Veterinary Office and dog pound building" width="1448" height="1086" loading="lazy" decoding="async">
           <span>Shelter facility</span>
         </button>
 
         <button type="button" class="about-shelter-card">
-          <img src="../../src/assets/images/about-cat-cages.jpeg" alt="Cat cages inside the shelter">
+          <img src="../../src/assets/images/about-cat-cages.jpeg" alt="Cat cages inside the shelter" width="2048" height="1536" loading="lazy" decoding="async">
           <span>Cat care area</span>
         </button>
 
         <button type="button" class="about-shelter-card">
-          <img src="../../src/assets/images/about-dog-cages.jpeg" alt="Dog cages inside the shelter">
+          <img src="../../src/assets/images/about-dog-cages.jpeg" alt="Dog cages inside the shelter" width="2048" height="1536" loading="lazy" decoding="async">
           <span>Dog holding area</span>
         </button>
 
         <button type="button" class="about-shelter-card about-shelter-vet-card">
-          <img src="../../src/assets/images/about-vet-room.png" alt="Veterinary room for animal care">
+          <img src="../../src/assets/images/about-vet-room.png" alt="Veterinary room for animal care" width="1502" height="1134" loading="lazy" decoding="async">
           <span>Veterinary room</span>
         </button>
 
         <button type="button" class="about-shelter-card about-shelter-vaccination-card">
-          <img src="../../src/assets/images/about-free-vaccination.jpg" alt="Angeles City Veterinary free vaccination activity">
+          <img src="../../src/assets/images/about-free-vaccination.jpg" alt="Angeles City Veterinary free vaccination activity" width="1440" height="960" loading="lazy" decoding="async">
           <span>Community vaccination</span>
         </button>
       </div>
@@ -356,7 +360,7 @@
       <button type="button" class="about-photo-lightbox-close" id="aboutPhotoLightboxClose" aria-label="Close image preview">
         <i class="fa-solid fa-xmark" aria-hidden="true"></i>
       </button>
-      <img src="" alt="" id="aboutPhotoLightboxImage">
+      <img src="" alt="" id="aboutPhotoLightboxImage" loading="lazy" decoding="async">
       <p id="aboutPhotoLightboxTitle"></p>
     </div>
   </div>
@@ -642,7 +646,7 @@
         </div>
 
         <figure class="quiz-intro-photo">
-          <img src="../../src/assets/images/quiz-adoption-rescue-photo.jpg" alt="A rescued white cat being held during an animal welfare activity">
+          <img src="../../src/assets/images/quiz-adoption-rescue-photo.jpg" alt="A rescued white cat being held during an animal welfare activity" width="1440" height="960" loading="lazy" decoding="async">
         </figure>
       </div>
 
@@ -719,7 +723,7 @@
 
     <div class="auth-modal-left auth-modal-left-simple">
       <div class="auth-side-mark" aria-label="Nimua">
-        <img class="auth-side-logo" src="/images/animua_logo1.svg" alt="" aria-hidden="true">
+        <img class="auth-side-logo" src="/images/animua_logo1.svg" alt="" aria-hidden="true" width="240" height="216" loading="lazy" decoding="async">
         <span>NIMUA</span>
       </div>
       <h1 id="authModalTitle">Welcome back.</h1>
