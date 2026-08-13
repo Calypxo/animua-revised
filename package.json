@@ -8,6 +8,13 @@
     "dev:emulator": "node scripts/dev-emulator.mjs",
     "emulators": "firebase emulators:start --only auth,firestore,storage --project demo-animua",
     "emulators:seed": "npm --prefix backend run seed:emulator",
-    "backend:start": "node server.js"
+    "backend:start": "node server.js",
+    "check:functionality:config": "node scripts/checkFunctionalityEnvironment.mjs",
+    "test:functionality": "cypress run",
+    "test:functionality:open": "cypress open",
+    "test:functionality:verify": "cypress verify"
+  },
+  "devDependencies": {
+    "cypress": "15.20.1"
   }
 }

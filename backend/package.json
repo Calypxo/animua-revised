@@ -5,11 +5,18 @@
   "main": "server.js",
   "scripts": {
     "test": "node --test --test-isolation=none",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
     "dev": "node scripts/dev.js",
     "dev:emulator": "node scripts/dev.js --emulators",
     "dev:backend": "nodemon server.js",
+    "start:test": "node scripts/startFunctionalityEnvironment.js",
     "seed:emulator": "node scripts/seedEmulator.js",
     "seed:announcements": "node scripts/seedAnnouncementHighlights.js",
+    "ft:baseline:dry-run": "node scripts/ftBaseline.js dry-run",
+    "ft:baseline:seed": "node scripts/ftBaseline.js seed",
+    "ft:baseline:reset": "node scripts/ftBaseline.js reset",
+    "ft:baseline:verify": "node scripts/ftBaseline.js verify",
     "sentiment": "..\\animua-sentiment-service\\.venv\\Scripts\\python.exe -B -m uvicorn --app-dir ..\\animua-sentiment-service app:app --host 127.0.0.1 --port 8002",
     "start": "node server.js"
   },
@@ -31,6 +38,7 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.14",
+    "vitest": "^4.1.10"
   }
 }
