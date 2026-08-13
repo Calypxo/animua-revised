@@ -1,8 +1,7 @@
 import Swal from "sweetalert2";
-import { auth, db } from "../utils/firebase.js";
+import { auth } from "../utils/firebase.js";
 import { API_BASE_URL } from "../utils/api.js";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
-import { doc, updateDoc } from "firebase/firestore";
 import { showEmailVerificationScreen } from "./register.js";
 
 const RECAPTCHA_SITE_KEY =
@@ -191,16 +190,6 @@ export async function handleLogin(event) {
       });
 
       return;
-    }
-
-    if (firebaseUser.emailVerified) {
-      // Keep login moving; this status sync is not required before redirecting.
-      updateDoc(doc(db, "users", firebaseUser.email.toLowerCase()), {
-        emailVerified: true,
-        status: "Active"
-      }).catch((error) => {
-        console.warn("[User status sync failed]", error.message);
-      });
     }
 
     const account = data.account || {};

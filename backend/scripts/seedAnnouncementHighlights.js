@@ -148,15 +148,13 @@ async function uploadSeedImage(item) {
   await imageFile.save(fs.readFileSync(localPath), {
     metadata: {
       contentType: contentTypeFor(item.imageFile),
-      cacheControl: "public, max-age=31536000",
+      cacheControl: "private, max-age=1800",
     },
     resumable: false,
   });
-  await imageFile.makePublic();
-
   return {
     imagePath,
-    imageUrl: `https://storage.googleapis.com/${bucket.name}/${imagePath}`,
+    imageUrl: "",
   };
 }
 

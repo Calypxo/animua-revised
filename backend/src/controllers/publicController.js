@@ -4,6 +4,7 @@ const path = require("path");
 const {
   buildShelterLabel,
 } = require("../utils/animalIdentity");
+const { getSignedReadUrl } = require("../services/storageUrlService");
 const {
   invalidateAttentionCache,
 } = require("./dashboardController");
@@ -188,9 +189,14 @@ const isPublicReadyAnimal = (animal = {}) => {
   );
 };
 
-const serializePublicPet = (doc) => {
+const serializePublicPet = async (doc) => {
   const data = doc.data();
   const displayLabel = buildShelterLabel(data, doc.id);
+  const photoURL = await getSignedReadUrl({
+    path: data.photoPath,
+    legacyUrl: data.photoURL || data.photoUrl || data.imageUrl || "",
+    expectedPrefix: `animals/${doc.id}`,
+  });
 
   return {
     id: doc.id,
@@ -205,7 +211,7 @@ const serializePublicPet = (doc) => {
     ageEstimate: data.ageEstimate || "",
     color: data.color || "",
     colorMarkings: data.colorMarkings || data.color || "",
-    photoURL: data.photoURL || "",
+    photoURL,
     source: data.source || "",
     intakeDate: data.intakeDate || "",
     readyForAdoptionAt: data.readyForAdoptionAt || "",
@@ -219,6 +225,38 @@ const serializePublicPet = (doc) => {
     visibleDefects: data.visibleDefects || "",
     behavioralAssessment: data.behavioralAssessment || null,
     status: data.status || "Ready",
+  };
+};
+
+const isAdoptedAnimal = (animal = {}) => {
+  const status = String(animal.status || animal.adoptionStatus || "").toLowerCase();
+  return status.includes("adopted") || status.includes("finalized");
+};
+
+const serializeAdoptedStory = async (doc) => {
+  const data = doc.data() || {};
+  const displayLabel = buildShelterLabel(data, doc.id);
+  const photoURL = await getSignedReadUrl({
+    path: data.photoPath,
+    legacyUrl: data.photoURL || data.photoUrl || data.imageUrl || "",
+    expectedPrefix: `animals/${doc.id}`,
+  });
+  return {
+    id: doc.id,
+    name: data.adoptedName || "",
+    displayLabel,
+    shelterLabel: displayLabel,
+    species: data.species || "",
+    breed: data.breed || "",
+    sex: data.sex || "Unknown",
+    ageEstimate: data.ageEstimate || "",
+    photoURL,
+    status: data.status || "",
+    adoptionStatus: data.adoptionStatus || "",
+    adoptionDate: data.adoptionDate || "",
+    approvedAt: data.approvedAt || "",
+    updatedAt: data.updatedAt || "",
+    createdAt: data.createdAt || "",
   };
 };
 
@@ -238,9 +276,11 @@ exports.getPublicPets = async (req, res) => {
 
     const snapshot = await db.collection(ANIMAL_COL).get();
 
-    let pets = snapshot.docs
-      .filter((doc) => isPublicReadyAnimal(doc.data() || {}))
-      .map(serializePublicPet);
+    let pets = await Promise.all(
+      snapshot.docs
+        .filter((doc) => isPublicReadyAnimal(doc.data() || {}))
+        .map(serializePublicPet)
+    );
 
     // Optional frontend filters
     if (species) {
@@ -278,6 +318,22 @@ exports.getPublicPets = async (req, res) => {
   }
 };
 
+exports.getPublicAdoptedStories = async (_req, res) => {
+  try {
+    res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    const snapshot = await db.collection(ANIMAL_COL).get();
+    const stories = await Promise.all(
+      snapshot.docs
+        .filter((document) => isAdoptedAnimal(document.data() || {}))
+        .map(serializeAdoptedStory)
+    );
+    return res.status(200).json({ stories, total: stories.length });
+  } catch (error) {
+    console.error("[getPublicAdoptedStories]", error.message);
+    return res.status(500).json({ message: "Failed to fetch adopted animal stories." });
+  }
+};
+
 /**
  * GET /api/public/pets/:id
  * Public-facing single pet details
@@ -304,7 +360,7 @@ exports.getPublicPetById = async (req, res) => {
       });
     }
 
-    const pet = serializePublicPet(doc);
+    const pet = await serializePublicPet(doc);
 
     res.status(200).json({ pet });
   } catch (error) {

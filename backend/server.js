@@ -1,8 +1,19 @@
-require("dotenv").config();
+const path = require("path");
+
+const requestedEnvironmentFile = process.env.ANIMUA_ENV_FILE;
+const environmentFile = requestedEnvironmentFile || ".env";
+const environmentLoadResult = require("dotenv").config({
+  path: path.resolve(__dirname, environmentFile),
+});
+
+if (requestedEnvironmentFile && environmentLoadResult.error) {
+  throw new Error(
+    `Unable to load the requested backend environment file: ${environmentFile}`
+  );
+}
 
 const express = require("express");
 const cors = require("cors");
-const path = require("path");
 
 const app = express();
 
@@ -20,9 +31,13 @@ const matchRoutes = require("./src/routes/matchRoutes");
 const chatbotRoutes = require("./src/routes/chatbotRoutes");
 const surrenderRoutes = require("./src/routes/surrenderRoutes");
 const { reconcileRequestDeadlines } = require("./src/services/requestDeadlineService");
+const {
+  startAutomaticDeadlineReconciliation,
+} = require("./src/services/startupDeadlineReconciliation");
 const auditRoutes = require("./src/routes/auditRoutes");
 const reportRoutes = require("./src/routes/reportRoutes");
 const notificationRoutes = require("./src/routes/notificationRoutes");
+const inventoryRoutes = require("./src/routes/inventoryRoutes");
 const { getPublicEvents } = require("./src/controllers/publicController");
 
 const authenticateToken = require("./src/middleware/authMiddleware");
@@ -112,6 +127,7 @@ app.use("/api", matchRoutes);
 app.use("/api/audit", auditRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/inventory", inventoryRoutes);
 
 // Backward-compatible alias for older deployed public bundles.
 app.get("/api/events", getPublicEvents);
@@ -155,15 +171,11 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`ANIMUA Server active on port ${PORT}`);
 
-  reconcileRequestDeadlines().catch((error) => {
-    console.error("Initial request deadline check failed:", error.message);
+  startAutomaticDeadlineReconciliation({
+    env: process.env,
+    reconcileRequestDeadlines,
+    logger: console,
   });
-  const deadlineTimer = setInterval(() => {
-    reconcileRequestDeadlines().catch((error) => {
-      console.error("Scheduled request deadline check failed:", error.message);
-    });
-  }, 15 * 60 * 1000);
-  deadlineTimer.unref();
 
   trainInventoryModel()
     .then((summary) => {

@@ -10,6 +10,7 @@ const {
   requestForgotPasswordOtp,
   confirmForgotPasswordOtp,
   confirmPhoneVerification,
+  syncEmailVerification,
   discardUnverifiedRegistration,
   getCurrentAccount,
   updateUsername,
@@ -25,6 +26,7 @@ router.post("/confirm-email-verification-otp", confirmEmailVerificationOtp);
 router.post("/request-forgot-password-otp", requestForgotPasswordOtp);
 router.post("/confirm-forgot-password-otp", confirmForgotPasswordOtp);
 router.post("/confirm-phone-verification", confirmPhoneVerification);
+router.post("/sync-email-verification", syncEmailVerification);
 router.post("/discard-unverified-registration", discardUnverifiedRegistration);
 
 router.put("/update-username", verifyToken, updateUsername);

@@ -17,7 +17,7 @@ import {
   getInventoryItemById,
   updateInventoryItem,
   createInventoryItem,
-  addInventoryTransaction,
+  applyInventoryMovement,
   getItemTransactions,
   getLiveInventoryPredictions
 } from "../services/inventoryFirestore.service.js";
@@ -1099,27 +1099,23 @@ window.addEventListener("animua:stockDeduct", async (e) => {
 
     Object.assign(updatedLocal, rfClassify(updatedLocal));
 
-    await updateInventoryItem(itemId, {
-      currentStock: updatedLocal.currentStock,
-      recencyDays: updatedLocal.recencyDays,
-      stockoutFrequency: updatedLocal.stockoutFrequency,
-      monthlyTurnoverRatio: updatedLocal.monthlyTurnoverRatio,
-      ruleBasedMovement: updatedLocal.movement,
-      reorderRisk: updatedLocal.reorderRisk,
-      reorderPoint: updatedLocal.reorderPoint,
-      daysUntilStockout: updatedLocal.daysUntilStockout,
-      daysToRestock: updatedLocal.daysToRestock,
-      stockStatus: updatedLocal.stockStatus,
-    });
-
-    await addInventoryTransaction(itemId, {
-      type: "out",
+    await applyInventoryMovement(itemId, "out", {
       qty,
       date: today(),
       animal: animal || "",
       procedure: procedure || "General Use",
       notes: notes || "",
-      staff: getUserName()?.split(" ")[0] || "Staff",
+      predictionUpdates: {
+        recencyDays: updatedLocal.recencyDays,
+        stockoutFrequency: updatedLocal.stockoutFrequency,
+        monthlyTurnoverRatio: updatedLocal.monthlyTurnoverRatio,
+        ruleBasedMovement: updatedLocal.movement,
+        reorderRisk: updatedLocal.reorderRisk,
+        reorderPoint: updatedLocal.reorderPoint,
+        daysUntilStockout: updatedLocal.daysUntilStockout,
+        daysToRestock: updatedLocal.daysToRestock,
+        stockStatus: updatedLocal.stockStatus,
+      },
     });
 
     await loadInventory();
@@ -1331,24 +1327,20 @@ async function saveBatchStockIn() {
 
       Object.assign(updatedLocal, rfClassify(updatedLocal));
 
-      await updateInventoryItem(id, {
-        currentStock: updatedLocal.currentStock,
-        ruleBasedMovement: updatedLocal.movement,
-        reorderRisk: updatedLocal.reorderRisk,
-        reorderPoint: updatedLocal.reorderPoint,
-        daysUntilStockout: updatedLocal.daysUntilStockout,
-        daysToRestock: updatedLocal.daysToRestock,
-        stockStatus: updatedLocal.stockStatus,
-      });
-
-      await addInventoryTransaction(id, {
-        type: "in",
+      await applyInventoryMovement(id, "in", {
         qty,
         date: batchDate,
         supplier,
         notes: rowNote || notes,
         batchId,
-        staff: getUserName()?.split(" ")[0] || "Staff",
+        predictionUpdates: {
+          ruleBasedMovement: updatedLocal.movement,
+          reorderRisk: updatedLocal.reorderRisk,
+          reorderPoint: updatedLocal.reorderPoint,
+          daysUntilStockout: updatedLocal.daysUntilStockout,
+          daysToRestock: updatedLocal.daysToRestock,
+          stockStatus: updatedLocal.stockStatus,
+        },
       });
     }
 
@@ -1420,28 +1412,24 @@ async function saveBatchStockOut() {
 
       Object.assign(updatedLocal, rfClassify(updatedLocal));
 
-      await updateInventoryItem(id, {
-        currentStock: updatedLocal.currentStock,
-        recencyDays: updatedLocal.recencyDays,
-        stockoutFrequency: updatedLocal.stockoutFrequency,
-        monthlyTurnoverRatio: updatedLocal.monthlyTurnoverRatio,
-        ruleBasedMovement: updatedLocal.movement,
-        reorderRisk: updatedLocal.reorderRisk,
-        reorderPoint: updatedLocal.reorderPoint,
-        daysUntilStockout: updatedLocal.daysUntilStockout,
-        daysToRestock: updatedLocal.daysToRestock,
-        stockStatus: updatedLocal.stockStatus,
-      });
-
-      await addInventoryTransaction(id, {
-        type: "out",
+      await applyInventoryMovement(id, "out", {
         qty,
         date: batchDate,
         animal,
         procedure,
         notes,
         batchId,
-        staff: getUserName()?.split(" ")[0] || "Staff",
+        predictionUpdates: {
+          recencyDays: updatedLocal.recencyDays,
+          stockoutFrequency: updatedLocal.stockoutFrequency,
+          monthlyTurnoverRatio: updatedLocal.monthlyTurnoverRatio,
+          ruleBasedMovement: updatedLocal.movement,
+          reorderRisk: updatedLocal.reorderRisk,
+          reorderPoint: updatedLocal.reorderPoint,
+          daysUntilStockout: updatedLocal.daysUntilStockout,
+          daysToRestock: updatedLocal.daysToRestock,
+          stockStatus: updatedLocal.stockStatus,
+        },
       });
     }
 
@@ -1516,23 +1504,19 @@ async function saveStockIn() {
 
     Object.assign(updatedLocal, rfClassify(updatedLocal));
 
-    await updateInventoryItem(id, {
-      currentStock: updatedLocal.currentStock,
-      ruleBasedMovement: updatedLocal.movement,
-      reorderRisk: updatedLocal.reorderRisk,
-      reorderPoint: updatedLocal.reorderPoint,
-      daysUntilStockout: updatedLocal.daysUntilStockout,
-      daysToRestock: updatedLocal.daysToRestock,
-      stockStatus: updatedLocal.stockStatus,
-    });
-
-    await addInventoryTransaction(id, {
-      type: "in",
+    await applyInventoryMovement(id, "in", {
       qty,
       date: document.getElementById("fStockDate").value,
       supplier: document.getElementById("fStockSupplier").value.trim(),
       notes: document.getElementById("fStockNotes").value.trim(),
-      staff: getUserName()?.split(" ")[0] || "Staff",
+      predictionUpdates: {
+        ruleBasedMovement: updatedLocal.movement,
+        reorderRisk: updatedLocal.reorderRisk,
+        reorderPoint: updatedLocal.reorderPoint,
+        daysUntilStockout: updatedLocal.daysUntilStockout,
+        daysToRestock: updatedLocal.daysToRestock,
+        stockStatus: updatedLocal.stockStatus,
+      },
     });
 
     closeModal("stockInModalBackdrop");
@@ -1621,27 +1605,23 @@ async function saveStockOut() {
 
     Object.assign(updatedLocal, rfClassify(updatedLocal));
 
-    await updateInventoryItem(id, {
-      currentStock: updatedLocal.currentStock,
-      recencyDays: updatedLocal.recencyDays,
-      stockoutFrequency: updatedLocal.stockoutFrequency,
-      monthlyTurnoverRatio: updatedLocal.monthlyTurnoverRatio,
-      ruleBasedMovement: updatedLocal.movement,
-      reorderRisk: updatedLocal.reorderRisk,
-      reorderPoint: updatedLocal.reorderPoint,
-      daysUntilStockout: updatedLocal.daysUntilStockout,
-      daysToRestock: updatedLocal.daysToRestock,
-      stockStatus: updatedLocal.stockStatus,
-    });
-
-    await addInventoryTransaction(id, {
-      type: "out",
+    await applyInventoryMovement(id, "out", {
       qty,
       date: document.getElementById("fOutDate").value,
       animal: document.getElementById("fOutAnimal").value.trim(),
       procedure: document.getElementById("fOutProcedure").value || "General Use",
       notes: document.getElementById("fOutNotes").value.trim(),
-      staff: getUserName()?.split(" ")[0] || "Staff",
+      predictionUpdates: {
+        recencyDays: updatedLocal.recencyDays,
+        stockoutFrequency: updatedLocal.stockoutFrequency,
+        monthlyTurnoverRatio: updatedLocal.monthlyTurnoverRatio,
+        ruleBasedMovement: updatedLocal.movement,
+        reorderRisk: updatedLocal.reorderRisk,
+        reorderPoint: updatedLocal.reorderPoint,
+        daysUntilStockout: updatedLocal.daysUntilStockout,
+        daysToRestock: updatedLocal.daysToRestock,
+        stockStatus: updatedLocal.stockStatus,
+      },
     });
 
     closeModal("stockOutModalBackdrop");

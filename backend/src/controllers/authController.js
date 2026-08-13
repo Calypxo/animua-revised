@@ -1060,6 +1060,49 @@ exports.confirmPhoneVerification = async (req, res) => {
   }
 };
 
+exports.syncEmailVerification = async (req, res) => {
+  try {
+    const firebaseIdToken = String(req.body?.firebaseIdToken || "").trim();
+    if (!firebaseIdToken) {
+      return res.status(400).json({ message: "Firebase verification token is required." });
+    }
+
+    const decodedToken = await admin.auth().verifyIdToken(firebaseIdToken);
+    const firebaseUser = await admin.auth().getUser(decodedToken.uid);
+    const email = String(firebaseUser.email || "").trim().toLowerCase();
+    if (!email || !firebaseUser.emailVerified) {
+      return res.status(409).json({ message: "Email is not verified yet." });
+    }
+
+    const userRef = db.collection("users").doc(email);
+    const userDoc = await userRef.get();
+    if (!userDoc.exists) {
+      return res.status(404).json({ message: "User profile not found." });
+    }
+
+    const userData = userDoc.data() || {};
+    if (userData.firebaseUid && userData.firebaseUid !== firebaseUser.uid) {
+      return res.status(403).json({ message: "Firebase identity does not match this user profile." });
+    }
+
+    await userRef.update({
+      emailVerified: true,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    return res.status(200).json({
+      message: "Email verification synchronized successfully.",
+      emailVerified: true,
+    });
+  } catch (error) {
+    console.error("[Sync Email Verification Error]", error.message);
+    const invalidToken = String(error.code || "").startsWith("auth/");
+    return res.status(invalidToken ? 401 : 500).json({
+      message: invalidToken ? "Invalid or expired Firebase verification token." : "Internal server error.",
+    });
+  }
+};
+
 exports.discardUnverifiedRegistration = async (req, res) => {
   try {
     const firebaseIdToken = req.body.firebaseIdToken;

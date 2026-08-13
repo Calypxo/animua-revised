@@ -1,9 +1,7 @@
 import Swal from "sweetalert2";
-import { collection, getDocs } from "firebase/firestore";
 import { handleLogin } from "../../auth/login.js";
 import { handleRegistration } from "../../auth/register.js";
 import { API_BASE_URL } from "../../utils/api.js";
-import { db } from "../../utils/firebase.js";
 import { getToken } from "../../utils/storage.js";
 
 const CHATBOT_MIN_TYPING_MS = 1000;
@@ -1055,7 +1053,7 @@ function setupHomeStories() {
   };
 
   const normalizeAdoptedStories = (data) => {
-    const rawPets = Array.isArray(data) ? data : data?.pets || data?.animals || [];
+    const rawPets = Array.isArray(data) ? data : data?.stories || data?.pets || data?.animals || [];
     return rawPets
       .filter((pet) => {
         const status = String(pet.status || pet.adoptionStatus || "").toLowerCase();
@@ -1074,13 +1072,11 @@ function setupHomeStories() {
     adoptedStoriesLoaded = true;
 
     try {
-      const snapshot = await getDocs(collection(db, "animals"));
-      adoptedStories = normalizeAdoptedStories(
-        snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data()
-        }))
-      );
+      const response = await fetch(`${API_BASE_URL}/public/adopted-stories`, { cache: "no-store" });
+      if (!response.ok) {
+        throw new Error(`Adopted stories request failed with status ${response.status}.`);
+      }
+      adoptedStories = normalizeAdoptedStories(await response.json());
     } catch (error) {
       console.warn("Homepage adopted stories load skipped:", error);
       adoptedStories = [];

@@ -4,6 +4,20 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const DEADLINE_DAYS = 14;
 const WARNING_DAY = 7;
 
+function isFunctionalityTestingEnvironment(env = process.env) {
+  return String(env.APP_ENVIRONMENT || "").trim().toLowerCase() === "functionality-testing";
+}
+
+function skippedReconciliationResult() {
+  return {
+    checked: 0,
+    updated: 0,
+    expired: 0,
+    skipped: true,
+    reason: "functionality-testing",
+  };
+}
+
 const WORKFLOWS = {
   adoption: {
     collection: "adoptions",
@@ -156,6 +170,10 @@ async function reconcileWorkflow(type, now = new Date()) {
 }
 
 async function reconcileRequestDeadlines(types = Object.keys(WORKFLOWS), now = new Date()) {
+  if (isFunctionalityTestingEnvironment()) {
+    return skippedReconciliationResult();
+  }
+
   const selected = Array.isArray(types) ? types : [types];
   const results = await Promise.all(selected.map((type) => reconcileWorkflow(type, now)));
   return results.reduce((total, result) => ({
@@ -175,5 +193,6 @@ module.exports = {
   buildApprovalDeadlineFields,
   validateScheduleDate,
   lifecycleUpdate,
+  isFunctionalityTestingEnvironment,
   reconcileRequestDeadlines,
 };
