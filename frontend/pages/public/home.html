@@ -13,16 +13,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-  <link rel="preload" as="image" href="../../src/assets/images/hero-shelter-dog-kennel.png" fetchpriority="high">
+  <link rel="preload" as="image" href="../../src/assets/images/optimized/home/hero-shelter-dog-kennel-1109.avif" type="image/avif" fetchpriority="high">
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
   <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"></noscript>
-  <link rel="stylesheet" href="../../src/css/public/home.css">
-  <link rel="stylesheet" href="../../src/css/global.css?v=pwa-responsive-20260810">
+  <link rel="preload" as="style" href="../../src/css/public/home.css" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="../../src/css/public/home.css"></noscript>
+  <link rel="preload" as="style" href="../../src/css/global.css?v=pwa-responsive-20260810" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="../../src/css/global.css?v=pwa-responsive-20260810"></noscript>
 </head>
 <body class="home-page">
 
@@ -164,7 +165,11 @@
         data-highlight-key="new-furbabies"
       >
         <span class="highlight-cover">
-          <img src="../../src/assets/images/highlight-new-furbabies-cat.JPG" alt="Cat ready for adoption" width="4032" height="3024" decoding="async">
+          <picture>
+            <source type="image/avif" srcset="../../src/assets/images/optimized/home/highlight-new-furbabies-cat-360.avif 360w, ../../src/assets/images/optimized/home/highlight-new-furbabies-cat-720.avif 720w" sizes="(max-width: 760px) 25vw, 112px">
+            <source type="image/webp" srcset="../../src/assets/images/optimized/home/highlight-new-furbabies-cat-180.webp 180w, ../../src/assets/images/optimized/home/highlight-new-furbabies-cat-360.webp 360w, ../../src/assets/images/optimized/home/highlight-new-furbabies-cat-720.webp 720w" sizes="(max-width: 760px) 25vw, 112px">
+            <img src="../../src/assets/images/highlight-new-furbabies-cat.JPG" alt="Cat ready for adoption" width="4032" height="3024" decoding="async">
+          </picture>
         </span>
         <span>New Furbabies</span>
       </button>
@@ -175,7 +180,11 @@
         data-highlight-key="news-alerts"
       >
         <span class="highlight-cover">
-          <img src="../../src/assets/images/highlight-news-alert-palit-an.png" alt="Rescued cats inside a pet carrier" width="1254" height="1254" decoding="async">
+          <picture>
+            <source type="image/avif" srcset="../../src/assets/images/optimized/home/highlight-news-alert-palit-an-360.avif 360w, ../../src/assets/images/optimized/home/highlight-news-alert-palit-an-720.avif 720w" sizes="(max-width: 760px) 25vw, 112px">
+            <source type="image/webp" srcset="../../src/assets/images/optimized/home/highlight-news-alert-palit-an-180.webp 180w, ../../src/assets/images/optimized/home/highlight-news-alert-palit-an-360.webp 360w, ../../src/assets/images/optimized/home/highlight-news-alert-palit-an-720.webp 720w" sizes="(max-width: 760px) 25vw, 112px">
+            <img src="../../src/assets/images/highlight-news-alert-palit-an.png" alt="Rescued cats inside a pet carrier" width="1254" height="1254" decoding="async">
+          </picture>
         </span>
         <span>News &amp; Alerts</span>
       </button>
@@ -186,7 +195,11 @@
         data-highlight-key="success-stories"
       >
         <span class="highlight-cover">
-          <img src="../../src/assets/images/success-stories.jpg" alt="Adopter with cats in a carrier" width="688" height="680" decoding="async">
+          <picture>
+            <source type="image/avif" srcset="../../src/assets/images/optimized/home/success-stories-180.avif 180w, ../../src/assets/images/optimized/home/success-stories-360.avif 360w, ../../src/assets/images/optimized/home/success-stories-688.avif 688w" sizes="(max-width: 760px) 25vw, 112px">
+            <source type="image/webp" srcset="../../src/assets/images/optimized/home/success-stories-180.webp 180w, ../../src/assets/images/optimized/home/success-stories-360.webp 360w, ../../src/assets/images/optimized/home/success-stories-688.webp 688w" sizes="(max-width: 760px) 25vw, 112px">
+            <img src="../../src/assets/images/success-stories.jpg" alt="Adopter with cats in a carrier" width="688" height="680" decoding="async">
+          </picture>
         </span>
         <span>Success Stories</span>
       </button>
@@ -197,7 +210,11 @@
         data-highlight-key="events"
       >
         <span class="highlight-cover">
-          <img src="../../src/assets/images/highlight-upcoming-event.jpg" alt="Angeles City Veterinary Office speaking at a community event" width="1440" height="960" decoding="async">
+          <picture>
+            <source type="image/avif" srcset="../../src/assets/images/optimized/home/highlight-upcoming-event-180.avif 180w, ../../src/assets/images/optimized/home/highlight-upcoming-event-360.avif 360w, ../../src/assets/images/optimized/home/highlight-upcoming-event-720.avif 720w" sizes="(max-width: 760px) 25vw, 112px">
+            <source type="image/webp" srcset="../../src/assets/images/optimized/home/highlight-upcoming-event-180.webp 180w, ../../src/assets/images/optimized/home/highlight-upcoming-event-360.webp 360w, ../../src/assets/images/optimized/home/highlight-upcoming-event-720.webp 720w" sizes="(max-width: 760px) 25vw, 112px">
+            <img src="../../src/assets/images/highlight-upcoming-event.jpg" alt="Angeles City Veterinary Office speaking at a community event" width="1440" height="960" decoding="async">
+          </picture>
         </span>
         <span>Upcoming Events</span>
       </button>
@@ -214,7 +231,7 @@
       </div>
       <div class="story-modal-brand">
         <span class="story-modal-avatar" aria-hidden="true">
-          <img src="../../src/assets/images/highlight-new-furbabies-cat.JPG" alt="" id="storyModalAvatar" width="4032" height="3024" loading="lazy" decoding="async">
+          <img src="../../src/assets/images/optimized/home/highlight-new-furbabies-cat-180.webp" alt="" id="storyModalAvatar" width="180" height="135" loading="lazy" decoding="async">
           <i class="fa-solid fa-paw"></i>
         </span>
         <span class="story-modal-brand-copy">
@@ -233,7 +250,7 @@
         <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
       </button>
       <div class="story-modal-image">
-        <img src="../../src/assets/images/about-shelter-house.png" alt="" id="storyModalImage" width="1448" height="1086" loading="lazy" decoding="async">
+        <img src="../../src/assets/images/optimized/home/about-shelter-house-720.webp" alt="" id="storyModalImage" width="720" height="540" loading="lazy" decoding="async">
       </div>
       <div class="story-modal-copy">
         <span id="storyModalTag">Featured Story</span>
@@ -302,7 +319,11 @@
       </div>
 
       <figure class="home-match-quiz-media">
-        <img src="../../src/assets/images/match-quiz-form-showcase.png" alt="City Veterinarian adoption application form preview" width="994" height="1384" loading="lazy" decoding="async">
+        <picture>
+          <source type="image/avif" srcset="../../src/assets/images/optimized/home/match-quiz-form-showcase-360.avif 360w, ../../src/assets/images/optimized/home/match-quiz-form-showcase-640.avif 640w, ../../src/assets/images/optimized/home/match-quiz-form-showcase-900.avif 900w" sizes="(max-width: 760px) 330px, 42vw">
+          <source type="image/webp" srcset="../../src/assets/images/optimized/home/match-quiz-form-showcase-360.webp 360w, ../../src/assets/images/optimized/home/match-quiz-form-showcase-640.webp 640w, ../../src/assets/images/optimized/home/match-quiz-form-showcase-900.webp 900w" sizes="(max-width: 760px) 330px, 42vw">
+          <img src="../../src/assets/images/match-quiz-form-showcase.png" alt="City Veterinarian adoption application form preview" width="994" height="1384" loading="lazy" decoding="async">
+        </picture>
       </figure>
     </div>
   </section>
@@ -328,27 +349,47 @@
 
       <div class="about-shelter-gallery reveal" aria-label="Shelter facilities">
         <button type="button" class="about-shelter-card about-shelter-card-large">
-          <img src="../../src/assets/images/about-shelter-house.png" alt="City Veterinary Office and dog pound building" width="1448" height="1086" loading="lazy" decoding="async">
+          <picture>
+            <source type="image/avif" srcset="../../src/assets/images/optimized/home/about-shelter-house-480.avif 480w, ../../src/assets/images/optimized/home/about-shelter-house-720.avif 720w, ../../src/assets/images/optimized/home/about-shelter-house-1080.avif 1080w" sizes="(max-width: 720px) 50vw, 520px">
+            <source type="image/webp" srcset="../../src/assets/images/optimized/home/about-shelter-house-480.webp 480w, ../../src/assets/images/optimized/home/about-shelter-house-720.webp 720w, ../../src/assets/images/optimized/home/about-shelter-house-1080.webp 1080w" sizes="(max-width: 720px) 50vw, 520px">
+            <img src="../../src/assets/images/about-shelter-house.png" alt="City Veterinary Office and dog pound building" width="1448" height="1086" loading="lazy" decoding="async">
+          </picture>
           <span>Shelter facility</span>
         </button>
 
         <button type="button" class="about-shelter-card">
-          <img src="../../src/assets/images/about-cat-cages.jpeg" alt="Cat cages inside the shelter" width="2048" height="1536" loading="lazy" decoding="async">
+          <picture>
+            <source type="image/avif" srcset="../../src/assets/images/optimized/home/about-cat-cages-320.avif 320w, ../../src/assets/images/optimized/home/about-cat-cages-640.avif 640w" sizes="(max-width: 720px) 50vw, 260px">
+            <source type="image/webp" srcset="../../src/assets/images/optimized/home/about-cat-cages-320.webp 320w, ../../src/assets/images/optimized/home/about-cat-cages-640.webp 640w" sizes="(max-width: 720px) 50vw, 260px">
+            <img src="../../src/assets/images/about-cat-cages.jpeg" alt="Cat cages inside the shelter" width="2048" height="1536" loading="lazy" decoding="async">
+          </picture>
           <span>Cat care area</span>
         </button>
 
         <button type="button" class="about-shelter-card">
-          <img src="../../src/assets/images/about-dog-cages.jpeg" alt="Dog cages inside the shelter" width="2048" height="1536" loading="lazy" decoding="async">
+          <picture>
+            <source type="image/avif" srcset="../../src/assets/images/optimized/home/about-dog-cages-320.avif 320w, ../../src/assets/images/optimized/home/about-dog-cages-640.avif 640w" sizes="(max-width: 720px) 50vw, 260px">
+            <source type="image/webp" srcset="../../src/assets/images/optimized/home/about-dog-cages-320.webp 320w, ../../src/assets/images/optimized/home/about-dog-cages-640.webp 640w" sizes="(max-width: 720px) 50vw, 260px">
+            <img src="../../src/assets/images/about-dog-cages.jpeg" alt="Dog cages inside the shelter" width="2048" height="1536" loading="lazy" decoding="async">
+          </picture>
           <span>Dog holding area</span>
         </button>
 
         <button type="button" class="about-shelter-card about-shelter-vet-card">
-          <img src="../../src/assets/images/about-vet-room.png" alt="Veterinary room for animal care" width="1502" height="1134" loading="lazy" decoding="async">
+          <picture>
+            <source type="image/avif" srcset="../../src/assets/images/optimized/home/about-vet-room-320.avif 320w, ../../src/assets/images/optimized/home/about-vet-room-640.avif 640w" sizes="(max-width: 720px) 100vw, 260px">
+            <source type="image/webp" srcset="../../src/assets/images/optimized/home/about-vet-room-320.webp 320w, ../../src/assets/images/optimized/home/about-vet-room-640.webp 640w" sizes="(max-width: 720px) 100vw, 260px">
+            <img src="../../src/assets/images/about-vet-room.png" alt="Veterinary room for animal care" width="1502" height="1134" loading="lazy" decoding="async">
+          </picture>
           <span>Veterinary room</span>
         </button>
 
         <button type="button" class="about-shelter-card about-shelter-vaccination-card">
-          <img src="../../src/assets/images/about-free-vaccination.jpg" alt="Angeles City Veterinary free vaccination activity" width="1440" height="960" loading="lazy" decoding="async">
+          <picture>
+            <source type="image/avif" srcset="../../src/assets/images/optimized/home/about-free-vaccination-320.avif 320w, ../../src/assets/images/optimized/home/about-free-vaccination-640.avif 640w" sizes="(max-width: 720px) 50vw, 260px">
+            <source type="image/webp" srcset="../../src/assets/images/optimized/home/about-free-vaccination-320.webp 320w, ../../src/assets/images/optimized/home/about-free-vaccination-640.webp 640w" sizes="(max-width: 720px) 50vw, 260px">
+            <img src="../../src/assets/images/about-free-vaccination.jpg" alt="Angeles City Veterinary free vaccination activity" width="1440" height="960" loading="lazy" decoding="async">
+          </picture>
           <span>Community vaccination</span>
         </button>
       </div>
@@ -646,7 +687,11 @@
         </div>
 
         <figure class="quiz-intro-photo">
-          <img src="../../src/assets/images/quiz-adoption-rescue-photo.jpg" alt="A rescued white cat being held during an animal welfare activity" width="1440" height="960" loading="lazy" decoding="async">
+          <picture>
+            <source type="image/avif" srcset="../../src/assets/images/optimized/home/quiz-adoption-rescue-photo-360.avif 360w, ../../src/assets/images/optimized/home/quiz-adoption-rescue-photo-640.avif 640w" sizes="(max-width: 760px) 100vw, 320px">
+            <source type="image/webp" srcset="../../src/assets/images/optimized/home/quiz-adoption-rescue-photo-360.webp 360w, ../../src/assets/images/optimized/home/quiz-adoption-rescue-photo-640.webp 640w" sizes="(max-width: 760px) 100vw, 320px">
+            <img src="../../src/assets/images/quiz-adoption-rescue-photo.jpg" alt="A rescued white cat being held during an animal welfare activity" width="1440" height="960" loading="lazy" decoding="async">
+          </picture>
         </figure>
       </div>
 

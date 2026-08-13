@@ -6,11 +6,20 @@
       "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
       "headers": [
         {
-          "source": "**/*.{js,css,png,jpg,jpeg,gif,svg,webp,woff,woff2}",
+          "source": "**/*.{js,css,png,jpg,jpeg,gif,svg,webp,avif,woff,woff2}",
           "headers": [
             {
               "key": "Cache-Control",
               "value": "public, max-age=31536000, immutable"
+            }
+          ]
+        },
+        {
+          "source": "**/*.{html,json,webmanifest}",
+          "headers": [
+            {
+              "key": "Cache-Control",
+              "value": "public, max-age=300, must-revalidate"
             }
           ]
         }
