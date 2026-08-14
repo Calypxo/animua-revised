@@ -144,7 +144,7 @@ body.compatibility-results-page main i[class*="fa-solid"] {
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: start;
   gap: 14px 24px;
-  margin-bottom: 24px;
+  margin-bottom: 48px;
 }
 
 .compatibility-results-hero h1 {
@@ -281,15 +281,25 @@ body.compatibility-results-page main i[class*="fa-solid"] {
   transform: rotate(-7deg);
 }
 
+.compatibility-art-paw::before {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  line-height: 1;
+  transform: translate(-50%, -50%);
+}
+
 .compatibility-art-check {
   right: 0;
   top: 40px;
-  width: 108px;
+  box-sizing: border-box;
+  width: 118px;
   height: 62px;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  padding: 0 14px 0 50px;
+  justify-content: center;
+  gap: 9px;
+  padding: 0 14px 0 48px;
   border: 3px solid rgba(120, 1, 22, 0.18);
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.86);
@@ -329,6 +339,9 @@ body.compatibility-results-page main i[class*="fa-solid"] {
   font-family: "Font Awesome 6 Free";
   font-size: 11px;
   font-weight: 900;
+  line-height: 1;
+  text-align: center;
+  -webkit-font-smoothing: antialiased;
 }
 
 .compatibility-art-sparkle {
@@ -428,7 +441,7 @@ body.compatibility-results-page main i[class*="fa-solid"] {
 }
 
 .compatibility-account {
-  margin: 0 auto 22px !important;
+  margin: 28px auto 30px !important;
   padding: 0 !important;
 }
 
@@ -939,7 +952,7 @@ body.compatibility-results-page main i[class*="fa-solid"] {
   display: flex;
   align-items: flex-start;
   gap: 18px;
-  margin: 0 auto 22px;
+  margin: 0 auto 46px;
   padding: 24px 28px;
   border-color: rgba(120, 1, 22, 0.14);
   background: rgba(120, 1, 22, 0.055);
