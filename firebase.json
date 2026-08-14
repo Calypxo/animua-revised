@@ -32,6 +32,15 @@
       "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
       "headers": [
         {
+          "source": "/sw.js",
+          "headers": [
+            {
+              "key": "Cache-Control",
+              "value": "no-cache, no-store, must-revalidate"
+            }
+          ]
+        },
+        {
           "source": "**/*.{js,css,png,jpg,jpeg,gif,svg,webp,avif,woff,woff2}",
           "headers": [
             {
