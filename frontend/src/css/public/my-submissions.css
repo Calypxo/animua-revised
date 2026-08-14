@@ -3130,3 +3130,7 @@ body.submissions-page .compatibility-matches li{grid-template-columns:24px 34px 
     font-size: 0.66rem !important;
   }
 }
+
+body.home-page.submissions-page .submission-next-card {
+  margin: 64px auto 0 !important;
+}

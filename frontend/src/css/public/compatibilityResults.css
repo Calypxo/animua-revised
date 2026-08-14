@@ -1399,3 +1399,11 @@ body.compatibility-results-page main i[class*="fa-solid"] {
     grid-template-columns: 1fr;
   }
 }
+
+body.home-page.compatibility-results-page .compatibility-info-card {
+  margin: 0 auto 64px !important;
+}
+
+body.home-page.compatibility-results-page .compatibility-info-card + .compatibility-how-card {
+  margin-top: 0 !important;
+}
