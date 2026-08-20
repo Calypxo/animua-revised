@@ -16,6 +16,7 @@ const express = require("express");
 const cors = require("cors");
 
 const app = express();
+app.disable("x-powered-by");
 
 const authRoutes = require("./src/routes/authRoutes");
 const userRoutes = require("./src/routes/userRoutes");

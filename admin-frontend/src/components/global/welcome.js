@@ -1,3 +1,5 @@
+import Swal from "sweetalert2";
+
 // frontend/src/components/global/welcome.js
 
 const triggerWelcomeToast = () => {
@@ -5,13 +7,6 @@ const triggerWelcomeToast = () => {
     const userName  = localStorage.getItem("user_name");
 
     if (showToast === "true" && userName) {
-        // Ensure Swal is available (handling potential CDN delay)
-        if (typeof Swal === 'undefined') {
-            console.warn("SweetAlert2 not loaded yet, retrying...");
-            setTimeout(triggerWelcomeToast, 500);
-            return;
-        }
-
         const Toast = Swal.mixin({
             toast: true,
             position: 'top-end',

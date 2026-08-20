@@ -1,3 +1,4 @@
+import Swal from "sweetalert2";
 import { API_BASE_URL } from "../utils/api.js";
 import { clearUserSession } from "../utils/storage.js";
 import { normalizeRole } from "../auth/permissions.js";
