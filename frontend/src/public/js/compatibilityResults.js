@@ -1,3 +1,5 @@
+import { ensureUserSession, hasUserSession } from "../../utils/storage.js";
+
 // /src/public/js/compatibilityResults.js
 // ─────────────────────────────────────────────────────
 // NOTE: The new compatibilityResults.html has ALL logic
@@ -9,7 +11,8 @@
 // Update the HTML first, then you can delete this file.
 // ─────────────────────────────────────────────────────
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  await ensureUserSession();
   // If the new inline script already ran and rendered content, do nothing.
   const shell = document.getElementById("resultsShell");
   if (!shell) return;
@@ -20,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ── Fallback render (old design) ─────────────────────
   let savedResults = [];
-  try { savedResults = JSON.parse(localStorage.getItem("animua_match_results")) || []; }
+  try { savedResults = JSON.parse(sessionStorage.getItem("animua_match_results")) || []; }
   catch (e) { console.error("Failed to parse results:", e); }
 
   if (!savedResults.length) {
@@ -78,14 +81,14 @@ document.addEventListener("DOMContentLoaded", () => {
   // Attach handlers
   shell.querySelectorAll(".adopt-btn").forEach(btn => {
     btn.addEventListener("click", () => {
-      localStorage.setItem("animua_selected_pet_id", btn.dataset.petId);
-      if (!localStorage.getItem("animua_token")) { window.location.href = "/index.html"; return; }
+      sessionStorage.setItem("animua_selected_pet_id", btn.dataset.petId);
+      if (!hasUserSession()) { window.location.href = "/index.html"; return; }
       window.location.href = "/pages/public/find-furbabies.html";
     });
   });
   shell.querySelectorAll(".view-btn").forEach(btn => {
     btn.addEventListener("click", () => {
-      localStorage.setItem("animua_selected_pet_id", btn.dataset.petId);
+      sessionStorage.setItem("animua_selected_pet_id", btn.dataset.petId);
       window.location.href = "/pages/public/find-furbabies.html";
     });
   });

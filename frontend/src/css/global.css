@@ -1728,6 +1728,14 @@ button {
   z-index: 12000 !important;
 }
 
+.animua-session-expired-container {
+  pointer-events: none;
+}
+
+.animua-session-expired-container .swal2-popup {
+  pointer-events: auto;
+}
+
 .animua-popup {
   width: min(360px, calc(100% - 32px)) !important;
   padding: 26px 24px 22px !important;

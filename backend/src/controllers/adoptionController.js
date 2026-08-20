@@ -3,6 +3,7 @@ const {
   buildShelterLabel,
   cleanText,
 } = require("../utils/animalIdentity");
+const { getSignedReadUrl } = require("../services/storageUrlService");
 
 const ADOPTION_COL = "adoptions";
 const ANIMAL_COL = "animals";
@@ -375,24 +376,24 @@ exports.getMyAdoptions = async (req, res) => {
 
               if (animalDoc.exists) {
                 const animalData = animalDoc.data() || {};
+                const imageUrl = await getSignedReadUrl({
+                  path: animalData.photoPath,
+                  legacyUrl:
+                    animalData.imageUrl ||
+                    animalData.photoURL ||
+                    animalData.profileImageUrl ||
+                    animalData.photoUrl ||
+                    "",
+                  expectedPrefix: `animals/${animalDoc.id}`,
+                });
                 animal = {
                   id: animalDoc.id,
                   name: buildShelterLabel(animalData, animalDoc.id),
                   species: animalData.species || "",
                   sex: animalData.sex || animalData.gender || "",
                   age: animalData.age || "",
-                  imageUrl:
-                    animalData.imageUrl ||
-                    animalData.photoURL ||
-                    animalData.profileImageUrl ||
-                    animalData.photoUrl ||
-                    "",
-                  photoURL:
-                    animalData.photoURL ||
-                    animalData.imageUrl ||
-                    animalData.profileImageUrl ||
-                    animalData.photoUrl ||
-                    "",
+                  imageUrl,
+                  photoURL: imageUrl,
                 };
               }
             } catch (animalErr) {

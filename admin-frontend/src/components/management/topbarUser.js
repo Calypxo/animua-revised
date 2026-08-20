@@ -1,6 +1,6 @@
 import "../../css/topbarAlerts.css";
 import Swal from "sweetalert2";
-import { clearUserSession, getUserName, getUserRole } from "../../utils/storage.js";
+import { endUserSession, getUserName, getUserRole } from "../../utils/storage.js";
 import { apiFetch } from "../../utils/api.js";
 import { getManagementNotificationDestination } from "./notificationNavigation.js";
 
@@ -300,7 +300,7 @@ function bindAccountMenu(chip, menu) {
       buttonsStyling: false,
     });
     if (!result.isConfirmed) return;
-    clearUserSession();
+    await endUserSession();
     window.location.replace("/pages/admin-login.html");
   });
   document.addEventListener("click", () => close());

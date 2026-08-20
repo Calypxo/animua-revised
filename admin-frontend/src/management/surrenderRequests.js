@@ -24,13 +24,9 @@ const SURRENDER_AVAILABILITY_API_URL =
 
 async function getPublicSubmittedRequests() {
   try {
-    const token = localStorage.getItem("animua_token");
-
     const response = await fetch(SURRENDER_REQUESTS_API_URL, {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
     });
 
     const data = await response.json();
@@ -257,12 +253,11 @@ async function updateSurrenderAvailability(acceptingRequests) {
   renderSurrenderAvailability({ busy: true });
 
   try {
-    const token = localStorage.getItem("animua_token");
     const response = await fetch(SURRENDER_AVAILABILITY_API_URL, {
       method: "PATCH",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ acceptingRequests }),
     });
@@ -815,7 +810,7 @@ function renderDrawer(r) {
 }
   if (r.status === "Approved") {
     footerBtns += r.arrivalConfirmedAt
-      ? `<button class="btn-convert-confirm" id="drawerConvertBtn"><i class="bi bi-person-vcard-fill"></i> Complete Intake &amp; Start Profiling</button>`
+      ? `<button class="btn-convert-confirm" id="drawerConvertBtn"><i class="bi bi-clipboard2-plus-fill"></i> Start Intake</button>`
       : `
         <button class="btn-ghost-clay" id="drawerExtendDeadlineBtn"><i class="bi bi-calendar-plus"></i> Extend</button>
         <button class="btn-approve-confirm" id="drawerArrivalBtn"><i class="bi bi-person-check"></i> Confirm Arrival</button>
@@ -878,13 +873,11 @@ function renderDrawer(r) {
 }
 
 async function updateSurrenderStatusInBackend(id, payload) {
-  const token = localStorage.getItem("animua_token");
-
   const response = await fetch(`${SURRENDER_REQUESTS_API_URL}/${encodeURIComponent(id)}/status`, {
     method: "PATCH",
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(payload),
   });
@@ -1023,12 +1016,12 @@ async function executeAttendanceWorkflow() {
   try {
     button.disabled = true;
     button.innerHTML = '<span class="button-spinner" aria-hidden="true"></span> Updating…';
-    const token = localStorage.getItem("animua_token");
     const response = await fetch(
       `${SURRENDER_REQUESTS_API_URL}/${encodeURIComponent(id)}/${action}`,
       {
         method: "PATCH",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       }
     );
@@ -1271,6 +1264,10 @@ async function init() {
     renderTopbarUser();
     loadSidebar(); 
 
+    document.getElementById("surrenderAvailabilityToggle")?.addEventListener("change", event => {
+      updateSurrenderAvailability(event.currentTarget.checked);
+    });
+
     await loadSurrenderAvailability();
 
     publicRequests = await getPublicSubmittedRequests();
@@ -1309,10 +1306,6 @@ async function init() {
     document.getElementById("filterCategory")?.addEventListener("change",applyFilters);
     document.getElementById("clearSurrenderFilters")?.addEventListener("click", clearSurrenderFilters);
     document.getElementById("srDrawerBackdrop")?.addEventListener("click", closeDrawer);
-    document.getElementById("surrenderAvailabilityToggle")?.addEventListener("change", event => {
-      updateSurrenderAvailability(event.currentTarget.checked);
-    });
-
     // Reject modal
     document.getElementById("rejectModalClose")?.addEventListener("click",  ()=>closeModal("rejectModalBackdrop"));
     document.getElementById("rejectModalCancel")?.addEventListener("click", ()=>closeModal("rejectModalBackdrop"));

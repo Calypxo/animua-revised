@@ -6,6 +6,7 @@ const MODULES = {
   surrenders: "Surrender Management",
   notifications: "Notifications",
   auth: "Authentication",
+  inventory: "Inventory",
 };
 
 function pathSegments(req) {
@@ -31,6 +32,8 @@ function actionFor(resource, segments, method) {
     [/\/image$/, method === "DELETE" ? "image_removed" : "image_updated"],
     [/\/read$/, "marked_read"],
     [/profile$|update-username$/, "profile_updated"],
+    [/stock-in$/, "stock_in"],
+    [/stock-out$/, "stock_out"],
   ];
   const match = actionMatchers.find(([pattern]) => pattern.test(path));
   if (match) return `${resource}.${match[1]}`;

@@ -8,6 +8,7 @@ import {
   updateProfile,
   deleteUser
 } from "firebase/auth";
+import { clearUserSession, setUserSession } from "../utils/storage.js";
 
 const RECAPTCHA_SITE_KEY =
   import.meta.env?.VITE_RECAPTCHA_SITE_KEY ||
@@ -556,6 +557,7 @@ async function handleEmailVerifiedClick() {
     const firebaseIdToken = await user.getIdToken(true);
     const response = await fetch(`${API_BASE_URL}/auth/confirm-email-verification-otp`, {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json"
       },
@@ -573,13 +575,9 @@ async function handleEmailVerifiedClick() {
     const userRole = data.role || "Public";
     const userFullName = data.fullName || user.displayName || "User";
 
-    localStorage.setItem("animua_token", data.token || "");
-    localStorage.setItem("user_role", userRole);
-    localStorage.setItem("user_name", userFullName);
-    localStorage.setItem("user_email", email);
-    localStorage.setItem("is_logged_in", "true");
-    localStorage.removeItem("pending_verify_email");
-    localStorage.removeItem("pending_verify_password");
+    clearUserSession();
+    setUserSession({ role: userRole, fullName: userFullName, email });
+    sessionStorage.setItem("show_welcome_toast", "true");
 
     if (message) {
       message.textContent = "Account successfully created. Redirecting...";
@@ -589,8 +587,8 @@ async function handleEmailVerifiedClick() {
 
     closeModal(document.getElementById("authModal"));
 
-    const pendingPetId = localStorage.getItem("animua_selected_pet_id");
-    const pendingAction = localStorage.getItem("animua_selected_pet_action");
+    const pendingPetId = sessionStorage.getItem("animua_selected_pet_id");
+    const pendingAction = sessionStorage.getItem("animua_selected_pet_action");
 
     if (userRole === "Admin" || userRole === "Staff") {
       window.location.replace("/pages/dashboard.html");

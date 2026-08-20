@@ -1,20 +1,21 @@
-const LOCAL_API_BASE_URL = "http://localhost:5000/api";
 const PRODUCTION_API_BASE_URL = "https://animua-backend.onrender.com/api";
 
 const configuredApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim().replace(/\/+$/, "");
 
+const currentHostname = globalThis.window?.location?.hostname || "localhost";
 const isLocalHost =
-  window.location.hostname === "localhost" ||
-  window.location.hostname === "127.0.0.1";
+  currentHostname === "localhost" ||
+  currentHostname === "127.0.0.1";
+const localApiBaseUrl = `http://${currentHostname}:5000/api`;
 
 // Keep management and public pages on the same backend in every environment.
 export const API_BASE_URL = isLocalHost
-  ? (configuredApiBaseUrl || LOCAL_API_BASE_URL)
+  ? (configuredApiBaseUrl || localApiBaseUrl)
   : (configuredApiBaseUrl || PRODUCTION_API_BASE_URL);
 
 /**
  * Authenticated fetch wrapper.
- * Automatically attaches the Bearer token from localStorage.
+ * The browser sends the HttpOnly session cookie; JavaScript never reads it.
  * Throws a structured error on non-2xx responses.
  *
  * @param {string} endpoint
@@ -22,17 +23,15 @@ export const API_BASE_URL = isLocalHost
  * @returns {Promise<any>}
  */
 export async function apiFetch(endpoint, opts = {}) {
-  const token = localStorage.getItem("animua_token");
-
   const headers = {
     "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(opts.headers || {}),
   };
 
   const res = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...opts,
     headers,
+    credentials: "include",
   });
 
   const contentType = res.headers.get("content-type") || "";

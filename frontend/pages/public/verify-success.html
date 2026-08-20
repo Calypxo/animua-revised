@@ -422,10 +422,10 @@
   </div>
 
   <script type="module">
-  import { auth, db } from "../../src/utils/firebase.js";
+  import { auth } from "../../src/utils/firebase.js";
   import { onAuthStateChanged } from "firebase/auth";
-  import { doc, updateDoc } from "firebase/firestore";
   import { API_BASE_URL } from "../../src/utils/api.js";
+  import { syncEmailVerification } from "../../src/auth/verification.js";
 
   const statusText = document.getElementById("statusText");
   const continueBtn = document.getElementById("continueBtn");
@@ -502,10 +502,7 @@
     setVisualState("success");
 
     try {
-      await updateDoc(doc(db, "users", user.email.toLowerCase()), {
-        emailVerified: true,
-        status: "Active"
-      });
+      await syncEmailVerification(user);
     } catch (e) {}
 
     const savedEmail = localStorage.getItem("pending_verify_email");

@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "../../utils/api.js";
+import { ensureUserSession, hasUserSession } from "../../utils/storage.js";
 import {
   mergeSubmissionResults,
   submissionLoadErrorMessage,
@@ -26,10 +27,10 @@ async function getSwal() {
 async function loadCompatibilityAccount() {
   if (compatibilityAccount?.classList.contains("hidden")) return;
   if (!compatibilityAccountBody) return;
-  const token = getToken();
-  if (!token) { compatibilityAccountBody.innerHTML = `<p>Log in to view your saved compatibility result.</p>`; return; }
+  await ensureUserSession();
+  if (!hasUserSession()) { compatibilityAccountBody.innerHTML = `<p>Log in to view your saved compatibility result.</p>`; return; }
   try {
-    const response = await fetch(`${API_BASE_URL}/match/my-results`, { headers: { Authorization: `Bearer ${token}` } });
+    const response = await fetch(`${API_BASE_URL}/match/my-results`, { credentials: "include" });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.message || "Unable to load compatibility results.");
     const results = data.results || [];
@@ -67,7 +68,7 @@ async function showSavedAnimalDetails(button) {
     customClass: { popup: "saved-animal-popup" },
     didOpen: (popup) => {
       popup.querySelectorAll("[data-close-saved-animal]").forEach((item) => item.addEventListener("click", () => Swal.close()));
-      popup.querySelector("[data-open-saved-animal]")?.addEventListener("click", () => { localStorage.setItem("animua_selected_pet_id", animalId); localStorage.setItem("animua_selected_pet_action", "view"); });
+      popup.querySelector("[data-open-saved-animal]")?.addEventListener("click", () => { sessionStorage.setItem("animua_selected_pet_id", animalId); sessionStorage.setItem("animua_selected_pet_action", "view"); });
     },
   });
 }
@@ -84,10 +85,6 @@ let currentSort = "newest";
 let currentPage = 1;
 
 const SUBMISSIONS_PER_PAGE = 5;
-
-function getToken() {
-  return localStorage.getItem("animua_token") || "";
-}
 
 function formatDate(value) {
   if (!value) return "Not available";
@@ -231,16 +228,13 @@ function normalizeSurrender(item) {
 }
 
 async function fetchJson(url) {
-  const token = getToken();
-
-  if (!token) {
+  await ensureUserSession();
+  if (!hasUserSession()) {
     return null;
   }
 
   const response = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    credentials: "include",
   });
 
   if (!response.ok) {
@@ -722,6 +716,7 @@ function renderApprovedAdoptionNextSteps(item) {
         <p><strong>Congratulations, your application has been approved.</strong>You may now schedule a pickup date and time to bring your new companion home.</p>
       </div>
       ${renderAttendanceDeadline(item, "adoption")}
+      ${renderScheduleFeedback(item)}
 
       <section class="schedule-card">
         <header>
@@ -1236,9 +1231,9 @@ async function saveSchedule(item, kind) {
 
   const response = await fetch(endpoint, {
     method: "PATCH",
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${getToken()}`,
     },
     body: JSON.stringify(schedule),
   });

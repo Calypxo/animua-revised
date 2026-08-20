@@ -25,13 +25,12 @@ export async function deleteAnnouncement(id) {
 }
 
 async function announcementImageRequest(id, options) {
-  const token = localStorage.getItem("animua_token");
   const response = await fetch(
     `${API_BASE_URL}/announcements/${encodeURIComponent(id)}/image`,
     {
       ...options,
+      credentials: "include",
       headers: {
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...(options.headers || {}),
       },
     }

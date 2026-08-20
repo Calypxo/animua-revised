@@ -1,30 +1,32 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
 
+const projectRoot = import.meta.dirname;
+
 export default defineConfig({
   root: '.',
   build: {
     outDir: 'dist',
     rollupOptions: {
       input: {
-        main: resolve(__dirname, 'index.html'),
+        main: resolve(projectRoot, 'index.html'),
 
-        adminLogin:             resolve(__dirname, 'pages/admin-login.html'),
-        dashboard:              resolve(__dirname, 'pages/dashboard.html'),
-        animalProfile:          resolve(__dirname, 'pages/animalProfile.html'),
-        animalProfiling:        resolve(__dirname, 'pages/animalProfiling.html'),
-        adoptionApplications:   resolve(__dirname, 'pages/adoptionApplications.html'),
-        surrenders:             resolve(__dirname, 'pages/surrenders.html'),
-        inventory:              resolve(__dirname, 'pages/inventory.html'),
-        reports:                resolve(__dirname, 'pages/reports.html'),
-        userManagement:         resolve(__dirname, 'pages/userManagement.html'),
-        intakeList:             resolve(__dirname, 'pages/intakeList.html'),
-        auditTrail:             resolve(__dirname, 'pages/auditTrail.html'),
-        archivedRecords:        resolve(__dirname, 'pages/archivedRecords.html'),
-        announcements:          resolve(__dirname, 'pages/announcements.html'),
-        contactMessages:        resolve(__dirname, 'pages/contactMessages.html'),
-        accountSettings:         resolve(__dirname, 'pages/accountSettings.html'),
-        compatibilityQuiz:       resolve(__dirname, 'pages/compatibilityQuiz.html'),
+        adminLogin:             resolve(projectRoot, 'pages/admin-login.html'),
+        dashboard:              resolve(projectRoot, 'pages/dashboard.html'),
+        animalProfile:          resolve(projectRoot, 'pages/animalProfile.html'),
+        animalProfiling:        resolve(projectRoot, 'pages/animalProfiling.html'),
+        adoptionApplications:   resolve(projectRoot, 'pages/adoptionApplications.html'),
+        surrenders:             resolve(projectRoot, 'pages/surrenders.html'),
+        inventory:              resolve(projectRoot, 'pages/inventory.html'),
+        reports:                resolve(projectRoot, 'pages/reports.html'),
+        userManagement:         resolve(projectRoot, 'pages/userManagement.html'),
+        intakeList:             resolve(projectRoot, 'pages/intakeList.html'),
+        auditTrail:             resolve(projectRoot, 'pages/auditTrail.html'),
+        archivedRecords:        resolve(projectRoot, 'pages/archivedRecords.html'),
+        announcements:          resolve(projectRoot, 'pages/announcements.html'),
+        contactMessages:        resolve(projectRoot, 'pages/contactMessages.html'),
+        accountSettings:         resolve(projectRoot, 'pages/accountSettings.html'),
+        compatibilityQuiz:       resolve(projectRoot, 'pages/compatibilityQuiz.html'),
       },
     },
   },

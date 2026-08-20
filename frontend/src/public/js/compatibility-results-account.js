@@ -1,5 +1,6 @@
 import Swal from "sweetalert2";
 import { API_BASE_URL } from "../../utils/api.js";
+import { ensureUserSession, hasUserSession } from "../../utils/storage.js";
 
 const DOG_IMAGE = new URL("../../assets/images/dog.jpg", import.meta.url).href;
 const CAT_IMAGE = new URL("../../assets/images/cat.jpg", import.meta.url).href;
@@ -73,10 +74,6 @@ const answerSections = [
     ],
   },
 ];
-
-function getToken() {
-  return localStorage.getItem("animua_token") || "";
-}
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -181,13 +178,13 @@ function setAccountHeader(mode = "results") {
 
 function getFreshQuizResult() {
   const params = new URLSearchParams(window.location.search);
-  const shouldUseFresh = params.get("source") === "quiz" || localStorage.getItem("animua_match_fresh") === "1";
+  const shouldUseFresh = params.get("source") === "quiz" || sessionStorage.getItem("animua_match_fresh") === "1";
   if (!shouldUseFresh) return null;
 
   try {
-    const matches = JSON.parse(localStorage.getItem("animua_match_results") || "[]");
-    const quizData = JSON.parse(localStorage.getItem("animua_quiz_data") || "{}");
-    const metadata = JSON.parse(localStorage.getItem("animua_match_metadata") || "{}");
+    const matches = JSON.parse(sessionStorage.getItem("animua_match_results") || "[]");
+    const quizData = JSON.parse(sessionStorage.getItem("animua_quiz_data") || "{}");
+    const metadata = JSON.parse(sessionStorage.getItem("animua_match_metadata") || "{}");
     if (!Array.isArray(matches)) return null;
 
     return {
@@ -435,8 +432,8 @@ async function showSavedAnimalDetails(button) {
     didOpen: (popup) => {
       popup.querySelectorAll("[data-close-saved-animal]").forEach((item) => item.addEventListener("click", () => Swal.close()));
       popup.querySelector("[data-open-saved-animal]")?.addEventListener("click", () => {
-        localStorage.setItem("animua_selected_pet_id", animalId);
-        localStorage.setItem("animua_selected_pet_action", "view");
+        sessionStorage.setItem("animua_selected_pet_id", animalId);
+        sessionStorage.setItem("animua_selected_pet_action", "view");
       });
     },
   });
@@ -446,19 +443,19 @@ async function loadCompatibilityAccount() {
   const freshResult = getFreshQuizResult();
   if (freshResult) {
     renderResults([freshResult], "fresh");
-    localStorage.removeItem("animua_match_fresh");
+    sessionStorage.removeItem("animua_match_fresh");
     return;
   }
 
-  const token = getToken();
-  if (!token) {
+  await ensureUserSession();
+  if (!hasUserSession()) {
     renderEmpty("Log in to view your saved compatibility result.", "Go to login");
     return;
   }
 
   try {
     const response = await fetch(`${API_BASE_URL}/match/my-results`, {
-      headers: { Authorization: `Bearer ${token}` },
+      credentials: "include",
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.message || "Unable to load compatibility results.");

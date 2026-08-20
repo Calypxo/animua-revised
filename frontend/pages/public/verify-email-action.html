@@ -275,9 +275,9 @@
   </div>
 
   <script type="module">
-  import { auth, db } from "../../src/utils/firebase.js";
+  import { auth } from "../../src/utils/firebase.js";
   import { applyActionCode, checkActionCode } from "firebase/auth";
-  import { doc, getDoc, updateDoc, query, collection, where, getDocs } from "firebase/firestore";
+  import { syncEmailVerification } from "../../src/auth/verification.js";
 
   const statusIcon = document.getElementById("statusIcon");
   const statusBadge = document.getElementById("statusBadge");
@@ -306,38 +306,6 @@
     helperText.textContent = help;
   }
 
-  async function markUserVerifiedByEmail(email) {
-    if (!email) return;
-
-    const normalizedEmail = email.trim().toLowerCase();
-
-    try {
-      const directRef = doc(db, "users", normalizedEmail);
-      const directSnap = await getDoc(directRef);
-
-      if (directSnap.exists()) {
-        await updateDoc(directRef, {
-          emailVerified: true,
-          status: "Active"
-        });
-        return;
-      }
-
-      const usersRef = collection(db, "users");
-      const q = query(usersRef, where("email", "==", normalizedEmail));
-      const querySnap = await getDocs(q);
-
-      for (const userDoc of querySnap.docs) {
-        await updateDoc(doc(db, "users", userDoc.id), {
-          emailVerified: true,
-          status: "Active"
-        });
-      }
-    } catch (firestoreError) {
-      console.error("[Firestore Verification Update Error]", firestoreError);
-    }
-  }
-
   async function handleEmailVerification() {
     const mode = getParam("mode");
     const oobCode = getParam("oobCode");
@@ -357,7 +325,14 @@
       const verifiedEmail = info?.data?.email || "";
 
       await applyActionCode(auth, oobCode);
-      await markUserVerifiedByEmail(verifiedEmail);
+      if (
+        auth.currentUser &&
+        String(auth.currentUser.email || "").toLowerCase() === verifiedEmail.trim().toLowerCase()
+      ) {
+        await syncEmailVerification(auth.currentUser).catch((syncError) => {
+          console.warn("[Email Verification Sync Warning]", syncError.message);
+        });
+      }
 
       setState(
         "success",

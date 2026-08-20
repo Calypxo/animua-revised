@@ -1,5 +1,6 @@
 import Swal from "sweetalert2";
 import { API_BASE_URL } from "../../utils/api.js";
+import { ensureUserSession, getUserSession, hasUserSession } from "../../utils/storage.js";
 
 const contactForm = document.getElementById("contactForm");
 const contactSubmit = document.getElementById("contactSubmit");
@@ -10,7 +11,6 @@ const contactLoginPanel = document.getElementById("contactLoginPanel");
 const contactLoginButton = document.getElementById("contactLoginButton");
 const contactFormPanel = document.getElementById("contactFormPanel");
 const contactRepliesPanel = document.getElementById("contactRepliesPanel");
-const CONTACT_EMAIL_KEY = "animua_contact_email";
 const fullNameInput = contactForm?.querySelector('input[name="fullName"]');
 const emailInput = contactForm?.querySelector('input[name="email"]');
 let currentContactMessages = [];
@@ -79,7 +79,7 @@ function getContactInitial(value = "") {
 }
 
 function getContactUserPhoto() {
-  return localStorage.getItem("user_profile_photo") || "";
+  return getUserSession()?.profilePhotoDataUrl || "";
 }
 
 function getConversationStatus(item = {}) {
@@ -101,25 +101,19 @@ function getFormPayload() {
 }
 
 function getLoggedInContactUser() {
-  const token = localStorage.getItem("animua_token");
-  const isLoggedIn = localStorage.getItem("is_logged_in");
+  const session = getUserSession();
+  if (!session) return null;
 
-  if (!token && isLoggedIn !== "true") return null;
-
-  const name = localStorage.getItem("user_name") || "";
-  const email = localStorage.getItem("user_email") || "";
+  const name = session.fullName || "";
+  const email = session.email || "";
 
   if (!name && !email) return null;
 
   return { name, email };
 }
 
-function getAuthToken() {
-  return localStorage.getItem("animua_token") || "";
-}
-
 function isContactLoggedIn() {
-  return Boolean(getAuthToken());
+  return hasUserSession();
 }
 
 function requireLogin(message = "Please log in before sending a message.") {
@@ -161,20 +155,15 @@ function applyAccountPrefill() {
     emailInput.classList.add("readonly-account-field");
   }
 
-  if (user.email) {
-    localStorage.setItem(CONTACT_EMAIL_KEY, user.email.toLowerCase());
-  }
-
   return user.email || "";
 }
 
 async function fetchJson(url, options = {}) {
-  const token = getAuthToken();
   const response = await fetch(url, {
     ...options,
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(options.headers || {}),
     },
   });
@@ -384,7 +373,7 @@ function openConversation(contactId) {
   const item = currentContactMessages.find((message) => message.id === contactId);
 
   if (!item) return;
-  if (!getAuthToken()) {
+  if (!hasUserSession()) {
     requireLogin("Please log in before replying to a conversation.");
     return;
   }
@@ -454,7 +443,6 @@ contactForm?.addEventListener("submit", async (event) => {
       body: JSON.stringify(payload),
     });
 
-    localStorage.setItem(CONTACT_EMAIL_KEY, payload.email.toLowerCase());
     contactForm.reset();
     applyAccountPrefill();
     setStatus(data.message || "Your message has been sent to the ANIMUA team.", "success");
@@ -524,7 +512,8 @@ contactLoginButton?.addEventListener("click", () => {
   requireLogin("Please log in to message the ANIMUA team.");
 });
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  await ensureUserSession();
   const isLoggedIn = updateContactAuthState();
   if (!isLoggedIn) return;
   applyAccountPrefill();

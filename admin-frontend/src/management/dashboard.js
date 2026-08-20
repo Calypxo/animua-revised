@@ -7,7 +7,7 @@ import { renderPageHeader } from "../components/management/pageHeader.js";
 import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.js";
 import { apiFetch } from "../utils/api.js";
 import { canAccessModule } from "../auth/permissions.js";
-import { getUserRole } from "../utils/storage.js";
+import { getUserName, getUserRole } from "../utils/storage.js";
 
 let animals = [];
 let activities = [];
@@ -273,7 +273,7 @@ async function init() {
     const data = await apiFetch("/dashboard/stats");
     dashboardData = data;
     document.getElementById("live-date").textContent = new Date().toLocaleDateString("en-PH", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
-    const name = localStorage.getItem("user_name") || "Admin";
+    const name = getUserName() || "Admin";
     document.getElementById("welcomeName").textContent = name.split(" ")[0];
     populateCounts(data);
     renderCharts(data);

@@ -172,5 +172,6 @@ def score_matches(payload: MatchRequest):
     results.sort(key=lambda x: x["matchScore"], reverse=True)
 
     return {
+        "engine": "python",
         "matches": results[: payload.top_k]
     }
