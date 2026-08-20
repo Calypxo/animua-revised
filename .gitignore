@@ -15,6 +15,7 @@ build/
 # local/generated artifacts
 .runtime-logs/
 .tmp-chrome-contact-check/
+.tmp-mobile-check-*/
 .venv/
 .python/
 __pycache__/
