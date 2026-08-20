@@ -84,10 +84,10 @@ describe("FT-042 - Finalize Approved Adoption", () => {
       expect(registeredPaths.filter((path) => path.startsWith("notifications/"))).to.have.length(1);
       expect(registeredPaths.filter((path) => path.startsWith("auditLogs/"))).to.have.length(2);
     });
-    cy.window().then((window) =>
+    cy.getCookie("animua_session").then((cookie) =>
       apiRequest({
         path: "animals/FT_ANIMAL_READY_FINALIZE",
-        token: window.localStorage.getItem("animua_token"),
+        token: cookie?.value,
       }),
     ).then((response) => {
       expect(response.status).to.equal(200);

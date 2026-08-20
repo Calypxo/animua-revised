@@ -15,6 +15,9 @@ describe("FT-025 — Management Portal Login", () => {
         window.sessionStorage.clear();
       },
     });
+    cy.wait("@protectedSession", { timeout: 30000 })
+      .its("response.statusCode")
+      .should("eq", 401);
     cy.fillSensitiveInput("#login-email", email);
     cy.fillSensitiveInput("#login-password", password);
     cy.get("#login-form button[type='submit']").click();
@@ -25,10 +28,11 @@ describe("FT-025 — Management Portal Login", () => {
     cy.wait("@dashboardStats", { timeout: 30000 }).its("response.statusCode").should("eq", 200);
     cy.get("#sidebar").should("be.visible").and("contain.text", "Dashboard");
     cy.get("#display-role").should("contain.text", "Admin");
+    cy.assertHardenedBrowserStorage();
     cy.window().then((window) => {
-      expect(window.localStorage.getItem("animua_token")).to.be.a("string").and.not.be.empty;
-      expect(window.localStorage.getItem("user_role")).to.equal("Admin");
-      expect(window.localStorage.getItem("user_email")).to.equal(email);
+      expect(window.localStorage.getItem("animua_token")).to.be.null;
+      expect(window.localStorage.getItem("user_role")).to.be.null;
+      expect(window.localStorage.getItem("user_email")).to.be.null;
     });
   });
 });

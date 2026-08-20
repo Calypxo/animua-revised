@@ -1,5 +1,5 @@
 import { API_BASE_URL } from "/src/utils/api.js";
-import { getToken } from "/src/utils/storage.js";
+import { ensureUserSession, hasUserSession } from "/src/utils/storage.js";
 
 const DEFAULT_DOG_IMAGE = new URL("../../assets/images/dog.jpg", import.meta.url).href;
 const DEFAULT_CAT_IMAGE = new URL("../../assets/images/cat.jpg", import.meta.url).href;
@@ -116,9 +116,9 @@ const escapeQuizText = (value) => String(value ?? "")
   .replaceAll(">", "&gt;")
   .replaceAll('"', "&quot;");
 
-async function loadQuestionConfiguration(token) {
+async function loadQuestionConfiguration() {
   const response = await fetch(`${API_BASE_URL}/match/questions`, {
-    headers: { Authorization: `Bearer ${token}` },
+    credentials: "include",
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.message || "Unable to load quiz questions.");
@@ -817,9 +817,9 @@ async function handleSubmit() {
   try {
     const response = await fetch(`${API_BASE_URL}/match`, {
       method: "POST",
+      credentials: "include",
       headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${getToken()}`
+        "Content-Type": "application/json"
       },
       body: JSON.stringify(quizData)
     });
@@ -828,16 +828,16 @@ async function handleSubmit() {
     if (!response.ok) throw new Error(result.message || "Failed to fetch compatibility matches.");
     const matched = result.matches || [];
 
-    localStorage.setItem("animua_quiz_data", JSON.stringify(quizData));
-    localStorage.setItem("animua_match_results", JSON.stringify(matched));
-    localStorage.setItem("animua_match_metadata", JSON.stringify({ resultId: result.resultId, completedAt: result.completedAt, nextRetakeAt: result.nextRetakeAt }));
-    localStorage.setItem("animua_match_fresh", "1");
+    sessionStorage.setItem("animua_quiz_data", JSON.stringify(quizData));
+    sessionStorage.setItem("animua_match_results", JSON.stringify(matched));
+    sessionStorage.setItem("animua_match_metadata", JSON.stringify({ resultId: result.resultId, completedAt: result.completedAt, nextRetakeAt: result.nextRetakeAt }));
+    sessionStorage.setItem("animua_match_fresh", "1");
 
     window.location.href = "/pages/public/compatibilityResults.html?source=quiz";
   } catch (err) {
     console.error("Matching failed:", err);
-    localStorage.setItem("animua_quiz_data", JSON.stringify(quizData));
-    localStorage.setItem("animua_match_results", JSON.stringify([]));
+    sessionStorage.setItem("animua_quiz_data", JSON.stringify(quizData));
+    sessionStorage.setItem("animua_match_results", JSON.stringify([]));
     document.getElementById("quizMain").style.display = "none";
     document.getElementById("completionScreen").style.display = "flex";
     document.querySelector(".quiz-phase-nav")?.setAttribute("hidden", "");
@@ -920,11 +920,11 @@ async function resolveTopMatchPhoto(match) {
 
 /* ── Init ─────────────────────────────────────────── */
 async function initializeQuiz() {
-  const token = getToken();
+  await ensureUserSession();
   const access = document.getElementById("quizAccessCard");
   document.body.classList.remove("quiz-locked-result");
   access?.classList.remove("quiz-retake-note");
-  if (!token) {
+  if (!hasUserSession()) {
     document.getElementById("questionArea").hidden = true;
     document.querySelector(".quiz-phase-nav")?.setAttribute("hidden", "");
     access.hidden = false;
@@ -933,8 +933,8 @@ async function initializeQuiz() {
   }
   try {
     const [response] = await Promise.all([
-      fetch(`${API_BASE_URL}/match/eligibility`, { headers: { Authorization: `Bearer ${token}` } }),
-      loadQuestionConfiguration(token),
+      fetch(`${API_BASE_URL}/match/eligibility`, { credentials: "include" }),
+      loadQuestionConfiguration(),
     ]);
     const info = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(info.message || "Please log in again.");
@@ -983,7 +983,7 @@ async function initializeQuiz() {
       } else {
         access.innerHTML = `<section class="saved-result-state ${info.reason === "QUIZ_DISABLED" ? "is-break" : ""}"><header><div><span class="saved-state-kicker">Compatibility result saved</span><h1>Your best matches are waiting.</h1><p>Your recommendation is stored securely in your ANIMUA account until your next quiz attempt.</p></div><a class="locked-result-home-link" href="/pages/public/home.html"><i class="bi bi-house-door"></i>Back to home</a></header><div class="saved-result-dashboard"><aside class="saved-date-stack"><article><span><i class="bi bi-check2-circle"></i></span><div><small>Completed</small><strong>${safe(completedDate)}</strong></div></article><article><span><i class="bi bi-calendar2-week"></i></span><div><small>Next allowed retake</small><strong>${safe(nextDate)}</strong></div></article><p><i class="bi bi-clock-history"></i><b>${remainingDays} day${remainingDays === 1 ? "" : "s"} remaining</b><em><i style="width:${remainingPercent}%"></i></em></p><div class="saved-result-actions"><a href="/pages/public/compatibilityResults.html"><i class="bi bi-stars"></i>View full results</a><a class="is-secondary" href="/pages/public/find-furbabies.html"><i class="bi bi-heart"></i>Adopt now</a></div></aside><main class="saved-result-main"><article class="saved-top-match"><span class="saved-match-label"><i class="bi bi-award"></i>Top recommendation</span><div class="saved-match-body"><img class="saved-match-photo" src="${safe(topPhoto)}" alt="${safe(top.animalName || "Recommended animal")}"><div><small>Best match</small><h2>${safe(top.animalName || "Your saved shelter match")}</h2><p>Based on your lifestyle and care preferences</p></div><strong style="--score-percent:${scoreValue}">${score}<small>%</small></strong></div></article>${traitCards ? `<section class="saved-trait-profile"><div class="saved-profile-heading"><span><i class="bi bi-person-circle"></i></span><div><span class="saved-state-kicker">Your profile</span><h3>Compatibility analysis based on your quiz responses.</h3></div></div><div class="saved-trait-grid">${traitCards}</div></section>` : ""}<footer><i class="bi bi-calendar-event"></i>You can take the quiz again beginning <strong>${safe(nextDate)}</strong>.</footer></main></div></section>`;
       }
-      if (info.latestResult) localStorage.setItem("animua_saved_result", JSON.stringify(info.latestResult));
+      if (info.latestResult) sessionStorage.setItem("animua_saved_result", JSON.stringify(info.latestResult));
       return;
     }
     if (info.hasPreviousResult) {

@@ -2,10 +2,16 @@ import Swal from "sweetalert2";
 import { handleLogin } from "../../auth/login.js";
 import { handleRegistration } from "../../auth/register.js";
 import { API_BASE_URL } from "../../utils/api.js";
+import { auth } from "../../utils/firebase.js";
+import { signOut } from "firebase/auth";
 import {
   clearUserSession,
-  getToken,
+  endUserSession,
+  ensureUserSession,
+  getUserSession,
+  hasUserSession,
   isAuthenticationFailure,
+  setUserSession,
 } from "../../utils/storage.js";
 
 const CHATBOT_MIN_TYPING_MS = 1000;
@@ -147,7 +153,7 @@ function openAuthModal(event) {
   if (!authModal) return;
   if (event) event.preventDefault();
 
-  if (localStorage.getItem("animua_token")) {
+  if (hasUserSession()) {
     closeAuthModal();
     updateAuthUI();
     return;
@@ -476,7 +482,7 @@ function promptLoginAfterSessionExpired() {
     },
     buttonsStyling: false
   }).then(() => {
-    localStorage.setItem("animua_open_auth_modal", "true");
+    sessionStorage.setItem("animua_open_auth_modal", "true");
     showLoginView();
     openAuthModal();
   });
@@ -491,10 +497,10 @@ function updateAuthUI() {
   const dropdownUserInitial = document.getElementById("dropdownUserInitial");
   const logoutBtn = document.getElementById("logoutBtn");
 
-  const hasToken = Boolean(localStorage.getItem("animua_token"));
-  const isLoggedIn = hasToken;
-  const userName = localStorage.getItem("user_name") || "User";
-  const userPhoto = localStorage.getItem("user_profile_photo") || "";
+  const session = getUserSession();
+  const isLoggedIn = Boolean(session);
+  const userName = session?.fullName || "User";
+  const userPhoto = session?.profilePhotoDataUrl || "";
   const displayName = getFirstName(userName);
   const dropdownAvatar = document.querySelector(".user-dropdown-avatar");
 
@@ -539,6 +545,10 @@ function updateAuthUI() {
 
       if (!result.isConfirmed) return;
 
+      await Promise.allSettled([
+        endUserSession(),
+        signOut(auth),
+      ]);
       clearPublicSession();
 
       window.location.href = "/pages/public/home.html";
@@ -547,8 +557,8 @@ function updateAuthUI() {
 }
 
 function showWelcomeToastIfNeeded() {
-  const shouldShow = localStorage.getItem("show_welcome_toast") === "true";
-  const userName = localStorage.getItem("user_name") || "User";
+  const shouldShow = sessionStorage.getItem("show_welcome_toast") === "true";
+  const userName = getUserSession()?.fullName || "User";
 
   if (shouldShow) {
     Swal.fire({
@@ -561,7 +571,7 @@ function showWelcomeToastIfNeeded() {
       timerProgressBar: true
     });
 
-    localStorage.removeItem("show_welcome_toast");
+    sessionStorage.removeItem("show_welcome_toast");
   }
 }
 
@@ -1571,8 +1581,8 @@ function setupFeaturedFurbabies() {
 
   const openPetProfile = (petId) => {
     if (petId) {
-      localStorage.setItem("animua_selected_pet_id", petId);
-      localStorage.setItem("animua_selected_pet_action", "view");
+      sessionStorage.setItem("animua_selected_pet_id", petId);
+      sessionStorage.setItem("animua_selected_pet_action", "view");
     }
 
     window.location.href = "find-furbabies.html";
@@ -1953,11 +1963,10 @@ function renderNotificationsLoading() {
 }
 
 async function fetchNotifications({ markRead = false } = {}) {
-  const token = localStorage.getItem("animua_token");
-  if (!token) throw new Error("Please log in to view notifications.");
+  if (!hasUserSession()) throw new Error("Please log in to view notifications.");
 
   const response = await fetch(`${API_BASE_URL}/notifications`, {
-    headers: { Authorization: `Bearer ${token}` }
+    credentials: "include"
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
@@ -1971,7 +1980,7 @@ async function fetchNotifications({ markRead = false } = {}) {
   if (markRead && Number(data.unreadCount || 0) > 0) {
     fetch(`${API_BASE_URL}/notifications/read`, {
       method: "PATCH",
-      headers: { Authorization: `Bearer ${token}` }
+      credentials: "include"
     }).then(() => {
       updateNotificationBadge(0);
       notificationPopup?.querySelectorAll(".notification-item.is-unread")
@@ -1985,8 +1994,8 @@ async function fetchNotifications({ markRead = false } = {}) {
 async function toggleNotificationsPopup() {
   if (!notificationPopup) return;
 
-  if (!localStorage.getItem("animua_token")) {
-    localStorage.setItem("animua_open_auth_modal", "true");
+  if (!hasUserSession()) {
+    sessionStorage.setItem("animua_open_auth_modal", "true");
     showLoginView();
     openAuthModal();
     return;
@@ -2021,7 +2030,7 @@ async function toggleNotificationsPopup() {
 }
 
 function refreshNotificationDot() {
-  if (!localStorage.getItem("animua_token")) {
+  if (!hasUserSession()) {
     updateNotificationBadge(0);
     return;
   }
@@ -2211,8 +2220,8 @@ async function openProfileModal(trigger = null) {
   ensureAccountProfileModal();
   if (!profileModal) return;
 
-  if (!localStorage.getItem("animua_token")) {
-    localStorage.setItem("animua_open_auth_modal", "true");
+  if (!hasUserSession()) {
+    sessionStorage.setItem("animua_open_auth_modal", "true");
     showLoginView();
     openAuthModal();
     return;
@@ -2264,11 +2273,9 @@ function closeProfileModal() {
 }
 
 async function fetchCurrentAccount() {
-  const token = localStorage.getItem("animua_token");
   const response = await fetch(`${API_BASE_URL}/auth/account`, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
+    credentials: "include",
+    cache: "no-store",
   });
   const data = await response.json();
 
@@ -2277,15 +2284,17 @@ async function fetchCurrentAccount() {
   }
 
   currentProfileAccount = mergeAccountFallbacks(data.account || {});
+  setUserSession(currentProfileAccount);
   pendingProfilePhotoDataUrl = currentProfileAccount.profilePhotoDataUrl || "";
   return currentProfileAccount;
 }
 
 function getStoredProfileFallbacks() {
+  const session = getUserSession() || {};
   return {
-    fullName: localStorage.getItem("user_name") || "",
-    email: localStorage.getItem("user_email") || "",
-    profilePhotoDataUrl: localStorage.getItem("user_profile_photo") || "",
+    fullName: session.fullName || "",
+    email: session.email || "",
+    profilePhotoDataUrl: session.profilePhotoDataUrl || "",
   };
 }
 
@@ -2435,8 +2444,8 @@ async function ensureCurrentAccount() {
 }
 
 async function showNotificationSettingsDialog({ returnToProfile = false } = {}) {
-  if (!localStorage.getItem("animua_token")) {
-    localStorage.setItem("animua_open_auth_modal", "true");
+  if (!hasUserSession()) {
+    sessionStorage.setItem("animua_open_auth_modal", "true");
     showLoginView();
     openAuthModal();
     return;
@@ -2607,19 +2616,18 @@ async function handleNotificationSettingsConfirm() {
 }
 
 async function saveNotificationSettings(settings) {
-  const token = localStorage.getItem("animua_token");
   const account = await ensureCurrentAccount();
   const notificationSettings = normalizeNotificationSettings(settings);
   const notificationPreference = getNotificationPreferenceSummary(notificationSettings);
 
   const response = await fetch(`${API_BASE_URL}/auth/account/profile`, {
     method: "PATCH",
+    credentials: "include",
     headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`
+      "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      fullName: account.fullName || localStorage.getItem("user_name") || "User",
+      fullName: account.fullName || getUserSession()?.fullName || "User",
       phone: account.phone || "",
       profilePhotoDataUrl: account.profilePhotoDataUrl || "",
       notificationSettings,
@@ -2657,7 +2665,6 @@ async function handleProfileSave(event) {
   setProfileSaveState("saving");
 
   try {
-    const token = localStorage.getItem("animua_token");
     const payload = {
       fullName,
       phone: getValue("profilePhone"),
@@ -2672,9 +2679,9 @@ async function handleProfileSave(event) {
 
     const response = await fetch(`${API_BASE_URL}/auth/account/profile`, {
       method: "PATCH",
+      credentials: "include",
       headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
+        "Content-Type": "application/json"
       },
       body: JSON.stringify(payload)
     });
@@ -2694,13 +2701,7 @@ async function handleProfileSave(event) {
       console.warn("[Profile refresh after save failed]", refreshError.message);
     }
 
-    localStorage.setItem("user_name", currentProfileAccount.fullName || fullName);
-    localStorage.setItem("user_email", currentProfileAccount.email || getValue("profileEmail"));
-    if (currentProfileAccount.profilePhotoDataUrl) {
-      localStorage.setItem("user_profile_photo", currentProfileAccount.profilePhotoDataUrl);
-    } else {
-      localStorage.removeItem("user_profile_photo");
-    }
+    setUserSession(currentProfileAccount);
     updateHeaderProfile(
       currentProfileAccount.fullName || fullName,
       currentProfileAccount.profilePhotoDataUrl || ""
@@ -3326,7 +3327,7 @@ async function handleChangePasswordConfirm() {
 
 function showPasswordOtpStep() {
   const popup = Swal.getPopup();
-  const email = localStorage.getItem("user_email") || currentProfileAccount?.email || "";
+  const email = currentProfileAccount?.email || getUserSession()?.email || "";
   const safeMaskedEmail = escapeHtmlText(maskProfileEmail(email));
 
   Swal.hideLoading();
@@ -3825,7 +3826,13 @@ function setupProcessLucideIcons() {
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  clearUserSession();
+  try {
+    await ensureUserSession();
+  } catch (error) {
+    console.warn("Unable to restore the public session:", error.message);
+  }
   setupProfileModal();
   setupProcessLucideIcons();
   setupAccountActions();
@@ -3845,11 +3852,11 @@ document.addEventListener("DOMContentLoaded", () => {
     showLoginView();
   }
 
-  if (window.location.pathname.includes("login.html") && authModal && !localStorage.getItem("animua_token")) {
+  if (window.location.pathname.includes("login.html") && authModal && !hasUserSession()) {
     openAuthModal();
   }
 
-  if (window.location.hash === "#login" && authModal && !localStorage.getItem("animua_token")) {
+  if (window.location.hash === "#login" && authModal && !hasUserSession()) {
     showLoginView();
     openAuthModal();
     window.history.replaceState(null, "", window.location.pathname + window.location.search);
@@ -3867,13 +3874,13 @@ document.addEventListener("DOMContentLoaded", () => {
     clearQuizIntroUrlState();
   }
 
-  const shouldOpenAuthModal = localStorage.getItem("animua_open_auth_modal") === "true";
-  if (shouldOpenAuthModal && !localStorage.getItem("animua_token")) {
+  const shouldOpenAuthModal = sessionStorage.getItem("animua_open_auth_modal") === "true";
+  if (shouldOpenAuthModal && !hasUserSession()) {
     showLoginView();
     openAuthModal();
-    localStorage.removeItem("animua_open_auth_modal");
+    sessionStorage.removeItem("animua_open_auth_modal");
   } else if (shouldOpenAuthModal) {
-    localStorage.removeItem("animua_open_auth_modal");
+    sessionStorage.removeItem("animua_open_auth_modal");
   }
 
 });
@@ -3886,7 +3893,7 @@ function setupAccountActions() {
     changeUsernameBtn.dataset.bound = "true";
 
     changeUsernameBtn.addEventListener("click", async () => {
-      const currentName = localStorage.getItem("user_name") || "";
+      const currentName = getUserSession()?.fullName || "";
 
       const result = await Swal.fire({
         title: "Change Username",
@@ -3927,13 +3934,11 @@ function setupAccountActions() {
 }
 
 async function updateUsername(newName) {
-  const token = localStorage.getItem("animua_token");
-
   const response = await fetch(`${API_BASE_URL}/auth/update-username`, {
     method: "PUT",
+    credentials: "include",
     headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`
+      "Content-Type": "application/json"
     },
     body: JSON.stringify({ fullName: newName })
   });
@@ -3954,7 +3959,8 @@ async function updateUsername(newName) {
     return;
   }
 
-  localStorage.setItem("user_name", data.fullName || newName);
+  const updatedName = data.fullName || newName;
+  setUserSession({ ...(getUserSession() || {}), fullName: updatedName });
 
   const loggedUserName = document.getElementById("loggedUserName");
   const dropdownUserName = document.getElementById("dropdownUserName");
@@ -3968,7 +3974,7 @@ async function updateUsername(newName) {
   renderUserAvatar(
     document.querySelector(".user-dropdown-avatar"),
     data.fullName || newName,
-    localStorage.getItem("user_profile_photo") || ""
+    getUserSession()?.profilePhotoDataUrl || ""
   );
 
   Swal.fire({
@@ -3984,17 +3990,15 @@ async function updateUsername(newName) {
 }
 
 async function changePasswordRequest(oldPassword, newPassword) {
-  const token = localStorage.getItem("animua_token");
-
-  if (!token) {
+  if (!hasUserSession()) {
     throw new Error("Please log in before changing your password.");
   }
 
   const response = await fetch(`${API_BASE_URL}/auth/change-password`, {
     method: "PUT",
+    credentials: "include",
     headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`
+      "Content-Type": "application/json"
     },
     body: JSON.stringify({ oldPassword, newPassword })
   });
@@ -4009,17 +4013,15 @@ async function changePasswordRequest(oldPassword, newPassword) {
 }
 
 async function requestPasswordChangeOtp(oldPassword, newPassword) {
-  const token = localStorage.getItem("animua_token");
-
-  if (!token) {
+  if (!hasUserSession()) {
     throw new Error("Please log in before changing your password.");
   }
 
   const response = await fetch(`${API_BASE_URL}/auth/request-password-change-otp`, {
     method: "POST",
+    credentials: "include",
     headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`
+      "Content-Type": "application/json"
     },
     body: JSON.stringify({ oldPassword, newPassword })
   });
@@ -4036,17 +4038,15 @@ async function requestPasswordChangeOtp(oldPassword, newPassword) {
 }
 
 async function confirmPasswordChangeOtp(oldPassword, newPassword, otp) {
-  const token = localStorage.getItem("animua_token");
-
-  if (!token) {
+  if (!hasUserSession()) {
     throw new Error("Please log in before changing your password.");
   }
 
   const response = await fetch(`${API_BASE_URL}/auth/confirm-password-change-otp`, {
     method: "POST",
+    credentials: "include",
     headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`
+      "Content-Type": "application/json"
     },
     body: JSON.stringify({ oldPassword, newPassword, otp })
   });
@@ -4350,6 +4350,7 @@ function initChatbotWidget() {
     try {
       const response = await fetch(`${API_BASE_URL}/chatbot/message`, {
         method: "POST",
+        credentials: "include",
         headers: getChatbotRequestHeaders(),
         body: JSON.stringify({
           message,
@@ -4384,13 +4385,7 @@ function initChatbotWidget() {
 }
 
 function getChatbotRequestHeaders() {
-  const headers = { "Content-Type": "application/json" };
-  const token = getToken();
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
-
-  return headers;
+  return { "Content-Type": "application/json" };
 }
 
 function appendChatMessage(container, type, text) {

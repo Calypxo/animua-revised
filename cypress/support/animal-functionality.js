@@ -16,9 +16,15 @@ function loginAndOpenAnimal(id, role = "Admin") {
     disableCaching,
   ).as(sessionAlias);
   cy[`login${role === "Veterinarian" ? "Vet" : role}`]();
-  cy.wait(`@${sessionAlias}`, { timeout: 30000 })
-    .its("response.statusCode")
-    .should("eq", 200);
+  cy.wait(`@${sessionAlias}`, { timeout: 30000 }).then(({ response }) => {
+    if (response?.statusCode === 401) {
+      return cy.wait(`@${sessionAlias}`, { timeout: 30000 })
+        .its("response.statusCode")
+        .should("eq", 200);
+    }
+
+    expect(response?.statusCode).to.equal(200);
+  });
   cy.intercept(
     { method: "GET", url: `**/api/animals/${id}`, middleware: true },
     disableCaching,
@@ -33,9 +39,9 @@ function loginAndOpenAnimal(id, role = "Admin") {
 }
 
 function animalApi(id) {
-  return cy.window().then((window) => apiRequest({
+  return cy.getCookie("animua_session").then((cookie) => apiRequest({
     path: `animals/${id}`,
-    token: window.localStorage.getItem("animua_token"),
+    token: cookie?.value,
   }));
 }
 

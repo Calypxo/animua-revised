@@ -9,15 +9,15 @@ describe("FT-050 - Restore Animal Form Draft", () => {
     cy.get("#eNotes").clear().type("Batch 8 draft must survive reload");
     cy.get("#editModalDraft").click();
     cy.get("#editDraftStatus").should("have.text", "Draft saved on this device");
-    cy.window().then((window) => expect(window.localStorage.getItem(key)).to.be.a("string"));
+    cy.window().then((window) => expect(window.sessionStorage.getItem(key)).to.be.a("string"));
     cy.reload();
     cy.get("body").should("not.have.class", "loading");
     cy.get("#btnEditProfile").click();
     cy.get("#editDraftStatus").should("have.text", "Local draft restored");
     cy.get("#eName").should("have.value", "Batch 8 unsaved animal draft");
     cy.get("#eNotes").should("have.value", "Batch 8 draft must survive reload");
-    cy.window().then((window) => window.localStorage.removeItem(key));
+    cy.window().then((window) => window.sessionStorage.removeItem(key));
     cy.get("#editModalCancel").click();
-    cy.window().then((window) => expect(window.localStorage.getItem(key)).to.be.null);
+    cy.window().then((window) => expect(window.sessionStorage.getItem(key)).to.be.null);
   });
 });

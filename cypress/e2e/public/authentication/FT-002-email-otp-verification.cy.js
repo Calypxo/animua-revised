@@ -53,10 +53,14 @@ describe("FT-002 — Email OTP Verification", () => {
 
     cy.location("pathname", { timeout: 30000 }).should("eq", "/pages/public/home.html");
     cy.get("#userLoggedInBox", { timeout: 30000 }).should("be.visible");
+    cy.getCookie("animua_session").should((cookie) => {
+      expect(cookie, "HttpOnly session created by OTP confirmation").not.to.be.null;
+      expect(cookie.httpOnly).to.equal(true);
+    });
     cy.window().then((window) => {
-      expect(window.localStorage.getItem("is_logged_in")).to.equal("true");
-      expect(window.localStorage.getItem("user_email")).to.equal(email);
-      expect(window.localStorage.getItem("animua_token")).to.be.a("string").and.not.be.empty;
+      expect(window.localStorage.getItem("is_logged_in")).to.be.null;
+      expect(window.localStorage.getItem("user_email")).to.be.null;
+      expect(window.localStorage.getItem("animua_token")).to.be.null;
     });
   });
 });

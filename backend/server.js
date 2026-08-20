@@ -45,33 +45,10 @@ const authenticateToken = require("./src/middleware/authMiddleware");
 const authorizeRole = require("./src/middleware/roleMiddleware");
 const { trainInventoryModel } = require("./src/services/predictiveService");
 const auditMutationMiddleware = require("./src/middleware/auditMutationMiddleware");
+const protectCookieAuthenticatedMutation = require("./src/middleware/csrfProtection");
+const { isAllowedBrowserOrigin } = require("./src/config/browserOrigins");
 
 // ─── CORS ─────────────────────────────────────────────────────────────────────
-const allowedOrigins = [
-  "https://animua-angelescity.web.app",
-  "https://animua-angelescity.firebaseapp.com",
-  "https://animua-admin.web.app",
-  "https://animua-admin.firebaseapp.com",
-
-  "http://localhost:5173",
-  "http://127.0.0.1:5173",
-
-  "http://localhost:5174",
-  "http://127.0.0.1:5174",
-
-  "http://localhost:5175",
-  "http://127.0.0.1:5175",
-
-  "http://localhost:5176",
-  "http://127.0.0.1:5176",
-
-  "http://localhost:5177",
-  "http://127.0.0.1:5177",
-
-  "http://localhost:5179",
-  "http://127.0.0.1:5179",
-];
-
 const corsOptions = {
   origin: function (origin, callback) {
     // Allow requests with no origin, like Postman, mobile apps, or server-to-server calls
@@ -79,15 +56,7 @@ const corsOptions = {
       return callback(null, true);
     }
 
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-
-    // Allow localhost / 127.0.0.1 on any port during development
-    if (
-      origin.startsWith("http://localhost:") ||
-      origin.startsWith("http://127.0.0.1:")
-    ) {
+    if (isAllowedBrowserOrigin(origin)) {
       return callback(null, true);
     }
 
@@ -102,6 +71,7 @@ app.use(cors(corsOptions));
 app.options(/.*/, cors(corsOptions));
 
 app.use(express.json({ limit: "2mb" }));
+app.use("/api", protectCookieAuthenticatedMutation);
 app.use(
   "/images",
   express.static(path.join(__dirname, "src/assets"), {

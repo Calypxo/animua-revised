@@ -2,8 +2,9 @@ describe("FT-004 — Client Logout and Session Removal", () => {
   it("logs out through the public UI and does not restore the old session", () => {
     cy.loginClient();
 
-    cy.window().its("localStorage").invoke("getItem", "animua_token").should("not.be.null");
+    cy.getCookie("animua_session").should("not.be.null");
     cy.logoutClient();
+    cy.getCookie("animua_session").should("be.null");
 
     cy.get("#loginNavBtn").should("be.visible");
     cy.get("#userLoggedInBox").should("not.be.visible");

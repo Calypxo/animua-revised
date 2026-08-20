@@ -3,6 +3,7 @@ import { auth } from "../utils/firebase.js";
 import { API_BASE_URL } from "../utils/api.js";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { showEmailVerificationScreen } from "./register.js";
+import { clearUserSession, setUserSession } from "../utils/storage.js";
 
 const RECAPTCHA_SITE_KEY =
   import.meta.env?.VITE_RECAPTCHA_SITE_KEY ||
@@ -13,6 +14,7 @@ const LOGIN_CAPTCHA_MESSAGE = "Please complete the CAPTCHA before logging in.";
 
 let loginCaptchaWidgetId = null;
 let loginCaptchaRenderPromise = null;
+const failedLoginCounts = new Map();
 
 export async function handleLogin(event) {
   event.preventDefault();
@@ -102,6 +104,7 @@ export async function handleLogin(event) {
   try {
     const response = await fetch(`${API_BASE_URL}/auth/login`, {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json"
       },
@@ -171,10 +174,6 @@ export async function handleLogin(event) {
     await firebaseUser.reload();
 
     if (!firebaseUser.emailVerified && !data.phoneVerified) {
-      // SAVE FOR LOGIN AFTER MANUAL EMAIL VERIFICATION
-      localStorage.setItem("pending_verify_email", email);
-      localStorage.setItem("pending_verify_password", password);
-
       await signOut(auth);
 
       closeModal(authModal);
@@ -202,16 +201,15 @@ export async function handleLogin(event) {
     resetLoginCaptcha();
     hideLoginCaptcha();
 
-    localStorage.setItem("animua_token", data.token || "");
-    localStorage.setItem("user_role", userRole);
-    localStorage.setItem("user_name", userFullName);
-    localStorage.setItem("user_email", userEmail);
-    localStorage.setItem("is_logged_in", "true");
-    if (userProfilePhoto) {
-      localStorage.setItem("user_profile_photo", userProfilePhoto);
-    } else {
-      localStorage.removeItem("user_profile_photo");
-    }
+    clearUserSession();
+    setUserSession({
+      ...account,
+      role: userRole,
+      fullName: userFullName,
+      email: userEmail,
+      profilePhotoDataUrl: userProfilePhoto,
+    });
+    sessionStorage.setItem("show_welcome_toast", "true");
 
     closeModal(authModal);
 
@@ -238,8 +236,8 @@ export async function handleLogin(event) {
     if (userRole === "Admin" || userRole === "Staff") {
       window.location.replace("/pages/dashboard.html");
     } else {
-      const pendingPetId = localStorage.getItem("animua_selected_pet_id");
-      const pendingAction = localStorage.getItem("animua_selected_pet_action");
+      const pendingPetId = sessionStorage.getItem("animua_selected_pet_id");
+      const pendingAction = sessionStorage.getItem("animua_selected_pet_action");
 
       if (pendingPetId && pendingAction === "adopt") {
         window.location.replace("/pages/public/find-furbabies.html");
@@ -320,22 +318,18 @@ function setSubmitLoading(button, isLoading, loadingText = "Please wait...") {
   delete button.dataset.originalText;
 }
 
-function getLoginFailureKey(email = "") {
-  return `animua_login_failures:${email || "unknown"}`;
-}
-
 function getFailedLoginCount(email) {
-  return Number(localStorage.getItem(getLoginFailureKey(email)) || "0");
+  return failedLoginCounts.get(email) || 0;
 }
 
 function recordFailedLogin(email) {
   if (!email) return;
-  localStorage.setItem(getLoginFailureKey(email), String(getFailedLoginCount(email) + 1));
+  failedLoginCounts.set(email, getFailedLoginCount(email) + 1);
 }
 
 function clearFailedLogin(email) {
   if (!email) return;
-  localStorage.removeItem(getLoginFailureKey(email));
+  failedLoginCounts.delete(email);
 }
 
 function isLoginCaptchaRequired(email) {

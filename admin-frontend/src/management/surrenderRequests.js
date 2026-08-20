@@ -24,13 +24,9 @@ const SURRENDER_AVAILABILITY_API_URL =
 
 async function getPublicSubmittedRequests() {
   try {
-    const token = localStorage.getItem("animua_token");
-
     const response = await fetch(SURRENDER_REQUESTS_API_URL, {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
     });
 
     const data = await response.json();
@@ -257,12 +253,11 @@ async function updateSurrenderAvailability(acceptingRequests) {
   renderSurrenderAvailability({ busy: true });
 
   try {
-    const token = localStorage.getItem("animua_token");
     const response = await fetch(SURRENDER_AVAILABILITY_API_URL, {
       method: "PATCH",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ acceptingRequests }),
     });
@@ -878,13 +873,11 @@ function renderDrawer(r) {
 }
 
 async function updateSurrenderStatusInBackend(id, payload) {
-  const token = localStorage.getItem("animua_token");
-
   const response = await fetch(`${SURRENDER_REQUESTS_API_URL}/${encodeURIComponent(id)}/status`, {
     method: "PATCH",
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(payload),
   });
@@ -1023,12 +1016,12 @@ async function executeAttendanceWorkflow() {
   try {
     button.disabled = true;
     button.innerHTML = '<span class="button-spinner" aria-hidden="true"></span> Updating…';
-    const token = localStorage.getItem("animua_token");
     const response = await fetch(
       `${SURRENDER_REQUESTS_API_URL}/${encodeURIComponent(id)}/${action}`,
       {
         method: "PATCH",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       }
     );

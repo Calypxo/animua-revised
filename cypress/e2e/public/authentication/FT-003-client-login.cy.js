@@ -28,11 +28,12 @@ describe("FT-003 — Client Login", () => {
     });
     cy.get("#userLoggedInBox", { timeout: 30000 }).should("be.visible");
     cy.get("#loginNavBtn").should("not.be.visible");
+    cy.assertHardenedBrowserStorage();
     cy.window().then((window) => {
-      expect(window.localStorage.getItem("animua_token")).to.be.a("string").and.not.be.empty;
-      expect(window.localStorage.getItem("user_role")).to.equal("Public");
-      expect(window.localStorage.getItem("user_email")).to.equal(email);
-      expect(window.localStorage.getItem("is_logged_in")).to.equal("true");
+      expect(window.localStorage.getItem("animua_token")).to.be.null;
+      expect(window.localStorage.getItem("user_role")).to.be.null;
+      expect(window.localStorage.getItem("user_email")).to.be.null;
+      expect(window.localStorage.getItem("is_logged_in")).to.be.null;
     });
   });
 });

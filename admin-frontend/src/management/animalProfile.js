@@ -83,20 +83,20 @@ function setDraftStatus(id, message) {
 function saveLocalFormDraft(formId, scope, statusId) {
   const form = document.getElementById(formId);
   if (!form) return;
-  saveFormDraft(localStorage, formDraftKey(scope), form);
+  saveFormDraft(sessionStorage, formDraftKey(scope), form);
   setDraftStatus(statusId, "Draft saved on this device");
   showToast("info", "Draft saved locally.");
 }
 
 function restoreLocalFormDraft(formId, scope, statusId) {
   const form = document.getElementById(formId);
-  const restored = form && restoreFormDraft(localStorage, formDraftKey(scope), form);
+  const restored = form && restoreFormDraft(sessionStorage, formDraftKey(scope), form);
   setDraftStatus(statusId, restored ? "Local draft restored" : "");
   return Boolean(restored);
 }
 
 function clearLocalFormDraft(scope, statusId) {
-  clearFormDraft(localStorage, formDraftKey(scope));
+  clearFormDraft(sessionStorage, formDraftKey(scope));
   setDraftStatus(statusId, "");
 }
 
@@ -490,13 +490,9 @@ async function uploadAnimalPhoto() {
     const formData = new FormData();
     formData.append("photo", file);
 
-    const token = localStorage.getItem("animua_token");
-
     const res = await fetch(`${API_BASE_URL}/animals/${animal.id}/photo`, {
       method: "PATCH",
-      headers: {
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
+      credentials: "include",
       body: formData,
     });
 

@@ -1,5 +1,6 @@
 import Swal from "sweetalert2";
 import { API_BASE_URL } from "../../utils/api.js";
+import { ensureUserSession, hasUserSession } from "../../utils/storage.js";
 
 const NEWS_CCA_CAT_RESCUE_IMAGE = new URL(
   "../../assets/images/news-cca-cat-rescue.png",
@@ -48,7 +49,11 @@ const typeMenu = document.getElementById("announcementTypeMenu");
 const showAllButton = document.getElementById("showAllAnnouncements");
 const pastAnnouncementsButton = document.getElementById("pastAnnouncementsBtn");
 
-document.querySelector("[data-login-link]")?.classList.toggle("hidden", localStorage.getItem("is_logged_in") === "true");
+ensureUserSession()
+  .then(() => {
+    document.querySelector("[data-login-link]")?.classList.toggle("hidden", hasUserSession());
+  })
+  .catch((error) => console.warn("Unable to restore announcement session:", error.message));
 
 function escapeHtml(value = "") {
   return String(value).replace(/[&<>"']/g, (character) => ({

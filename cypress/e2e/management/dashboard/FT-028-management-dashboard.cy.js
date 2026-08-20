@@ -36,25 +36,22 @@ describe("FT-028 — View and Navigate Management Dashboard", () => {
     cy.get("body").should("not.contain.text", "Dashboard unavailable");
     cy.get("body").should("not.contain.text", "Firebase error");
 
-    cy.window().then((window) => {
-      const token = window.localStorage.getItem("animua_token");
-      const headers = { Authorization: `Bearer ${token}` };
-
-      cy.request({ url: `${Cypress.env("apiBaseUrl")}/adoptions`, headers }).then(({ body }) => {
+    cy.then(() => {
+      cy.request({ url: `${Cypress.env("apiBaseUrl")}/adoptions` }).then(({ body }) => {
         beforeAdoptions = trackedState(body.adoptions || [], adoptionIds);
         expect(Object.keys(beforeAdoptions)).to.have.length(adoptionIds.length);
       });
-      cy.request({ url: `${Cypress.env("apiBaseUrl")}/surrenders`, headers }).then(({ body }) => {
+      cy.request({ url: `${Cypress.env("apiBaseUrl")}/surrenders` }).then(({ body }) => {
         beforeSurrenders = trackedState(body.requests || body.surrenders || [], surrenderIds);
         expect(Object.keys(beforeSurrenders)).to.have.length(surrenderIds.length);
       });
-      cy.request({ url: `${Cypress.env("apiBaseUrl")}/dashboard/attention`, headers })
+      cy.request({ url: `${Cypress.env("apiBaseUrl")}/dashboard/attention` })
         .its("status")
         .should("eq", 200);
-      cy.request({ url: `${Cypress.env("apiBaseUrl")}/adoptions`, headers }).then(({ body }) => {
+      cy.request({ url: `${Cypress.env("apiBaseUrl")}/adoptions` }).then(({ body }) => {
         expect(trackedState(body.adoptions || [], adoptionIds)).to.deep.equal(beforeAdoptions);
       });
-      cy.request({ url: `${Cypress.env("apiBaseUrl")}/surrenders`, headers }).then(({ body }) => {
+      cy.request({ url: `${Cypress.env("apiBaseUrl")}/surrenders` }).then(({ body }) => {
         expect(trackedState(body.requests || body.surrenders || [], surrenderIds)).to.deep.equal(beforeSurrenders);
       });
     });

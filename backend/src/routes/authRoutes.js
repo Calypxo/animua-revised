@@ -3,6 +3,7 @@ const router  = express.Router();
 const {
   register,
   login,
+  logout,
   requestEmailVerificationOtp,
   confirmEmailVerificationOtp,
   requestPasswordChangeOtp,
@@ -21,6 +22,7 @@ const verifyToken = require("../middleware/authMiddleware");
 // Public routes — no token needed
 router.post("/register", register);
 router.post("/login",    login);
+router.post("/logout",   logout);
 router.post("/request-email-verification-otp", requestEmailVerificationOtp);
 router.post("/confirm-email-verification-otp", confirmEmailVerificationOtp);
 router.post("/request-forgot-password-otp", requestForgotPasswordOtp);

@@ -2,6 +2,7 @@
 
 const jwt = require("jsonwebtoken");
 const { db } = require("../config/firebase");
+const { getSessionCookieToken } = require("../utils/sessionCookie");
 
 // Keep this false in normal production use.
 const IS_INSECURE_MODE = false;
@@ -94,7 +95,7 @@ async function authenticateToken(
       return next();
     }
 
-    const token = getBearerToken(req);
+    const token = getSessionCookieToken(req) || getBearerToken(req);
 
     if (!token) {
       return res.status(401).json({

@@ -30,6 +30,20 @@ function authorizationHeaders(token) {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+function sessionTokenFromResponse(response) {
+  const setCookieHeaders = [].concat(response.headers?.["set-cookie"] || []);
+  const sessionHeader = setCookieHeaders.find((header) =>
+    /^(?:__Host-)?animua_session=/.test(String(header)),
+  );
+  const encodedToken = String(sessionHeader || "")
+    .split(";", 1)[0]
+    .split("=")
+    .slice(1)
+    .join("=");
+
+  return encodedToken ? decodeURIComponent(encodedToken) : "";
+}
+
 function apiRequest({ method = "GET", path, token, body, ...options }) {
   return cy.request({
     method,
@@ -55,10 +69,12 @@ function loginByApi(role) {
     log: false,
   }).then((response) => {
     expect(response.status, `real ANIMUA ${role} login`).to.equal(200);
-    expect(response.body?.token, `${role} application JWT`)
+    expect(response.body?.token, `${role} JWT is not exposed in JSON`).to.be.undefined;
+    const token = sessionTokenFromResponse(response);
+    expect(token, `${role} HttpOnly session JWT`)
       .to.be.a("string")
       .and.not.be.empty;
-    return { email, token: response.body.token };
+    return { email, token };
   });
 }
 

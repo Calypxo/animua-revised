@@ -6,7 +6,7 @@ import { loadSidebar } from "../components/management/sidebarLoader.js";
 import { renderPageHeader } from "../components/management/pageHeader.js";
 import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.js";
 import { apiFetch } from "../utils/api.js";
-import { clearUserSession } from "../utils/storage.js";
+import { endUserSession, setUserSession } from "../utils/storage.js";
 
 let account = null;
 const rules = {
@@ -88,7 +88,7 @@ async function saveProfile(event) {
       body: JSON.stringify({ fullName }),
     });
     account.fullName = result.fullName;
-    localStorage.setItem("user_name", result.fullName);
+    setUserSession({ ...account, fullName: result.fullName });
     renderAccount();
     renderTopbarUser();
     loadSidebar();
@@ -136,7 +136,7 @@ async function changePassword(event) {
       text: "Sign in again using your new password.",
       confirmButtonColor: "#780116",
     });
-    clearUserSession();
+    await endUserSession();
     window.location.replace("/pages/admin-login.html");
   } catch (requestError) {
     error.textContent = requestError.message;

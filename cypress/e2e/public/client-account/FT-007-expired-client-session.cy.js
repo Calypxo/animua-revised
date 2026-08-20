@@ -7,8 +7,8 @@ describe("FT-007 — Expired or Invalid Client Session Handling", () => {
       .should("be.oneOf", [200, 304]);
     cy.intercept("GET", "**/api/notifications").as("rejectedSessionRequest");
 
-    cy.window().then((window) => {
-      const issuedToken = window.localStorage.getItem("animua_token");
+    cy.getCookie("animua_session").then((cookie) => {
+      const issuedToken = cookie?.value;
       expect(issuedToken, "session issued by the real login flow")
         .to.be.a("string")
         .and.not.be.empty;
@@ -20,7 +20,10 @@ describe("FT-007 — Expired or Invalid Client Session Handling", () => {
       // The real backend must reject this client session through its JWT verifier.
       const firstSignatureCharacter = segments[2].charAt(0);
       segments[2] = `${firstSignatureCharacter === "A" ? "B" : "A"}${segments[2].slice(1)}`;
-      window.localStorage.setItem("animua_token", segments.join("."));
+      cy.setCookie("animua_session", segments.join("."), {
+        httpOnly: true,
+        sameSite: "lax",
+      });
     });
 
     cy.get("#notificationBtn").click();

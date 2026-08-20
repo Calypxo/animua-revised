@@ -1,5 +1,9 @@
 import { getApp, getApps, initializeApp } from "firebase/app";
-import { connectAuthEmulator, getAuth } from "firebase/auth";
+import {
+  connectAuthEmulator,
+  inMemoryPersistence,
+  initializeAuth,
+} from "firebase/auth";
 
 const defaultFirebaseConfig = {
   apiKey: "AIzaSyCOOYL9AMozn4Hx2acLgBcCYttyDFm33cs",
@@ -85,7 +89,9 @@ const firebaseConfig = useFirebaseEmulators
 
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
-export const auth = getAuth(app);
+export const auth = initializeAuth(app, {
+  persistence: inMemoryPersistence,
+});
 
 if (useFirebaseEmulators && !globalThis.__ANIMUA_FIREBASE_EMULATORS_CONNECTED__) {
   connectAuthEmulator(auth, `http://${emulatorHost}:9099`, {

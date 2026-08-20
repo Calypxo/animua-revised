@@ -15,6 +15,21 @@ const SESSION_KEYS = [
   "pending_verify_password",
 ];
 
+const INTENTIONAL_LOCAL_STORAGE_KEYS = new Set([
+  "animua_contact_message_count",
+  "animua_quiz_language",
+]);
+
+function assertSafeLocalStorage(window) {
+  SESSION_KEYS.forEach((key) => expect(window.localStorage.getItem(key), key).to.be.null);
+  Object.keys(window.localStorage).forEach((key) => {
+    expect(
+      INTENTIONAL_LOCAL_STORAGE_KEYS.has(key),
+      `intentional long-lived localStorage key: ${key}`,
+    ).to.equal(true);
+  });
+}
+
 function joinUrl(baseUrl, path) {
   const base = String(baseUrl || "").replace(/\/+$/, "");
   const suffix = `/${String(path || "").replace(/^\/+/, "")}`;
@@ -83,6 +98,20 @@ Cypress.Commands.add("clearAnimuaSession", () => {
   });
 });
 
+Cypress.Commands.add("assertHardenedBrowserStorage", () => {
+  cy.getCookie("animua_session").should((cookie) => {
+    expect(cookie, "HttpOnly application session cookie").not.to.be.null;
+    expect(cookie.httpOnly).to.equal(true);
+    expect(cookie.path).to.equal("/");
+    expect(cookie.sameSite).to.equal("lax");
+    expect(cookie.secure).to.equal(false);
+  });
+  cy.window().then((window) => {
+    expect(window.document.cookie).not.to.contain("animua_session=");
+    assertSafeLocalStorage(window);
+  });
+});
+
 Cypress.Commands.add("loginClient", (overrides = {}) => {
   const { email, password } = roleCredentials("Client", overrides);
 
@@ -101,11 +130,7 @@ Cypress.Commands.add("loginClient", (overrides = {}) => {
     .its("response.statusCode")
     .should("eq", 200);
   cy.get("#userLoggedInBox", { timeout: 30000 }).should("be.visible");
-  cy.window()
-    .its("localStorage")
-    .invoke("getItem", "animua_token")
-    .should("be.a", "string")
-    .and("not.be.empty");
+  cy.assertHardenedBrowserStorage();
 });
 
 Cypress.Commands.add("loginManagement", (role, overrides = {}) => {
@@ -127,9 +152,7 @@ Cypress.Commands.add("loginManagement", (role, overrides = {}) => {
     "eq",
     "/pages/dashboard.html",
   );
-  cy.window().then((window) => {
-    expect(window.localStorage.getItem("user_role")).to.equal(role);
-  });
+  cy.assertHardenedBrowserStorage();
 });
 
 Cypress.Commands.add("loginAdmin", (overrides = {}) =>

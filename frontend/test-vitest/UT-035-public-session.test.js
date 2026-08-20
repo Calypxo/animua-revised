@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   clearUserSession,
+  getUserSession,
   isAuthenticationFailure,
+  setUserSession,
 } from "../src/utils/storage.js";
 
 describe("UT-035 — Public Client Session Handling", () => {
@@ -37,7 +39,28 @@ describe("UT-035 — Public Client Session Handling", () => {
 
     clearUserSession(storage);
 
-    expect([...values.entries()]).toEqual([["unrelated_preference", "keep"]]);
-    expect(storage.removeItem).toHaveBeenCalledTimes(8);
+    expect([...values.entries()]).toEqual([
+      ["sidebar_collapsed", "true"],
+      ["unrelated_preference", "keep"],
+    ]);
+    expect(storage.removeItem).toHaveBeenCalledWith("animua_token");
+    expect(storage.removeItem).toHaveBeenCalledWith("user_email");
+    expect(storage.removeItem).toHaveBeenCalledWith("pending_verify_password");
+  });
+
+  it("keeps display identity in memory without persisting it to browser storage", () => {
+    const session = setUserSession({
+      email: "client@example.test",
+      fullName: "Client User",
+      role: "Public",
+    });
+
+    expect(session).toEqual({
+      email: "client@example.test",
+      fullName: "Client User",
+      role: "Public",
+      profilePhotoDataUrl: "",
+    });
+    expect(getUserSession()).toEqual(session);
   });
 });

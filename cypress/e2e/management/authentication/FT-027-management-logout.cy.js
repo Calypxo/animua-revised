@@ -2,6 +2,7 @@ describe("FT-027 — Management Logout and Session Removal", () => {
   it("logs out through the management UI and blocks the old protected session", () => {
     cy.loginAdmin();
     cy.logoutManagement();
+    cy.getCookie("animua_session").should("be.null");
 
     cy.window().then((window) => {
       expect(window.localStorage.getItem("animua_token")).to.be.null;

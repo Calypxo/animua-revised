@@ -13,7 +13,7 @@ function disableCaching(request) {
 }
 
 function currentToken() {
-  return cy.window().then((window) => window.localStorage.getItem("animua_token"));
+  return cy.getCookie("animua_session").then((cookie) => cookie?.value || "");
 }
 
 function loginMutableManagement(password = Cypress.env("FT_MANAGEMENT_PASSWORD")) {

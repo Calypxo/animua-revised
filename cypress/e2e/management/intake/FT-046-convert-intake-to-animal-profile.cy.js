@@ -56,8 +56,8 @@ describe("FT-046 - Convert Intake to Animal Profile", () => {
       "eq",
       "/pages/animalProfile.html",
     );
-    cy.window().then((window) => {
-      const token = window.localStorage.getItem("animua_token");
+    cy.getCookie("animua_session").then((cookie) => {
+      const token = cookie?.value;
       return apiRequest({
         path: "intake/FT_INTAKE_CONVERT_CANDIDATE",
         token,

@@ -28,10 +28,13 @@ function loginByApi(email, password) {
     log: false,
   }).then((response) => {
     expect(response.status, `real ANIMUA login for ${email}`).to.equal(200);
-    expect(response.body?.token, "issued application JWT")
-      .to.be.a("string")
-      .and.not.be.empty;
-    return response.body.token;
+    expect(response.body, "login response body").not.to.have.property("token");
+    const setCookie = [].concat(response.headers["set-cookie"] || []).join(";");
+    const token = decodeURIComponent(
+      setCookie.match(/(?:__Host-animua_session|animua_session)=([^;]+)/)?.[1] || "",
+    );
+    expect(token, "JWT transported only in Set-Cookie").to.be.a("string").and.not.be.empty;
+    return cy.clearCookies({ log: false }).then(() => token);
   });
 }
 

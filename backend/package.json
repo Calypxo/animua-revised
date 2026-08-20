@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "node --test --test-isolation=none",
+    "test": "node --test --test-isolation=none \"test/*.test.js\"",
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",
     "dev": "node scripts/dev.js",

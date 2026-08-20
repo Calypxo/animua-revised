@@ -21,9 +21,9 @@ function loginAndOpenInventory(role = "Admin") {
   cy.intercept({ method: "POST", url: "**/api/predictive/items", middleware: true }, disableCaching)
     .as(`inventoryPredictions${suffix}`);
   cy[loginCommand(role)]();
-  cy.window().then((window) => apiRequest({
+  cy.getCookie("animua_session").then((cookie) => apiRequest({
     path: "protected",
-    token: window.localStorage.getItem("animua_token"),
+    token: cookie?.value,
   })).then((response) => {
     expect(response.status).to.equal(200);
     expect(response.body?.user?.role).to.equal(role);
@@ -48,9 +48,9 @@ function loginAndOpenCompatibility(role = "Admin") {
   cy.intercept({ method: "GET", url: "**/api/match/admin/questions", middleware: true }, disableCaching)
     .as(`quizQuestions${suffix}`);
   cy[loginCommand(role)]();
-  cy.window().then((window) => apiRequest({
+  cy.getCookie("animua_session").then((cookie) => apiRequest({
     path: "protected",
-    token: window.localStorage.getItem("animua_token"),
+    token: cookie?.value,
   })).then((response) => {
     expect(response.status).to.equal(200);
     expect(response.body?.user?.role).to.equal(role);
@@ -63,7 +63,7 @@ function loginAndOpenCompatibility(role = "Admin") {
 }
 
 function currentToken() {
-  return cy.window().then((window) => window.localStorage.getItem("animua_token"));
+  return cy.getCookie("animua_session").then((cookie) => cookie?.value || "");
 }
 
 function registerMutation(input) {

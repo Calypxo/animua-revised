@@ -42,6 +42,16 @@ function responseRecorder() {
     status: vi.fn(function status(code) { this.statusCode = code; return this; }),
     json: vi.fn(function json(body) { this.body = body; return this; }),
     set: vi.fn(function set(name, value) { this.headers[name] = value; return this; }),
+    cookie: vi.fn(function cookie(name, value, options) {
+      this.cookies ||= [];
+      this.cookies.push({ name, value, options });
+      return this;
+    }),
+    clearCookie: vi.fn(function clearCookie(name, options) {
+      this.clearedCookies ||= [];
+      this.clearedCookies.push({ name, options });
+      return this;
+    }),
   };
 }
 

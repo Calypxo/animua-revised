@@ -1,10 +1,11 @@
 import Swal from "sweetalert2";
+import { getUserName } from "../../utils/storage.js";
 
 // frontend/src/components/global/welcome.js
 
 const triggerWelcomeToast = () => {
-    const showToast = localStorage.getItem("show_welcome_toast");
-    const userName  = localStorage.getItem("user_name");
+    const showToast = sessionStorage.getItem("show_welcome_toast");
+    const userName  = getUserName();
 
     if (showToast === "true" && userName) {
         const Toast = Swal.mixin({
@@ -27,7 +28,7 @@ const triggerWelcomeToast = () => {
         });
 
         // Remove the flag so it doesn't repeat on every refresh
-        localStorage.removeItem("show_welcome_toast");
+        sessionStorage.removeItem("show_welcome_toast");
     }
 };
 

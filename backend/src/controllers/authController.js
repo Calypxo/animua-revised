@@ -6,6 +6,10 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const https = require("https");
 const path = require("path");
+const {
+  clearSessionCookies,
+  setSessionCookie,
+} = require("../utils/sessionCookie");
 
 const IS_INSECURE_MODE = false;
 const RECAPTCHA_SECRET_KEY =
@@ -870,9 +874,10 @@ exports.confirmEmailVerificationOtp = async (req, res) => {
       { expiresIn: "8h", algorithm: "HS256" }
     );
 
+    setSessionCookie(res, token);
+
     return res.status(200).json({
       message: "Email verified successfully.",
-      token,
       role: userData.role,
       fullName: userData.fullName,
       email: userData.email,
@@ -1001,13 +1006,14 @@ if (!userData.emailVerified && !userData.phoneVerified) {
       { expiresIn: "8h", algorithm: "HS256" }
     );
 
+    setSessionCookie(res, token);
+
     db.collection("users").doc(email).update({
       lastLogin: admin.firestore.FieldValue.serverTimestamp()
     }).catch(err => console.warn("[lastLogin update failed]", err.message));
 
     return res.status(200).json({
       message: "Login successful!",
-      token,
       role: userData.role,
       fullName: userData.fullName,
       email: userData.email,
@@ -1022,6 +1028,11 @@ if (!userData.emailVerified && !userData.phoneVerified) {
 };
 
 // ─── UPDATE USERNAME ──────────────────────────────────────────────────────────
+exports.logout = async (req, res) => {
+  clearSessionCookies(res);
+  return res.status(200).json({ message: "Logout successful." });
+};
+
 exports.confirmPhoneVerification = async (req, res) => {
   try {
     const firebaseIdToken = req.body.firebaseIdToken;

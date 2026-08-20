@@ -4,7 +4,7 @@ import "../../css/pageSkeleton.css";
 
 import { initializeManagementModals } from "./managementModal.js";
 import { initializeManagementConsistency } from "./managementConsistency.js";
-import { clearUserSession, getUserRole } from "../../utils/storage.js";
+import { clearUserSession, endUserSession, getUserRole } from "../../utils/storage.js";
 import { canAccessModule, normalizeRole } from "../../auth/permissions.js";
 import { workspaceSkeletonMarkup } from "./pageSkeleton.js";
 import {
@@ -410,7 +410,7 @@ function setupPersistentNavigation(container, sidebar) {
   window.__animuaPersistentNavigation = state;
 }
 
-export function loadSidebar() {
+export async function loadSidebar() {
   const container = document.getElementById("sidebar-container");
   if (!container) return;
 
@@ -420,7 +420,7 @@ export function loadSidebar() {
 
   const role = normalizeRole(getUserRole());
   if (!role) {
-    clearUserSession();
+    await endUserSession();
     window.location.replace("/pages/admin-login.html");
     return;
   }

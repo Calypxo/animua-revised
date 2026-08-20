@@ -10,7 +10,7 @@ function loginCommand(role) {
 }
 
 function currentToken() {
-  return cy.window().then((window) => window.localStorage.getItem("animua_token"));
+  return cy.getCookie("animua_session").then((cookie) => cookie?.value || "");
 }
 
 function loginAndOpenManagement({ role = "Admin", page, requestUrl, alias, ready }) {
