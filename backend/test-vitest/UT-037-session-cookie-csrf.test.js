@@ -3,6 +3,7 @@ const {
   getSessionCookieOptions,
   getSessionCookieToken,
   parseCookieHeader,
+  setSessionCookie,
 } = require("../src/utils/sessionCookie");
 const protectCookieAuthenticatedMutation = require("../src/middleware/csrfProtection");
 const { loadWithMocks, responseRecorder, snapshot } = require("./helpers/commonjs");
@@ -40,6 +41,50 @@ describe("UT-037 — HttpOnly Session Cookie and CSRF Protection", () => {
     expect(getSessionCookieToken({
       headers: { cookie: "theme=dark; animua_session=jwt.value.sig" },
     })).toBe("jwt.value.sig");
+  });
+
+  it("prefers the cookie for the active environment when stale cookies coexist", () => {
+    const req = {
+      headers: {
+        cookie: "__Host-animua_session=production-token; animua_session=development-token",
+      },
+    };
+
+    expect(getSessionCookieToken(req, { NODE_ENV: "development" }))
+      .toBe("development-token");
+    expect(getSessionCookieToken(req, { NODE_ENV: "production" }))
+      .toBe("production-token");
+  });
+
+  it("clears the alternate cookie before setting a new session", () => {
+    const res = responseRecorder();
+
+    setSessionCookie(res, "fresh-token", { NODE_ENV: "development" });
+
+    expect(res.clearedCookies).toEqual([
+      {
+        name: "__Host-animua_session",
+        options: {
+          httpOnly: true,
+          secure: true,
+          sameSite: "none",
+          path: "/",
+          partitioned: true,
+        },
+      },
+    ]);
+    expect(res.cookies).toEqual([
+      {
+        name: "animua_session",
+        value: "fresh-token",
+        options: expect.objectContaining({
+          httpOnly: true,
+          secure: false,
+          sameSite: "lax",
+          path: "/",
+        }),
+      },
+    ]);
   });
 
   it("permits an approved browser origin for a cookie-authenticated mutation", () => {

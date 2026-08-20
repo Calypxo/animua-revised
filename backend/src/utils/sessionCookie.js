@@ -54,10 +54,15 @@ function parseCookieHeader(cookieHeader = "") {
     }, {});
 }
 
-function getSessionCookieToken(req) {
+function getSessionCookieToken(req, env = process.env) {
   const cookies = parseCookieHeader(req?.headers?.cookie);
+  const preferredCookieName = getSessionCookieName(env);
+  const cookieNames = [
+    preferredCookieName,
+    ...SESSION_COOKIE_NAMES.filter((name) => name !== preferredCookieName),
+  ];
 
-  for (const name of SESSION_COOKIE_NAMES) {
+  for (const name of cookieNames) {
     if (cookies[name]) return cookies[name];
   }
 
@@ -65,19 +70,33 @@ function getSessionCookieToken(req) {
 }
 
 function setSessionCookie(res, token, env = process.env) {
+  const cookieName = getSessionCookieName(env);
+
+  SESSION_COOKIE_NAMES
+    .filter((name) => name !== cookieName)
+    .forEach((name) => {
+      const cookieEnvironment = name === PRODUCTION_COOKIE_NAME
+        ? { NODE_ENV: "production" }
+        : { NODE_ENV: "development" };
+
+      res.clearCookie(name, getClearCookieOptions(cookieEnvironment));
+    });
+
   res.cookie(
-    getSessionCookieName(env),
+    cookieName,
     token,
     getSessionCookieOptions(env)
   );
   res.set("Cache-Control", "no-store");
 }
 
-function clearSessionCookies(res, env = process.env) {
-  const options = getClearCookieOptions(env);
-
+function clearSessionCookies(res) {
   SESSION_COOKIE_NAMES.forEach((name) => {
-    res.clearCookie(name, options);
+    const cookieEnvironment = name === PRODUCTION_COOKIE_NAME
+      ? { NODE_ENV: "production" }
+      : { NODE_ENV: "development" };
+
+    res.clearCookie(name, getClearCookieOptions(cookieEnvironment));
   });
   res.set("Cache-Control", "no-store");
 }

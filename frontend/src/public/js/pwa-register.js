@@ -1,4 +1,18 @@
-if ("serviceWorker" in navigator) {
+if (import.meta.env.DEV && "serviceWorker" in navigator) {
+  window.addEventListener("load", async () => {
+    const registrations = await navigator.serviceWorker.getRegistrations();
+    await Promise.all(registrations.map((registration) => registration.unregister()));
+
+    if ("caches" in globalThis) {
+      const cacheNames = await caches.keys();
+      await Promise.all(
+        cacheNames
+          .filter((name) => name.startsWith("animua-public-"))
+          .map((name) => caches.delete(name))
+      );
+    }
+  });
+} else if ("serviceWorker" in navigator) {
   let refreshing = false;
 
   navigator.serviceWorker.addEventListener("controllerchange", () => {
