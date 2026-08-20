@@ -88,14 +88,19 @@ const serializeContactDate = (value) => {
 const buildContactThread = (data = {}) => {
   const storedMessages = Array.isArray(data.messages) ? data.messages : [];
   const messages = storedMessages
-    .map((item) => ({
-      sender: item.sender === "admin" ? "admin" : "user",
-      name:
-        item.name ||
-        (item.sender === "admin" ? "ANIMUA Team" : data.fullName || "User"),
-      message: item.message || "",
-      createdAt: serializeContactDate(item.createdAt),
-    }))
+    .map((item) => {
+      const isManagementSender = ["admin", "staff"].includes(
+        String(item.sender || "").trim().toLowerCase()
+      );
+      return {
+        sender: isManagementSender ? "admin" : "user",
+        name:
+          item.name ||
+          (isManagementSender ? "ANIMUA Team" : data.fullName || "User"),
+        message: item.message || "",
+        createdAt: serializeContactDate(item.createdAt),
+      };
+    })
     .filter((item) => item.message);
 
   if (!messages.length && data.message) {

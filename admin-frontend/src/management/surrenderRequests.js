@@ -815,7 +815,7 @@ function renderDrawer(r) {
 }
   if (r.status === "Approved") {
     footerBtns += r.arrivalConfirmedAt
-      ? `<button class="btn-convert-confirm" id="drawerConvertBtn"><i class="bi bi-person-vcard-fill"></i> Complete Intake &amp; Start Profiling</button>`
+      ? `<button class="btn-convert-confirm" id="drawerConvertBtn"><i class="bi bi-clipboard2-plus-fill"></i> Start Intake</button>`
       : `
         <button class="btn-ghost-clay" id="drawerExtendDeadlineBtn"><i class="bi bi-calendar-plus"></i> Extend</button>
         <button class="btn-approve-confirm" id="drawerArrivalBtn"><i class="bi bi-person-check"></i> Confirm Arrival</button>
@@ -1271,6 +1271,10 @@ async function init() {
     renderTopbarUser();
     loadSidebar(); 
 
+    document.getElementById("surrenderAvailabilityToggle")?.addEventListener("change", event => {
+      updateSurrenderAvailability(event.currentTarget.checked);
+    });
+
     await loadSurrenderAvailability();
 
     publicRequests = await getPublicSubmittedRequests();
@@ -1309,10 +1313,6 @@ async function init() {
     document.getElementById("filterCategory")?.addEventListener("change",applyFilters);
     document.getElementById("clearSurrenderFilters")?.addEventListener("click", clearSurrenderFilters);
     document.getElementById("srDrawerBackdrop")?.addEventListener("click", closeDrawer);
-    document.getElementById("surrenderAvailabilityToggle")?.addEventListener("change", event => {
-      updateSurrenderAvailability(event.currentTarget.checked);
-    });
-
     // Reject modal
     document.getElementById("rejectModalClose")?.addEventListener("click",  ()=>closeModal("rejectModalBackdrop"));
     document.getElementById("rejectModalCancel")?.addEventListener("click", ()=>closeModal("rejectModalBackdrop"));

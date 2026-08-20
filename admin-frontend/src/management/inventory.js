@@ -1310,10 +1310,10 @@ async function saveBatchStockIn() {
   try {
     for (const row of rows) {
       const id = row.querySelector(".batch-stock-item")?.value;
-      const qty = parseInt(row.querySelector(".batch-stock-qty")?.value, 10);
+      const qty = Number(row.querySelector(".batch-stock-qty")?.value);
       const rowNote = row.querySelector(".batch-stock-note")?.value.trim() || "";
 
-      if (!id || !qty || qty < 1) {
+      if (!id || !Number.isInteger(qty) || qty < 1) {
         throw new Error("Please complete all batch stock in rows.");
       }
 
@@ -1374,11 +1374,11 @@ async function saveBatchStockOut() {
   try {
     for (const row of rows) {
       const id = row.querySelector(".batch-out-item")?.value;
-      const qty = parseInt(row.querySelector(".batch-out-qty")?.value, 10);
+      const qty = Number(row.querySelector(".batch-out-qty")?.value);
       const animal = row.querySelector(".batch-out-animal")?.value.trim() || "";
       const procedure = row.querySelector(".batch-out-procedure")?.value.trim() || "General Use";
 
-      if (!id || !qty || qty < 1) {
+      if (!id || !Number.isInteger(qty) || qty < 1) {
         throw new Error("Please complete all batch usage rows.");
       }
 
@@ -1481,14 +1481,14 @@ async function saveStockIn() {
 }
 
   const id = document.getElementById("fStockItemSelect").value;
-  const qty = parseInt(document.getElementById("fStockQty").value, 10);
+  const qty = Number(document.getElementById("fStockQty").value);
 
   if (!id) {
     document.getElementById("errStockItem").textContent = "Please select an item.";
     return;
   }
 
-  if (!qty || qty < 1) {
+  if (!Number.isInteger(qty) || qty < 1) {
     document.getElementById("errStockQty").textContent = "Enter a valid quantity.";
     return;
   }
@@ -1565,9 +1565,9 @@ async function saveStockOut() {
 }
 
   const id = document.getElementById("fOutItemId").value;
-  const qty = parseInt(document.getElementById("fOutQty").value, 10);
+  const qty = Number(document.getElementById("fOutQty").value);
 
-  if (!qty || qty < 1) {
+  if (!Number.isInteger(qty) || qty < 1) {
     document.getElementById("errOutQty").textContent = "Enter a valid quantity.";
     return;
   }

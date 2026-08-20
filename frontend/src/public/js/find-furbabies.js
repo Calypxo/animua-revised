@@ -1,6 +1,7 @@
 import { API_BASE_URL } from "../../utils/api.js";
 import dogFallbackImage from "../../assets/images/dog.jpg";
 import catFallbackImage from "../../assets/images/cat.jpg";
+import { createSelectionFocusGuard } from "./adoption-ui-state.js";
 
 const petsGrid = document.getElementById("petsGrid");
 const resultsCount = document.getElementById("resultsCount");
@@ -181,6 +182,7 @@ function setupBirthdatePicker() {
     new Date(2000, month, 1).toLocaleString("en-US", { month: "long" })
   );
   let viewDate = parseDateValue(birthdateField.value) || new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+  const selectionFocusGuard = createSelectionFocusGuard();
 
   const closePicker = () => {
     picker.hidden = true;
@@ -199,7 +201,7 @@ function setupBirthdatePicker() {
     birthdateField.value = formatDateValue(date);
     birthdateField.dispatchEvent(new Event("change", { bubbles: true }));
     closePicker();
-    birthdateField.focus();
+    selectionFocusGuard.focusAfterSelection(birthdateField);
   };
 
   const renderPicker = () => {
@@ -260,7 +262,9 @@ function setupBirthdatePicker() {
   });
 
   birthdateField.addEventListener("click", openPicker);
-  birthdateField.addEventListener("focus", openPicker);
+  birthdateField.addEventListener("focus", () => {
+    if (selectionFocusGuard.shouldOpenOnFocus()) openPicker();
+  });
   birthdateField.addEventListener("input", () => {
     validateBirthdateField();
     syncBirthdateAge();

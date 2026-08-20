@@ -12,6 +12,7 @@ const {
 const {
   dryRunPlan,
   resetBaseline,
+  verifyBaseline,
   validateGeneratedDocumentPath,
   validateLedgerData,
 } = require("../scripts/ft-baseline/operations");
@@ -98,9 +99,37 @@ describe("FT baseline manifest and dry-run", () => {
     expect(manifest.users.map((user) => user.testId)).not.toContain(REGISTRATION_TEST_ID);
     expect(manifest.documents.map((entry) => entry.data.testId)).not.toContain(REGISTRATION_TEST_ID);
     expect(manifest.registrationAccount.testId).toBe(REGISTRATION_TEST_ID);
+    expect(manifest.registrationAccount.otpFirestorePath).toBe(
+      `emailVerificationOtps/${manifest.registrationAccount.email}`,
+    );
+    expect(manifest.transientCleanupDocuments).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        testId: "FT_CLIENT_UNVERIFIED_EMAIL_OTP",
+        path: `emailVerificationOtps/${manifest.users.find((user) => user.testId === "FT_CLIENT_UNVERIFIED").email}`,
+      }),
+      expect.objectContaining({
+        testId: "FT_CLIENT_PROFILE_MUTABLE_PASSWORD_OTP",
+        path: `passwordChangeOtps/${manifest.users.find((user) => user.testId === "FT_CLIENT_PROFILE_MUTABLE").email}`,
+      }),
+    ]));
     expect(manifest.documents.every((entry) => (
       entry.data.testData === true && entry.data.testBaseline === "FT_BASELINE_V1"
     ))).toBe(true);
+    const savedResult = manifest.documents.find(
+      (entry) => entry.path === "compatibilityResults/FT_QUIZ_RESULT_COOLDOWN"
+    )?.data;
+    expect(Object.keys(savedResult.preferences)).toHaveLength(18);
+    expect(savedResult.filters).toEqual({
+      preferredSpecies: "Any",
+      preferredSex: "Any",
+      needAllergyFriendly: "no",
+      acceptSpecialNeeds: "yes",
+    });
+    expect(savedResult.questionSnapshot).toHaveLength(18);
+    expect(savedResult.matches).toEqual(expect.arrayContaining([
+      expect.objectContaining({ animalId: "FT_ANIMAL_READY_DOG" }),
+      expect.objectContaining({ animalId: "FT_ANIMAL_READY_CAT" }),
+    ]));
   });
 
   it("dry-run creates a plan and performs zero Firebase calls", () => {
@@ -189,6 +218,20 @@ function resetHarness() {
     users: [],
     documents: [baselineDocument, ledgerDocument],
     registrationAccount: { testId: REGISTRATION_TEST_ID, email: "registration@example.test" },
+    transientCleanupDocuments: [
+      {
+        testId: "FT_CLIENT_UNVERIFIED_EMAIL_OTP",
+        collection: "emailVerificationOtps",
+        id: "unverified@example.test",
+        path: "emailVerificationOtps/unverified@example.test",
+      },
+      {
+        testId: "FT_CLIENT_PROFILE_MUTABLE_PASSWORD_OTP",
+        collection: "passwordChangeOtps",
+        id: "mutable@example.test",
+        path: "passwordChangeOtps/mutable@example.test",
+      },
+    ],
     ledgerPath: "ftRunLedgers/FT_BASELINE_V1",
     storage: { fixtureObjects: [] },
     generatedFirestorePolicy: {
@@ -213,11 +256,25 @@ describe("FT baseline reset target controls", () => {
 
   it("deletes only the exact ledger-owned generated record and restores manifest records", async () => {
     const { adapter, manifest, records, deleted, written } = resetHarness();
+    records.set("users/registration@example.test", { email: "registration@example.test" });
+    records.set("emailVerificationOtps/registration@example.test", { otpHash: "ft-only" });
+    records.set("emailVerificationOtps/unverified@example.test", { otpHash: "ft-email-otp" });
+    records.set("passwordChangeOtps/mutable@example.test", { otpHash: "ft-password-otp" });
+    records.set("emailVerificationOtps/ordinary@example.test", { otpHash: "must survive" });
+    records.set("passwordChangeOtps/ordinary@example.test", { otpHash: "must survive" });
     await resetBaseline(adapter, manifest);
-    expect(deleted).toEqual(["notifications/FT_RUN_ONE"]);
+    expect(deleted.sort()).toEqual([
+      "emailVerificationOtps/registration@example.test",
+      "emailVerificationOtps/unverified@example.test",
+      "notifications/FT_RUN_ONE",
+      "passwordChangeOtps/mutable@example.test",
+      "users/registration@example.test",
+    ]);
     expect(written.sort()).toEqual(["ftRunLedgers/FT_BASELINE_V1", "notifications/FT_BASE"]);
     expect(records.get("notifications/FT_BASE").value).toBe("baseline");
     expect(records.get("notifications/ORDINARY")).toEqual({ value: "must survive" });
+    expect(records.get("emailVerificationOtps/ordinary@example.test")).toEqual({ otpHash: "must survive" });
+    expect(records.get("passwordChangeOtps/ordinary@example.test")).toEqual({ otpHash: "must survive" });
   });
 
   it("aborts before deletion when a ledger target lacks FT ownership markers", async () => {
@@ -225,5 +282,13 @@ describe("FT baseline reset target controls", () => {
     records.set("notifications/FT_RUN_ONE", { testData: false, testId: "FT_RUN_ONE", testBaseline: "FT_BASELINE_V1" });
     await expect(resetBaseline(adapter, manifest)).rejects.toThrow(/ownership markers/);
     expect(deleted).toEqual([]);
+  });
+
+  it("verification fails while an exact ledger-owned generated record remains", async () => {
+    const { adapter, manifest } = resetHarness();
+    const result = await verifyBaseline(adapter, manifest);
+    expect(result.valid).toBe(false);
+    expect(result.generatedFirestoreRecords).toEqual({ registered: 1, existing: 1 });
+    expect(result.invalid).toContain("Generated/notifications/FT_RUN_ONE");
   });
 });

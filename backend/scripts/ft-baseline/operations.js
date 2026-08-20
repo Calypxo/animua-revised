@@ -51,6 +51,7 @@ function parseDocumentPath(path) {
 function validateGeneratedDocumentPath(path, manifest) {
   const parsed = parseDocumentPath(path);
   const policy = manifest.generatedFirestorePolicy;
+  if (path === manifest.registrationAccount.firestorePath) return parsed;
   if (parsed.parts.length === 4) {
     const [collection, parentId, subcollection, documentId] = parsed.parts;
     const parentOwned = manifest.documents.some(
@@ -89,7 +90,9 @@ function validateGeneratedStoragePath(path, manifest) {
   const approvedPaths = new Set(
     manifest.storage.fixtureObjects.map((item) => item.path)
   );
-  if (!approvedPaths.has(normalized)) {
+  const generatedPolicy = (manifest.storage.generatedObjectPolicies || [])
+    .find((policy) => policy.pathPattern.test(normalized));
+  if (!approvedPaths.has(normalized) && !generatedPolicy) {
     throw operationError(`Unknown Storage delete target: ${normalized}.`);
   }
   return normalized;
@@ -216,10 +219,15 @@ async function preflightBaselineOwnership({ db, auth, bucket }, manifest, { incl
   }
 
   const registrationRef = db.collection("users").doc(manifest.registrationAccount.email);
+  const registrationOtpRef = db.collection("emailVerificationOtps").doc(manifest.registrationAccount.email);
   let registrationDoc;
+  let registrationOtpDoc;
   let registrationAuth;
   try {
-    registrationDoc = await registrationRef.get();
+    [registrationDoc, registrationOtpDoc] = await Promise.all([
+      registrationRef.get(),
+      registrationOtpRef.get(),
+    ]);
   } catch (error) {
     throw mutationError("Firestore preflight read", manifest.registrationAccount.testId, error);
   }
@@ -228,12 +236,31 @@ async function preflightBaselineOwnership({ db, auth, bucket }, manifest, { incl
   } catch (error) {
     throw mutationError("Auth preflight read", manifest.registrationAccount.testId, error);
   }
-  if (!includeResetCleanup && (registrationDoc.exists || registrationAuth)) {
+  if (!includeResetCleanup && (registrationDoc.exists || registrationOtpDoc.exists || registrationAuth)) {
     throw ownershipError(
       "Registration absence preflight",
       manifest.registrationAccount.testId,
-      "FT_REGISTRATION_ACCOUNT must be absent before baseline seed."
+      "FT_REGISTRATION_ACCOUNT and its exact OTP record must be absent before baseline seed."
     );
+  }
+
+  const transientDocuments = [];
+  for (const entry of manifest.transientCleanupDocuments || []) {
+    const ref = db.collection(entry.collection).doc(entry.id);
+    let snapshot;
+    try {
+      snapshot = await ref.get();
+    } catch (error) {
+      throw mutationError("Firestore preflight read", entry.testId, error);
+    }
+    if (!includeResetCleanup && snapshot.exists) {
+      throw ownershipError(
+        "Transient FT record absence preflight",
+        entry.testId,
+        `${entry.path} must be absent before baseline seed.`
+      );
+    }
+    transientDocuments.push({ entry, ref, snapshot });
   }
 
   const cleanup = {
@@ -242,7 +269,10 @@ async function preflightBaselineOwnership({ db, auth, bucket }, manifest, { incl
     storage: [],
     registrationRef,
     registrationDoc,
+    registrationOtpRef,
+    registrationOtpDoc,
     registrationAuth,
+    transientDocuments,
   };
   if (!includeResetCleanup) return { documentSnapshots, authStates, cleanup };
 
@@ -288,6 +318,8 @@ async function preflightBaselineOwnership({ db, auth, bucket }, manifest, { incl
     const objectPath = validateGeneratedStoragePath(path, manifest);
     const file = bucket.file(objectPath);
     const fixture = manifest.storage.fixtureObjects.find((item) => item.path === objectPath);
+    const generatedPolicy = (manifest.storage.generatedObjectPolicies || [])
+      .find((item) => item.pathPattern.test(objectPath));
     let exists;
     let metadata;
     try {
@@ -297,7 +329,8 @@ async function preflightBaselineOwnership({ db, auth, bucket }, manifest, { incl
       throw mutationError("Storage cleanup preflight read", fixture?.testId || manifest.baselineId, error);
     }
     if (!exists) continue;
-    if (metadata?.metadata?.testBaseline !== manifest.baselineId || metadata?.metadata?.testData !== "true") {
+    if (!generatedPolicy &&
+      (metadata?.metadata?.testBaseline !== manifest.baselineId || metadata?.metadata?.testData !== "true")) {
       throw operationError(`Ledger Storage target ${objectPath} lacks FT ownership metadata.`);
     }
     cleanup.storage.push(file);
@@ -369,9 +402,16 @@ async function writeDocuments(db, documents) {
 async function performCleanup({ db, auth }, manifest, cleanup) {
   const firestoreTargets = [...cleanup.firestore];
   if (cleanup.registrationDoc.exists) firestoreTargets.push(cleanup.registrationRef);
-  for (let offset = 0; offset < firestoreTargets.length; offset += 400) {
+  if (cleanup.registrationOtpDoc.exists) firestoreTargets.push(cleanup.registrationOtpRef);
+  for (const transient of cleanup.transientDocuments || []) {
+    if (transient.snapshot.exists) firestoreTargets.push(transient.ref);
+  }
+  const uniqueFirestoreTargets = [
+    ...new Map(firestoreTargets.map((ref) => [ref.path, ref])).values(),
+  ];
+  for (let offset = 0; offset < uniqueFirestoreTargets.length; offset += 400) {
     const batch = db.batch();
-    firestoreTargets.slice(offset, offset + 400).forEach((ref) => batch.delete(ref));
+    uniqueFirestoreTargets.slice(offset, offset + 400).forEach((ref) => batch.delete(ref));
     try {
       await batch.commit();
     } catch (error) {
@@ -389,10 +429,16 @@ async function performCleanup({ db, auth }, manifest, cleanup) {
   }
   for (const file of cleanup.storage) {
     const fixture = manifest.storage.fixtureObjects.find((item) => item.path === file.name);
+    const generatedPolicy = (manifest.storage.generatedObjectPolicies || [])
+      .find((item) => item.pathPattern.test(file.name));
     try {
       await file.delete();
     } catch (error) {
-      throw mutationError("Storage controlled cleanup", fixture?.testId || manifest.baselineId, error);
+      throw mutationError(
+        "Storage controlled cleanup",
+        fixture?.testId || generatedPolicy?.testId || manifest.baselineId,
+        error
+      );
     }
   }
 }
@@ -410,6 +456,9 @@ function dryRunPlan(manifest, mode = "seed") {
       testId: entry.data.testId,
     })),
     registrationAccountExpectedAbsent: manifest.registrationAccount.testId,
+    transientCleanupDocumentsExpectedAbsent: (manifest.transientCleanupDocuments || []).map(
+      (entry) => entry.testId
+    ),
     storageUploads: 0,
     hostedCalls: 0,
     writes: 0,
@@ -455,7 +504,9 @@ async function resetBaseline(adapter, manifest, {
     users: manifest.users.length,
     documents: manifest.documents.length,
     deleted: cleanup.firestore.length + cleanup.auth.length + cleanup.storage.length +
-      Number(cleanup.registrationDoc.exists) + Number(Boolean(cleanup.registrationAuth)),
+      Number(cleanup.registrationDoc.exists) + Number(cleanup.registrationOtpDoc.exists) +
+      Number(Boolean(cleanup.registrationAuth)) +
+      (cleanup.transientDocuments || []).filter((entry) => entry.snapshot.exists).length,
     auth,
     firestore,
   };
@@ -495,15 +546,56 @@ async function verifyBaseline(adapter, manifest) {
     else if (!valid) invalid.push(`Auth/${user.testId}`);
     else validAuthUsers += 1;
   }
-  const registrationDoc = await adapter.db.collection("users").doc(manifest.registrationAccount.email).get();
+  const [registrationDoc, registrationOtpDoc] = await Promise.all([
+    adapter.db.collection("users").doc(manifest.registrationAccount.email).get(),
+    adapter.db.collection("emailVerificationOtps").doc(manifest.registrationAccount.email).get(),
+  ]);
   const registrationAuth = await getAuthUserByEmail(adapter.auth, manifest.registrationAccount.email);
-  const registrationAbsent = !registrationDoc.exists && !registrationAuth;
+  const registrationAbsent = !registrationDoc.exists && !registrationOtpDoc.exists && !registrationAuth;
   if (!registrationAbsent) invalid.push(`Absent/${manifest.registrationAccount.testId}`);
+  let transientCleanupDocumentsAbsent = true;
+  for (const entry of manifest.transientCleanupDocuments || []) {
+    const snapshot = await adapter.db.collection(entry.collection).doc(entry.id).get();
+    if (snapshot.exists) {
+      transientCleanupDocumentsAbsent = false;
+      invalid.push(`Absent/${entry.testId}`);
+    }
+  }
+  const ledgerRef = adapter.db.collection("ftRunLedgers").doc(manifest.baselineId);
+  const ledgerSnapshot = await ledgerRef.get();
+  let ledgerPaths = [];
+  let existingGeneratedRecords = 0;
+  if (ledgerSnapshot.exists) {
+    try {
+      const ledger = validateLedgerData(ledgerSnapshot.data(), manifest);
+      ledgerPaths = [...ledger.generatedFirestorePaths];
+      for (const generatedPath of ledgerPaths) {
+        const parsed = validateGeneratedDocumentPath(generatedPath, manifest);
+        const snapshot = await generatedDocumentReference(adapter.db, parsed).get();
+        if (snapshot.exists) {
+          existingGeneratedRecords += 1;
+          invalid.push(`Generated/${generatedPath}`);
+        } else {
+          invalid.push(`Ledger/${generatedPath}`);
+        }
+      }
+      if (ledger.generatedAuthEmails.length || ledger.generatedStoragePaths.length) {
+        invalid.push("Ledger/non-Firestore generated targets remain registered");
+      }
+    } catch (_error) {
+      invalid.push(`Ledger/${manifest.baselineId} is invalid`);
+    }
+  }
   return {
     baselineId: manifest.baselineId,
     authUsers: { expected: manifest.users.length, valid: validAuthUsers },
     collections,
     registrationAccountAbsent: registrationAbsent,
+    transientCleanupDocumentsAbsent,
+    generatedFirestoreRecords: {
+      registered: ledgerPaths.length,
+      existing: existingGeneratedRecords,
+    },
     missing,
     invalid,
     valid: missing.length === 0 && invalid.length === 0,

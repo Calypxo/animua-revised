@@ -2,7 +2,11 @@ import Swal from "sweetalert2";
 import { handleLogin } from "../../auth/login.js";
 import { handleRegistration } from "../../auth/register.js";
 import { API_BASE_URL } from "../../utils/api.js";
-import { getToken } from "../../utils/storage.js";
+import {
+  clearUserSession,
+  getToken,
+  isAuthenticationFailure,
+} from "../../utils/storage.js";
 
 const CHATBOT_MIN_TYPING_MS = 1000;
 const PASSWORD_OTP_RESEND_SECONDS = 60;
@@ -103,6 +107,7 @@ let pendingPasswordChange = null;
 let pendingForgotPassword = null;
 let passwordOtpResendTimer = null;
 let passwordOtpResendRemaining = 0;
+let isSessionReauthenticationPending = false;
 
 const loginSection = document.getElementById("login-section");
 const registerSection = document.getElementById("register-section");
@@ -442,32 +447,30 @@ function renderUserAvatar(element, fullName = "User", photoDataUrl = "") {
 }
 
 function clearPublicSession() {
-  localStorage.removeItem("animua_token");
-  localStorage.removeItem("user_role");
-  localStorage.removeItem("user_name");
-  localStorage.removeItem("user_email");
-  localStorage.removeItem("user_profile_photo");
-  localStorage.removeItem("is_logged_in");
-  localStorage.removeItem("show_welcome_toast");
+  clearUserSession();
   currentProfileAccount = null;
   pendingProfilePhotoDataUrl = "";
   hasPendingProfileChanges = false;
 }
 
 function isSessionExpiredError(errorOrMessage = "") {
-  const message = String(errorOrMessage?.message || errorOrMessage || "").toLowerCase();
-  return message.includes("token has expired") || message.includes("jwt expired");
+  return isAuthenticationFailure(errorOrMessage);
 }
 
 function promptLoginAfterSessionExpired() {
+  if (isSessionReauthenticationPending) return;
+  isSessionReauthenticationPending = true;
   clearPublicSession();
   updateAuthUI();
   closeProfileModal();
+  notificationPopup?.classList.remove("show");
+  updateNotificationBadge(0);
   Swal.fire({
     icon: "info",
     title: "Please Log In Again",
     text: "Your session expired. Sign in again to view your notifications.",
     customClass: {
+      container: "animua-session-expired-container",
       popup: "animua-popup",
       confirmButton: "animua-confirm"
     },
@@ -616,7 +619,7 @@ function setupHomeStories() {
   let lastFocusedHighlight = null;
   let animalsLoaded = false;
   let newestPets = [];
-  let eventsLoaded = false;
+  let eventsLoadPromise = null;
   let upcomingEvents = [];
   let adoptedStoriesLoaded = false;
   let adoptedStories = [];
@@ -1031,25 +1034,28 @@ function setupHomeStories() {
   };
 
   const loadUpcomingEvents = async () => {
-    if (eventsLoaded) return upcomingEvents;
-    eventsLoaded = true;
+    if (eventsLoadPromise) return eventsLoadPromise;
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/public/events`, { cache: "no-store" });
-      if (!response.ok) {
-        throw new Error(`Events request failed with status ${response.status}.`);
+    eventsLoadPromise = (async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/public/events`, { cache: "no-store" });
+        if (!response.ok) {
+          throw new Error(`Events request failed with status ${response.status}.`);
+        }
+
+        upcomingEvents = normalizeEvents(await response.json());
+        if (upcomingEvents.length) {
+          return upcomingEvents;
+        }
+      } catch (error) {
+        console.warn("Homepage events API load skipped:", error);
       }
 
-      upcomingEvents = normalizeEvents(await response.json());
-      if (upcomingEvents.length) {
-        return upcomingEvents;
-      }
-    } catch (error) {
-      console.warn("Homepage events API load skipped:", error);
-    }
+      upcomingEvents = [getDemoUpcomingEvent()];
+      return upcomingEvents;
+    })();
 
-    upcomingEvents = [getDemoUpcomingEvent()];
-    return upcomingEvents;
+    return eventsLoadPromise;
   };
 
   const normalizeAdoptedStories = (data) => {
@@ -1954,7 +1960,11 @@ async function fetchNotifications({ markRead = false } = {}) {
     headers: { Authorization: `Bearer ${token}` }
   });
   const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(data.message || "Unable to load notifications.");
+  if (!response.ok) {
+    const error = new Error(data.message || "Unable to load notifications.");
+    error.status = response.status;
+    throw error;
+  }
 
   renderNotificationsPopup(data.notifications || [], Number(data.unreadCount || 0));
 
@@ -1991,6 +2001,11 @@ async function toggleNotificationsPopup() {
   try {
     await fetchNotifications({ markRead: true });
   } catch (error) {
+    if (isSessionExpiredError(error)) {
+      promptLoginAfterSessionExpired();
+      return;
+    }
+
     notificationPopup.innerHTML = `
       <div class="notification-popup-head">
         <div class="notification-popup-title">
@@ -2010,7 +2025,12 @@ function refreshNotificationDot() {
     updateNotificationBadge(0);
     return;
   }
-  fetchNotifications({ markRead: false }).catch(() => {
+  fetchNotifications({ markRead: false }).catch((error) => {
+    if (isSessionExpiredError(error)) {
+      promptLoginAfterSessionExpired();
+      return;
+    }
+
     updateNotificationBadge(0);
   });
 }

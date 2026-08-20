@@ -669,6 +669,7 @@ function renderApprovedAdoptionNextSteps(item) {
         <p><strong>Congratulations, your application has been approved.</strong>You may now schedule a pickup date and time to bring your new companion home.</p>
       </div>
       ${renderAttendanceDeadline(item, "adoption")}
+      ${renderScheduleFeedback(item)}
 
       <section class="schedule-card">
         <header>

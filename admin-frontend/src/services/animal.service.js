@@ -62,3 +62,9 @@ export async function archiveAnimal(id) {
     method: "PATCH",
   });
 }
+
+export async function deleteAnimalPhoto(id) {
+  return await apiFetch(`/animals/${encodeURIComponent(id)}/photo`, {
+    method: "DELETE",
+  });
+}

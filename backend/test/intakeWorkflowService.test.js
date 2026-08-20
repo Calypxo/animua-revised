@@ -17,10 +17,10 @@ test("closed intake statuses cannot create another profile", () => {
   assert.equal(canAdvanceIntakeToProfiling("Draft"), false);
 });
 
-test("an arrived approved-surrender intake skips the duplicate review stage", () => {
+test("an arrived approved-surrender intake remains pending until explicit conversion", () => {
   assert.equal(
     shouldAutoAdvanceIntake({ source: "Approved Surrender", status: "Pending" }),
-    true
+    false
   );
   assert.equal(
     shouldAutoAdvanceIntake({ source: "Rescue", status: "Pending" }),

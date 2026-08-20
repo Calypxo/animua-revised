@@ -1,4 +1,7 @@
-const { DEFAULT_QUESTIONS } = require("../../src/services/quizQuestionService");
+const {
+  DEFAULT_QUESTIONS,
+  buildQuestionSnapshot,
+} = require("../../src/services/quizQuestionService");
 
 const BASELINE_ID = "FT_BASELINE_V1";
 const LEDGER_PATH = `ftRunLedgers/${BASELINE_ID}`;
@@ -445,6 +448,33 @@ function makeSupportingDocuments(resetAt, users) {
   const clientEmail = byId.FT_CLIENT_ACTIVE.email;
   const cooldownEmail = byId.FT_CLIENT_QUIZ_COOLDOWN.email;
   const eligibleEmail = byId.FT_CLIENT_QUIZ_ELIGIBLE.email;
+  const savedPreferences = Object.fromEntries(
+    DEFAULT_QUESTIONS.map((question) => [question.traitKey, 3])
+  );
+  const savedFilters = {
+    preferredSpecies: "Any",
+    preferredSex: "Any",
+    needAllergyFriendly: "no",
+    acceptSpecialNeeds: "yes",
+  };
+  const savedQuestionSnapshot = buildQuestionSnapshot(
+    DEFAULT_QUESTIONS,
+    savedPreferences
+  );
+  const savedMatches = [
+    {
+      animalId: "FT_ANIMAL_READY_DOG",
+      animalName: "Synthetic dog for FT_ANIMAL_READY_DOG",
+      compatibilityScore: 100,
+      compatibilityPercent: 100,
+    },
+    {
+      animalId: "FT_ANIMAL_READY_CAT",
+      animalName: "Synthetic cat for FT_ANIMAL_READY_CAT",
+      compatibilityScore: 100,
+      compatibilityPercent: 100,
+    },
+  ];
   return [
     document("surrenderSettings", "requestAvailability", { testId: "FT_SURRENDER_AVAILABILITY", acceptingRequests: true, updatedAt: iso(resetAt), updatedBy: { email: "ft-admin@animua.test", name: "FT Admin Active", role: "Admin" } }),
     document("announcements", "FT_ANNOUNCEMENT_PUBLISHED", { testId: "FT_ANNOUNCEMENT_PUBLISHED", title: "FT Published Announcement", type: "News & Article", caption: "Synthetic public announcement", status: "Published", visibleToPublic: true, imagePath: "", imageUrl: "", createdAt: addDays(resetAt, -2), updatedAt: resetAt, createdBy: "ft-staff@animua.test", createdByName: "FT Staff Active", createdByRole: "Staff" }),
@@ -454,7 +484,7 @@ function makeSupportingDocuments(resetAt, users) {
     document("contactMessages", "FT_CONTACT_REPLIED", { testId: "FT_CONTACT_REPLIED", userId: clientEmail, fullName: "FT Client Active", email: clientEmail, subject: "FT Replied Inquiry", message: "Synthetic inquiry", messages: [{ sender: "user", name: "FT Client Active", message: "Synthetic inquiry", createdAt: iso(addDays(resetAt, -2)) }, { sender: "staff", name: "FT Staff Active", message: "Synthetic reply", createdAt: iso(addDays(resetAt, -1)) }], status: "Replied", source: "Contact Us Page", replyMessage: "Synthetic reply", repliedBy: "ft-staff@animua.test", repliedAt: iso(addDays(resetAt, -1)), createdAt: iso(addDays(resetAt, -2)) }),
     document("notifications", "FT_NOTIFICATION_UNREAD", { testId: "FT_NOTIFICATION_UNREAD", userEmail: byId.FT_CLIENT_NOTIFICATIONS.email, category: "application", type: "ft_unread", title: "FT Unread Notification", message: "Synthetic unread notification", link: "/pages/public/my-submissions.html", referenceId: "FT_ADOPTION_PENDING", metadata: {}, read: false, createdAt: resetAt }),
     document("notifications", "FT_NOTIFICATION_READ", { testId: "FT_NOTIFICATION_READ", userEmail: byId.FT_CLIENT_NOTIFICATIONS.email, category: "event", type: "ft_read", title: "FT Read Notification", message: "Synthetic read notification", link: "/pages/public/announcements.html", referenceId: "FT_EVENT_PUBLIC", metadata: {}, read: true, readAt: resetAt, createdAt: addDays(resetAt, -1) }),
-    document("compatibilityResults", "FT_QUIZ_RESULT_COOLDOWN", { testId: "FT_QUIZ_RESULT_COOLDOWN", resultId: "FT_QUIZ_RESULT_COOLDOWN", userId: cooldownEmail, userEmail: cooldownEmail, userName: "FT Client Quiz Cooldown", preferences: {}, filters: {}, questionSnapshot: [], matches: [], quizVersion: 1, completedAt: resetAt, nextRetakeAt: addDays(resetAt, 7), isLatest: true }),
+    document("compatibilityResults", "FT_QUIZ_RESULT_COOLDOWN", { testId: "FT_QUIZ_RESULT_COOLDOWN", resultId: "FT_QUIZ_RESULT_COOLDOWN", userId: cooldownEmail, userEmail: cooldownEmail, userName: "FT Client Quiz Cooldown", preferences: savedPreferences, filters: savedFilters, questionSnapshot: savedQuestionSnapshot, matches: savedMatches, quizVersion: 1, completedAt: resetAt, nextRetakeAt: addDays(resetAt, 7), isLatest: true }),
     document("compatibilityResults", "FT_QUIZ_RESULT_ELIGIBLE", { testId: "FT_QUIZ_RESULT_ELIGIBLE", resultId: "FT_QUIZ_RESULT_ELIGIBLE", userId: eligibleEmail, userEmail: eligibleEmail, userName: "FT Client Quiz Eligible", preferences: {}, filters: {}, questionSnapshot: [], matches: [], quizVersion: 1, completedAt: addDays(resetAt, -40), nextRetakeAt: addDays(resetAt, -10), isLatest: true }),
     document("quizSettings", "compatibilityQuiz", { testId: "FT_QUIZ_SETTINGS", quizEnabled: true, retakeCooldownDays: 30, quizVersion: 1, updatedAt: resetAt, updatedBy: "ft-admin@animua.test" }),
     document("quizQuestionConfigs", "compatibilityQuiz", { testId: "FT_QUIZ_QUESTION_CONFIG", questions: DEFAULT_QUESTIONS, version: 1, updatedAt: resetAt, updatedBy: { email: "ft-admin@animua.test", name: "FT Admin Active" } }),
@@ -493,6 +523,20 @@ function buildManifest({ env = process.env, now = new Date() } = {}) {
   if (userEmails.includes(registrationEmail)) {
     throw new Error("FT_REGISTRATION_ACCOUNT_EMAIL must not match a baseline account.");
   }
+  const transientCleanupDocuments = [
+    {
+      testId: "FT_CLIENT_UNVERIFIED_EMAIL_OTP",
+      collection: "emailVerificationOtps",
+      id: byId.FT_CLIENT_UNVERIFIED.email,
+      path: `emailVerificationOtps/${byId.FT_CLIENT_UNVERIFIED.email}`,
+    },
+    {
+      testId: "FT_CLIENT_PROFILE_MUTABLE_PASSWORD_OTP",
+      collection: "passwordChangeOtps",
+      id: byId.FT_CLIENT_PROFILE_MUTABLE.email,
+      path: `passwordChangeOtps/${byId.FT_CLIENT_PROFILE_MUTABLE.email}`,
+    },
+  ];
   return Object.freeze({
     baselineId: BASELINE_ID,
     resetAt,
@@ -502,7 +546,9 @@ function buildManifest({ env = process.env, now = new Date() } = {}) {
       testId: REGISTRATION_TEST_ID,
       email: registrationEmail,
       firestorePath: `users/${registrationEmail}`,
+      otpFirestorePath: `emailVerificationOtps/${registrationEmail}`,
     },
+    transientCleanupDocuments,
     ledgerPath: LEDGER_PATH,
     storage: {
       bucket: "animua-ft.firebasestorage.app",
@@ -510,10 +556,22 @@ function buildManifest({ env = process.env, now = new Date() } = {}) {
         { testId: "FT_ANIMAL_READY_DOG_IMAGE", path: "animals/FT_ANIMAL_READY_DOG/ft-profile.jpg", upload: false },
         { testId: "FT_ANNOUNCEMENT_PUBLISHED_IMAGE", path: "announcements/FT_ANNOUNCEMENT_PUBLISHED/ft-cover.jpg", upload: false },
       ],
+      generatedObjectPolicies: [
+        {
+          testId: "IT_023_ANNOUNCEMENT_IMAGE",
+          parentDocumentPath: "announcements/FT_ANNOUNCEMENT_DRAFT",
+          pathPattern: /^announcements\/FT_ANNOUNCEMENT_DRAFT\/cover-\d{13}\.(?:jpg|png|webp)$/,
+        },
+        {
+          testId: "FT_049_ANIMAL_PROFILE_IMAGE",
+          parentDocumentPath: "animals/FT_ANIMAL_PROFILE_EDIT",
+          pathPattern: /^animals\/FT_ANIMAL_PROFILE_EDIT\/profile-\d{13}\.png$/,
+        },
+      ],
     },
     generatedFirestorePolicy: {
-      allowedCollections: ["adoptions", "surrenderRequests", "intakeRecords", "contactMessages", "notifications", "auditLogs", "compatibilityResults"],
-      documentIdPattern: /^(?:FT_RUN_[A-Za-z0-9_-]+|[A-Za-z0-9]{20}|INT-\d{4}-\d{3,}|SR-\d{4}-\d+)$/,
+      allowedCollections: ["adoptions", "surrenderRequests", "intakeRecords", "animals", "announcements", "contactMessages", "notifications", "auditLogs", "compatibilityResults", "inventoryItems"],
+      documentIdPattern: /^(?:FT_RUN_[A-Za-z0-9_-]+|[A-Za-z0-9]{20}|QR-\d{4}-[A-F0-9]{8}|INT-\d{4}-\d{3,}|ANIM-\d{4}-\d{3,}|SR-\d{4}-\d+|ITM013X)$/,
       inventoryTransactionIdPattern: /^(?:FT_RUN_[A-Za-z0-9_-]+|[A-Za-z0-9]{20})$/,
     },
   });

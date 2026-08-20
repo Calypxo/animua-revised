@@ -88,6 +88,11 @@ Cypress.Commands.add("loginClient", (overrides = {}) => {
 
   cy.intercept("POST", "**/api/auth/login").as("clientLoginRequest");
   cy.visitPublicPage(`${PUBLIC_HOME_PATH}#login`);
+  cy.get("body").then(($body) => {
+    if ($body.find("#authModal.hidden").length) {
+      cy.get("#loginNavBtn").should("be.visible").click();
+    }
+  });
   cy.get("#authModal").should("not.have.class", "hidden");
   cy.fillSensitiveInput("#login-email", email);
   cy.fillSensitiveInput("#login-password", password);
@@ -95,12 +100,12 @@ Cypress.Commands.add("loginClient", (overrides = {}) => {
   cy.wait("@clientLoginRequest", { timeout: 30000 })
     .its("response.statusCode")
     .should("eq", 200);
+  cy.get("#userLoggedInBox", { timeout: 30000 }).should("be.visible");
   cy.window()
     .its("localStorage")
     .invoke("getItem", "animua_token")
     .should("be.a", "string")
     .and("not.be.empty");
-  cy.get("#userLoggedInBox", { timeout: 30000 }).should("be.visible");
 });
 
 Cypress.Commands.add("loginManagement", (role, overrides = {}) => {
@@ -157,4 +162,46 @@ Cypress.Commands.add("logoutManagement", () => {
   cy.window().then((window) => {
     expect(window.localStorage.getItem("animua_token")).to.be.null;
   });
+});
+
+Cypress.Commands.add("fillValidSurrenderForm", (options = {}) => {
+  const png = Cypress.Buffer.from(
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl2nWQAAAAASUVORK5CYII=",
+    "base64",
+  );
+  const imageFile = (name) => ({
+    contents: png,
+    fileName: name,
+    mimeType: "image/png",
+    lastModified: 0,
+  });
+
+  cy.get(".surrender-workspace").scrollIntoView().should("have.class", "show");
+  cy.get("#ownerName").should("have.attr", "readonly");
+  cy.get("#ownerEmail").should("have.attr", "readonly");
+  cy.get("#contactNo").type("09170000000");
+  cy.get("#ownerAddress").type("FT Address, Pampang, Angeles City");
+  cy.get("#ownerBarangay").select("Pampang", { force: true });
+  cy.get("#identityIdFront").selectFile(imageFile("ft-id-front.png"), { force: true });
+  cy.get("#identityIdBack").selectFile(imageFile("ft-id-back.png"), { force: true });
+  cy.get('[data-next-step="2"]').click();
+
+  cy.get("#petName").type(options.petName || "FT Surrender Animal");
+  cy.get("#species").select("Dog", { force: true });
+  cy.get("#breed").type("Mixed Breed");
+  cy.get("#petAge").type("Adult");
+  cy.get("#petSex").select("Male", { force: true });
+  cy.get("#colorMarkings").type("Synthetic brown and white markings");
+  cy.get('input[name="status"][value="Unknown"]').check({ force: true });
+  cy.get("#vaccinationHistory").type("Unknown");
+  cy.get('[data-next-step="3"]').click();
+
+  cy.get("#reasons").type(
+    options.reason || "FT deterministic surrender reason for formal functionality testing.",
+  );
+  cy.get('[data-next-step="4"]').click();
+
+  if (options.agree !== false) {
+    cy.get("#agreeAllTerms").check({ force: true });
+  }
 });

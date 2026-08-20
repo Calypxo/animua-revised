@@ -10,11 +10,26 @@ export function getUserName() {
   return localStorage.getItem("user_name");
 }
 
-export function clearUserSession() {
-  localStorage.removeItem("animua_token");
-  localStorage.removeItem("user_role");
-  localStorage.removeItem("user_name");
-  localStorage.removeItem("user_email");
-  localStorage.removeItem("show_welcome_toast");
-  localStorage.removeItem("sidebar_collapsed");
+const USER_SESSION_KEYS = [
+  "animua_token",
+  "user_role",
+  "user_name",
+  "user_email",
+  "user_profile_photo",
+  "is_logged_in",
+  "show_welcome_toast",
+  "sidebar_collapsed",
+];
+
+export function clearUserSession(storage = globalThis.localStorage) {
+  USER_SESSION_KEYS.forEach((key) => storage.removeItem(key));
+}
+
+export function isAuthenticationFailure(errorOrResponse = {}) {
+  if (Number(errorOrResponse?.status) === 401) return true;
+
+  const message = String(
+    errorOrResponse?.message || errorOrResponse || "",
+  ).toLowerCase();
+  return message.includes("token has expired") || message.includes("jwt expired");
 }

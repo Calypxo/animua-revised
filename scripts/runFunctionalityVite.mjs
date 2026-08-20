@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { spawnSync } from "node:child_process";
+import { spawn } from "node:child_process";
 
 const command = process.argv[2] === "build" ? "build" : "dev";
 const projectDirectory = process.cwd();
@@ -32,7 +32,7 @@ if (!fs.existsSync(viteCli)) {
   process.exit(1);
 }
 
-const child = spawnSync(
+const child = spawn(
   process.execPath,
   [viteCli, command, "--mode", "test"],
   {
@@ -46,9 +46,32 @@ const child = spawnSync(
   }
 );
 
-if (child.error) {
-  console.error(child.error.message);
-  process.exit(1);
+let stopping = false;
+
+function stopChild(signal) {
+  if (stopping) return;
+  stopping = true;
+
+  if (child.exitCode === null && child.signalCode === null) {
+    child.kill(signal);
+  }
 }
 
-process.exit(child.status ?? 1);
+for (const signal of ["SIGINT", "SIGTERM"]) {
+  process.once(signal, () => stopChild(signal));
+}
+
+process.once("exit", () => {
+  if (child.exitCode === null && child.signalCode === null) {
+    child.kill();
+  }
+});
+
+child.once("error", (error) => {
+  console.error(error.message);
+  process.exitCode = 1;
+});
+
+child.once("exit", (code, signal) => {
+  process.exitCode = code ?? (signal ? 1 : 0);
+});

@@ -17,6 +17,7 @@ import {
 import {
   getAnimalById,
   updateAnimal,
+  deleteAnimalPhoto,
   sendAnimalToQuarantine,
   markAnimalReady,
   saveBehavioralAssessment as saveBehavioralAssessmentApi,
@@ -394,6 +395,10 @@ function renderHero() {
   profilePhotoEl.innerHTML = animal.photoURL
     ? `<img src="${animal.photoURL}" alt="${displayLabel}" />`
     : `<span class="profile-photo-initial" aria-label="${animal.species || "Animal"}">${speciesInitial(animal.species)}</span>`;
+  const removePhotoButton = document.getElementById("btnRemovePhoto");
+  if (removePhotoButton) {
+    removePhotoButton.style.display = animal.photoURL && can("upload_photo") ? "" : "none";
+  }
 
   document.getElementById("profileMeta").innerHTML = `
     <div class="profile-meta-item"><span>Record ID</span><strong><i class="bi bi-upc-scan"></i>${animal.id}</strong></div>
@@ -504,12 +509,7 @@ async function uploadAnimalPhoto() {
     const data = await res.json();
 
     animal.photoURL = data.photoURL || "";
-
-    const ph = document.getElementById("profilePhoto");
-
-    ph.innerHTML = animal.photoURL
-      ? `<img src="${animal.photoURL}" alt="${animalDisplayLabel()}" />`
-      : `<span>${animalDisplayLabel()[0]}</span>`;
+    renderHero();
 
     input.value = "";
 
@@ -521,6 +521,18 @@ async function uploadAnimalPhoto() {
       "error",
       err.message || "Failed to upload image."
     );
+  }
+}
+
+async function removeAnimalPhoto() {
+  if (!can("upload_photo") || !animal.photoURL) return;
+  try {
+    await deleteAnimalPhoto(animal.id);
+    await refreshAnimal();
+    renderHero();
+    showToast("success", "Animal photo removed successfully.");
+  } catch (error) {
+    showToast("error", error.message || "Failed to remove animal photo.");
   }
 }
 
@@ -1853,6 +1865,7 @@ async function init() {
     bindTabs();
 
     document.getElementById("btnEditProfile")?.addEventListener("click", openEditModal);
+    document.getElementById("btnRemovePhoto")?.addEventListener("click", removeAnimalPhoto);
     document.getElementById("editModalClose")?.addEventListener("click", () => closeModal("editModalBackdrop"));
     document.getElementById("editModalCancel")?.addEventListener("click", () => closeModal("editModalBackdrop"));
     document.getElementById("editModalSave")?.addEventListener("click", saveEditProfile);

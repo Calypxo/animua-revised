@@ -187,9 +187,10 @@ exports.createIntake = async (req, res) => {
     }
 
     let surrenderRef = null;
+    let surrenderSnapshot = null;
     if (source === "Approved Surrender") {
       surrenderRef = db.collection("surrenderRequests").doc(surrenderRefId);
-      const surrenderSnapshot = await surrenderRef.get();
+      surrenderSnapshot = await surrenderRef.get();
       if (!surrenderSnapshot.exists) {
         return res.status(404).json({ message: "Referenced surrender request was not found." });
       }
@@ -285,7 +286,7 @@ exports.createIntake = async (req, res) => {
     }
 
     if (surrenderRef) {
-      batch.update(surrenderRef, {
+      const surrenderUpdates = {
         status: "Converted",
         intakeId,
         dropoffDate: intakeDate,
@@ -295,7 +296,14 @@ exports.createIntake = async (req, res) => {
         convertedAt: new Date().toISOString(),
         convertedBy: req.user?.fullName || req.user?.email || "Staff",
         updatedAt: new Date().toISOString(),
-      });
+      };
+      if (surrenderSnapshot?.updateTime) {
+        batch.update(surrenderRef, surrenderUpdates, {
+          lastUpdateTime: surrenderSnapshot.updateTime,
+        });
+      } else {
+        batch.update(surrenderRef, surrenderUpdates);
+      }
     }
 
     await batch.commit();
@@ -327,7 +335,7 @@ exports.createIntake = async (req, res) => {
       message: preparedProfile
         ? "Intake completed and animal moved to profiling."
         : surrenderRef
-        ? "Intake record created and surrender request converted."
+        ? "Intake record created and linked to the surrender request."
         : "Intake record created.",
       id: intakeId,
       surrenderConverted: Boolean(surrenderRef),
@@ -336,6 +344,11 @@ exports.createIntake = async (req, res) => {
     });
   } catch (err) {
     console.error("[createIntake]", err.message);
+    if (err.code === 9 || err.code === "failed-precondition" || err.code === "aborted") {
+      return res.status(409).json({
+        message: "An Intake record already exists for this surrender request.",
+      });
+    }
     res.status(500).json({ message: "Failed to create intake record." });
   }
 };

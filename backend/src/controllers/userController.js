@@ -113,6 +113,8 @@ exports.getUserById = async (req, res) => {
 
 // CREATE USER — Admin/Staff only (Public users self-register)
 exports.createUser = async (req, res) => {
+  let createdAuthUser = null;
+  let firestoreCreated = false;
   try {
     const { firstName, lastName, email, password, role, status, permissions, color } = req.body;
     if (!firstName || !lastName || !email || !password || !role) {
@@ -121,32 +123,69 @@ exports.createUser = async (req, res) => {
     if (!["Admin","Staff","Veterinarian"].includes(role)) {
       return res.status(400).json({ message: "Admin panel can only create management accounts. Public users self-register." });
     }
+    if (status !== undefined && !["Active", "Inactive"].includes(status)) {
+      return res.status(400).json({ message: "Invalid account status." });
+    }
     const emailLower = email.trim().toLowerCase();
-    const existing = await db.collection("users").doc(emailLower).get();
+    const userRef = db.collection("users").doc(emailLower);
+    const existing = await userRef.get();
     if (existing.exists) return res.status(409).json({ message: "Email is already in use." });
+
+    try {
+      await admin.auth().getUserByEmail(emailLower);
+      return res.status(409).json({ message: "Email is already in use." });
+    } catch (error) {
+      if (error.code !== "auth/user-not-found") throw error;
+    }
 
     const salt = await bcrypt.genSalt(12);
     const hashedPw = await bcrypt.hash(password, salt);
     const fullName = `${firstName.trim()} ${lastName.trim()}`;
     const assigned = color || AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)];
     const computedPermissions = getPermissionsForRole(role);
+    const accountStatus = status || "Active";
 
-    await db.collection("users").doc(emailLower).set({
+    createdAuthUser = await admin.auth().createUser({
+      email: emailLower,
+      password,
+      displayName: fullName,
+      emailVerified: true,
+      disabled: accountStatus === "Inactive",
+    });
+
+    await userRef.create({
       firstName: firstName.trim(), lastName: lastName.trim(), fullName,
       email: emailLower, password: hashedPw, role,
-      status: status || "Active", permissions: computedPermissions,
+      status: accountStatus, permissions: computedPermissions,
       color: assigned, lastLogin: null,
+      firebaseUid: createdAuthUser.uid,
+      emailVerified: true,
+      phoneVerified: false,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
       createdBy: req.user?.email || "system",
     });
+    firestoreCreated = true;
     await writeAuditLog({ action:"user.created", module:"User Management",
       targetId: emailLower, targetName: fullName,
       performedBy: req.user?.email, performedByName: req.user?.fullName,
-      after: { firstName, lastName, email: emailLower, role, status, permissions: computedPermissions },
+      after: { firstName, lastName, email: emailLower, role, status: accountStatus, permissions: computedPermissions },
     });
     res.status(201).json({ message: "User created successfully.", id: emailLower });
   } catch (error) {
+    if (createdAuthUser && !firestoreCreated) {
+      try {
+        await admin.auth().deleteUser(createdAuthUser.uid);
+      } catch (rollbackError) {
+        console.error("[createUser Rollback Error]", rollbackError.message);
+      }
+    }
     console.error("[createUser Error]", error.message);
+    if (error.code === "auth/email-already-exists" || error.code === 6 || error.code === "already-exists") {
+      return res.status(409).json({ message: "Email is already in use." });
+    }
+    if (error.code === "auth/invalid-email" || error.code === "auth/invalid-password") {
+      return res.status(400).json({ message: "Invalid email or password format." });
+    }
     res.status(500).json({ message: "Failed to create user." });
   }
 };

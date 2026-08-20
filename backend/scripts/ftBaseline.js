@@ -58,6 +58,13 @@ function printVerification(result, logger = console) {
     logger.log(`${collection}: ${count.valid}/${count.expected}`);
   }
   logger.log(`FT_REGISTRATION_ACCOUNT absent: ${result.registrationAccountAbsent ? "Yes" : "No"}`);
+  logger.log(
+    `Controlled transient OTP records absent: ${result.transientCleanupDocumentsAbsent ? "Yes" : "No"}`
+  );
+  logger.log(
+    `Generated Firestore records pending cleanup: ` +
+    `${result.generatedFirestoreRecords.existing}/${result.generatedFirestoreRecords.registered}`
+  );
   logger.log(`Verification: ${result.valid ? "PASSED" : "FAILED"}`);
   if (!result.valid) {
     result.missing.forEach((item) => logger.error(`Missing: ${item}`));

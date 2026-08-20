@@ -195,7 +195,7 @@ exports.replaceAdminQuestions = async (req, res) => {
       version,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       updatedBy,
-    });
+    }, { merge: true });
     batch.set(SETTINGS, {
       quizVersion: version,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),

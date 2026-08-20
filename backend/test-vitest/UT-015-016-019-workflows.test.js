@@ -30,6 +30,6 @@ describe("UT-016 — Attendance Deadline Lifecycle", () => {
 
 describe("UT-019 — Intake Workflow State Rules", () => {
   it.each([[1,"Pending",true],[2,"Approved",true],[3,"Converted",false]])("Scenario %i — advancement rule for %s", (_n,status,expected)=>expect(intake.canAdvanceIntakeToProfiling(status)).toBe(expected));
-  it("Scenario 4 — auto-advances a Pending Approved Surrender",()=>expect(intake.shouldAutoAdvanceIntake({source:"Approved Surrender",status:"Pending"})).toBe(true));
+  it("Scenario 4 — keeps a Pending Approved Surrender intake in its initial state",()=>expect(intake.shouldAutoAdvanceIntake({source:"Approved Surrender",status:"Pending"})).toBe(false));
   it("Scenario 5 — does not auto-advance a Pending Rescue",()=>expect(intake.shouldAutoAdvanceIntake({source:"Rescue",status:"Pending"})).toBe(false));
 });
