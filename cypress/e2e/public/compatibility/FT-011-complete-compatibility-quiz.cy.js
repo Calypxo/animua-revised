@@ -61,7 +61,8 @@ describe("FT-011 — Complete Compatibility Quiz", () => {
       }).then(({ registeredPaths }) => {
         expect(registeredPaths).to.include(`compatibilityResults/${resultId}`);
       });
-      expect(request.headers.authorization).to.match(/^Bearer\s+\S+/);
+      expect(request.headers).not.to.have.property("authorization");
+      expect(request.headers.origin).to.equal(Cypress.env("publicBaseUrl"));
       expect(Object.keys(request.body.preferences || {})).to.have.length(18);
       expect(request.body.filters).to.deep.include({
         preferredSpecies: "Any",

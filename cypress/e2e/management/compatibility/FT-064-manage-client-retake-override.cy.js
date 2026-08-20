@@ -4,6 +4,7 @@ const {
   registerMutation,
   resetAndVerifyBaseline,
 } = require("../../../support/batch9-functionality");
+const { loginByApi } = require("../../../support/integration");
 
 describe("FT-064 - Manage Client Retake Override", () => {
   after(() => resetAndVerifyBaseline());
@@ -21,17 +22,9 @@ describe("FT-064 - Manage Client Retake Override", () => {
     });
     registerMutation({ kind: "compatibilityRetakeOverride", primaryId: "FT_CLIENT_QUIZ_COOLDOWN" })
       .its("registeredPaths").should("have.length", 1);
-    apiRequest({
-      method: "POST",
-      path: "auth/login",
-      body: {
-        email: Cypress.env("FT_CLIENT_QUIZ_COOLDOWN_EMAIL"),
-        password: Cypress.env("FT_PUBLIC_PASSWORD"),
-      },
-      log: false,
-    }).then((login) => {
-      expect(login.status).to.equal(200);
-      return apiRequest({ path: "match/eligibility", token: login.body.token });
+    loginByApi("PublicQuizCooldown").then(({ response, token }) => {
+      expect(response.status).to.equal(200);
+      return apiRequest({ path: "match/eligibility", token });
     }).then((eligibility) => {
       expect(eligibility.status).to.equal(200);
       expect(eligibility.body.canTakeQuiz).to.equal(true);

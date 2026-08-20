@@ -7,6 +7,7 @@ const ROLE_CREDENTIALS = {
   Public: ["FT_CLIENT_ACTIVE_EMAIL", "FT_PUBLIC_PASSWORD"],
   PublicMutable: ["FT_CLIENT_PROFILE_MUTABLE_EMAIL", "FT_PUBLIC_PASSWORD"],
   PublicQuizEligible: ["FT_CLIENT_QUIZ_ELIGIBLE_EMAIL", "FT_PUBLIC_PASSWORD"],
+  PublicQuizCooldown: ["FT_CLIENT_QUIZ_COOLDOWN_EMAIL", "FT_PUBLIC_PASSWORD"],
   PublicNotifications: ["FT_CLIENT_NOTIFICATIONS_EMAIL", "FT_PUBLIC_PASSWORD"],
   Admin: ["FT_ADMIN_ACTIVE_EMAIL", "FT_MANAGEMENT_PASSWORD"],
   Staff: ["FT_STAFF_ACTIVE_EMAIL", "FT_MANAGEMENT_PASSWORD"],
@@ -44,37 +45,47 @@ function sessionTokenFromResponse(response) {
   return encodedToken ? decodeURIComponent(encodedToken) : "";
 }
 
-function apiRequest({ method = "GET", path, token, body, ...options }) {
-  return cy.request({
+function apiRequest({ method = "GET", path, token, body, headers = {}, ...options }) {
+  const request = () => cy.request({
     method,
     url: apiUrl(path),
-    headers: authorizationHeaders(token),
+    headers: {
+      ...headers,
+      ...authorizationHeaders(token),
+    },
     body,
     failOnStatusCode: false,
     ...options,
   });
+
+  // API integration requests intentionally exercise Bearer compatibility only.
+  // Remove any HttpOnly cookie synchronized from a preceding API login so an
+  // unsafe request never mixes cookie authentication with a Bearer token.
+  return token
+    ? cy.clearAllCookies({ log: false }).then(request)
+    : request();
 }
 
-function loginByApi(role) {
+function loginByApi(role, overrides = {}) {
   const variables = ROLE_CREDENTIALS[role];
   if (!variables) throw new Error(`Unsupported integration-test role: ${role}.`);
   const [emailVariable, passwordVariable] = variables;
-  const email = requiredEnvironmentValue(emailVariable);
-  const password = requiredEnvironmentValue(passwordVariable);
+  const email = overrides.email || requiredEnvironmentValue(emailVariable);
+  const password = overrides.password || requiredEnvironmentValue(passwordVariable);
 
-  return apiRequest({
+  return cy.clearAllCookies({ log: false }).then(() => apiRequest({
     method: "POST",
     path: "auth/login",
     body: { email, password },
     log: false,
-  }).then((response) => {
+  })).then((response) => {
     expect(response.status, `real ANIMUA ${role} login`).to.equal(200);
     expect(response.body?.token, `${role} JWT is not exposed in JSON`).to.be.undefined;
     const token = sessionTokenFromResponse(response);
     expect(token, `${role} HttpOnly session JWT`)
       .to.be.a("string")
       .and.not.be.empty;
-    return { email, token };
+    return cy.clearAllCookies({ log: false }).then(() => ({ email, token, response }));
   });
 }
 
@@ -196,6 +207,7 @@ module.exports = {
   firebasePasswordSignIn,
   getAuditLogs,
   inspectFtAnnouncementImage,
+  loginByApi,
   registerMutation,
   requiredEnvironmentValue,
   resetAndVerifyBaseline,

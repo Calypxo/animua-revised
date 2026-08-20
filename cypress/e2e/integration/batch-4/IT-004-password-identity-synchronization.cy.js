@@ -2,6 +2,7 @@ const {
   apiRequest,
   firebasePasswordSignIn,
   getAuditLogs,
+  loginByApi,
   registerMutation,
   requiredEnvironmentValue,
   useIntegrationBaseline,
@@ -18,15 +19,10 @@ describe("IT-004 — Password Identity Synchronization", () => {
       const changedPassword = TEMPORARY_PASSWORD;
       let restoredToken;
 
-      return apiRequest({
-        method: "POST",
-        path: "auth/login",
-        body: { email, password: originalPassword },
-        log: false,
-      })
-        .then((response) => {
+      return loginByApi("PublicMutable")
+        .then(({ response, token }) => {
           expect(response.status, "original application password restored").to.equal(200);
-          restoredToken = response.body?.token;
+          restoredToken = token;
           return firebasePasswordSignIn(email, originalPassword);
         })
         .then((response) => {
@@ -98,14 +94,9 @@ describe("IT-004 — Password Identity Synchronization", () => {
         ledgerResult = result;
       });
 
-    apiRequest({
-      method: "POST",
-      path: "auth/login",
-      body: { email, password: changedPassword },
-      log: false,
-    }).then((response) => {
+    loginByApi("PublicMutable", { password: changedPassword }).then(({ response, token }) => {
       newApplicationLogin = response;
-      return apiRequest({ path: "auth/account", token: response.body?.token });
+      return apiRequest({ path: "auth/account", token });
     }).then((response) => {
       expect(response.status).to.equal(200);
       afterAccount = response.body?.account;
@@ -134,7 +125,7 @@ describe("IT-004 — Password Identity Synchronization", () => {
 
     cy.then(() => {
       expect(newApplicationLogin.status).to.equal(200);
-      expect(newApplicationLogin.body?.token).to.be.a("string").and.not.be.empty;
+      expect(newApplicationLogin.body).not.to.have.property("token");
       expect(newFirebaseLogin.status).to.equal(200);
       expect(newFirebaseLogin.body?.idToken).to.be.a("string").and.not.be.empty;
       expect(oldApplicationLogin.status).to.equal(401);

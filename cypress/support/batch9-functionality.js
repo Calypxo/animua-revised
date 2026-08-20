@@ -21,13 +21,6 @@ function loginAndOpenInventory(role = "Admin") {
   cy.intercept({ method: "POST", url: "**/api/predictive/items", middleware: true }, disableCaching)
     .as(`inventoryPredictions${suffix}`);
   cy[loginCommand(role)]();
-  cy.getCookie("animua_session").then((cookie) => apiRequest({
-    path: "protected",
-    token: cookie?.value,
-  })).then((response) => {
-    expect(response.status).to.equal(200);
-    expect(response.body?.user?.role).to.equal(role);
-  });
   cy.visitManagementPage("/pages/inventory.html");
   cy.wait(`@inventoryList${suffix}`, { timeout: 30000 })
     .its("response.statusCode").should("eq", 200);
@@ -48,13 +41,6 @@ function loginAndOpenCompatibility(role = "Admin") {
   cy.intercept({ method: "GET", url: "**/api/match/admin/questions", middleware: true }, disableCaching)
     .as(`quizQuestions${suffix}`);
   cy[loginCommand(role)]();
-  cy.getCookie("animua_session").then((cookie) => apiRequest({
-    path: "protected",
-    token: cookie?.value,
-  })).then((response) => {
-    expect(response.status).to.equal(200);
-    expect(response.body?.user?.role).to.equal(role);
-  });
   cy.visitManagementPage("/pages/compatibilityQuiz.html");
   cy.wait([`@quizSettings${suffix}`, `@quizResults${suffix}`, `@quizQuestions${suffix}`], { timeout: 30000 })
     .each(({ response }) => expect(response?.statusCode).to.equal(200));

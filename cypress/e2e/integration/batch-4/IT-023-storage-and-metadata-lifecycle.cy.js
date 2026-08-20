@@ -109,6 +109,9 @@ describe("IT-023 — Storage and Metadata Lifecycle", () => {
       return cy.request({ url: replacementSignedUrl, encoding: "binary", failOnStatusCode: false });
     }).then((response) => {
       expect(response.status, "authorized signed read of replacement image").to.equal(200);
+      // This is a server-to-server API integration assertion. apiRequest uses
+      // the Bearer token only and clears the login cookie, so CSRF protection is
+      // neither bypassed nor accidentally invoked by mixed authentication.
       return apiRequest({
         method: "DELETE",
         path: `announcements/${ANNOUNCEMENT_ID}/image`,

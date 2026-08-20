@@ -35,7 +35,8 @@ describe("FT-023 — Manage Client Contact Conversation", () => {
     cy.get(".contact-thread-send").click();
 
     cy.wait("@sendContactFollowUp", { timeout: 30000 }).then(({ request, response }) => {
-      expect(request.headers.authorization).to.match(/^Bearer\s+\S+/);
+      expect(request.headers).not.to.have.property("authorization");
+      expect(request.headers.origin).to.equal(Cypress.env("publicBaseUrl"));
       expect(request.body).to.deep.equal({ message: followUp });
       expect(response?.statusCode).to.equal(200);
       expect(response?.body?.message).to.equal("Your reply has been added to the conversation.");

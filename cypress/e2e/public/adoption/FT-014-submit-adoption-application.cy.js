@@ -141,8 +141,8 @@ describe("FT-014 — Submit Adoption Application", () => {
     // Verify the real backend submission.
     cy.wait("@submitAdoption", { timeout: 30000 }).then(
       ({ request, response }) => {
-        expect(request.headers.authorization)
-          .to.match(/^Bearer\s+\S+/);
+        expect(request.headers).not.to.have.property("authorization");
+        expect(request.headers.origin).to.equal(Cypress.env("publicBaseUrl"));
 
         expect(request.body).to.include({
           pet_id: "FT_ANIMAL_READY_DOG",

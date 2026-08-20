@@ -20,7 +20,8 @@ describe("FT-022 — Submit Contact Inquiry", () => {
     cy.get("#contactSubmit").click();
 
     cy.wait("@submitContactInquiry", { timeout: 30000 }).then(({ request, response }) => {
-      expect(request.headers.authorization).to.match(/^Bearer\s+\S+/);
+      expect(request.headers).not.to.have.property("authorization");
+      expect(request.headers.origin).to.equal(Cypress.env("publicBaseUrl"));
       expect(request.body).not.to.have.property("website");
       expect(response?.statusCode).to.equal(201);
       expect(response?.headers).to.have.property("ratelimit-remaining");

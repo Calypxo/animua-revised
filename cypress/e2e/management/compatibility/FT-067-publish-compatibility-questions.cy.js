@@ -4,6 +4,7 @@ const {
   registerMutation,
   resetAndVerifyBaseline,
 } = require("../../../support/batch9-functionality");
+const { loginByApi } = require("../../../support/integration");
 
 describe("FT-067 - Publish Compatibility Questions", () => {
   after(() => resetAndVerifyBaseline());
@@ -29,17 +30,9 @@ describe("FT-067 - Publish Compatibility Questions", () => {
     });
     registerMutation({ kind: "compatibilityQuestionPublish", primaryId: "exerciseNeeds" })
       .its("registeredPaths").should("have.length", 1);
-    apiRequest({
-      method: "POST",
-      path: "auth/login",
-      body: {
-        email: Cypress.env("FT_CLIENT_QUIZ_ELIGIBLE_EMAIL"),
-        password: Cypress.env("FT_PUBLIC_PASSWORD"),
-      },
-      log: false,
-    }).then((login) => {
-      expect(login.status).to.equal(200);
-      return apiRequest({ path: "match/questions", token: login.body.token });
+    loginByApi("PublicQuizEligible").then(({ response, token }) => {
+      expect(response.status).to.equal(200);
+      return apiRequest({ path: "match/questions", token });
     }).then((response) => {
       expect(response.status).to.equal(200);
       expect(response.body.version).to.equal(2);
