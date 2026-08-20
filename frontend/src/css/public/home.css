@@ -1,4 +1,157 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+@font-face {
+  font-family: "Font Awesome 6 Free";
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/webfonts/fa-solid-900.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Font Awesome 6 Free";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/webfonts/fa-regular-400.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Font Awesome 6 Brands";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/webfonts/fa-brands-400.woff2") format("woff2");
+}
+
+.fa-solid,
+.fa-regular,
+.fa-brands {
+  display: var(--fa-display, inline-block);
+  font-style: normal;
+  font-variant: normal;
+  line-height: 1;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.fa-solid {
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+}
+
+.fa-regular {
+  font-family: "Font Awesome 6 Free";
+  font-weight: 400;
+}
+
+.fa-brands {
+  font-family: "Font Awesome 6 Brands";
+  font-weight: 400;
+}
+
+.fa-spin {
+  animation: fa-spin 2s infinite linear;
+}
+
+@keyframes fa-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.fa-arrow-left::before { content: "\f060"; }
+.fa-arrow-right::before { content: "\f061"; }
+.fa-address-card::before { content: "\f2bb"; }
+.fa-arrow-right-arrow-left::before { content: "\f0ec"; }
+.fa-bell::before { content: "\f0f3"; }
+.fa-bookmark::before { content: "\f02e"; }
+.fa-bullhorn::before { content: "\f0a1"; }
+.fa-building-columns::before { content: "\f19c"; }
+.fa-calendar::before { content: "\f133"; }
+.fa-calendar-check::before { content: "\f274"; }
+.fa-calendar-days::before { content: "\f073"; }
+.fa-camera::before { content: "\f030"; }
+.fa-caret-down::before { content: "\f0d7"; }
+.fa-cat::before { content: "\f6be"; }
+.fa-chart-simple::before { content: "\e473"; }
+.fa-check::before { content: "\f00c"; }
+.fa-chevron-down::before { content: "\f078"; }
+.fa-chevron-left::before { content: "\f053"; }
+.fa-chevron-right::before { content: "\f054"; }
+.fa-chevron-up::before { content: "\f077"; }
+.fa-circle::before { content: "\f111"; }
+.fa-circle-exclamation::before { content: "\f06a"; }
+.fa-circle-check::before { content: "\f058"; }
+.fa-circle-info::before { content: "\f05a"; }
+.fa-circle-notch::before { content: "\f1ce"; }
+.fa-circle-question::before { content: "\f059"; }
+.fa-circle-user::before { content: "\f2bd"; }
+.fa-circle-xmark::before { content: "\f057"; }
+.fa-clipboard::before { content: "\f328"; }
+.fa-clipboard-check::before { content: "\f46c"; }
+.fa-clock::before { content: "\f017"; }
+.fa-comment-dots::before { content: "\f4ad"; }
+.fa-comments::before { content: "\f086"; }
+.fa-dog::before { content: "\f6d3"; }
+.fa-droplet::before { content: "\f043"; }
+.fa-envelope::before { content: "\f0e0"; }
+.fa-expand::before { content: "\f065"; }
+.fa-eye::before { content: "\f06e"; }
+.fa-eye-slash::before { content: "\f070"; }
+.fa-face-sad-tear::before { content: "\f5b4"; }
+.fa-facebook-f::before { content: "\f39e"; }
+.fa-file-signature::before { content: "\f573"; }
+.fa-file-pdf::before { content: "\f1c1"; }
+.fa-file-circle-check::before { content: "\e5a0"; }
+.fa-file-lines::before { content: "\f15c"; }
+.fa-flag-checkered::before { content: "\f11e"; }
+.fa-floppy-disk::before { content: "\f0c7"; }
+.fa-folder-open::before { content: "\f07c"; }
+.fa-gear::before { content: "\f013"; }
+.fa-globe::before { content: "\f0ac"; }
+.fa-hand-holding-heart::before { content: "\f4be"; }
+.fa-heart::before { content: "\f004"; }
+.fa-heart-circle-check::before { content: "\e4fd"; }
+.fa-house::before { content: "\f015"; }
+.fa-house-chimney::before { content: "\e3af"; }
+.fa-house-chimney-medical::before { content: "\e3b2"; }
+.fa-house-circle-check::before { content: "\e509"; }
+.fa-house-circle-xmark::before { content: "\e50b"; }
+.fa-id-card::before { content: "\f2c2"; }
+.fa-image::before { content: "\f03e"; }
+.fa-key::before { content: "\f084"; }
+.fa-language::before { content: "\f1ab"; }
+.fa-location-dot::before { content: "\f3c5"; }
+.fa-lock::before { content: "\f023"; }
+.fa-magnifying-glass::before { content: "\f002"; }
+.fa-mars::before { content: "\f222"; }
+.fa-newspaper::before { content: "\f1ea"; }
+.fa-palette::before { content: "\f53f"; }
+.fa-paper-plane::before { content: "\f1d8"; }
+.fa-paw::before { content: "\f1b0"; }
+.fa-pen::before { content: "\f304"; }
+.fa-people-arrows::before { content: "\e068"; }
+.fa-people-group::before { content: "\e533"; }
+.fa-phone::before { content: "\f095"; }
+.fa-puzzle-piece::before { content: "\f12e"; }
+.fa-quote-right::before { content: "\f10e"; }
+.fa-right-from-bracket::before { content: "\f2f5"; }
+.fa-rotate::before { content: "\f2f1"; }
+.fa-shield::before { content: "\f132"; }
+.fa-shield-halved::before { content: "\f3ed"; }
+.fa-shield-heart::before { content: "\e574"; }
+.fa-share-nodes::before { content: "\f1e0"; }
+.fa-sliders::before { content: "\f1de"; }
+.fa-spinner::before { content: "\f110"; }
+.fa-tag::before { content: "\f02b"; }
+.fa-tags::before { content: "\f02c"; }
+.fa-triangle-exclamation::before { content: "\f071"; }
+.fa-user::before { content: "\f007"; }
+.fa-user-lock::before { content: "\f502"; }
+.fa-user-shield::before { content: "\f505"; }
+.fa-venus::before { content: "\f221"; }
+.fa-xmark::before { content: "\f00d"; }
+.fa-youtube::before { content: "\f167"; }
 
 .hero-left h1,
 .about-animua-copy h1,
@@ -12,6 +165,15 @@
 
 .home-page {
   background: var(--animua-warm-cream);
+}
+
+.highlight-cover picture,
+.home-match-quiz-media picture,
+.about-shelter-card picture,
+.quiz-intro-photo picture {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .hero {
@@ -4781,7 +4943,13 @@ body.home-page .hero::before {
   inset: 0 !important;
   z-index: -2 !important;
   display: block !important;
-  background: url("../../assets/images/hero-shelter-dog-kennel.png") 56% 34% / cover no-repeat !important;
+  background-image: image-set(
+    url("../../assets/images/optimized/home/hero-shelter-dog-kennel-1109.avif") type("image/avif"),
+    url("../../assets/images/optimized/home/hero-shelter-dog-kennel-1109.webp") type("image/webp")
+  ) !important;
+  background-position: 56% 34% !important;
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
   filter: brightness(1.04) contrast(1.05) saturate(0.96);
   transform: none !important;
 }
@@ -4799,6 +4967,15 @@ body.home-page .hero::after {
     rgba(0, 0, 0, 0.25) 72%,
     rgba(0, 0, 0, 0.12) 100%
   ) !important;
+}
+
+@media (max-width: 760px) {
+  body.home-page .hero::before {
+    background-image: image-set(
+      url("../../assets/images/optimized/home/hero-shelter-dog-kennel-768.avif") type("image/avif"),
+      url("../../assets/images/optimized/home/hero-shelter-dog-kennel-768.webp") type("image/webp")
+    ) !important;
+  }
 }
 
 body.home-page .hero-doodle,
@@ -14053,6 +14230,43 @@ body.home-page .about-shelter-card span::before {
     grid-column: 1 / -1;
     grid-row: 1;
   }
+
+  body.home-page .about-shelter-vet-card {
+    grid-column: 1 / -1 !important;
+  }
+
+  body.home-page .about-shelter-vet-card img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center 54% !important;
+  }
+}
+
+@media (max-width: 430px) {
+  body.home-page .nav-shell {
+    min-height: 58px !important;
+    padding-inline: 10px !important;
+  }
+
+  body.home-page .menu-toggle {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    max-width: 40px !important;
+    flex-basis: 40px !important;
+  }
+
+  body.home-page .navbar {
+    width: min(280px, calc(100vw - 20px)) !important;
+    max-width: calc(100vw - 20px) !important;
+  }
+}
+
+@media (max-width: 340px) {
+  body.home-page .navbar {
+    width: calc(100vw - 18px) !important;
+  }
 }
 
 /* Shorter About ANIMUA section. */
@@ -15546,5 +15760,284 @@ body.home-page .quiz-intro-steps::before,
 body.home-page .quiz-intro-steps::after {
   content: none !important;
   display: none !important;
+}
+
+/* Mobile overflow fix for the home Match Quiz section. */
+body.home-page .home-match-quiz-copy,
+body.home-page .home-match-quiz-points article > div {
+  min-width: 0 !important;
+}
+
+body.home-page .home-match-quiz-points h3,
+body.home-page .home-match-quiz-points p,
+body.home-page .home-match-quiz-primary,
+body.home-page .home-match-quiz-secondary {
+  overflow-wrap: anywhere !important;
+}
+
+@media (max-width: 760px) {
+  body.home-page .home-match-quiz-section {
+    overflow-x: hidden !important;
+  }
+
+  body.home-page .home-match-quiz-layout {
+    width: min(100% - 24px, 1280px) !important;
+    max-width: calc(100vw - 24px) !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    margin-inline: auto !important;
+    padding-inline: 0 !important;
+  }
+
+  body.home-page .home-match-quiz-copy {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  body.home-page .home-match-quiz-copy .section-label {
+    max-width: 100% !important;
+    white-space: normal !important;
+    line-height: 1.25 !important;
+  }
+
+  body.home-page .home-match-quiz-points article {
+    grid-template-columns: 44px minmax(0, 1fr) !important;
+    gap: 12px !important;
+    align-items: start !important;
+  }
+
+  body.home-page .home-match-quiz-points article > span {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+    aspect-ratio: 1 / 1 !important;
+    align-self: start !important;
+    flex: 0 0 44px !important;
+  }
+
+  body.home-page .home-match-quiz-actions {
+    width: 100% !important;
+    max-width: 100% !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  body.home-page .home-match-quiz-primary,
+  body.home-page .home-match-quiz-secondary {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    min-height: 52px !important;
+    padding: 0 16px !important;
+    white-space: normal !important;
+    line-height: 1.15 !important;
+    text-align: center !important;
+  }
+
+  body.home-page .home-match-quiz-media {
+    width: min(100%, 330px) !important;
+    max-width: 100% !important;
+    display: block !important;
+    order: 2 !important;
+    justify-self: center !important;
+    margin: 8px auto 0 !important;
+    overflow: visible !important;
+  }
+
+  body.home-page .home-match-quiz-media::before {
+    inset: 14% 2% auto 9% !important;
+    height: 62% !important;
+    transform: rotate(-3deg) !important;
+  }
+
+  body.home-page .home-match-quiz-media img {
+    width: 100% !important;
+    height: clamp(220px, 72vw, 330px) !important;
+    max-height: 330px !important;
+    object-fit: contain !important;
+  }
+}
+
+/* Keep mobile circular icons from compressing into ovals. */
+@media (max-width: 760px) {
+  body.home-page .process-icon,
+  body.home-page .quiz-intro-close,
+  body.home-page .quiz-intro-steps article > span,
+  body.home-page .quiz-intro-steps article > i,
+  body.home-page .quiz-intro-reminder i,
+  body.home-page .featured-furbaby-favorite,
+  body.home-page .featured-furbaby-arrow {
+    aspect-ratio: 1 / 1 !important;
+    flex-shrink: 0 !important;
+    align-self: center !important;
+  }
+
+  body.home-page .process-icon {
+    width: 72px !important;
+    height: 72px !important;
+    min-width: 72px !important;
+    max-width: 72px !important;
+    min-height: 72px !important;
+    max-height: 72px !important;
+  }
+
+  body.home-page .quiz-intro-steps article > span {
+    min-width: 36px !important;
+    max-width: 36px !important;
+    min-height: 36px !important;
+    max-height: 36px !important;
+  }
+
+  body.home-page .quiz-intro-steps article > i,
+  body.home-page .quiz-intro-reminder i {
+    min-width: 56px !important;
+    max-width: 56px !important;
+    min-height: 56px !important;
+    max-height: 56px !important;
+  }
+}
+
+@media (max-width: 420px) {
+  body.home-page .home-match-quiz-layout {
+    width: min(100% - 18px, 1280px) !important;
+    max-width: calc(100vw - 18px) !important;
+  }
+
+  body.home-page .home-match-quiz-copy h2 {
+    font-size: clamp(28px, 9.5vw, 36px) !important;
+  }
+
+  body.home-page .home-match-quiz-copy > p,
+  body.home-page .home-match-quiz-points p {
+    font-size: 0.86rem !important;
+  }
+}
+
+/* Final mobile-only nav and shelter-gallery overrides. */
+@media (max-width: 900px) {
+  body.home-page .header {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 1200 !important;
+  }
+
+  body.home-page .nav-shell {
+    position: relative !important;
+    overflow: visible !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    grid-template-rows: auto !important;
+  }
+
+  body.home-page .logo {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+  }
+
+  body.home-page .nav-actions {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    justify-self: end !important;
+  }
+
+  body.home-page .navbar {
+    position: absolute !important;
+    top: calc(100% + 8px) !important;
+    right: 10px !important;
+    left: auto !important;
+    z-index: 1250 !important;
+    width: min(300px, calc(100vw - 24px)) !important;
+    max-width: calc(100vw - 24px) !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    border-color: transparent !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: none !important;
+  }
+
+  body.home-page .navbar.show {
+    max-height: calc(100dvh - 86px) !important;
+    overflow-y: auto !important;
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+    border-color: rgba(35, 45, 53, 0.08) !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: none !important;
+  }
+
+  body.home-page .menu-toggle {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
+    flex: 0 0 44px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    padding: 0 11px !important;
+    border-radius: 50% !important;
+  }
+
+  body.home-page .menu-toggle span {
+    width: 18px !important;
+    height: 2px !important;
+  }
+}
+
+@media (max-width: 720px) {
+  body.home-page .about-shelter-gallery {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+    grid-template-rows: minmax(210px, 1.25fr) repeat(2, minmax(140px, 0.85fr)) !important;
+    height: auto !important;
+    background: transparent !important;
+  }
+
+  body.home-page .about-shelter-vet-card {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+  }
+
+  body.home-page .about-shelter-vet-card img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center 54% !important;
+  }
+}
+
+@media (max-width: 430px) {
+  body.home-page .nav-shell {
+    min-height: 58px !important;
+    padding-inline: 10px !important;
+  }
+
+  body.home-page .navbar {
+    width: min(280px, calc(100vw - 20px)) !important;
+    max-width: calc(100vw - 20px) !important;
+  }
+
+  body.home-page .menu-toggle {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    max-width: 40px !important;
+    flex-basis: 40px !important;
+  }
+}
+
+@media (max-width: 340px) {
+  body.home-page .navbar {
+    width: calc(100vw - 18px) !important;
+  }
 }
 

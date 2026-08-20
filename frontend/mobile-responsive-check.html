@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Responsive Check</title>
+    <link rel="stylesheet" href="/src/css/global.css">
+    <link rel="stylesheet" href="/src/css/public/furbabies.css">
+    <link rel="stylesheet" href="/src/css/public/my-submissions.css">
+  </head>
+  <body class="home-page furbabies-page submissions-page menu-open swal2-shown">
+    <section class="animua-chatbot" id="animuaChatbot">
+      <button type="button" class="animua-chatbot-toggle"><i>?</i></button>
+    </section>
+
+    <div class="modal-overlay show" id="adoptModal">
+      <div class="modal-panel adopt-form-panel adoption-wizard-modal">
+        <button class="modal-close adoption-wizard-close" type="button" aria-label="Close adoption application">x</button>
+        <div class="adoption-form-header">
+          <span class="adoption-form-logo"><i aria-hidden="true">p</i></span>
+          <div class="adoption-form-title">
+            <h2>Animal Adoption Application</h2>
+            <p>Please fill out the form honestly. All information will be kept confidential.</p>
+          </div>
+        </div>
+        <div class="adoption-stepper" aria-label="Adoption application steps">
+          <button type="button" class="adoption-stepper-item active"><span>1</span><strong>Applicant Information</strong><small>Tell us about yourself.</small></button>
+          <button type="button" class="adoption-stepper-item"><span>2</span><strong>Household Information</strong><small>Your family and pets.</small></button>
+          <button type="button" class="adoption-stepper-item"><span>3</span><strong>Adoption Readiness</strong><small>A few questions about your readiness.</small></button>
+          <button type="button" class="adoption-stepper-item"><span>4</span><strong>Review & Declaration</strong><small>Review your answers and submit.</small></button>
+        </div>
+        <div class="selected-pet-box" id="selectedPetBox">
+          <h3>Selected Pet</h3>
+          <div class="selected-pet-preview">
+            <img src="/src/assets/images/dog.jpg" alt="Buddy" class="selected-pet-image">
+            <div>
+              <strong>Buddy</strong>
+              <span>2 Years &bull; Female Cat</span>
+              <em>Ready for Adoption</em>
+              <small>Animal ID: PET-2026-007</small>
+            </div>
+          </div>
+        </div>
+        <form class="adoption-form">
+          <div class="adoption-section-title"><i aria-hidden="true">i</i><h3>Personal Information</h3></div>
+          <div class="adoption-grid">
+            <div class="form-group"><label>Full Name</label><input value="Juan Dela Cruz"></div>
+            <div class="form-group"><label>Birthdate</label><input value="2000-01-01"></div>
+            <div class="form-group"><label>Contact Number</label><input value="09171234567"></div>
+            <div class="form-group full"><label>Address</label><textarea>Long sample address without any forced single-letter wrapping.</textarea></div>
+          </div>
+          <div class="adoption-grid adoption-bottom-grid">
+            <div class="form-group"><label>Issued Day</label><input value="12"></div>
+            <div class="form-group"><label>Issued Month</label><input value="August"></div>
+            <div class="form-group"><label>Issued Year</label><input value="2026"></div>
+          </div>
+        </form>
+        <div class="form-actions adoption-wizard-actions">
+          <button type="button" class="btn secondary-btn">Back</button>
+          <button type="button" class="btn primary-btn">Continue</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="swal2-container">
+      <div class="swal2-popup application-detail-popup adoption-detail-popup">
+        <div class="swal2-html-container">
+          <section class="application-detail-modal adoption-detail-modal">
+            <header class="application-detail-header">
+              <span class="application-detail-accent"><i aria-hidden="true">f</i></span>
+              <div>
+                <h2>Application Details</h2>
+                <p>View the latest status and next steps for this application.</p>
+              </div>
+              <button type="button" class="application-detail-x">x</button>
+            </header>
+            <div class="application-detail-hero">
+              <img src="/src/assets/images/dog.jpg" alt="Buddy">
+              <div class="application-detail-main">
+                <h3>Buddy</h3>
+                <p>Female <span class="submission-dot">&bull;</span> Dog <span class="submission-dot">&bull;</span> 2 Years</p>
+                <span class="application-type-badge"><i aria-hidden="true">h</i>Adoption Application</span>
+                <div class="application-detail-line"><i aria-hidden="true">c</i><span>Submitted on August 12, 2026</span></div>
+                <div class="application-reference">Reference: <strong>APP-2026-007</strong></div>
+              </div>
+              <span class="application-modal-status submission-status pending"><i aria-hidden="true">s</i>Under Review</span>
+            </div>
+            <div class="application-timeline">
+              <div class="application-step done"><span>1</span><strong>Submitted</strong><small>August 12</small></div>
+              <div class="application-step active"><span>2</span><strong>Review</strong><small>In progress</small></div>
+              <div class="application-step"><span>3</span><strong>Decision</strong><small>Pending</small></div>
+            </div>
+            <div class="application-summary">
+              <h3>Application Summary</h3>
+              <div class="application-summary-grid">
+                <article><span><i aria-hidden="true">h</i></span><div><strong>Home Type</strong><p>Apartment with family support.</p></div></article>
+                <article><span><i aria-hidden="true">p</i></span><div><strong>Pet Experience</strong><p>Has cared for cats and dogs.</p></div></article>
+                <article><span><i aria-hidden="true">m</i></span><div><strong>Compatibility</strong><p class="application-match"><i aria-hidden="true">c</i>Good match</p></div></article>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const rect = (selector) => {
+        const node = document.querySelector(selector);
+        if (!node) return null;
+        const r = node.getBoundingClientRect();
+        return { width: Math.round(r.width), height: Math.round(r.height), left: Math.round(r.left), right: Math.round(r.right) };
+      };
+      const gridCols = (selector) => getComputedStyle(document.querySelector(selector)).gridTemplateColumns.split(" ").length;
+      const circleOk = (selector) => Array.from(document.querySelectorAll(selector)).every((node) => {
+        const r = node.getBoundingClientRect();
+        return Math.abs(r.width - r.height) < 1;
+      });
+      const circleDetails = (selector) => Array.from(document.querySelectorAll(selector)).map((node) => {
+        const r = node.getBoundingClientRect();
+        return { className: node.className, width: Math.round(r.width), height: Math.round(r.height) };
+      });
+      const report = {
+        viewport: window.innerWidth,
+        pageOverflow: document.documentElement.scrollWidth - window.innerWidth,
+        adoptionModal: rect(".adoption-wizard-modal"),
+        adoptionGridCols: gridCols(".adoption-grid"),
+        adoptionBottomCols: gridCols(".adoption-bottom-grid"),
+        stepperText: getComputedStyle(document.querySelector(".adoption-stepper-item.active"), "::before").content,
+        selectedPet: rect(".selected-pet-box"),
+        adoptionCirclesRound: circleOk(".adoption-wizard-close, .adoption-form-logo, .adoption-stepper-item:not(.active)"),
+        adoptionCircleDetails: circleDetails(".adoption-wizard-close, .adoption-form-logo, .adoption-stepper-item:not(.active)"),
+        statusPopup: rect(".application-detail-popup"),
+        statusHeroCols: gridCols(".application-detail-hero"),
+        referenceLine: rect(".application-reference strong"),
+        referenceText: document.querySelector(".application-reference strong").textContent,
+        badge: rect(".application-modal-status"),
+        timeline: rect(".application-timeline"),
+        timelineCirclesRound: circleOk(".application-step > span, .application-summary-grid article > span"),
+        chatbotDisplay: getComputedStyle(document.querySelector(".animua-chatbot")).display
+      };
+      document.body.innerHTML = `<pre id="report">${JSON.stringify(report, null, 2)}</pre>`;
+    </script>
+  </body>
+</html>

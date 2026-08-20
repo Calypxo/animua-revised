@@ -1,4 +1,4 @@
-const CACHE_VERSION = "animua-public-v9";
+const CACHE_VERSION = "animua-public-v10";
 const APP_SHELL = [
   "/",
   "/index.html",

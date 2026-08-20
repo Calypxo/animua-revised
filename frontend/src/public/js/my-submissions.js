@@ -1,4 +1,3 @@
-import Swal from "sweetalert2";
 import { API_BASE_URL } from "../../utils/api.js";
 import {
   mergeSubmissionResults,
@@ -17,6 +16,12 @@ const submissionSortLabel = document.getElementById("submissionSortLabel");
 const submissionSortMenu = document.getElementById("submissionSortMenu");
 const compatibilityAccount = document.getElementById("compatibilityAccount");
 const compatibilityAccountBody = document.getElementById("compatibilityAccountBody");
+let swalModulePromise;
+
+async function getSwal() {
+  swalModulePromise ||= import("sweetalert2").then((module) => module.default);
+  return swalModulePromise;
+}
 
 async function loadCompatibilityAccount() {
   if (compatibilityAccount?.classList.contains("hidden")) return;
@@ -39,6 +44,7 @@ async function loadCompatibilityAccount() {
 }
 
 async function showSavedAnimalDetails(button) {
+  const Swal = await getSwal();
   const animalId = button.dataset.savedAnimalId || "";
   const savedName = button.dataset.savedAnimalName || "Shelter animal";
   const savedScore = button.dataset.savedAnimalScore || "0.0";
@@ -75,6 +81,9 @@ let allSubmissions = [];
 let submissionsLoadError = "";
 let currentFilter = "all";
 let currentSort = "newest";
+let currentPage = 1;
+
+const SUBMISSIONS_PER_PAGE = 5;
 
 function getToken() {
   return localStorage.getItem("animua_token") || "";
@@ -260,6 +269,7 @@ async function loadSubmissions() {
     submissionsLoadError = submissionLoadErrorMessage(error);
   }
 
+  currentPage = 1;
   updateTabs();
   renderSubmissions();
 }
@@ -311,6 +321,10 @@ function renderSubmissions() {
       ? allSubmissions
       : allSubmissions.filter((item) => item.type === currentFilter);
   const visibleItems = sortSubmissions(filteredItems);
+  const totalPages = Math.max(1, Math.ceil(visibleItems.length / SUBMISSIONS_PER_PAGE));
+  currentPage = Math.min(Math.max(1, currentPage), totalPages);
+  const pageStart = (currentPage - 1) * SUBMISSIONS_PER_PAGE;
+  const pageItems = visibleItems.slice(pageStart, pageStart + SUBMISSIONS_PER_PAGE);
 
   if (!visibleItems.length) {
     submissionsList.innerHTML = `
@@ -322,7 +336,10 @@ function renderSubmissions() {
     return;
   }
 
-  submissionsList.innerHTML = visibleItems.map(renderSubmissionCard).join("");
+  submissionsList.innerHTML = `
+    ${pageItems.map(renderSubmissionCard).join("")}
+    ${renderSubmissionPagination(visibleItems.length, totalPages)}
+  `;
 
   submissionsList.querySelectorAll("[data-submission-id]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -330,6 +347,42 @@ function renderSubmissions() {
       if (item) showSubmissionDetails(item);
     });
   });
+
+  submissionsList.querySelectorAll("[data-submission-page]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const nextPage = Number(button.dataset.submissionPage);
+      if (!Number.isInteger(nextPage) || nextPage === currentPage) return;
+      currentPage = nextPage;
+      renderSubmissions();
+      submissionsList.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  });
+}
+
+function renderSubmissionPagination(totalItems, totalPages) {
+  if (totalPages <= 1) return "";
+
+  const pageButtons = Array.from({ length: totalPages }, (_, index) => {
+    const page = index + 1;
+    return `<button type="button" data-submission-page="${page}" ${page === currentPage ? 'class="active" aria-current="page"' : ""}>${page}</button>`;
+  }).join("");
+  const firstItem = (currentPage - 1) * SUBMISSIONS_PER_PAGE + 1;
+  const lastItem = Math.min(totalItems, currentPage * SUBMISSIONS_PER_PAGE);
+
+  return `
+    <nav class="submission-pagination" aria-label="Submission pages">
+      <span>Showing ${firstItem}-${lastItem} of ${totalItems}</span>
+      <div>
+        <button type="button" data-submission-page="${currentPage - 1}" ${currentPage === 1 ? "disabled" : ""} aria-label="Previous page">
+          <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+        </button>
+        ${pageButtons}
+        <button type="button" data-submission-page="${currentPage + 1}" ${currentPage === totalPages ? "disabled" : ""} aria-label="Next page">
+          <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+        </button>
+      </div>
+    </nav>
+  `;
 }
 
 function renderSubmissionCard(item) {
@@ -344,7 +397,7 @@ function renderSubmissionCard(item) {
 
   return `
     <article class="submission-card">
-      <img class="submission-photo" src="${safeImage}" alt="${safeName}">
+      <img class="submission-photo" src="${safeImage}" alt="${safeName}" width="190" height="112" loading="lazy" decoding="async">
       <div class="submission-info">
         <h2 class="submission-name">${safeName}</h2>
         <p class="submission-meta">${metaParts.map((part, index) => `${index ? '<span class="submission-dot">•</span>' : ""}<span>${escapeHtml(part)}</span>`).join("")}</p>
@@ -957,6 +1010,7 @@ function renderScheduleCalendar(monthDate, selectedDate, minDate, maxDate) {
 }
 
 async function promptForSchedule(kind, item) {
+  const Swal = await getSwal();
   const isSurrender = kind === "surrender";
   const { minDate, maxDate } = getScheduleWindow(kind, item);
   const title = isSurrender ? "Schedule Surrender Appointment" : "Schedule Pet Pickup";
@@ -1233,7 +1287,8 @@ async function saveSchedule(item, kind) {
   showSubmissionDetails(item);
 }
 
-function showSubmissionDetails(item) {
+async function showSubmissionDetails(item) {
+  const Swal = await getSwal();
   if (item.type !== "adoption") {
     const status = cleanStatus(item.status, item.type);
     const isAccepted = isApprovedDecision(status, "surrender");
@@ -1514,6 +1569,7 @@ function showSubmissionDetails(item) {
 filterTabs.forEach((tab) => {
   tab.addEventListener("click", () => {
     currentFilter = tab.dataset.filter || "all";
+    currentPage = 1;
     updateTabs();
     renderSubmissions();
   });
@@ -1554,6 +1610,7 @@ submissionSortMenu?.addEventListener("click", (event) => {
   if (!option) return;
 
   currentSort = option.dataset.sortValue || "newest";
+  currentPage = 1;
 
   syncSortMenuState();
   closeSortMenu();

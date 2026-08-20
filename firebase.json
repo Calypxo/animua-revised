@@ -4,12 +4,61 @@
       "target": "public",
       "public": "frontend/dist",
       "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+      "headers": [
+        {
+          "source": "**/*.{js,css,png,jpg,jpeg,gif,svg,webp,avif,woff,woff2}",
+          "headers": [
+            {
+              "key": "Cache-Control",
+              "value": "public, max-age=31536000, immutable"
+            }
+          ]
+        },
+        {
+          "source": "**/*.{html,json,webmanifest}",
+          "headers": [
+            {
+              "key": "Cache-Control",
+              "value": "public, max-age=300, must-revalidate"
+            }
+          ]
+        }
+      ],
       "rewrites": [{ "source": "**", "destination": "/index.html" }]
     },
     {
       "target": "admin",
       "public": "admin-frontend/dist",
       "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+      "headers": [
+        {
+          "source": "/sw.js",
+          "headers": [
+            {
+              "key": "Cache-Control",
+              "value": "no-cache, no-store, must-revalidate"
+            }
+          ]
+        },
+        {
+          "source": "**/*.{js,css,png,jpg,jpeg,gif,svg,webp,avif,woff,woff2}",
+          "headers": [
+            {
+              "key": "Cache-Control",
+              "value": "public, max-age=31536000, immutable"
+            }
+          ]
+        },
+        {
+          "source": "**/*.{html,json,webmanifest}",
+          "headers": [
+            {
+              "key": "Cache-Control",
+              "value": "public, max-age=300, must-revalidate"
+            }
+          ]
+        }
+      ],
       "rewrites": [{ "source": "**", "destination": "/index.html" }]
     }
   ],
