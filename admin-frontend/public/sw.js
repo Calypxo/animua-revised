@@ -1,4 +1,4 @@
-const CACHE_VERSION = "animua-admin-v4";
+const CACHE_VERSION = "animua-admin-v5";
 const RENDER_API_ORIGIN = "https://animua-backend.onrender.com";
 const APP_SHELL = [
   "/",
@@ -64,13 +64,8 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (requestUrl.origin !== self.location.origin) {
-    event.respondWith(
-      caches.match(request).then((cached) => cached || fetch(request).then((response) => {
-        const copy = response.clone();
-        caches.open(CACHE_VERSION).then((cache) => cache.put(request, copy));
-        return response;
-      }).catch(() => cached))
-    );
+    // Let the browser load CDN styles, fonts, and scripts normally. Re-fetching
+    // them inside the worker changes their CSP classification to connect-src.
     return;
   }
 

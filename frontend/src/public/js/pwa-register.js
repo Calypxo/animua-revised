@@ -1,5 +1,6 @@
 if (import.meta.env.DEV && "serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
+    const hadController = Boolean(navigator.serviceWorker.controller);
     const registrations = await navigator.serviceWorker.getRegistrations();
     await Promise.all(registrations.map((registration) => registration.unregister()));
 
@@ -11,6 +12,8 @@ if (import.meta.env.DEV && "serviceWorker" in navigator) {
           .map((name) => caches.delete(name))
       );
     }
+
+    if (hadController) window.location.reload();
   });
 } else if ("serviceWorker" in navigator) {
   let refreshing = false;
