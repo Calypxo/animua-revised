@@ -1,4 +1,4 @@
-const CACHE_VERSION = "animua-public-v10";
+const CACHE_VERSION = "animua-public-v11";
 const APP_SHELL = [
   "/",
   "/index.html",
@@ -83,13 +83,8 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (requestUrl.origin !== self.location.origin) {
-    event.respondWith(
-      caches.match(request).then((cached) => cached || fetch(request).then((response) => {
-        const copy = response.clone();
-        caches.open(CACHE_VERSION).then((cache) => cache.put(request, copy));
-        return response;
-      }).catch(() => cached))
-    );
+    // Let the browser load CDN styles, fonts, and scripts normally. Re-fetching
+    // them inside the worker changes their CSP classification to connect-src.
     return;
   }
 
