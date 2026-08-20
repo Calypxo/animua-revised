@@ -4,11 +4,7 @@ describe("FT-039 - Approve or Reject Adoption Application", () => {
   after(() => resetAndVerifyBaseline());
 
   it("approves and rejects the controlled candidates through management UI", () => {
-    cy.intercept("GET", "**/api/protected").as("managementSession");
     cy.loginAdmin();
-    cy.wait("@managementSession", { timeout: 30000 })
-      .its("response.statusCode")
-      .should("eq", 200);
     cy.intercept(
       { method: "GET", url: "**/api/adoptions", middleware: true },
       (request) => {

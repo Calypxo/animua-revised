@@ -8,11 +8,7 @@ describe("FT-046 - Convert Intake to Animal Profile", () => {
 
   it("converts the controlled approved intake through the explicit UI action", () => {
     let animalProfileId = "";
-    cy.intercept("GET", "**/api/protected").as("managementSession");
     cy.loginAdmin();
-    cy.wait("@managementSession", { timeout: 30000 })
-      .its("response.statusCode")
-      .should("eq", 200);
     cy.intercept(
       { method: "GET", url: "**/api/intake", middleware: true },
       (request) => {

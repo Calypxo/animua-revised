@@ -1,4 +1,10 @@
+const {
+  resetAndVerifyBaseline,
+} = require("../../../support/integration");
+
 describe("FT-015 — Track Adoption Application", () => {
+  before(() => resetAndVerifyBaseline());
+
   it("shows the signed-in client's baseline adoption and its tracking details", () => {
     const clientEmail = Cypress.env("FT_CLIENT_ACTIVE_EMAIL");
     cy.loginClient();
@@ -17,12 +23,13 @@ describe("FT-015 — Track Adoption Application", () => {
     });
     cy.wait("@mySurrenders", { timeout: 30000 });
 
-    cy.get('.submission-details-btn[data-submission-id="FT_ADOPTION_PENDING"]', { timeout: 30000 })
+    cy.findSubmissionDetailsButton("FT_ADOPTION_PENDING", "adoption")
       .should("be.visible")
+      .as("pendingAdoptionButton")
       .parents(".submission-card")
       .should("contain.text", "FT_ANIMAL_READY_DOG")
       .and("contain.text", "Under Review");
-    cy.get('.submission-details-btn[data-submission-id="FT_ADOPTION_PENDING"]').click();
+    cy.get("@pendingAdoptionButton").click();
     cy.get(".application-detail-modal").should("be.visible");
     cy.get(".application-detail-modal")
       .should("contain.text", "Application Details")

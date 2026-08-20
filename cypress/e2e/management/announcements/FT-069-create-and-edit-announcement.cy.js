@@ -1,6 +1,4 @@
 const {
-  apiRequest,
-  currentToken,
   loginAndOpenAnnouncements,
   registerMutation,
   resetAndVerifyBaseline,
@@ -54,7 +52,7 @@ describe("FT-069 - Create and Edit Announcement", () => {
         expect(registeredPaths).to.include(`announcements/${announcementId}`);
         expect(registeredPaths.filter((path) => path.startsWith("auditLogs/"))).to.have.length(2);
       });
-    currentToken().then((token) => apiRequest({ path: "announcements", token })).then((response) => {
+    cy.sessionApiRequest({ path: "announcements" }).then((response) => {
       const saved = response.body?.announcements?.find(({ id }) => id === announcementId);
       expect(saved).to.include({ title: TITLE, caption: EDITED, status: "Draft", visibleToPublic: false });
     });

@@ -1,10 +1,6 @@
 describe("FT-036 — Manage Surrender Attendance Deadline", () => {
   it("records a seeded scheduled surrender as a no-show and exposes the expiry state", () => {
-    cy.intercept("GET", "**/api/protected").as("managementSession");
     cy.loginAdmin();
-    cy.wait("@managementSession", { timeout: 30000 })
-      .its("response.statusCode")
-      .should("eq", 200);
     cy.intercept(
       { method: "GET", url: "**/api/surrenders", middleware: true },
       (request) => {

@@ -133,6 +133,28 @@ module.exports = defineConfig({
       VITE_FIREBASE_API_KEY: credentialEnvironmentValue("VITE_FIREBASE_API_KEY"),
     },
     setupNodeEvents(on, config) {
+      on("before:browser:launch", (browser, launchOptions) => {
+        if (browser.family !== "chromium") return launchOptions;
+
+        const featureArgumentIndex = launchOptions.args.findIndex((argument) =>
+          argument.startsWith("--disable-features="),
+        );
+        if (featureArgumentIndex >= 0) {
+          const disabledFeatures = new Set(
+            launchOptions.args[featureArgumentIndex]
+              .slice("--disable-features=".length)
+              .split(",")
+              .filter(Boolean),
+          );
+          disabledFeatures.add("ServiceWorker");
+          launchOptions.args[featureArgumentIndex] =
+            `--disable-features=${[...disabledFeatures].join(",")}`;
+        } else {
+          launchOptions.args.push("--disable-features=ServiceWorker");
+        }
+
+        return launchOptions;
+      });
       on("task", {
         inspectFtReportDownload,
         createFtManagementNotificationFixture() {

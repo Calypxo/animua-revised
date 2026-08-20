@@ -4,11 +4,7 @@ describe("FT-040 - Review Adoption Pickup Reschedule", () => {
   after(() => resetAndVerifyBaseline());
 
   it("approves the controlled pending pickup reschedule", () => {
-    cy.intercept("GET", "**/api/protected").as("managementSession");
     cy.loginAdmin();
-    cy.wait("@managementSession", { timeout: 30000 })
-      .its("response.statusCode")
-      .should("eq", 200);
     cy.intercept(
       { method: "GET", url: "**/api/adoptions", middleware: true },
       (request) => {

@@ -159,6 +159,22 @@ async function main() {
       bucketName: bucket.name,
       appProjectId: admin.app().options.projectId,
     }, expected);
+    if (mode === "reset") {
+      const {
+        recoverBatch3GeneratedRecords,
+        recoverBatch10FailedAnnouncementDelete,
+        recoverFinalBatchAccountAudits,
+      } = require("./ft-baseline/ledger");
+      const recoveryResults = [];
+      recoveryResults.push(await recoverBatch3GeneratedRecords());
+      recoveryResults.push(await recoverBatch10FailedAnnouncementDelete());
+      recoveryResults.push(await recoverFinalBatchAccountAudits());
+      const recoveredPathCount = recoveryResults.reduce(
+        (count, result) => count + (result.registeredPaths?.length || 0),
+        0,
+      );
+      console.log(`Reset controlled recovery paths: ${recoveredPathCount}`);
+    }
     const adapter = { admin, db, bucket, auth: admin.auth() };
     return await runBaselineMode({ mode, manifest, adapter, logger: console });
   } catch (error) {

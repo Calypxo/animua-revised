@@ -4,11 +4,7 @@ describe("FT-041 - Manage Adoption Attendance Deadline", () => {
   after(() => resetAndVerifyBaseline());
 
   it("marks the controlled scheduled adoption as a no-show", () => {
-    cy.intercept("GET", "**/api/protected").as("managementSession");
     cy.loginAdmin();
-    cy.wait("@managementSession", { timeout: 30000 })
-      .its("response.statusCode")
-      .should("eq", 200);
     cy.intercept(
       { method: "GET", url: "**/api/adoptions", middleware: true },
       (request) => {

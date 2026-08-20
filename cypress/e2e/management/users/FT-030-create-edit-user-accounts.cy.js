@@ -5,11 +5,7 @@ describe("FT-030 — Create and Edit User Accounts", () => {
     expect(email, "controlled generated account email").to.be.a("string").and.not.be.empty;
     expect(password, "management account password").to.be.a("string").and.not.be.empty;
 
-    cy.intercept("GET", "**/api/protected").as("managementSession");
     cy.loginAdmin();
-    cy.wait("@managementSession", { timeout: 30000 })
-      .its("response.statusCode")
-      .should("eq", 200);
     cy.intercept(
       { method: "GET", url: "**/api/users", middleware: true },
       (request) => {

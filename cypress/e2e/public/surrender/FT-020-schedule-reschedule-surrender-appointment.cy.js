@@ -1,4 +1,11 @@
+const {
+  resetAndVerifyBaseline,
+} = require("../../../support/integration");
+
 describe("FT-020 — Schedule and Reschedule Surrender Appointment", () => {
+  before(() => resetAndVerifyBaseline());
+  after(() => resetAndVerifyBaseline());
+
   it("schedules the seeded approved surrender and submits its reschedule request within the attendance deadline", () => {
     cy.loginClient();
     cy.intercept("GET", "**/api/adoptions/my-applications").as("myAdoptions");
@@ -21,7 +28,7 @@ describe("FT-020 — Schedule and Reschedule Surrender Appointment", () => {
       expect(surrender.attendanceDeadlineAt).to.exist;
     });
 
-    cy.get('.submission-details-btn[data-submission-id="FT_SURRENDER_APPROVED"]')
+    cy.findSubmissionDetailsButton("FT_SURRENDER_APPROVED", "surrender")
       .should("be.visible")
       .click();
     cy.get(".surrender-detail-modal")

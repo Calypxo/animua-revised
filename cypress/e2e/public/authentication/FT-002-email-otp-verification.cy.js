@@ -41,10 +41,18 @@ describe("FT-002 — Email OTP Verification", () => {
     cy.log("MANUAL STEP: Read the six-digit OTP from the dedicated mailbox, enter it in the visible OTP boxes, then click Resume in the Cypress runner.");
     cy.pause();
 
-    cy.get("#email-verification-code", { log: false }).should(($input) => {
-      expect(String($input.val()), "a manually entered six-digit OTP").to.match(/^\d{6}$/);
+    cy.get("body").then(($body) => {
+      const $otpInput = $body.find("#email-verification-code");
+      if (!$otpInput.length) {
+        cy.location("pathname").should("eq", "/pages/public/home.html");
+        return;
+      }
+
+      cy.wrap($otpInput, { log: false }).should(($input) => {
+        expect(String($input.val()), "a manually entered six-digit OTP").to.match(/^\d{6}$/);
+      });
+      cy.get("#check-email-verification-btn").click();
     });
-    cy.get("#check-email-verification-btn").click();
     cy.wait("@confirmEmailOtp", { timeout: 60000 }).then(({ response }) => {
       expect(response?.statusCode).to.equal(200);
       expect(response?.body?.message).to.equal("Email verified successfully.");

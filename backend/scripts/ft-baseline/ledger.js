@@ -22,6 +22,9 @@ const MUTATIONS = Object.freeze({
       "FT_VET_ACTIVE",
       "FT_MANAGEMENT_PROFILE_MUTABLE",
     ],
+    notificationType: "compatibility_quiz_completed",
+    notificationResourceType: "compatibility_result",
+    allowAdditionalManagementRecipients: true,
   },
   compatibilityQuizRetake: {
     primaryCollection: "compatibilityResults",
@@ -40,6 +43,9 @@ const MUTATIONS = Object.freeze({
       "FT_STAFF_ACTIVE",
       "FT_MANAGEMENT_PROFILE_MUTABLE",
     ],
+    notificationType: "adoption_application_created",
+    notificationResourceType: "adoption_application",
+    allowAdditionalManagementRecipients: true,
     auditDetails: "POST /api/adoptions completed with status 201.",
     auditAction: "adoption.created",
   },
@@ -679,7 +685,10 @@ function assertNotifications(documents, primaryId, definition, manifest) {
       data.referenceId !== primaryId ||
       data.metadata?.relatedResourceId !== primaryId ||
       (definition.notificationType && data.type !== definition.notificationType) ||
-      !recipients.has(clean(data.userEmail).toLowerCase())
+      (definition.notificationResourceType &&
+        data.metadata?.resourceType !== definition.notificationResourceType) ||
+      (!definition.allowAdditionalManagementRecipients &&
+        !recipients.has(clean(data.userEmail).toLowerCase()))
     ) {
       throw new Error("Refusing to register a notification outside the controlled FT mutation.");
     }
@@ -2008,17 +2017,78 @@ async function recoverBatch3GeneratedRecords() {
     } catch (_error) {
       continue;
     }
-    registered.push(...(await collectMutationPaths({
-      db,
+    registered.push(documentPath(document));
+
+    const adoptionDefinition = MUTATIONS.adoptionApplication;
+    const notificationSnapshot = await db
+      .collection("notifications")
+      .where("referenceId", "==", document.id)
+      .get();
+    assertNotifications(
+      notificationSnapshot.docs,
+      document.id,
+      adoptionDefinition,
       manifest,
-      kind: "adoptionApplication",
-      primaryId: document.id,
-    })));
+    );
+    registered.push(...notificationSnapshot.docs.map(documentPath));
+
+    const auditSnapshot = await db
+      .collection("auditLogs")
+      .where("details", "==", adoptionDefinition.auditDetails)
+      .get();
+    const auditDocuments = auditSnapshot.docs.filter(
+      (auditDocument) =>
+        auditDocument.data()?.targetId === document.id &&
+        !baselinePaths.has(documentPath(auditDocument)),
+    );
+    assertAuditLogs(auditDocuments, adoptionDefinition, manifest, document.id);
+    registered.push(...auditDocuments.map(documentPath));
   }
 
-  for (const kind of ["adoptionPickup"]) {
-    registered.push(...(await collectMutationPaths({ db, manifest, kind })));
-  }
+  const pickupDefinition = MUTATIONS.adoptionPickup;
+  const pickupSnapshot = await db
+    .collection("auditLogs")
+    .where("details", "==", pickupDefinition.auditDetails)
+    .get();
+  const pickupDocuments = pickupSnapshot.docs.filter(
+    (document) => !baselinePaths.has(documentPath(document)),
+  );
+  assertAuditLogs(pickupDocuments, pickupDefinition, manifest);
+  registered.push(...pickupDocuments.map(documentPath));
+
+  const contactDefinition = MUTATIONS.contactReply;
+  const contactRecipient = userEmail(manifest, contactDefinition.recipient);
+  const contactNotifications = await db
+    .collection("notifications")
+    .where("referenceId", "==", contactDefinition.contactId)
+    .get();
+  registered.push(
+    ...contactNotifications.docs
+      .filter((document) => {
+        const data = document.data() || {};
+        return data.type === "contact_reply" &&
+          clean(data.userEmail).toLowerCase() === contactRecipient;
+      })
+      .map(documentPath),
+  );
+
+  const contactActor = userEmail(manifest, contactDefinition.actor);
+  const contactAudits = await db
+    .collection("auditLogs")
+    .where("targetId", "==", contactDefinition.contactId)
+    .get();
+  registered.push(
+    ...contactAudits.docs
+      .filter((document) => {
+        const data = document.data() || {};
+        return data.action === "contact.replied" &&
+          data.status === "Success" &&
+          data.details ===
+            `POST /api/public/contact/${contactDefinition.contactId}/reply completed with status 200.` &&
+          clean(data.performedBy).toLowerCase() === contactActor;
+      })
+      .map(documentPath),
+  );
 
   const registeredPaths = await registerExactGeneratedPaths({
     ...context,

@@ -11,6 +11,7 @@ Cypress.on("window:before:load", (window) => {
           waiting: null,
           installing: null,
           addEventListener() {},
+          update: () => Promise.resolve(),
         }),
     },
   });

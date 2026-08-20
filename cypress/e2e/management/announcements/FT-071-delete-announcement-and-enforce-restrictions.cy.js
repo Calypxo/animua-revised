@@ -1,6 +1,4 @@
 const {
-  apiRequest,
-  currentToken,
   loginAndOpenAnnouncements,
   registerMutation,
   resetAndVerifyBaseline,
@@ -40,15 +38,14 @@ describe("FT-071 - Delete Announcement and Enforce Restrictions", () => {
     cy.get("#searchAnnouncement").type(TITLE);
     cy.get("#announcementFeed .post-card").should("have.length", 1);
     cy.get("#announcementFeed [data-delete-id]").should("not.exist");
-    currentToken().then((token) => apiRequest({
+    cy.then(() => cy.sessionApiRequest({
       method: "DELETE",
       path: `announcements/${announcementId}`,
-      token,
     })).then((response) => {
       expect(response.status).to.equal(403);
       expect(response.body?.message).to.equal("Access denied. Required role: Admin.");
     });
-    currentToken().then((token) => apiRequest({ path: "announcements", token })).then((response) => {
+    cy.sessionApiRequest({ path: "announcements" }).then((response) => {
       expect(response.body?.announcements?.some(({ id }) => id === announcementId)).to.equal(true);
     });
 

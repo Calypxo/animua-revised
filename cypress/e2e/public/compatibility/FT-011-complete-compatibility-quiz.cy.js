@@ -1,3 +1,6 @@
+const { resetAndVerifyBaseline } = require("../../../support/integration");
+const { disableCaching } = require("../../../support/final-batch-functionality");
+
 function answerCurrentQuizPhase() {
   cy.get("#questionArea .filter-section, #questionArea .question-card").each(
     ($question) => {
@@ -15,6 +18,9 @@ function answerCurrentQuizPhase() {
 }
 
 describe("FT-011 — Complete Compatibility Quiz", () => {
+  before(() => resetAndVerifyBaseline());
+  after(() => resetAndVerifyBaseline());
+
   it("submits a complete quiz for the dedicated first-attempt client and saves ranked matches", () => {
     const email = Cypress.env("FT_CLIENT_QUIZ_NEW_EMAIL");
     expect(email, "quiz-new FT client email is configured")
@@ -22,8 +28,14 @@ describe("FT-011 — Complete Compatibility Quiz", () => {
       .and.not.be.empty;
 
     cy.loginClient({ email });
-    cy.intercept("GET", "**/api/match/eligibility").as("quizEligibility");
-    cy.intercept("GET", "**/api/match/questions").as("quizQuestions");
+    cy.intercept(
+      { method: "GET", url: "**/api/match/eligibility", middleware: true },
+      disableCaching,
+    ).as("quizEligibility");
+    cy.intercept(
+      { method: "GET", url: "**/api/match/questions", middleware: true },
+      disableCaching,
+    ).as("quizQuestions");
     cy.intercept("POST", "**/api/match").as("submitQuiz");
 
     cy.visitPublicPage("/pages/public/petCompatibility.html");

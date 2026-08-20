@@ -92,6 +92,32 @@ Cypress.Commands.add("visitManagementPage", (path, options = {}) =>
   cy.visit(joinUrl(Cypress.env("managementBaseUrl"), path), options),
 );
 
+Cypress.Commands.add("findSubmissionDetailsButton", (submissionId, type) => {
+  const selector =
+    `.submission-details-btn[data-submission-id="${submissionId}"]`;
+
+  cy.get(`.submission-tab[data-filter="${type}"]`).click();
+
+  function findOnCurrentPage() {
+    return cy.get("#submissionsList").then(($list) => {
+      const $button = $list.find(selector);
+      if ($button.length) return cy.wrap($button.first());
+
+      const $next = $list.find(
+        '.submission-pagination button[aria-label="Next page"]:not([disabled])',
+      );
+      expect(
+        $next.length,
+        `${submissionId} available in the paginated ${type} submissions`,
+      ).to.equal(1);
+      cy.wrap($next).click();
+      return findOnCurrentPage();
+    });
+  }
+
+  return findOnCurrentPage();
+});
+
 Cypress.Commands.add("clearAnimuaSession", () => {
   cy.clearCookies();
   cy.window({ log: false }).then((window) => {
@@ -114,17 +140,43 @@ Cypress.Commands.add("assertHardenedBrowserStorage", () => {
   });
 });
 
+Cypress.Commands.add("assertManagementSession", (role) =>
+  cy.request({
+    method: "GET",
+    url: joinUrl(Cypress.env("apiBaseUrl"), "/protected"),
+    headers: {
+      Origin: Cypress.env("managementBaseUrl"),
+      Referer: joinUrl(Cypress.env("managementBaseUrl"), "/pages/dashboard.html"),
+    },
+    failOnStatusCode: false,
+  }).then((response) => {
+    expect(response.status, "backend-verified management session").to.equal(200);
+    expect(response.body?.user?.role).to.equal(role);
+  }),
+);
+
+Cypress.Commands.add("sessionApiRequest", ({ method = "GET", path, headers = {}, ...options }) =>
+  cy.window({ log: false }).then(async (window) => {
+    const response = await window.fetch(
+      joinUrl(Cypress.env("apiBaseUrl"), path),
+      {
+        method,
+        credentials: "include",
+        headers,
+        ...options,
+      },
+    );
+    const body = await response.json().catch(() => ({}));
+    return { status: response.status, body };
+  }),
+);
+
 Cypress.Commands.add("loginClient", (overrides = {}) => {
   const { email, password } = roleCredentials("Client", overrides);
 
   cy.intercept("POST", "**/api/auth/login").as("clientLoginRequest");
   cy.visitPublicPage(`${PUBLIC_HOME_PATH}#login`);
-  cy.get("body").then(($body) => {
-    if ($body.find("#authModal.hidden").length) {
-      cy.get("#loginNavBtn").should("be.visible").click();
-    }
-  });
-  cy.get("#authModal").should("not.have.class", "hidden");
+  cy.get("#authModal", { timeout: 10000 }).should("not.have.class", "hidden");
   cy.fillSensitiveInput("#login-email", email);
   cy.fillSensitiveInput("#login-password", password);
   cy.get("#login-form .auth-submit-btn").click();
@@ -143,8 +195,8 @@ Cypress.Commands.add("loginManagement", (role, overrides = {}) => {
 
   const { email, password } = roleCredentials(role, overrides);
   managementLoginAttempt += 1;
-  const sessionCheckAlias = `managementLoginSessionCheck${managementLoginAttempt}`;
   const loginRequestAlias = `managementLoginRequest${managementLoginAttempt}`;
+  const loginPreflightAlias = `managementLoginPreflight${managementLoginAttempt}`;
   cy.request({
     method: "POST",
     url: joinUrl(Cypress.env("apiBaseUrl"), "/auth/logout"),
@@ -160,7 +212,14 @@ Cypress.Commands.add("loginManagement", (role, overrides = {}) => {
     .its("status")
     .should("eq", 200);
   cy.clearAllCookies({ log: false });
-  cy.intercept("GET", "**/api/protected").as(sessionCheckAlias);
+  cy.request({
+    method: "GET",
+    url: joinUrl(Cypress.env("apiBaseUrl"), "/protected"),
+    failOnStatusCode: false,
+  })
+    .its("status")
+    .should("be.oneOf", [401, 403]);
+  cy.intercept("GET", "**/api/protected").as(loginPreflightAlias);
   cy.intercept("POST", "**/api/auth/login").as(loginRequestAlias);
   cy.visitManagementPage(MANAGEMENT_LOGIN_PATH, {
     onBeforeLoad(window) {
@@ -168,7 +227,7 @@ Cypress.Commands.add("loginManagement", (role, overrides = {}) => {
       window.sessionStorage.clear();
     },
   });
-  cy.wait(`@${sessionCheckAlias}`, { timeout: 30000 })
+  cy.wait(`@${loginPreflightAlias}`, { timeout: 30000 })
     .its("response.statusCode")
     .should("be.oneOf", [401, 403]);
   cy.fillSensitiveInput("#login-email", email);
@@ -181,18 +240,7 @@ Cypress.Commands.add("loginManagement", (role, overrides = {}) => {
     "eq",
     "/pages/dashboard.html",
   );
-  cy.request({
-    method: "GET",
-    url: joinUrl(Cypress.env("apiBaseUrl"), "/protected"),
-    headers: {
-      Origin: Cypress.env("managementBaseUrl"),
-      Referer: joinUrl(Cypress.env("managementBaseUrl"), "/pages/dashboard.html"),
-    },
-    failOnStatusCode: false,
-  }).then((response) => {
-    expect(response.status, "backend-verified management session").to.equal(200);
-    expect(response.body?.user?.role).to.equal(role);
-  });
+  cy.assertManagementSession(role);
   cy.assertHardenedBrowserStorage();
 });
 

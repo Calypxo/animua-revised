@@ -1,3 +1,5 @@
+const { disableCaching } = require("../../../support/final-batch-functionality");
+
 describe("FT-025 — Management Portal Login", () => {
   it("authenticates the active FT administrator through the management login", () => {
     const email = Cypress.env("FT_ADMIN_ACTIVE_EMAIL");
@@ -34,5 +36,19 @@ describe("FT-025 — Management Portal Login", () => {
       expect(window.localStorage.getItem("user_role")).to.be.null;
       expect(window.localStorage.getItem("user_email")).to.be.null;
     });
+
+    cy.intercept(
+      { method: "GET", url: "**/api/auth/account", middleware: true },
+      disableCaching,
+    ).as("adminAccount");
+    cy.visitManagementPage("/pages/accountSettings.html");
+    cy.wait("@adminAccount", { timeout: 30000 }).then(({ response }) => {
+      expect(response?.statusCode).to.equal(200);
+      expect(response?.body?.account).to.include({ email, role: "Admin" });
+    });
+    cy.get("#profileForm").scrollIntoView().should("be.visible");
+    cy.get("#emailInput").should("have.value", email);
+    cy.get("#roleInput").should("have.value", "Admin");
+    cy.assertHardenedBrowserStorage();
   });
 });

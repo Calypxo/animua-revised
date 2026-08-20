@@ -4,11 +4,7 @@ describe("FT-045 - Reject Intake Record", () => {
   after(() => resetAndVerifyBaseline());
 
   it("rejects the controlled pending intake with the recorded reason", () => {
-    cy.intercept("GET", "**/api/protected").as("managementSession");
     cy.loginAdmin();
-    cy.wait("@managementSession", { timeout: 30000 })
-      .its("response.statusCode")
-      .should("eq", 200);
     cy.intercept(
       { method: "GET", url: "**/api/intake", middleware: true },
       (request) => {

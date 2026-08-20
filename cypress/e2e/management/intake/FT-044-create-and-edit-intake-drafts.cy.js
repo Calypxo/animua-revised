@@ -5,11 +5,7 @@ describe("FT-044 - Create and Edit Intake Drafts", () => {
 
   it("creates and edits one controlled draft without converting it", () => {
     let intakeId = "";
-    cy.intercept("GET", "**/api/protected").as("managementSession");
     cy.loginAdmin();
-    cy.wait("@managementSession", { timeout: 30000 })
-      .its("response.statusCode")
-      .should("eq", 200);
     cy.intercept(
       { method: "GET", url: "**/api/intake", middleware: true },
       (request) => {

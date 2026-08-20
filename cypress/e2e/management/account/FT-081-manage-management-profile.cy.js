@@ -1,6 +1,4 @@
 const {
-  apiRequest,
-  currentToken,
   loginAndOpenMutableAccount,
   registerFinalMutation,
   resetAndVerifyBaseline,
@@ -33,7 +31,7 @@ describe("FT-081 - Manage Management Profile", () => {
     cy.reload();
     cy.wait("@managementAccount", { timeout: 30000 });
     cy.get("#displayNameInput").should("have.value", updatedName);
-    currentToken().then((token) => apiRequest({ path: "auth/account", token }))
+    cy.sessionApiRequest({ path: "auth/account" })
       .its("body.account.fullName").should("eq", updatedName);
     cy.get("#displayNameInput").clear().type(originalName);
     cy.get("#saveProfileButton").click();

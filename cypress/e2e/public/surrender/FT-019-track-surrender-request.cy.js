@@ -1,4 +1,10 @@
+const {
+  resetAndVerifyBaseline,
+} = require("../../../support/integration");
+
 describe("FT-019 — Track Surrender Request", () => {
+  before(() => resetAndVerifyBaseline());
+
   it("shows the signed-in client's baseline surrender request and detail view", () => {
     const clientEmail = Cypress.env("FT_CLIENT_ACTIVE_EMAIL");
     cy.loginClient();
@@ -17,12 +23,13 @@ describe("FT-019 — Track Surrender Request", () => {
       });
     });
 
-    cy.get('.submission-details-btn[data-submission-id="FT_SURRENDER_PENDING"]', { timeout: 30000 })
+    cy.findSubmissionDetailsButton("FT_SURRENDER_PENDING", "surrender")
       .should("be.visible")
+      .as("pendingSurrenderButton")
       .parents(".submission-card")
       .should("contain.text", "FT Surrender Pet")
       .and("contain.text", "Received");
-    cy.get('.submission-details-btn[data-submission-id="FT_SURRENDER_PENDING"]').click();
+    cy.get("@pendingSurrenderButton").click();
     cy.get(".surrender-detail-modal").should("be.visible");
     cy.get(".surrender-detail-modal")
       .should("contain.text", "Request Details")

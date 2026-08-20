@@ -21,10 +21,7 @@ function loginAndOpenManagement({ role = "Admin", page, requestUrl, alias, ready
   cy.intercept({ method: "GET", url: requestUrl, middleware: true }, disableCaching)
     .as(requestAlias);
   cy[loginCommand(role)]();
-  currentToken().then((token) => apiRequest({ path: "protected", token })).then((response) => {
-    expect(response.status).to.equal(200);
-    expect(response.body?.user?.role).to.equal(role);
-  });
+  cy.assertManagementSession(role);
   cy.visitManagementPage(page);
   cy.wait(`@${requestAlias}`, { timeout: 30000 })
     .its("response.statusCode").should("eq", 200);

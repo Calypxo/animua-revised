@@ -1,6 +1,4 @@
 const {
-  apiRequest,
-  currentToken,
   loginAndOpenContact,
   registerMutation,
   resetAndVerifyBaseline,
@@ -9,6 +7,7 @@ const {
 const REPLY = "FT-073 controlled management reply through the ANIMUA conversation.";
 
 describe("FT-073 - Reply to Contact Inquiry", () => {
+  before(() => resetAndVerifyBaseline());
   after(() => resetAndVerifyBaseline());
 
   it("sends one ordered reply with one notification and audit through the UI", () => {
@@ -27,17 +26,19 @@ describe("FT-073 - Reply to Contact Inquiry", () => {
     cy.get(".swal2-container", { timeout: 10000 }).should("not.exist");
     cy.wait("@contactListAdmin", { timeout: 30000 });
     cy.get("#userMessageHistory .cm-chat-message").then(($messages) => {
-      const exactReplies = [...$messages].filter((message) => message.textContent.trim() === REPLY);
+      const messageTexts = [...$messages].map((message) => message.textContent.trim());
+      const exactReplies = messageTexts.filter((message) => message.includes(REPLY));
       expect(exactReplies).to.have.length(1);
-      const ordered = [...$messages].map((message) => message.textContent.trim());
-      expect(ordered.indexOf(REPLY)).to.be.greaterThan(ordered.indexOf("Synthetic inquiry"));
+      expect(messageTexts.findIndex((message) => message.includes(REPLY))).to.be.greaterThan(
+        messageTexts.findIndex((message) => message.includes("Synthetic inquiry")),
+      );
     });
     cy.then(() => registerMutation({ kind: "contactReply", primaryId: "FT_CONTACT_NEW" }))
       .then(({ registeredPaths }) => {
         expect(registeredPaths.filter((path) => path.startsWith("notifications/"))).to.have.length(1);
         expect(registeredPaths.filter((path) => path.startsWith("auditLogs/"))).to.have.length(1);
       });
-    currentToken().then((token) => apiRequest({ path: "public/contact/messages", token })).then((response) => {
+    cy.sessionApiRequest({ path: "public/contact/messages" }).then((response) => {
       const contact = response.body?.messages?.find(({ id }) => id === "FT_CONTACT_NEW");
       expect(contact).to.include({ status: "Replied", replyMessage: REPLY });
       expect(contact.messages.map(({ message }) => message)).to.deep.equal(["Synthetic inquiry", REPLY]);

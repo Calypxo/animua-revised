@@ -1,4 +1,8 @@
+const { resetAndVerifyBaseline } = require("../../../support/integration");
+
 describe("FT-033 — Browse Surrender Requests", () => {
+  before(() => resetAndVerifyBaseline());
+
   it("shows seeded surrender states and opens complete request details", () => {
     cy.loginAdmin();
     cy.intercept("GET", "**/api/surrenders").as("surrenders");

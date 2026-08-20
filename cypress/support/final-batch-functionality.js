@@ -29,10 +29,7 @@ function loginAndOpen({ role = "Admin", credentials, page, requestUrl, alias, re
   cy.intercept({ method: "GET", url: requestUrl, middleware: true }, disableCaching).as(alias);
   if (credentials) cy.loginManagement(role, credentials);
   else cy[`login${role === "Veterinarian" ? "Vet" : role}`]();
-  currentToken().then((token) => apiRequest({ path: "protected", token })).then((response) => {
-    expect(response.status).to.equal(200);
-    expect(response.body?.user?.role).to.equal(role);
-  });
+  cy.assertManagementSession(role);
   cy.visitManagementPage(page);
   cy.wait(`@${alias}`, { timeout: 30000 })
     .its("response.statusCode").should("be.oneOf", [200, 304]);

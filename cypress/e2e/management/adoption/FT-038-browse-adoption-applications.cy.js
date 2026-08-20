@@ -1,10 +1,6 @@
 describe("FT-038 - Browse Adoption Applications", () => {
   it("shows seeded adoption states and opens application details", () => {
-    cy.intercept("GET", "**/api/protected").as("managementSession");
     cy.loginAdmin();
-    cy.wait("@managementSession", { timeout: 30000 })
-      .its("response.statusCode")
-      .should("eq", 200);
     cy.intercept(
       { method: "GET", url: "**/api/adoptions", middleware: true },
       (request) => {

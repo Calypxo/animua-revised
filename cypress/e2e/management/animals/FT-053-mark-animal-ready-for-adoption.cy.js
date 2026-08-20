@@ -1,6 +1,7 @@
 const { animalApi, loginAndOpenAnimal, registerAnimalMutation, resetAndVerifyBaseline } = require("../../../support/animal-functionality");
 
 describe("FT-053 - Mark Animal Ready for Adoption", () => {
+  before(() => resetAndVerifyBaseline());
   after(() => resetAndVerifyBaseline());
   it("marks only the cleared and behaviorally assessed animal ready", () => {
     loginAndOpenAnimal("FT_ANIMAL_QUARANTINE_CLEARED");

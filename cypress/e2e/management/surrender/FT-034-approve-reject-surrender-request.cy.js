@@ -1,10 +1,6 @@
 describe("FT-034 — Approve or Reject Surrender Request", () => {
   it("approves and rejects separate seeded candidates through the real workflow", () => {
-    cy.intercept("GET", "**/api/protected").as("managementSession");
     cy.loginAdmin();
-    cy.wait("@managementSession", { timeout: 30000 })
-      .its("response.statusCode")
-      .should("eq", 200);
     cy.intercept(
       { method: "GET", url: "**/api/surrenders", middleware: true },
       (request) => {

@@ -1,6 +1,5 @@
 const {
-  apiRequest,
-  currentToken,
+  disableCaching,
   loginAndOpenArchive,
   registerFinalMutation,
   resetAndVerifyBaseline,
@@ -23,12 +22,19 @@ describe("FT-078 - Restore Archived Animal", () => {
     registerFinalMutation({ kind: "animalRestore", primaryId: "FT_ANIMAL_ARCHIVED" })
       .its("registeredPaths").should("have.length", 1);
     cy.get("#archiveTableBody").should("not.contain.text", "FT_ANIMAL_ARCHIVED");
-    currentToken().then((token) => apiRequest({ path: "animals/FT_ANIMAL_ARCHIVED", token }))
+    cy.sessionApiRequest({ path: "animals/FT_ANIMAL_ARCHIVED" })
       .then((response) => {
         expect(response.status).to.equal(200);
         expect(response.body?.animal).to.include({ id: "FT_ANIMAL_ARCHIVED", status: "Ready" });
       });
-    cy.intercept("GET", "**/api/animals/FT_ANIMAL_ARCHIVED").as("restoredProfile");
+    cy.intercept(
+      {
+        method: "GET",
+        url: "**/api/animals/FT_ANIMAL_ARCHIVED",
+        middleware: true,
+      },
+      disableCaching,
+    ).as("restoredProfile");
     cy.visitManagementPage("/pages/animalProfile.html?id=FT_ANIMAL_ARCHIVED");
     cy.wait("@restoredProfile", { timeout: 30000 }).its("response.statusCode").should("eq", 200);
     cy.get("#profileStatusBadge").should("contain.text", "Ready");

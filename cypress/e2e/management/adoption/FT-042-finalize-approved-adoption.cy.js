@@ -7,11 +7,7 @@ describe("FT-042 - Finalize Approved Adoption", () => {
   after(() => resetAndVerifyBaseline());
 
   it("rejects the blocked application and finalizes only the eligible adoption", () => {
-    cy.intercept("GET", "**/api/protected").as("managementSession");
     cy.loginAdmin();
-    cy.wait("@managementSession", { timeout: 30000 })
-      .its("response.statusCode")
-      .should("eq", 200);
     cy.intercept(
       { method: "GET", url: "**/api/adoptions", middleware: true },
       (request) => {

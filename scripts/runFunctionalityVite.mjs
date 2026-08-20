@@ -32,9 +32,12 @@ if (!fs.existsSync(viteCli)) {
   process.exit(1);
 }
 
+const viteArguments = [viteCli, command, "--mode", "test"];
+if (command === "dev") viteArguments.push("--force");
+
 const child = spawn(
   process.execPath,
-  [viteCli, command, "--mode", "test"],
+  viteArguments,
   {
     cwd: projectDirectory,
     env: {

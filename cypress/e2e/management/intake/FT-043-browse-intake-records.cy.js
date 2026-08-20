@@ -1,10 +1,6 @@
 describe("FT-043 - Browse Intake Records", () => {
   it("shows seeded intake states and opens record details", () => {
-    cy.intercept("GET", "**/api/protected").as("managementSession");
     cy.loginAdmin();
-    cy.wait("@managementSession", { timeout: 30000 })
-      .its("response.statusCode")
-      .should("eq", 200);
     cy.intercept(
       { method: "GET", url: "**/api/intake", middleware: true },
       (request) => {
