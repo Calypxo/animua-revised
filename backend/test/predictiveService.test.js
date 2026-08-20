@@ -56,6 +56,24 @@ test("a valid live inventory record produces a keyed prediction", () => {
   });
 });
 
+test("live prediction aggregates valid tree votes when one tree cannot traverse the item", () => {
+  const result = predictLiveInventoryItems([liveItem()], {
+    classifier: {
+      predict() {
+        throw new Error("the forest-level fallback must not run");
+      },
+    },
+    trainedTrees: [
+      { predict: () => "Slow" },
+      { predict: () => { throw new Error("missing categorical child"); } },
+      { predict: () => "Slow" },
+    ],
+  });
+
+  assert.equal(result.predictedCount, 1);
+  assert.equal(result.items[0].predictedMovement, "Slow");
+});
+
 test("optional display fields may be missing and turnover is transparently derived", () => {
   const item = liveItem({ name: undefined, unit: undefined, monthlyTurnoverRatio: undefined });
   const input = buildPredictionInputFromLiveItem(item);

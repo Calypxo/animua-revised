@@ -19,6 +19,36 @@ let rf = null;
 let trees = null;
 let trainingSummary = null;
 
+function predictMovement(row, classifier, trainedTrees) {
+  const usableTrees = Array.isArray(trainedTrees)
+    ? trainedTrees.filter((tree) => typeof tree?.predict === "function")
+    : [];
+
+  if (usableTrees.length) {
+    const votes = usableTrees.flatMap((tree) => {
+      try {
+        const vote = tree.predict(row);
+        return ["Fast", "Slow"].includes(vote) ? [vote] : [];
+      } catch {
+        return [];
+      }
+    });
+
+    if (!votes.length) {
+      throw new Error("No trained tree returned a supported movement label.");
+    }
+
+    const counts = votes.reduce(
+      (result, vote) => ({ ...result, [vote]: result[vote] + 1 }),
+      { Fast: 0, Slow: 0 },
+    );
+    return counts.Fast > counts.Slow ? "Fast" : "Slow";
+  }
+
+  const prediction = classifier.predict([row], trainedTrees);
+  return Array.isArray(prediction) ? prediction[0] : prediction;
+}
+
 function recordTrainingFailure(error) {
   rf = null;
   trees = null;
@@ -104,10 +134,11 @@ function predictLiveInventoryItems(
     const fallbackId = cleanText(item?.id ?? item?.docId ?? item?.itemId);
     try {
       const input = buildPredictionInputFromLiveItem(item);
-      const prediction = classifier.predict([input.row], trainedTrees);
-      const predictedMovement = Array.isArray(prediction)
-        ? prediction[0]
-        : prediction;
+      const predictedMovement = predictMovement(
+        input.row,
+        classifier,
+        trainedTrees,
+      );
       if (!["Fast", "Slow"].includes(predictedMovement)) {
         throw new Error("The model returned an unsupported movement label.");
       }
