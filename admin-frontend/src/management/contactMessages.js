@@ -382,7 +382,7 @@ function renderDetail() {
   );
 
   const replyBox = el("replyMessage");
-  if (replyBox) replyBox.value = getReplyDraft(localStorage, selected.id);
+  if (replyBox) replyBox.value = getReplyDraft(sessionStorage, selected.id);
   setText("replyDraftStatus", replyBox?.value ? "Draft restored" : "Enter to send · Shift+Enter for a new line");
 
   const sendBtn = el("sendReplyBtn");
@@ -483,7 +483,7 @@ async function sendReply(event) {
       body: JSON.stringify({ replyMessage }),
     });
 
-    clearReplyDraft(localStorage, selected.id);
+    clearReplyDraft(sessionStorage, selected.id);
     if (el("replyMessage")) el("replyMessage").value = "";
     setText("replyDraftStatus", "Sent · Enter to send another reply");
 
@@ -547,7 +547,7 @@ function bindEvents() {
   el("replyMessage")?.addEventListener("input", (event) => {
     const selected = getSelectedMessage();
     if (!selected) return;
-    saveReplyDraft(localStorage, selected.id, event.target.value);
+    saveReplyDraft(sessionStorage, selected.id, event.target.value);
     setText(
       "replyDraftStatus",
       event.target.value.trim()
@@ -565,7 +565,7 @@ function bindEvents() {
 document.addEventListener("DOMContentLoaded", async () => {
   try {
     const session = await protectPageByModule("contact");
-    currentRole = session.role || localStorage.getItem("animua_role") || "";
+    currentRole = session.role || "";
 
     renderTopbarUser();
     loadSidebar();

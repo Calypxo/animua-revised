@@ -2,6 +2,7 @@ import "../css/reports.css";
 import "../css/managementTables.css";
 import "../css/recordsPanelReference.css";
 import { protectManagementPage } from "../auth/authGuard.js";
+import { getUserName } from "../utils/storage.js";
 import { renderTopbarUser } from "../components/management/topbarUser.js";
 import { loadSidebar } from "../components/management/sidebarLoader.js";
 import { renderPageHeader } from "../components/management/pageHeader.js";
@@ -308,7 +309,7 @@ function renderPrintHeader(list) {
   const topGroup = dimensionCounts(list)[0];
   document.getElementById("printPeriod").textContent = periodLabel();
   document.getElementById("printBarangay").textContent = barangay || "All barangays";
-  document.getElementById("printPreparedBy").textContent = localStorage.getItem("user_name") || "Shelter Management";
+  document.getElementById("printPreparedBy").textContent = getUserName() || "Shelter Management";
   document.getElementById("printRecordTotal").textContent = list.length;
   document.getElementById("printReportNarrative").textContent = `This report summarizes ${config.description.toLowerCase()} using live shelter records within the selected reporting period and barangay scope. Barangay values come from the structured intake or owner record; pickup location remains a separate, more specific field.`;
   document.getElementById("printReportFinding").textContent = topGroup

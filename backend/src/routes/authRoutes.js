@@ -3,6 +3,7 @@ const router  = express.Router();
 const {
   register,
   login,
+  logout,
   requestEmailVerificationOtp,
   confirmEmailVerificationOtp,
   requestPasswordChangeOtp,
@@ -10,6 +11,7 @@ const {
   requestForgotPasswordOtp,
   confirmForgotPasswordOtp,
   confirmPhoneVerification,
+  syncEmailVerification,
   discardUnverifiedRegistration,
   getCurrentAccount,
   updateUsername,
@@ -20,11 +22,13 @@ const verifyToken = require("../middleware/authMiddleware");
 // Public routes — no token needed
 router.post("/register", register);
 router.post("/login",    login);
+router.post("/logout",   logout);
 router.post("/request-email-verification-otp", requestEmailVerificationOtp);
 router.post("/confirm-email-verification-otp", confirmEmailVerificationOtp);
 router.post("/request-forgot-password-otp", requestForgotPasswordOtp);
 router.post("/confirm-forgot-password-otp", confirmForgotPasswordOtp);
 router.post("/confirm-phone-verification", confirmPhoneVerification);
+router.post("/sync-email-verification", syncEmailVerification);
 router.post("/discard-unverified-registration", discardUnverifiedRegistration);
 
 router.put("/update-username", verifyToken, updateUsername);

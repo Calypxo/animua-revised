@@ -70,7 +70,7 @@ router.put(
 router.patch(
   "/:id/photo",
   authorize("Admin", "Staff"),
-  uploadAnimalImage.single("photo"),
+  uploadAnimalImage,
   ctrl.uploadAnimalProfileImage
 );
 

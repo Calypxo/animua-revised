@@ -8,6 +8,7 @@ const {
 } = require("../middleware/contactProtection");
 const {
   getPublicPets,
+  getPublicAdoptedStories,
   getPublicPetById,
   getPublicEvents,
   getOptimizedImage,
@@ -22,6 +23,7 @@ const {
 router.get("/events", getPublicEvents);
 router.get("/optimized-image", getOptimizedImage);
 router.get("/pets", getPublicPets);
+router.get("/adopted-stories", getPublicAdoptedStories);
 router.get("/pets/:id", getPublicPetById);
 router.get(
   "/contact/messages",

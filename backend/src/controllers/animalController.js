@@ -3,6 +3,11 @@ const { db, admin, bucket } = require("../config/firebase");
 const {
   getAnimalDisplayLabel,
 } = require("../utils/animalIdentity");
+const {
+  assertExpectedStoragePath,
+  getSignedReadUrl,
+} = require("../services/storageUrlService");
+const { validateImageFile } = require("../utils/imageUploadPolicy");
 
 const ANIMAL_COL = "animals";
 const AUDIT_COL  = "auditLogs";
@@ -24,6 +29,19 @@ const MEDICAL_RECORD_TYPES = new Set([
   "Deworming",
   "Quarantine Clearance",
 ]);
+async function serializeAnimalImage(id, data = {}) {
+  const animal = { id, ...data };
+  animal.photoURL = await getSignedReadUrl({
+    path: data.photoPath,
+    legacyUrl: data.photoURL || data.photoUrl || data.imageUrl || data.profileImageUrl || "",
+    expectedPrefix: `animals/${id}`,
+  });
+  delete animal.photoPath;
+  delete animal.photoUrl;
+  delete animal.imageUrl;
+  delete animal.profileImageUrl;
+  return animal;
+}
 
 function requestError(statusCode, message) {
   const error = new Error(message);
@@ -208,7 +226,9 @@ exports.getAllAnimals = async (req, res) => {
     const { status, species, sex } = req.query;
     const snapshot = await db.collection(ANIMAL_COL).orderBy("createdAt", "desc").get();
 
-    let animals = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    let animals = await Promise.all(
+      snapshot.docs.map(doc => serializeAnimalImage(doc.id, doc.data() || {}))
+    );
 
     if (status)  animals = animals.filter(a => a.status === status);
     if (species) animals = animals.filter(a => a.species === species);
@@ -241,7 +261,7 @@ exports.getAnimalById = async (req, res) => {
       return res.status(404).json({ message: "Animal not found." });
     }
 
-    const animal = { id: doc.id, ...doc.data() };
+    const animal = await serializeAnimalImage(doc.id, doc.data() || {});
     animal.history = animal.history || [];
     animal.medicalRecords = animal.medicalRecords || [];
 
@@ -319,6 +339,7 @@ exports.updateAnimal = async (req, res) => {
 };
 
 exports.uploadAnimalProfileImage = async (req, res) => {
+  let uploadedPath = "";
   try {
     const { id } = req.params;
 
@@ -338,32 +359,39 @@ exports.uploadAnimalProfileImage = async (req, res) => {
     }
 
     const animalData = animalDoc.data();
-
-    if (animalData.photoPath) {
-      await bucket.file(animalData.photoPath).delete().catch(() => {});
-    }
-
-    const fileExt = req.file.originalname.split(".").pop();
+    const previousPath = animalData.photoPath
+      ? assertExpectedStoragePath(animalData.photoPath, `animals/${id}`)
+      : "";
+    const fileExt = validateImageFile(
+      req.file,
+      "The animal photo must be 5 MB or smaller."
+    );
     const fileName = `animals/${id}/profile-${Date.now()}.${fileExt}`;
+    uploadedPath = fileName;
 
     const file = bucket.file(fileName);
 
     await file.save(req.file.buffer, {
       metadata: {
         contentType: req.file.mimetype,
-        cacheControl: "public, max-age=31536000",
+        cacheControl: "private, max-age=1800",
       },
       resumable: false,
     });
 
-    await file.makePublic();
-
-    const photoURL = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
-
     await animalRef.update({
-      photoURL,
+      photoURL: "",
       photoPath: fileName,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    if (previousPath && previousPath !== fileName) {
+      await bucket.file(previousPath).delete().catch(() => {});
+    }
+
+    const photoURL = await getSignedReadUrl({
+      path: fileName,
+      expectedPrefix: `animals/${id}`,
     });
 
     res.status(200).json({
@@ -371,9 +399,12 @@ exports.uploadAnimalProfileImage = async (req, res) => {
       photoURL,
     });
   } catch (error) {
+    if (uploadedPath) {
+      await bucket.file(uploadedPath).delete().catch(() => {});
+    }
     console.error("[uploadAnimalProfileImage]", error.message);
-    res.status(500).json({
-      message: "Failed to upload animal image.",
+    res.status(error.statusCode || 500).json({
+      message: error.statusCode ? error.message : "Failed to upload animal image.",
     });
   }
 };
@@ -394,7 +425,8 @@ exports.deleteAnimalProfileImage = async (req, res) => {
     const animalData = animalDoc.data();
 
     if (animalData.photoPath) {
-      await bucket.file(animalData.photoPath).delete().catch(() => {});
+      const photoPath = assertExpectedStoragePath(animalData.photoPath, `animals/${id}`);
+      await bucket.file(photoPath).delete().catch(() => {});
     }
 
     await animalRef.update({
@@ -408,8 +440,8 @@ exports.deleteAnimalProfileImage = async (req, res) => {
     });
   } catch (error) {
     console.error("[deleteAnimalProfileImage]", error.message);
-    res.status(500).json({
-      message: "Failed to remove animal image.",
+    res.status(error.statusCode || 500).json({
+      message: error.statusCode ? error.message : "Failed to remove animal image.",
     });
   }
 };

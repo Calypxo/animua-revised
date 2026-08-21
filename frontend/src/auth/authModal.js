@@ -1,3 +1,5 @@
+import { hasUserSession } from "../utils/storage.js";
+
 function updateAuthPanel() {
   const loginSection = document.getElementById("login-section");
   const isLoginVisible = loginSection && !loginSection.classList.contains("hidden");
@@ -93,7 +95,7 @@ function openAuthModal() {
   const authModal = document.getElementById("authModal");
   if (!authModal) return;
 
-  if (localStorage.getItem("animua_token")) {
+  if (hasUserSession()) {
     closeAuthModal();
     return;
   }

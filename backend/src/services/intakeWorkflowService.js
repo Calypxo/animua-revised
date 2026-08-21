@@ -5,7 +5,7 @@ function canAdvanceIntakeToProfiling(status) {
 }
 
 function shouldAutoAdvanceIntake({ source, status }) {
-  return source === "Approved Surrender" && status === "Pending";
+  return false;
 }
 
 module.exports = {

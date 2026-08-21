@@ -1,7 +1,6 @@
 import {
-  getToken,
-  getUserRole,
   clearUserSession,
+  setUserSession,
 } from "../utils/storage.js";
 
 import { API_BASE_URL } from "../utils/api.js";
@@ -21,37 +20,17 @@ const MANAGEMENT_ROLES = [
  * Protects pages that belong to the management frontend.
  *
  * This confirms that:
- * 1. A token exists.
- * 2. The locally stored role is a management role.
- * 3. The backend confirms the current token, role, and account status.
+ * The backend confirms the HttpOnly session, current role, and account status.
  */
 export async function protectManagementPage() {
-  const token = getToken();
-  const storedRole = getUserRole();
-  const role = normalizeRole(storedRole);
-
-  console.log("Guard token exists:", Boolean(token));
-  console.log("Guard stored role:", storedRole);
-  console.log("Guard normalized role:", role);
-
-  if (
-    !token ||
-    !MANAGEMENT_ROLES.includes(role)
-  ) {
-    handleUnauthorizedAccess(
-      "Missing token or invalid management role."
-    );
-  }
-
   try {
     const response = await fetch(
       `${API_BASE_URL}/protected`,
       {
         method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        cache: "no-store",
       }
     );
 
@@ -93,21 +72,12 @@ export async function protectManagementPage() {
       );
     }
 
-    if (serverRole !== role) {
-      console.warn("Guard role mismatch:", {
-        localRole: role,
-        serverRole,
-      });
-
-      handleUnauthorizedAccess(
-        "Stored role does not match the current server role."
-      );
-    }
+    const user = setUserSession(data.user);
 
     return {
       authenticated: true,
       role: serverRole,
-      user: data.user,
+      user,
       verifiedByServer: true,
     };
   } catch (error) {

@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "../../utils/api.js";
+import { ensureUserSession, getUserSession } from "../../utils/storage.js";
 
 const SUBMIT_SURRENDER_API_URL = `${API_BASE_URL}/surrenders`;
 const MY_SURRENDER_REQUESTS_API_URL = `${SUBMIT_SURRENDER_API_URL}/my-requests`;
@@ -61,14 +62,12 @@ function generateRequestId() {
 }
 
 function getLoggedInUser() {
-  const isLoggedIn = localStorage.getItem("is_logged_in");
-  const token = localStorage.getItem("animua_token");
-  if (isLoggedIn !== "true" || !token) return null;
+  const session = getUserSession();
+  if (!session) return null;
   return {
-    token,
-    name: localStorage.getItem("user_name"),
-    email: localStorage.getItem("user_email"),
-    role: localStorage.getItem("user_role"),
+    name: session.fullName,
+    email: session.email,
+    role: session.role,
   };
 }
 
@@ -109,7 +108,7 @@ function openLoginModal() {
     document.body.classList.add("modal-open");
     return;
   }
-  localStorage.setItem("animua_open_auth_modal", "true");
+  sessionStorage.setItem("animua_open_auth_modal", "true");
   window.location.href = "/pages/public/home.html";
 }
 
@@ -536,12 +535,12 @@ function updateReviewSummary() {
 }
 
 async function submitSurrenderRequest(requestData) {
-  const token = localStorage.getItem("animua_token");
   let response;
   try {
     response = await fetch(SUBMIT_SURRENDER_API_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(requestData),
     });
   } catch {
@@ -704,7 +703,7 @@ async function loadMySurrenderRequests() {
   refreshButton?.setAttribute("aria-busy", "true");
   container.innerHTML = '<div class="surrender-state surrender-state-loading"><i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i><p>Loading your requests…</p></div>';
   try {
-    const response = await fetch(MY_SURRENDER_REQUESTS_API_URL, { headers: { Authorization: `Bearer ${user.token}` } });
+    const response = await fetch(MY_SURRENDER_REQUESTS_API_URL, { credentials: "include" });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.message || "Unable to load your requests.");
     renderRequestHistory(Array.isArray(data.requests) ? data.requests : []);
@@ -807,7 +806,8 @@ function bindWaiverLanguageToggle() {
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  await ensureUserSession();
   const form = document.getElementById("surrenderForm");
   fillOwnerInfoFromAccount();
   bindStepNavigation();

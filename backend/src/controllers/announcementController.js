@@ -1,5 +1,10 @@
 const { db, admin, bucket } = require("../config/firebase");
 const { createNotificationForUsersBySetting } = require("../services/notificationService");
+const {
+  assertExpectedStoragePath,
+  getSignedReadUrl,
+} = require("../services/storageUrlService");
+const { validateImageFile } = require("../utils/imageUploadPolicy");
 
 const ANNOUNCEMENT_COL = "announcements";
 
@@ -46,6 +51,19 @@ function normalizeAnnouncement(data = {}) {
   return payload;
 }
 
+async function serializeAnnouncementImage(id, data = {}) {
+  const announcement = { id, ...data };
+  announcement.imageUrl = await getSignedReadUrl({
+    path: data.imagePath,
+    legacyUrl: data.imageUrl || data.imageURL || data.coverImage || "",
+    expectedPrefix: `announcements/${id}`,
+  });
+  delete announcement.imagePath;
+  delete announcement.imageURL;
+  delete announcement.coverImage;
+  return announcement;
+}
+
 function shouldNotifyEventAnnouncement(data = {}) {
   return data.type === "Upcoming Events" &&
     data.status === "Published" &&
@@ -76,7 +94,7 @@ exports.getPublicAnnouncements = async (req, res) => {
       .collection(ANNOUNCEMENT_COL)
       .get();
 
-    const announcements = snapshot.docs
+    const visibleAnnouncements = snapshot.docs
       .map((doc) => ({
         id: doc.id,
         ...doc.data(),
@@ -86,31 +104,36 @@ exports.getPublicAnnouncements = async (req, res) => {
         // always treated those records as public, so the public endpoint must
         // use the same default instead of silently hiding them.
         return item.visibleToPublic !== false && normalizeAnnouncementStatus(item.status) === "Published";
+      });
+    const announcements = await Promise.all(
+      visibleAnnouncements.map(async (item) => {
+        const signed = await serializeAnnouncementImage(item.id, item);
+        return {
+          id: item.id,
+          title: item.title,
+          type: normalizeAnnouncementType(item.type),
+          caption: item.caption,
+          description: item.description || "",
+          body: item.body || "",
+          content: item.content || "",
+          summary: item.summary || "",
+          details: Array.isArray(item.details) ? item.details : [],
+          storyParagraphs: Array.isArray(item.storyParagraphs) ? item.storyParagraphs : [],
+          imageUrl: signed.imageUrl,
+          eventDate: item.eventDate,
+          eventTime: item.eventTime || "",
+          location: item.location,
+          source: item.source || item.createdByName || "ANIMUA City Government",
+          createdAt: item.createdAt,
+          updatedAt: item.updatedAt,
+        };
       })
-      .sort((a, b) => {
+    );
+    announcements.sort((a, b) => {
         const dateA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
         const dateB = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
         return dateB - dateA;
-      })
-      .map((item) => ({
-        id: item.id,
-        title: item.title,
-        type: normalizeAnnouncementType(item.type),
-        caption: item.caption,
-        description: item.description || "",
-        body: item.body || "",
-        content: item.content || "",
-        summary: item.summary || "",
-        details: Array.isArray(item.details) ? item.details : [],
-        storyParagraphs: Array.isArray(item.storyParagraphs) ? item.storyParagraphs : [],
-        imageUrl: item.imageUrl,
-        eventDate: item.eventDate,
-        eventTime: item.eventTime || "",
-        location: item.location,
-        source: item.source || item.createdByName || "ANIMUA City Government",
-        createdAt: item.createdAt,
-        updatedAt: item.updatedAt,
-      }));
+      });
 
     res.set("Cache-Control", "no-store");
     return res.status(200).json({ announcements });
@@ -135,18 +158,17 @@ exports.getAllAnnouncements = async (req, res) => {
       .collection(ANNOUNCEMENT_COL)
       .get();
 
-    const announcements = snapshot.docs
-      .map((doc) => {
+    const announcements = await Promise.all(snapshot.docs
+      .map(async (doc) => {
         const data = doc.data();
-        return {
-          id: doc.id,
+        return serializeAnnouncementImage(doc.id, {
           ...data,
           type: normalizeAnnouncementType(data.type),
           status: normalizeAnnouncementStatus(data.status),
           visibleToPublic: data.visibleToPublic !== false,
-        };
-      })
-      .sort((a, b) => {
+        });
+      }));
+    announcements.sort((a, b) => {
         const dateA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
         const dateB = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
         return dateB - dateA;
@@ -283,38 +305,38 @@ exports.uploadAnnouncementImage = async (req, res) => {
     }
 
     const announcementData = announcementDoc.data();
-    const extensionByMimeType = {
-      "image/jpeg": "jpg",
-      "image/png": "png",
-      "image/webp": "webp",
-    };
-    const extension = extensionByMimeType[req.file.mimetype];
-    if (!extension) {
-      return res.status(400).json({ message: "Only JPG, PNG, and WebP images are allowed." });
-    }
+    const previousPath = announcementData.imagePath
+      ? assertExpectedStoragePath(announcementData.imagePath, `announcements/${id}`)
+      : "";
+    const extension = validateImageFile(
+      req.file,
+      "The cover photo must be 5 MB or smaller."
+    );
 
     uploadedImagePath = `announcements/${id}/cover-${Date.now()}.${extension}`;
     const imageFile = bucket.file(uploadedImagePath);
     await imageFile.save(req.file.buffer, {
       metadata: {
         contentType: req.file.mimetype,
-        cacheControl: "public, max-age=31536000",
+        cacheControl: "private, max-age=1800",
       },
       resumable: false,
     });
-    await imageFile.makePublic();
-
-    const imageUrl = `https://storage.googleapis.com/${bucket.name}/${uploadedImagePath}`;
     await announcementRef.update({
-      imageUrl,
+      imageUrl: "",
       imagePath: uploadedImagePath,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       updatedBy: req.user.email || "",
     });
 
-    if (announcementData.imagePath && announcementData.imagePath !== uploadedImagePath) {
-      await bucket.file(announcementData.imagePath).delete().catch(() => {});
+    if (previousPath && previousPath !== uploadedImagePath) {
+      await bucket.file(previousPath).delete().catch(() => {});
     }
+
+    const imageUrl = await getSignedReadUrl({
+      path: uploadedImagePath,
+      expectedPrefix: `announcements/${id}`,
+    });
 
     return res.status(200).json({
       message: "Announcement image uploaded successfully.",
@@ -325,7 +347,9 @@ exports.uploadAnnouncementImage = async (req, res) => {
       await bucket.file(uploadedImagePath).delete().catch(() => {});
     }
     console.error("[uploadAnnouncementImage]", error.message);
-    return res.status(500).json({ message: "Failed to upload announcement image." });
+    return res.status(error.statusCode || 500).json({
+      message: error.statusCode ? error.message : "Failed to upload announcement image.",
+    });
   }
 };
 
@@ -339,6 +363,14 @@ exports.deleteAnnouncementImage = async (req, res) => {
     }
 
     const announcementData = announcementDoc.data();
+    const imagePath = announcementData.imagePath
+      ? assertExpectedStoragePath(announcementData.imagePath, `announcements/${id}`)
+      : "";
+
+    if (imagePath) {
+      await bucket.file(imagePath).delete().catch(() => {});
+    }
+
     await announcementRef.update({
       imageUrl: "",
       imagePath: "",
@@ -346,14 +378,12 @@ exports.deleteAnnouncementImage = async (req, res) => {
       updatedBy: req.user.email || "",
     });
 
-    if (announcementData.imagePath) {
-      await bucket.file(announcementData.imagePath).delete().catch(() => {});
-    }
-
     return res.status(200).json({ message: "Announcement image removed successfully." });
   } catch (error) {
     console.error("[deleteAnnouncementImage]", error.message);
-    return res.status(500).json({ message: "Failed to remove announcement image." });
+    return res.status(error.statusCode || 500).json({
+      message: error.statusCode ? error.message : "Failed to remove announcement image.",
+    });
   }
 };
 
@@ -376,10 +406,13 @@ exports.deleteAnnouncement = async (req, res) => {
     }
 
     const announcementData = announcementDoc.data();
+    const imagePath = announcementData.imagePath
+      ? assertExpectedStoragePath(announcementData.imagePath, `announcements/${id}`)
+      : "";
     await announcementRef.delete();
 
-    if (announcementData.imagePath) {
-      await bucket.file(announcementData.imagePath).delete().catch(() => {});
+    if (imagePath) {
+      await bucket.file(imagePath).delete().catch(() => {});
     }
 
     return res.status(200).json({
@@ -387,8 +420,8 @@ exports.deleteAnnouncement = async (req, res) => {
     });
   } catch (error) {
     console.error("[deleteAnnouncement]", error.message);
-    return res.status(500).json({
-      message: "Failed to delete announcement.",
+    return res.status(error.statusCode || 500).json({
+      message: error.statusCode ? error.message : "Failed to delete announcement.",
     });
   }
 };

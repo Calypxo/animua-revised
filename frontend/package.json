@@ -5,12 +5,18 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:test": "node ../scripts/runFunctionalityVite.mjs",
     "build": "vite build",
-    "test": "node --test --test-isolation=none",
+    "build:test": "node ../scripts/runFunctionalityVite.mjs build",
+    "test": "node --test --test-isolation=none \"test/*.test.js\"",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
     "preview": "vite preview"
   },
   "devDependencies": {
-    "vite": "^8.0.0"
+    "@vitest/ui": "^4.1.10",
+    "vite": "^8.0.0",
+    "vitest": "^4.1.10"
   },
   "dependencies": {
     "firebase": "^12.12.0",

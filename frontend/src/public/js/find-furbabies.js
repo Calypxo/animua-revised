@@ -1,6 +1,8 @@
 import { API_BASE_URL } from "../../utils/api.js";
 import dogFallbackImage from "../../assets/images/optimized/home/hero-shelter-dog-kennel-768.webp";
 import catFallbackImage from "../../assets/images/optimized/home/highlight-new-furbabies-cat-360.webp";
+import { createSelectionFocusGuard } from "./adoption-ui-state.js";
+import { ensureUserSession, getUserSession, hasUserSession } from "../../utils/storage.js";
 
 const petsGrid = document.getElementById("petsGrid");
 const resultsCount = document.getElementById("resultsCount");
@@ -172,6 +174,7 @@ function setupBirthdatePicker() {
     new Date(2000, month, 1).toLocaleString("en-US", { month: "long" })
   );
   let viewDate = parseDateValue(birthdateField.value) || new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+  const selectionFocusGuard = createSelectionFocusGuard();
 
   const closePicker = () => {
     picker.hidden = true;
@@ -190,7 +193,7 @@ function setupBirthdatePicker() {
     birthdateField.value = formatDateValue(date);
     birthdateField.dispatchEvent(new Event("change", { bubbles: true }));
     closePicker();
-    birthdateField.focus();
+    selectionFocusGuard.focusAfterSelection(birthdateField);
   };
 
   const renderPicker = () => {
@@ -251,7 +254,9 @@ function setupBirthdatePicker() {
   });
 
   birthdateField.addEventListener("click", openPicker);
-  birthdateField.addEventListener("focus", openPicker);
+  birthdateField.addEventListener("focus", () => {
+    if (selectionFocusGuard.shouldOpenOnFocus()) openPicker();
+  });
   birthdateField.addEventListener("input", () => {
     validateBirthdateField();
     syncBirthdateAge();
@@ -470,7 +475,8 @@ function generateLocalApplicationReference() {
 }
 
 function prefillApplicantFromAccount() {
-  const fullName = localStorage.getItem("user_name") || "";
+  const session = getUserSession() || {};
+  const fullName = session.fullName || "";
   const fullNameField = getField("fullName");
   if (fullNameField) {
     fullNameField.value = fullName;
@@ -478,7 +484,7 @@ function prefillApplicantFromAccount() {
     fullNameField.classList.add("readonly-account-field");
   }
   if (!getValue("applicantAccountId")) {
-    getField("applicantAccountId").value = localStorage.getItem("user_email") || "";
+    getField("applicantAccountId").value = session.email || "";
   }
 }
 
@@ -622,10 +628,10 @@ function closeAdoptionModalWithoutPrompt() {
   if (!adoptModal) return;
   adoptModal.classList.remove("show");
   adoptionExitConfirm?.setAttribute("hidden", "");
-  localStorage.removeItem("animua_selected_pet_id");
-  localStorage.removeItem("animua_selected_pet_action");
-  localStorage.removeItem("animua_selected_pet_source");
-  localStorage.removeItem("animua_selected_pet_timestamp");
+  sessionStorage.removeItem("animua_selected_pet_id");
+  sessionStorage.removeItem("animua_selected_pet_action");
+  sessionStorage.removeItem("animua_selected_pet_source");
+  sessionStorage.removeItem("animua_selected_pet_timestamp");
   if (!profileModal || !profileModal.classList.contains("show")) {
     document.body.classList.remove("menu-open");
   }
@@ -1191,11 +1197,10 @@ function openProfileModal(pet) {
 }
 
 function openSelectedPetFromResults() {
-  const selectedPetRecordId = localStorage.getItem("animua_selected_pet_id");
-  const selectedAction = localStorage.getItem("animua_selected_pet_action");
-  const selectedSource = localStorage.getItem("animua_selected_pet_source");
-  const selectedAt = Number(localStorage.getItem("animua_selected_pet_timestamp") || 0);
-  const token = localStorage.getItem("animua_token");
+  const selectedPetRecordId = sessionStorage.getItem("animua_selected_pet_id");
+  const selectedAction = sessionStorage.getItem("animua_selected_pet_action");
+  const selectedSource = sessionStorage.getItem("animua_selected_pet_source");
+  const selectedAt = Number(sessionStorage.getItem("animua_selected_pet_timestamp") || 0);
 
   if (!selectedPetRecordId || !pets.length) return;
 
@@ -1204,10 +1209,10 @@ function openSelectedPetFromResults() {
 
   if (selectedAction === "view") {
     openProfileModal(selectedPet);
-    localStorage.removeItem("animua_selected_pet_id");
-    localStorage.removeItem("animua_selected_pet_action");
-    localStorage.removeItem("animua_selected_pet_source");
-    localStorage.removeItem("animua_selected_pet_timestamp");
+    sessionStorage.removeItem("animua_selected_pet_id");
+    sessionStorage.removeItem("animua_selected_pet_action");
+    sessionStorage.removeItem("animua_selected_pet_source");
+    sessionStorage.removeItem("animua_selected_pet_timestamp");
     return;
   }
 
@@ -1218,20 +1223,20 @@ function openSelectedPetFromResults() {
       Date.now() - selectedAt <= ADOPTION_PENDING_MAX_AGE_MS;
 
     if (!isRecentAdoptClick) {
-      localStorage.removeItem("animua_selected_pet_id");
-      localStorage.removeItem("animua_selected_pet_action");
-      localStorage.removeItem("animua_selected_pet_source");
-      localStorage.removeItem("animua_selected_pet_timestamp");
+      sessionStorage.removeItem("animua_selected_pet_id");
+      sessionStorage.removeItem("animua_selected_pet_action");
+      sessionStorage.removeItem("animua_selected_pet_source");
+      sessionStorage.removeItem("animua_selected_pet_timestamp");
       return;
     }
 
-    if (!token) return;
+    if (!hasUserSession()) return;
 
     showAdoptModalForPet(selectedPet);
-    localStorage.removeItem("animua_selected_pet_id");
-    localStorage.removeItem("animua_selected_pet_action");
-    localStorage.removeItem("animua_selected_pet_source");
-    localStorage.removeItem("animua_selected_pet_timestamp");
+    sessionStorage.removeItem("animua_selected_pet_id");
+    sessionStorage.removeItem("animua_selected_pet_action");
+    sessionStorage.removeItem("animua_selected_pet_source");
+    sessionStorage.removeItem("animua_selected_pet_timestamp");
   }
 }
 
@@ -1266,16 +1271,14 @@ function showAdoptModalForPet(pet) {
 function openAdoptModal(pet) {
   if (!adoptModal) return;
 
-  const token = localStorage.getItem("animua_token");
-
   currentPetForAdoption = pet;
-  localStorage.setItem("animua_selected_pet_id", pet.id);
-  localStorage.setItem("animua_selected_pet_action", "adopt");
-  localStorage.setItem("animua_selected_pet_source", ADOPTION_PENDING_SOURCE);
-  localStorage.setItem("animua_selected_pet_timestamp", String(Date.now()));
+  sessionStorage.setItem("animua_selected_pet_id", pet.id);
+  sessionStorage.setItem("animua_selected_pet_action", "adopt");
+  sessionStorage.setItem("animua_selected_pet_source", ADOPTION_PENDING_SOURCE);
+  sessionStorage.setItem("animua_selected_pet_timestamp", String(Date.now()));
 
-  if (!token) {
-    localStorage.setItem("animua_open_auth_modal", "true");
+  if (!hasUserSession()) {
+    sessionStorage.setItem("animua_open_auth_modal", "true");
 
     const authModal = document.getElementById("authModal");
     if (authModal) {
@@ -1420,8 +1423,8 @@ if (adoptionForm) {
     try {
       updateConditionalAdoptionFields();
       syncIssuedDateFields();
-      const quizData = JSON.parse(localStorage.getItem("animua_quiz_data") || "{}");
-      const matchResults = JSON.parse(localStorage.getItem("animua_match_results") || "[]");
+      const quizData = JSON.parse(sessionStorage.getItem("animua_quiz_data") || "{}");
+      const matchResults = JSON.parse(sessionStorage.getItem("animua_match_results") || "[]");
 
       const selectedMatch = matchResults.find(
         (pet) => String(pet.id || pet.petId) === String(selectedPetRecordId)
@@ -1487,17 +1490,13 @@ if (adoptionForm) {
         signature_name: getValue("fullName"),
       };
 
-      const token = localStorage.getItem("animua_token");
       const headers = {
         "Content-Type": "application/json"
       };
 
-      if (token) {
-        headers.Authorization = `Bearer ${token}`;
-      }
-
       const res = await fetch(`${API_BASE_URL}/adoptions`, {
         method: "POST",
+        credentials: "include",
         headers,
         body: JSON.stringify(formData)
       });
@@ -1582,4 +1581,6 @@ function schedulePetsLoad() {
   window.setTimeout(startPetsLoad, 8500);
 }
 
-schedulePetsLoad();
+ensureUserSession()
+  .catch((error) => console.warn("Unable to restore adoption session:", error.message))
+  .finally(schedulePetsLoad);

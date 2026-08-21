@@ -6,6 +6,31 @@
       "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
       "headers": [
         {
+          "source": "**",
+          "headers": [
+            {
+              "key": "Content-Security-Policy",
+              "value": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; script-src 'self' 'unsafe-inline' https://www.google.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https://animua-backend.onrender.com https://storage.googleapis.com https://firebasestorage.googleapis.com https://loremflickr.com; connect-src 'self' https://animua-backend.onrender.com https://animua-angelescity.firebaseapp.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebaseinstallations.googleapis.com https://firestore.googleapis.com https://storage.googleapis.com https://firebasestorage.googleapis.com https://www.google.com https://www.gstatic.com; frame-src 'self' https://animua-angelescity.firebaseapp.com https://www.google.com https://recaptcha.google.com; worker-src 'self' blob:; manifest-src 'self'; media-src 'self' https://animua-backend.onrender.com"
+            },
+            {
+              "key": "X-Frame-Options",
+              "value": "SAMEORIGIN"
+            },
+            {
+              "key": "X-Content-Type-Options",
+              "value": "nosniff"
+            },
+            {
+              "key": "Referrer-Policy",
+              "value": "strict-origin-when-cross-origin"
+            },
+            {
+              "key": "Permissions-Policy",
+              "value": "accelerometer=(), bluetooth=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), serial=(), usb=()"
+            }
+          ]
+        },
+        {
           "source": "**/*.{js,css,png,jpg,jpeg,gif,svg,webp,avif,woff,woff2}",
           "headers": [
             {
@@ -31,6 +56,31 @@
       "public": "admin-frontend/dist",
       "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
       "headers": [
+        {
+          "source": "**",
+          "headers": [
+            {
+              "key": "Content-Security-Policy",
+              "value": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdn.sheetjs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https://animua-backend.onrender.com https://storage.googleapis.com https://firebasestorage.googleapis.com; connect-src 'self' https://animua-backend.onrender.com https://cdn.jsdelivr.net; frame-src 'self'; worker-src 'self' blob:; manifest-src 'self'; media-src 'self' https://animua-backend.onrender.com"
+            },
+            {
+              "key": "X-Frame-Options",
+              "value": "SAMEORIGIN"
+            },
+            {
+              "key": "X-Content-Type-Options",
+              "value": "nosniff"
+            },
+            {
+              "key": "Referrer-Policy",
+              "value": "strict-origin-when-cross-origin"
+            },
+            {
+              "key": "Permissions-Policy",
+              "value": "accelerometer=(), bluetooth=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), serial=(), usb=()"
+            }
+          ]
+        },
         {
           "source": "/sw.js",
           "headers": [

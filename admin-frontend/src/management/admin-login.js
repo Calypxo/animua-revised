@@ -1,5 +1,6 @@
+import Swal from "sweetalert2";
 import { API_BASE_URL } from "../utils/api.js";
-import { clearUserSession } from "../utils/storage.js";
+import { clearUserSession, endUserSession, setUserSession } from "../utils/storage.js";
 import { normalizeRole } from "../auth/permissions.js";
  
 // ── HELPERS ────────────────────────────────────────────
@@ -61,6 +62,7 @@ async function handleAdminLogin(e) {
   try {
     const res = await fetch(`${API_BASE_URL}/auth/login`, {
       method: "POST",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: email.toLowerCase(), password }),
     });
@@ -79,9 +81,9 @@ async function handleAdminLogin(e) {
  
     const role     = normalizeRole(data.role);
     const fullName = data.fullName || "User";
-    const token    = data.token    || "";
  
  if (!MANAGEMENT_ROLES.includes(role)) {
+  await endUserSession();
   await Swal.fire({
     icon: "warning",
     title: "Access Denied",
@@ -93,12 +95,9 @@ async function handleAdminLogin(e) {
   return;
 }
  
-    localStorage.setItem("animua_token",       token);
-    localStorage.setItem("user_role",          role);
-    localStorage.setItem("user_name",          fullName);
-    localStorage.setItem("user_email",         email.toLowerCase());
-    localStorage.setItem("is_logged_in",       "true");
-    localStorage.setItem("show_welcome_toast", "true");
+    clearUserSession();
+    setUserSession({ role, fullName, email: data.email || email.toLowerCase() });
+    sessionStorage.setItem("show_welcome_toast", "true");
  
     await Swal.fire({
       icon: "success", title: "Welcome back", text: `Signed in as ${fullName}`,
@@ -147,41 +146,28 @@ async function handleAdminLogin(e) {
  
 // ── INIT ───────────────────────────────────────────────
 (async function init() {
-  const token = localStorage.getItem("animua_token");
-  const role  = normalizeRole(localStorage.getItem("user_role"));
+  clearUserSession();
 
-  if (
-    token &&
-    MANAGEMENT_ROLES.includes(role)
-  ) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/protected`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        cache: "no-store",
-      });
+  try {
+    const response = await fetch(`${API_BASE_URL}/protected`, {
+      method: "GET",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+    });
 
-      if (response.ok) {
-        const data = await response.json();
-        const serverRole = normalizeRole(data.user?.role);
+    if (response.ok) {
+      const data = await response.json();
+      const serverRole = normalizeRole(data.user?.role);
 
-        if (serverRole === role && MANAGEMENT_ROLES.includes(serverRole)) {
-          window.location.replace("/pages/dashboard.html");
-          return;
-        }
+      if (MANAGEMENT_ROLES.includes(serverRole)) {
+        setUserSession(data.user);
+        window.location.replace("/pages/dashboard.html");
+        return;
       }
-
-      if (response.status === 401 || response.status === 403) {
-        clearUserSession();
-      }
-    } catch (error) {
-      console.warn("[Admin Session Restore] Backend validation unavailable:", error.message);
     }
-  } else if (token || role) {
-    clearUserSession();
+  } catch (error) {
+    console.warn("[Admin Session Restore] Backend validation unavailable:", error.message);
   }
 
   document.getElementById("login-form")?.addEventListener("submit", handleAdminLogin);

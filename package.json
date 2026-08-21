@@ -8,6 +8,20 @@
     "dev:emulator": "node scripts/dev-emulator.mjs",
     "emulators": "firebase emulators:start --only auth,firestore,storage --project demo-animua",
     "emulators:seed": "npm --prefix backend run seed:emulator",
-    "backend:start": "node server.js"
+    "backend:start": "node server.js",
+    "check:functionality:config": "node scripts/checkFunctionalityEnvironment.mjs",
+    "test:integration": "cypress run --config baseUrl=http://127.0.0.1:5000 --spec \"cypress/e2e/integration/**/*.cy.js\"",
+    "test:integration:batch1": "cypress run --config baseUrl=http://127.0.0.1:5000 --spec \"cypress/e2e/integration/batch-1/**/*.cy.js\"",
+    "test:integration:batch2": "node scripts/runIntegrationBatch2.mjs",
+    "test:integration:batch3": "node scripts/runIntegrationBatch3.mjs",
+    "test:integration:batch4": "node scripts/runIntegrationBatch4.mjs",
+    "test:integration:batch5": "node scripts/runIntegrationBatch5.mjs",
+    "test:integration:open": "cypress open --e2e --config \"baseUrl=http://127.0.0.1:5000,specPattern=cypress/e2e/integration/**/*.cy.js\"",
+    "test:functionality": "cypress run",
+    "test:functionality:open": "cypress open",
+    "test:functionality:verify": "cypress verify"
+  },
+  "devDependencies": {
+    "cypress": "15.20.1"
   }
 }

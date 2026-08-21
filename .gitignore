@@ -3,6 +3,10 @@ node_modules/
 
 # env files
 .env
+.env.test
+.env.test.local
+.env.local
+.env.*.local
 
 # build folders
 dist/
@@ -16,6 +20,10 @@ build/
 __pycache__/
 *.py[cod]
 animua-sentiment-service/models/
+cypress.env.json
+cypress/downloads/
+cypress/screenshots/
+cypress/videos/
 
 # firebase admin key
 service-account-key.json

@@ -17,7 +17,7 @@ import {
   getInventoryItemById,
   updateInventoryItem,
   createInventoryItem,
-  addInventoryTransaction,
+  applyInventoryMovement,
   getItemTransactions,
   getLiveInventoryPredictions
 } from "../services/inventoryFirestore.service.js";
@@ -1099,27 +1099,23 @@ window.addEventListener("animua:stockDeduct", async (e) => {
 
     Object.assign(updatedLocal, rfClassify(updatedLocal));
 
-    await updateInventoryItem(itemId, {
-      currentStock: updatedLocal.currentStock,
-      recencyDays: updatedLocal.recencyDays,
-      stockoutFrequency: updatedLocal.stockoutFrequency,
-      monthlyTurnoverRatio: updatedLocal.monthlyTurnoverRatio,
-      ruleBasedMovement: updatedLocal.movement,
-      reorderRisk: updatedLocal.reorderRisk,
-      reorderPoint: updatedLocal.reorderPoint,
-      daysUntilStockout: updatedLocal.daysUntilStockout,
-      daysToRestock: updatedLocal.daysToRestock,
-      stockStatus: updatedLocal.stockStatus,
-    });
-
-    await addInventoryTransaction(itemId, {
-      type: "out",
+    await applyInventoryMovement(itemId, "out", {
       qty,
       date: today(),
       animal: animal || "",
       procedure: procedure || "General Use",
       notes: notes || "",
-      staff: getUserName()?.split(" ")[0] || "Staff",
+      predictionUpdates: {
+        recencyDays: updatedLocal.recencyDays,
+        stockoutFrequency: updatedLocal.stockoutFrequency,
+        monthlyTurnoverRatio: updatedLocal.monthlyTurnoverRatio,
+        ruleBasedMovement: updatedLocal.movement,
+        reorderRisk: updatedLocal.reorderRisk,
+        reorderPoint: updatedLocal.reorderPoint,
+        daysUntilStockout: updatedLocal.daysUntilStockout,
+        daysToRestock: updatedLocal.daysToRestock,
+        stockStatus: updatedLocal.stockStatus,
+      },
     });
 
     await loadInventory();
@@ -1314,10 +1310,10 @@ async function saveBatchStockIn() {
   try {
     for (const row of rows) {
       const id = row.querySelector(".batch-stock-item")?.value;
-      const qty = parseInt(row.querySelector(".batch-stock-qty")?.value, 10);
+      const qty = Number(row.querySelector(".batch-stock-qty")?.value);
       const rowNote = row.querySelector(".batch-stock-note")?.value.trim() || "";
 
-      if (!id || !qty || qty < 1) {
+      if (!id || !Number.isInteger(qty) || qty < 1) {
         throw new Error("Please complete all batch stock in rows.");
       }
 
@@ -1331,24 +1327,20 @@ async function saveBatchStockIn() {
 
       Object.assign(updatedLocal, rfClassify(updatedLocal));
 
-      await updateInventoryItem(id, {
-        currentStock: updatedLocal.currentStock,
-        ruleBasedMovement: updatedLocal.movement,
-        reorderRisk: updatedLocal.reorderRisk,
-        reorderPoint: updatedLocal.reorderPoint,
-        daysUntilStockout: updatedLocal.daysUntilStockout,
-        daysToRestock: updatedLocal.daysToRestock,
-        stockStatus: updatedLocal.stockStatus,
-      });
-
-      await addInventoryTransaction(id, {
-        type: "in",
+      await applyInventoryMovement(id, "in", {
         qty,
         date: batchDate,
         supplier,
         notes: rowNote || notes,
         batchId,
-        staff: getUserName()?.split(" ")[0] || "Staff",
+        predictionUpdates: {
+          ruleBasedMovement: updatedLocal.movement,
+          reorderRisk: updatedLocal.reorderRisk,
+          reorderPoint: updatedLocal.reorderPoint,
+          daysUntilStockout: updatedLocal.daysUntilStockout,
+          daysToRestock: updatedLocal.daysToRestock,
+          stockStatus: updatedLocal.stockStatus,
+        },
       });
     }
 
@@ -1382,11 +1374,11 @@ async function saveBatchStockOut() {
   try {
     for (const row of rows) {
       const id = row.querySelector(".batch-out-item")?.value;
-      const qty = parseInt(row.querySelector(".batch-out-qty")?.value, 10);
+      const qty = Number(row.querySelector(".batch-out-qty")?.value);
       const animal = row.querySelector(".batch-out-animal")?.value.trim() || "";
       const procedure = row.querySelector(".batch-out-procedure")?.value.trim() || "General Use";
 
-      if (!id || !qty || qty < 1) {
+      if (!id || !Number.isInteger(qty) || qty < 1) {
         throw new Error("Please complete all batch usage rows.");
       }
 
@@ -1420,28 +1412,24 @@ async function saveBatchStockOut() {
 
       Object.assign(updatedLocal, rfClassify(updatedLocal));
 
-      await updateInventoryItem(id, {
-        currentStock: updatedLocal.currentStock,
-        recencyDays: updatedLocal.recencyDays,
-        stockoutFrequency: updatedLocal.stockoutFrequency,
-        monthlyTurnoverRatio: updatedLocal.monthlyTurnoverRatio,
-        ruleBasedMovement: updatedLocal.movement,
-        reorderRisk: updatedLocal.reorderRisk,
-        reorderPoint: updatedLocal.reorderPoint,
-        daysUntilStockout: updatedLocal.daysUntilStockout,
-        daysToRestock: updatedLocal.daysToRestock,
-        stockStatus: updatedLocal.stockStatus,
-      });
-
-      await addInventoryTransaction(id, {
-        type: "out",
+      await applyInventoryMovement(id, "out", {
         qty,
         date: batchDate,
         animal,
         procedure,
         notes,
         batchId,
-        staff: getUserName()?.split(" ")[0] || "Staff",
+        predictionUpdates: {
+          recencyDays: updatedLocal.recencyDays,
+          stockoutFrequency: updatedLocal.stockoutFrequency,
+          monthlyTurnoverRatio: updatedLocal.monthlyTurnoverRatio,
+          ruleBasedMovement: updatedLocal.movement,
+          reorderRisk: updatedLocal.reorderRisk,
+          reorderPoint: updatedLocal.reorderPoint,
+          daysUntilStockout: updatedLocal.daysUntilStockout,
+          daysToRestock: updatedLocal.daysToRestock,
+          stockStatus: updatedLocal.stockStatus,
+        },
       });
     }
 
@@ -1493,14 +1481,14 @@ async function saveStockIn() {
 }
 
   const id = document.getElementById("fStockItemSelect").value;
-  const qty = parseInt(document.getElementById("fStockQty").value, 10);
+  const qty = Number(document.getElementById("fStockQty").value);
 
   if (!id) {
     document.getElementById("errStockItem").textContent = "Please select an item.";
     return;
   }
 
-  if (!qty || qty < 1) {
+  if (!Number.isInteger(qty) || qty < 1) {
     document.getElementById("errStockQty").textContent = "Enter a valid quantity.";
     return;
   }
@@ -1516,23 +1504,19 @@ async function saveStockIn() {
 
     Object.assign(updatedLocal, rfClassify(updatedLocal));
 
-    await updateInventoryItem(id, {
-      currentStock: updatedLocal.currentStock,
-      ruleBasedMovement: updatedLocal.movement,
-      reorderRisk: updatedLocal.reorderRisk,
-      reorderPoint: updatedLocal.reorderPoint,
-      daysUntilStockout: updatedLocal.daysUntilStockout,
-      daysToRestock: updatedLocal.daysToRestock,
-      stockStatus: updatedLocal.stockStatus,
-    });
-
-    await addInventoryTransaction(id, {
-      type: "in",
+    await applyInventoryMovement(id, "in", {
       qty,
       date: document.getElementById("fStockDate").value,
       supplier: document.getElementById("fStockSupplier").value.trim(),
       notes: document.getElementById("fStockNotes").value.trim(),
-      staff: getUserName()?.split(" ")[0] || "Staff",
+      predictionUpdates: {
+        ruleBasedMovement: updatedLocal.movement,
+        reorderRisk: updatedLocal.reorderRisk,
+        reorderPoint: updatedLocal.reorderPoint,
+        daysUntilStockout: updatedLocal.daysUntilStockout,
+        daysToRestock: updatedLocal.daysToRestock,
+        stockStatus: updatedLocal.stockStatus,
+      },
     });
 
     closeModal("stockInModalBackdrop");
@@ -1581,9 +1565,9 @@ async function saveStockOut() {
 }
 
   const id = document.getElementById("fOutItemId").value;
-  const qty = parseInt(document.getElementById("fOutQty").value, 10);
+  const qty = Number(document.getElementById("fOutQty").value);
 
-  if (!qty || qty < 1) {
+  if (!Number.isInteger(qty) || qty < 1) {
     document.getElementById("errOutQty").textContent = "Enter a valid quantity.";
     return;
   }
@@ -1621,27 +1605,23 @@ async function saveStockOut() {
 
     Object.assign(updatedLocal, rfClassify(updatedLocal));
 
-    await updateInventoryItem(id, {
-      currentStock: updatedLocal.currentStock,
-      recencyDays: updatedLocal.recencyDays,
-      stockoutFrequency: updatedLocal.stockoutFrequency,
-      monthlyTurnoverRatio: updatedLocal.monthlyTurnoverRatio,
-      ruleBasedMovement: updatedLocal.movement,
-      reorderRisk: updatedLocal.reorderRisk,
-      reorderPoint: updatedLocal.reorderPoint,
-      daysUntilStockout: updatedLocal.daysUntilStockout,
-      daysToRestock: updatedLocal.daysToRestock,
-      stockStatus: updatedLocal.stockStatus,
-    });
-
-    await addInventoryTransaction(id, {
-      type: "out",
+    await applyInventoryMovement(id, "out", {
       qty,
       date: document.getElementById("fOutDate").value,
       animal: document.getElementById("fOutAnimal").value.trim(),
       procedure: document.getElementById("fOutProcedure").value || "General Use",
       notes: document.getElementById("fOutNotes").value.trim(),
-      staff: getUserName()?.split(" ")[0] || "Staff",
+      predictionUpdates: {
+        recencyDays: updatedLocal.recencyDays,
+        stockoutFrequency: updatedLocal.stockoutFrequency,
+        monthlyTurnoverRatio: updatedLocal.monthlyTurnoverRatio,
+        ruleBasedMovement: updatedLocal.movement,
+        reorderRisk: updatedLocal.reorderRisk,
+        reorderPoint: updatedLocal.reorderPoint,
+        daysUntilStockout: updatedLocal.daysUntilStockout,
+        daysToRestock: updatedLocal.daysToRestock,
+        stockStatus: updatedLocal.stockStatus,
+      },
     });
 
     closeModal("stockOutModalBackdrop");

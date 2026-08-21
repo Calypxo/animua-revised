@@ -1,6 +1,7 @@
 const crypto = require("crypto");
 const { admin, db } = require("../config/firebase");
 const { buildShelterLabel } = require("../utils/animalIdentity");
+const { getSignedReadUrl } = require("../services/storageUrlService");
 const { createManagementNotification } = require("../services/notificationService");
 const {
   scoreMatches,
@@ -125,6 +126,18 @@ exports.matchPets = async (req, res) => {
     const snap = await db.collection("animals").get();
     let animals = snap.docs.map((doc) => { const data = doc.data(); const name = buildShelterLabel(data, doc.id); return { id: doc.id, ...data, name, displayLabel: name, shelterLabel: name, photoUrl: data.photoURL || data.photoUrl || "", age: data.ageEstimate || data.age || "" }; });
     animals = applyFilters(animals, input.filters);
+    animals = await Promise.all(animals.map(async (animal) => {
+      const photoURL = await getSignedReadUrl({
+        path: animal.photoPath,
+        legacyUrl: animal.photoURL || animal.photoUrl || animal.imageUrl || "",
+        expectedPrefix: `animals/${animal.id}`,
+      });
+      const serialized = { ...animal, photoURL, photoUrl: photoURL };
+      delete serialized.photoPath;
+      delete serialized.imageUrl;
+      delete serialized.profileImageUrl;
+      return serialized;
+    }));
     const scored = animals.length ? await scoreMatches(input.scoringPreferences, animals, 5) : { matches: [] };
     const saved = await db.runTransaction(async (tx) => {
       const current = await context(req.user.id, tx);
@@ -190,7 +203,7 @@ exports.replaceAdminQuestions = async (req, res) => {
       version,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       updatedBy,
-    });
+    }, { merge: true });
     batch.set(SETTINGS, {
       quizVersion: version,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),

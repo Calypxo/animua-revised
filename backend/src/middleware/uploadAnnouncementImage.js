@@ -1,12 +1,14 @@
 const multer = require("multer");
-
-const allowedImageTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
+const {
+  MAX_IMAGE_SIZE_BYTES,
+  IMAGE_EXTENSION_BY_MIME_TYPE,
+} = require("../utils/imageUploadPolicy");
 
 const announcementImageUpload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024 },
+  limits: { fileSize: MAX_IMAGE_SIZE_BYTES },
   fileFilter: (req, file, cb) => {
-    if (!allowedImageTypes.has(file.mimetype)) {
+    if (!IMAGE_EXTENSION_BY_MIME_TYPE[file.mimetype]) {
       return cb(new Error("Only JPG, PNG, and WebP images are allowed."));
     }
     return cb(null, true);

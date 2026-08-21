@@ -1,10 +1,22 @@
-require("dotenv").config();
+const path = require("path");
+
+const requestedEnvironmentFile = process.env.ANIMUA_ENV_FILE;
+const environmentFile = requestedEnvironmentFile || ".env";
+const environmentLoadResult = require("dotenv").config({
+  path: path.resolve(__dirname, environmentFile),
+});
+
+if (requestedEnvironmentFile && environmentLoadResult.error) {
+  throw new Error(
+    `Unable to load the requested backend environment file: ${environmentFile}`
+  );
+}
 
 const express = require("express");
 const cors = require("cors");
-const path = require("path");
 
 const app = express();
+app.disable("x-powered-by");
 
 const authRoutes = require("./src/routes/authRoutes");
 const userRoutes = require("./src/routes/userRoutes");
@@ -20,42 +32,23 @@ const matchRoutes = require("./src/routes/matchRoutes");
 const chatbotRoutes = require("./src/routes/chatbotRoutes");
 const surrenderRoutes = require("./src/routes/surrenderRoutes");
 const { reconcileRequestDeadlines } = require("./src/services/requestDeadlineService");
+const {
+  startAutomaticDeadlineReconciliation,
+} = require("./src/services/startupDeadlineReconciliation");
 const auditRoutes = require("./src/routes/auditRoutes");
 const reportRoutes = require("./src/routes/reportRoutes");
 const notificationRoutes = require("./src/routes/notificationRoutes");
+const inventoryRoutes = require("./src/routes/inventoryRoutes");
 const { getPublicEvents } = require("./src/controllers/publicController");
 
 const authenticateToken = require("./src/middleware/authMiddleware");
 const authorizeRole = require("./src/middleware/roleMiddleware");
 const { trainInventoryModel } = require("./src/services/predictiveService");
 const auditMutationMiddleware = require("./src/middleware/auditMutationMiddleware");
+const protectCookieAuthenticatedMutation = require("./src/middleware/csrfProtection");
+const { isAllowedBrowserOrigin } = require("./src/config/browserOrigins");
 
 // ─── CORS ─────────────────────────────────────────────────────────────────────
-const allowedOrigins = [
-  "https://animua-angelescity.web.app",
-  "https://animua-angelescity.firebaseapp.com",
-  "https://animua-admin.web.app",
-  "https://animua-admin.firebaseapp.com",
-
-  "http://localhost:5173",
-  "http://127.0.0.1:5173",
-
-  "http://localhost:5174",
-  "http://127.0.0.1:5174",
-
-  "http://localhost:5175",
-  "http://127.0.0.1:5175",
-
-  "http://localhost:5176",
-  "http://127.0.0.1:5176",
-
-  "http://localhost:5177",
-  "http://127.0.0.1:5177",
-
-  "http://localhost:5179",
-  "http://127.0.0.1:5179",
-];
-
 const corsOptions = {
   origin: function (origin, callback) {
     // Allow requests with no origin, like Postman, mobile apps, or server-to-server calls
@@ -63,15 +56,7 @@ const corsOptions = {
       return callback(null, true);
     }
 
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-
-    // Allow localhost / 127.0.0.1 on any port during development
-    if (
-      origin.startsWith("http://localhost:") ||
-      origin.startsWith("http://127.0.0.1:")
-    ) {
+    if (isAllowedBrowserOrigin(origin)) {
       return callback(null, true);
     }
 
@@ -86,6 +71,7 @@ app.use(cors(corsOptions));
 app.options(/.*/, cors(corsOptions));
 
 app.use(express.json({ limit: "2mb" }));
+app.use("/api", protectCookieAuthenticatedMutation);
 app.use(
   "/images",
   express.static(path.join(__dirname, "src/assets"), {
@@ -112,6 +98,7 @@ app.use("/api", matchRoutes);
 app.use("/api/audit", auditRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/inventory", inventoryRoutes);
 
 // Backward-compatible alias for older deployed public bundles.
 app.get("/api/events", getPublicEvents);
@@ -155,15 +142,11 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`ANIMUA Server active on port ${PORT}`);
 
-  reconcileRequestDeadlines().catch((error) => {
-    console.error("Initial request deadline check failed:", error.message);
+  startAutomaticDeadlineReconciliation({
+    env: process.env,
+    reconcileRequestDeadlines,
+    logger: console,
   });
-  const deadlineTimer = setInterval(() => {
-    reconcileRequestDeadlines().catch((error) => {
-      console.error("Scheduled request deadline check failed:", error.message);
-    });
-  }, 15 * 60 * 1000);
-  deadlineTimer.unref();
 
   trainInventoryModel()
     .then((summary) => {

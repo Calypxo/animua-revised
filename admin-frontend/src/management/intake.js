@@ -486,10 +486,10 @@ function openApprovedSurrenderIntakeModal() {
 
   document.getElementById("intakeModalTitle").textContent = "New Intake from Approved Surrender";
   document.getElementById("intakeModalSubtitle").textContent =
-    "Review the arrival details once. Saving will create the profile immediately.";
+    "Review the arrival details. Saving will create the linked intake record.";
   document.getElementById("btnSaveDraft").hidden = true;
   document.getElementById("btnSubmitIntake").innerHTML =
-    '<i class="bi bi-person-vcard-fill"></i> Complete Intake & Start Profiling';
+    '<i class="bi bi-clipboard2-plus-fill"></i> Start Intake';
 
   document.getElementById("intakeForm").reset();
   document.getElementById("fIntakeId").value = "";
@@ -790,7 +790,7 @@ async function saveIntake(asDraft = false) {
       approvedSurrenderContext = null;
 
       if (!result?.animalProfileId) {
-        showToast("success", "Intake created and surrender request converted.");
+        showToast("success", "Intake created and linked to the surrender request.");
       }
     }
 
