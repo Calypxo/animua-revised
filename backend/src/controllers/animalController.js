@@ -351,6 +351,7 @@ exports.uploadAnimalProfileImage = async (req, res) => {
     await file.save(req.file.buffer, {
       metadata: {
         contentType: req.file.mimetype,
+        cacheControl: "public, max-age=31536000",
       },
       resumable: false,
     });

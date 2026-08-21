@@ -1,7 +1,7 @@
 .submissions-page {
   --burgundy: #780116;
   --submission-gold: var(--animua-gold, #F1C045);
-  --submission-gold-dark: #9a6f12;
+  --submission-gold-dark: #76520a;
   --submission-gold-soft: #fff7df;
   background:
     radial-gradient(circle at 82% 16%, rgba(226, 218, 205, 0.44), transparent 19rem),
@@ -494,15 +494,15 @@
   cursor: pointer;
 }
 
-.submission-sort-menu button[aria-selected="true"] {
+.submission-sort-menu button[aria-pressed="true"] {
   background: transparent;
   color: #5b2a22;
 }
 
 .submission-sort-menu button:hover,
 .submission-sort-menu button:focus-visible,
-.submission-sort-menu button[aria-selected="true"]:hover,
-.submission-sort-menu button[aria-selected="true"]:focus-visible {
+.submission-sort-menu button[aria-pressed="true"]:hover,
+.submission-sort-menu button[aria-pressed="true"]:focus-visible {
   outline: 0;
   background: #f3d6d0;
   color: var(--burgundy);
@@ -641,7 +641,7 @@
 .submission-type.surrender {
   border-color: #eadfca;
   background: #f9f3e8;
-  color: #a96f13;
+  color: #76520a;
   box-shadow: none;
 }
 
@@ -787,6 +787,12 @@
   color: rgba(43, 23, 25, 0.78);
   font-size: 0.78rem;
   font-weight: 600;
+}
+
+.submissions-hero-copy,
+.submission-next-card > div,
+.submission-card > div {
+  min-width: 0;
 }
 
 .submission-next-actions {
@@ -2576,12 +2582,38 @@
 
 @media (max-width: 680px) {
   .submissions-main {
-    padding-top: 34px;
+    padding-top: 86px;
+  }
+
+  body.home-page.submissions-page .container,
+  body.home-page.submissions-page .submissions-hero,
+  body.home-page.submissions-page .submissions-list,
+  body.home-page.submissions-page .submission-next-card {
+    width: min(100% - 24px, 1040px) !important;
+    max-width: calc(100vw - 24px) !important;
+    padding-inline: 0 !important;
+  }
+
+  .submissions-hero h1,
+  .submissions-hero p,
+  .submission-next-card h2,
+  .submission-next-card p {
+    max-width: 100%;
+    overflow-wrap: normal;
+    word-break: normal;
+    white-space: normal;
+  }
+
+  .submission-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .submission-tab {
-    min-width: calc(50% - 9px);
-    flex: 1;
+    min-width: 0;
+    width: 100%;
+    padding-inline: 6px;
+    font-size: 0.7rem;
   }
 
   .submission-card {
@@ -2619,11 +2651,25 @@
 
   .submission-next-card {
     grid-template-columns: 1fr;
+    padding: 22px 20px !important;
     text-align: center;
   }
 
   .submission-next-icon {
     margin: 0 auto;
+  }
+
+  .submission-next-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .submission-primary-link,
+  .submission-secondary-link {
+    width: 100%;
+    min-width: 0;
   }
 
   .application-detail-header {
@@ -2822,6 +2868,75 @@ body.home-page.submissions-page .user-dropdown {
 
 body.home-page.submissions-page .user-dropdown.hidden {
   display: none !important;
+}
+
+@media (max-width: 900px) {
+  body.home-page.submissions-page .header,
+  body.home-page.submissions-page .main-nav-wrap {
+    min-height: 62px !important;
+  }
+
+  body.home-page.submissions-page .nav-shell {
+    position: relative !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 62px !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    grid-template-rows: auto !important;
+    gap: 10px !important;
+    overflow: visible !important;
+    padding-inline: 12px !important;
+  }
+
+  body.home-page.submissions-page .logo {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    min-width: 0 !important;
+  }
+
+  body.home-page.submissions-page .nav-actions {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    justify-self: end !important;
+  }
+
+  body.home-page.submissions-page .navbar {
+    position: absolute !important;
+    top: calc(100% + 8px) !important;
+    right: 10px !important;
+    left: auto !important;
+    z-index: 1250 !important;
+    width: min(300px, calc(100vw - 24px)) !important;
+    max-width: calc(100vw - 24px) !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    border-color: transparent !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: none !important;
+  }
+
+  body.home-page.submissions-page .navbar.show {
+    max-height: calc(100dvh - 86px) !important;
+    overflow-y: auto !important;
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+    border-color: rgba(35, 45, 53, 0.08) !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  body.home-page.submissions-page .menu-toggle {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
+    flex: 0 0 44px !important;
+    display: inline-flex !important;
+  }
 }
 
 html:has(body.submissions-page),
@@ -3133,4 +3248,23 @@ body.submissions-page .compatibility-matches li{grid-template-columns:24px 34px 
 
 body.home-page.submissions-page .submission-next-card {
   margin: 64px auto 0 !important;
+}
+
+body.submissions-page .notification-popup-title {
+  margin: 0;
+  color: var(--animua-red-dark);
+  font-family: "League Spartan", "Inter", sans-serif;
+  font-size: 1.26rem;
+  line-height: 1;
+}
+
+body.home-page.submissions-page > .footer .footer-links h3 {
+  margin: 0 0 10px;
+  color: #F1C045;
+  font-family: "Inter", sans-serif;
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  line-height: 1;
+  text-transform: uppercase;
 }

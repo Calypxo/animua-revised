@@ -7,6 +7,7 @@ import {
 const DOG_IMAGE = new URL("../../assets/images/dog.jpg", import.meta.url).href;
 const CAT_IMAGE = new URL("../../assets/images/cat.jpg", import.meta.url).href;
 const SURRENDER_IMAGE = new URL("../../assets/images/surrender.jpg", import.meta.url).href;
+const OPTIMIZED_SUBMISSION_IMAGE_WIDTH = 380;
 
 const submissionsList = document.getElementById("submissionsList");
 const filterTabs = document.querySelectorAll(".submission-tab");
@@ -133,6 +134,20 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
+function optimizedSubmissionImageUrl(imageUrl) {
+  const value = String(imageUrl || "").trim();
+  if (!value || value.startsWith("data:") || value.startsWith("blob:")) return value;
+  if (!/^https?:\/\//i.test(value)) return value;
+
+  return `${API_BASE_URL}/public/optimized-image?width=${OPTIMIZED_SUBMISSION_IMAGE_WIDTH}&src=${encodeURIComponent(value)}`;
+}
+
+function submissionImageSources(imageUrl, fallbackImage) {
+  const original = String(imageUrl || "").trim() || fallbackImage;
+  const optimized = optimizedSubmissionImageUrl(original) || original;
+  return { original, optimized };
+}
+
 function normalizeAge(age) {
   if (!age) return "";
   const text = String(age).trim();
@@ -195,6 +210,9 @@ function normalizeAdoption(item) {
     item.selected_pet?.photoUrl ||
     "";
 
+  const fallbackImage = String(species).toLowerCase().includes("cat") ? CAT_IMAGE : DOG_IMAGE;
+  const imageSources = submissionImageSources(image, fallbackImage);
+
   return {
     id: item.id || item.applicationId,
     type: "adoption",
@@ -205,7 +223,8 @@ function normalizeAdoption(item) {
     submittedAt: item.submittedAt || item.updatedAt,
     reference: item.applicationId || item.id || "ADP",
     status: cleanStatus(item.status, "adoption"),
-    image: image || (String(species).toLowerCase().includes("cat") ? CAT_IMAGE : DOG_IMAGE),
+    image: imageSources.optimized,
+    fallbackImage: imageSources.original,
     details: item,
   };
 }
@@ -214,6 +233,9 @@ function normalizeSurrender(item) {
   const pet = item.pet || {};
   const species = pet.species || "";
   const image = collectSurrenderPhotos(item)[0] || "";
+
+  const fallbackImage = String(species).toLowerCase().includes("cat") ? CAT_IMAGE : SURRENDER_IMAGE;
+  const imageSources = submissionImageSources(image, fallbackImage);
 
   return {
     id: item.id || item.requestId,
@@ -225,7 +247,8 @@ function normalizeSurrender(item) {
     submittedAt: item.submittedAt || item.createdAt || item.updatedAt,
     reference: item.id || item.requestId || "SUR",
     status: cleanStatus(item.status, "surrender"),
-    image: image || (String(species).toLowerCase().includes("cat") ? CAT_IMAGE : SURRENDER_IMAGE),
+    image: imageSources.optimized,
+    fallbackImage: imageSources.original,
     details: item,
   };
 }
@@ -292,13 +315,14 @@ function updateTabs() {
     const filter = tab.dataset.filter;
     const label = filter === "all" ? "All" : filter.charAt(0).toUpperCase() + filter.slice(1);
     const icon = filter === "all"
-      ? "fa-solid fa-border-all"
+      ? "fa-solid fa-sliders"
       : filter === "adoption"
-        ? "fa-solid fa-house-chimney-user"
+        ? "fa-solid fa-house-chimney"
         : "fa-solid fa-hand-holding-heart";
 
     tab.innerHTML = `<i class="${icon}" aria-hidden="true"></i><span>${label} (${counts[filter] || 0})</span>`;
     tab.classList.toggle("active", filter === currentFilter);
+    tab.setAttribute("aria-pressed", String(filter === currentFilter));
   });
 }
 
@@ -337,7 +361,7 @@ function renderSubmissions() {
   }
 
   submissionsList.innerHTML = `
-    ${pageItems.map(renderSubmissionCard).join("")}
+    ${pageItems.map((item, index) => renderSubmissionCard(item, index)).join("")}
     ${renderSubmissionPagination(visibleItems.length, totalPages)}
   `;
 
@@ -385,7 +409,7 @@ function renderSubmissionPagination(totalItems, totalPages) {
   `;
 }
 
-function renderSubmissionCard(item) {
+function renderSubmissionCard(item, index = 0) {
   const typeLabel = item.type === "adoption" ? "Adoption" : "Surrender";
   const typeIcon = item.type === "adoption" ? "fa-regular fa-heart" : "fa-regular fa-hand";
   const status = cleanStatus(item.status, item.type);
@@ -394,10 +418,14 @@ function renderSubmissionCard(item) {
   const safeReference = escapeHtml(item.reference);
   const safeId = escapeHtml(item.id);
   const safeImage = escapeHtml(item.image);
+  const safeFallbackImage = escapeHtml(item.fallbackImage || item.image);
+  const isPriorityImage = index === 0 && currentPage === 1;
+  const imageLoading = isPriorityImage ? "eager" : "lazy";
+  const imagePriority = isPriorityImage ? 'fetchpriority="high"' : 'fetchpriority="low"';
 
   return `
     <article class="submission-card">
-      <img class="submission-photo" src="${safeImage}" alt="${safeName}" width="190" height="112" loading="lazy" decoding="async">
+      <img class="submission-photo" src="${safeImage}" data-fallback-src="${safeFallbackImage}" alt="${safeName}" width="190" height="112" loading="${imageLoading}" decoding="async" ${imagePriority}>
       <div class="submission-info">
         <h2 class="submission-name">${safeName}</h2>
         <p class="submission-meta">${metaParts.map((part, index) => `${index ? '<span class="submission-dot">•</span>' : ""}<span>${escapeHtml(part)}</span>`).join("")}</p>
@@ -413,17 +441,28 @@ function renderSubmissionCard(item) {
       <div class="submission-badges">
         <span class="submission-type ${item.type}"><i class="${typeIcon}" aria-hidden="true"></i>${typeLabel}</span>
         <span class="submission-status ${statusClass(status)}">
-          <i class="${iconForStatus(status)}"></i>
+          <i class="${iconForStatus(status)}" aria-hidden="true"></i>
           ${escapeHtml(status)}
         </span>
       </div>
       <button type="button" class="submission-details-btn" data-submission-id="${safeId}">
         <span>View Details</span>
-        <i class="fa-solid fa-arrow-right"></i>
+        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
       </button>
     </article>
   `;
 }
+
+submissionsList?.addEventListener("error", (event) => {
+  const image = event.target;
+  if (!(image instanceof HTMLImageElement) || !image.classList.contains("submission-photo")) return;
+
+  const fallbackSrc = image.dataset.fallbackSrc || "";
+  if (!fallbackSrc || image.src === fallbackSrc) return;
+
+  image.dataset.fallbackSrc = "";
+  image.src = fallbackSrc;
+}, true);
 
 function valueOrFallback(value, fallback = "Not provided") {
   const text = String(value ?? "").trim();
@@ -1583,7 +1622,7 @@ function syncSortMenuState() {
   submissionSortMenu?.querySelectorAll("[data-sort-value]").forEach((button) => {
     const isActive = button.dataset.sortValue === currentSort;
     button.classList.toggle("active", isActive);
-    button.setAttribute("aria-selected", String(isActive));
+    button.setAttribute("aria-pressed", String(isActive));
 
     if (isActive && submissionSortLabel) {
       submissionSortLabel.textContent = button.textContent.trim();

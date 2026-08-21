@@ -1,4 +1,5 @@
 const { db } = require("../config/firebase");
+const sharp = require("sharp");
 const { analyzeSurrenderReason } = require("../services/surrenderNlpService");
 const {
   buildApprovalDeadlineFields,
@@ -19,6 +20,7 @@ const CLOSED_CAPACITY_MESSAGE =
 
 const MAX_SURRENDER_PHOTO_DATA_URL_LENGTH = 900000;
 const MAX_ID_PHOTO_DATA_URL_LENGTH = 560000;
+const SURRENDER_LIST_THUMB_WIDTH = 380;
 
 const ANGELES_BARANGAYS = [
   "Agapito del Rosario", "Amsic", "Anunas", "Balibago", "Capaya", "Claro M. Recto",
@@ -48,6 +50,72 @@ function normalizeImageDocument(document = {}) {
     type: String(document.type || "").trim().slice(0, 80),
     size: Number(document.size || 0),
     dataUrl,
+  };
+}
+
+function parseImageDataUrl(dataUrl = "") {
+  const match = String(dataUrl).match(/^data:(image\/(?:png|jpe?g|webp));base64,([A-Za-z0-9+/=]+)$/i);
+  if (!match) return null;
+  return {
+    mimeType: match[1],
+    buffer: Buffer.from(match[2], "base64"),
+  };
+}
+
+async function createSurrenderListThumbnail(dataUrl = "") {
+  const parsed = parseImageDataUrl(dataUrl);
+  if (!parsed) return "";
+
+  try {
+    const output = await sharp(parsed.buffer, { failOn: "none" })
+      .rotate()
+      .resize({ width: SURRENDER_LIST_THUMB_WIDTH, withoutEnlargement: true })
+      .webp({ quality: 72, effort: 4 })
+      .toBuffer();
+
+    return `data:image/webp;base64,${output.toString("base64")}`;
+  } catch (error) {
+    console.error("[createSurrenderListThumbnail]", error.message);
+    return "";
+  }
+}
+
+async function summarizeMySurrenderRequest(request = {}) {
+  const owner = request.owner || {};
+  const pet = request.pet || {};
+  const photoDataUrl = await createSurrenderListThumbnail(pet.photoDataUrl);
+
+  return {
+    ...request,
+    owner: {
+      name: owner.name || "",
+      email: owner.email || "",
+      contact: owner.contact || "",
+      address: owner.address || "",
+      barangay: owner.barangay || "",
+      city: owner.city || "",
+      isAngelesResident: Boolean(owner.isAngelesResident),
+    },
+    pet: {
+      name: pet.name || "",
+      species: pet.species || "",
+      breed: pet.breed || "",
+      age: pet.age || "",
+      sex: pet.sex || "",
+      colorMarkings: pet.colorMarkings || "",
+      status: Array.isArray(pet.status) ? pet.status : [],
+      vaccinationHistory: pet.vaccinationHistory || "",
+      photoName: pet.photoName || "",
+      photoType: photoDataUrl ? "image/webp" : pet.photoType || "",
+      photoDataUrl,
+      photoURL: pet.photoURL || "",
+      imageUrl: pet.imageUrl || "",
+      imageURL: pet.imageURL || "",
+      photoUrl: pet.photoUrl || "",
+      profileImageUrl: pet.profileImageUrl || "",
+      photos: Array.isArray(pet.photos) ? pet.photos : [],
+      photoUrls: Array.isArray(pet.photoUrls) ? pet.photoUrls : [],
+    },
   };
 }
 
@@ -330,7 +398,7 @@ async function getMySurrenderRequests(req, res) {
       .get();
 
     const requests = snapshot.docs
-      .map((doc) => doc.data())
+      .map((doc) => summarizeMySurrenderRequest(doc.data()))
       .sort((a, b) => {
         const aTime = new Date(a.createdAt || a.submittedAt || 0).getTime();
         const bTime = new Date(b.createdAt || b.submittedAt || 0).getTime();

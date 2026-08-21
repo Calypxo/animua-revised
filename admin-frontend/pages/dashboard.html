@@ -45,9 +45,9 @@
         </div>
       </div>
       <div class="topbar-right">
-        <button class="icon-btn notif-btn" type="button" title="Notifications" id="notifToggle">
-          <i class="bi bi-bell-fill"></i>
-          <span class="notif-dot" id="notifDot"></span>
+        <button class="icon-btn notif-btn" type="button" title="Notifications" id="notifToggle" aria-label="Notifications">
+          <i class="bi bi-bell-fill" aria-hidden="true"></i>
+          <span class="notif-dot" id="notifDot" aria-hidden="true"></span>
         </button>
         <div class="user-chip">
           <div class="user-avatar" id="topbar-initials">AS</div>
@@ -61,7 +61,7 @@
     </header>
 
     <!-- Page body -->
-    <div class="page-body">
+    <main class="page-body" id="mainContent">
 
       <div id="pageHeaderMount"></div>
 
@@ -88,7 +88,7 @@
             <div class="kpi-icon"><i class="bi bi-heart-pulse-fill"></i></div>
             <span class="kpi-pill">Live</span>
           </div>
-          <h2 id="totalPetsCount" class="kpi-counter" data-target="0">0</h2>
+          <div id="totalPetsCount" class="kpi-counter" data-target="0">0</div>
           <p>Total Animals</p>
           <div class="kpi-trend"><i class="bi bi-arrow-up-short"></i><span id="totalTrend">—</span></div>
         </article>
@@ -98,7 +98,7 @@
             <div class="kpi-icon kpi-amber"><i class="bi bi-box-arrow-in-down"></i></div>
             <span class="kpi-pill">Queue</span>
           </div>
-          <h2 id="intakeCount" class="kpi-counter" data-target="0">0</h2>
+          <div id="intakeCount" class="kpi-counter" data-target="0">0</div>
           <p>In Intake</p>
           <div class="kpi-trend kpi-trend-amber"><i class="bi bi-clock-history"></i><span id="intakeTrend">—</span></div>
         </article>
@@ -108,14 +108,14 @@
             <div class="kpi-icon kpi-blue"><i class="bi bi-shield-plus"></i></div>
             <span class="kpi-pill">Care</span>
           </div>
-          <h2 id="quarantineCount" class="kpi-counter" data-target="0">0</h2>
+          <div id="quarantineCount" class="kpi-counter" data-target="0">0</div>
           <p>Quarantine</p>
           <div class="kpi-trend kpi-trend-blue"><i class="bi bi-clipboard2-pulse"></i><span id="quarantineTrend">—</span></div>
         </article>
 
         <article class="kpi-card" id="kpi-profiling">
           <div class="kpi-head"><div class="kpi-icon kpi-amber"><i class="bi bi-clipboard2-check"></i></div><span class="kpi-pill">Profile</span></div>
-          <h2 id="profilingCount" class="kpi-counter">0</h2>
+          <div id="profilingCount" class="kpi-counter">0</div>
           <p>Profiling</p>
           <div class="kpi-trend kpi-trend-amber"><span id="profilingTrend">—</span></div>
         </article>
@@ -125,7 +125,7 @@
             <div class="kpi-icon kpi-green"><i class="bi bi-house-heart-fill"></i></div>
             <span class="kpi-pill">Ready</span>
           </div>
-          <h2 id="readyCount" class="kpi-counter" data-target="0">0</h2>
+          <div id="readyCount" class="kpi-counter" data-target="0">0</div>
           <p>Ready for Adoption</p>
           <div class="kpi-trend kpi-trend-green"><i class="bi bi-arrow-up-short"></i><span id="readyTrend">—</span></div>
         </article>
@@ -135,14 +135,14 @@
             <div class="kpi-icon kpi-rose"><i class="bi bi-balloon-heart-fill"></i></div>
             <span class="kpi-pill">This Month</span>
           </div>
-          <h2 id="adoptedCount" class="kpi-counter" data-target="0">0</h2>
+          <div id="adoptedCount" class="kpi-counter" data-target="0">0</div>
           <p>Adopted</p>
           <div class="kpi-trend kpi-trend-rose"><i class="bi bi-arrow-up-short"></i><span id="adoptedTrend">—</span></div>
         </article>
 
         <article class="kpi-card" id="kpi-archived">
           <div class="kpi-head"><div class="kpi-icon"><i class="bi bi-archive-fill"></i></div><span class="kpi-pill">Records</span></div>
-          <h2 id="archivedCount" class="kpi-counter">0</h2>
+          <div id="archivedCount" class="kpi-counter">0</div>
           <p>Archived</p>
           <div class="kpi-trend"><span id="archivedTrend">—</span></div>
         </article>
@@ -157,7 +157,7 @@
           <div class="panel h-100">
             <div class="panel-head">
               <div>
-                <h3>Intake vs Adoptions</h3>
+                <h2>Intake vs Adoptions</h2>
                 <p>Monthly comparison — current year</p>
               </div>
               <div class="d-flex gap-2 align-items-center flex-wrap">
@@ -190,7 +190,7 @@
           <div class="panel h-100">
             <div class="panel-head">
               <div>
-                <h3>Species Breakdown</h3>
+                <h2>Species Breakdown</h2>
                 <p>Current shelter population</p>
               </div>
             </div>
@@ -211,10 +211,11 @@
           <div class="panel">
             <div class="panel-head">
               <div>
-                <h3>Recent Activity</h3>
+                <h2>Recent Activity</h2>
                 <p>Latest shelter events and updates</p>
               </div>
               <div class="d-flex gap-2">
+                <label class="visually-hidden" for="activityFilter">Activity type</label>
                 <select class="filter-select" id="activityFilter">
                   <option value="all">All types</option>
                   <option value="intake">Intake</option>
@@ -222,7 +223,7 @@
                   <option value="medical">Medical</option>
                   <option value="transfer">Transfer</option>
                 </select>
-                <a href="/pages/auditTrail.html" class="text-btn">View all →</a>
+                <a href="/pages/auditTrail.html" class="text-btn" aria-label="View all recent activity">View all →</a>
               </div>
             </div>
             <div class="table-responsive">
@@ -253,7 +254,7 @@
             <div class="panel">
               <div class="panel-head">
                 <div>
-                  <h3>Alerts</h3>
+                  <h2>Alerts</h2>
                   <p>Requires attention</p>
                 </div>
                 <span class="alert-badge" id="alertCount">0</span>
@@ -280,10 +281,10 @@
             <div class="panel">
               <div class="panel-head">
                 <div>
-                  <h3>Pending Applications</h3>
+                  <h2>Pending Applications</h2>
                   <p>Adoption applications awaiting review</p>
                 </div>
-                <a href="/pages/adoptionApplications.html" class="text-btn">See all →</a>
+                <a href="/pages/adoptionApplications.html" class="text-btn" aria-label="See all pending applications">See all →</a>
               </div>
               <div class="compat-list" id="compatList">
                 <p class="text-muted mb-0">Loading live applications…</p>
@@ -303,7 +304,7 @@
           <div class="panel h-100">
             <div class="panel-head">
               <div>
-                <h3>Length of Stay</h3>
+                <h2>Length of Stay</h2>
                 <p>Days in shelter distribution</p>
               </div>
             </div>
@@ -319,7 +320,7 @@
           <div class="panel h-100">
             <div class="panel-head">
               <div>
-                <h3>Quick Actions</h3>
+                <h2>Quick Actions</h2>
                 <p>Shortcuts for common tasks</p>
               </div>
             </div>
@@ -357,10 +358,10 @@
           <div class="panel h-100">
             <div class="panel-head">
               <div>
-                <h3>Inventory Attention</h3>
+                <h2>Inventory Attention</h2>
                 <p>Low and critical stock</p>
               </div>
-              <button class="dot-btn"><i class="bi bi-three-dots"></i></button>
+              <button class="dot-btn" type="button" aria-label="Inventory options"><i class="bi bi-three-dots" aria-hidden="true"></i></button>
             </div>
             <div class="sched-stack" id="schedStack">
               <p class="text-muted mb-0">Loading live inventory…</p>
@@ -376,12 +377,13 @@
           <div class="panel">
             <div class="panel-head">
               <div>
-                <h3>Recent Animals</h3>
+                <h2>Recent Animals</h2>
                 <p>Latest entries from the shelter system</p>
               </div>
               <div class="d-flex gap-2 align-items-center">
+                <label class="visually-hidden" for="animalSearch">Search recent animals</label>
                 <input type="text" class="filter-select" id="animalSearch" placeholder="Search animals…" style="width:180px" />
-                <a href="/pages/animalProfiling.html" class="text-btn">View all →</a>
+                <a href="/pages/animalProfiling.html" class="text-btn" aria-label="View all recent animals">View all →</a>
               </div>
             </div>
             <div class="table-responsive">
@@ -408,7 +410,7 @@
         </div>
       </div>
 
-    </div><!-- /page-body -->
+    </main><!-- /page-body -->
   </div><!-- /stage -->
 </div><!-- /shell -->
 

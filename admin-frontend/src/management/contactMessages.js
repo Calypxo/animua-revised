@@ -245,7 +245,6 @@ function renderMessageList() {
         <button
           class="cm-message-item${active ? " active" : ""}"
           type="button"
-          role="listitem"
           data-user-key="${escapeHtml(user.key)}"
           aria-pressed="${String(active)}"
           aria-label="Open all contact messages from ${escapeHtml(user.fullName || "unknown user")}"

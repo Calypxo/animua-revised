@@ -128,7 +128,7 @@ function group({ id, icon, label, items }) {
   if (!visibleItems.length) return "";
   return `
     <div class="nav-group" data-nav-group>
-      <button class="nav-group-toggle" type="button" aria-expanded="false" aria-controls="${id}">
+      <button class="nav-group-toggle" type="button" aria-label="${escapeHtml(label)} menu" aria-expanded="false" aria-controls="${id}">
         <span class="nav-icon"><i class="bi ${icon}" aria-hidden="true"></i></span>
         <span class="nav-text">${escapeHtml(label)}</span>
         <span class="nav-group-indicator" aria-hidden="true">

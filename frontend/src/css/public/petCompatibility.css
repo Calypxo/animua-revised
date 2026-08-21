@@ -9616,3 +9616,8 @@ html body.quiz-locked-result .saved-result-state:not(.is-disabled) > header {
   border-top-left-radius: 0 !important;
   border-top-right-radius: 0 !important;
 }
+
+html body.quiz-locked-result .saved-match-label,
+html body.quiz-locked-result .saved-trait-profile .saved-state-kicker {
+  color: #780116 !important;
+}

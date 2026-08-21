@@ -1,4 +1,3 @@
-import Swal from "sweetalert2";
 import { API_BASE_URL } from "../../utils/api.js";
 
 const DOG_IMAGE = new URL("../../assets/images/dog.jpg", import.meta.url).href;
@@ -12,6 +11,12 @@ const compatibilityRetakeDate = document.getElementById("compatibilityRetakeDate
 let nextAllowedRetakeDate = null;
 let loadedResults = [];
 let currentResultsMode = "saved";
+let swalModulePromise;
+
+async function getSwal() {
+  swalModulePromise ||= import("sweetalert2").then((module) => module.default);
+  return swalModulePromise;
+}
 
 const traitLabels = {
   energyLevel: "Energy level",
@@ -360,6 +365,7 @@ function renderResults(results, mode = "saved") {
 }
 
 async function showSavedAnimalDetails(button) {
+  const Swal = await getSwal();
   const animalId = button.dataset.savedAnimalId || "";
   const savedName = button.dataset.savedAnimalName || "Shelter animal";
   const savedScore = button.dataset.savedAnimalScore || "0.0";
@@ -502,6 +508,7 @@ document.addEventListener("click", async (event) => {
   if (!nextAllowedRetakeDate || today >= nextAllowedRetakeDate) return;
 
   event.preventDefault();
+  const Swal = await getSwal();
   await Swal.fire({
     icon: "warning",
     title: "Retake Not Available Yet",

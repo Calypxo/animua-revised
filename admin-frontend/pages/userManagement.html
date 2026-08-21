@@ -27,15 +27,15 @@
     <!-- Topbar -->
     <header class="topbar">
       <div class="topbar-left">
-        <button id="sidebarToggle" class="icon-btn" type="button"><i class="bi bi-list"></i></button>
-        <nav class="d-flex align-items-center">
+        <button id="sidebarToggle" class="icon-btn" type="button" aria-label="Toggle sidebar"><i class="bi bi-list" aria-hidden="true"></i></button>
+        <nav class="d-flex align-items-center" aria-label="Breadcrumb">
           <span class="breadcrumb-link">System Administration</span>
-          <i class="bi bi-chevron-right breadcrumb-sep"></i>
-          <span class="breadcrumb-current">User Management</span>
+          <i class="bi bi-chevron-right breadcrumb-sep" aria-hidden="true"></i>
+          <span class="breadcrumb-current" aria-current="page">User Management</span>
         </nav>
       </div>
       <div class="topbar-right">
-        <button class="icon-btn notif-btn" type="button"><i class="bi bi-bell-fill"></i><span class="notif-dot"></span></button>
+        <button class="icon-btn notif-btn" type="button" aria-label="Notifications"><i class="bi bi-bell-fill" aria-hidden="true"></i><span class="notif-dot" aria-hidden="true"></span></button>
         <div class="user-chip">
           <div class="user-avatar" id="topbar-initials">AS</div>
           <div class="user-meta"><span id="display-name">Super Admin</span><small id="display-role">Administrator</small></div>
@@ -44,7 +44,7 @@
       </div>
     </header>
 
-    <div class="page-body">
+    <div class="page-body" role="main">
 
       <div id="pageHeaderMount"></div>
 

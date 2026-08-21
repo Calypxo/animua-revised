@@ -243,7 +243,6 @@ function renderEventCalendar() {
       <button
         class="${classes}"
         type="button"
-        role="gridcell"
         data-calendar-date="${key}"
         aria-label="${escapeHtml(ariaLabel)}"
         aria-pressed="${String(key === state.selectedEventDate)}"
@@ -271,7 +270,7 @@ function renderEventCalendar() {
   agenda.innerHTML = selectedEvents
     .map(
       (item) => `
-        <button class="event-calendar-agenda-item" type="button" data-calendar-event-id="${escapeHtml(item.id)}">
+        <button class="event-calendar-agenda-item" type="button" data-calendar-event-id="${escapeHtml(item.id)}" aria-label="Edit ${escapeHtml(item.title || "Important event")}">
           <span class="event-calendar-date-badge">
             <small>${item.calendarDate.toLocaleDateString("en-PH", { month: "short" })}</small>
             <strong>${item.calendarDate.getDate()}</strong>
@@ -483,7 +482,7 @@ function renderFeed() {
           <div class="post-actions">
             ${
               canEdit
-                ? `<button class="secondary-btn small" data-edit-id="${escapeHtml(item.id)}">
+                ? `<button class="secondary-btn small" type="button" data-edit-id="${escapeHtml(item.id)}" aria-label="Edit ${escapeHtml(item.title || "announcement")}">
                     <i class="bi bi-pencil"></i> Edit
                   </button>`
                 : ""
@@ -491,7 +490,7 @@ function renderFeed() {
 
             ${
               canDelete
-                ? `<button class="danger-btn small" data-delete-id="${escapeHtml(item.id)}">
+                ? `<button class="danger-btn small" type="button" data-delete-id="${escapeHtml(item.id)}" aria-label="Delete ${escapeHtml(item.title || "announcement")}">
                     <i class="bi bi-trash"></i> Delete
                   </button>`
                 : ""

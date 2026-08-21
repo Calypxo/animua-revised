@@ -54,7 +54,7 @@
 
               <div class="notification-popup" id="notificationPopup">
                 <div class="notification-popup-head">
-                  <h4>Notifications</h4>
+                  <h4 role="presentation">Notifications</h4>
                 </div>
                 <ul class="notification-list">
                   <li>New animals were recently added for adoption.</li>
@@ -128,7 +128,7 @@
   </header>
 
   <!-- MAIN BANNER -->
-<section class="furbabies-hero">
+<section class="furbabies-hero" role="main">
   <img class="public-page-hero-image" src="../../src/assets/images/optimized/find-furbabies/find-furbabies-header-1280.jpg" srcset="../../src/assets/images/optimized/find-furbabies/find-furbabies-header-960.jpg 960w, ../../src/assets/images/optimized/find-furbabies/find-furbabies-header-1280.jpg 1280w, ../../src/assets/images/optimized/find-furbabies/find-furbabies-header-1672.jpg 1672w" sizes="100vw" alt="" aria-hidden="true" width="1672" height="941" fetchpriority="high" decoding="async">
   <div class="container">
     <div class="finder-shell reveal">
@@ -292,7 +292,7 @@
   <div class="redesigned-profile-modal">
     <span class="profile-type-badge" id="profileType">Dog</span>
     <span class="profile-status-pill" id="profileStatus">Ready for Adoption</span>
-    <button class="modal-close profile-close-btn" data-close="petProfileModal">
+    <button class="modal-close profile-close-btn" data-close="petProfileModal" aria-label="Close pet profile">
       <i class="fa-solid fa-xmark"></i>
     </button>
 
@@ -832,9 +832,8 @@
   </div>
 </div>
 
-<script type="module" src="../../src/public/js/public-ui.js?v=pwa-responsive-20260810"></script>
+<script type="module" src="../../src/public/js/find-furbabies-ui.js?v=lighthouse-20260814"></script>
   <script type="module" src="../../src/public/js/find-furbabies.js"></script>
-<script type="module" src="../../src/auth/authModal.js"></script>
 
 
 

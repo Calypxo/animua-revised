@@ -15,8 +15,12 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="preconnect" href="https://animua-backend.onrender.com" crossorigin>
+  <link rel="preconnect" href="https://storage.googleapis.com" crossorigin>
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap">
+  </noscript>
   <link rel="stylesheet" href="../../src/css/public/home.css">
   <link rel="stylesheet" href="../../src/css/global.css?v=pwa-responsive-20260810">
   <link rel="stylesheet" href="../../src/css/public/my-submissions.css">
@@ -26,7 +30,7 @@
     <div class="main-nav-wrap">
       <div class="container nav-shell">
         <a href="home.html" class="logo">
-          <img src="/images/animua_logo1.svg" alt="" class="navbar-logo-img" aria-hidden="true">
+          <img src="/images/animua_logo1.svg" alt="" class="navbar-logo-img" aria-hidden="true" width="240" height="216" decoding="async">
           <span class="navbar-brand-copy">
             <span class="navbar-brand-name">NIMUA</span>
             <span class="navbar-brand-tagline">Connect. Learn. Adopt.</span>
@@ -45,13 +49,13 @@
           <div class="user-actions-wrap">
             <div class="notification-wrap">
               <button class="notification-btn" id="notificationBtn" aria-label="Notifications">
-                <i class="fa-solid fa-bell"></i>
-                <span class="notification-dot"></span>
+                <i class="fa-solid fa-bell" aria-hidden="true"></i>
+                <span class="notification-dot" aria-hidden="true"></span>
               </button>
 
               <div class="notification-popup" id="notificationPopup">
                 <div class="notification-popup-head">
-                  <h4>Notifications</h4>
+                  <div class="notification-popup-title">Notifications</div>
                 </div>
                 <ul class="notification-list">
                   <li>New animals were recently added for adoption.</li>
@@ -141,24 +145,24 @@
       </div>
 
       <div class="submissions-toolbar">
-        <div class="submission-tabs" role="tablist" aria-label="Submission filters">
-          <button type="button" class="submission-tab active" data-filter="all">All (0)</button>
-          <button type="button" class="submission-tab" data-filter="adoption">Adoption (0)</button>
-          <button type="button" class="submission-tab" data-filter="surrender">Surrender (0)</button>
+        <div class="submission-tabs" role="group" aria-label="Submission filters">
+          <button type="button" class="submission-tab active" data-filter="all" aria-pressed="true"><i class="fa-solid fa-sliders" aria-hidden="true"></i><span>All (0)</span></button>
+          <button type="button" class="submission-tab" data-filter="adoption" aria-pressed="false"><i class="fa-solid fa-house-chimney" aria-hidden="true"></i><span>Adoption (0)</span></button>
+          <button type="button" class="submission-tab" data-filter="surrender" aria-pressed="false"><i class="fa-solid fa-hand-holding-heart" aria-hidden="true"></i><span>Surrender (0)</span></button>
         </div>
 
         <div class="submission-sort-control" id="submissionSortControl">
           <span class="submission-sort-icon" aria-hidden="true">
-            <i class="fa-solid fa-arrow-down-wide-short"></i>
+            <i class="fa-solid fa-sliders"></i>
           </span>
           <span>Sort by:</span>
-          <button type="button" class="submission-sort-btn" id="submissionSortBtn" aria-haspopup="listbox" aria-expanded="false">
+          <button type="button" class="submission-sort-btn" id="submissionSortBtn" aria-haspopup="true" aria-expanded="false">
             <span id="submissionSortLabel">Newest First</span>
             <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
           </button>
-          <div class="submission-sort-menu hidden" id="submissionSortMenu" role="listbox" aria-label="Sort submissions">
-            <button type="button" data-sort-value="newest" role="option" aria-selected="false">Newest First</button>
-            <button type="button" data-sort-value="oldest" role="option" aria-selected="false">Oldest First</button>
+          <div class="submission-sort-menu hidden" id="submissionSortMenu">
+            <button type="button" data-sort-value="newest" aria-pressed="true">Newest First</button>
+            <button type="button" data-sort-value="oldest" aria-pressed="false">Oldest First</button>
           </div>
         </div>
       </div>
@@ -217,7 +221,7 @@
       </div>
 
       <div class="footer-links">
-        <h4>Explore</h4>
+        <h3>Explore</h3>
         <a href="home.html">Home</a>
         <a href="find-furbabies.html">Find Furbabies</a>
         <a href="home.html?quizIntro=open">Compatibility Quiz</a>
@@ -225,7 +229,7 @@
       </div>
 
       <div class="footer-links footer-support">
-        <h4>Services</h4>
+        <h3>Services</h3>
         <a href="home.html#home-highlights">Adoption Guide</a>
         <a href="surrender.html">Surrender Request</a>
         <a href="contact.html">Contact the Shelter</a>
@@ -233,7 +237,7 @@
       </div>
 
       <div class="footer-links footer-about">
-        <h4>About</h4>
+        <h3>About</h3>
         <a href="home.html#about-animua">About ANIMUA</a>
         <a href="home.html#how-animua-works">How It Works</a>
         <a href="home.html#terms-privacy-notice">Privacy Policy</a>
@@ -241,7 +245,7 @@
       </div>
 
       <div class="footer-links footer-contact">
-        <h4>Contact</h4>
+        <h3>Contact</h3>
         <p><i class="fa-regular fa-circle-user" aria-hidden="true"></i> Angeles City Veterinary Office</p>
         <p><i class="fa-solid fa-location-dot" aria-hidden="true"></i> City Hall Building, Pulung Maragul, Angeles City</p>
         <a href="tel:0453220485"><i class="fa-solid fa-phone" aria-hidden="true"></i> (045) 322-0485</a>
@@ -354,7 +358,7 @@
     </article>
   </section>
 
-  <script type="module" src="../../src/public/js/public-ui.js?v=pwa-responsive-20260810"></script>
+  <script type="module" src="../../src/public/js/account-ui.js"></script>
   <script type="module" src="../../src/public/js/my-submissions.js"></script>
 
   <script type="module" src="/src/public/js/pwa-register.js"></script>

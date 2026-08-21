@@ -10,6 +10,7 @@ const {
   getPublicPets,
   getPublicPetById,
   getPublicEvents,
+  getOptimizedImage,
   getContactMessages,
   getMyContactMessages,
   submitContactMessage,
@@ -18,9 +19,10 @@ const {
 } = require("../controllers/publicController");
 
 // Public pet browsing
+router.get("/events", getPublicEvents);
+router.get("/optimized-image", getOptimizedImage);
 router.get("/pets", getPublicPets);
 router.get("/pets/:id", getPublicPetById);
-router.get("/events", getPublicEvents);
 router.get(
   "/contact/messages",
   authenticateToken,

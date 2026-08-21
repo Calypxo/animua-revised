@@ -61,15 +61,6 @@ const adoptionDeclarationCheckboxes = [
   document.getElementById("understandNoGuarantee")
 ].filter(Boolean);
 
-console.log("API_BASE_URL:", API_BASE_URL);
-console.log("petsGrid:", petsGrid);
-console.log("resultsCount:", resultsCount);
-console.log("emptyState:", emptyState);
-
-console.log("adoptModal:", adoptModal);
-console.log("selectedPetName:", selectedPetName);
-console.log("petNameField:", petNameField);
-
 let currentFilter = "all";
 let currentSort = "newest";
 let currentPetForAdoption = null;
@@ -903,17 +894,13 @@ function mapPetFromBackend(pet) {
 
 async function loadPublicPets() {
   try {
-    console.log("Loading public pets...");
-    const res = await fetch(`${API_BASE_URL}/public/pets`, { cache: "no-store" });
-    console.log("Response status:", res.status);
+    const res = await fetch(`${API_BASE_URL}/public/pets`, { cache: "force-cache" });
 
     if (!res.ok) {
       throw new Error("Failed to load public pets");
     }
 
     const data = await res.json();
-    console.log("API data:", data);
-
     const rawPets = Array.isArray(data) ? data : (data.pets || []);
     pets = rawPets.map((pet, index) => ({
       ...mapPetFromBackend(pet),
@@ -1560,4 +1547,39 @@ if (profileAdoptBtn) {
   });
 }
 
-loadPublicPets();
+let petsLoadStarted = false;
+
+function startPetsLoad() {
+  if (petsLoadStarted) return;
+  petsLoadStarted = true;
+  loadPublicPets();
+}
+
+function schedulePetsLoad() {
+  const shouldLoadNow = new URLSearchParams(window.location.search).has("pet") ||
+    localStorage.getItem("animua_selected_pet_id");
+
+  if (shouldLoadNow) {
+    startPetsLoad();
+    return;
+  }
+
+  const browserSection = document.getElementById("browse-pets");
+  if ("IntersectionObserver" in window && browserSection) {
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) {
+        observer.disconnect();
+        startPetsLoad();
+      }
+    }, { rootMargin: "260px 0px" });
+    observer.observe(browserSection);
+  }
+
+  ["pointerdown", "keydown", "touchstart"].forEach((eventName) => {
+    window.addEventListener(eventName, startPetsLoad, { once: true, passive: true });
+  });
+
+  window.setTimeout(startPetsLoad, 8500);
+}
+
+schedulePetsLoad();

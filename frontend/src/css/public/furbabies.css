@@ -6996,6 +6996,11 @@ body.furbabies-page .pet-meta {
   gap: 7px !important;
   overflow: hidden !important;
   white-space: nowrap !important;
+  color: #4c4a4f !important;
+}
+
+body.furbabies-page .pet-meta span {
+  color: #4c4a4f !important;
 }
 
 body.furbabies-page .pet-facts {

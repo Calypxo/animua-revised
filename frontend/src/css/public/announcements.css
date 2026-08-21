@@ -42,8 +42,7 @@ body.announcements-page main {
   overflow: hidden;
   background:
     linear-gradient(90deg, rgba(20, 29, 34, 0.82) 0%, rgba(20, 29, 34, 0.58) 43%, rgba(20, 29, 34, 0.14) 78%),
-    linear-gradient(180deg, rgba(20, 20, 20, 0.42) 0%, rgba(20, 20, 20, 0.1) 32%, transparent 70%),
-    url("../../assets/images/optimized/announcements/announcements-header-1280.jpg") center 42% / cover no-repeat;
+    linear-gradient(180deg, rgba(20, 20, 20, 0.42) 0%, rgba(20, 20, 20, 0.1) 32%, transparent 70%);
 }
 
 .community-cover-inner {
@@ -1179,8 +1178,7 @@ body.announcements-page .animua-chatbot-toggle {
     min-height: 540px;
     background:
       linear-gradient(90deg, rgba(20, 29, 34, 0.86) 0%, rgba(20, 29, 34, 0.66) 54%, rgba(20, 29, 34, 0.24) 100%),
-      linear-gradient(180deg, rgba(20, 20, 20, 0.5) 0%, rgba(20, 20, 20, 0.12) 42%, transparent 76%),
-      url("../../assets/images/optimized/announcements/announcements-header-1280.jpg") center 42% / cover no-repeat;
+      linear-gradient(180deg, rgba(20, 20, 20, 0.5) 0%, rgba(20, 20, 20, 0.12) 42%, transparent 76%);
   }
 
   .community-cover-inner {
@@ -2022,6 +2020,147 @@ body.announcements-page .animua-chatbot-toggle {
   line-height: 1 !important;
 }
 
+/* Restore the original compact details modal proportions. */
+.announcement-detail-popup {
+  width: min(600px, calc(100vw - 28px)) !important;
+  height: min(720px, calc(100dvh - 32px)) !important;
+  max-height: calc(100dvh - 32px) !important;
+  display: block !important;
+  padding: 14px 20px 18px !important;
+  overflow: hidden !important;
+}
+
+.announcement-detail-popup .swal2-html-container {
+  height: 100% !important;
+  max-height: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+.announcement-detail {
+  position: relative !important;
+  height: 100% !important;
+  max-height: none !important;
+  min-height: 0 !important;
+  display: grid !important;
+  gap: 9px !important;
+  padding: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  scrollbar-width: none !important;
+}
+
+.announcement-detail::-webkit-scrollbar,
+.announcement-detail-content::-webkit-scrollbar {
+  display: none !important;
+}
+
+.announcement-detail-header {
+  position: absolute !important;
+  top: 8px !important;
+  right: 0 !important;
+  z-index: 5 !important;
+  min-height: 0 !important;
+  display: block !important;
+  padding: 0 !important;
+}
+
+.announcement-detail-close {
+  width: 34px !important;
+  height: 34px !important;
+  position: static !important;
+  border-radius: 50% !important;
+  background: #f5ead7 !important;
+  color: #5f0012 !important;
+  font-size: 1.08rem !important;
+  box-shadow: none !important;
+}
+
+.announcement-detail-content {
+  display: grid !important;
+  gap: 9px !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+.announcement-detail-kicker {
+  margin-top: 4px !important;
+  padding-right: 46px !important;
+}
+
+.announcement-detail h2,
+.announcement-detail.is-long-title h2 {
+  margin: 0 !important;
+  padding-right: 42px !important;
+  color: var(--announce-burgundy-dark) !important;
+  font-size: clamp(1.25rem, 2.85vw, 1.62rem) !important;
+  font-weight: 800 !important;
+  line-height: 1.08 !important;
+  overflow-wrap: normal !important;
+}
+
+.announcement-detail-photo-button,
+.announcement-detail-photo-button img {
+  min-height: 0 !important;
+  height: clamp(175px, 28vh, 235px) !important;
+}
+
+.announcement-detail-photo-button {
+  margin-top: 5px !important;
+  border-radius: 14px !important;
+}
+
+.announcement-detail-photo-button img {
+  object-fit: cover !important;
+}
+
+.announcement-detail-copy {
+  gap: 8px !important;
+  margin-top: 4px !important;
+}
+
+.announcement-detail-copy p {
+  font-size: 0.74rem !important;
+  line-height: 1.38 !important;
+}
+
+.announcement-detail-info {
+  margin-top: 4px !important;
+  border-radius: 10px !important;
+}
+
+.announcement-detail-actions {
+  margin-top: 2px !important;
+  padding-bottom: 0 !important;
+}
+
+.announcement-detail-actions button {
+  min-height: 38px !important;
+  border-radius: 9px !important;
+  font-size: 0.68rem !important;
+}
+
+@media (max-width: 640px) {
+  .announcement-detail-popup {
+    width: calc(100vw - 18px) !important;
+    height: min(720px, calc(100dvh - 18px)) !important;
+    max-height: calc(100dvh - 18px) !important;
+    padding: 12px 12px 14px !important;
+  }
+
+  .announcement-detail-close {
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 1.05rem !important;
+  }
+
+  .announcement-detail h2,
+  .announcement-detail.is-long-title h2 {
+    font-size: clamp(1.22rem, 6vw, 1.55rem) !important;
+  }
+}
+
 /* Final public header image: keep Announcement, Find Furbabies, and Surrender heroes equal. */
 body.announcements-page .community-cover {
   position: relative !important;
@@ -2136,4 +2275,89 @@ body.announcements-page .community-cover-copy p {
 
 body.announcements-page .community-cover {
   background-image: none !important;
+}
+
+/* Announcement details: keep the pre-Lighthouse compact modal layout. */
+body.announcements-page .announcement-detail-popup {
+  width: min(600px, calc(100vw - 28px)) !important;
+  height: min(720px, calc(100dvh - 32px)) !important;
+  max-height: calc(100dvh - 32px) !important;
+  display: block !important;
+  padding: 14px 20px 18px !important;
+  overflow: hidden !important;
+}
+
+body.announcements-page .announcement-detail-popup .swal2-html-container {
+  height: 100% !important;
+  max-height: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+body.announcements-page .announcement-detail-popup :is(.swal2-icon, .swal2-title, .swal2-actions) {
+  display: none !important;
+}
+
+body.announcements-page .announcement-detail {
+  position: relative !important;
+  height: 100% !important;
+  max-height: none !important;
+  display: grid !important;
+  gap: 9px !important;
+  padding: 0 !important;
+  overflow-y: auto !important;
+  scrollbar-width: none !important;
+}
+
+body.announcements-page .announcement-detail::-webkit-scrollbar {
+  display: none !important;
+}
+
+body.announcements-page .announcement-detail-handle {
+  display: none !important;
+}
+
+body.announcements-page .announcement-detail-close {
+  position: absolute !important;
+  top: 8px !important;
+  right: 0 !important;
+  z-index: 5 !important;
+  width: 34px !important;
+  height: 34px !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  background: #f5ead7 !important;
+  color: #5f0012 !important;
+  font-size: 1.08rem !important;
+  box-shadow: none !important;
+}
+
+body.announcements-page .announcement-detail-kicker {
+  margin-top: 4px !important;
+  padding-right: 46px !important;
+}
+
+body.announcements-page .announcement-detail h2,
+body.announcements-page .announcement-detail.is-long-title h2 {
+  margin: 0 !important;
+  padding-right: 42px !important;
+  font-size: clamp(1.25rem, 2.85vw, 1.62rem) !important;
+  line-height: 1.08 !important;
+  overflow-wrap: normal !important;
+}
+
+body.announcements-page .announcement-detail-photo-button,
+body.announcements-page .announcement-detail-photo-button img {
+  min-height: 0 !important;
+  height: clamp(175px, 28vh, 235px) !important;
+}
+
+@media (max-width: 640px) {
+  body.announcements-page .announcement-detail-popup {
+    width: calc(100vw - 18px) !important;
+    height: min(720px, calc(100dvh - 18px)) !important;
+    max-height: calc(100dvh - 18px) !important;
+    padding: 12px 12px 14px !important;
+  }
 }

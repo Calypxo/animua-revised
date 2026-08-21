@@ -1,4 +1,3 @@
-import Swal from "sweetalert2";
 import { API_BASE_URL } from "../../utils/api.js";
 
 const contactForm = document.getElementById("contactForm");
@@ -38,6 +37,11 @@ function escapeHtml(value = "") {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+}
+
+async function showContactDialog(options) {
+  const Swal = (await import("sweetalert2")).default;
+  return Swal.fire(options);
 }
 
 function formatMessageDate(value) {
@@ -460,7 +464,7 @@ contactForm?.addEventListener("submit", async (event) => {
     setStatus(data.message || "Your message has been sent to the ANIMUA team.", "success");
     await loadContactMessages();
 
-    Swal.fire({
+    await showContactDialog({
       icon: "success",
       title: "Message Sent",
       html: "<p>Your message was sent to the ANIMUA team. Staff replies will appear in Messages.</p>",
@@ -474,7 +478,7 @@ contactForm?.addEventListener("submit", async (event) => {
     });
   } catch (error) {
     setStatus(error.message || "Unable to prepare your message.", "error");
-    Swal.fire({
+    await showContactDialog({
       icon: "error",
       title: "Message Failed",
       html: `<p>${escapeHtml(error.message || "Unable to prepare your message.")}</p>`,
@@ -525,6 +529,14 @@ contactLoginButton?.addEventListener("click", () => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
+  const isLoggedIn = updateContactAuthState();
+  if (!isLoggedIn) return;
+  applyAccountPrefill();
+  const scheduleNonCriticalRequest = window.requestIdleCallback || ((callback) => window.setTimeout(callback, 1200));
+  scheduleNonCriticalRequest(() => loadContactMessages(), { timeout: 2500 });
+});
+
+window.addEventListener("animua-auth-updated", () => {
   const isLoggedIn = updateContactAuthState();
   if (!isLoggedIn) return;
   applyAccountPrefill();

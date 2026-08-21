@@ -1,16 +1,15 @@
-import Swal from "sweetalert2";
 import { API_BASE_URL } from "../../utils/api.js";
 
 const NEWS_CCA_CAT_RESCUE_IMAGE = new URL(
-  "../../assets/images/news-cca-cat-rescue.png",
+  "../../assets/images/optimized/announcements/news-cca-cat-rescue-720.jpg",
   import.meta.url
 ).href;
 const HIGHLIGHT_UPCOMING_EVENT_IMAGE = new URL(
-  "../../assets/images/highlight-upcoming-event.jpg",
+  "../../assets/images/optimized/home/highlight-upcoming-event-720.webp",
   import.meta.url
 ).href;
 const SUCCESS_ZACH_ADOPTION_IMAGE = new URL(
-  "../../assets/images/success-zach-adoption.jpg",
+  "../../assets/images/optimized/announcements/success-zach-adoption-720.jpg",
   import.meta.url
 ).href;
 
@@ -47,6 +46,7 @@ const typeLabel = document.getElementById("announcementTypeLabel");
 const typeMenu = document.getElementById("announcementTypeMenu");
 const showAllButton = document.getElementById("showAllAnnouncements");
 const pastAnnouncementsButton = document.getElementById("pastAnnouncementsBtn");
+let swalModulePromise;
 
 document.querySelector("[data-login-link]")?.classList.toggle("hidden", localStorage.getItem("is_logged_in") === "true");
 
@@ -58,6 +58,11 @@ function escapeHtml(value = "") {
     "\"": "&quot;",
     "'": "&#039;",
   }[character]));
+}
+
+async function getSwal() {
+  swalModulePromise ||= import("sweetalert2").then((module) => module.default);
+  return swalModulePromise;
 }
 
 function normalizeType(value) {
@@ -211,6 +216,7 @@ function createMedia(item, type) {
   image.src = getImage(item, type);
   image.alt = item.title ? `${item.title} cover` : `${type} cover`;
   image.loading = "lazy";
+  image.decoding = "async";
   image.addEventListener("error", () => {
     image.remove();
     media.classList.add("is-placeholder");
@@ -409,7 +415,8 @@ function applySearchFilter(term = "") {
   render();
 }
 
-function showAnnouncementDetail(item) {
+async function showAnnouncementDetail(item) {
+  const Swal = await getSwal();
   const type = normalizeType(item.type);
   const details = getStoryDetails(item);
   const title = item.title || "ANIMUA community update";
@@ -426,60 +433,56 @@ function showAnnouncementDetail(item) {
   Swal.fire({
     html: `
       <article class="announcement-detail${titleClass}">
-        <header class="announcement-detail-header">
-          <button type="button" class="announcement-detail-close" data-announcement-detail-close aria-label="Close announcement details">
-            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        <button type="button" class="announcement-detail-close" data-announcement-detail-close aria-label="Close announcement details">
+          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        </button>
+        <span class="announcement-detail-handle" aria-hidden="true"></span>
+        <div class="announcement-detail-kicker">${typeBadgeHtml(type, detailLabel)}</div>
+        <h2>${escapeHtml(title)}</h2>
+        <div class="announcement-detail-meta">
+          <span><i class="fa-regular fa-calendar" aria-hidden="true"></i>${escapeHtml(getPostDate(item))}</span>
+          <span>${escapeHtml(postedTime)}</span>
+          <span><i class="fa-solid fa-building-columns" aria-hidden="true"></i>${escapeHtml(source)}</span>
+        </div>
+        <button type="button" class="announcement-detail-photo-button" data-announcement-photo-src="${escapeHtml(image)}" data-announcement-photo-title="${escapeHtml(title)}" aria-label="View full photo for ${escapeHtml(title)}">
+          <img src="${escapeHtml(image)}" alt="${escapeHtml(title)}" data-fallback-src="${escapeHtml(fallbackImage)}">
+          <span><i class="fa-solid fa-expand" aria-hidden="true"></i></span>
+        </button>
+        <div class="announcement-detail-copy">
+        ${details.length
+          ? details.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join("")
+          : `<p>${escapeHtml(getCaption(item))}</p>`}
+        </div>
+        <div class="announcement-detail-info">
+          <span>
+            <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+            <strong>Affected Areas</strong>
+            <small>${escapeHtml(item.location || "Angeles City")}</small>
+          </span>
+          <span>
+            <i class="fa-solid fa-tag" aria-hidden="true"></i>
+            <strong>Priority</strong>
+            <small>${escapeHtml(priority)}</small>
+          </span>
+          <span>
+            <i class="fa-regular fa-clock" aria-hidden="true"></i>
+            <strong>Read Time</strong>
+            <small>${readMinutes} min</small>
+          </span>
+        </div>
+        <div class="announcement-detail-note">
+          <i class="fa-solid fa-shield-heart" aria-hidden="true"></i>
+          <span><strong>Stay Safe, ANIMUA.</strong> Monitor official channels and follow safety protocols. Your safety is our top priority.</span>
+        </div>
+        <div class="announcement-detail-actions">
+          <button type="button" class="announcement-detail-back" data-announcement-detail-close>
+            <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+            <span>Back to Announcements</span>
           </button>
-        </header>
-        <div class="announcement-detail-content">
-          <span class="announcement-detail-handle" aria-hidden="true"></span>
-          <div class="announcement-detail-kicker">${typeBadgeHtml(type, detailLabel)}</div>
-          <h2>${escapeHtml(title)}</h2>
-          <div class="announcement-detail-meta">
-            <span><i class="fa-regular fa-calendar" aria-hidden="true"></i>${escapeHtml(getPostDate(item))}</span>
-            <span>${escapeHtml(postedTime)}</span>
-            <span><i class="fa-solid fa-building-columns" aria-hidden="true"></i>${escapeHtml(source)}</span>
-          </div>
-          <button type="button" class="announcement-detail-photo-button" data-announcement-photo-src="${escapeHtml(image)}" data-announcement-photo-title="${escapeHtml(title)}" aria-label="View full photo for ${escapeHtml(title)}">
-            <img src="${escapeHtml(image)}" alt="${escapeHtml(title)}" data-fallback-src="${escapeHtml(fallbackImage)}">
-            <span><i class="fa-solid fa-expand" aria-hidden="true"></i></span>
+          <button type="button" class="announcement-detail-share" data-announcement-detail-share data-share-title="${escapeHtml(title)}" data-share-text="${escapeHtml(shareText)}">
+            <i class="fa-solid fa-share-nodes" aria-hidden="true"></i>
+            <span>Share Update</span>
           </button>
-          <div class="announcement-detail-copy">
-          ${details.length
-            ? details.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join("")
-            : `<p>${escapeHtml(getCaption(item))}</p>`}
-          </div>
-          <div class="announcement-detail-info">
-            <span>
-              <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
-              <strong>Affected Areas</strong>
-              <small>${escapeHtml(item.location || "Angeles City")}</small>
-            </span>
-            <span>
-              <i class="fa-solid fa-tag" aria-hidden="true"></i>
-              <strong>Priority</strong>
-              <small>${escapeHtml(priority)}</small>
-            </span>
-            <span>
-              <i class="fa-regular fa-clock" aria-hidden="true"></i>
-              <strong>Read Time</strong>
-              <small>${readMinutes} min</small>
-            </span>
-          </div>
-          <div class="announcement-detail-note">
-            <i class="fa-solid fa-shield-heart" aria-hidden="true"></i>
-            <span><strong>Stay Safe, ANIMUA.</strong> Monitor official channels and follow safety protocols. Your safety is our top priority.</span>
-          </div>
-          <div class="announcement-detail-actions">
-            <button type="button" class="announcement-detail-back" data-announcement-detail-close>
-              <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
-              <span>Back to Announcements</span>
-            </button>
-            <button type="button" class="announcement-detail-share" data-announcement-detail-share data-share-title="${escapeHtml(title)}" data-share-text="${escapeHtml(shareText)}">
-              <i class="fa-solid fa-share-nodes" aria-hidden="true"></i>
-              <span>Share Update</span>
-            </button>
-          </div>
         </div>
       </article>
     `,
@@ -701,7 +704,40 @@ document.getElementById("pastAnnouncementsBtn")?.addEventListener("click", () =>
   render();
 });
 
-loadAnnouncements();
+let announcementsLoadStarted = false;
+
+function startAnnouncementsLoad() {
+  if (announcementsLoadStarted) return;
+  announcementsLoadStarted = true;
+  loadAnnouncements();
+}
+
+function scheduleInitialAnnouncementsLoad() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.has("story") || params.has("id") || params.has("type")) {
+    startAnnouncementsLoad();
+    return;
+  }
+
+  const section = document.querySelector(".announcements-section");
+  if ("IntersectionObserver" in window && section) {
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) {
+        observer.disconnect();
+        startAnnouncementsLoad();
+      }
+    }, { rootMargin: "260px 0px" });
+    observer.observe(section);
+  }
+
+  ["pointerdown", "keydown", "touchstart"].forEach((eventName) => {
+    window.addEventListener(eventName, startAnnouncementsLoad, { once: true, passive: true });
+  });
+
+  window.setTimeout(startAnnouncementsLoad, 8500);
+}
+
+scheduleInitialAnnouncementsLoad();
 
 // Refresh when a visitor returns to this tab after management publishes or
 // updates a post in another tab.

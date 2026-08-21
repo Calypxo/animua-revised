@@ -22,16 +22,34 @@ body.contact-page .contact-hero {
   display: flex;
   align-items: center;
   padding: 98px 0 86px;
-  overflow: visible;
-  background:
-    linear-gradient(90deg, rgba(47, 12, 8, 0.44), rgba(47, 12, 8, 0.18)),
-    url("/images/contact-header-bg-red.png") center / cover no-repeat;
+  overflow: hidden;
+  background: #3a0f12;
   color: #fff;
+}
+
+.contact-hero-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center center;
+  pointer-events: none;
+}
+
+body.contact-page .contact-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(90deg, rgba(47, 12, 8, 0.44), rgba(47, 12, 8, 0.18));
+  pointer-events: none;
 }
 
 .contact-hero .container {
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 
 .contact-hero-copy {
@@ -1503,10 +1521,17 @@ body.contact-page .contact-hero {
   }
 }
 
+@media (min-width: 1300px) {
+  body.contact-page .contact-hero {
+    background-image: none;
+  }
+}
+
 @media (max-width: 760px) {
   body.contact-page .contact-hero {
     min-height: 310px;
     padding: 92px 0 74px;
+    background-image: none;
   }
 
   .contact-method-grid {

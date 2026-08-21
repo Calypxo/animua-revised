@@ -24,18 +24,18 @@
     <div class="stage">
       <header class="topbar">
         <div class="topbar-left">
-          <button id="sidebarToggle" class="icon-btn"><i class="bi bi-list"></i></button>
-          <nav class="d-flex align-items-center">
+          <button id="sidebarToggle" class="icon-btn" type="button" aria-label="Toggle sidebar"><i class="bi bi-list" aria-hidden="true"></i></button>
+          <nav class="d-flex align-items-center" aria-label="Breadcrumb">
             <span class="breadcrumb-link">System</span>
-            <i class="bi bi-chevron-right breadcrumb-sep"></i>
-            <span class="breadcrumb-current">Archived Records</span>
+            <i class="bi bi-chevron-right breadcrumb-sep" aria-hidden="true"></i>
+            <span class="breadcrumb-current" aria-current="page">Archived Records</span>
           </nav>
         </div>
 
         <div class="topbar-right">
-          <button class="icon-btn notif-btn">
-            <i class="bi bi-bell-fill"></i>
-            <span class="notif-dot"></span>
+          <button class="icon-btn notif-btn" type="button" aria-label="Notifications">
+            <i class="bi bi-bell-fill" aria-hidden="true"></i>
+            <span class="notif-dot" aria-hidden="true"></span>
           </button>
 
           <div class="user-chip">
@@ -49,7 +49,7 @@
         </div>
       </header>
 
-      <div class="page-body">
+      <div class="page-body" role="main">
         <div id="pageHeaderMount"></div>
 
         <section class="archive-signal-layout" aria-label="Archive summary">

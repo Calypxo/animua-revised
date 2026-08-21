@@ -1,6 +1,7 @@
 const { admin, db } = require("../config/firebase");
 const nodemailer = require("nodemailer");
 const path = require("path");
+const sharp = require("sharp");
 const {
   buildShelterLabel,
 } = require("../utils/animalIdentity");
@@ -16,6 +17,11 @@ const CONTACT_RECIPIENT =
   process.env.CONTACT_EMAIL ||
   process.env.EMAIL_USER ||
   "AngelesCityVeterinaryOffice@animua.local";
+const OPTIMIZED_IMAGE_MAX_BYTES = 8 * 1024 * 1024;
+const OPTIMIZED_IMAGE_ALLOWED_HOSTS = new Set([
+  "storage.googleapis.com",
+  "firebasestorage.googleapis.com",
+]);
 
 const contactTransporter = nodemailer.createTransport({
   service: "gmail",
@@ -51,6 +57,74 @@ const escapeEmailHtml = (value = "") =>
 
 const isValidEmail = (value = "") =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value).trim());
+
+function parseImageWidth(value) {
+  const width = Number.parseInt(String(value || ""), 10);
+  if (!Number.isFinite(width)) return 380;
+  return Math.min(900, Math.max(96, width));
+}
+
+exports.getOptimizedImage = async (req, res) => {
+  try {
+    const source = String(req.query.src || "").trim();
+    const width = parseImageWidth(req.query.width);
+
+    if (!source) {
+      return res.status(400).json({ message: "Image source is required." });
+    }
+
+    let sourceUrl;
+    try {
+      sourceUrl = new URL(source);
+    } catch {
+      return res.status(400).json({ message: "Invalid image source." });
+    }
+
+    if (!OPTIMIZED_IMAGE_ALLOWED_HOSTS.has(sourceUrl.hostname)) {
+      return res.status(400).json({ message: "Image source is not allowed." });
+    }
+
+    const upstream = await fetch(sourceUrl, {
+      headers: { Accept: "image/avif,image/webp,image/*,*/*;q=0.8" },
+    });
+
+    if (!upstream.ok) {
+      return res.status(upstream.status).json({ message: "Unable to load image." });
+    }
+
+    const contentType = upstream.headers.get("content-type") || "";
+    if (!contentType.startsWith("image/")) {
+      return res.status(415).json({ message: "Source is not an image." });
+    }
+
+    const length = Number(upstream.headers.get("content-length") || 0);
+    if (length > OPTIMIZED_IMAGE_MAX_BYTES) {
+      return res.status(413).json({ message: "Image is too large to optimize." });
+    }
+
+    const input = Buffer.from(await upstream.arrayBuffer());
+    if (input.length > OPTIMIZED_IMAGE_MAX_BYTES) {
+      return res.status(413).json({ message: "Image is too large to optimize." });
+    }
+
+    const output = await sharp(input, { failOn: "none" })
+      .rotate()
+      .resize({ width, withoutEnlargement: true })
+      .webp({ quality: 72, effort: 4 })
+      .toBuffer();
+
+    res.set({
+      "Content-Type": "image/webp",
+      "Cache-Control": "public, max-age=31536000, immutable",
+      "Content-Length": String(output.length),
+      "Vary": "Accept",
+    });
+    return res.status(200).send(output);
+  } catch (error) {
+    console.error("[getOptimizedImage]", error.message);
+    return res.status(500).json({ message: "Failed to optimize image." });
+  }
+};
 
 const getEventDateValue = (event = {}) => {
   const value =

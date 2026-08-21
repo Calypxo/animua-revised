@@ -16,10 +16,12 @@ const deferPublicSharedCss = () => ({
 
       if (!filename || !DEFER_SHARED_CSS_PAGES.some((page) => filename.endsWith(page))) return html;
 
-      return html.replace(
+      let nextHtml = html.replace(
         /<link rel="stylesheet" crossorigin href="(\/assets\/public-ui-[^"]+\.css)">/g,
         '<link rel="preload" as="style" crossorigin href="$1" onload="this.onload=null;this.rel=\'stylesheet\'"><noscript><link rel="stylesheet" crossorigin href="$1"></noscript>'
       );
+
+      return nextHtml;
     },
   },
 });

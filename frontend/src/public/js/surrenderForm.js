@@ -816,8 +816,11 @@ document.addEventListener("DOMContentLoaded", () => {
   bindIdentityDocumentUploads();
   setupSurrenderSelectMenus();
   showStep(1, { scroll: false, focus: false });
-  loadSurrenderAvailability();
-  loadMySurrenderRequests();
+  const scheduleNonCriticalRequest = window.requestIdleCallback || ((callback) => window.setTimeout(callback, 1200));
+  scheduleNonCriticalRequest(() => {
+    loadSurrenderAvailability();
+    loadMySurrenderRequests();
+  }, { timeout: 2500 });
   form?.addEventListener("submit", handleSurrenderSubmit);
 
   form?.querySelectorAll("input, select, textarea").forEach(field => {
