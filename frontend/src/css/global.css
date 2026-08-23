@@ -16635,6 +16635,28 @@ button#chatbotSend.chatbot-input-send i {
   color: #FFF8EE !important;
 }
 
+/* Keep the chatbot language label on one line on narrow phones. */
+.chatbot-language-select {
+  width: auto !important;
+  min-width: 112px !important;
+  white-space: nowrap !important;
+}
+
+.chatbot-language-select span {
+  display: inline-block !important;
+  white-space: nowrap !important;
+  overflow-wrap: normal !important;
+  word-break: keep-all !important;
+}
+
+@media (max-width: 430px) {
+  .chatbot-language-select {
+    min-width: 104px !important;
+    padding-inline: 10px !important;
+    gap: 6px !important;
+  }
+}
+
 .chatbot-bot-avatar {
   background: linear-gradient(145deg, #780116 0%, #5f0012 100%) !important;
   color: #F7B538 !important;

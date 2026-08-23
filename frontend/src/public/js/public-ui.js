@@ -4407,8 +4407,6 @@ async function updatePassword(oldPassword, newPassword) {
   }
 }
 
-initChatbotWidget();
-
 function initChatbotWidget() {
   if (document.getElementById("animuaChatbot")) return;
 
