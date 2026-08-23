@@ -21,6 +21,7 @@ import {
   sendAnimalToQuarantine,
   markAnimalReady,
   saveBehavioralAssessment as saveBehavioralAssessmentApi,
+  getBehavioralQuestions,
   addMedicalRecord as addMedicalRecordApi,
   updateMedicalRecord as updateMedicalRecordApi,
   archiveAnimal as archiveAnimalApi
@@ -38,6 +39,12 @@ import {
   shouldShowAddMedical,
   buildQuarantineDecisionPayload,
 } from "./animalProfileWorkflow.js";
+import {
+  normalizeBehavioralObservations,
+  parseBehavioralNotes,
+  serializeBehavioralNotes,
+} from "./behavioralObservations.js";
+import { initializeBehavioralQuestionManager } from "./behavioralQuestionManager.js";
 
 const TRAITS = [
   { key: "energyLevel", label: "Energy Level", desc: "Overall energy of the animal" },
@@ -70,6 +77,19 @@ let editingMedId = null;
 let currentRole = "";
 let currentUser = null;
 let medicalInventoryItems = [];
+let behavioralObservations = [];
+let behaviorObservationId = 0;
+let behavioralQuestionConfig = null;
+
+async function loadBehavioralQuestionConfig() {
+  if (!can("edit_behavioral")) return;
+  try {
+    behavioralQuestionConfig = await getBehavioralQuestions();
+  } catch (error) {
+    console.error("[loadBehavioralQuestionConfig]", error);
+    behavioralQuestionConfig = null;
+  }
+}
 
 function formDraftKey(scope) {
   return `animua_animal_form_draft:${animal?.id || "unknown"}:${scope}`;
@@ -107,6 +127,139 @@ function signedInUserName() {
     currentUser?.email ||
     "Staff"
   ).trim();
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function createBehaviorObservation(entry = {}) {
+  return {
+    id: ++behaviorObservationId,
+    label: String(entry.label || ""),
+    detail: String(entry.detail || ""),
+  };
+}
+
+function setBehaviorObservationError(message = "") {
+  const error = document.getElementById("behaviorObservationError");
+  if (!error) return;
+  error.textContent = message;
+  error.hidden = !message;
+}
+
+function syncBehaviorObservationDraft() {
+  const field = document.getElementById("behavioralObservationsDraft");
+  if (!field) return;
+  field.value = JSON.stringify(behavioralObservations.map(({ label, detail }) => ({ label, detail })));
+}
+
+function renderBehaviorObservationEditor() {
+  const list = document.getElementById("behaviorObservationList");
+  const addButton = document.getElementById("addBehaviorObservation");
+  if (!list) return;
+
+  if (!behavioralObservations.length) {
+    list.innerHTML = `
+      <div class="behavior-observation-empty">
+        <i class="bi bi-journal-plus" aria-hidden="true"></i>
+        <div><strong>No supplemental behaviors added</strong><span>Add handling, social, or environmental observations specific to this animal.</span></div>
+      </div>`;
+  } else {
+    list.innerHTML = behavioralObservations.map((entry, index) => `
+      <article class="behavior-observation-row" data-observation-id="${entry.id}">
+        <div class="behavior-observation-row-head">
+          <span>Behavior ${index + 1}</span>
+          <button class="behavior-remove-btn" type="button" data-remove-observation="${entry.id}" aria-label="Remove behavior ${index + 1}">
+            <i class="bi bi-trash3" aria-hidden="true"></i><span>Remove</span>
+          </button>
+        </div>
+        <div class="form-group">
+          <label class="form-lbl" for="behaviorObservationLabel-${entry.id}">Behavior name <span class="req">*</span></label>
+          <input class="form-inp" id="behaviorObservationLabel-${entry.id}" data-observation-field="label" maxlength="80" value="${escapeHtml(entry.label)}" placeholder="e.g. Resource guarding" />
+        </div>
+        <div class="form-group">
+          <label class="form-lbl" for="behaviorObservationDetail-${entry.id}">Observation details</label>
+          <textarea class="form-inp form-textarea" id="behaviorObservationDetail-${entry.id}" data-observation-field="detail" maxlength="300" rows="2" placeholder="Describe triggers, frequency, handling guidance, or context…">${escapeHtml(entry.detail)}</textarea>
+        </div>
+      </article>`).join("");
+  }
+
+  if (addButton) addButton.disabled = behavioralObservations.length >= 20;
+  syncBehaviorObservationDraft();
+}
+
+function restoreBehaviorObservationDraft() {
+  const field = document.getElementById("behavioralObservationsDraft");
+  if (!field?.value) return;
+  try {
+    const entries = JSON.parse(field.value);
+    if (!Array.isArray(entries)) return;
+    behavioralObservations = entries.slice(0, 20).map(createBehaviorObservation);
+    renderBehaviorObservationEditor();
+  } catch {
+    syncBehaviorObservationDraft();
+  }
+}
+
+function validateBehaviorObservations() {
+  const normalized = normalizeBehavioralObservations(behavioralObservations);
+  const missingName = normalized.find((entry) => !entry.label && entry.detail);
+  if (missingName) {
+    setBehaviorObservationError("Add a behavior name or remove the incomplete observation.");
+    return null;
+  }
+
+  const names = new Set();
+  for (const entry of normalized.filter((item) => item.label)) {
+    const key = entry.label.toLocaleLowerCase();
+    if (names.has(key)) {
+      setBehaviorObservationError(`“${entry.label}” has been added more than once.`);
+      return null;
+    }
+    names.add(key);
+  }
+
+  setBehaviorObservationError();
+  return normalized.filter((entry) => entry.label);
+}
+
+function bindBehaviorObservationEditor() {
+  document.getElementById("addBehaviorObservation")?.addEventListener("click", () => {
+    if (behavioralObservations.length >= 20) {
+      setBehaviorObservationError("A maximum of 20 supplemental behaviors can be recorded.");
+      return;
+    }
+    const entry = createBehaviorObservation();
+    behavioralObservations.push(entry);
+    setBehaviorObservationError();
+    renderBehaviorObservationEditor();
+    document.getElementById(`behaviorObservationLabel-${entry.id}`)?.focus();
+  });
+
+  const list = document.getElementById("behaviorObservationList");
+  list?.addEventListener("input", (event) => {
+    const row = event.target.closest("[data-observation-id]");
+    const field = event.target.dataset.observationField;
+    const entry = behavioralObservations.find((item) => item.id === Number(row?.dataset.observationId));
+    if (!entry || !field) return;
+    entry[field] = event.target.value;
+    setBehaviorObservationError();
+    syncBehaviorObservationDraft();
+  });
+
+  list?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-remove-observation]");
+    if (!button) return;
+    behavioralObservations = behavioralObservations.filter((entry) => entry.id !== Number(button.dataset.removeObservation));
+    setBehaviorObservationError();
+    renderBehaviorObservationEditor();
+  });
 }
 
 const speciesInitial = species => String(species || "Animal").charAt(0).toUpperCase();
@@ -412,15 +565,14 @@ function renderHero() {
     <span class="profile-tag"><i class="bi bi-door-open"></i>${animal.cageNumber || animal.housingType || "Housing unassigned"}</span>`;
 
   const btn = document.getElementById("btnStatusChange");
-
-  btn.style.display = "none";
+  btn.hidden = true;
   btn.onclick = null;
 
   if (
     animal.status === "Profiling" &&
     can("send_to_quarantine")
   ) {
-    btn.style.display = "";
+    btn.hidden = false;
 
     btn.innerHTML = `
       <i class="bi bi-shield-plus"></i>
@@ -439,7 +591,7 @@ function renderHero() {
       Boolean(animal.behavioralAssessment);
 
     if (requirementsComplete) {
-      btn.style.display = "";
+      btn.hidden = false;
 
       btn.innerHTML = `
         <i class="bi bi-house-heart-fill"></i>
@@ -452,7 +604,7 @@ function renderHero() {
     animal.status === "Ready" &&
     can("process_adoption")
   ) {
-    btn.style.display = "";
+    btn.hidden = false;
 
     btn.innerHTML = `
       <i class="bi bi-person-check-fill"></i>
@@ -728,6 +880,14 @@ function renderBehavioralTab() {
   lbl.textContent = "Edit Assessment";
   const ba = animal.behavioralAssessment;
   const traitCount = Object.keys(ba).length;
+  const parsedNotes = parseBehavioralNotes(animal.behavioralNotes || "");
+  const recordedDimensions = Array.isArray(animal.behavioralQuestionSnapshot)
+    ? animal.behavioralQuestionSnapshot.map((item) => ({
+        key: item.traitKey,
+        label: item.questionTitle || item.behaviorLabel || item.traitKey,
+        value: Number(item.value),
+      }))
+    : TRAITS.map((item) => ({ ...item, value: Number(ba[item.key] || 0) }));
 
   el.innerHTML = `
     <div class="behavioral-result-card">
@@ -741,15 +901,22 @@ function renderBehavioralTab() {
           <p class="behavioral-summary">
             ${traitCount} behavioral dimensions scored on a 1–5 scale.
           </p>
-          ${animal.behavioralNotes
-            ? `<p class="behavioral-note">${animal.behavioralNotes}</p>`
+          ${parsedNotes.observations.length
+            ? `<div class="behavioral-observation-summary">
+                <strong>Observed behaviors</strong>
+                <div>${parsedNotes.observations.map((entry) => `
+                  <article><span>${escapeHtml(entry.label)}</span>${entry.detail ? `<p>${escapeHtml(entry.detail)}</p>` : ""}</article>`).join("")}</div>
+              </div>`
+            : ""}
+          ${parsedNotes.notes
+            ? `<p class="behavioral-note">${escapeHtml(parsedNotes.notes)}</p>`
             : ""}
         </div>
       </div>
 
       <div class="trait-bars">
-        ${TRAITS.map((t, i) => {
-          const val = ba[t.key] || 0;
+        ${recordedDimensions.map((t, i) => {
+          const val = t.value;
           const pct = (val / 5) * 100;
           const fillColor = TRAIT_COLORS[i] || "var(--clay)";
           return `
@@ -983,36 +1150,50 @@ function openBehavioralModal() {
   }
 
   const ba = animal.behavioralAssessment || {};
-  document.getElementById("behavioralNotes").value = animal.behavioralNotes || "";
+  const parsedNotes = parseBehavioralNotes(animal.behavioralNotes || "");
+  behavioralObservations = parsedNotes.observations.map(createBehaviorObservation);
+  document.getElementById("behavioralNotes").value = parsedNotes.notes;
   document.getElementById("behavioralAssessor").value = signedInUserName();
+  setBehaviorObservationError();
+  renderBehaviorObservationEditor();
 
-  const behaviorGroups = [
-    { title: "Activity & routine", icon: "bi-activity", keys: ["energyLevel", "exerciseNeeds", "playfulness", "attentionNeeds"] },
-    { title: "Social comfort", icon: "bi-people", keys: ["friendlinessToHumans", "goodWithKids", "goodWithOtherPets", "strangerTolerance", "affectionLevel"] },
-    { title: "Home fit", icon: "bi-house-check", keys: ["independenceLevel", "noiseLevel", "spaceNeeds", "adaptability", "trainingDifficulty"] },
-    { title: "Support & safety", icon: "bi-shield-check", keys: ["separationAnxiety", "aggressive", "specialNeeds"] },
-  ];
+  if (!behavioralQuestionConfig?.questions?.length) {
+    showToast("error", "Behavioral assessment questions are unavailable. Refresh the page and try again.");
+    return;
+  }
+  const activeQuestions = behavioralQuestionConfig.questions.filter(question => question.active);
+  const groupIcons = { activity: "bi-activity", social: "bi-people", home: "bi-house-check", safety: "bi-shield-check" };
+  const behaviorGroups = (behavioralQuestionConfig.groups || []).map(group => ({
+    ...group,
+    title: group.label,
+    icon: groupIcons[group.key] || "bi-ui-checks-grid",
+    questions: activeQuestions.filter(question => question.groupKey === group.key),
+  })).filter(group => group.questions.length);
 
   const grid = document.getElementById("traitGrid");
   grid.innerHTML = behaviorGroups.map(group => `
-    <section class="trait-group" aria-labelledby="group-${group.keys[0]}">
+    <section class="trait-group" aria-labelledby="group-${group.key}">
       <header class="trait-group-header">
         <span><i class="bi ${group.icon}" aria-hidden="true"></i></span>
-        <div><strong id="group-${group.keys[0]}">${group.title}</strong><small>${group.keys.length} observations</small></div>
+        <div><strong id="group-${group.key}">${group.title}</strong><small>${group.questions.length} questions</small></div>
       </header>
       <div class="trait-group-list">
-        ${group.keys.map(key => {
-          const trait = TRAITS.find(item => item.key === key);
+        ${group.questions.map(question => {
+          const key = question.traitKey;
           const val = ba[key] ?? 3;
           return `
             <div class="trait-modal-row">
               <div class="trait-modal-copy">
-                <label class="trait-modal-name" id="label-${key}">${trait.label}</label>
-                <div class="trait-modal-desc" id="desc-${key}">${trait.desc}</div>
+                <label class="trait-modal-name" id="label-${question.id}">${escapeHtml(question.label)}</label>
+                <div class="trait-modal-desc" id="desc-${question.id}">${escapeHtml(question.text)}</div>
               </div>
               <input type="hidden" id="slider-${key}" value="${val}" />
-              <div class="trait-score-options" role="group" aria-labelledby="label-${key}" aria-describedby="desc-${key}">
-                ${[1, 2, 3, 4, 5].map(score => `<button type="button" class="trait-score-option${Number(val) === score ? " is-selected" : ""}" data-trait-key="${key}" data-score="${score}" aria-pressed="${Number(val) === score}">${score}</button>`).join("")}
+              <div class="trait-score-options" role="group" aria-labelledby="label-${question.id}" aria-describedby="desc-${question.id}">
+                ${question.choices.map(choice => {
+                  const answerText = String(choice.text || "").trim();
+                  const numericOnly = answerText === String(choice.value);
+                  return `<button type="button" class="trait-score-option${Number(val) === choice.value ? " is-selected" : ""}" data-question-id="${question.id}" data-choice-id="${choice.id}" data-trait-key="${key}" data-score="${choice.value}" aria-pressed="${Number(val) === choice.value}"><span>${escapeHtml(answerText || choice.value)}</span>${numericOnly ? "" : `<small>Score ${choice.value}</small>`}</button>`;
+                }).join("")}
               </div>
             </div>`;
         }).join("")}
@@ -1034,7 +1215,8 @@ function openBehavioralModal() {
   });
 
   if (restoreLocalFormDraft("behavioralForm", "behavioral", "behavioralDraftStatus")) {
-    TRAITS.forEach(({ key }) => {
+    restoreBehaviorObservationDraft();
+    activeQuestions.forEach(({ traitKey: key }) => {
       const score = document.getElementById(`slider-${key}`)?.value;
       grid.querySelectorAll(`[data-trait-key="${key}"]`).forEach((button) => {
         const selected = button.dataset.score === score;
@@ -1068,15 +1250,31 @@ async function saveBehavioralAssessment() {
 }
 
   const traits = {};
-  TRAITS.forEach(t => {
-    traits[t.key] = parseInt(document.getElementById(`slider-${t.key}`)?.value || 3);
+  const answerSelections = {};
+  const activeQuestions = behavioralQuestionConfig?.questions?.filter(question => question.active) || [];
+  activeQuestions.forEach(question => {
+    const score = parseInt(document.getElementById(`slider-${question.traitKey}`)?.value || 3);
+    traits[question.traitKey] = score;
+    const selected = question.choices.find(choice => choice.value === score);
+    if (selected) answerSelections[question.id] = selected.id;
   });
 
-  const notes = document.getElementById("behavioralNotes").value.trim();
+  const observations = validateBehaviorObservations();
+  if (!observations) return;
+  const notes = serializeBehavioralNotes(
+    observations,
+    document.getElementById("behavioralNotes").value
+  );
   const assessor = signedInUserName();
 
   try {
-    await saveBehavioralAssessmentApi(animal.id, { traits, notes, assessor });
+    await saveBehavioralAssessmentApi(animal.id, {
+      traits,
+      answerSelections,
+      configurationVersion: behavioralQuestionConfig.version,
+      notes,
+      assessor,
+    });
     await refreshAnimal();
 
     clearLocalFormDraft("behavioral", "behavioralDraftStatus");
@@ -1803,6 +2001,9 @@ function applyRolePermissions() {
   const behavioralButton =
     document.getElementById("btnEditBehavioral");
 
+  const manageBehaviorQuestionsButton =
+    document.getElementById("btnManageBehaviorQuestions");
+
   const addMedicalButton =
     document.getElementById("btnAddMedical");
 
@@ -1821,6 +2022,10 @@ if (behavioralButton) {
   behavioralButton.style.display =
     canEditBehavioralAssessment() ? "" : "none";
 }
+
+  if (manageBehaviorQuestionsButton) {
+    manageBehaviorQuestionsButton.style.display = can("edit_behavioral") ? "" : "none";
+  }
 
   if (addMedicalButton) {
     const canShowMedical = shouldShowAddMedical(
@@ -1853,8 +2058,10 @@ async function init() {
     renderTopbarUser();
     await loadSidebar();
     await loadAnimal();
+    await loadBehavioralQuestionConfig();
     await loadMedicalInventoryItems();
     bindMedicalInventoryPicker();
+    bindBehaviorObservationEditor();
 
     renderAllTabs();
 
@@ -1872,6 +2079,12 @@ async function init() {
     document.getElementById("behavioralModalCancel")?.addEventListener("click", () => closeModal("behavioralModalBackdrop"));
     document.getElementById("behavioralModalSave")?.addEventListener("click", saveBehavioralAssessment);
     document.getElementById("behavioralModalDraft")?.addEventListener("click", () => saveLocalFormDraft("behavioralForm", "behavioral", "behavioralDraftStatus"));
+
+    initializeBehavioralQuestionManager({
+      role: currentRole,
+      showToast,
+      onSaved: async () => loadBehavioralQuestionConfig(),
+    });
 
     document.getElementById("btnAddMedical")?.addEventListener("click", () => openMedicalModal());
     document.getElementById("btnMarkReady")?.addEventListener("click", markReadyForAdoption);

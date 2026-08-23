@@ -65,8 +65,8 @@
         <aside class="profile-action-panel" aria-label="Profile actions">
           <div class="profile-action-copy"><span>Record controls</span><p>Keep identification, housing, and care details current.</p></div>
           <div class="profile-hero-actions">
+            <button class="btn-primary-clay" type="button" id="btnStatusChange" hidden></button>
             <button class="btn-ghost-clay" type="button" id="btnEditProfile"><i class="bi bi-pencil" aria-hidden="true"></i> Edit profile</button>
-            <button class="btn-primary-clay" type="button" id="btnStatusChange" style="display:none"></button>
             <div class="dropdown">
               <button class="btn-ghost-clay profile-more-btn" type="button" data-bs-toggle="dropdown" aria-label="More profile actions"><i class="bi bi-three-dots" aria-hidden="true"></i><span>More actions</span></button>
               <ul class="dropdown-menu dropdown-menu-end ap-dropdown">
@@ -138,9 +138,12 @@
               <h4 class="tab-section-title">Behavioral Assessment</h4>
               <p class="tab-section-sub">Observed traits used to support responsible adopter matching.</p>
             </div>
-            <button class="btn-primary-clay" id="btnEditBehavioral">
-              <i class="bi bi-sliders"></i> <span id="behavioralBtnLabel">Add Assessment</span>
-            </button>
+            <div class="profile-section-actions">
+              <button class="btn-ghost-clay" type="button" id="btnManageBehaviorQuestions" aria-haspopup="dialog" aria-controls="behaviorQuestionManagerBackdrop" aria-expanded="false"><i class="bi bi-ui-checks-grid"></i> Manage questions</button>
+              <button class="btn-primary-clay" id="btnEditBehavioral">
+                <i class="bi bi-sliders"></i> <span id="behavioralBtnLabel">Add Assessment</span>
+              </button>
+            </div>
           </div>
           <div id="behavioralContent"></div>
         </div>
@@ -173,7 +176,11 @@
 <div class="um-modal-backdrop" id="editModalBackdrop">
   <div class="um-modal ap-modal" role="dialog" aria-modal="true">
     <div class="um-modal-header">
-      <h2>Edit Animal Profile</h2>
+      <div>
+        <span class="modal-kicker">Animal profile</span>
+        <h2>Edit Animal Profile</h2>
+        <p class="modal-subtitle">Update identification, care status, and intake information.</p>
+      </div>
       <button class="modal-close-btn" id="editModalClose" type="button" aria-label="Close animal profile form"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="um-modal-body">
@@ -258,6 +265,21 @@
     </div>
     <div class="um-modal-body">
       <form id="behavioralForm">
+        <section class="behavior-observation-editor" aria-labelledby="behaviorObservationTitle">
+          <div class="behavior-observation-heading">
+            <div>
+              <span class="modal-kicker">Supplemental observations</span>
+              <h3 id="behaviorObservationTitle">Observed behaviors</h3>
+              <p>Add animal-specific behaviors and handling details. Protected matching scores above remain unchanged.</p>
+            </div>
+            <button class="btn-ghost-clay behavior-add-btn" id="addBehaviorObservation" type="button">
+              <i class="bi bi-plus-lg" aria-hidden="true"></i> Add Behavior
+            </button>
+          </div>
+          <input id="behavioralObservationsDraft" type="hidden" value="[]" />
+          <div class="behavior-observation-list" id="behaviorObservationList"></div>
+          <p class="behavior-observation-error" id="behaviorObservationError" role="alert" hidden></p>
+        </section>
         <div class="trait-scale-guide" aria-label="Scoring guide"><span><strong>1</strong> Low</span><span><strong>2</strong></span><span><strong>3</strong> Moderate</span><span><strong>4</strong></span><span><strong>5</strong> High</span></div>
         <div class="trait-grid" id="traitGrid"></div>
         <div class="behavioral-form-meta">
@@ -391,6 +413,45 @@
         <i class="bi bi-floppy-fill"></i> Save Record
       </button>
     </div>
+  </div>
+</div>
+
+<div class="um-modal-backdrop" id="behaviorQuestionManagerBackdrop">
+  <div class="um-modal behavior-question-manager-modal" role="dialog" aria-modal="true" aria-labelledby="behaviorQuestionTitle">
+    <div class="um-modal-header">
+      <div><span class="modal-kicker">Behavioral assessment</span><h2 id="behaviorQuestionTitle" tabindex="-1">Manage assessment questions</h2><p class="modal-subtitle">Add, edit, replace, or remove the behavior questions used by administrators and veterinarians.</p></div>
+      <button type="button" class="modal-close-btn" id="closeBehaviorQuestionManager" aria-label="Close question management"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="um-modal-body">
+      <div class="behavior-config-notice"><i class="bi bi-shield-check"></i><div><strong>Scoring remains protected</strong><p>Questions may only link to existing ANIMUA behavior dimensions. Each active dimension keeps one complete 1–5 scale.</p></div></div>
+      <div class="behavior-question-list" id="behaviorQuestionList" aria-live="polite"><div class="ap-record-loading"><div class="um-spinner"></div><span>Loading behavioral questions…</span></div></div>
+    </div>
+    <div class="um-modal-footer behavior-question-manager-footer">
+      <span class="behavior-config-version" id="behaviorConfigVersion">Version 1</span>
+      <button type="button" class="btn-ghost-clay" id="addBehaviorQuestion"><i class="bi bi-plus-lg"></i> Add question</button>
+      <button type="button" class="btn-primary-clay" id="saveBehaviorQuestions"><i class="bi bi-floppy-fill"></i> Save changes</button>
+    </div>
+  </div>
+</div>
+
+<div class="um-modal-backdrop" id="behaviorQuestionModalBackdrop">
+  <div class="um-modal behavior-question-modal" role="dialog" aria-modal="true" aria-labelledby="behaviorQuestionModalTitle">
+    <div class="um-modal-header">
+      <div><span class="modal-kicker">Assessment configuration</span><h2 id="behaviorQuestionModalTitle">Edit question</h2><p class="modal-subtitle">Question IDs remain protected so completed assessments stay traceable.</p></div>
+      <button type="button" class="modal-close-btn" id="behaviorQuestionModalClose" aria-label="Close question editor"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="um-modal-body">
+      <form id="behaviorQuestionForm" novalidate>
+        <div class="form-group"><label class="form-lbl" for="behaviorQuestionLabel">Question title <span class="req">*</span></label><input class="form-inp" id="behaviorQuestionLabel" maxlength="100" required /></div>
+        <div class="form-group"><label class="form-lbl" for="behaviorQuestionText">Question text <span class="req">*</span></label><textarea class="form-inp form-textarea" id="behaviorQuestionText" maxlength="300" rows="3" required></textarea></div>
+        <div class="form-group"><label class="form-lbl" for="behaviorQuestionTrait">Behavior measured <span class="req">*</span></label><select class="form-inp" id="behaviorQuestionTrait"></select><small class="form-help">Only behavior dimensions already used by ANIMUA can be selected.</small></div>
+        <div class="form-group"><label class="form-lbl" for="behaviorQuestionGroup">Section <span class="req">*</span></label><select class="form-inp" id="behaviorQuestionGroup"></select></div>
+        <label class="behavior-active-control"><input type="checkbox" id="behaviorQuestionActive" /><span><strong>Active question</strong><small>Active questions appear in new assessments.</small></span></label>
+        <fieldset class="behavior-answer-editor"><legend>Answer choices and score mapping</legend><p>Wording can be edited. Scores remain the existing fixed 1–5 scale.</p><div id="behaviorAnswerFields"></div></fieldset>
+        <p class="form-err behavior-question-error" id="behaviorQuestionError" role="alert"></p>
+      </form>
+    </div>
+    <div class="um-modal-footer"><button type="button" class="btn-ghost-clay" id="behaviorQuestionModalCancel">Cancel</button><button type="button" class="btn-primary-clay" id="behaviorQuestionModalApply"><i class="bi bi-check-lg"></i> Apply to draft</button></div>
   </div>
 </div>
 

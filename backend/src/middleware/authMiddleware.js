@@ -63,6 +63,16 @@ function getBearerToken(req) {
   return token;
 }
 
+function isSessionVersionCurrent(decoded = {}, currentUser = {}) {
+  const tokenSessionVersion = Number.isInteger(decoded.sessionVersion)
+    ? decoded.sessionVersion
+    : 0;
+  const currentSessionVersion = Number.isInteger(currentUser.sessionVersion)
+    ? currentUser.sessionVersion
+    : 0;
+  return tokenSessionVersion === currentSessionVersion;
+}
+
 async function authenticateToken(
   req,
   res,
@@ -153,6 +163,12 @@ async function authenticateToken(
     const currentUser =
       userSnapshot.data() || {};
 
+    if (!isSessionVersionCurrent(decoded, currentUser)) {
+      return res.status(401).json({
+        message: "This session was invalidated. Please log in again.",
+      });
+    }
+
     const role =
       normalizeRole(currentUser.role);
 
@@ -204,3 +220,4 @@ async function authenticateToken(
 module.exports = authenticateToken;
 module.exports.normalizeRole = normalizeRole;
 module.exports.getBearerToken = getBearerToken;
+module.exports.isSessionVersionCurrent = isSessionVersionCurrent;

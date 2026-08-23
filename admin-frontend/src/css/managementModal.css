@@ -1709,3 +1709,401 @@ html body.management-consistent-ui .animua-management-swal-danger {
     transition-duration: 1ms !important;
   }
 }
+
+/* Final Create Intake parity contract.
+   The two impossible :not() IDs establish a shared specificity boundary above
+   old page-ID overrides. Modules keep their unique content layouts, while the
+   shell, type scale, controls, scrolling, and actions remain consistent. */
+html body.management-consistent-ui .management-modal-layer:not(#management-intake-contract):not(#management-intake-contract-override) > .management-side-modal,
+html body.management-consistent-ui :is(#aaDrawer.aa-drawer, #srDrawer.sr-drawer) {
+  width: min(860px, calc(100vw - 32px)) !important;
+  max-width: 860px !important;
+  color: var(--management-modal-ink, #1f2329) !important;
+  background: var(--management-modal-cream, #FFF8EE) !important;
+  font: 500 12px/1.5 "Poppins", sans-serif !important;
+}
+
+html body.management-consistent-ui .management-modal-layer:not(#management-intake-contract):not(#management-intake-contract-override) > .management-side-modal > :is(.um-modal-header, .modal-head),
+html body.management-consistent-ui .management-modal-layer:not(#management-intake-contract):not(#management-intake-contract-override) .management-side-modal #viewItemModalInner > .drawer-header,
+html body.management-consistent-ui :is(#aaDrawer.aa-drawer, #srDrawer.sr-drawer) .drawer-header {
+  min-height: 108px !important;
+  align-items: center !important;
+  gap: 14px !important;
+  padding: 25px 34px 22px !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--management-modal-line, #eadfd4) !important;
+  background: var(--management-modal-cream, #FFF8EE) !important;
+}
+
+html body.management-consistent-ui .management-modal-layer:not(#management-intake-contract):not(#management-intake-contract-override) .management-side-modal :is(.um-modal-header, .modal-head, .drawer-header) :is(h2, h3),
+html body.management-consistent-ui :is(#aaDrawer.aa-drawer, #srDrawer.sr-drawer) .drawer-header h3 {
+  margin: 0 !important;
+  color: var(--management-modal-ink, #1f2329) !important;
+  font: 800 1.34rem/1.18 "Poppins", sans-serif !important;
+  letter-spacing: normal !important;
+}
+
+html body.management-consistent-ui .management-modal-layer:not(#management-intake-contract):not(#management-intake-contract-override) .management-side-modal :is(.modal-subtitle, .drawer-header p),
+html body.management-consistent-ui :is(#aaDrawer.aa-drawer, #srDrawer.sr-drawer) .drawer-header p {
+  margin: 5px 0 0 !important;
+  color: var(--management-modal-muted, #756b67) !important;
+  font: 500 .76rem/1.45 "Poppins", sans-serif !important;
+}
+
+html body.management-consistent-ui .management-modal-layer:not(#management-intake-contract):not(#management-intake-contract-override) .management-side-modal :is(
+  .modal-kicker,
+  .composer-eyebrow,
+  .user-modal-eyebrow,
+  .cq-modal-kicker,
+  .adoption-modal-eyebrow,
+  .intake-decision-kicker
+) {
+  display: block !important;
+  margin: 0 0 6px !important;
+  color: var(--management-modal-red, #780116) !important;
+  font: 800 .64rem/1.2 "Poppins", sans-serif !important;
+  letter-spacing: .1em !important;
+  text-transform: uppercase !important;
+}
+
+html body.management-consistent-ui .management-modal-layer:not(#management-intake-contract):not(#management-intake-contract-override) .management-side-modal :is(.modal-close-btn, .drawer-close-btn),
+html body.management-consistent-ui :is(#aaDrawer.aa-drawer, #srDrawer.sr-drawer) .drawer-close-btn {
+  width: 40px !important;
+  min-width: 40px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  flex: 0 0 40px !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  border: 1px solid #e5d8cf !important;
+  border-radius: 50% !important;
+  color: #786a65 !important;
+  background: #FFFFFF !important;
+  font: 700 .9rem/1 "Poppins", sans-serif !important;
+}
+
+html body.management-consistent-ui .management-modal-layer:not(#management-intake-contract):not(#management-intake-contract-override) > .management-side-modal > .um-modal-body,
+html body.management-consistent-ui .management-modal-layer:not(#management-intake-contract):not(#management-intake-contract-override) .management-side-modal #viewItemModalInner > .drawer-body,
+html body.management-consistent-ui :is(#aaDrawer.aa-drawer, #srDrawer.sr-drawer) .drawer-body {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  padding: 28px 34px 34px !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  background: var(--management-modal-cream, #FFF8EE) !important;
+  font: 500 12px/1.5 "Poppins", sans-serif !important;
+}
+
+html body.management-consistent-ui .management-modal-layer:not(#management-intake-contract):not(#management-intake-contract-override) .management-side-modal :is(.form-section, .user-form-section, .view-section, .drawer-section) {
+  margin-bottom: 20px !important;
+  padding: 21px !important;
+  border: 1px solid var(--management-modal-brown-line, rgba(54, 40, 34, .18)) !important;
+  border-radius: 15px !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 8px 22px rgba(54, 40, 34, .055) !important;
+}
+
+/* CRUD modal bodies use one predictable reading path. Page-level grids may
+   arrange full pages, but fields and record facts inside a dialog never split
+   into side-by-side columns. */
+html body.management-consistent-ui .management-modal-layer:not(#management-intake-contract):not(#management-intake-contract-override) .management-side-modal :is(
+  .form-grid,
+  .form-grid-2,
+  .form-grid-3,
+  .user-account-form-layout,
+  .announcement-form.composer-layout,
+  .community-post-grid,
+  .event-fields,
+  .composer-media-grid,
+  .source-selector,
+  .perm-grid,
+  .view-grid,
+  .view-details-grid,
+  .drawer-info-grid,
+  .audit-detail-grid,
+  .archive-detail-grid,
+  .cq-facts,
+  .adoption-finalize-fields,
+  .behavioral-form-meta,
+  .trait-grid,
+  .cq-focused-form
+),
+html body.management-consistent-ui .management-confirm-layer:not(#management-intake-contract):not(#management-intake-contract-override) .management-confirm-modal :is(
+  .form-grid,
+  .view-grid,
+  .adoption-finalize-fields,
+  .intake-decision-summary
+),
+html body.management-consistent-ui :is(#aaDrawer.aa-drawer, #srDrawer.sr-drawer) :is(
+  .drawer-body,
+  .drawer-info-grid,
+  .drawer-section-analysis,
+  .doc-list
+) {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+html body.management-consistent-ui .management-modal-layer:not(#management-intake-contract):not(#management-intake-contract-override) .management-side-modal :is(.form-group, .cq-focused-form > label) {
+  min-width: 0 !important;
+}
+
+html body.management-consistent-ui .management-modal-layer:not(#management-intake-contract):not(#management-intake-contract-override) .management-side-modal :is(.form-section-title, .user-form-section-title, .view-section-title, .drawer-section-title, .perm-section-title) {
+  min-height: 32px !important;
+  margin: 0 0 18px !important;
+  padding: 0 0 13px !important;
+  border-bottom: 1px solid #eee1d7 !important;
+  color: #2b2528 !important;
+  font: 800 .82rem/1.2 "Poppins", sans-serif !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+}
+
+html body.management-consistent-ui .management-modal-layer:not(#management-intake-contract):not(#management-intake-contract-override) .management-side-modal :is(.form-lbl, .form-group > label:not(.source-opt):not(.radio-opt), .cq-focused-form label > span) {
+  margin: 0 !important;
+  color: var(--management-modal-brown, #362822) !important;
+  font: 700 11px/1.35 "Poppins", sans-serif !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+}
+
+html body.management-consistent-ui .management-modal-layer:not(#management-intake-contract):not(#management-intake-contract-override) .management-side-modal :is(.field-help, .form-help, .form-hint, .cq-focused-form label > small) {
+  margin: 5px 0 0 !important;
+  color: var(--management-modal-muted, #756b67) !important;
+  font: 500 10px/1.5 "Poppins", sans-serif !important;
+}
+
+html body.management-consistent-ui .management-modal-layer:not(#management-intake-contract):not(#management-intake-contract-override) .management-side-modal .req {
+  color: var(--management-modal-red, #780116) !important;
+}
+
+html body.management-consistent-ui .management-modal-layer:not(#management-intake-contract):not(#management-intake-contract-override) .management-side-modal :is(input, select, textarea):not([type="radio"]):not([type="checkbox"]):not([type="file"]) {
+  width: 100% !important;
+  min-height: 44px !important;
+  padding: 11px 13px !important;
+  border: 1px solid #dfd3cb !important;
+  border-radius: 10px !important;
+  color: var(--management-modal-ink, #1f2329) !important;
+  background: #FFFFFF !important;
+  font: 500 12px/1.45 "Poppins", sans-serif !important;
+}
+
+html body.management-consistent-ui .management-modal-layer:not(#management-intake-contract):not(#management-intake-contract-override) .management-side-modal textarea {
+  min-height: 88px !important;
+  resize: vertical !important;
+}
+
+html body.management-consistent-ui .management-modal-layer:not(#management-intake-contract):not(#management-intake-contract-override) .management-side-modal :is(.form-err, .field-error, .cq-editor-error) {
+  color: var(--management-modal-red, #780116) !important;
+  font: 600 10px/1.4 "Poppins", sans-serif !important;
+}
+
+html body.management-consistent-ui .management-modal-layer:not(#management-intake-contract):not(#management-intake-contract-override) > .management-side-modal > :is(.um-modal-footer, .modal-actions),
+html body.management-consistent-ui .management-modal-layer:not(#management-intake-contract):not(#management-intake-contract-override) .management-side-modal #viewItemModalInner > .drawer-footer,
+html body.management-consistent-ui :is(#aaDrawer.aa-drawer, #srDrawer.sr-drawer) .drawer-footer {
+  min-height: 76px !important;
+  gap: 10px !important;
+  margin: 0 !important;
+  padding: 15px 26px !important;
+  border: 0 !important;
+  border-top: 1px solid var(--management-modal-line, #eadfd4) !important;
+  background: var(--management-modal-cream, #FFF8EE) !important;
+}
+
+html body.management-consistent-ui .management-modal-layer:not(#management-intake-contract):not(#management-intake-contract-override) .management-side-modal :is(.um-modal-footer, .modal-actions, .drawer-footer) button,
+html body.management-consistent-ui :is(#aaDrawer.aa-drawer, #srDrawer.sr-drawer) .drawer-footer button {
+  min-height: 46px !important;
+  padding: 0 20px !important;
+  border-radius: 999px !important;
+  font: 800 .78rem/1 "Poppins", sans-serif !important;
+}
+
+html body.management-consistent-ui .management-modal-layer:not(#management-intake-contract):not(#management-intake-contract-override) .management-side-modal :is(.um-modal-footer, .modal-actions, .drawer-footer),
+html body.management-consistent-ui :is(#aaDrawer.aa-drawer, #srDrawer.sr-drawer) .drawer-footer {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  flex-wrap: wrap !important;
+}
+
+html body.management-consistent-ui .management-modal-layer:not(#management-intake-contract):not(#management-intake-contract-override) .management-side-modal :is(.btn-primary-clay, .primary-btn, .cq-btn-primary, .management-primary-action) {
+  border-color: var(--management-modal-red, #780116) !important;
+  color: #FFFFFF !important;
+  background: var(--management-modal-red, #780116) !important;
+  box-shadow: 0 10px 22px rgba(120, 1, 22, .18) !important;
+}
+
+html body.management-consistent-ui .management-modal-layer:not(#management-intake-contract):not(#management-intake-contract-override) .management-side-modal :is(.btn-ghost-clay, .btn-outline-save, .secondary-btn, .cq-btn-secondary) {
+  border-color: #dfd3cb !important;
+  color: var(--management-modal-red, #780116) !important;
+  background: #FFFFFF !important;
+  box-shadow: none !important;
+}
+
+html body.management-consistent-ui .management-modal-layer:not(#management-intake-contract):not(#management-intake-contract-override) .management-side-modal :is(.btn-outline-add, .cq-modal-done) {
+  border-color: #dfd3cb !important;
+  color: var(--management-modal-red, #780116) !important;
+  background: #FFFFFF !important;
+  box-shadow: none !important;
+}
+
+/* Compact decisions use the same type and action hierarchy without becoming
+   full workflow drawers. */
+html body.management-consistent-ui .management-confirm-layer:not(#management-intake-contract):not(#management-intake-contract-override) > .management-confirm-modal {
+  width: min(520px, calc(100vw - 32px)) !important;
+  max-width: 520px !important;
+  color: var(--management-modal-ink, #1f2329) !important;
+  background: #FFFFFF !important;
+  font: 500 12px/1.5 "Poppins", sans-serif !important;
+}
+
+html body.management-consistent-ui .management-confirm-layer:not(#management-intake-contract):not(#management-intake-contract-override) > .management-confirm-modal > .um-modal-header {
+  min-height: 82px !important;
+  padding: 20px 24px 17px !important;
+  border-bottom: 1px solid var(--management-modal-line, #eadfd4) !important;
+  background: linear-gradient(135deg, rgba(255, 248, 238, .98), #FFFFFF 74%) !important;
+}
+
+html body.management-consistent-ui .management-confirm-layer:not(#management-intake-contract):not(#management-intake-contract-override) > .management-confirm-modal > .um-modal-header h2 {
+  color: #1f1716 !important;
+  font: 800 1.12rem/1.2 "Poppins", sans-serif !important;
+}
+
+html body.management-consistent-ui .management-confirm-layer:not(#management-intake-contract):not(#management-intake-contract-override) .management-confirm-modal :is(
+  .modal-kicker,
+  .adoption-modal-eyebrow,
+  .intake-decision-kicker
+) {
+  display: block !important;
+  margin: 0 0 6px !important;
+  color: var(--management-modal-red, #780116) !important;
+  font: 800 .62rem/1.2 "Poppins", sans-serif !important;
+  letter-spacing: .1em !important;
+  text-transform: uppercase !important;
+}
+
+html body.management-consistent-ui .management-confirm-layer:not(#management-intake-contract):not(#management-intake-contract-override) .management-confirm-modal .modal-subtitle {
+  margin: 5px 0 0 !important;
+  color: var(--management-modal-muted, #756b67) !important;
+  font: 500 .72rem/1.45 "Poppins", sans-serif !important;
+}
+
+html body.management-consistent-ui .management-confirm-layer:not(#management-intake-contract):not(#management-intake-contract-override) > .management-confirm-modal > .um-modal-body {
+  min-height: 0 !important;
+  padding: 24px !important;
+  overflow-y: auto !important;
+  background: linear-gradient(180deg, #FFFFFF 0%, #FFF8EE 100%) !important;
+  font: 500 12px/1.5 "Poppins", sans-serif !important;
+}
+
+html body.management-consistent-ui .management-confirm-layer:not(#management-intake-contract):not(#management-intake-contract-override) .management-confirm-modal .form-group {
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+}
+
+html body.management-consistent-ui .management-confirm-layer:not(#management-intake-contract):not(#management-intake-contract-override) .management-confirm-modal .form-lbl {
+  margin: 0 !important;
+  color: var(--management-modal-brown, #362822) !important;
+  font: 700 11px/1.35 "Poppins", sans-serif !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+}
+
+html body.management-consistent-ui .management-confirm-layer:not(#management-intake-contract):not(#management-intake-contract-override) .management-confirm-modal :is(input, select, textarea):not([type="radio"]):not([type="checkbox"]) {
+  width: 100% !important;
+  min-height: 44px !important;
+  padding: 11px 13px !important;
+  border: 1px solid #dfd3cb !important;
+  border-radius: 10px !important;
+  color: var(--management-modal-ink, #1f2329) !important;
+  background: #FFFFFF !important;
+  font: 500 12px/1.45 "Poppins", sans-serif !important;
+}
+
+html body.management-consistent-ui .management-confirm-layer:not(#management-intake-contract):not(#management-intake-contract-override) > .management-confirm-modal > .um-modal-footer {
+  min-height: 76px !important;
+  gap: 10px !important;
+  padding: 15px 24px !important;
+  border-top: 1px solid var(--management-modal-line, #eadfd4) !important;
+  background: var(--management-modal-cream, #FFF8EE) !important;
+}
+
+html body.management-consistent-ui .management-confirm-layer:not(#management-intake-contract):not(#management-intake-contract-override) .management-confirm-modal .um-modal-footer :is(
+  .btn-primary-clay,
+  .btn-reject,
+  .btn-reject-confirm,
+  .btn-approve-confirm,
+  .btn-finalize,
+  .btn-convert,
+  .btn-danger,
+  .btn-success
+) {
+  border-color: var(--management-modal-red, #780116) !important;
+  color: #FFFFFF !important;
+  background: var(--management-modal-red, #780116) !important;
+  box-shadow: 0 10px 22px rgba(120, 1, 22, .18) !important;
+}
+
+@media (max-width: 800px) {
+  html body.management-consistent-ui .management-modal-layer:not(#management-intake-contract):not(#management-intake-contract-override) > .management-side-modal,
+  html body.management-consistent-ui :is(#aaDrawer.aa-drawer, #srDrawer.sr-drawer) {
+    width: 100vw !important;
+    min-width: 100vw !important;
+    max-width: 100vw !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  html body.management-consistent-ui .management-modal-layer:not(#management-intake-contract):not(#management-intake-contract-override) > .management-side-modal > :is(.um-modal-header, .modal-head),
+  html body.management-consistent-ui .management-modal-layer:not(#management-intake-contract):not(#management-intake-contract-override) .management-side-modal #viewItemModalInner > .drawer-header,
+  html body.management-consistent-ui :is(#aaDrawer.aa-drawer, #srDrawer.sr-drawer) .drawer-header {
+    min-height: 92px !important;
+    padding: 20px 18px 17px !important;
+  }
+
+  html body.management-consistent-ui .management-modal-layer:not(#management-intake-contract):not(#management-intake-contract-override) > .management-side-modal > .um-modal-body,
+  html body.management-consistent-ui .management-modal-layer:not(#management-intake-contract):not(#management-intake-contract-override) .management-side-modal #viewItemModalInner > .drawer-body,
+  html body.management-consistent-ui :is(#aaDrawer.aa-drawer, #srDrawer.sr-drawer) .drawer-body {
+    padding: 20px 18px 28px !important;
+  }
+
+  html body.management-consistent-ui .management-modal-layer:not(#management-intake-contract):not(#management-intake-contract-override) > .management-side-modal > :is(.um-modal-footer, .modal-actions),
+  html body.management-consistent-ui .management-modal-layer:not(#management-intake-contract):not(#management-intake-contract-override) .management-side-modal #viewItemModalInner > .drawer-footer,
+  html body.management-consistent-ui :is(#aaDrawer.aa-drawer, #srDrawer.sr-drawer) .drawer-footer {
+    padding: 14px 18px !important;
+  }
+}
+
+@media (max-width: 560px) {
+  html body.management-consistent-ui .management-modal-layer:not(#management-intake-contract):not(#management-intake-contract-override) .management-side-modal :is(.um-modal-header, .modal-head, .drawer-header) :is(h2, h3),
+  html body.management-consistent-ui :is(#aaDrawer.aa-drawer, #srDrawer.sr-drawer) .drawer-header h3 {
+    font-size: 1.12rem !important;
+  }
+
+  html body.management-consistent-ui .management-modal-layer:not(#management-intake-contract):not(#management-intake-contract-override) .management-side-modal :is(.form-section, .user-form-section, .view-section, .drawer-section) {
+    padding: 15px !important;
+  }
+
+  html body.management-consistent-ui .management-modal-layer:not(#management-intake-contract):not(#management-intake-contract-override) .management-side-modal :is(.um-modal-footer, .modal-actions, .drawer-footer) button,
+  html body.management-consistent-ui :is(#aaDrawer.aa-drawer, #srDrawer.sr-drawer) .drawer-footer button {
+    width: 100% !important;
+    flex: 1 1 100% !important;
+  }
+
+  html body.management-consistent-ui .management-confirm-layer:not(#management-intake-contract):not(#management-intake-contract-override) > .management-confirm-modal {
+    width: 100% !important;
+    max-height: calc(100dvh - 24px) !important;
+  }
+
+  html body.management-consistent-ui .management-confirm-layer:not(#management-intake-contract):not(#management-intake-contract-override) > .management-confirm-modal > .um-modal-footer {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  html body.management-consistent-ui .management-confirm-layer:not(#management-intake-contract):not(#management-intake-contract-override) > .management-confirm-modal > .um-modal-footer button {
+    width: 100% !important;
+  }
+}

@@ -74,20 +74,23 @@
           </div>
 
           <div class="announcement-category-rail" aria-label="Content categories">
-            <button class="category-story" type="button" data-category-type="News & Article">
+            <button class="category-story" type="button" data-category-type="News & Article" aria-pressed="false">
               <span class="category-story-ring"><i class="bi bi-newspaper"></i></span>
               <strong>News &amp; Article</strong>
               <small><span id="categoryNewsCount">0</span> posts</small>
+              <i class="bi bi-arrow-right category-story-arrow" aria-hidden="true"></i>
             </button>
-            <button class="category-story" type="button" data-category-type="Success Stories">
+            <button class="category-story" type="button" data-category-type="Success Stories" aria-pressed="false">
               <span class="category-story-ring is-success"><i class="bi bi-heart-fill"></i></span>
               <strong>Success Stories</strong>
               <small><span id="categorySuccessCount">0</span> posts</small>
+              <i class="bi bi-arrow-right category-story-arrow" aria-hidden="true"></i>
             </button>
-            <button class="category-story" type="button" data-category-type="Upcoming Events">
+            <button class="category-story" type="button" data-category-type="Upcoming Events" aria-pressed="false">
               <span class="category-story-ring is-event"><i class="bi bi-calendar2-heart-fill"></i></span>
               <strong>Upcoming Events</strong>
               <small><span id="categoryEventCount">0</span> posts</small>
+              <i class="bi bi-arrow-right category-story-arrow" aria-hidden="true"></i>
             </button>
           </div>
 
@@ -181,16 +184,17 @@
   </div>
 
   <!-- Create / edit community post modal -->
-  <div id="announcementModalBackdrop" class="modal-backdrop-custom um-modal-backdrop">
-    <div class="announcement-modal um-modal intake-modal" role="dialog" aria-modal="true" aria-labelledby="announcementModalTitle">
+  <div id="announcementModalBackdrop" class="modal-backdrop-custom um-modal-backdrop" aria-hidden="true">
+    <div class="announcement-modal um-modal intake-modal" role="dialog" aria-modal="true" aria-labelledby="announcementModalTitle" aria-describedby="announcementModalSubtitle">
       <div class="modal-head um-modal-header">
         <div>
+          <span class="composer-eyebrow">Community publishing</span>
           <h2 id="announcementModalTitle">Create Community Post</h2>
-          <p class="modal-subtitle">Share an update with the ANIMUA community.</p>
+          <p class="modal-subtitle" id="announcementModalSubtitle">Share an update with the ANIMUA community.</p>
         </div>
 
         <button id="announcementModalClose" class="icon-btn modal-close-btn" type="button" aria-label="Close community post form">
-          <i class="bi bi-x-lg"></i>
+          <i class="bi bi-x-lg" aria-hidden="true"></i>
         </button>
       </div>
 
@@ -198,7 +202,7 @@
         <form id="announcementForm" class="announcement-form composer-layout">
           <section class="form-section composer-media-column" aria-label="Post media">
             <div class="form-section-title">
-              <i class="bi bi-image"></i>
+              <i class="bi bi-image" aria-hidden="true"></i>
               Post Media
             </div>
 
@@ -208,7 +212,7 @@
 
                 <div class="media-placeholder">
                   <div class="media-placeholder-icon">
-                    <i class="bi bi-image"></i>
+                    <i class="bi bi-image" aria-hidden="true"></i>
                   </div>
                   <strong>Add a cover image</strong>
                   <span>Choose a photo from your device to preview your post.</span>
@@ -219,15 +223,15 @@
                 <span class="form-lbl">Cover Photo</span>
                 <div class="media-upload-actions">
                   <label class="media-file-button" for="fImageFile">
-                    <i class="bi bi-upload"></i>
+                    <i class="bi bi-upload" aria-hidden="true"></i>
                     <span>Choose photo</span>
                   </label>
                   <button id="removeImageBtn" class="media-remove-button" type="button" hidden>
-                    <i class="bi bi-trash3"></i>
+                    <i class="bi bi-trash3" aria-hidden="true"></i>
                     Remove
                   </button>
                 </div>
-                <input id="fImageFile" class="media-file-input" type="file" accept="image/jpeg,image/png,image/webp" />
+                <input id="fImageFile" class="media-file-input" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="mediaPreviewStatus" />
                 <small id="mediaPreviewStatus">JPG, PNG, or WebP up to 5 MB.</small>
               </div>
             </div>
@@ -235,15 +239,15 @@
 
           <section class="form-section composer-fields" aria-label="Post details">
             <div class="form-section-title">
-              <i class="bi bi-megaphone"></i>
+              <i class="bi bi-megaphone" aria-hidden="true"></i>
               Post Details
             </div>
 
             <div class="composer-author">
-              <div class="composer-author-avatar"><i class="bi bi-heart-fill"></i></div>
+              <div class="composer-author-avatar"><i class="bi bi-heart-fill" aria-hidden="true"></i></div>
               <div>
                 <strong>ANIMUA Angeles City</strong>
-                <span><i class="bi bi-globe2"></i> Community post</span>
+                <span><i class="bi bi-globe2" aria-hidden="true"></i> Community post</span>
               </div>
             </div>
 
@@ -302,10 +306,14 @@
       </div>
 
       <div class="modal-actions um-modal-footer">
+        <button id="announcementDraftBtn" class="secondary-btn btn-ghost-clay announcement-draft-btn" type="button">
+          <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
+          <span>Save Draft</span>
+        </button>
         <button id="announcementCancelBtn" class="secondary-btn btn-ghost-clay" type="button">Cancel</button>
         <button class="primary-btn composer-submit btn-primary-clay" type="submit" form="announcementForm">
-          <i class="bi bi-send-fill"></i>
-          Publish Post
+          <i class="bi bi-send-fill" id="announcementSubmitIcon" aria-hidden="true"></i>
+          <span id="announcementSubmitLabel">Publish Post</span>
         </button>
       </div>
     </div>

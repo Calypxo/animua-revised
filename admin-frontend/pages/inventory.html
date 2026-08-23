@@ -118,7 +118,6 @@
             </div>
             <div class="inventory-filter-summary" aria-live="polite">
               <span id="filterResultsCount">Showing all inventory items</span>
-              <span><i class="bi bi-lightning-charge-fill"></i> Filters update instantly</span>
             </div>
           </div>
 
@@ -129,7 +128,7 @@
 
 <div id="tableView">
   <div class="table-responsive inventory-table-wrap">
-    <table class="shelter-table inventory-smart-table management-data-table">
+    <table class="shelter-table inventory-smart-table management-data-table management-card-table" data-card-until="1365">
 
       <colgroup>
         <col class="col-item" />
@@ -224,6 +223,7 @@
   <div class="um-modal inv-modal intake-modal management-side-modal" role="dialog" aria-modal="true">
     <div class="um-modal-header">
       <div>
+        <span class="modal-kicker">Inventory transaction</span>
         <h2 id="stockInTitle">Stock In</h2>
         <p class="modal-subtitle">Record incoming stock for an item.</p>
       </div>
@@ -332,7 +332,7 @@
 <div class="um-modal-backdrop" id="stockOutModalBackdrop">
   <div class="um-modal inv-modal intake-modal management-side-modal" role="dialog" aria-modal="true">
     <div class="um-modal-header">
-      <div><h2>Record Usage</h2><p class="modal-subtitle" id="stockOutSubtitle">Deduct stock used on an animal.</p></div>
+      <div><span class="modal-kicker">Inventory transaction</span><h2>Record Usage</h2><p class="modal-subtitle" id="stockOutSubtitle">Deduct stock used on an animal.</p></div>
       <button class="modal-close-btn" id="stockOutClose" type="button" aria-label="Close stock usage form"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="um-modal-body">
@@ -419,7 +419,11 @@
 <div class="um-modal-backdrop" id="itemModalBackdrop">
   <div class="um-modal inv-modal intake-modal management-side-modal" role="dialog" aria-modal="true">
     <div class="um-modal-header">
-      <h2 id="itemModalTitle">Add New Item</h2>
+      <div>
+        <span class="modal-kicker">Inventory record</span>
+        <h2 id="itemModalTitle">Add New Item</h2>
+        <p class="modal-subtitle">Create or update an inventory item and its stock settings.</p>
+      </div>
       <button class="modal-close-btn" id="itemModalClose" type="button" aria-label="Close inventory item form"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="um-modal-body">

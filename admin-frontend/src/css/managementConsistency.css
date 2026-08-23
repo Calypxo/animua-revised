@@ -119,3 +119,577 @@ html body.management-consistent-ui :is(
 html body.management-consistent-ui :is(button, [role="button"]):disabled {
   cursor: not-allowed !important;
 }
+
+/* Shared component polish: readable operational density and predictable hierarchy. */
+html body.management-consistent-ui :is(
+  button,
+  a,
+  input,
+  select,
+  textarea,
+  summary,
+  [role="button"],
+  [role="tab"]
+):focus-visible {
+  outline: 3px solid rgba(247, 181, 56, .58) !important;
+  outline-offset: 2px !important;
+}
+
+html body.management-consistent-ui :is(
+  .form-lbl,
+  .filter-field > span,
+  .ap-filter-field > span,
+  .um-select-field > span,
+  .inventory-reference-field > span,
+  .report-filter-grid label > span
+) {
+  color: #5f514c !important;
+  font-size: .7rem !important;
+  font-weight: 700 !important;
+  line-height: 1.35 !important;
+  letter-spacing: .01em !important;
+  text-transform: none !important;
+}
+
+/* Compact context hierarchy shared with the Animal Profiling register. */
+html body.management-consistent-ui :is(.audit-panel, .archive-panel) .records-heading .section-kicker {
+  display: block !important;
+  margin-bottom: 5px !important;
+  color: #780116 !important;
+  font: 800 .625rem/1 "Poppins", sans-serif !important;
+  letter-spacing: .1em !important;
+  text-transform: uppercase !important;
+}
+
+html body.management-consistent-ui :is(
+  .btn-primary-clay,
+  .btn-ghost-clay,
+  .btn-outline-add,
+  .primary-btn,
+  .secondary-btn,
+  .btn-export,
+  .btn-finalize
+) {
+  min-height: 42px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  padding-inline: 16px !important;
+  border-radius: 11px !important;
+  font-size: .74rem !important;
+  font-weight: 750 !important;
+  line-height: 1.2 !important;
+}
+
+html body.management-consistent-ui :is(
+  .status-badge,
+  .status-pill,
+  .role-badge,
+  .module-badge,
+  .module-chip,
+  .type-badge,
+  .app-type-badge,
+  .stock-status,
+  .risk-badge,
+  .urgency-badge,
+  .cq-score,
+  .cq-version
+) {
+  min-height: 27px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  padding: 5px 10px !important;
+  border: 1px solid currentColor !important;
+  border-radius: 999px !important;
+  font-size: .67rem !important;
+  font-weight: 750 !important;
+  line-height: 1.15 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+html body.management-consistent-ui :is(
+  .empty-state,
+  .records-empty-state,
+  .reference-records-empty,
+  .report-empty-state,
+  .ap-empty-state,
+  .cq-empty,
+  .pet-empty,
+  .user-board-empty,
+  .empty-feed
+) {
+  min-height: 180px;
+  padding: 30px 20px !important;
+  color: var(--animua-muted) !important;
+  text-align: center !important;
+}
+
+html body.management-consistent-ui :is(
+  .empty-state,
+  .records-empty-state,
+  .reference-records-empty,
+  .report-empty-state,
+  .ap-empty-state,
+  .cq-empty,
+  .pet-empty,
+  .user-board-empty,
+  .empty-feed
+) :is(strong, h3) {
+  color: var(--animua-charcoal) !important;
+  font-size: .92rem !important;
+  line-height: 1.35 !important;
+}
+
+html body.management-consistent-ui :is(
+  .empty-state,
+  .records-empty-state,
+  .reference-records-empty,
+  .report-empty-state,
+  .ap-empty-state,
+  .cq-empty,
+  .pet-empty,
+  .user-board-empty,
+  .empty-feed
+) :is(p, small, span:not([class])) {
+  max-width: 480px;
+  color: var(--animua-muted) !important;
+  font-size: .72rem !important;
+  line-height: 1.55 !important;
+}
+
+@media (max-width: 560px) {
+  html body.management-consistent-ui :is(
+    .btn-primary-clay,
+    .btn-ghost-clay,
+    .btn-outline-add,
+    .primary-btn,
+    .secondary-btn
+  ) {
+    min-height: 44px !important;
+  }
+
+  html body.management-consistent-ui :is(
+    .empty-state,
+    .records-empty-state,
+    .reference-records-empty,
+    .report-empty-state,
+    .ap-empty-state,
+    .cq-empty,
+    .pet-empty,
+    .user-board-empty,
+    .empty-feed
+  ) {
+    min-height: 150px;
+    padding: 24px 16px !important;
+  }
+}
+
+/* ANIMUA management-wide visual polish: burgundy structure with gold accents. */
+:root {
+  --animua-gold: #f7b538;
+  --animua-gold-soft: #fff1cf;
+  --animua-gold-line: #efcf83;
+  --animua-red-deep: #59000f;
+  --animua-surface-warm: #fffaf1;
+}
+
+html body.management-consistent-ui {
+  background:
+    radial-gradient(circle at 92% 4%, rgba(247, 181, 56, .09), transparent 24rem),
+    var(--animua-cream) !important;
+}
+
+html body.management-consistent-ui .topbar {
+  border-bottom-color: rgba(247, 181, 56, .46) !important;
+  box-shadow:
+    inset 0 -2px 0 rgba(120, 1, 22, .06),
+    0 5px 20px rgba(63, 35, 30, .05) !important;
+}
+
+html body.management-consistent-ui .topbar .icon-btn:hover,
+html body.management-consistent-ui .topbar .icon-btn:focus-visible,
+html body.management-consistent-ui .topbar-quick-action:hover,
+html body.management-consistent-ui .topbar-quick-action:focus-visible {
+  border-color: var(--animua-gold-line) !important;
+  color: var(--animua-red) !important;
+  background: var(--animua-gold-soft) !important;
+}
+
+html body.management-consistent-ui :is(
+  .panel,
+  .rpt-card,
+  .cq-card,
+  .insight-card,
+  .post-card,
+  .kpi-card,
+  .workflow-card,
+  .integrity-card
+) {
+  border-color: #ead8c8 !important;
+  box-shadow: 0 16px 38px rgba(70, 34, 27, .075) !important;
+}
+
+/* Dashboard cards retain their data hierarchy while gaining a consistent frame. */
+html body.management-consistent-ui .kpi-card {
+  position: relative;
+  border-top: 3px solid var(--animua-gold) !important;
+  background: linear-gradient(155deg, #FFFFFF 0%, #FFFBF4 100%) !important;
+}
+
+html body.management-consistent-ui .kpi-card:hover {
+  border-color: var(--animua-gold-line) !important;
+  box-shadow: 0 20px 42px rgba(120, 1, 22, .11) !important;
+}
+
+html body.management-consistent-ui .kpi-card.kpi-primary {
+  border-color: var(--animua-gold) !important;
+  color: #FFFFFF !important;
+  background:
+    radial-gradient(circle at 88% 12%, rgba(247, 181, 56, .28), transparent 34%),
+    linear-gradient(135deg, var(--animua-red-deep), var(--animua-red)) !important;
+}
+
+html body.management-consistent-ui .kpi-card:not(.kpi-primary) .kpi-pill {
+  border: 1px solid rgba(247, 181, 56, .55) !important;
+  color: var(--animua-red) !important;
+  background: var(--animua-gold-soft) !important;
+}
+
+html body.management-consistent-ui .panel:not(.ap-records-panel):not(.records-panel):not(.aa-table-panel):not(.sr-table-panel):not(.inv-table-panel) > .panel-head {
+  margin-bottom: 18px !important;
+  padding-bottom: 14px !important;
+  border-bottom: 1px solid rgba(247, 181, 56, .34) !important;
+}
+
+html body.management-consistent-ui .panel > .panel-head :is(h2, h3),
+html body.management-consistent-ui .rpt-card-head h3 {
+  color: #2b1719 !important;
+}
+
+html body.management-consistent-ui .panel > .panel-head :is(h2, h3)::after,
+html body.management-consistent-ui .rpt-card-head h3::after {
+  content: "";
+  width: 30px;
+  height: 3px;
+  display: block;
+  margin-top: 7px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--animua-red), var(--animua-gold));
+}
+
+html body.management-consistent-ui .action-tile:hover,
+html body.management-consistent-ui .action-tile:focus-visible {
+  border-color: var(--animua-gold-line) !important;
+  color: var(--animua-red) !important;
+  background: var(--animua-gold-soft) !important;
+  box-shadow: 0 10px 24px rgba(120, 1, 22, .09) !important;
+}
+
+/* Every operational register shares the same warm frame and branded heading. */
+html body.management-consistent-ui :is(
+  .ap-records-panel,
+  .records-panel,
+  .aa-table-panel,
+  .sr-table-panel,
+  .inv-table-panel,
+  .um-directory-panel,
+  .cq-records,
+  .audit-panel,
+  .archive-panel,
+  .report-data-card
+) {
+  border-top-color: var(--animua-gold) !important;
+  box-shadow: 0 18px 44px rgba(72, 36, 29, .09) !important;
+}
+
+html body.management-consistent-ui :is(
+  .records-panel .records-heading,
+  .aa-table-panel .aa-panel-intro,
+  .sr-table-panel .records-toolbar,
+  .inv-table-panel .inventory-records-heading,
+  .ap-records-panel .ap-records-heading,
+  .cq-records .cq-record-head,
+  .report-data-card > .rpt-card-head
+) {
+  border-bottom-color: rgba(247, 181, 56, .38) !important;
+  background: linear-gradient(125deg, var(--animua-gold-soft) 0%, #FFF8EE 30%, #FFFFFF 76%) !important;
+}
+
+html body.management-consistent-ui :is(
+  .reference-records-icon,
+  .records-heading-icon,
+  .aa-panel-icon,
+  .cq-card-icon
+) {
+  border: 2px solid var(--animua-gold) !important;
+  color: #FFFFFF !important;
+  background: var(--animua-red) !important;
+  box-shadow:
+    0 0 0 3px rgba(247, 181, 56, .18),
+    0 9px 20px rgba(120, 1, 22, .18) !important;
+}
+
+html body.management-consistent-ui :is(
+  .ap-records-legend,
+  .records-legend,
+  .aa-panel-tip,
+  .inventory-records-tip,
+  .chart-context-pill,
+  .table-record-count
+) {
+  border-color: rgba(247, 181, 56, .48) !important;
+  color: var(--animua-red) !important;
+  background: #FFFFFF !important;
+}
+
+/* Compact tab groups read as one control with an unmistakable active page. */
+html body.management-consistent-ui :is(
+  .ap-tabs,
+  .archive-tabs,
+  .intake-tabs,
+  .aa-tabs,
+  .inv-tabs,
+  .um-tabs,
+  .sr-tabs
+) {
+  border-color: var(--animua-gold-line) !important;
+  background: var(--animua-gold-soft) !important;
+}
+
+html body.management-consistent-ui :is(
+  .ap-tab,
+  .archive-tab,
+  .intake-tab,
+  .aa-tab,
+  .inv-tab,
+  .um-tab,
+  .sr-tab
+):hover {
+  color: var(--animua-red) !important;
+  background: #FFFFFF !important;
+}
+
+html body.management-consistent-ui :is(
+  .ap-tab,
+  .archive-tab,
+  .intake-tab,
+  .aa-tab,
+  .inv-tab,
+  .um-tab,
+  .sr-tab
+).active {
+  color: #FFFFFF !important;
+  background: var(--animua-red) !important;
+  box-shadow: 0 7px 16px rgba(120, 1, 22, .18) !important;
+}
+
+html body.management-consistent-ui :is(
+  .ap-tab,
+  .archive-tab,
+  .intake-tab,
+  .aa-tab,
+  .inv-tab,
+  .um-tab,
+  .sr-tab
+).active :is(i, span) {
+  color: inherit !important;
+}
+
+html body.management-consistent-ui :is(
+  .ap-filter-toolbar,
+  .filter-toolbar,
+  .aa-filter-toolbar,
+  .um-filter-bar,
+  .inventory-filter-controls,
+  .cq-toolbar,
+  .audit-filter-grid,
+  .report-filter-grid,
+  .feed-filters
+) {
+  border-bottom-color: rgba(247, 181, 56, .32) !important;
+  background: linear-gradient(180deg, #FFFFFF, #FFFCF7) !important;
+}
+
+html body.management-consistent-ui :is(
+  .ap-control,
+  .search-pill-sm,
+  .report-input,
+  .feed-search
+):focus-within,
+html body.management-consistent-ui select:focus {
+  border-color: var(--animua-red) !important;
+  box-shadow: 0 0 0 4px rgba(247, 181, 56, .24) !important;
+}
+
+/* Gold-tinted headings make dense tables scan as branded workspaces. */
+html body.management-consistent-ui :is(.shelter-table, .rpt-table, .management-data-table) thead th {
+  border-color: #ead4a0 !important;
+  color: var(--animua-red) !important;
+  background: var(--animua-gold-soft) !important;
+}
+
+html body.management-consistent-ui :is(.shelter-table, .rpt-table, .management-data-table) tbody tr:hover > * {
+  background: #FFF9EA !important;
+}
+
+html body.management-consistent-ui :is(
+  .tbl-action-btn,
+  .detail-btn,
+  .view-btn,
+  .audit-review-btn
+) {
+  border-color: var(--animua-gold-line) !important;
+  color: var(--animua-red) !important;
+  background: var(--animua-gold-soft) !important;
+}
+
+html body.management-consistent-ui :is(
+  .tbl-action-btn,
+  .detail-btn,
+  .view-btn,
+  .audit-review-btn
+):hover {
+  border-color: var(--animua-red) !important;
+  color: #FFFFFF !important;
+  background: var(--animua-red) !important;
+}
+
+html body.management-consistent-ui :is(.um-pagination, .report-table-footer) {
+  border-top-color: rgba(247, 181, 56, .38) !important;
+  background: var(--animua-surface-warm) !important;
+}
+
+html body.management-consistent-ui :is(.page-btn, .report-page-btn).active {
+  border-color: var(--animua-gold) !important;
+  color: #FFFFFF !important;
+  background: var(--animua-red) !important;
+  box-shadow: 0 7px 16px rgba(120, 1, 22, .2) !important;
+}
+
+/* Reports and publishing keep their specialized layouts but share the palette. */
+html body.management-consistent-ui .report-command-card {
+  border-top: 3px solid var(--animua-gold) !important;
+}
+
+html body.management-consistent-ui .report-preset-row button.active,
+html body.management-consistent-ui .report-tab.active {
+  border-color: var(--animua-gold) !important;
+  color: var(--animua-red) !important;
+  background: linear-gradient(135deg, var(--animua-gold-soft), #FFFFFF) !important;
+  box-shadow: 0 10px 24px rgba(120, 1, 22, .09) !important;
+}
+
+html body.management-consistent-ui .report-insight-card {
+  border: 1px solid var(--animua-gold) !important;
+  background:
+    radial-gradient(circle at 88% 12%, rgba(247, 181, 56, .28), transparent 34%),
+    linear-gradient(135deg, var(--animua-red-deep), var(--animua-red)) !important;
+}
+
+html body.management-consistent-ui .report-insight-card :is(.section-kicker, h3) {
+  color: var(--animua-gold) !important;
+}
+
+html body.management-consistent-ui .report-insight-card .section-kicker {
+  color: #fff4d6 !important;
+}
+
+html body.management-consistent-ui .report-apply-btn {
+  border-color: var(--animua-gold) !important;
+  color: #FFFFFF !important;
+  background: var(--animua-red) !important;
+}
+
+html body.management-consistent-ui .channel-profile-card {
+  border-color: var(--animua-gold) !important;
+  background:
+    radial-gradient(circle at 82% 10%, rgba(247, 181, 56, .34), transparent 26%),
+    linear-gradient(120deg, var(--animua-red-deep), var(--animua-red) 68%, #94132a) !important;
+}
+
+html body.management-consistent-ui .category-story:hover,
+html body.management-consistent-ui .category-story:focus-visible,
+html body.management-consistent-ui .category-story.is-active {
+  border-color: var(--animua-gold-line) !important;
+  color: var(--animua-red) !important;
+  background: var(--animua-gold-soft) !important;
+}
+
+html body.management-consistent-ui :is(.insight-card, .post-card) {
+  border-top-color: var(--animua-gold) !important;
+}
+
+html body.management-consistent-ui .post-card:hover {
+  border-color: var(--animua-gold-line) !important;
+  box-shadow: 0 18px 38px rgba(120, 1, 22, .1) !important;
+}
+
+/* Dialogs use the same hierarchy as their parent workspaces. */
+html body.management-consistent-ui :is(.um-modal-header, .modal-head, .drawer-head) {
+  border-top: 3px solid var(--animua-gold) !important;
+  border-bottom-color: rgba(247, 181, 56, .34) !important;
+  background: linear-gradient(125deg, var(--animua-gold-soft), #FFF8EE 36%, #FFFFFF) !important;
+}
+
+html body.management-consistent-ui :is(.um-modal-header, .modal-head, .drawer-head) :is(h2, h3) {
+  color: var(--animua-red) !important;
+}
+
+html body.management-consistent-ui :is(
+  .btn-primary-clay,
+  .primary-btn,
+  .btn-export,
+  .btn-finalize,
+  .cq-btn-primary,
+  .cm-send-btn
+) {
+  border-color: var(--animua-gold) !important;
+  color: #FFFFFF !important;
+  background: var(--animua-red) !important;
+  box-shadow: 0 7px 16px rgba(120, 1, 22, .16) !important;
+}
+
+/* Conversations intentionally use the stronger burgundy workspace header. */
+html body.management-consistent-ui.contact-messages-page .cm-records-panel > .ap-records-heading {
+  border-bottom-color: rgba(247, 181, 56, .42) !important;
+  background:
+    radial-gradient(circle at 86% 18%, rgba(247, 181, 56, .2), transparent 24%),
+    linear-gradient(120deg, var(--animua-red-deep), var(--animua-red) 62%, #94132a) !important;
+}
+
+html body.management-consistent-ui.contact-messages-page .cm-records-panel > .ap-records-heading :is(h2, p, .ap-records-legend) {
+  color: #FFFFFF !important;
+}
+
+html body.management-consistent-ui.contact-messages-page .cm-records-panel > .ap-records-heading .ap-section-kicker,
+html body.management-consistent-ui.contact-messages-page .cm-records-panel > .ap-records-heading .ap-records-legend i {
+  color: var(--animua-gold) !important;
+}
+
+@media (max-width: 680px) {
+  html body.management-consistent-ui .panel:not(.ap-records-panel):not(.records-panel):not(.aa-table-panel):not(.sr-table-panel):not(.inv-table-panel) > .panel-head {
+    padding-bottom: 12px !important;
+  }
+
+  html body.management-consistent-ui :is(
+    .ap-tabs,
+    .archive-tabs,
+    .intake-tabs,
+    .aa-tabs,
+    .inv-tabs,
+    .um-tabs,
+    .sr-tabs
+  ) {
+    scroll-padding-inline: 6px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body.management-consistent-ui :is(.kpi-card, .panel, .action-tile, .post-card, .category-story) {
+    transition: none !important;
+  }
+}

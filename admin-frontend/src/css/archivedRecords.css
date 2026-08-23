@@ -609,4 +609,182 @@
   .search-pill-sm {
     min-width: 100%;
   }
+
+  body.management-consistent-ui.archived-records-page .archive-signal-layout {
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  body.management-consistent-ui.archived-records-page :is(
+    .archive-signal-card, .retention-card
+  ) {
+    gap: 12px;
+    padding: 14px;
+  }
+
+  body.management-consistent-ui.archived-records-page :is(
+    .signal-icon, .retention-icon
+  ) {
+    width: 40px;
+    height: 40px;
+    flex-basis: 40px;
+    border-radius: 12px;
+  }
+
+  body.management-consistent-ui.archived-records-page :is(
+    .signal-copy strong, .retention-card strong
+  ) {
+    font-size: .82rem;
+    line-height: 1.35;
+  }
+
+  body.management-consistent-ui.archived-records-page :is(
+    .signal-copy small, .retention-card small
+  ) {
+    font-size: .66rem;
+    line-height: 1.45;
+  }
+
+  body.management-consistent-ui.archived-records-page .archive-toolbar {
+    gap: 14px;
+    padding-block: 17px 15px;
+  }
+
+  html body.management-consistent-ui.archived-records-page .archive-tabs {
+    min-height: 0 !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 5px !important;
+    padding: 5px !important;
+    overflow: visible !important;
+  }
+
+  html body.management-consistent-ui.archived-records-page .archive-tab {
+    width: 100% !important;
+    min-width: 0 !important;
+    justify-content: flex-start !important;
+    padding: 8px 9px !important;
+    white-space: normal !important;
+    line-height: 1.25 !important;
+  }
+
+  body.management-consistent-ui.archived-records-page .archive-filter-grid {
+    gap: 10px;
+    padding-block: 14px;
+  }
+
+  body.management-consistent-ui.archived-records-page .filter-field {
+    gap: 5px;
+  }
+
+  body.management-consistent-ui.archived-records-page .archive-records-table :is(
+    .archive-record-cell .record-title, .archive-record-cell .record-sub,
+    .module-badge, .type-badge, .reason-badge, .archiver-cell
+  ) {
+    max-width: 100%;
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+  }
+
+  body.management-consistent-ui.archived-records-page .archive-records-table .table-actions {
+    justify-content: flex-start !important;
+  }
+}
+
+.archive-action-text {
+  display: none;
+}
+
+@media (max-width: 700px) {
+  body.management-consistent-ui.archived-records-page .archive-signal-layout {
+    display: block;
+    margin-bottom: 12px;
+  }
+
+  body.management-consistent-ui.archived-records-page #archiveAlertBar {
+    width: 100%;
+  }
+
+  body.management-consistent-ui.archived-records-page .archive-signal-card {
+    min-height: 0;
+    align-items: center;
+    padding: 14px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #fff8ee, #fff);
+  }
+
+  body.management-consistent-ui.archived-records-page .archive-signal-card .signal-copy strong {
+    font-size: .86rem;
+    line-height: 1.35;
+  }
+
+  body.management-consistent-ui.archived-records-page .archive-signal-card .signal-copy small {
+    font-size: .69rem;
+    line-height: 1.5;
+  }
+
+  body.management-consistent-ui.archived-records-page .archive-signal-card .vault-count {
+    display: block;
+    min-width: 62px;
+    padding: 8px;
+  }
+
+  body.management-consistent-ui.archived-records-page .archive-toolbar .records-heading p {
+    margin-top: 3px;
+    line-height: 1.45;
+  }
+
+  body.management-consistent-ui.archived-records-page .table-section-head {
+    min-height: 42px;
+    justify-content: flex-end;
+    padding-block: 9px;
+  }
+
+  body.management-consistent-ui.archived-records-page .table-section-head > div {
+    display: none;
+  }
+
+  body.management-consistent-ui.archived-records-page .archive-records-table .management-card-primary > .management-mobile-label,
+  body.management-consistent-ui.archived-records-page .archive-records-table .management-card-actions > .management-mobile-label {
+    display: none;
+  }
+
+  body.management-consistent-ui.archived-records-page .archive-record-cell .record-title {
+    font-size: .86rem !important;
+  }
+
+  body.management-consistent-ui.archived-records-page .archive-record-cell .record-sub {
+    font-size: .68rem !important;
+  }
+
+  body.management-consistent-ui.archived-records-page .archive-records-table .table-actions {
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+
+  body.management-consistent-ui.archived-records-page .archive-records-table .tbl-action-btn {
+    width: auto !important;
+    min-width: 76px !important;
+    min-height: 44px !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding-inline: 12px !important;
+  }
+
+  body.management-consistent-ui.archived-records-page .archive-action-text {
+    display: inline;
+    font-size: .7rem;
+    font-weight: 750;
+  }
+
+  body.management-consistent-ui.archived-records-page .records-empty-state {
+    min-height: 210px;
+    padding: 32px 18px;
+  }
 }

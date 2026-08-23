@@ -10,6 +10,13 @@ const {
   clearSessionCookies,
   setSessionCookie,
 } = require("../utils/sessionCookie");
+const {
+  OTP_PURPOSES,
+  toDate,
+  storeAndSendOtp,
+  createOtpChallenge,
+  verifyOtpChallenge,
+} = require("../services/otpChallengeService");
 
 const IS_INSECURE_MODE = false;
 const RECAPTCHA_SECRET_KEY =
@@ -19,6 +26,8 @@ const RECAPTCHA_SECRET_KEY =
 const CURRENT_POLICY_VERSION = "1.0";
 const EMAIL_HERO_IMAGE_PATH = path.join(__dirname, "../assets/animua-services-email-banner.png");
 const EMAIL_HERO_IMAGE_CID = "animua-cityvet-banner";
+const MANAGEMENT_RESET_NEUTRAL_MESSAGE =
+  "If this email is associated with an eligible ANIMUA management account, a verification code has been sent.";
 
 function isBcryptHash(value) {
   return typeof value === "string" && /^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$/.test(value);
@@ -122,19 +131,6 @@ function sendOtpEmailErrorResponse(res, error) {
   }
 
   return null;
-}
-
-async function storeAndSendOtp({ otpRef, otpData, send }) {
-  await otpRef.set(otpData);
-
-  try {
-    await send();
-  } catch (error) {
-    await otpRef.delete().catch((cleanupError) => {
-      console.warn("[OTP Cleanup Failed]", cleanupError.message);
-    });
-    throw error;
-  }
 }
 
 function escapeHtml(value = "") {
@@ -464,6 +460,18 @@ async function sendForgotPasswordOtp({ email, fullName, otp }) {
   });
 }
 
+async function sendManagementPasswordResetOtp({ email, fullName, otp }) {
+  return sendEmailVerificationOtp({
+    email,
+    fullName,
+    otp,
+    subject: "Your ANIMUA management password reset code",
+    preheader: "Use this verification code to recover your ANIMUA management account.",
+    heading: "Recover management access",
+    introHtml: "We received a request to reset your ANIMUA management password.<br>Use the verification code below to continue. ANIMUA administrators cannot see this code."
+  });
+}
+
 function validateNewPasswordValue(newPassword) {
   if (typeof newPassword !== "string" || !newPassword) {
     return { status: 400, message: "New password is required." };
@@ -549,6 +557,9 @@ async function validateForgotPasswordAccount(email) {
   }
 
   const userData = userDoc.data();
+  if (String(userData.role || "Public").trim().toLowerCase() !== "public") {
+    return { status: 404, message: "No public account was found for that email address." };
+  }
   if (String(userData.status || "Active").toLowerCase() === "inactive") {
     return { status: 403, message: "This account is inactive. Please contact ANIMUA support." };
   }
@@ -556,7 +567,92 @@ async function validateForgotPasswordAccount(email) {
   return { userRef, userData };
 }
 
-async function applyPasswordChange({ userRef, userData, newPassword, auditUser }) {
+function isValidAccountEmail(email) {
+  return Boolean(email && typeof email === "string" && email.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
+}
+
+function recoveryDocumentId(value) {
+  return crypto.createHash("sha256").update(String(value || "").toLowerCase()).digest("hex");
+}
+
+function isEligibleManagementUserData(userData = {}) {
+  const role = String(userData.role || "").trim().toLowerCase();
+  const isManagementRole = role === "admin"
+    || role === "staff"
+    || role === "veterinarian"
+    || role === "vet";
+  return isManagementRole
+    && String(userData.status || "Active").trim().toLowerCase() === "active";
+}
+
+async function getEligibleManagementAccount(email) {
+  if (!isValidAccountEmail(email)) return { eligible: false, invalidEmail: true };
+  const userRef = db.collection("users").doc(email);
+  const userDoc = await userRef.get();
+  if (!userDoc.exists) return { eligible: false };
+  const userData = userDoc.data() || {};
+  const eligible = isEligibleManagementUserData(userData);
+  return { eligible, userRef, userData, accountId: userDoc.id };
+}
+
+async function writeManagementRecoveryAudit({ action, target, actor, after = {} }) {
+  if (!target?.email) return;
+  try {
+    await db.collection("auditLogs").add({
+      action,
+      module: "Management Security",
+      targetId: target.id || target.email,
+      targetName: target.fullName || target.email,
+      performedBy: actor?.email || target.email,
+      performedByName: actor?.fullName || target.fullName || target.email,
+      before: {},
+      after,
+      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+    });
+  } catch (error) {
+    console.warn("[Management Recovery Audit]", error.message);
+  }
+}
+
+async function requestManagementPasswordResetForEmail({ email, actor = null, source = "self_service" }) {
+  const normalizedEmail = String(email || "").trim().toLowerCase();
+  const account = await getEligibleManagementAccount(normalizedEmail);
+  if (account.invalidEmail) return { status: 400, message: "Please enter a valid email address." };
+  if (!account.eligible) return { status: 200, message: MANAGEMENT_RESET_NEUTRAL_MESSAGE, eligible: false };
+
+  const otpRef = db.collection("managementPasswordResetOtps").doc(recoveryDocumentId(normalizedEmail));
+  const result = await createOtpChallenge({
+    otpRef,
+    email: normalizedEmail,
+    accountId: account.accountId,
+    purpose: OTP_PURPOSES.MANAGEMENT_PASSWORD_RESET,
+    serverTimestamp: () => admin.firestore.FieldValue.serverTimestamp(),
+    send: (otp) => sendManagementPasswordResetOtp({
+      email: normalizedEmail,
+      fullName: account.userData.fullName,
+      otp,
+    }),
+  });
+
+  if (result.sent) {
+    await writeManagementRecoveryAudit({
+      action: "management.password_reset_requested",
+      target: { id: account.accountId, email: normalizedEmail, fullName: account.userData.fullName },
+      actor,
+      after: { source, otpDeliveredToAccountEmail: true },
+    });
+  }
+  return { status: 200, message: MANAGEMENT_RESET_NEUTRAL_MESSAGE, eligible: true };
+}
+
+async function applyPasswordChange({
+  userRef,
+  userData,
+  newPassword,
+  auditUser,
+  invalidateSessions = false,
+  auditAction = "account.password_changed",
+}) {
   if (userData.firebaseUid) {
     try {
       await admin.auth().updateUser(userData.firebaseUid, {
@@ -577,11 +673,20 @@ async function applyPasswordChange({ userRef, userData, newPassword, auditUser }
 
   await userRef.update({
     password: newStoredPassword,
-    updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    ...(invalidateSessions
+      ? { sessionVersion: admin.firestore.FieldValue.increment(1) }
+      : {}),
   });
 
+  if (invalidateSessions && userData.firebaseUid) {
+    await admin.auth().revokeRefreshTokens(userData.firebaseUid).catch((error) => {
+      console.warn("[Revoke Firebase Sessions Failed]", error.message);
+    });
+  }
+
   await writeAccountAuditLog({
-    action: "account.password_changed",
+    action: auditAction,
     user: auditUser,
     after: { passwordChanged: true },
   });
@@ -868,7 +973,8 @@ exports.confirmEmailVerificationOtp = async (req, res) => {
       {
         email: userData.email,
         fullName: userData.fullName,
-        role: userData.role
+        role: userData.role,
+        sessionVersion: Number.isInteger(userData.sessionVersion) ? userData.sessionVersion : 0,
       },
       process.env.JWT_SECRET,
       { expiresIn: "8h", algorithm: "HS256" }
@@ -1000,7 +1106,8 @@ if (!userData.emailVerified && !userData.phoneVerified) {
       {
         email: userData.email,
         fullName: userData.fullName,
-        role: userData.role
+        role: userData.role,
+        sessionVersion: Number.isInteger(userData.sessionVersion) ? userData.sessionVersion : 0,
       },
       process.env.JWT_SECRET,
       { expiresIn: "8h", algorithm: "HS256" }
@@ -1447,36 +1554,21 @@ exports.requestForgotPasswordOtp = async (req, res) => {
     }
 
     const otpRef = db.collection("forgotPasswordOtps").doc(email);
-    const existingOtpDoc = await otpRef.get();
-
-    if (existingOtpDoc.exists) {
-      const existing = existingOtpDoc.data();
-      const createdAt = existing.createdAt?.toDate ? existing.createdAt.toDate() : null;
-
-      if (createdAt && Date.now() - createdAt.getTime() < 30 * 1000) {
-        return res.status(429).json({ message: "Please wait before requesting another password reset OTP." });
-      }
-    }
-
-    const otp = String(Math.floor(100000 + Math.random() * 900000));
-    const otpHash = await bcrypt.hash(otp, 10);
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
-
-    await storeAndSendOtp({
+    const challenge = await createOtpChallenge({
       otpRef,
-      otpData: {
-        email,
-        otpHash,
-        attempts: 0,
-        expiresAt,
-        createdAt: admin.firestore.FieldValue.serverTimestamp()
-      },
-      send: () => sendForgotPasswordOtp({
+      email,
+      accountId: validation.userRef.id,
+      purpose: OTP_PURPOSES.PUBLIC_PASSWORD_RESET,
+      serverTimestamp: () => admin.firestore.FieldValue.serverTimestamp(),
+      send: (otp) => sendForgotPasswordOtp({
         email,
         fullName: validation.userData.fullName,
         otp
       })
     });
+    if (challenge.cooldown) {
+      return res.status(429).json({ message: "Please wait before requesting another password reset OTP." });
+    }
 
     return res.status(200).json({ message: "We sent a six-digit OTP to your email." });
   } catch (error) {
@@ -1508,33 +1600,26 @@ exports.confirmForgotPasswordOtp = async (req, res) => {
     }
 
     const otpRef = db.collection("forgotPasswordOtps").doc(email);
-    const otpDoc = await otpRef.get();
-
-    if (!otpDoc.exists) {
-      return res.status(404).json({ message: "No password reset OTP request found. Please request a new code." });
-    }
-
-    const otpData = otpDoc.data();
-    const expiresAt = otpData.expiresAt?.toDate ? otpData.expiresAt.toDate() : new Date(otpData.expiresAt);
-
-    if (!expiresAt || expiresAt.getTime() < Date.now()) {
-      await otpRef.delete();
-      return res.status(410).json({ message: "Password reset OTP expired. Please request a new code." });
-    }
-
-    if ((otpData.attempts || 0) >= 5) {
-      await otpRef.delete();
-      return res.status(429).json({ message: "Too many password reset OTP attempts. Please request a new code." });
-    }
-
-    const isOtpMatch = await bcrypt.compare(otp, otpData.otpHash);
-
-    if (!isOtpMatch) {
-      await otpRef.update({
-        attempts: admin.firestore.FieldValue.increment(1),
-        lastAttemptAt: admin.firestore.FieldValue.serverTimestamp()
-      });
-      return res.status(401).json({ message: "Incorrect password reset OTP. Please try again." });
+    const verified = await verifyOtpChallenge({
+      otpRef,
+      otp,
+      email,
+      accountId: validation.userRef.id,
+      purpose: OTP_PURPOSES.PUBLIC_PASSWORD_RESET,
+      allowLegacyPurpose: true,
+      incrementAttempts: (value) => admin.firestore.FieldValue.increment(value),
+      serverTimestamp: () => admin.firestore.FieldValue.serverTimestamp(),
+    });
+    if (!verified.ok) {
+      const messages = {
+        INVALID_FORMAT: "Please enter the six-digit password reset OTP.",
+        NOT_FOUND: "No password reset OTP request found. Please request a new code.",
+        EXPIRED: "Password reset OTP expired. Please request a new code.",
+        ATTEMPTS_EXCEEDED: "Too many password reset OTP attempts. Please request a new code.",
+        INVALID_OTP: "Incorrect password reset OTP. Please try again.",
+        CONTEXT_MISMATCH: "This password reset code is not valid for this recovery request.",
+      };
+      return res.status(verified.status).json({ message: messages[verified.code] || "Unable to verify password reset OTP." });
     }
 
     const applyError = await applyPasswordChange({
@@ -1544,7 +1629,9 @@ exports.confirmForgotPasswordOtp = async (req, res) => {
       auditUser: {
         email,
         fullName: validation.userData.fullName || email
-      }
+      },
+      invalidateSessions: true,
+      auditAction: "public.password_reset_completed",
     });
 
     if (applyError) {
@@ -1559,6 +1646,173 @@ exports.confirmForgotPasswordOtp = async (req, res) => {
   } catch (error) {
     console.error("[Confirm Forgot Password OTP Error]", error.message);
     return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+exports.requestManagementPasswordResetOtp = async (req, res) => {
+  try {
+    const result = await requestManagementPasswordResetForEmail({
+      email: req.body?.email,
+      source: "self_service",
+    });
+    return res.status(result.status).json({ message: result.message });
+  } catch (error) {
+    console.error("[Request Management Password Reset OTP Error]", error.message);
+    const emailErrorResponse = sendOtpEmailErrorResponse(res, error);
+    if (emailErrorResponse) return emailErrorResponse;
+    return res.status(500).json({ message: "Unable to start management account recovery." });
+  }
+};
+
+exports.verifyManagementPasswordResetOtp = async (req, res) => {
+  try {
+    const email = String(req.body?.email || "").trim().toLowerCase();
+    const otp = String(req.body?.otp || "").trim();
+    if (!isValidAccountEmail(email)) return res.status(400).json({ message: "Please enter a valid email address." });
+    const account = await getEligibleManagementAccount(email);
+    if (!account.eligible) {
+      return res.status(401).json({ message: "The verification code is invalid or expired." });
+    }
+
+    const otpRef = db.collection("managementPasswordResetOtps").doc(recoveryDocumentId(email));
+    const verified = await verifyOtpChallenge({
+      otpRef,
+      otp,
+      email,
+      accountId: account.accountId,
+      purpose: OTP_PURPOSES.MANAGEMENT_PASSWORD_RESET,
+      incrementAttempts: (value) => admin.firestore.FieldValue.increment(value),
+      serverTimestamp: () => admin.firestore.FieldValue.serverTimestamp(),
+    });
+    if (!verified.ok) {
+      const messages = {
+        INVALID_FORMAT: "Please enter the six-digit verification code.",
+        EXPIRED: "The verification code expired. Request a new code.",
+        ATTEMPTS_EXCEEDED: "Too many incorrect attempts. Request a new code.",
+        INVALID_OTP: "Incorrect verification code. Please try again.",
+      };
+      return res.status(verified.status).json({
+        message: messages[verified.code] || "The verification code is invalid or expired.",
+      });
+    }
+
+    const resetToken = crypto.randomBytes(32).toString("base64url");
+    const grantRef = db.collection("managementPasswordResetGrants").doc(recoveryDocumentId(resetToken));
+    await grantRef.set({
+      email,
+      accountId: account.accountId,
+      purpose: OTP_PURPOSES.MANAGEMENT_PASSWORD_RESET,
+      used: false,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+    });
+    await otpRef.delete();
+    await writeManagementRecoveryAudit({
+      action: "management.password_reset_otp_verified",
+      target: { id: account.accountId, email, fullName: account.userData.fullName },
+      after: { verificationSuccessful: true },
+    });
+    return res.status(200).json({
+      message: "Verification successful. Create your new password.",
+      resetToken,
+    });
+  } catch (error) {
+    console.error("[Verify Management Password Reset OTP Error]", error.message);
+    return res.status(500).json({ message: "Unable to verify the management recovery code." });
+  }
+};
+
+exports.completeManagementPasswordReset = async (req, res) => {
+  try {
+    const resetToken = String(req.body?.resetToken || "").trim();
+    const newPassword = req.body?.newPassword;
+    const confirmPassword = req.body?.confirmPassword;
+    if (!/^[A-Za-z0-9_-]{40,100}$/.test(resetToken)) {
+      return res.status(401).json({ message: "Your recovery verification expired. Start again." });
+    }
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ message: "New password and confirmation do not match." });
+    }
+    const passwordError = validateNewPasswordValue(newPassword);
+    if (passwordError) return res.status(passwordError.status).json({ message: passwordError.message });
+
+    const grantRef = db.collection("managementPasswordResetGrants").doc(recoveryDocumentId(resetToken));
+    const initialGrantDoc = await grantRef.get();
+    if (!initialGrantDoc.exists) {
+      return res.status(401).json({ message: "Your recovery verification expired. Start again." });
+    }
+    const grantData = initialGrantDoc.data() || {};
+    const initialExpiry = toDate(grantData.expiresAt);
+    if (grantData.used || grantData.purpose !== OTP_PURPOSES.MANAGEMENT_PASSWORD_RESET || !initialExpiry || initialExpiry.getTime() < Date.now()) {
+      return res.status(401).json({ message: "Your recovery verification expired. Start again." });
+    }
+    const account = await getEligibleManagementAccount(String(grantData.email || "").toLowerCase());
+    if (!account.eligible || account.accountId !== grantData.accountId) {
+      return res.status(401).json({ message: "This management account is no longer eligible for recovery." });
+    }
+    const passwordCheck = await verifyStoredPassword(newPassword, account.userData.password);
+    if (passwordCheck.isMatch) {
+      return res.status(400).json({ message: "Choose a password different from your current password." });
+    }
+
+    await db.runTransaction(async (transaction) => {
+      const grantDoc = await transaction.get(grantRef);
+      if (!grantDoc.exists) throw Object.assign(new Error("Recovery verification not found."), { statusCode: 401 });
+      const currentGrant = grantDoc.data() || {};
+      const expiresAt = toDate(currentGrant.expiresAt);
+      if (currentGrant.used || currentGrant.purpose !== OTP_PURPOSES.MANAGEMENT_PASSWORD_RESET || !expiresAt || expiresAt.getTime() < Date.now()) {
+        throw Object.assign(new Error("Recovery verification expired."), { statusCode: 401 });
+      }
+      transaction.update(grantRef, {
+        used: true,
+        usedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    });
+
+    const applyError = await applyPasswordChange({
+      userRef: account.userRef,
+      userData: account.userData,
+      newPassword,
+      auditUser: { email: grantData.email, fullName: account.userData.fullName || grantData.email },
+      invalidateSessions: true,
+      auditAction: "management.password_reset_completed",
+    });
+    if (applyError) return res.status(applyError.status).json({ message: applyError.message });
+    await grantRef.delete();
+    clearSessionCookies(res);
+    return res.status(200).json({
+      message: "Password reset successfully. Sign in with your new password.",
+    });
+  } catch (error) {
+    console.error("[Complete Management Password Reset Error]", error.message);
+    return res.status(error.statusCode || 500).json({
+      message: error.statusCode
+        ? "Your recovery verification expired. Start again."
+        : "Unable to reset the management password.",
+    });
+  }
+};
+
+exports.sendManagementPasswordResetByAdmin = async (req, res) => {
+  try {
+    const targetEmail = String(req.params?.id || "").trim().toLowerCase();
+    const account = await getEligibleManagementAccount(targetEmail);
+    if (!account.eligible) {
+      return res.status(400).json({ message: "Password recovery can only be sent to an active management account." });
+    }
+    const result = await requestManagementPasswordResetForEmail({
+      email: targetEmail,
+      actor: req.user,
+      source: "administrator_assisted",
+    });
+    return res.status(result.status).json({
+      message: "Password recovery instructions were sent to the account holder's registered email.",
+    });
+  } catch (error) {
+    console.error("[Admin Send Management Password Reset Error]", error.message);
+    const emailErrorResponse = sendOtpEmailErrorResponse(res, error);
+    if (emailErrorResponse) return emailErrorResponse;
+    return res.status(500).json({ message: "Unable to send password recovery instructions." });
   }
 };
 
@@ -1597,3 +1851,5 @@ exports.isBcryptHash = isBcryptHash;
 exports.verifyStoredPassword = verifyStoredPassword;
 exports.getEmailCredentials = getEmailCredentials;
 exports.storeAndSendOtp = storeAndSendOtp;
+exports.isEligibleManagementUserData = isEligibleManagementUserData;
+exports.MANAGEMENT_RESET_NEUTRAL_MESSAGE = MANAGEMENT_RESET_NEUTRAL_MESSAGE;

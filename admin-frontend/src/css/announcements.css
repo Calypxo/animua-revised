@@ -1005,9 +1005,9 @@ body.loading .main-content {
 }
 
 #announcementModalBackdrop .announcement-modal {
-  width: var(--management-modal-width, min(860px, calc(100vw - 32px))) !important;
+  width: min(900px, calc(100vw - 32px)) !important;
   min-width: 0 !important;
-  max-width: 860px !important;
+  max-width: 900px !important;
   height: 100dvh !important;
   max-height: 100dvh !important;
   display: flex !important;
@@ -1030,13 +1030,13 @@ body.loading .main-content {
 }
 
 #announcementModalBackdrop .modal-head {
-  min-height: 108px !important;
+  min-height: 96px !important;
   flex: 0 0 auto !important;
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
   gap: 14px !important;
-  padding: 25px 34px 22px !important;
+  padding: 21px 28px 19px !important;
   border: 0 !important;
   border-bottom: 1px solid var(--management-modal-line, #eadfd4) !important;
   background: var(--management-modal-cream, #FFF8EE) !important;
@@ -1057,6 +1057,15 @@ body.loading .main-content {
   margin: 5px 0 0 !important;
   color: var(--management-modal-muted, #756b67) !important;
   font: 500 .76rem/1.45 "Poppins", sans-serif !important;
+}
+
+#announcementModalBackdrop .composer-eyebrow {
+  display: block !important;
+  margin: 0 0 4px !important;
+  color: var(--management-modal-red, #780116) !important;
+  font: 800 .62rem/1.2 "Poppins", sans-serif !important;
+  letter-spacing: .1em !important;
+  text-transform: uppercase !important;
 }
 
 #announcementModalBackdrop .modal-close-btn {
@@ -1083,29 +1092,32 @@ body.loading .main-content {
 #announcementModalBackdrop .announcement-modal-body {
   flex: 1 1 auto !important;
   min-height: 0 !important;
-  padding: 28px 34px 34px !important;
+  padding: 22px 24px 26px !important;
   overflow-x: hidden !important;
   overflow-y: auto !important;
   overscroll-behavior: contain !important;
-  background: #FFF8EE !important;
+  background: #f6eee3 !important;
   scrollbar-width: thin !important;
   scrollbar-color: #d9c8bc transparent !important;
 }
 
 #announcementModalBackdrop .announcement-form.composer-layout {
-  display: block !important;
+  display: grid !important;
+  grid-template-columns: minmax(240px, .78fr) minmax(0, 1.42fr) !important;
+  align-items: start !important;
+  gap: 18px !important;
   max-height: none !important;
   padding: 0 !important;
   overflow: visible !important;
 }
 
 #announcementModalBackdrop .form-section {
-  margin: 0 0 20px !important;
-  padding: 21px !important;
+  margin: 0 !important;
+  padding: 18px !important;
   border: 1px solid var(--management-modal-line, #eadfd4) !important;
   border-radius: 15px !important;
-  background: var(--management-modal-section, #FFF8EE) !important;
-  box-shadow: none !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 8px 22px rgba(61, 36, 28, .045) !important;
 }
 
 #announcementModalBackdrop .form-section:last-child {
@@ -1117,8 +1129,8 @@ body.loading .main-content {
   display: flex !important;
   align-items: center !important;
   gap: 10px !important;
-  margin: 0 0 18px !important;
-  padding: 0 0 13px !important;
+  margin: 0 0 15px !important;
+  padding: 0 0 11px !important;
   border-bottom: 1px solid #eee1d7 !important;
   color: #2b2528 !important;
   font: 800 .82rem/1.2 "Poppins", sans-serif !important;
@@ -1132,7 +1144,7 @@ body.loading .main-content {
   margin: -4px 0 !important;
   border-radius: 50% !important;
   color: var(--management-modal-red, #780116) !important;
-  background: #FFF8EE !important;
+  background: #fff1c9 !important;
 }
 
 #announcementModalBackdrop .composer-media-column {
@@ -1141,16 +1153,16 @@ body.loading .main-content {
 
 #announcementModalBackdrop .composer-media-grid {
   display: grid !important;
-  grid-template-columns: minmax(220px, .82fr) minmax(0, 1.18fr) !important;
-  align-items: center !important;
-  gap: 16px !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  align-items: start !important;
+  gap: 14px !important;
 }
 
 #announcementModalBackdrop .media-preview {
   width: 100% !important;
-  min-height: 174px !important;
-  max-height: 230px !important;
-  aspect-ratio: 16 / 9 !important;
+  min-height: 190px !important;
+  max-height: 260px !important;
+  aspect-ratio: 4 / 3 !important;
   border: 1px dashed #dfd3cb !important;
   border-radius: 12px !important;
   background: #FFFFFF !important;
@@ -1262,10 +1274,10 @@ body.loading .main-content {
 }
 
 #announcementModalBackdrop .composer-author {
-  min-height: 62px !important;
+  min-height: 56px !important;
   gap: 11px !important;
-  margin: 0 0 18px !important;
-  padding: 10px 12px !important;
+  margin: 0 0 15px !important;
+  padding: 8px 11px !important;
   border: 1px solid #eee1d8 !important;
   border-radius: 12px !important;
   background: #FFFFFF !important;
@@ -1291,14 +1303,14 @@ body.loading .main-content {
 }
 
 #announcementModalBackdrop .modal-actions {
-  min-height: 76px !important;
+  min-height: 70px !important;
   flex: 0 0 auto !important;
   display: flex !important;
   align-items: center !important;
   justify-content: flex-end !important;
   gap: 10px !important;
   margin: 0 !important;
-  padding: 15px 26px !important;
+  padding: 13px 24px !important;
   border: 0 !important;
   border-top: 1px solid var(--management-modal-line, #eadfd4) !important;
   background: var(--management-modal-cream, #FFF8EE) !important;
@@ -1316,6 +1328,22 @@ body.loading .main-content {
   border: 1px solid #dfd3cb !important;
   color: #504845 !important;
   background: #FFFFFF !important;
+}
+
+#announcementModalBackdrop .announcement-draft-btn {
+  border-color: rgba(247, 181, 56, .72) !important;
+  color: #780116 !important;
+  background: #fff5d9 !important;
+}
+
+#announcementModalBackdrop .announcement-draft-btn:hover,
+#announcementModalBackdrop .announcement-draft-btn:focus-visible {
+  border-color: #f7b538 !important;
+  background: #ffe9ae !important;
+}
+
+#announcementModalBackdrop .announcement-draft-btn[hidden] {
+  display: none !important;
 }
 
 #announcementModalBackdrop .modal-actions .primary-btn {
@@ -1347,6 +1375,18 @@ body.loading .main-content {
 
   #announcementModalBackdrop .modal-actions {
     padding: 14px 18px !important;
+  }
+}
+
+@media (max-width: 720px) {
+  #announcementModalBackdrop .announcement-form.composer-layout {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  #announcementModalBackdrop .media-preview {
+    min-height: 180px !important;
+    max-height: 270px !important;
+    aspect-ratio: 16 / 9 !important;
   }
 }
 
@@ -1399,6 +1439,10 @@ body.loading .main-content {
   #announcementModalBackdrop .modal-actions .primary-btn {
     flex: 1 1 100% !important;
     order: -1 !important;
+  }
+
+  #announcementModalBackdrop .modal-actions .secondary-btn {
+    flex: 1 1 calc(50% - 5px) !important;
   }
 }
 
@@ -1584,4 +1628,151 @@ body.management-consistent-ui .page-body .category-story-ring {
   body.management-consistent-ui .page-body .channel-profile-card {
     padding: 18px;
   }
+}
+
+/* Keep the editorial calendar and composer readable at operational density. */
+body.management-consistent-ui .event-calendar-weekdays span {
+  font-size: .64rem;
+  letter-spacing: .03em;
+}
+
+body.management-consistent-ui .event-calendar-event-copy > small {
+  font-size: .66rem;
+  line-height: 1.35;
+}
+
+/* Mirror the public announcement category-card pattern inside management.
+   The rail itself stays visually neutral so the three controls are the only
+   surfaces, avoiding a card nested inside another card. */
+body.management-consistent-ui .page-body .announcement-category-rail {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  padding: 0;
+  overflow: visible;
+  border: 0 !important;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none !important;
+}
+
+body.management-consistent-ui .page-body .category-story {
+  position: relative;
+  min-width: 0;
+  min-height: 100px;
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) 30px;
+  grid-template-rows: auto auto;
+  align-items: center;
+  gap: 3px 13px;
+  padding: 16px;
+  border: 1px solid var(--animua-line, #eadfd4);
+  border-radius: 8px;
+  color: var(--animua-text, #383237) !important;
+  background: #FFFFFF;
+  text-align: left;
+  box-shadow: var(--animua-shadow-soft, 0 10px 28px rgba(43, 23, 25, .08));
+  transform: none;
+}
+
+body.management-consistent-ui .page-body .category-story:hover,
+body.management-consistent-ui .page-body .category-story:focus-visible,
+body.management-consistent-ui .page-body .category-story.is-active {
+  border-color: rgba(120, 1, 22, .42);
+  background: #FFFFFF;
+  box-shadow: 0 0 0 3px rgba(247, 181, 56, .18), var(--animua-shadow-soft, 0 10px 28px rgba(43, 23, 25, .08));
+  transform: none;
+}
+
+body.management-consistent-ui .page-body .category-story-ring,
+body.management-consistent-ui .page-body .category-story-ring:is(.is-success, .is-event) {
+  grid-column: 1;
+  grid-row: 1 / 3;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  color: #9a6500;
+  background: rgba(241, 192, 69, .22);
+  font-size: 1.2rem;
+  box-shadow: none;
+}
+
+body.management-consistent-ui .page-body .category-story strong {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  align-self: end;
+  color: #2b1719 !important;
+  font-size: .78rem;
+  font-weight: 800;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+body.management-consistent-ui .page-body .category-story small {
+  grid-column: 2;
+  grid-row: 2;
+  min-width: 0;
+  align-self: start;
+  margin-top: 0;
+  color: #62666a !important;
+  font-size: .62rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+body.management-consistent-ui .page-body .category-story-arrow {
+  grid-column: 3;
+  grid-row: 1 / 3;
+  width: 29px;
+  height: 29px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #780116;
+  background: #FFF8EE;
+  font-size: .7rem;
+  transition: color .18s ease, background-color .18s ease;
+}
+
+body.management-consistent-ui .page-body .category-story:hover .category-story-arrow,
+body.management-consistent-ui .page-body .category-story:focus-visible .category-story-arrow,
+body.management-consistent-ui .page-body .category-story.is-active .category-story-arrow {
+  color: #FFFFFF;
+  background: #780116;
+}
+
+@media (max-width: 1100px) {
+  body.management-consistent-ui .page-body .announcement-category-rail {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  body.management-consistent-ui .page-body .announcement-category-rail {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+body.management-consistent-ui :is(.event-calendar-status, .event-calendar-date-badge small) {
+  font-size: .62rem;
+  line-height: 1.2;
+}
+
+body.management-consistent-ui :is(.event-calendar-empty, .event-date-help) {
+  font-size: .68rem;
+  line-height: 1.5;
+}
+
+body.management-consistent-ui #announcementModalBackdrop .media-upload-control small {
+  font-size: .68rem !important;
+  line-height: 1.5 !important;
+}
+
+body.management-consistent-ui #announcementModalBackdrop :is(.form-lbl, .modal-subtitle) {
+  font-size: .7rem !important;
+  line-height: 1.45 !important;
 }

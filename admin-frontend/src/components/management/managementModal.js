@@ -2,7 +2,7 @@ import "../../css/managementModal.css";
 
 const LAYER_SELECTOR = ".um-modal-backdrop, .modal-backdrop-custom";
 const PANEL_SELECTOR = ".um-modal, .announcement-modal";
-const CLOSE_SELECTOR = ".modal-close-btn, .drawer-close-btn, [data-modal-close]";
+const CLOSE_SELECTOR = ".modal-close-btn, .drawer-close-btn, [data-modal-close], [data-close], [data-question-close]";
 const OPEN_LAYER_SELECTOR = LAYER_SELECTOR.split(",")
   .map((selector) => `${selector.trim()}.open`)
   .join(",");
@@ -37,6 +37,11 @@ function ensureAccessibleMarkup(layer, panel) {
     if (!button.hasAttribute("aria-label")) {
       button.setAttribute("aria-label", title ? `Close ${title.textContent.trim()}` : "Close dialog");
     }
+    button.querySelectorAll("i").forEach((icon) => icon.setAttribute("aria-hidden", "true"));
+  });
+
+  panel.querySelectorAll(".um-modal-footer button, .modal-actions button, .drawer-footer button").forEach((button) => {
+    if (button instanceof HTMLButtonElement && !button.hasAttribute("type")) button.type = "button";
     button.querySelectorAll("i").forEach((icon) => icon.setAttribute("aria-hidden", "true"));
   });
 }

@@ -177,7 +177,9 @@ function applyFilters() {
   const resultLabel = getEl("auditResultLabel");
   if (resultLabel) resultLabel.textContent = `${state.filteredLogs.length} event${state.filteredLogs.length === 1 ? "" : "s"}`;
   document.querySelectorAll("[data-audit-view]").forEach((button) => {
-    button.classList.toggle("active", button.dataset.auditView === state.view);
+    const isSelected = button.dataset.auditView === state.view;
+    button.classList.toggle("active", isSelected);
+    button.setAttribute("aria-selected", String(isSelected));
   });
   const totalPages = Math.max(1, Math.ceil(state.filteredLogs.length / state.pageSize));
   if (state.currentPage > totalPages) state.currentPage = totalPages;
@@ -264,32 +266,38 @@ function renderTable() {
   }
 
   tbody.innerHTML = rows.map((log) => `
-    <tr class="audit-row ${getStatusClass(log.status)}">
-      <td>
+    <tr class="audit-row management-card-row">
+      <td class="management-card-primary">
+        <span class="management-mobile-label" aria-hidden="true">Event time</span>
         <div class="event-time-cell">
           <span class="event-dot ${getStatusClass(log.status)}"><i class="bi ${log.status === "Success" ? "bi-check-lg" : log.status === "Warning" ? "bi-exclamation-lg" : "bi-x-lg"}"></i></span>
           <span><strong>${escapeHtml(log.date)}</strong><small>${escapeHtml(log.time)}</small></span>
         </div>
       </td>
-      <td>
+      <td class="audit-actor-field">
+        <span class="management-mobile-label" aria-hidden="true">Performed by</span>
         <div class="actor-cell"><span class="actor-avatar ${getActorTone(log.role)}">${escapeHtml(getInitials(log.actor))}</span><span><strong>${escapeHtml(log.actor)}</strong><small>${escapeHtml(log.role)}</small></span></div>
       </td>
-      <td><span class="module-cell ${getModuleTone(log.module)}"><i class="bi ${getModuleIcon(log.module)}"></i><span>${escapeHtml(log.module)}</span></span></td>
+      <td><span class="management-mobile-label" aria-hidden="true">System area</span><span class="module-cell ${getModuleTone(log.module)}"><i class="bi ${getModuleIcon(log.module)}"></i><span>${escapeHtml(log.module)}</span></span></td>
       <td>
+        <span class="management-mobile-label" aria-hidden="true">Activity</span>
         <span class="action-badge ${getActionClass(log.action)}">
           <i class="bi ${getActionIcon(log.action)}"></i>${escapeHtml(log.action)}
         </span>
       </td>
-      <td>
+      <td class="audit-record-field">
+        <span class="management-mobile-label" aria-hidden="true">Affected record</span>
         <span class="audit-record-cell"><strong>${escapeHtml(log.targetName || log.record)}</strong><small>${escapeHtml(log.record)}</small></span>
       </td>
       <td>
+        <span class="management-mobile-label" aria-hidden="true">Outcome</span>
         <span class="status-badge ${getStatusClass(log.status)}">
           <i class="bi ${log.status === "Success" ? "bi-check-circle-fill" : log.status === "Warning" ? "bi-exclamation-triangle-fill" : "bi-x-octagon-fill"}"></i>${escapeHtml(log.status)}
         </span>
       </td>
-      <td>
-        <button class="audit-review-btn" type="button" data-view-id="${escapeHtml(log.id)}" title="View event details" aria-label="View ${escapeHtml(log.record)} event details"><i class="bi bi-eye"></i></button>
+      <td class="management-card-actions">
+        <span class="management-mobile-label" aria-hidden="true">Review event</span>
+        <button class="audit-review-btn management-card-open" type="button" data-view-id="${escapeHtml(log.id)}" title="View event details" aria-label="View ${escapeHtml(log.record)} event details"><i class="bi bi-eye" aria-hidden="true"></i><span>View event</span></button>
       </td>
     </tr>
   `).join("");

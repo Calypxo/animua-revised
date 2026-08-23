@@ -493,3 +493,22 @@
   .account-primary-button { width: 100%; }
   .account-live-status { right: 14px; bottom: 14px; left: 14px; max-width: none; }
 }
+
+/* Settings remain compact without relying on fine-print labels. */
+.account-field small,
+.password-strength,
+.password-rules {
+  font-size: .7rem;
+  line-height: 1.45;
+}
+
+.password-toggle {
+  width: 40px;
+  height: 40px;
+  right: 4px;
+}
+
+@media (max-width: 520px) {
+  .account-field input { min-height: 48px; }
+  .account-primary-button { min-height: 46px; }
+}

@@ -49,7 +49,10 @@ export function renderPageHeader(config = {}, target = "#pageHeaderMount") {
   const metrics = Array.isArray(config.metrics) ? config.metrics : [];
   const queue = config.queue || {};
 
-  mount.className = "system-page-header";
+  // Every management route uses the same header density. Keeping this class on
+  // the shared renderer prevents individual page configs from changing the
+  // hero, title, and summary proportions.
+  mount.className = "system-page-header is-workspace";
   mount.innerHTML = `
     <section class="system-page-hero" aria-labelledby="${escapeHtml(headingId)}">
       <i class="bi ${iconClass(config.watermarkIcon)} system-hero-watermark" aria-hidden="true"></i>

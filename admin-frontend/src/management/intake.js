@@ -241,8 +241,8 @@ function renderTable() {
     can("edit");
 
     return `
-    <tr data-id="${r.id}">
-      <td data-label="Intake ID" class="intake-code">${r.id}</td>
+    <tr data-id="${r.id}" class="management-card-row">
+      <td data-label="Intake ID" class="intake-code management-card-primary">${r.id}</td>
       <td data-label="Animal">
         <div class="animal-cell">
           <div class="animal-thumb ${speciesThumb(r.species)}" aria-hidden="true">${speciesInitial(r.species)}</div>
@@ -257,14 +257,14 @@ function renderTable() {
       <td data-label="Encoded by" class="encoded-by">${r.encodedBy}</td>
       <td data-label="Date" class="intake-date">${formatDate(r.intakeDate)}</td>
       <td data-label="Status">${statusBadge(r.status)}</td>
-      <td data-label="Actions" class="table-actions">
+      <td data-label="Actions" class="table-actions management-card-actions">
         <div class="intake-action-group">
-          <button class="tbl-action-btn" title="View Details" aria-label="View ${r.id}" data-action="view" data-id="${r.id}">
-            <i class="bi bi-eye"></i>
+          <button class="tbl-action-btn management-card-open" title="View record" aria-label="View ${r.id}" data-action="view" data-id="${r.id}">
+            <i class="bi bi-eye"></i><span class="intake-action-label">View record</span>
           </button>
-          ${canEdit    ? `<button class="tbl-action-btn" title="Edit" aria-label="Edit ${r.id}" data-action="edit" data-id="${r.id}"><i class="bi bi-pencil"></i></button>` : ""}
-          ${canReject  ? `<button class="tbl-action-btn reject" title="Reject" aria-label="Reject ${r.id}" data-action="reject" data-id="${r.id}"><i class="bi bi-x-lg"></i></button>` : ""}
-          ${canConvert ? `<button class="tbl-action-btn convert" title="${r.status === "Pending" ? "Approve and start profiling" : "Start profiling"}" aria-label="${r.status === "Pending" ? "Approve and start profiling for" : "Start profiling for"} ${r.id}" data-action="convert" data-id="${r.id}"><i class="bi bi-arrow-right-circle"></i></button>` : ""}
+          ${canEdit    ? `<button class="tbl-action-btn" title="Edit" aria-label="Edit ${r.id}" data-action="edit" data-id="${r.id}"><i class="bi bi-pencil"></i><span class="intake-action-label">Edit</span></button>` : ""}
+          ${canReject  ? `<button class="tbl-action-btn reject" title="Reject" aria-label="Reject ${r.id}" data-action="reject" data-id="${r.id}"><i class="bi bi-x-lg"></i><span class="intake-action-label">Reject</span></button>` : ""}
+          ${canConvert ? `<button class="tbl-action-btn convert" title="${r.status === "Pending" ? "Approve and start profiling" : "Start profiling"}" aria-label="${r.status === "Pending" ? "Approve and start profiling for" : "Start profiling for"} ${r.id}" data-action="convert" data-id="${r.id}"><i class="bi bi-arrow-right-circle"></i><span class="intake-action-label">${r.status === "Pending" ? "Approve" : "Profile"}</span></button>` : ""}
         </div>
       </td>
     </tr>`;
@@ -323,10 +323,17 @@ function renderPagination() {
   const start = Math.min((currentPage - 1) * PAGE_SIZE + 1, total);
   const end   = Math.min(currentPage * PAGE_SIZE, total);
 
+  const visiblePages = [...new Set([1, currentPage - 1, currentPage, currentPage + 1, pages])]
+    .filter(page => page >= 1 && page <= pages)
+    .sort((a, b) => a - b);
+
   let h = `<span class="page-info">Showing ${total ? start : 0}–${end} of ${total}</span>`;
-  h += `<button class="page-btn" id="pagePrev" ${currentPage===1?"disabled":""}><i class="bi bi-chevron-left"></i></button>`;
-  for (let i = 1; i <= pages; i++) h += `<button class="page-btn ${i===currentPage?"active":""}" data-page="${i}">${i}</button>`;
-  h += `<button class="page-btn" id="pageNext" ${currentPage===pages?"disabled":""}><i class="bi bi-chevron-right"></i></button>`;
+  h += `<button class="page-btn" type="button" id="pagePrev" aria-label="Previous page" ${currentPage===1?"disabled":""}><i class="bi bi-chevron-left" aria-hidden="true"></i></button>`;
+  visiblePages.forEach((page, index) => {
+    if (index > 0 && page - visiblePages[index - 1] > 1) h += `<span class="page-ellipsis" aria-hidden="true">…</span>`;
+    h += `<button class="page-btn ${page===currentPage?"active":""}" type="button" data-page="${page}" aria-label="Page ${page}" ${page===currentPage?'aria-current="page"':""}>${page}</button>`;
+  });
+  h += `<button class="page-btn" type="button" id="pageNext" aria-label="Next page" ${currentPage===pages?"disabled":""}><i class="bi bi-chevron-right" aria-hidden="true"></i></button>`;
   bar.innerHTML = h;
 
   bar.querySelector("#pagePrev")?.addEventListener("click", () => { if (currentPage > 1) { currentPage--; renderTable(); renderPagination(); } });
@@ -342,6 +349,8 @@ function bindSourceSelector() {
     opt.addEventListener("click", () => {
       document.querySelectorAll(".source-opt").forEach(o => o.classList.remove("selected"));
       opt.classList.add("selected");
+      const radio = opt.querySelector(".source-opt-input");
+      if (radio) radio.checked = true;
       document.getElementById("fSource").value = opt.dataset.value;
       document.getElementById("errSource").textContent = "";
       renderDynamicSection(opt.dataset.value);
@@ -352,6 +361,8 @@ function bindSourceSelector() {
 function setSource(value) {
   document.querySelectorAll(".source-opt").forEach(o => {
     o.classList.toggle("selected", o.dataset.value === value);
+    const radio = o.querySelector(".source-opt-input");
+    if (radio) radio.checked = o.dataset.value === value;
   });
   document.getElementById("fSource").value = value;
   renderDynamicSection(value);
@@ -464,6 +475,7 @@ function openAddModal() {
   document.getElementById("fSex").value = "Unknown";
   setOptionalDetailsVisible(false);
   document.querySelectorAll(".source-opt").forEach(o => o.classList.remove("selected"));
+  document.querySelectorAll(".source-opt-input").forEach(input => { input.checked = false; });
   document.getElementById("sourceSelector").classList.remove("is-locked");
   document.getElementById("fSource").value = "";
   document.getElementById("dynamicSection").innerHTML = "";
@@ -1254,12 +1266,14 @@ if (params.get("source") === "surrender") {
 
     // Source selector (inside modal — needs to re-bind on each open)
     // Done via event delegation instead
-    document.getElementById("sourceSelector")?.addEventListener("click", e => {
+    document.getElementById("sourceSelector")?.addEventListener("change", e => {
       if (e.currentTarget.classList.contains("is-locked")) return;
-      const opt = e.target.closest(".source-opt");
+      const input = e.target.closest(".source-opt-input");
+      const opt = input?.closest(".source-opt");
       if (!opt) return;
       document.querySelectorAll(".source-opt").forEach(o => o.classList.remove("selected"));
       opt.classList.add("selected");
+      input.checked = true;
       document.getElementById("fSource").value = opt.dataset.value;
       document.getElementById("errSource").textContent = "";
       renderDynamicSection(opt.dataset.value);

@@ -94,7 +94,7 @@
           </div>
 
           <div class="table-responsive">
-            <table class="shelter-table management-data-table">
+            <table class="shelter-table management-data-table management-card-table" data-card-until="1365">
               <thead>
                 <tr>
                   <th>Application</th>
@@ -129,29 +129,34 @@
 </div><!-- /shell -->
 
 <!-- REJECT MODAL -->
-<div class="um-modal-backdrop" id="rejectModalBackdrop">
-  <div class="um-modal um-modal-xs" role="dialog" aria-modal="true">
+<div class="um-modal-backdrop adoption-decision-layer" id="rejectModalBackdrop" aria-hidden="true">
+  <div class="um-modal um-modal-xs adoption-decision-modal adoption-reject-modal" role="dialog" aria-modal="true" aria-labelledby="rejectModalTitle" aria-describedby="rejectModalSubtitle">
     <div class="um-modal-header">
-      <h2>Reject Application</h2>
+      <div class="adoption-modal-heading">
+        <span class="adoption-modal-eyebrow">Application decision</span>
+        <h2 id="rejectModalTitle">Reject Application</h2>
+        <p class="modal-subtitle" id="rejectModalSubtitle">Record a clear reason for the applicant and audit history.</p>
+      </div>
       <button class="modal-close-btn" id="rejectModalClose" type="button" aria-label="Close rejection form"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="um-modal-body">
-      <div class="confirm-body">
-        <div class="confirm-icon-wrap" style="background:var(--clay-soft);color:var(--clay)">
+      <div class="confirm-body adoption-decision-summary">
+        <div class="confirm-icon-wrap reject">
           <i class="bi bi-x-circle-fill"></i>
         </div>
-        <p id="rejectConfirmMsg" style="margin-bottom:14px"></p>
+        <p id="rejectConfirmMsg"></p>
       </div>
-      <div class="form-group">
-        <label class="form-lbl">Reason for Rejection <span class="req">*</span></label>
+      <div class="form-group adoption-modal-form-section" id="rejectReasonWrap">
+        <label class="form-lbl" for="rejectReason">Reason for rejection <span class="req" aria-hidden="true">*</span></label>
         <textarea class="form-inp form-textarea mt-1" id="rejectReason" rows="3"
-          placeholder="Explain why this application is being rejected…"></textarea>
-        <span class="form-err" id="errRejectReason"></span>
+          placeholder="Explain why this application is being rejected…" aria-required="true" aria-describedby="rejectReasonHint errRejectReason"></textarea>
+        <small class="adoption-field-hint" id="rejectReasonHint">Use a concise, factual explanation that staff can reference later.</small>
+        <span class="form-err" id="errRejectReason" aria-live="polite"></span>
       </div>
     </div>
     <div class="um-modal-footer">
-      <button class="btn-ghost-clay" id="rejectModalCancel">Cancel</button>
-      <button class="btn-reject-confirm" id="rejectConfirmBtn">
+      <button class="btn-ghost-clay" id="rejectModalCancel" type="button">Cancel</button>
+      <button class="btn-reject-confirm" id="rejectConfirmBtn" type="button">
         <i class="bi bi-x-lg"></i> Reject Application
       </button>
     </div>
@@ -159,37 +164,43 @@
 </div>
 
 <!-- FINALIZE MODAL -->
-<div class="um-modal-backdrop" id="finalizeModalBackdrop">
-  <div class="um-modal um-modal-xs" role="dialog" aria-modal="true">
+<div class="um-modal-backdrop adoption-decision-layer" id="finalizeModalBackdrop" aria-hidden="true">
+  <div class="um-modal um-modal-xs adoption-decision-modal adoption-finalize-modal" role="dialog" aria-modal="true" aria-labelledby="finalizeModalTitle" aria-describedby="finalizeModalSubtitle">
     <div class="um-modal-header">
-      <h2>Finalize Adoption</h2>
+      <div class="adoption-modal-heading">
+        <span class="adoption-modal-eyebrow">Placement completion</span>
+        <h2 id="finalizeModalTitle">Finalize Adoption</h2>
+        <p class="modal-subtitle" id="finalizeModalSubtitle">Confirm the placement details before closing this application.</p>
+      </div>
       <button class="modal-close-btn" id="finalizeModalClose" type="button" aria-label="Close adoption finalization form"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="um-modal-body">
-      <div class="confirm-body">
-        <div class="confirm-icon-wrap" style="background:var(--green-soft);color:var(--green)">
+      <div class="confirm-body adoption-decision-summary">
+        <div class="confirm-icon-wrap approve">
           <i class="bi bi-balloon-heart-fill"></i>
         </div>
         <p id="finalizeMsg"></p>
       </div>
-      <div class="form-group mt-3">
-        <label class="form-lbl">Adopter-Given Animal Name <span class="req">*</span></label>
-        <input type="text" class="form-inp mt-1" id="fAdoptedName"
-          maxlength="60" placeholder="Name chosen by the adopter" />
-        <span class="form-err" id="errAdoptedName"></span>
-      </div>
-      <div class="form-group mt-3">
-        <label class="form-lbl">Adoption Date</label>
-        <input type="date" class="form-inp mt-1" id="fAdoptionDate" />
-      </div>
-      <div class="form-group mt-3">
-        <label class="form-lbl">Processed By</label>
-        <input type="text" class="form-inp mt-1" id="fAdoptionStaff" placeholder="Staff name" />
+      <div class="adoption-modal-form-section adoption-finalize-fields">
+        <div class="form-group adoption-field-wide">
+          <label class="form-lbl" for="fAdoptedName">Adopter-given animal name <span class="req" aria-hidden="true">*</span></label>
+          <input type="text" class="form-inp mt-1" id="fAdoptedName"
+            maxlength="60" placeholder="Name chosen by the adopter" aria-required="true" aria-describedby="errAdoptedName" />
+          <span class="form-err" id="errAdoptedName" aria-live="polite"></span>
+        </div>
+        <div class="form-group">
+          <label class="form-lbl" for="fAdoptionDate">Adoption date</label>
+          <input type="date" class="form-inp mt-1" id="fAdoptionDate" />
+        </div>
+        <div class="form-group">
+          <label class="form-lbl" for="fAdoptionStaff">Processed by</label>
+          <input type="text" class="form-inp mt-1" id="fAdoptionStaff" placeholder="Staff name" />
+        </div>
       </div>
     </div>
     <div class="um-modal-footer">
-      <button class="btn-ghost-clay" id="finalizeModalCancel">Cancel</button>
-      <button class="btn-finalize" id="finalizeConfirmBtn">
+      <button class="btn-ghost-clay" id="finalizeModalCancel" type="button">Cancel</button>
+      <button class="btn-finalize" id="finalizeConfirmBtn" type="button">
         <i class="bi bi-balloon-heart-fill"></i> Confirm Adoption
       </button>
     </div>

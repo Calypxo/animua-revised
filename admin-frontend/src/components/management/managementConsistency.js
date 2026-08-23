@@ -11,6 +11,27 @@ const TABLIST_SELECTOR = [
 const TAB_SELECTOR = TABLIST_SELECTOR.split(",")
   .map((selector) => `${selector} > button`)
   .join(",");
+const RESPONSIVE_TABLE_SELECTOR = ".management-card-table[data-card-until]";
+
+function managementViewportWidth() {
+  try {
+    if (window.parent !== window && window.parent.location.origin === window.location.origin) {
+      return window.parent.innerWidth;
+    }
+  } catch {
+    // Cross-origin preview frames use the current document viewport.
+  }
+  return window.innerWidth;
+}
+
+function syncResponsiveTables(root = document) {
+  const viewportWidth = managementViewportWidth();
+  root.querySelectorAll(RESPONSIVE_TABLE_SELECTOR).forEach((table) => {
+    const cardUntil = Number(table.dataset.cardUntil);
+    if (!Number.isFinite(cardUntil)) return;
+    table.classList.toggle("management-card-active", viewportWidth <= cardUntil);
+  });
+}
 
 function compactPagination(bar) {
   if (!(bar instanceof HTMLElement)) return;
@@ -108,10 +129,27 @@ function normalizeActionButtons(root = document) {
 }
 
 function normalizeInterface(root = document) {
+  syncResponsiveTables(root);
   normalizePagination(root);
   normalizeTabs(root);
   normalizeTables(root);
   normalizeActionButtons(root);
+}
+
+function bindResponsiveTableSync() {
+  if (document.documentElement.dataset.managementTableSync === "true") return;
+  document.documentElement.dataset.managementTableSync = "true";
+  let scheduled = false;
+  const scheduleSync = () => {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(() => {
+      scheduled = false;
+      syncResponsiveTables();
+    });
+  };
+  window.addEventListener("resize", scheduleSync, { passive: true });
+  window.addEventListener("orientationchange", scheduleSync, { passive: true });
 }
 
 function bindTabKeyboardNavigation() {
@@ -136,6 +174,7 @@ export function initializeManagementConsistency() {
   document.body.classList.add("management-consistent-ui");
   normalizeInterface();
   bindTabKeyboardNavigation();
+  bindResponsiveTableSync();
   if (document.documentElement.dataset.managementConsistencyObserver === "true") return;
   document.documentElement.dataset.managementConsistencyObserver = "true";
   let scheduled = false;

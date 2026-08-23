@@ -17,7 +17,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" integrity="sha384-tViUnnbYAV00FLIhhi3v/dWt3Jxw4gZQcNoSCxCIFNJVCx7/D55/wXsrNIRANwdD" crossorigin="anonymous" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 </head>
-<body class="loading">
+<body class="loading intake-management-page">
 <div class="shell">
   <div id="sidebar-container"></div>
 
@@ -127,7 +127,7 @@
         </div>
 
         <div class="table-responsive">
-          <table class="shelter-table management-data-table">
+          <table class="shelter-table management-data-table management-card-table" data-card-until="1365">
             <thead>
               <tr>
                 <th>Intake ID</th>
@@ -159,6 +159,7 @@
   <div class="um-modal intake-modal" role="dialog" aria-modal="true" aria-labelledby="intakeModalTitle">
     <div class="um-modal-header">
       <div>
+        <span class="modal-kicker">Intake management</span>
         <h2 id="intakeModalTitle">New Intake Record</h2>
         <p class="modal-subtitle" id="intakeModalSubtitle">Fill in the intake details below.</p>
       </div>
@@ -173,28 +174,31 @@
         <div class="form-section">
           <div class="form-section-title"><i class="bi bi-box-arrow-in-right"></i> Intake Source</div>
           <div class="form-grid-3">
-            <div class="form-group form-full">
-              <label class="form-lbl">Source Type <span class="req">*</span></label>
+            <fieldset class="form-group form-full source-fieldset">
+              <legend class="form-lbl">Source Type <span class="req">*</span></legend>
               <div class="source-selector" id="sourceSelector">
-                <div class="source-opt" data-value="Rescue">
-                  <div class="source-opt-icon"><i class="bi bi-life-preserver"></i></div>
-                  <div class="source-opt-label">Rescue</div>
-                  <div class="source-opt-desc">Stray or emergency rescue</div>
-                </div>
-                <div class="source-opt" data-value="Barangay Impound">
-                  <div class="source-opt-icon"><i class="bi bi-building"></i></div>
-                  <div class="source-opt-label">Barangay Impound</div>
-                  <div class="source-opt-desc">Local barangay turnover</div>
-                </div>
-                <div class="source-opt" data-value="Approved Surrender">
-                  <div class="source-opt-icon"><i class="bi bi-file-earmark-check"></i></div>
-                  <div class="source-opt-label">Approved Surrender</div>
-                  <div class="source-opt-desc">Approved owner request</div>
-                </div>
+                <label class="source-opt" data-value="Rescue">
+                  <input class="source-opt-input" type="radio" name="intakeSource" value="Rescue" aria-describedby="errSource" />
+                  <span class="source-opt-icon"><i class="bi bi-life-preserver" aria-hidden="true"></i></span>
+                  <span class="source-opt-label">Rescue</span>
+                  <span class="source-opt-desc">Stray or emergency rescue</span>
+                </label>
+                <label class="source-opt" data-value="Barangay Impound">
+                  <input class="source-opt-input" type="radio" name="intakeSource" value="Barangay Impound" aria-describedby="errSource" />
+                  <span class="source-opt-icon"><i class="bi bi-building" aria-hidden="true"></i></span>
+                  <span class="source-opt-label">Barangay Impound</span>
+                  <span class="source-opt-desc">Local barangay turnover</span>
+                </label>
+                <label class="source-opt" data-value="Approved Surrender">
+                  <input class="source-opt-input" type="radio" name="intakeSource" value="Approved Surrender" aria-describedby="errSource" />
+                  <span class="source-opt-icon"><i class="bi bi-file-earmark-check" aria-hidden="true"></i></span>
+                  <span class="source-opt-label">Approved Surrender</span>
+                  <span class="source-opt-desc">Approved owner request</span>
+                </label>
               </div>
               <input type="hidden" id="fSource" />
               <span class="form-err" id="errSource"></span>
-            </div>
+            </fieldset>
           </div>
         </div>
 
@@ -342,9 +346,9 @@
     <div class="um-modal-footer">
       <button type="button" class="btn-ghost-clay" id="intakeModalCancel">Cancel</button>
       <button type="button" class="btn-outline-save" id="btnSaveDraft">
-        <i class="bi bi-floppy"></i> Save as Draft
+        <i class="bi bi-floppy"></i> Save Draft
       </button>
-      <button type="button" class="btn-primary-clay" id="btnSubmitIntake">
+      <button type="button" class="btn-primary-clay management-primary-action" id="btnSubmitIntake">
         <i class="bi bi-send-fill"></i> Submit for Review
       </button>
     </div>
@@ -358,6 +362,7 @@
   <div class="um-modal intake-modal intake-view-modal" role="dialog" aria-modal="true" aria-labelledby="viewModalTitle">
     <div class="um-modal-header">
       <div>
+        <span class="modal-kicker">Intake record</span>
         <h2 id="viewModalTitle">Intake Record</h2>
         <p class="modal-subtitle" id="viewModalSubtitle"></p>
       </div>

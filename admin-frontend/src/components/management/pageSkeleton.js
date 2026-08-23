@@ -4,9 +4,12 @@ export function workspaceSkeletonMarkup() {
   return `
     <div class="animua-skeleton-workspace" aria-hidden="true">
       <div class="animua-sk-topbar">
-        <div class="animua-sk-topbar-copy">
-          ${skeletonLine("animua-sk-kicker")}
-          ${skeletonLine("animua-sk-page-title")}
+        <div class="animua-sk-topbar-left">
+          ${skeletonLine("animua-sk-menu")}
+          <div class="animua-sk-topbar-copy">
+            ${skeletonLine("animua-sk-kicker")}
+            ${skeletonLine("animua-sk-page-title")}
+          </div>
         </div>
         <div class="animua-sk-profile">
           ${skeletonLine("animua-sk-avatar")}
@@ -136,6 +139,7 @@ function mountInitialSkeleton() {
   loader.id = "animua-initial-skeleton";
   loader.className = "animua-initial-skeleton";
   loader.setAttribute("role", "status");
+  loader.setAttribute("aria-live", "polite");
   loader.setAttribute("aria-label", "Loading ANIMUA workspace");
   loader.innerHTML = `${sidebarSkeletonMarkup()}${workspaceSkeletonMarkup()}`;
   body.append(loader);

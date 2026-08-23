@@ -955,6 +955,82 @@
   .ap-list-page *, .ap-list-page *::before, .ap-list-page *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
 }
 
+@media (max-width: 720px) {
+  .ap-list-page .ap-workflow {
+    gap: 16px;
+    padding: 18px 16px;
+  }
+
+  .ap-list-page .ap-workflow h2 {
+    margin-top: 5px;
+    font-size: 1.08rem;
+    line-height: 1.3;
+  }
+
+  .ap-list-page .ap-workflow p {
+    font-size: .75rem;
+    line-height: 1.5;
+  }
+
+  .ap-list-page .ap-workflow-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 14px;
+  }
+
+  .ap-list-page .ap-workflow-step {
+    min-height: 58px;
+    grid-template-columns: 38px minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-content: center;
+    justify-items: start;
+    gap: 2px 9px;
+    padding: 9px 10px;
+    border: 1px solid #eadfd4;
+    border-radius: 12px;
+    background: #fff;
+    text-align: left;
+  }
+
+  .ap-list-page .ap-workflow-step > span {
+    width: 38px;
+    height: 38px;
+    grid-row: 1 / span 2;
+    border-radius: 11px;
+  }
+
+  .ap-list-page .ap-workflow-step > small {
+    align-self: end;
+    color: #8b7d76;
+    font: 700 .65rem/1.2 "Poppins", sans-serif;
+  }
+
+  .ap-list-page .ap-workflow-step > strong {
+    align-self: start;
+    font-size: .78rem;
+    line-height: 1.25;
+  }
+
+  .ap-list-page .ap-workflow-step.is-active {
+    border-color: #780116;
+    background: #fff8ee;
+    box-shadow: inset 0 0 0 1px rgba(120, 1, 22, .08);
+  }
+
+  .ap-list-page .ap-workflow-step.is-active > small::after {
+    content: " · Current";
+    color: #780116;
+    font-weight: 800;
+  }
+
+  .ap-list-page .ap-workflow-step:nth-child(odd):not(:last-child)::after {
+    top: 50%;
+    left: 100%;
+    width: 14px;
+    display: block;
+    border-top: 1px dashed #d7c7bb;
+  }
+}
+
 /* Clear, touch-friendly behavioral scoring and connected clinical workflow. */
 .animal-profile-page .behavioral-modal {
   width: min(1040px, calc(100vw - 32px));
@@ -1190,27 +1266,35 @@
 
 .animal-profile-page .medical-inventory-search {
   position: relative;
-  display: flex;
+  min-height: 42px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
+  gap: 8px;
+  padding: 0 7px 0 13px;
+  border: 1px solid #ddd0c5;
+  border-radius: 9px;
+  background: #FFFFFF;
 }
 
 .animal-profile-page .medical-inventory-search > i {
-  position: absolute;
-  left: 13px;
-  z-index: 1;
+  position: static;
   color: #780116;
   pointer-events: none;
 }
 
-.animal-profile-page .medical-inventory-search .form-inp {
-  padding-right: 42px;
-  padding-left: 38px;
-  background: #FFFFFF;
+.animal-profile-page .medical-inventory-search .form-inp,
+.animal-profile-page .medical-inventory-search .form-inp:focus {
+  min-height: 40px;
+  padding: 0;
+  border: 0 !important;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none !important;
 }
 
 .animal-profile-page .medical-inventory-search button {
-  position: absolute;
-  right: 7px;
+  position: static;
   width: 30px;
   height: 30px;
   display: grid;
@@ -1861,7 +1945,8 @@
 .animal-profile-page .profile-action-copy span { color: var(--profile-ink); font: 800 .74rem/1 "Poppins", sans-serif; }
 .animal-profile-page .profile-action-copy p { margin: 7px 0 0; color: var(--profile-muted); font-size: .7rem; line-height: 1.5; }
 .animal-profile-page .profile-hero-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; min-width: 0; }
-.animal-profile-page .profile-hero-actions #btnStatusChange { grid-column: 1 / -1; grid-row: 1; }
+.animal-profile-page .profile-hero-actions #btnStatusChange { grid-column: 1 / -1; }
+.animal-profile-page .profile-hero-actions #btnStatusChange[hidden] { display: none !important; }
 .animal-profile-page .profile-hero-actions #btnEditProfile { grid-column: 1; }
 .animal-profile-page .profile-hero-actions .dropdown { min-width: 0; }
 .animal-profile-page .profile-more-btn { width: 100%; padding: 0 12px; }
@@ -1963,6 +2048,7 @@
   border-bottom: 1px solid var(--profile-line);
 }
 .animal-profile-page .profile-section-title-wrap { min-width: 0; }
+.animal-profile-page .profile-section-actions { display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:8px }
 .animal-profile-page .tab-section-title { margin: 0; color: var(--profile-ink); font: 800 1rem/1.2 "Poppins", sans-serif; letter-spacing: -.01em; }
 .animal-profile-page .tab-section-sub { max-width: 650px; margin: 3px 0 0; color: var(--profile-muted); font-size: .68rem; line-height: 1.45; }
 .animal-profile-page .profile-section-header .btn-primary-clay { height: 38px; min-height: 38px; flex: 0 0 auto; font-size: .69rem; }
@@ -2154,7 +2240,7 @@
 .animal-profile-page .trait-scale-guide strong { color: var(--profile-red-deep); font: 800 .65rem/1 "Poppins", monospace; }
 .animal-profile-page .behavioral-modal .trait-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   align-items: start;
   gap: 10px;
 }
@@ -2233,7 +2319,7 @@
 }
 .animal-profile-page .behavioral-form-meta {
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(180px, .7fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 10px;
   margin-top: 11px;
   padding: 11px;
@@ -2244,6 +2330,164 @@
 .animal-profile-page .behavioral-form-meta .form-lbl { font-size: .62rem; }
 .animal-profile-page .behavioral-form-meta .form-inp { min-height: 37px; height: 37px; background: #FFFFFF; }
 .animal-profile-page .behavioral-form-meta textarea.form-inp { min-height: 37px; padding-block: 9px; resize: vertical; }
+.animal-profile-page .behavior-observation-editor {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+  margin-top: 14px;
+  padding: 18px;
+  border: 1px solid var(--profile-line);
+  border-radius: 15px;
+  background: #FFFFFF;
+  box-shadow: 0 8px 22px rgba(54, 40, 34, .05);
+}
+.animal-profile-page .trait-score-option span,
+.animal-profile-page .trait-score-option small { display: block; }
+.animal-profile-page .trait-score-option span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.animal-profile-page .trait-score-option small { margin-top: 3px; color: inherit; font-size: .52rem; opacity: .72; }
+.animal-profile-page .behavior-observation-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #eee1d7;
+}
+.animal-profile-page .behavior-observation-heading > div { min-width: 0; }
+.animal-profile-page .behavior-observation-heading h3 {
+  margin: 0;
+  color: var(--profile-ink);
+  font: 800 .84rem/1.25 "Poppins", sans-serif;
+}
+.animal-profile-page .behavior-observation-heading p {
+  max-width: 540px;
+  margin: 5px 0 0;
+  color: #81766e;
+  font: 500 .66rem/1.5 "Poppins", sans-serif;
+}
+.animal-profile-page .behavior-add-btn {
+  min-height: 40px;
+  flex: 0 0 auto;
+  border-color: #e2c16d !important;
+  color: #780116 !important;
+  background: #fff1c9 !important;
+}
+.animal-profile-page .behavior-observation-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 11px;
+}
+.animal-profile-page .behavior-observation-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 11px;
+  padding: 15px;
+  border: 1px solid #eadfd4;
+  border-left: 4px solid #780116;
+  border-radius: 13px;
+  background: #fffaf3;
+}
+.animal-profile-page .behavior-observation-row-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.animal-profile-page .behavior-observation-row-head > span {
+  color: #780116;
+  font: 800 .63rem/1.2 "Poppins", sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.animal-profile-page .behavior-remove-btn {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  border: 1px solid #eadfd4;
+  border-radius: 999px;
+  color: #780116;
+  background: #FFFFFF;
+  font: 750 .61rem/1 "Poppins", sans-serif;
+}
+.animal-profile-page .behavior-remove-btn:hover,
+.animal-profile-page .behavior-remove-btn:focus-visible {
+  border-color: #780116;
+  background: #fff0ef;
+}
+.animal-profile-page .behavior-observation-empty {
+  min-height: 82px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px;
+  border: 1px dashed #dfd3cb;
+  border-radius: 13px;
+  color: #81766e;
+  background: #FFF8EE;
+}
+
+.animal-profile-page .medical-inventory-search:focus-within {
+  border-color: var(--profile-red);
+  box-shadow: 0 0 0 3px rgba(120, 1, 22, .1);
+}
+.animal-profile-page .behavior-observation-empty > i {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 38px;
+  border-radius: 11px;
+  color: #780116;
+  background: #fff1c9;
+}
+.animal-profile-page .behavior-observation-empty strong,
+.animal-profile-page .behavior-observation-empty span { display: block; }
+.animal-profile-page .behavior-observation-empty strong { color: #362822; font-size: .7rem; }
+.animal-profile-page .behavior-observation-empty span { margin-top: 3px; font-size: .61rem; line-height: 1.45; }
+.animal-profile-page .behavior-observation-error {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(120, 1, 22, .16);
+  border-radius: 10px;
+  color: #780116;
+  background: #fff0ef;
+  font: 650 .64rem/1.45 "Poppins", sans-serif;
+}
+.animal-profile-page .behavioral-observation-summary {
+  margin-top: 12px;
+  padding: 13px;
+  border: 1px solid #eadfd4;
+  border-radius: 12px;
+  background: #FFF8EE;
+}
+.animal-profile-page .behavioral-observation-summary > strong {
+  display: block;
+  margin-bottom: 8px;
+  color: #780116;
+  font-size: .67rem;
+  text-transform: uppercase;
+}
+.animal-profile-page .behavioral-observation-summary > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 7px;
+}
+.animal-profile-page .behavioral-observation-summary article {
+  padding: 9px 11px;
+  border-left: 3px solid #f0b72f;
+  border-radius: 8px;
+  background: #FFFFFF;
+}
+.animal-profile-page .behavioral-observation-summary article span { color: #362822; font-size: .68rem; font-weight: 800; }
+.animal-profile-page .behavioral-observation-summary article p { margin: 3px 0 0; color: #81766e; font-size: .62rem; line-height: 1.45; }
+@media (max-width: 600px) {
+  .animal-profile-page .behavior-observation-heading { flex-direction: column; }
+  .animal-profile-page .behavior-add-btn { width: 100%; }
+  .animal-profile-page .behavior-observation-editor,
+  .animal-profile-page .behavior-observation-row { padding: 14px; }
+}
 .animal-profile-page .behavioral-modal .um-modal-footer { gap: 8px; padding: 11px 18px; }
 .animal-profile-page .modal-save-hint { display: inline-flex; align-items: center; gap: 6px; margin-right: auto; color: #81766e; font-size: .59rem; font-weight: 650; }
 .animal-profile-page .modal-save-hint i { color: #187b55; }
@@ -2269,7 +2513,7 @@
   .animal-profile-page .profile-action-copy { max-width: 390px; }
   .animal-profile-page .profile-hero-actions { min-width: 310px; }
   .animal-profile-page .tab-content { padding: 18px 18px 22px; }
-  .animal-profile-page .behavioral-modal .trait-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .animal-profile-page .behavioral-modal .trait-grid { grid-template-columns: minmax(0, 1fr); }
   .animal-profile-page #behavioralContent .trait-bars { grid-template-columns: 1fr; }
   .animal-profile-page .profile-tabs-bar {
     scroll-snap-type: x proximity;
@@ -2302,6 +2546,8 @@
   .animal-profile-page .behavioral-form-meta { grid-template-columns: 1fr; }
   .animal-profile-page .modal-save-hint { display: none; }
   .animal-profile-page .profile-section-header { align-items: flex-start; flex-direction: column; }
+  .animal-profile-page .profile-section-actions { width:100%;justify-content:stretch }
+  .animal-profile-page .profile-section-actions > button { flex:1 1 180px;width:auto }
   .animal-profile-page .profile-section-header .btn-primary-clay { width: 100%; }
   .animal-profile-page .profile-section-title-wrap { width: 100%; }
   .animal-profile-page .medical-record-card { padding: 14px 14px 14px 19px; }
@@ -2359,4 +2605,135 @@
 
 @media (prefers-reduced-motion: reduce) {
   .animal-profile-page *, .animal-profile-page *::before, .animal-profile-page *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+}
+
+/* Compact case-file summary for phones. The image remains prominent, while
+   facts and actions use the available width instead of forming a long stack. */
+@media (max-width: 700px) {
+  .animal-profile-page .profile-portrait-panel { padding: 16px 16px 14px; }
+  .animal-profile-page .profile-photo { width: 96px; height: 106px; }
+  .animal-profile-page .profile-photo img,
+  .animal-profile-page #profilePhoto img { object-fit: contain; background: #FFFFFF; }
+  .animal-profile-page .profile-hero-info { padding: 17px 16px; }
+  .animal-profile-page .profile-name { font-size: clamp(1.7rem, 9vw, 2.1rem); }
+  .animal-profile-page .profile-meta { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 12px; }
+  .animal-profile-page .profile-meta-item,
+  .animal-profile-page .profile-meta-item:nth-child(2n) {
+    padding: 9px 8px;
+    border-right: 1px solid var(--profile-line);
+    border-bottom: 1px solid var(--profile-line);
+  }
+  .animal-profile-page .profile-meta-item:nth-child(2n) { border-right: 0; }
+  .animal-profile-page .profile-meta-item:nth-last-child(-n + 2) { border-bottom: 0; }
+  .animal-profile-page .profile-tags { margin-top: 9px; }
+  .animal-profile-page .profile-action-panel { gap: 10px; padding: 14px 16px; }
+  .animal-profile-page .profile-action-copy p { margin-top: 4px; }
+  .animal-profile-page .profile-hero-actions :is(.btn-primary-clay, .btn-ghost-clay) { min-height: 44px; }
+  .animal-profile-page .profile-context-strip { margin: 8px 0 10px; padding: 8px 10px; }
+}
+
+@media (max-width: 480px) {
+  .animal-profile-page .info-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .animal-profile-page .info-item,
+  .animal-profile-page .info-item:nth-child(2n),
+  .animal-profile-page .info-item:nth-child(4n) {
+    padding: 9px 7px;
+    border-right: 1px solid #eee5dc;
+  }
+  .animal-profile-page .info-item:nth-child(2n) { border-right: 0; }
+}
+
+@media (max-width: 340px) {
+  .animal-profile-page .profile-meta,
+  .animal-profile-page .info-grid { grid-template-columns: minmax(0, 1fr); }
+  .animal-profile-page .profile-meta-item,
+  .animal-profile-page .profile-meta-item:nth-child(2n),
+  .animal-profile-page .info-item,
+  .animal-profile-page .info-item:nth-child(2n) { border-right: 0; border-bottom: 1px solid var(--profile-line); }
+}
+
+/* Case-file metadata stays legible on compact screens. */
+.animal-profile-page :is(.behavioral-form-meta .form-lbl, .modal-save-hint) {
+  font-size: .68rem;
+  line-height: 1.4;
+}
+
+@media (max-width: 480px) {
+  .animal-profile-page .timeline-date { font-size: .64rem; line-height: 1.4; }
+  .animal-profile-page .timeline-detail { font-size: .7rem; line-height: 1.5; }
+}
+
+/* Question configuration opens from the Behavioral Assessment tab as a modal. */
+.behavior-question-manager-modal { width: min(980px, calc(100vw - 32px)); max-width: 980px; }
+.behavior-question-manager-modal > .um-modal-body { background: #fbf7f1; }
+.behavior-config-version { padding: 8px 12px; border: 1px solid #e4cfa9; border-radius: 999px; color: #780116; background: #fff8e8; font-size: .68rem; font-weight: 800; }
+.behavior-question-manager-footer { flex-wrap: wrap; }
+.behavior-question-manager-footer .behavior-config-version { margin-right: auto; }
+.behavior-config-notice { display: flex; gap: 12px; margin: 0 0 18px; padding: 14px 16px; border: 1px solid #efdba9; border-radius: 14px; color: #5a421b; background: #fff8e8; }
+.behavior-config-notice > i { color: #9a001c; font-size: 1.15rem; }
+.behavior-config-notice strong { display: block; font-size: .75rem; }
+.behavior-config-notice p { margin: 3px 0 0; color: #756a60; font-size: .68rem; line-height: 1.5; }
+.behavior-question-list { display: grid; gap: 20px; }
+.behavior-question-group { overflow: visible; border: 1px solid #e9ddd3; border-radius: 18px; background: #fff; }
+.behavior-question-group > header { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 16px 18px; border-bottom: 1px solid #eee3da; background: linear-gradient(90deg, #fff7e7, #fff); }
+.behavior-question-group h3 { margin: 2px 0 0; color: #2f2420; font-size: .95rem; font-weight: 800; }
+.behavior-question-group > header > strong { padding: 6px 10px; border-radius: 999px; color: #7d0017; background: #f4ead9; font-size: .64rem; }
+.behavior-question-card { display: grid; grid-template-columns: 52px minmax(0,1fr); gap: 14px; padding: 17px 18px; border-bottom: 1px solid #eee5dd; }
+.behavior-question-card:last-child { border-bottom: 0; }
+.behavior-question-card.is-inactive { background: #faf9f7; opacity: .78; }
+.behavior-question-number { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 12px; color: #fff; background: #90001b; font-size: .72rem; font-weight: 800; }
+.behavior-question-copy { min-width: 0; }
+.behavior-question-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+.behavior-question-card h4 { margin: 0; color: #302522; font-size: .82rem; font-weight: 800; }
+.behavior-question-card-head p { margin: 4px 0 0; color: #756c66; font-size: .7rem; line-height: 1.55; }
+.behavior-status { flex: 0 0 auto; padding: 5px 9px; border-radius: 999px; color: #756c66; background: #eee9e5; font-size: .58rem; font-weight: 800; text-transform: uppercase; }
+.behavior-status.is-active { color: #17633b; background: #e5f6ec; }
+.behavior-question-summary { display: flex; flex-wrap: wrap; gap: 7px 14px; margin-top: 9px; color: #7d716a; font-size: .63rem; font-weight: 650; }
+.behavior-question-summary span { display: inline-flex; align-items: center; gap: 6px; }
+.behavior-question-summary i { color: #9a001c; }
+.behavior-question-card-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 7px; margin-top: 12px; }
+.behavior-question-card-actions button { min-height: 35px; padding: 7px 10px; border: 1px solid #e2d4ca; border-radius: 9px; color: #655a54; background: #fff; font: 700 .63rem/1 "Poppins", sans-serif; }
+.behavior-question-card-actions button i { margin-right: 5px; }
+.behavior-question-card-actions button.is-primary { color: #fff; border-color: #90001b; background: #90001b; }
+.behavior-question-card-actions button.is-danger { color:#90001b;border-color:#e6c8ce;background:#fff7f8 }
+.behavior-question-card-actions button.is-danger:hover { color:#fff;border-color:#90001b;background:#90001b }
+.behavior-question-card-actions button:disabled { opacity: .35; }
+.behavior-question-more { position: relative; }
+.behavior-question-more summary { min-height: 35px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 11px; border: 1px solid #e2d4ca; border-radius: 9px; color: #655a54; background: #fff; font: 700 .63rem/1 "Poppins", sans-serif; cursor: pointer; list-style: none; }
+.behavior-question-more summary::-webkit-details-marker { display: none; }
+.behavior-question-more[open] summary { color: #90001b; border-color: #d8b9bf; background: #fff7f8; }
+.behavior-question-more > div { position: absolute; right: 0; bottom: calc(100% + 7px); z-index: 20; width: 190px; display: grid; gap: 3px; padding: 7px; border: 1px solid #e5d7cd; border-radius: 12px; background: #fff; box-shadow: 0 15px 34px rgba(65,42,33,.17); }
+.behavior-question-more > div button { width: 100%; justify-content: flex-start; border: 0; text-align: left; }
+.behavior-question-more > div button:hover { color: #90001b; background: #fff8ee; }
+.behavior-question-modal { width: min(620px, calc(100vw - 32px)); }
+.behavior-question-modal form { display: grid; gap: 15px; }
+.behavior-active-control { display: flex; align-items: flex-start; gap: 10px; padding: 12px; border: 1px solid #e7dbd1; border-radius: 12px; background: #fffaf3; }
+.behavior-active-control input { width: 18px; height: 18px; margin-top: 2px; accent-color: #90001b; }
+.behavior-active-control strong,
+.behavior-active-control small { display: block; }
+.behavior-active-control strong { color: #3a2e29; font-size: .72rem; }
+.behavior-active-control small { margin-top: 2px; color: #877b73; font-size: .62rem; }
+.behavior-answer-editor { padding: 14px; border: 1px solid #e5d7cc; border-radius: 14px; }
+.behavior-answer-editor legend { float: none; width: auto; margin: 0; color: #780116; font-size: .75rem; font-weight: 800; }
+.behavior-answer-editor > p { margin: 3px 0 12px; color: #877b73; font-size: .62rem; }
+#behaviorAnswerFields { display: grid; gap: 8px; }
+#behaviorAnswerFields label { display: grid; grid-template-columns: 68px minmax(0,1fr); align-items: center; gap: 9px; }
+#behaviorAnswerFields label span { color: #6a5d56; font-size: .63rem; font-weight: 800; }
+.behavior-question-error { min-height: 1em; margin: 0; }
+
+@media (max-width: 760px) {
+  .behavior-question-card { grid-template-columns: 1fr; padding: 14px; }
+  .behavior-question-number { width: 36px; height: 36px; }
+  .behavior-question-card-head { flex-direction: column; }
+  .behavior-question-card-actions { justify-content: stretch; }
+  .behavior-question-card-actions > button,
+  .behavior-question-more { flex: 1 1 120px; }
+  .behavior-question-more summary { justify-content: center; }
+  .behavior-question-manager-footer .behavior-config-version { width: 100%; margin: 0; text-align: center; }
+}
+
+@media (max-width: 600px) {
+  .animal-profile-page .trait-score-options { grid-template-columns: minmax(0, 1fr); }
+  .animal-profile-page .trait-score-option { height: auto; min-height: 42px; padding: 8px 10px; text-align: left; }
+  .animal-profile-page .trait-score-option span { white-space: normal; }
 }

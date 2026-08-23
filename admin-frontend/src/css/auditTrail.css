@@ -773,6 +773,7 @@ body.audit-trail-page .audit-review-btn {
 }
 body.audit-trail-page .audit-review-btn:hover { color: #fff; border-color: var(--audit-burgundy); background: var(--audit-burgundy); transform: translateY(-1px); }
 body.audit-trail-page .audit-review-btn:focus-visible { outline: 3px solid rgba(120,1,22,.18); outline-offset: 2px; }
+body.audit-trail-page .audit-review-btn > span { display: none; }
 
 body.audit-trail-page .audit-panel .um-pagination { min-height: 70px; padding: 15px 24px 19px !important; background: var(--audit-cream) !important; }
 body.audit-trail-page .audit-panel .page-info { color: #766962; font-size: .65rem !important; font-weight: 650 !important; }
@@ -791,4 +792,141 @@ body.audit-trail-page .audit-panel .page-info { color: #766962; font-size: .65re
   body.audit-trail-page .audit-filter-grid { grid-template-columns: 1fr; }
   body.audit-trail-page .filter-field-search { grid-column: auto; }
   body.audit-trail-page .records-table-wrap { max-height: none; }
+
+  html body.management-consistent-ui.audit-trail-page .audit-view-switch {
+    min-height: 0 !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 5px !important;
+    padding: 5px !important;
+    overflow: visible !important;
+  }
+
+  html body.management-consistent-ui.audit-trail-page .audit-view-btn {
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 8px 6px !important;
+    white-space: normal !important;
+    line-height: 1.25 !important;
+    text-align: center;
+  }
+
+  body.management-consistent-ui.audit-trail-page .records-toolbar {
+    gap: 14px;
+    padding-block: 17px 15px;
+  }
+
+  body.management-consistent-ui.audit-trail-page .audit-filter-grid {
+    gap: 10px;
+    padding-block: 14px;
+  }
+
+  body.management-consistent-ui.audit-trail-page .filter-field {
+    gap: 5px;
+  }
+
+  html body.management-consistent-ui.audit-trail-page .audit-panel .audit-log-table td:last-child {
+    position: static;
+  }
+
+  body.management-consistent-ui.audit-trail-page .audit-log-table :is(
+    .actor-cell strong, .module-cell span,
+    .audit-record-cell strong, .audit-record-cell small
+  ) {
+    max-width: 100%;
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  body.management-consistent-ui.audit-trail-page .audit-log-table :is(
+    .module-cell, .action-badge, .status-badge
+  ) {
+    max-width: 100%;
+    white-space: normal;
+    line-height: 1.35;
+  }
+
+  body.management-consistent-ui.audit-trail-page .audit-review-btn {
+    width: auto;
+    min-width: 112px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding-inline: 14px;
+    font-weight: 750;
+  }
+
+  body.management-consistent-ui.audit-trail-page .audit-review-btn > span {
+    display: inline;
+    font-size: .72rem;
+  }
+
+  body.management-consistent-ui.audit-trail-page .audit-log-table tbody > tr.management-card-row {
+    border: 1px solid #e6dbd3;
+    background: #fff !important;
+    box-shadow: 0 6px 18px rgba(64, 34, 29, .05);
+  }
+
+  body.management-consistent-ui.audit-trail-page .audit-log-table tbody > tr.management-card-row > td {
+    background: transparent !important;
+  }
+
+  body.management-consistent-ui.audit-trail-page .audit-log-table :is(
+    .audit-actor-field, .audit-record-field
+  ) {
+    grid-column: 1 / -1;
+  }
+
+  body.management-consistent-ui.audit-trail-page .event-time-cell > span:last-child {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 4px 7px;
+  }
+
+  body.management-consistent-ui.audit-trail-page .event-time-cell strong {
+    font-size: .82rem;
+  }
+
+  body.management-consistent-ui.audit-trail-page .event-time-cell small {
+    margin: 0;
+    font-size: .7rem;
+  }
+
+  body.management-consistent-ui.audit-trail-page .event-time-cell small::before {
+    content: "·";
+    margin-right: 7px;
+    color: #b2a49c;
+  }
+
+  body.management-consistent-ui.audit-trail-page .actor-cell strong {
+    font-size: .82rem;
+    line-height: 1.35;
+  }
+
+  body.management-consistent-ui.audit-trail-page .actor-cell small {
+    font-size: .69rem;
+  }
+
+  body.management-consistent-ui.audit-trail-page .audit-record-cell strong {
+    font-size: .8rem;
+    line-height: 1.4;
+  }
+
+  body.management-consistent-ui.audit-trail-page .audit-record-cell small {
+    font-size: .68rem;
+    word-break: normal;
+    overflow-wrap: anywhere;
+  }
+
+  body.management-consistent-ui.audit-trail-page .audit-log-table :is(
+    .module-cell, .action-badge, .status-badge
+  ) {
+    min-height: 30px;
+    font-size: .68rem !important;
+  }
 }

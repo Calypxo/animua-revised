@@ -2,6 +2,7 @@ import Swal from "sweetalert2";
 import { API_BASE_URL } from "../utils/api.js";
 import { clearUserSession, endUserSession, setUserSession } from "../utils/storage.js";
 import { normalizeRole } from "../auth/permissions.js";
+import { initializeManagementRecovery } from "./managementRecovery.js";
  
 // ── HELPERS ────────────────────────────────────────────
 function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
@@ -171,4 +172,5 @@ async function handleAdminLogin(e) {
   }
 
   document.getElementById("login-form")?.addEventListener("submit", handleAdminLogin);
+  initializeManagementRecovery();
 })();

@@ -1286,3 +1286,238 @@ html body.management-consistent-ui.adoption-applications-page .page-body .aa-tab
   color: #FFFFFF !important;
   background: #780116 !important;
 }
+
+/* Adoption decisions use the Create Intake modal rhythm and controls. */
+html body.adoption-applications-page .adoption-decision-modal {
+  width: min(560px, calc(100vw - 32px)) !important;
+  max-width: 560px !important;
+  max-height: min(90dvh, 780px) !important;
+  border-radius: 24px !important;
+  background: #FFFFFF !important;
+  font: 500 12px/1.5 "Poppins", sans-serif !important;
+}
+
+html body.adoption-applications-page .adoption-finalize-modal {
+  width: min(620px, calc(100vw - 32px)) !important;
+  max-width: 620px !important;
+}
+
+html body.adoption-applications-page .adoption-decision-modal > .um-modal-header {
+  min-height: 0 !important;
+  align-items: flex-start !important;
+  padding: 20px 22px 18px !important;
+  background: #FFF8EE !important;
+}
+
+.adoption-modal-heading {
+  min-width: 0;
+  padding-right: 10px;
+}
+
+.adoption-modal-eyebrow {
+  display: block;
+  margin-bottom: 4px;
+  color: #780116;
+  font: 800 10px/1.2 "Poppins", sans-serif;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+html body.adoption-applications-page .adoption-decision-modal .adoption-modal-heading h2 {
+  margin: 0 !important;
+  color: #1f2329 !important;
+  font: 800 18px/1.25 "Poppins", sans-serif !important;
+  letter-spacing: -.02em !important;
+}
+
+html body.adoption-applications-page .adoption-decision-modal .modal-subtitle {
+  max-width: 440px;
+  margin: 4px 0 0 !important;
+  color: #756b67 !important;
+  font: 500 11px/1.5 "Poppins", sans-serif !important;
+}
+
+html body.adoption-applications-page .adoption-decision-modal > .um-modal-body {
+  padding: 20px 22px 22px !important;
+  background: #FFFFFF !important;
+}
+
+html body.adoption-applications-page .adoption-decision-summary {
+  grid-template-columns: 48px minmax(0, 1fr) !important;
+  justify-items: stretch !important;
+  align-items: center !important;
+  gap: 13px !important;
+  padding: 0 0 16px !important;
+  text-align: left !important;
+}
+
+html body.adoption-applications-page .adoption-decision-summary .confirm-icon-wrap {
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 14px !important;
+  font-size: 1.12rem !important;
+  box-shadow: none !important;
+}
+
+html body.adoption-applications-page .adoption-decision-summary .confirm-icon-wrap::after {
+  display: none !important;
+}
+
+html body.adoption-applications-page .adoption-decision-summary > p {
+  max-width: none !important;
+  color: #4f4743 !important;
+  font: 600 12px/1.55 "Poppins", sans-serif !important;
+  text-align: left !important;
+}
+
+html body.adoption-applications-page .adoption-modal-form-section,
+html body.adoption-applications-page .management-confirm-modal #rejectReasonWrap {
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 16px !important;
+  border: 1px solid #eadfd4 !important;
+  border-radius: 14px !important;
+  background: #FFF8EE !important;
+  text-align: left !important;
+}
+
+.adoption-finalize-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 16px;
+}
+
+.adoption-finalize-fields .adoption-field-wide { grid-column: 1 / -1; }
+
+html body.adoption-applications-page .adoption-decision-modal .form-lbl {
+  color: #504845 !important;
+  font: 700 11px/1.4 "Poppins", sans-serif !important;
+}
+
+html body.adoption-applications-page .adoption-decision-modal .form-inp {
+  min-height: 44px !important;
+  border: 1px solid #ddd2ca !important;
+  border-radius: 10px !important;
+  color: #1f2329 !important;
+  background: #FFFFFF !important;
+  font: 500 12px/1.45 "Poppins", sans-serif !important;
+}
+
+html body.adoption-applications-page .adoption-decision-modal textarea.form-inp {
+  min-height: 108px !important;
+  padding: 11px 12px !important;
+}
+
+html body.adoption-applications-page .adoption-decision-modal .form-inp:focus {
+  border-color: #780116 !important;
+  box-shadow: 0 0 0 3px rgba(120, 1, 22, .1) !important;
+}
+
+.adoption-field-hint {
+  color: #7b706b;
+  font: 500 10px/1.45 "Poppins", sans-serif;
+}
+
+html body.adoption-applications-page .adoption-decision-modal .form-err {
+  color: #780116 !important;
+  font: 700 10px/1.4 "Poppins", sans-serif !important;
+}
+
+html body.adoption-applications-page .adoption-decision-modal .form-err:empty {
+  display: none;
+}
+
+html body.adoption-applications-page .adoption-decision-modal > .um-modal-footer {
+  min-height: 72px !important;
+  padding: 13px 22px !important;
+  background: #FFF8EE !important;
+}
+
+html body.adoption-applications-page .adoption-decision-modal .um-modal-footer button {
+  min-height: 42px !important;
+  padding-inline: 18px !important;
+  border-radius: 999px !important;
+  font: 800 11px/1 "Poppins", sans-serif !important;
+}
+
+@media (max-width: 600px) {
+  html body.adoption-applications-page .adoption-decision-layer.management-modal-layer {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+
+  html body.adoption-applications-page .adoption-decision-modal {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 94dvh !important;
+    border-width: 1px 0 0 !important;
+    border-radius: 22px 22px 0 0 !important;
+  }
+
+  html body.adoption-applications-page .adoption-decision-modal > .um-modal-header,
+  html body.adoption-applications-page .adoption-decision-modal > .um-modal-body,
+  html body.adoption-applications-page .adoption-decision-modal > .um-modal-footer {
+    padding-inline: 16px !important;
+  }
+
+  .adoption-finalize-fields { grid-template-columns: minmax(0, 1fr); }
+  .adoption-finalize-fields .adoption-field-wide { grid-column: auto; }
+
+  html body.adoption-applications-page .adoption-decision-modal > .um-modal-footer {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  html body.adoption-applications-page .adoption-decision-modal .um-modal-footer button {
+    width: 100% !important;
+  }
+
+  html body.adoption-applications-page .adoption-decision-modal :is(.btn-reject-confirm, .btn-finalize) {
+    order: -1;
+  }
+}
+
+/* The shared modal contract is intentionally strict; these adoption-specific
+   selectors retain that contract while setting the workflow's compact size. */
+html body.management-consistent-ui.adoption-applications-page :is(#rejectModalBackdrop, #finalizeModalBackdrop).management-confirm-layer > .adoption-decision-modal {
+  width: min(560px, calc(100vw - 32px)) !important;
+  max-width: 560px !important;
+  max-height: min(90dvh, 780px) !important;
+  border-radius: 24px !important;
+}
+
+html body.management-consistent-ui.adoption-applications-page #finalizeModalBackdrop.management-confirm-layer > .adoption-finalize-modal {
+  width: min(620px, calc(100vw - 32px)) !important;
+  max-width: 620px !important;
+}
+
+html body.management-consistent-ui.adoption-applications-page :is(#rejectModalBackdrop, #finalizeModalBackdrop).management-confirm-layer > .adoption-decision-modal > .um-modal-header {
+  min-height: 0 !important;
+  align-items: flex-start !important;
+  padding: 20px 22px 18px !important;
+  background: #FFF8EE !important;
+}
+
+html body.management-consistent-ui.adoption-applications-page :is(#rejectModalBackdrop, #finalizeModalBackdrop).management-confirm-layer > .adoption-decision-modal > .um-modal-body {
+  padding: 20px 22px 22px !important;
+  background: #FFFFFF !important;
+}
+
+html body.management-consistent-ui.adoption-applications-page :is(#rejectModalBackdrop, #finalizeModalBackdrop).management-confirm-layer > .adoption-decision-modal > .um-modal-footer {
+  min-height: 72px !important;
+  padding: 13px 22px !important;
+  background: #FFF8EE !important;
+}
+
+@media (max-width: 600px) {
+  html body.management-consistent-ui.adoption-applications-page :is(#rejectModalBackdrop, #finalizeModalBackdrop).management-confirm-layer > .adoption-decision-modal {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 94dvh !important;
+    border-radius: 22px 22px 0 0 !important;
+  }
+
+  html body.management-consistent-ui.adoption-applications-page :is(#rejectModalBackdrop, #finalizeModalBackdrop).management-confirm-layer > .adoption-decision-modal > :is(.um-modal-header, .um-modal-body, .um-modal-footer) {
+    padding-inline: 16px !important;
+  }
+}

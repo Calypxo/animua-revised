@@ -32,7 +32,12 @@ import {
   createUser,
   updateUser,
   toggleUserStatus,
+  sendPasswordReset,
 } from "../services/users.service.js";
+import {
+  confirmManagementAction,
+  showManagementNotice,
+} from "../components/management/managementAlerts.js";
 
 renderPageHeader(PAGE_HEADER_CONFIGS.users);
 
@@ -423,6 +428,9 @@ function renderTable() {
     const editAction = !isPublic && can("edit")
       ? `<button type="button" role="menuitem" data-action="edit" data-id="${u.id}"><i class="bi bi-person-gear"></i><span>Change role</span></button>`
       : "";
+    const recoveryAction = !isPublic && isActive && normalizeRole(currentRole) === "Admin"
+      ? `<button type="button" role="menuitem" data-action="recovery" data-id="${u.id}"><i class="bi bi-key"></i><span>Send password reset</span></button>`
+      : "";
     const toggleAction = can("delete")
       ? `<div class="user-action-divider" role="separator"></div><button type="button" role="menuitem" class="${isActive ? "is-danger" : "is-success"}" data-action="toggle" data-id="${u.id}"><i class="bi ${isActive ? "bi-person-x" : "bi-person-check"}"></i><span>${isActive ? "Deactivate account" : "Activate account"}</span></button>`
       : "";
@@ -446,7 +454,7 @@ function renderTable() {
               <button class="animal-record-open" type="button" data-action="view" data-id="${u.id}" aria-label="View account for ${dname}"><span>View account details</span><i class="bi bi-arrow-up-right"></i></button>
               <div class="user-action-menu">
                 <button type="button" class="user-menu-trigger" aria-label="More actions for ${dname}" aria-haspopup="menu" aria-expanded="false" aria-controls="${menuId}" data-action="menu"><i class="bi bi-three-dots-vertical"></i></button>
-                <div class="user-menu-popover" id="${menuId}" role="menu" hidden><button type="button" role="menuitem" data-action="view" data-id="${u.id}"><i class="bi bi-eye"></i><span>View account</span></button>${editAction}${toggleAction}</div>
+                <div class="user-menu-popover" id="${menuId}" role="menu" hidden><button type="button" role="menuitem" data-action="view" data-id="${u.id}"><i class="bi bi-eye"></i><span>View account</span></button>${editAction}${recoveryAction}${toggleAction}</div>
               </div>
             </div>
           </div>
@@ -497,6 +505,7 @@ function renderTable() {
       closeOtherMenus(null);
       if (action==="view")   openViewModal(id);
       if (action==="edit")   openEditModal(id);
+      if (action==="recovery") sendRecoveryInstructions(id);
       if (action==="toggle") openToggleModal(id);
     });
   });
@@ -577,6 +586,14 @@ function renderPermGrid(selected = []) {
   }).join("");
 }
 
+function syncUserModalAction() {
+  const button = document.getElementById("modalSaveBtn");
+  const iconClass = editingId ? "bi-floppy-fill" : "bi-person-plus-fill";
+  const label = editingId ? "Save Changes" : "Create User";
+  if (!button) return;
+  button.innerHTML = `<i class="bi ${iconClass}" id="userModalActionIcon" aria-hidden="true"></i><span id="userModalActionLabel">${label}</span>`;
+}
+
 /* ── Add Modal ───────────────────────────────────────── */
 function openAddModal() {
   if (!can("create")) {
@@ -603,6 +620,7 @@ function openAddModal() {
 
   clearFormErrors();
   renderPermGrid(getPermissionsForRole("Staff"));
+  syncUserModalAction();
   openModal("userModalBackdrop");
 }
 
@@ -623,7 +641,7 @@ function openEditModal(id) {
   }
 
   editingId = id;
-  document.getElementById("modalTitle").textContent = "Edit User";
+  document.getElementById("modalTitle").textContent = "Edit Management User";
   document.getElementById("userModalSubtitle").textContent = "Update this account’s identity, role, status, and assigned access.";
   document.getElementById("formUserId").value  = id;
   document.getElementById("fFirstName").value  = u.firstName || u.fullName?.split(" ")[0] || "";
@@ -638,6 +656,7 @@ function openEditModal(id) {
   updateAvatarPreview();
   clearFormErrors();
   renderPermGrid(getPermissionsForRole(normalizedRole));
+  syncUserModalAction();
   openModal("userModalBackdrop");
 }
 
@@ -657,7 +676,8 @@ if (!can(requiredPermission)) {
 
   if (!validateForm()) return;
   const btn = document.getElementById("modalSaveBtn");
-  btn.disabled = true; btn.textContent = "Saving…";
+  btn.disabled = true;
+  btn.innerHTML = '<span class="button-spinner" aria-hidden="true"></span><span>Saving…</span>';
 
   try {
     const firstName = document
@@ -700,7 +720,8 @@ if (!can(requiredPermission)) {
     if (err.status===409) { setErr("errEmail","This email is already in use."); setInvalid("fEmail"); }
     else showToast("error", err.message || "Failed to save user.");
   } finally {
-    btn.disabled = false; btn.innerHTML = `<i class="bi bi-floppy-fill"></i> Save User`;
+    btn.disabled = false;
+    syncUserModalAction();
   }
 }
 
@@ -766,7 +787,47 @@ function openViewModal(id) {
   editBtn.style.display = isPublic ? "none" : "";
   editBtn.onclick = () => { closeModal("viewModalBackdrop"); openEditModal(id); };
 
+  const recoveryBtn = document.getElementById("viewModalRecoveryBtn");
+  const canSendRecovery = !isPublic
+    && u.status === "Active"
+    && normalizeRole(currentRole) === "Admin";
+  recoveryBtn.style.display = canSendRecovery ? "" : "none";
+  recoveryBtn.onclick = () => {
+    closeModal("viewModalBackdrop");
+    sendRecoveryInstructions(id);
+  };
+
   openModal("viewModalBackdrop");
+}
+
+async function sendRecoveryInstructions(id) {
+  if (normalizeRole(currentRole) !== "Admin") {
+    showToast("error", "Only an administrator can send management password recovery.");
+    return;
+  }
+  const user = allUsers.find((entry) => entry.id === id);
+  if (!user || getDisplayRole(user.role) === "Public" || user.status !== "Active") {
+    showToast("error", "Password recovery is available only for active management accounts.");
+    return;
+  }
+  const confirmed = await confirmManagementAction({
+    title: "Send password recovery?",
+    text: `A verification code will be emailed directly to ${displayName(user)}. You will not see their code or choose their password.`,
+    icon: "question",
+    confirmButtonText: "Send recovery email",
+  });
+  if (!confirmed) return;
+  try {
+    const result = await sendPasswordReset(id);
+    await showManagementNotice({
+      icon: "success",
+      title: "Recovery email requested",
+      text: result.message || "Password recovery instructions were sent to the account holder's registered email.",
+      confirmButtonText: "Done",
+    });
+  } catch (error) {
+    showToast("error", error.message || "Unable to send password recovery instructions.");
+  }
 }
 
 /* ── Toggle Status Modal ─────────────────────────────── */
@@ -845,14 +906,22 @@ function validateForm() {
     else if(pw.length<8){ setErr("errPassword","Min. 8 chars.");     setInvalid("fPassword"); ok=false; }
     if(pw&&cp!==pw) { setErr("errConfirmPassword","Passwords do not match."); setInvalid("fConfirmPassword"); ok=false; }
   }
+  if (!ok) document.querySelector("#userForm .form-inp.invalid")?.focus();
   return ok;
 }
 
 function setErr(id,m)   { const e=document.getElementById(id); if(e) e.textContent=m; }
-function setInvalid(id) { document.getElementById(id)?.classList.add("invalid"); }
+function setInvalid(id) {
+  const field = document.getElementById(id);
+  field?.classList.add("invalid");
+  field?.setAttribute("aria-invalid", "true");
+}
 function clearFormErrors() {
   document.querySelectorAll(".form-err").forEach(e=>e.textContent="");
-  document.querySelectorAll(".form-inp.invalid").forEach(e=>e.classList.remove("invalid"));
+  document.querySelectorAll(".form-inp.invalid").forEach(e => {
+    e.classList.remove("invalid");
+    e.removeAttribute("aria-invalid");
+  });
 }
 
 /* ── Avatar Preview ──────────────────────────────────── */

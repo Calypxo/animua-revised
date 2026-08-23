@@ -65,13 +65,14 @@
 
       <div id="pageHeaderMount"></div>
 
-      <!-- Hero -->
-      <section class="hero mb-4">
+      <!-- Live workspace context -->
+      <section class="hero dashboard-welcome mb-4" aria-labelledby="welcomeHeading">
+        <span class="dashboard-welcome-icon" aria-hidden="true"><i class="bi bi-sun-fill"></i></span>
         <div class="hero-text">
-          <p class="hero-eyebrow">Dashboard Overview</p>
-          <h1>Hello, <em id="welcomeName">Admin</em></h1>
+          <p class="hero-eyebrow">Live operations briefing</p>
+          <h2 id="welcomeHeading">Welcome back, <em id="welcomeName">Admin</em></h2>
           <p class="hero-sub">Monitor shelter activity, track intake progress, and keep adoption readiness in check — all in one place.</p>
-          <div class="d-flex align-items-center gap-3 flex-wrap mt-2">
+          <div class="dashboard-live-row">
             <span class="hero-date" id="live-date"></span>
             <span class="hero-weather" id="shelter-status">
               <span class="status-dot status-green"></span> Shelter operating normally
@@ -80,8 +81,8 @@
         </div>
       </section>
 
-      <!-- KPI Strip -->
-      <section class="kpi-strip mb-4">
+      <!-- Counts are presented once in the shared Command Center summary. -->
+      <section class="kpi-strip mb-4" hidden aria-hidden="true">
 
         <article class="kpi-card kpi-primary" id="kpi-total">
           <div class="kpi-head">
@@ -150,15 +151,19 @@
       </section>
 
       <!-- Main grid -->
-      <div class="row g-4 mb-4">
+      <div class="row g-4 mb-4 dashboard-row dashboard-analytics-row">
 
         <!-- Intake vs Adoptions chart -->
         <div class="col-xl-8 col-lg-7">
-          <div class="panel h-100">
+          <div class="panel h-100 dashboard-panel dashboard-chart-panel">
             <div class="panel-head">
-              <div>
+              <div class="dashboard-panel-title">
+                <span class="dashboard-panel-icon" aria-hidden="true"><i class="bi bi-graph-up-arrow"></i></span>
+                <div>
+                <span class="dashboard-section-kicker">Shelter movement</span>
                 <h2>Intake vs Adoptions</h2>
                 <p>Monthly comparison — current year</p>
+                </div>
               </div>
               <div class="d-flex gap-2 align-items-center flex-wrap">
                 <div class="chart-legend">
@@ -173,7 +178,7 @@
                 </select>
               </div>
             </div>
-            <div style="position:relative;height:280px;">
+            <div class="dashboard-chart-frame dashboard-chart-frame-main">
               <canvas id="intakeAdoptionChart"></canvas>
             </div>
             <div class="chart-stat-row" aria-label="Annual movement summary">
@@ -187,14 +192,18 @@
 
         <!-- Species donut -->
         <div class="col-xl-4 col-lg-5">
-          <div class="panel h-100">
+          <div class="panel h-100 dashboard-panel dashboard-species-panel">
             <div class="panel-head">
-              <div>
+              <div class="dashboard-panel-title">
+                <span class="dashboard-panel-icon" aria-hidden="true"><i class="bi bi-pie-chart-fill"></i></span>
+                <div>
+                <span class="dashboard-section-kicker">Population mix</span>
                 <h2>Species Breakdown</h2>
                 <p>Current shelter population</p>
+                </div>
               </div>
             </div>
-            <div style="position:relative;height:200px;margin-bottom:12px;">
+            <div class="dashboard-chart-frame dashboard-chart-frame-donut">
               <canvas id="speciesChart"></canvas>
             </div>
             <div id="speciesLegend" class="species-legend-grid"></div>
@@ -204,17 +213,21 @@
       </div>
 
       <!-- Second row -->
-      <div class="row g-4 mb-4">
+      <div class="row g-4 mb-4 dashboard-row dashboard-operations-row">
 
         <!-- Recent activities table -->
         <div class="col-xl-8">
-          <div class="panel">
+          <div class="panel dashboard-panel dashboard-activity-panel">
             <div class="panel-head">
-              <div>
+              <div class="dashboard-panel-title">
+                <span class="dashboard-panel-icon" aria-hidden="true"><i class="bi bi-activity"></i></span>
+                <div>
+                <span class="dashboard-section-kicker">Live operations</span>
                 <h2>Recent Activity</h2>
                 <p>Latest shelter events and updates</p>
+                </div>
               </div>
-              <div class="d-flex gap-2">
+              <div class="d-flex gap-2 activity-toolbar">
                 <label class="visually-hidden" for="activityFilter">Activity type</label>
                 <select class="filter-select" id="activityFilter">
                   <option value="all">All types</option>
@@ -227,7 +240,7 @@
               </div>
             </div>
             <div class="table-responsive">
-              <table class="shelter-table management-data-table" id="activityTable">
+              <table class="shelter-table management-data-table management-card-table" id="activityTable" data-card-until="1100">
                 <thead>
                   <tr>
                     <th>Animal</th>
@@ -251,11 +264,15 @@
           <div class="d-flex flex-column gap-4">
 
             <!-- Alerts -->
-            <div class="panel">
+            <div class="panel dashboard-panel dashboard-alert-panel">
               <div class="panel-head">
-                <div>
+                <div class="dashboard-panel-title">
+                  <span class="dashboard-panel-icon is-warning" aria-hidden="true"><i class="bi bi-exclamation-triangle-fill"></i></span>
+                  <div>
+                  <span class="dashboard-section-kicker">Needs attention</span>
                   <h2>Alerts</h2>
                   <p>Requires attention</p>
+                  </div>
                 </div>
                 <span class="alert-badge" id="alertCount">0</span>
               </div>
@@ -278,11 +295,15 @@
             </div>
 
             <!-- Compatibility Queue -->
-            <div class="panel">
+            <div class="panel dashboard-panel dashboard-queue-panel">
               <div class="panel-head">
-                <div>
+                <div class="dashboard-panel-title">
+                  <span class="dashboard-panel-icon" aria-hidden="true"><i class="bi bi-inbox-fill"></i></span>
+                  <div>
+                  <span class="dashboard-section-kicker">Review queue</span>
                   <h2>Pending Applications</h2>
                   <p>Adoption applications awaiting review</p>
+                  </div>
                 </div>
                 <a href="/pages/adoptionApplications.html" class="text-btn" aria-label="See all pending applications">See all →</a>
               </div>
@@ -297,18 +318,22 @@
       </div>
 
       <!-- Third row -->
-      <div class="row g-4 mb-4">
+      <div class="row g-4 mb-4 dashboard-row dashboard-support-row">
 
         <!-- Length of stay chart -->
         <div class="col-xl-4 col-lg-5">
-          <div class="panel h-100">
+          <div class="panel h-100 dashboard-panel dashboard-stay-panel">
             <div class="panel-head">
-              <div>
+              <div class="dashboard-panel-title">
+                <span class="dashboard-panel-icon" aria-hidden="true"><i class="bi bi-clock-history"></i></span>
+                <div>
+                <span class="dashboard-section-kicker">Care duration</span>
                 <h2>Length of Stay</h2>
                 <p>Days in shelter distribution</p>
+                </div>
               </div>
             </div>
-            <div style="position:relative;height:220px;">
+            <div class="dashboard-chart-frame dashboard-chart-frame-stay">
               <canvas id="stayChart"></canvas>
             </div>
             <div class="stay-summary" id="staySummary">No long-stay records require attention.</div>
@@ -317,21 +342,25 @@
 
         <!-- Quick actions -->
         <div class="col-xl-4 col-lg-7">
-          <div class="panel h-100">
+          <div class="panel h-100 dashboard-panel dashboard-actions-panel">
             <div class="panel-head">
-              <div>
+              <div class="dashboard-panel-title">
+                <span class="dashboard-panel-icon is-warning" aria-hidden="true"><i class="bi bi-lightning-charge-fill"></i></span>
+                <div>
+                <span class="dashboard-section-kicker">Workspace shortcuts</span>
                 <h2>Quick Actions</h2>
                 <p>Shortcuts for common tasks</p>
+                </div>
               </div>
             </div>
             <div class="action-grid">
               <a href="/pages/intakeList.html" class="action-tile">
                 <div class="action-tile-icon tile-clay"><i class="bi bi-plus-square-fill"></i></div>
-                <span>Add Animal</span>
+                <span>New intake</span>
               </a>
               <a href="/pages/adoptionApplications.html" class="action-tile">
                 <div class="action-tile-icon tile-rose"><i class="bi bi-heart-fill"></i></div>
-                <span>Adoptions</span>
+                <span>Applications</span>
               </a>
               <a href="/pages/reports.html" class="action-tile">
                 <div class="action-tile-icon tile-blue"><i class="bi bi-bar-chart-line-fill"></i></div>
@@ -339,14 +368,14 @@
               </a>
               <a href="/pages/animalProfiling.html" class="action-tile">
                 <div class="action-tile-icon tile-green"><i class="bi bi-clipboard2-heart-fill"></i></div>
-                <span>Medical</span>
+                <span>Animal care</span>
               </a>
               <a href="/pages/userManagement.html" class="action-tile">
                 <div class="action-tile-icon tile-amber"><i class="bi bi-people-fill"></i></div>
-                <span>Staff</span>
+                <span>Users</span>
               </a>
               <a href="/pages/inventory.html" class="action-tile">
-                <div class="action-tile-icon tile-teal"><i class="bi bi-house-door-fill"></i></div>
+                <div class="action-tile-icon tile-teal"><i class="bi bi-box-seam-fill"></i></div>
                 <span>Inventory</span>
               </a>
             </div>
@@ -355,13 +384,17 @@
 
         <!-- Today's schedule -->
         <div class="col-xl-4">
-          <div class="panel h-100">
+          <div class="panel h-100 dashboard-panel dashboard-inventory-panel">
             <div class="panel-head">
-              <div>
+              <div class="dashboard-panel-title">
+                <span class="dashboard-panel-icon" aria-hidden="true"><i class="bi bi-box-seam-fill"></i></span>
+                <div>
+                <span class="dashboard-section-kicker">Supply readiness</span>
                 <h2>Inventory Attention</h2>
                 <p>Low and critical stock</p>
+                </div>
               </div>
-              <button class="dot-btn" type="button" aria-label="Inventory options"><i class="bi bi-three-dots" aria-hidden="true"></i></button>
+              <a href="/pages/inventory.html" class="text-btn" aria-label="Open inventory management">Open inventory &rarr;</a>
             </div>
             <div class="sched-stack" id="schedStack">
               <p class="text-muted mb-0">Loading live inventory…</p>
@@ -372,22 +405,26 @@
       </div>
 
       <!-- Recent animals table -->
-      <div class="row g-4 mb-2">
+      <div class="row g-4 mb-2 dashboard-row dashboard-recent-row">
         <div class="col-12">
-          <div class="panel">
+          <div class="panel dashboard-panel dashboard-recent-panel">
             <div class="panel-head">
-              <div>
+              <div class="dashboard-panel-title">
+                <span class="dashboard-panel-icon" aria-hidden="true"><i class="bi bi-heart-pulse-fill"></i></span>
+                <div>
+                <span class="dashboard-section-kicker">Animal directory</span>
                 <h2>Recent Animals</h2>
                 <p>Latest entries from the shelter system</p>
+                </div>
               </div>
               <div class="d-flex gap-2 align-items-center">
                 <label class="visually-hidden" for="animalSearch">Search recent animals</label>
-                <input type="text" class="filter-select" id="animalSearch" placeholder="Search animals…" style="width:180px" />
+                <input type="text" class="filter-select dashboard-animal-search" id="animalSearch" placeholder="Search animals…" />
                 <a href="/pages/animalProfiling.html" class="text-btn" aria-label="View all recent animals">View all →</a>
               </div>
             </div>
             <div class="table-responsive">
-              <table class="shelter-table management-data-table" id="recentAnimalsTable">
+              <table class="shelter-table management-data-table management-card-table" id="recentAnimalsTable" data-card-until="1279">
                 <thead>
                   <tr>
                     <th>ID</th>

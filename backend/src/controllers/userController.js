@@ -298,37 +298,6 @@ exports.toggleUserStatus = async (req, res) => {
 };
 
 // RESET PASSWORD — Admin/Staff only, Public users use public portal
-exports.resetPassword = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { newPassword } = req.body;
-    if (!newPassword || newPassword.length < 8) {
-      return res.status(400).json({ message: "Password must be at least 8 characters." });
-    }
-    const userDoc = await db.collection("users").doc(id).get();
-    if (!userDoc.exists) return res.status(404).json({ message: "User not found." });
-    const userData = userDoc.data();
-    if (userData.role === "Public") {
-      return res.status(400).json({ message: "Cannot reset a Public user's password from the admin panel." });
-    }
-    const salt   = await bcrypt.genSalt(12);
-    const hashed = await bcrypt.hash(newPassword, salt);
-    await db.collection("users").doc(id).update({
-      password: hashed,
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-      updatedBy: req.user?.email,
-    });
-    await writeAuditLog({ action:"user.password_reset", module:"User Management",
-      targetId: id, targetName: userData.fullName,
-      performedBy: req.user?.email, performedByName: req.user?.fullName,
-    });
-    res.status(200).json({ message: "Password reset successfully." });
-  } catch (error) {
-    console.error("[resetPassword Error]", error.message);
-    res.status(500).json({ message: "Failed to reset password." });
-  }
-};
-
 // UPDATE LAST LOGIN (internal helper)
 exports.updateLastLogin = async (email) => {
   try {

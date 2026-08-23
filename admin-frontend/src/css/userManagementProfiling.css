@@ -219,10 +219,12 @@
 .ap-list-page.user-management-page .status-badge.badge-inactive { color: var(--ap-red-deep); background: #FFF8EE; }
 
 .ap-list-page.user-management-page .user-card-footer-actions { display: grid; grid-template-columns: minmax(0, 1fr) 38px; gap: 8px; }
-.ap-list-page.user-management-page .user-action-menu { position: relative; }
+.ap-list-page.user-management-page .user-action-menu { position: relative; z-index: 40; }
 .ap-list-page.user-management-page .user-menu-trigger { width: 38px; height: 38px; display: grid; place-items: center; border: 1px solid #dfd1c6; border-radius: 8px; color: var(--ap-red-deep); background: #FFFFFF; }
 .ap-list-page.user-management-page .user-menu-trigger:hover { color: #FFFFFF; border-color: var(--ap-red); background: var(--ap-red); }
-.ap-list-page.user-management-page .user-menu-popover { z-index: 20; right: 0; bottom: calc(100% + 7px); top: auto; min-width: 190px; }
+.ap-list-page.user-management-page .user-menu-popover { z-index: 60; right: 0; bottom: calc(100% + 7px); top: auto; width: 230px; min-width: 190px; }
+.ap-list-page.user-management-page .user-record-card:has(.user-menu-trigger[aria-expanded="true"]) { overflow: visible; z-index: 50; }
+.ap-list-page.user-management-page .user-record-card:has(.user-menu-trigger[aria-expanded="true"]) .animal-record-media { overflow: hidden; border-radius: 16px 0 0 16px; }
 .ap-list-page.user-management-page .user-record-message { grid-column: 1 / -1; }
 
 @media (max-width: 1280px) {
@@ -394,6 +396,7 @@
   .ap-list-page.user-management-page .user-record-avatar { padding-block: 22px 55px; }
   .ap-list-page.user-management-page .user-record-avatar span { width: 92px; height: 92px; font-size: 1.75rem; }
   .ap-list-page.user-management-page .user-record-card .animal-record-footer { grid-template-columns: 1fr; }
+  .ap-list-page.user-management-page .user-record-card:has(.user-menu-trigger[aria-expanded="true"]) .animal-record-media { border-radius: 16px 16px 0 0; }
 }
 
 @media (max-width: 520px) {

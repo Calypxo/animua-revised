@@ -5,6 +5,9 @@ const controller = require("../controllers/userController");
 
 const authenticateToken = require("../middleware/authMiddleware");
 const authorizeRole     = require("../middleware/roleMiddleware");
+const {
+  sendManagementPasswordResetByAdmin,
+} = require("../controllers/authController");
 
 // All user management routes require:
 //   1. valid JWT (authenticateToken)
@@ -28,7 +31,7 @@ router.put("/:id",          controller.updateUser);
 // PATCH /api/users/:id/toggle-status → activate / deactivate
 router.patch("/:id/toggle-status", controller.toggleUserStatus);
 
-// PATCH /api/users/:id/reset-password → admin resets a user's password
-router.patch("/:id/reset-password", controller.resetPassword);
+// PATCH /api/users/:id/reset-password → email account-holder recovery instructions
+router.patch("/:id/reset-password", sendManagementPasswordResetByAdmin);
 
 module.exports = router;
