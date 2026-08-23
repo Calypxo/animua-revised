@@ -1,3 +1,11 @@
+import {
+  clearUserSession,
+  endUserSession,
+  ensureUserSession,
+  getUserSession,
+  hasUserSession,
+} from "../../utils/storage.js";
+
 const menuToggle = document.getElementById("menuToggle");
 const navbar = document.getElementById("navbar");
 const header = document.querySelector(".header");
@@ -10,7 +18,8 @@ const userMenuBtn = document.getElementById("userMenuBtn");
 const userDropdown = document.getElementById("userDropdown");
 
 function firstName(name = "User") {
-  return name.trim().split(/\s+/)[0] || "User";
+  const first = String(name || "").trim().split(/\s+/)[0] || "User";
+  return first.charAt(0).toUpperCase() + first.slice(1);
 }
 
 function initial(name = "User") {
@@ -23,9 +32,10 @@ function renderAvatar(element, fullName = "User", photoDataUrl = "") {
 }
 
 function updateAuthUI() {
-  const hasToken = Boolean(localStorage.getItem("animua_token"));
-  const userName = localStorage.getItem("user_name") || "User";
-  const userPhoto = localStorage.getItem("user_profile_photo") || "";
+  const session = getUserSession();
+  const hasToken = hasUserSession();
+  const userName = session?.fullName || "User";
+  const userPhoto = session?.profilePhotoDataUrl || "";
   const displayName = firstName(userName);
   const userLoggedInBox = document.getElementById("userLoggedInBox");
   const loggedUserName = document.getElementById("loggedUserName");
@@ -46,7 +56,7 @@ function updateAuthUI() {
 function openAuthModal(event) {
   event?.preventDefault();
   if (!authModal) return;
-  if (localStorage.getItem("animua_token")) {
+  if (hasUserSession()) {
     updateAuthUI();
     return;
   }
@@ -60,15 +70,7 @@ function closeAuthModal() {
 }
 
 function clearSession() {
-  [
-    "animua_token",
-    "user_role",
-    "user_name",
-    "user_email",
-    "user_profile_photo",
-    "is_logged_in",
-    "show_welcome_toast",
-  ].forEach((key) => localStorage.removeItem(key));
+  clearUserSession();
 }
 
 function bindAuthForms() {
@@ -137,8 +139,8 @@ function bindMenus() {
     if (!event.target.closest(".user-menu")) userDropdown?.classList.add("hidden");
   });
 
-  document.getElementById("logoutBtn")?.addEventListener("click", () => {
-    clearSession();
+  document.getElementById("logoutBtn")?.addEventListener("click", async () => {
+    await endUserSession();
     updateAuthUI();
     window.location.href = "home.html";
   });
@@ -158,18 +160,56 @@ function bindMenus() {
   });
 }
 
+function resetAuthPanelScroll(panel) {
+  const registerPanel = document.getElementById("register-section");
+  if (panel) panel.scrollTop = 0;
+  if (registerPanel) registerPanel.scrollTop = 0;
+  window.requestAnimationFrame(() => {
+    if (panel) panel.scrollTop = 0;
+    if (registerPanel) registerPanel.scrollTop = 0;
+  });
+  window.setTimeout(() => {
+    if (panel) panel.scrollTop = 0;
+    if (registerPanel) registerPanel.scrollTop = 0;
+  }, 160);
+}
+
+function syncAuthSidePanel(showRegister) {
+  const sideTitle = document.getElementById("authModalTitle");
+  const sideText = document.getElementById("authSideText");
+  const sideAction = document.getElementById("authSideAction");
+
+  if (sideTitle) sideTitle.textContent = showRegister ? "Join Animua." : "Welcome back.";
+  if (sideText) {
+    sideText.textContent = showRegister
+      ? "Create your account and start connecting rescued animals with safer homes."
+      : "Continue managing matches, applications, and rescued animals through Animua.";
+  }
+  if (sideAction) sideAction.textContent = showRegister ? "Log In" : "Create account";
+}
+
 window.toggleAuthView = function toggleAuthView() {
   const loginSection = document.getElementById("login-section");
   const registerSection = document.getElementById("register-section");
   if (!loginSection || !registerSection) return;
   const showRegister = !loginSection.classList.contains("hidden");
+  const authPanel = authModal?.querySelector(".auth-modal-right");
+  resetAuthPanelScroll(authPanel);
   loginSection.classList.toggle("hidden", showRegister);
   registerSection.classList.toggle("hidden", !showRegister);
   authModal?.classList.toggle("register-mode", showRegister);
+  syncAuthSidePanel(showRegister);
+  resetAuthPanelScroll(authPanel);
   if (showRegister) import("../../auth/register.js");
 };
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  clearSession();
+  try {
+    await ensureUserSession();
+  } catch (error) {
+    console.warn("Unable to restore account session:", error.message);
+  }
   document.querySelectorAll(".reveal").forEach((element) => element.classList.add("show"));
   bindHeader();
   bindMenus();

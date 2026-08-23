@@ -213,26 +213,6 @@ export async function handleLogin(event) {
 
     closeModal(authModal);
 
-    await Swal.fire({
-      icon: "success",
-      title: "Login Successful",
-      html: `
-        <p>Welcome back!</p>
-        <p>You have successfully logged in to ANIMUA.</p>
-      `,
-      timer: 1600,
-      timerProgressBar: true,
-      showConfirmButton: false,
-      showCloseButton: false,
-      customClass: {
-        popup: "animua-popup animua-auth-feedback-popup",
-        icon: "animua-auth-feedback-icon",
-        closeButton: "animua-feedback-close",
-        confirmButton: "animua-confirm"
-      },
-      buttonsStyling: false
-    });
-
     if (userRole === "Admin" || userRole === "Staff") {
       window.location.replace("/pages/dashboard.html");
     } else {

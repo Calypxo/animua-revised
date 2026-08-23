@@ -1,5 +1,6 @@
 import {
   clearUserSession,
+  getCachedUserSession,
   setUserSession,
 } from "../utils/storage.js";
 
@@ -90,6 +91,23 @@ export async function protectManagementPage() {
       error
     );
 
+    const cachedUser = getCachedUserSession();
+    const cachedRole = normalizeRole(cachedUser?.role);
+
+    if (
+      isNetworkAuthError(error) &&
+      cachedRole &&
+      MANAGEMENT_ROLES.includes(cachedRole)
+    ) {
+      return {
+        authenticated: true,
+        role: cachedRole,
+        user: setUserSession(cachedUser),
+        verifiedByServer: false,
+        offline: true,
+      };
+    }
+
     clearUserSession();
     redirectToLogin();
 
@@ -97,6 +115,16 @@ export async function protectManagementPage() {
       "Unable to verify your session. Please log in again."
     );
   }
+}
+
+function isNetworkAuthError(error) {
+  if (!navigator.onLine) return true;
+
+  const message = String(error?.message || "");
+  return error instanceof TypeError ||
+    message.includes("Failed to fetch") ||
+    message.includes("NetworkError") ||
+    message.includes("Unable to connect");
 }
 
 /**

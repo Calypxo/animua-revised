@@ -480,10 +480,6 @@ async function showAnnouncementDetail(item) {
           <span><strong>Stay Safe, ANIMUA.</strong> Monitor official channels and follow safety protocols. Your safety is our top priority.</span>
         </div>
         <div class="announcement-detail-actions">
-          <button type="button" class="announcement-detail-back" data-announcement-detail-close>
-            <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
-            <span>Back to Announcements</span>
-          </button>
           <button type="button" class="announcement-detail-share" data-announcement-detail-share data-share-title="${escapeHtml(title)}" data-share-text="${escapeHtml(shareText)}">
             <i class="fa-solid fa-share-nodes" aria-hidden="true"></i>
             <span>Share Update</span>

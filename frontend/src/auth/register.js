@@ -22,6 +22,9 @@ const RESEND_COOLDOWN_SECONDS = 30;
 
 let registerCaptchaWidgetId = null;
 let registerCaptchaRenderPromise = null;
+let registerCaptchaIsCompact = null;
+let registerCaptchaResizeListenerBound = false;
+let registerCaptchaResizeTimer = null;
 let verificationResendTimer = null;
 let verificationResendRemaining = 0;
 let pendingVerificationEmail = "";
@@ -823,7 +826,7 @@ function ensurePolicyModals() {
             <div class="auth-policy-brand" aria-hidden="true">
               <span class="auth-policy-brand-mark"><i class="fa-solid fa-paw"></i></span>
               <span>
-                <strong>ANIMUA</strong>
+                <strong>animua</strong>
                 <small>ANGELES CITY ANIMAL WELFARE PORTAL</small>
               </span>
             </div>
@@ -1017,63 +1020,83 @@ function getPolicyFocusableElements(container) {
 export function setupRegisterCaptcha() {
   const container = document.getElementById("register-recaptcha");
   if (!container) return;
+  container.closest(".auth-recaptcha-row")?.classList.remove("hidden");
+  renderRegisterCaptcha();
 
-  const renderWhenVisible = () => {
-    const registerSection = document.getElementById("register-section");
-    if (registerSection?.classList.contains("hidden")) return;
-    renderRegisterCaptcha();
-  };
-
-  renderWhenVisible();
-
-  const registerSection = document.getElementById("register-section");
-  if (registerSection && !registerSection.dataset.captchaObserverBound) {
-    registerSection.dataset.captchaObserverBound = "true";
-    const observer = new MutationObserver(renderWhenVisible);
-    observer.observe(registerSection, { attributes: true, attributeFilter: ["class"] });
+  if (!registerCaptchaResizeListenerBound) {
+    registerCaptchaResizeListenerBound = true;
+    window.addEventListener("resize", () => {
+      window.clearTimeout(registerCaptchaResizeTimer);
+      registerCaptchaResizeTimer = window.setTimeout(() => {
+      const shouldUseCompact = window.matchMedia("(max-width: 330px)").matches;
+        if (registerCaptchaIsCompact !== null && registerCaptchaIsCompact !== shouldUseCompact) {
+          resetRegisterCaptcha(true);
+          renderRegisterCaptcha();
+        }
+      }, 150);
+    });
   }
 }
 
 function renderRegisterCaptcha() {
-  const container = document.getElementById("register-recaptcha");
-  if (!container || registerCaptchaWidgetId !== null) return Promise.resolve();
-  if (registerCaptchaRenderPromise) return registerCaptchaRenderPromise;
+  const useCompactCaptcha = window.matchMedia("(max-width: 330px)").matches;
+  if (registerCaptchaWidgetId !== null && registerCaptchaIsCompact === useCompactCaptcha) {
+    return registerCaptchaRenderPromise;
+  }
 
   if (!RECAPTCHA_SITE_KEY) {
     console.error("[Register Captcha Error] Missing reCAPTCHA site key.");
-    return Promise.resolve();
+    return Promise.resolve(null);
   }
 
   registerCaptchaRenderPromise = loadRecaptchaApi()
     .then(() => {
+      const container = document.getElementById("register-recaptcha");
+      if (!container || registerCaptchaWidgetId !== null) return registerCaptchaWidgetId;
+
       registerCaptchaWidgetId = window.grecaptcha.render(container, {
         sitekey: RECAPTCHA_SITE_KEY,
         theme: "light",
+        size: useCompactCaptcha ? "compact" : "normal",
         callback: () => setCaptchaError(""),
-        "expired-callback": () => setCaptchaError(CAPTCHA_EXPIRED_MESSAGE),
-        "error-callback": () => setCaptchaError("")
+        "expired-callback": () => {
+          setCaptchaError(CAPTCHA_EXPIRED_MESSAGE);
+        },
+        "error-callback": () => {
+          setCaptchaError("Unable to complete CAPTCHA. Please try again.");
+        }
       });
+      registerCaptchaIsCompact = useCompactCaptcha;
+      return registerCaptchaWidgetId;
     })
     .catch((error) => {
       console.error("[Register Captcha Error]", error);
       registerCaptchaRenderPromise = null;
+      return null;
     });
 
   return registerCaptchaRenderPromise;
 }
 
 function getRegisterCaptchaToken() {
-  if (registerCaptchaWidgetId === null) {
-    renderRegisterCaptcha();
+  if (registerCaptchaWidgetId === null || !window.grecaptcha?.getResponse) {
     return "";
   }
 
-  return window.grecaptcha?.getResponse(registerCaptchaWidgetId) || "";
+  return window.grecaptcha.getResponse(registerCaptchaWidgetId);
 }
 
-function resetRegisterCaptcha() {
+function resetRegisterCaptcha(clearContainer = false) {
   if (registerCaptchaWidgetId !== null && window.grecaptcha?.reset) {
     window.grecaptcha.reset(registerCaptchaWidgetId);
+  }
+
+  if (clearContainer) {
+    const container = document.getElementById("register-recaptcha");
+    if (container) container.innerHTML = "";
+    registerCaptchaWidgetId = null;
+    registerCaptchaRenderPromise = null;
+    registerCaptchaIsCompact = null;
   }
 }
 

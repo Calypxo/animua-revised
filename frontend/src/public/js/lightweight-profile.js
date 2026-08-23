@@ -1,5 +1,8 @@
+import { getUserSession } from "../../utils/storage.js";
+
 function firstName(name = "User") {
-  return name.trim().split(/\s+/)[0] || "User";
+  const first = String(name || "").trim().split(/\s+/)[0] || "User";
+  return first.charAt(0).toUpperCase() + first.slice(1);
 }
 
 function initial(name = "User") {
@@ -93,9 +96,10 @@ export function openProfileModal() {
   const modal = ensureProfileModal();
   if (!modal) return;
 
-  const fullName = localStorage.getItem("user_name") || "Account";
-  const email = localStorage.getItem("user_email") || "";
-  const photo = localStorage.getItem("user_profile_photo") || "";
+  const session = getUserSession();
+  const fullName = session?.fullName || "Account";
+  const email = session?.email || "";
+  const photo = session?.profilePhotoDataUrl || "";
 
   document.getElementById("profileSummaryName")?.replaceChildren(document.createTextNode(firstName(fullName)));
   const fullNameField = document.getElementById("profileFullName");

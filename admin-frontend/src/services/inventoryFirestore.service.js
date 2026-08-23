@@ -1,4 +1,5 @@
 import { apiFetch } from "../utils/api.js";
+import { queuedAdminApiFetch } from "./offlineAdminQueue.service.js";
 
 export async function getInventoryItems() {
   const data = await apiFetch("/inventory");
@@ -11,27 +12,27 @@ export async function getInventoryItemById(itemId) {
 }
 
 export async function updateInventoryItem(itemId, updates) {
-  const data = await apiFetch(`/inventory/${encodeURIComponent(itemId)}`, {
+  const data = await queuedAdminApiFetch(`/inventory/${encodeURIComponent(itemId)}`, {
     method: "PUT",
     body: JSON.stringify(updates),
-  });
+  }, { item: { id: itemId, ...updates, offlinePending: true } });
   return data.item;
 }
 
 export async function createInventoryItem(item) {
-  const data = await apiFetch("/inventory", {
+  const data = await queuedAdminApiFetch("/inventory", {
     method: "POST",
     body: JSON.stringify(item),
-  });
+  }, { item: { ...item, offlinePending: true } });
   return data.item;
 }
 
 export async function applyInventoryMovement(itemId, type, movement) {
   const endpoint = type === "in" ? "stock-in" : "stock-out";
-  return apiFetch(`/inventory/${encodeURIComponent(itemId)}/${endpoint}`, {
+  return queuedAdminApiFetch(`/inventory/${encodeURIComponent(itemId)}/${endpoint}`, {
     method: "POST",
     body: JSON.stringify(movement),
-  });
+  }, { offlineQueued: true, itemId, movementType: type });
 }
 
 export async function getItemTransactions(itemId) {

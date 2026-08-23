@@ -17,6 +17,13 @@ import {
   uploadAnnouncementImage,
   deleteAnnouncementImage,
 } from "../services/announcement.service.js";
+import {
+  deleteQueuedAnnouncementSave,
+  getQueuedAnnouncementSaves,
+  isNetworkSaveError,
+  markQueuedAnnouncementAttempt,
+  queueAnnouncementSave,
+} from "../services/offlineAnnouncementQueue.service.js";
 
 window.Swal = Swal;
 
@@ -32,8 +39,10 @@ const state = {
   calendarInitialized: false,
   selectedImageFile: null,
   previewObjectUrl: "",
+  pendingPreviewObjectUrls: [],
   existingImageUrl: "",
   removeImageRequested: false,
+  syncInProgress: false,
 };
 
 let currentRole = "";
@@ -52,6 +61,7 @@ function setHeaderValue(id, value) {
 }
 
 function renderHeaderStats() {
+  const pending = state.announcements.filter((item) => item.offlinePending).length;
   const drafts = state.announcements.filter((item) => item.status === "Draft").length;
   const published = state.announcements.filter((item) => item.status === "Published").length;
   const publicPosts = state.announcements.filter((item) => item.status === "Published" && item.visibleToPublic !== false).length;
@@ -60,7 +70,7 @@ function renderHeaderStats() {
   setHeaderValue("announcementTotal", state.announcements.length);
   setHeaderValue("announcementPublished", published);
   setHeaderValue("announcementDrafts", drafts);
-  setHeaderValue("heroDraftCount", drafts);
+  setHeaderValue("heroDraftCount", drafts + pending);
   setHeaderValue("announcementEvents", countType("Upcoming Events"));
   setHeaderValue("channelPublishedCount", published);
   setHeaderValue("channelPublicCount", publicPosts);
@@ -112,6 +122,19 @@ function formatDate(value) {
   }
 
   return String(value);
+}
+
+function formatDateTime(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  return date.toLocaleString("en-PH", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
 
 function parseEventDate(value) {
@@ -418,9 +441,10 @@ function renderFeed() {
       const canEdit = can("edit");
       const canDelete = can("delete");
       const postType = normalizePostType(item.type);
+      const isPending = Boolean(item.offlinePending);
 
       return `
-        <article class="post-card" data-post-type="${escapeHtml(postType)}" data-announcement-id="${escapeHtml(item.id)}">
+        <article class="post-card ${isPending ? "offline-pending-post" : ""}" data-post-type="${escapeHtml(postType)}" data-announcement-id="${escapeHtml(item.id)}">
           <div class="post-header">
             <div class="post-avatar">
               <i class="bi bi-heart-fill"></i>
@@ -429,14 +453,14 @@ function renderFeed() {
             <div class="post-meta">
               <strong>ANIMUA Angeles City</strong>
               <span>
-                Posted by ${escapeHtml(item.createdByName || "ANIMUA User")}
+                ${isPending ? "Saved on this device" : `Posted by ${escapeHtml(item.createdByName || "ANIMUA User")}`}
                 ${item.createdByRole ? `· ${escapeHtml(item.createdByRole)}` : ""}
-                ${item.createdAt ? `· ${escapeHtml(formatDate(item.createdAt))}` : ""}
+                ${item.createdAt ? `· ${escapeHtml(isPending ? formatDateTime(item.createdAt) : formatDate(item.createdAt))}` : ""}
               </span>
             </div>
 
-            <span class="status-pill ${item.status === "Published" ? "published" : "draft"}">
-              ${escapeHtml(item.status || "Draft")}
+            <span class="status-pill ${isPending ? "pending" : item.status === "Published" ? "published" : "draft"}">
+              ${isPending ? "Pending sync" : escapeHtml(item.status || "Draft")}
             </span>
           </div>
 
@@ -475,13 +499,13 @@ function renderFeed() {
           </div>
 
           <div class="post-reach">
-            <span><i class="bi ${item.visibleToPublic === false ? "bi-lock-fill" : "bi-globe2"}"></i> ${item.visibleToPublic === false ? "Internal post" : "Visible on the public community page"}</span>
+            <span><i class="bi ${isPending ? "bi-cloud-arrow-up" : item.visibleToPublic === false ? "bi-lock-fill" : "bi-globe2"}"></i> ${isPending ? "Waiting for Wi-Fi to publish" : item.visibleToPublic === false ? "Internal post" : "Visible on the public community page"}</span>
             <span><i class="bi bi-layout-text-window-reverse"></i> ${escapeHtml(postType)}</span>
           </div>
 
           <div class="post-actions">
             ${
-              canEdit
+              canEdit && !isPending
                 ? `<button class="secondary-btn small" type="button" data-edit-id="${escapeHtml(item.id)}" aria-label="Edit ${escapeHtml(item.title || "announcement")}">
                     <i class="bi bi-pencil"></i> Edit
                   </button>`
@@ -489,7 +513,7 @@ function renderFeed() {
             }
 
             ${
-              canDelete
+              canDelete && !isPending
                 ? `<button class="danger-btn small" type="button" data-delete-id="${escapeHtml(item.id)}" aria-label="Delete ${escapeHtml(item.title || "announcement")}">
                     <i class="bi bi-trash"></i> Delete
                   </button>`
@@ -510,17 +534,56 @@ function renderFeed() {
   });
 }
 
+function clearPendingPreviewObjectUrls() {
+  state.pendingPreviewObjectUrls.forEach((url) => URL.revokeObjectURL(url));
+  state.pendingPreviewObjectUrls = [];
+}
+
+async function loadPendingAnnouncements() {
+  try {
+    const queuedItems = await getQueuedAnnouncementSaves();
+    clearPendingPreviewObjectUrls();
+
+    return queuedItems.map((item) => {
+      let imageUrl = "";
+      if (item.imageFile) {
+        imageUrl = URL.createObjectURL(item.imageFile);
+        state.pendingPreviewObjectUrls.push(imageUrl);
+      }
+
+      return {
+        id: item.id,
+        ...item.payload,
+        imageUrl,
+        createdAt: item.queuedAt,
+        createdByName: "Pending sync",
+        createdByRole: item.action === "update" ? "Offline update" : "Offline post",
+        offlinePending: true,
+        syncAttempts: item.attempts || 0,
+        lastSyncError: item.lastError || "",
+      };
+    });
+  } catch (error) {
+    console.error("Failed to load offline announcements:", error);
+    return [];
+  }
+}
+
 async function loadAnnouncements() {
+  const pendingAnnouncements = await loadPendingAnnouncements();
+
   try {
     const data = await getAnnouncements();
-    state.announcements = data.announcements || [];
+    state.announcements = [...pendingAnnouncements, ...(data.announcements || [])];
     applyFilters();
   } catch (error) {
     console.error("Failed to load announcements:", error);
     showToast(error.message || "Failed to load announcements.", "danger");
+    state.announcements = pendingAnnouncements;
+    applyFilters();
 
     const feed = getEl("announcementFeed");
-    if (feed) {
+    if (feed && !pendingAnnouncements.length) {
       feed.innerHTML = `
         <div class="empty-feed">
           <i class="bi bi-exclamation-triangle"></i>
@@ -529,6 +592,52 @@ async function loadAnnouncements() {
         </div>
       `;
     }
+  }
+}
+
+async function syncQueuedAnnouncements() {
+  if (state.syncInProgress || !navigator.onLine) return;
+
+  state.syncInProgress = true;
+  let syncedCount = 0;
+
+  try {
+    const queuedItems = await getQueuedAnnouncementSaves();
+
+    for (const item of queuedItems) {
+      try {
+        let announcementId = item.remoteId;
+
+        if (item.action === "update" && announcementId) {
+          await updateAnnouncement(announcementId, item.payload);
+        } else {
+          const created = await createAnnouncement(item.payload);
+          announcementId = created.announcementId;
+          if (!announcementId) throw new Error("The new announcement ID was not returned.");
+        }
+
+        if (item.imageAction === "upload" && item.imageFile) {
+          await uploadAnnouncementImage(announcementId, item.imageFile);
+        } else if (item.imageAction === "delete" && announcementId) {
+          await deleteAnnouncementImage(announcementId);
+        }
+
+        await deleteQueuedAnnouncementSave(item.id);
+        syncedCount += 1;
+      } catch (error) {
+        await markQueuedAnnouncementAttempt(item.id, error);
+        if (isNetworkSaveError(error)) break;
+      }
+    }
+  } catch (error) {
+    console.error("Failed to sync offline announcements:", error);
+  } finally {
+    state.syncInProgress = false;
+  }
+
+  if (syncedCount) {
+    showToast(`${syncedCount} offline announcement${syncedCount === 1 ? "" : "s"} synced.`, "success");
+    await loadAnnouncements();
   }
 }
 
@@ -753,6 +862,34 @@ async function saveAnnouncement(event) {
     await loadAnnouncements();
   } catch (error) {
     console.error("Failed to save announcement:", error);
+
+    if (!detailsSaved && isNetworkSaveError(error)) {
+      try {
+        const queued = await queueAnnouncementSave({
+          action: state.editingId ? "update" : "create",
+          remoteId: state.editingId || "",
+          payload,
+          imageFile: state.selectedImageFile,
+          imageAction: state.selectedImageFile
+            ? "upload"
+            : state.removeImageRequested
+              ? "delete"
+              : "none",
+        });
+
+        showToast(
+          "Saved offline. It will sync when Wi-Fi returns.",
+          queued.action === "update" ? "warning" : "info"
+        );
+        closeModal();
+        await loadAnnouncements();
+      } catch (storageError) {
+        console.error("Failed to save announcement offline:", storageError);
+        showToast(storageError.message || "Offline storage is not available.", "danger");
+      }
+      return;
+    }
+
     const message = detailsSaved
       ? `Post details were saved, but the photo change failed: ${error.message}`
       : error.message || "Failed to save announcement.";
@@ -877,6 +1014,8 @@ async function initAnnouncementsPage() {
     document.body.classList.remove("loading");
 
     await loadAnnouncements();
+    await syncQueuedAnnouncements();
+    window.addEventListener("online", syncQueuedAnnouncements);
   } catch (error) {
     console.error("Announcements page init failed:", error);
     document.body.classList.remove("loading");

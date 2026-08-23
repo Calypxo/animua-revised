@@ -2,6 +2,8 @@ import { API_BASE_URL } from "./api.js";
 
 let currentUser = null;
 let sessionRequest = null;
+const PUBLIC_SESSION_CACHE_KEY = "animua_public_session_cache";
+const PUBLIC_SESSION_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 const LEGACY_SESSION_KEYS = [
   "animua_token",
@@ -44,7 +46,37 @@ export function setUserSession(user = {}) {
     profilePhotoDataUrl: user.profilePhotoDataUrl || "",
   };
 
+  try {
+    globalThis.localStorage?.setItem(
+      PUBLIC_SESSION_CACHE_KEY,
+      JSON.stringify({ user: currentUser, savedAt: Date.now() })
+    );
+  } catch (error) {
+    console.warn("Unable to cache public session summary:", error.message);
+  }
+
   return currentUser;
+}
+
+export function getCachedUserSession() {
+  try {
+    const cached = JSON.parse(globalThis.localStorage?.getItem(PUBLIC_SESSION_CACHE_KEY) || "null");
+    if (!cached?.user || Date.now() - Number(cached.savedAt || 0) > PUBLIC_SESSION_CACHE_TTL_MS) {
+      globalThis.localStorage?.removeItem(PUBLIC_SESSION_CACHE_KEY);
+      return null;
+    }
+
+    return {
+      ...cached.user,
+      role: cached.user.role || "",
+      fullName: cached.user.fullName || "",
+      email: cached.user.email || "",
+      profilePhotoDataUrl: cached.user.profilePhotoDataUrl || "",
+    };
+  } catch (error) {
+    globalThis.localStorage?.removeItem(PUBLIC_SESSION_CACHE_KEY);
+    return null;
+  }
 }
 
 export function getUserSession() {
@@ -71,6 +103,7 @@ export function clearUserSession(storage = globalThis.localStorage) {
   currentUser = null;
   sessionRequest = null;
   clearLegacyBrowserSession(storage);
+  storage?.removeItem(PUBLIC_SESSION_CACHE_KEY);
 }
 
 export async function ensureUserSession({ force = false } = {}) {
@@ -94,6 +127,13 @@ export async function ensureUserSession({ force = false } = {}) {
 
       const data = await response.json();
       return setUserSession(data.account || data.user || {});
+    })
+    .catch((error) => {
+      const cachedUser = getCachedUserSession();
+      if ((error instanceof TypeError || !navigator.onLine) && cachedUser) {
+        return setUserSession(cachedUser);
+      }
+      throw error;
     })
     .finally(() => {
       sessionRequest = null;

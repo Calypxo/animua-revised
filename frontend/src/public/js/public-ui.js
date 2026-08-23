@@ -368,6 +368,7 @@ function showLoginView() {
   if (loginSection) loginSection.classList.remove("hidden");
   if (registerSection) registerSection.classList.add("hidden");
   if (authModal) authModal.classList.remove("register-mode");
+  resetAuthPanelScroll();
 
   if (authSideTag) authSideTag.textContent = "Welcome Back";
   if (authModalTitle) authModalTitle.textContent = "Welcome back.";
@@ -384,6 +385,7 @@ function showRegisterView() {
   if (registerSection) registerSection.classList.remove("hidden");
   if (loginSection) loginSection.classList.add("hidden");
   if (authModal) authModal.classList.add("register-mode");
+  resetAuthPanelScroll();
 
   if (authSideTag) authSideTag.textContent = "New Here?";
   if (authModalTitle) authModalTitle.textContent = "Join Animua.";
@@ -437,7 +439,8 @@ function setupDateInputs() {
 }
 
 function getFirstName(name = "User") {
-  return name.trim().split(/\s+/)[0] || "User";
+  const first = String(name || "").trim().split(/\s+/)[0] || "User";
+  return first.charAt(0).toUpperCase() + first.slice(1);
 }
 
 function getInitial(name = "User") {
@@ -559,20 +562,72 @@ function updateAuthUI() {
 function showWelcomeToastIfNeeded() {
   const shouldShow = sessionStorage.getItem("show_welcome_toast") === "true";
   const userName = getUserSession()?.fullName || "User";
+  const safeUserName = escapeToastHtml(userName);
 
   if (shouldShow) {
-    Swal.fire({
-      toast: true,
-      position: "top-end",
-      icon: "success",
-      title: `Welcome, ${userName}!`,
-      showConfirmButton: false,
-      timer: 2500,
-      timerProgressBar: true
-    });
-
+    showAnimuaWelcomeToast(safeUserName, userName);
     sessionStorage.removeItem("show_welcome_toast");
   }
+}
+
+function resetAuthPanelScroll() {
+  const authPanel = authModal?.querySelector(".auth-modal-right");
+  const registerPanel = document.getElementById("register-section");
+
+  if (authPanel) authPanel.scrollTop = 0;
+  if (registerPanel) registerPanel.scrollTop = 0;
+  window.requestAnimationFrame(() => {
+    if (authPanel) authPanel.scrollTop = 0;
+    if (registerPanel) registerPanel.scrollTop = 0;
+  });
+  window.setTimeout(() => {
+    if (authPanel) authPanel.scrollTop = 0;
+    if (registerPanel) registerPanel.scrollTop = 0;
+  }, 160);
+}
+
+function showAnimuaWelcomeToast(safeUserName, rawUserName) {
+  document.querySelector(".animua-native-toast")?.remove();
+
+  const toast = document.createElement("div");
+  toast.className = "animua-native-toast";
+  toast.setAttribute("role", "status");
+  toast.setAttribute("aria-live", "polite");
+  toast.setAttribute("aria-label", `Welcome, ${rawUserName}. You are signed in to ANIMUA.`);
+  toast.innerHTML = `
+    <span class="animua-native-toast-check" aria-hidden="true">
+      <i class="fa-solid fa-check"></i>
+    </span>
+    <span class="animua-native-toast-copy">
+      <strong>Welcome, ${safeUserName}!</strong>
+      <span>You are signed in to ANIMUA.</span>
+    </span>
+    <span class="animua-native-toast-paw" aria-hidden="true">
+      <i class="fa-solid fa-paw"></i>
+    </span>
+    <button type="button" class="animua-native-toast-close" aria-label="Dismiss welcome message">
+      <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+    </button>
+    <span class="animua-native-toast-progress" aria-hidden="true"></span>
+  `;
+
+  const dismissToast = () => {
+    toast.classList.add("is-leaving");
+    window.setTimeout(() => toast.remove(), 180);
+  };
+
+  toast.querySelector(".animua-native-toast-close")?.addEventListener("click", dismissToast);
+  document.body.appendChild(toast);
+  window.setTimeout(dismissToast, 3200);
+}
+
+function escapeToastHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 function setupRevealAnimations() {
@@ -638,6 +693,14 @@ function setupHomeStories() {
   let activeStoryDeck = [];
   let storyAdvanceTimer = null;
   const STORY_AUTO_ADVANCE_MS = 7000;
+  const STORY_FRESH_DAYS = 14;
+  const STORY_FRESH_MS = STORY_FRESH_DAYS * 24 * 60 * 60 * 1000;
+  let announcementStoriesPromise = null;
+  let announcementStories = {
+    news: [],
+    success: [],
+    events: []
+  };
   const newsAlerts = [
     {
       id: "highlight-news-nepo-stray-cats",
@@ -809,6 +872,177 @@ function setupHomeStories() {
     primary: { label: "View full update", href: announcementStoryHref(story.id || "highlight-success-zach") }
   });
 
+  const getTimeValue = (value) => {
+    if (!value) return 0;
+    if (value?.toDate) return value.toDate().getTime();
+    if (value?._seconds) return value._seconds * 1000;
+    if (value?.seconds) return value.seconds * 1000;
+    if (typeof value === "number") return value;
+    const parsed = Date.parse(value);
+    return Number.isNaN(parsed) ? 0 : parsed;
+  };
+
+  const storyFreshCutoff = () => {
+    const date = new Date();
+    date.setHours(0, 0, 0, 0);
+    return date.getTime() - STORY_FRESH_MS;
+  };
+
+  const isFreshStoryDate = (value) => {
+    const time = getTimeValue(value);
+    return Boolean(time) && time >= storyFreshCutoff();
+  };
+
+  const normalizeAnnouncementType = (value = "") => {
+    const type = String(value || "").toLowerCase().trim();
+    if (type.includes("event")) return "Upcoming Events";
+    if (type.includes("success") || type.includes("rescue")) return "Success Stories";
+    return "News & Article";
+  };
+
+  const formatStoryDate = (value, fallback = "Recently") => {
+    const time = getTimeValue(value);
+    if (!time) return fallback;
+    return new Date(time).toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric"
+    });
+  };
+
+  const formatStoryTitleHtml = (title = "", fallbackSecondLine = "latest") => {
+    const cleanTitle = String(title || "ANIMUA community update").trim();
+    if (cleanTitle.length <= 30) {
+      return `${escapeHtml(cleanTitle)}<br><span>${escapeHtml(fallbackSecondLine)}</span>`;
+    }
+
+    const words = cleanTitle.split(/\s+/);
+    let firstLine = "";
+    const secondLine = [];
+
+    words.forEach((word) => {
+      if (!firstLine || `${firstLine} ${word}`.length <= 30) {
+        firstLine = firstLine ? `${firstLine} ${word}` : word;
+      } else {
+        secondLine.push(word);
+      }
+    });
+
+    return `${escapeHtml(firstLine)}<br><span>${escapeHtml(secondLine.join(" ") || fallbackSecondLine)}</span>`;
+  };
+
+  const getAnnouncementStoryDate = (item = {}) =>
+    item.createdAt || item.publishedAt || item.updatedAt || item.eventDate || "";
+
+  const getAnnouncementImage = (item = {}, type = "") => {
+    const fallback =
+      type === "Upcoming Events"
+        ? HIGHLIGHT_UPCOMING_EVENT_IMAGE
+        : type === "Success Stories"
+          ? HIGHLIGHT_SUCCESS_STORY_IMAGE
+          : HIGHLIGHT_NEWS_ALERT_IMAGE;
+    return item.imageUrl || item.image || item.imageURL || item.photoURL || item.coverImage || fallback;
+  };
+
+  const getAnnouncementParagraphs = (item = {}) => {
+    const sources = [
+      item.caption,
+      item.description,
+      item.summary,
+      item.body,
+      item.content,
+      ...(Array.isArray(item.details) ? item.details : []),
+      ...(Array.isArray(item.storyParagraphs) ? item.storyParagraphs : [])
+    ];
+    const seen = new Set();
+    return sources
+      .flatMap((value) => String(value || "").split(/\n{1,}/))
+      .map((paragraph) => paragraph.trim())
+      .filter(Boolean)
+      .filter((paragraph) => {
+        const key = paragraph.toLowerCase();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+  };
+
+  const getAnnouncementStoryConfig = (item = {}) => {
+    const type = normalizeAnnouncementType(item.type);
+    const title = item.title || "ANIMUA community update";
+    const paragraphs = getAnnouncementParagraphs(item);
+    const intro = paragraphs[0] || item.caption || item.description || "Official ANIMUA community update.";
+    const image = getAnnouncementImage(item, type);
+
+    return {
+      id: item.id || item.slug || title,
+      tag: type === "News & Article" ? "News & Alerts" : type,
+      title,
+      titleHtml: formatStoryTitleHtml(title, type === "Upcoming Events" ? "upcoming" : "latest"),
+      date: formatStoryDate(getAnnouncementStoryDate(item)),
+      image,
+      imageAlt: `${title} cover`,
+      intro,
+      source: item.source || "ANIMUA City Government",
+      photoCredit: image ? "Official ANIMUA update" : "",
+      hashtag: type,
+      storyParagraphs: paragraphs.length ? paragraphs : [intro],
+      primary: { label: "View full update", href: announcementStoryHref(item.id || title, type) }
+    };
+  };
+
+  const getAnnouncementEventConfig = (item = {}) => ({
+    ...item,
+    date: item.eventDate || item.date || "",
+    time: item.eventTime || item.time || "",
+    description: item.caption || item.description || item.summary || "",
+    image: getAnnouncementImage(item, "Upcoming Events"),
+    status: "Published",
+    isPublic: true,
+    createdAt: item.createdAt || item.updatedAt || ""
+  });
+
+  const loadAnnouncementStories = async () => {
+    if (announcementStoriesPromise) return announcementStoriesPromise;
+
+    announcementStoriesPromise = (async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/announcements/public`, { cache: "no-store" });
+        if (!response.ok) {
+          throw new Error(`Announcement stories request failed with status ${response.status}.`);
+        }
+
+        const data = await response.json();
+        const rawAnnouncements = Array.isArray(data) ? data : data?.announcements || [];
+        const recent = rawAnnouncements
+          .filter((item) => isFreshStoryDate(getAnnouncementStoryDate(item)))
+          .sort((a, b) => getTimeValue(getAnnouncementStoryDate(b)) - getTimeValue(getAnnouncementStoryDate(a)));
+
+        announcementStories = {
+          news: recent
+            .filter((item) => normalizeAnnouncementType(item.type) === "News & Article")
+            .map(getAnnouncementStoryConfig)
+            .slice(0, 4),
+          success: recent
+            .filter((item) => normalizeAnnouncementType(item.type) === "Success Stories")
+            .map(getAnnouncementStoryConfig)
+            .slice(0, 4),
+          events: recent
+            .filter((item) => normalizeAnnouncementType(item.type) === "Upcoming Events")
+            .map(getAnnouncementEventConfig)
+            .slice(0, 4)
+        };
+      } catch (error) {
+        console.warn("Homepage announcement stories load skipped:", error);
+        announcementStories = { news: [], success: [], events: [] };
+      }
+
+      return announcementStories;
+    })();
+
+    return announcementStoriesPromise;
+  };
+
   const highlightContent = {
     "new-furbabies": {
       tag: "Available Animals",
@@ -926,12 +1160,7 @@ function setupHomeStories() {
 
   const getPetDateValue = (pet = {}) => {
     const value = pet.createdAt || pet.updatedAt || pet.intakeDate || "";
-    if (value?.toDate) return value.toDate().getTime();
-    if (value?._seconds) return value._seconds * 1000;
-    if (value?.seconds) return value.seconds * 1000;
-    if (typeof value === "number") return value;
-    const parsed = Date.parse(value);
-    return Number.isNaN(parsed) ? 0 : parsed;
+    return getTimeValue(value);
   };
 
   const normalizePets = (data) => {
@@ -939,7 +1168,8 @@ function setupHomeStories() {
     return rawPets
       .filter((pet) => {
         const status = String(pet.status || "").toLowerCase();
-        return !status || status === "ready" || status.includes("adoption");
+        return (!status || status === "ready" || status.includes("adoption")) &&
+          isFreshStoryDate(pet.createdAt || pet.updatedAt || pet.intakeDate);
       })
       .sort((a, b) => getPetDateValue(b) - getPetDateValue(a))
       .slice(0, 3);
@@ -1047,18 +1277,29 @@ function setupHomeStories() {
     if (eventsLoadPromise) return eventsLoadPromise;
 
     eventsLoadPromise = (async () => {
+      const stories = await loadAnnouncementStories();
+      const announcementEvents = normalizeEvents(stories.events);
+
       try {
         const response = await fetch(`${API_BASE_URL}/public/events`, { cache: "no-store" });
         if (!response.ok) {
           throw new Error(`Events request failed with status ${response.status}.`);
         }
 
-        upcomingEvents = normalizeEvents(await response.json());
+        upcomingEvents = [
+          ...announcementEvents,
+          ...normalizeEvents(await response.json())
+        ].slice(0, 4);
         if (upcomingEvents.length) {
           return upcomingEvents;
         }
       } catch (error) {
         console.warn("Homepage events API load skipped:", error);
+      }
+
+      if (announcementEvents.length) {
+        upcomingEvents = announcementEvents;
+        return upcomingEvents;
       }
 
       upcomingEvents = [getDemoUpcomingEvent()];
@@ -1200,6 +1441,12 @@ function setupHomeStories() {
     img.alt = alt || img.alt || "";
   };
 
+  const setHighlightAvailable = (key, isAvailable) => {
+    const button = document.querySelector(`.home-highlight-story[data-highlight-key="${key}"]`);
+    if (!button) return;
+    button.hidden = !isAvailable;
+  };
+
   const setOptionalEventRow = (rowId, valueElement, value) => {
     const row = document.getElementById(rowId);
     if (!row || !valueElement) return;
@@ -1319,31 +1566,34 @@ function setupHomeStories() {
   };
 
   const renderSuccessStories = async () => {
-    showStoryDeck("success-stories", successStories.map(getSuccessStoryConfig), 0);
+    storyModalContent.innerHTML = '<p class="story-loading">Loading success stories...</p>';
+    const stories = await loadAnnouncementStories();
+    const deck = stories.success.length ? stories.success : successStories.map(getSuccessStoryConfig);
+    showStoryDeck("success-stories", deck, 0);
   };
 
   const renderStaticContent = (key) => {
     if (key === "news-alerts") {
-      const alert = newsAlerts[activeStoryIndex] || latestNewsAlert;
-      const storyParagraphs = alert.storyParagraphs || alert.paragraphs.slice(1);
+      const alert = activeStoryDeck[activeStoryIndex] || newsAlerts[activeStoryIndex] || latestNewsAlert;
+      const storyParagraphs = alert.storyParagraphs || alert.paragraphs?.slice(1) || [];
       storyModalContent.innerHTML = `
         <div class="story-news-caption">
           ${storyParagraphs
             .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`)
             .join("")}
-          <p class="story-news-credit"><i class="fa-regular fa-image" aria-hidden="true"></i> ${escapeHtml(alert.photoCredit)}</p>
-          <p class="story-news-source">${escapeHtml(alert.source)} | ${escapeHtml(alert.hashtag)}</p>
+          ${alert.photoCredit ? `<p class="story-news-credit"><i class="fa-regular fa-image" aria-hidden="true"></i> ${escapeHtml(alert.photoCredit)}</p>` : ""}
+          <p class="story-news-source">${escapeHtml(alert.source || "ANIMUA City Government")}${alert.hashtag ? ` | ${escapeHtml(alert.hashtag)}` : ""}</p>
         </div>
       `;
     } else if (key === "success-stories") {
-      const story = successStories[activeStoryIndex] || successStories[0];
+      const story = activeStoryDeck[activeStoryIndex] || successStories[activeStoryIndex] || successStories[0];
       storyModalContent.innerHTML = `
         <div class="story-news-caption">
-          ${story.storyParagraphs
+          ${(story.storyParagraphs || [])
             .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`)
             .join("")}
           <p class="story-news-credit"><i class="fa-solid fa-heart" aria-hidden="true"></i> Rescued pets now with new homes</p>
-          <p class="story-news-source">Adopt, Don't Shop | Angeles City Dog Pound and Animal Shelter</p>
+          <p class="story-news-source">${escapeHtml(story.source || "Adopt, Don't Shop | Angeles City Dog Pound and Animal Shelter")}</p>
         </div>
       `;
     }
@@ -1369,7 +1619,11 @@ function setupHomeStories() {
   };
 
   const showNewsAlert = (index = 0) => {
-    showStoryDeck("news-alerts", newsAlerts.map(getNewsAlertConfig), index);
+    storyModalContent.innerHTML = '<p class="story-loading">Loading news and alerts...</p>';
+    loadAnnouncementStories().then((stories) => {
+      const deck = stories.news.length ? stories.news : newsAlerts.map(getNewsAlertConfig);
+      showStoryDeck("news-alerts", deck, index);
+    });
   };
 
   const goToStory = (direction) => {
@@ -1379,29 +1633,46 @@ function setupHomeStories() {
 
   const initializeHighlightPreviews = async () => {
     const pets = await loadNewestPets();
+    const stories = await loadAnnouncementStories();
+
+    if (pets[0]) {
+      updateHighlightPreview(
+        "new-furbabies",
+        getPetImage(pets[0]),
+        pets[0].displayLabel || pets[0].shelterLabel || pets[0].name || "Newest furbaby"
+      );
+    }
+    setHighlightAvailable("new-furbabies", true);
 
     const events = await loadUpcomingEvents();
-    updateHighlightPreview(
-      "events",
-      HIGHLIGHT_UPCOMING_EVENT_IMAGE,
-      events[0]?.title || events[0]?.name || "Upcoming event"
-    );
+    if (events[0]) {
+      updateHighlightPreview(
+        "events",
+        getEventImage(events[0]) || HIGHLIGHT_UPCOMING_EVENT_IMAGE,
+        events[0]?.title || events[0]?.name || "Upcoming event"
+      );
+    }
+    setHighlightAvailable("events", true);
 
-    if (successStories[0]) {
+    if (stories.success[0] || successStories[0]) {
+      const story = stories.success[0] || successStories[0];
       updateHighlightPreview(
         "success-stories",
-        HIGHLIGHT_SUCCESS_STORY_IMAGE,
-        successStories[0].title
+        story.image || HIGHLIGHT_SUCCESS_STORY_IMAGE,
+        story.title
       );
     }
+    setHighlightAvailable("success-stories", true);
 
-    if (latestNewsAlert) {
+    if (stories.news[0] || latestNewsAlert) {
+      const story = stories.news[0] || latestNewsAlert;
       updateHighlightPreview(
         "news-alerts",
-        HIGHLIGHT_NEWS_ALERT_IMAGE,
-        latestNewsAlert.title
+        story.image || HIGHLIGHT_NEWS_ALERT_IMAGE,
+        story.title
       );
     }
+    setHighlightAvailable("news-alerts", true);
   };
 
   const closeStoryModal = () => {
@@ -1760,6 +2031,7 @@ window.toggleAuthView = function () {
   const loginVisible = loginSection && !loginSection.classList.contains("hidden");
   const currentSection = loginVisible ? loginSection : registerSection;
   const nextSection = loginVisible ? registerSection : loginSection;
+  resetAuthPanelScroll();
 
   if (authModal) {
     authModal.classList.remove("slide-to-register", "slide-to-login");
@@ -1781,10 +2053,12 @@ window.toggleAuthView = function () {
       currentSection.classList.remove("auth-view-exit");
       nextSection.classList.remove("hidden");
       nextSection.classList.add("auth-view-enter");
+      resetAuthPanelScroll();
     }, 120);
 
     window.setTimeout(() => {
       nextSection.classList.remove("auth-view-enter");
+      resetAuthPanelScroll();
     }, 260);
   }
 
@@ -1813,6 +2087,7 @@ window.toggleAuthView = function () {
 
 if (menuToggle && navbar) {
   menuToggle.addEventListener("click", () => {
+    document.getElementById("userDropdown")?.classList.add("hidden");
     navbar.classList.toggle("show");
     body.classList.toggle("menu-open");
   });
@@ -2186,6 +2461,8 @@ function setupUserDropdown() {
   userMenuBtn.addEventListener("click", (event) => {
     event.stopPropagation();
     notificationPopup?.classList.remove("show");
+    navbar?.classList.remove("show");
+    body.classList.remove("menu-open");
     userDropdown.classList.toggle("hidden");
   });
 

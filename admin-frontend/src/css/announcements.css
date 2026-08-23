@@ -196,6 +196,21 @@ body.loading .main-content {
   color: #8a5a00;
 }
 
+.status-pill.pending {
+  background: rgba(37, 99, 235, 0.12);
+  color: #1d4ed8;
+}
+
+.offline-pending-post {
+  border-color: rgba(37, 99, 235, 0.22);
+  box-shadow: 0 16px 36px rgba(37, 99, 235, 0.08);
+}
+
+.offline-pending-post .post-avatar {
+  background: rgba(37, 99, 235, 0.12);
+  color: #1d4ed8;
+}
+
 .post-image {
   width: 100%;
   max-height: 360px;
@@ -863,13 +878,16 @@ body.loading .main-content {
 
 .announcement-feed { max-width: none; gap: 15px; }
 .post-card { border-color: #eadfd7; border-radius: 22px; box-shadow: 0 8px 25px rgba(72, 43, 31, .07); }
+.post-card.offline-pending-post { border-color: rgba(37, 99, 235, .22); box-shadow: 0 16px 36px rgba(37, 99, 235, .08); }
 .post-header { padding: 17px 19px; }
 .post-avatar { width: 44px; height: 44px; border-radius: 14px; background: linear-gradient(145deg, #780116, #780116); font-size: 1rem; box-shadow: 0 8px 18px rgba(120, 1, 22, .18); }
+.offline-pending-post .post-avatar { background: rgba(37, 99, 235, .12); color: #1d4ed8; box-shadow: none; }
 .post-meta strong { color: #262125; font-size: .87rem; }
 .post-meta span { color: #93867f; font-size: .7rem; }
 .status-pill { padding: 6px 10px; font-size: .62rem; letter-spacing: .05em; text-transform: uppercase; }
 .status-pill.published { color: #167556; background: #e9f7f0; }
 .status-pill.draft { color: #946000; background: #fff4d8; }
+.status-pill.pending { color: #1d4ed8; background: rgba(37, 99, 235, .12); }
 .post-image { max-height: 470px; aspect-ratio: 16 / 8.7; border-color: #eee3db; background: #FFF8EE; }
 .post-body { padding: 20px 20px 18px; }
 .post-type { margin-bottom: 12px; padding: 6px 11px; font-size: .62rem; letter-spacing: .06em; text-transform: uppercase; }
