@@ -170,16 +170,20 @@ body.contact-page .contact-hero::before {
 }
 
 .contact-method-primary {
+  box-sizing: border-box;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 11px !important;
-  padding: 6px 15px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 6px 14px;
   border-radius: 999px;
   background: rgba(120, 1, 22, 0.075);
   color: #780116 !important;
   font-size: 0.84rem !important;
   font-weight: 850 !important;
+  line-height: 1.1;
 }
 
 .contact-method-primary a,
@@ -1543,6 +1547,27 @@ body.contact-page .contact-hero::before {
     padding: 22px 18px;
   }
 
+  .contact-method-primary {
+    width: fit-content;
+    max-width: min(100%, 320px);
+    height: auto;
+    min-height: 0;
+    padding: 6px 12px 5px;
+    border-radius: 12px;
+    font-size: clamp(0.72rem, 4vw, 0.82rem) !important;
+    line-height: 1.05;
+    overflow-wrap: anywhere;
+    word-break: normal;
+    white-space: normal;
+  }
+
+  .contact-method-primary a {
+    display: inline-block;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    line-height: inherit;
+  }
+
   .contact-method-icon {
     width: 52px;
     height: 52px;
@@ -1641,5 +1666,49 @@ body.contact-page .contact-hero::before {
 
   .contact-emergency-hours {
     padding-right: 0;
+  }
+}
+
+/* Compact mobile contact value pills so long details do not leave empty vertical space. */
+@media (max-width: 760px) {
+  body.contact-page .contact-method-card {
+    gap: 0;
+    padding: 20px 16px 22px;
+  }
+
+  body.contact-page .contact-method-card h2 {
+    margin-bottom: 10px;
+  }
+
+  body.contact-page .contact-method-primary {
+    width: fit-content !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    inline-size: fit-content !important;
+    max-inline-size: min(100%, calc(100vw - 92px));
+    min-block-size: 0 !important;
+    block-size: auto !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 13px !important;
+    padding: 5px 12px !important;
+    border-radius: 12px !important;
+    font-size: clamp(0.68rem, 3.7vw, 0.78rem) !important;
+    line-height: 1.05 !important;
+  }
+
+  body.contact-page .contact-method-primary a,
+  body.contact-page .contact-method-primary strong {
+    display: inline !important;
+    height: auto !important;
+    min-height: 0 !important;
+    line-height: 1.05 !important;
+  }
+
+  body.contact-page .contact-method-copy {
+    max-width: 30ch;
+    margin-inline: auto;
   }
 }

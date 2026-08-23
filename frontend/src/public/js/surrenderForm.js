@@ -1,5 +1,12 @@
 import { API_BASE_URL } from "../../utils/api.js";
 import { ensureUserSession, getUserSession } from "../../utils/storage.js";
+import {
+  deleteQueuedPublicRequest,
+  getQueuedPublicRequests,
+  isNetworkError,
+  markQueuedPublicRequestAttempt,
+  queuePublicRequest,
+} from "../../services/offlinePublicQueue.service.js";
 
 const SUBMIT_SURRENDER_API_URL = `${API_BASE_URL}/surrenders`;
 const MY_SURRENDER_REQUESTS_API_URL = `${SUBMIT_SURRENDER_API_URL}/my-requests`;
@@ -39,6 +46,7 @@ let isSubmitting = false;
 let animalPhotoData = null;
 let identityDocumentData = { front: null, back: null };
 let surrenderAcceptingRequests = true;
+let isSyncingQueuedSurrenders = false;
 const surrenderSelectMenus = [];
 
 const MAX_ANIMAL_PHOTO_SIZE = 650 * 1024;
@@ -556,6 +564,35 @@ async function submitSurrenderRequest(requestData) {
   return data;
 }
 
+async function syncQueuedSurrenderRequests() {
+  if (isSyncingQueuedSurrenders || !navigator.onLine) return;
+  isSyncingQueuedSurrenders = true;
+  let syncedCount = 0;
+
+  try {
+    const queued = await getQueuedPublicRequests("surrenderRequest");
+    for (const item of queued) {
+      try {
+        await submitSurrenderRequest(item.payload.requestData);
+        await deleteQueuedPublicRequest(item.id);
+        syncedCount += 1;
+      } catch (error) {
+        await markQueuedPublicRequestAttempt(item.id, error);
+        if (isNetworkError(error)) break;
+      }
+    }
+  } catch (error) {
+    console.error("Failed to sync queued surrender requests:", error);
+  } finally {
+    isSyncingQueuedSurrenders = false;
+  }
+
+  if (syncedCount) {
+    showFeedback(`${syncedCount} offline surrender request${syncedCount === 1 ? "" : "s"} synced.`, "info");
+    await loadMySurrenderRequests();
+  }
+}
+
 function setSubmitting(submitting) {
   isSubmitting = submitting;
   const button = document.getElementById("submitSurrenderBtn");
@@ -648,7 +685,8 @@ async function handleSurrenderSubmit(event) {
   setSubmitting(true);
   clearFeedback();
   try {
-    const result = await submitSurrenderRequest(buildRequestPayload(loggedInUser));
+    const requestData = buildRequestPayload(loggedInUser);
+    const result = await submitSurrenderRequest(requestData);
     const requestId = result.request?.id || "Submitted";
     document.getElementById("surrenderForm")?.classList.add("hidden");
     document.querySelector(".mobile-form-progress")?.classList.add("hidden");
@@ -659,6 +697,26 @@ async function handleSurrenderSubmit(event) {
     success?.focus();
     await loadMySurrenderRequests();
   } catch (error) {
+    if (isNetworkError(error)) {
+      try {
+        const requestData = buildRequestPayload(loggedInUser);
+        await queuePublicRequest("surrenderRequest", { requestData });
+        document.getElementById("surrenderForm")?.classList.add("hidden");
+        document.querySelector(".mobile-form-progress")?.classList.add("hidden");
+        const success = document.getElementById("surrenderSuccessPanel");
+        const idDisplay = document.getElementById("submittedRequestId");
+        if (idDisplay) idDisplay.textContent = requestData.id;
+        success?.classList.remove("hidden");
+        success?.focus();
+        showFeedback("Saved offline. Your surrender request will sync when internet returns.", "info");
+        await loadMySurrenderRequests();
+        return;
+      } catch (storageError) {
+        showFeedback(storageError.message || "Offline storage is not available.", "error");
+        return;
+      }
+    }
+
     if (error.code === "SURRENDER_REQUESTS_CLOSED") {
       applySurrenderAvailability(error.availability || { acceptingRequests: false });
       document.getElementById("surrenderAvailabilityPanel")?.focus({ preventScroll: true });
@@ -702,13 +760,30 @@ async function loadMySurrenderRequests() {
   refreshButton?.classList.remove("hidden");
   refreshButton?.setAttribute("aria-busy", "true");
   container.innerHTML = '<div class="surrender-state surrender-state-loading"><i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i><p>Loading your requests…</p></div>';
+  const pendingRequests = await getQueuedPublicRequests("surrenderRequest").catch(() => []);
+
   try {
     const response = await fetch(MY_SURRENDER_REQUESTS_API_URL, { credentials: "include" });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.message || "Unable to load your requests.");
-    renderRequestHistory(Array.isArray(data.requests) ? data.requests : []);
+    renderRequestHistory([
+      ...pendingRequests.map((item) => ({
+        ...(item.payload.requestData || {}),
+        offlinePending: true,
+        queuedAt: item.queuedAt,
+      })),
+      ...(Array.isArray(data.requests) ? data.requests : []),
+    ]);
   } catch (error) {
-    container.innerHTML = `<div class="surrender-state is-error"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i><div><h3>Request history is unavailable</h3><p>${escapeHtml(error.message || "Please try again in a moment.")}</p><button type="button" class="btn secondary-btn" id="retryRequestHistory">Try again</button></div></div>`;
+    if (pendingRequests.length) {
+      renderRequestHistory(pendingRequests.map((item) => ({
+        ...(item.payload.requestData || {}),
+        offlinePending: true,
+        queuedAt: item.queuedAt,
+      })));
+    } else {
+      container.innerHTML = `<div class="surrender-state is-error"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i><div><h3>Request history is unavailable</h3><p>${escapeHtml(error.message || "Please try again in a moment.")}</p><button type="button" class="btn secondary-btn" id="retryRequestHistory">Try again</button></div></div>`;
+    }
     document.getElementById("retryRequestHistory")?.addEventListener("click", loadMySurrenderRequests);
   } finally {
     refreshButton?.removeAttribute("aria-busy");
@@ -726,13 +801,14 @@ function renderRequestHistory(requests) {
   container.innerHTML = `<div class="request-history-list">${requests.map(request => {
     const status = request.status || "Pending";
     const detail = STATUS_DETAILS[status] || STATUS_DETAILS.Pending;
+    const pending = Boolean(request.offlinePending);
     const petName = request.pet?.name || "Unnamed animal";
     const petMeta = [request.pet?.species, request.pet?.breed].filter(Boolean).join(" · ") || "Animal details not provided";
     const note = status === "Rejected" ? request.rejectedReason : request.reviewNotes;
-    return `<article class="request-history-card status-${escapeHtml(status.toLowerCase())}">
-      <div class="request-card-top"><div><span class="request-id">${escapeHtml(request.id || "Request")}</span><h3>${escapeHtml(petName)}</h3><p>${escapeHtml(petMeta)}</p></div><span class="request-status-pill"><i class="fa-solid ${detail.icon}" aria-hidden="true"></i>${detail.label}</span></div>
-      <div class="request-status-guidance"><p>${detail.text}</p>${status === "Converted" && request.intakeId ? `<span><strong>Intake record:</strong> ${escapeHtml(request.intakeId)}</span>` : ""}${note ? `<span><strong>Staff note:</strong> ${escapeHtml(note)}</span>` : ""}</div>
-      <footer><span><i class="fa-regular fa-calendar" aria-hidden="true"></i> Submitted ${escapeHtml(formatDate(request.submittedAt || request.createdAt))}</span></footer>
+    return `<article class="request-history-card status-${escapeHtml(status.toLowerCase())} ${pending ? "is-offline-pending" : ""}">
+      <div class="request-card-top"><div><span class="request-id">${escapeHtml(request.id || "Request")}</span><h3>${escapeHtml(petName)}</h3><p>${escapeHtml(petMeta)}</p></div><span class="request-status-pill"><i class="fa-solid ${pending ? "fa-cloud-arrow-up" : detail.icon}" aria-hidden="true"></i>${pending ? "Pending sync" : detail.label}</span></div>
+      <div class="request-status-guidance"><p>${pending ? "Saved on this device. It will be submitted when internet returns." : detail.text}</p>${status === "Converted" && request.intakeId ? `<span><strong>Intake record:</strong> ${escapeHtml(request.intakeId)}</span>` : ""}${note ? `<span><strong>Staff note:</strong> ${escapeHtml(note)}</span>` : ""}</div>
+      <footer><span><i class="fa-regular fa-calendar" aria-hidden="true"></i> ${pending ? "Saved" : "Submitted"} ${escapeHtml(formatDate(request.queuedAt || request.submittedAt || request.createdAt))}</span></footer>
     </article>`;
   }).join("")}</div>`;
 }
@@ -818,6 +894,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   showStep(1, { scroll: false, focus: false });
   const scheduleNonCriticalRequest = window.requestIdleCallback || ((callback) => window.setTimeout(callback, 1200));
   scheduleNonCriticalRequest(() => {
+    syncQueuedSurrenderRequests();
     loadSurrenderAvailability();
     loadMySurrenderRequests();
   }, { timeout: 2500 });
@@ -839,4 +916,5 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("checkSurrenderAvailability")?.addEventListener("click", () => {
     loadSurrenderAvailability({ showError: true });
   });
+  window.addEventListener("online", syncQueuedSurrenderRequests);
 });

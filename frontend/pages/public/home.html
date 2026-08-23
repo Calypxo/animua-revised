@@ -19,7 +19,7 @@
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
   <link rel="stylesheet" href="../../src/css/public/home.css">
-  <link rel="stylesheet" href="../../src/css/global.css?v=pwa-responsive-20260810">
+  <link rel="stylesheet" href="../../src/css/global.css?v=welcome-toast-balanced-20260821">
 </head>
 <body class="home-page">
 
@@ -272,12 +272,21 @@
     <div class="container home-match-quiz-layout reveal">
       <div class="home-match-quiz-copy">
         <span class="section-label">Compatibility Matching</span>
-        <h2 id="homeMatchQuizTitle">Take the<br>Match Quiz</h2>
-        <p>
-          Answer a few simple questions about your lifestyle, home environment,
-          and care preferences so ANIMUA can suggest adoptable animals that may
-          be a great fit for you.
-        </p>
+        <div class="home-match-quiz-heading-row">
+          <h2 id="homeMatchQuizTitle">Take the<br>Match Quiz</h2>
+          <figure class="home-match-quiz-title-media" aria-hidden="true">
+            <picture>
+              <source type="image/avif" srcset="../../src/assets/images/optimized/home/match-quiz-form-showcase-360.avif 360w, ../../src/assets/images/optimized/home/match-quiz-form-showcase-640.avif 640w" sizes="112px">
+              <source type="image/webp" srcset="../../src/assets/images/optimized/home/match-quiz-form-showcase-360.webp 360w, ../../src/assets/images/optimized/home/match-quiz-form-showcase-640.webp 640w" sizes="112px">
+              <img src="../../src/assets/images/optimized/home/match-quiz-form-showcase-360.webp" alt="" width="994" height="1384" loading="lazy" decoding="async">
+            </picture>
+          </figure>
+          <p>
+            Answer a few simple questions about your lifestyle, home environment,
+            and care preferences so ANIMUA can suggest adoptable animals that may
+            be a great fit for you.
+          </p>
+        </div>
 
         <div class="home-match-quiz-points" aria-label="Match quiz benefits">
           <article>
@@ -908,7 +917,8 @@
   </div>
 </div>
 
-  <script type="module" src="../../src/public/js/public-ui.js?v=pwa-responsive-20260810"></script>
+  <script type="module" src="../../src/public/js/public-ui.js?v=welcome-toast-balanced-20260821"></script>
+  <script type="module" src="../../src/public/js/chatbot-widget.js"></script>
 
   <script type="module" src="/src/public/js/pwa-register.js"></script>
 </body>
