@@ -1,5 +1,6 @@
 // admin-frontend/src/services/animal.service.js
 import { apiFetch } from "../utils/api.js";
+import { queuedAdminApiFetch } from "./offlineAdminQueue.service.js";
 
 export async function getAllAnimals(params = {}) {
   const qs = new URLSearchParams(params).toString();
@@ -12,10 +13,10 @@ export async function getAnimalById(id) {
 }
 
 export async function updateAnimal(id, payload) {
-  return await apiFetch(`/animals/${encodeURIComponent(id)}`, {
+  return await queuedAdminApiFetch(`/animals/${encodeURIComponent(id)}`, {
     method: "PUT",
     body: JSON.stringify(payload),
-  });
+  }, { animal: { id, ...payload, offlinePending: true } });
 }
 
 export async function sendAnimalToQuarantine(id) {
@@ -37,10 +38,10 @@ export async function markAnimalReady(id) {
 }
 
 export async function saveBehavioralAssessment(id, payload) {
-  return await apiFetch(`/animals/${encodeURIComponent(id)}/behavioral`, {
+  return await queuedAdminApiFetch(`/animals/${encodeURIComponent(id)}/behavioral`, {
     method: "POST",
     body: JSON.stringify(payload),
-  });
+  }, { offlineQueued: true });
 }
 
 export async function getBehavioralQuestions() {
@@ -55,17 +56,17 @@ export async function saveBehavioralQuestions(questions, version) {
 }
 
 export async function addMedicalRecord(id, payload) {
-  return await apiFetch(`/animals/${encodeURIComponent(id)}/medical`, {
+  return await queuedAdminApiFetch(`/animals/${encodeURIComponent(id)}/medical`, {
     method: "POST",
     body: JSON.stringify(payload),
-  });
+  }, { record: { ...payload, offlinePending: true } });
 }
 
 export async function updateMedicalRecord(id, medicalId, payload) {
-  return await apiFetch(`/animals/${encodeURIComponent(id)}/medical/${encodeURIComponent(medicalId)}`, {
+  return await queuedAdminApiFetch(`/animals/${encodeURIComponent(id)}/medical/${encodeURIComponent(medicalId)}`, {
     method: "PUT",
     body: JSON.stringify(payload),
-  });
+  }, { record: { id: medicalId, ...payload, offlinePending: true } });
 }
 
 export async function archiveAnimal(id) {

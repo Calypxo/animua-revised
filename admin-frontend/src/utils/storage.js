@@ -1,6 +1,8 @@
 import { API_BASE_URL } from "./api.js";
 
 let currentUser = null;
+const MANAGEMENT_SESSION_CACHE_KEY = "animua_management_session_cache";
+const MANAGEMENT_SESSION_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 const LEGACY_SESSION_KEYS = [
   "animua_token",
@@ -32,7 +34,42 @@ export function setUserSession(user = {}) {
     email: user.email || "",
   };
 
+  try {
+    globalThis.localStorage?.setItem(
+      MANAGEMENT_SESSION_CACHE_KEY,
+      JSON.stringify({
+        user: currentUser,
+        savedAt: Date.now(),
+      })
+    );
+  } catch (error) {
+    console.warn("Unable to cache management session summary:", error.message);
+  }
+
   return currentUser;
+}
+
+export function getCachedUserSession() {
+  try {
+    const cached = JSON.parse(
+      globalThis.localStorage?.getItem(MANAGEMENT_SESSION_CACHE_KEY) || "null"
+    );
+
+    if (!cached?.user || Date.now() - Number(cached.savedAt || 0) > MANAGEMENT_SESSION_CACHE_TTL_MS) {
+      globalThis.localStorage?.removeItem(MANAGEMENT_SESSION_CACHE_KEY);
+      return null;
+    }
+
+    return {
+      ...cached.user,
+      role: cached.user.role || "",
+      fullName: cached.user.fullName || "",
+      email: cached.user.email || "",
+    };
+  } catch (error) {
+    globalThis.localStorage?.removeItem(MANAGEMENT_SESSION_CACHE_KEY);
+    return null;
+  }
 }
 
 export function getUserSession() {
@@ -54,6 +91,7 @@ export function getUserName() {
 export function clearUserSession(storage = globalThis.localStorage) {
   currentUser = null;
   clearLegacyBrowserSession(storage);
+  storage?.removeItem(MANAGEMENT_SESSION_CACHE_KEY);
 }
 
 export async function endUserSession() {

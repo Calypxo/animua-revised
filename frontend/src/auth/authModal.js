@@ -27,6 +27,22 @@ function updateAuthPanel() {
   }
 }
 
+function resetAuthPanelScroll() {
+  const authPanel = document.querySelector("#authModal .auth-modal-right");
+  const registerSection = document.getElementById("register-section");
+
+  if (authPanel) authPanel.scrollTop = 0;
+  if (registerSection) registerSection.scrollTop = 0;
+  window.requestAnimationFrame(() => {
+    if (authPanel) authPanel.scrollTop = 0;
+    if (registerSection) registerSection.scrollTop = 0;
+  });
+  window.setTimeout(() => {
+    if (authPanel) authPanel.scrollTop = 0;
+    if (registerSection) registerSection.scrollTop = 0;
+  }, 160);
+}
+
 function toggleAuthView() {
   const loginSection = document.getElementById("login-section");
   const registerSection = document.getElementById("register-section");
@@ -39,6 +55,7 @@ function toggleAuthView() {
   const loginVisible = !loginSection.classList.contains("hidden");
   const currentSection = loginVisible ? loginSection : registerSection;
   const nextSection = loginVisible ? registerSection : loginSection;
+  resetAuthPanelScroll();
 
   if (authModal) {
     authModal.classList.remove("slide-to-register", "slide-to-login");
@@ -58,10 +75,12 @@ function toggleAuthView() {
     currentSection.classList.remove("auth-view-exit");
     nextSection.classList.remove("hidden");
     nextSection.classList.add("auth-view-enter");
+    resetAuthPanelScroll();
   }, 120);
 
   window.setTimeout(() => {
     nextSection.classList.remove("auth-view-enter");
+    resetAuthPanelScroll();
   }, 260);
 
   clearAuthErrors();
@@ -104,6 +123,7 @@ function openAuthModal() {
   document.body.classList.add("auth-open");
   document.body.classList.add("modal-open");
   updateAuthPanel();
+  resetAuthPanelScroll();
 }
 
 function closeAuthModal() {

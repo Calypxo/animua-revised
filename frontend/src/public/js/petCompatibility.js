@@ -1,5 +1,12 @@
 import { API_BASE_URL } from "/src/utils/api.js";
 import { ensureUserSession, hasUserSession } from "/src/utils/storage.js";
+import {
+  deleteQueuedPublicRequest,
+  getQueuedPublicRequests,
+  isNetworkError,
+  markQueuedPublicRequestAttempt,
+  queuePublicRequest,
+} from "../../services/offlinePublicQueue.service.js";
 
 const DEFAULT_DOG_IMAGE = new URL("../../assets/images/dog.jpg", import.meta.url).href;
 const DEFAULT_CAT_IMAGE = new URL("../../assets/images/cat.jpg", import.meta.url).href;
@@ -148,6 +155,8 @@ async function loadQuestionConfiguration() {
   totalQ = PHASES.reduce((sum, phase) => sum + phase.questions.length, 0);
 }
 const QUIZ_LANGUAGE_KEY = "animua_quiz_language";
+const QUIZ_DRAFT_KEY = "animua_quiz_offline_draft";
+const QUIZ_PENDING_RESULT_KEY = "animua_quiz_pending_sync_result";
 let quizLanguage = localStorage.getItem(QUIZ_LANGUAGE_KEY) === "tagalog" ? "tagalog" : "english";
 
 const PHASE_COPY = {
@@ -405,6 +414,101 @@ let selectedChoices = {};
 let currentPhase= 0;
 let totalQ    = PHASES.reduce((s,p) => s+p.questions.length, 0);
 let isSubmitting = false;
+let isSyncingQueuedQuiz = false;
+
+function saveQuizDraft() {
+  try {
+    localStorage.setItem(
+      QUIZ_DRAFT_KEY,
+      JSON.stringify({
+        answers,
+        selectedChoices,
+        currentPhase,
+        savedAt: new Date().toISOString(),
+      })
+    );
+  } catch (error) {
+    console.warn("Unable to save quiz draft:", error.message);
+  }
+}
+
+function restoreQuizDraft() {
+  try {
+    const draft = JSON.parse(localStorage.getItem(QUIZ_DRAFT_KEY) || "null");
+    if (!draft?.answers || typeof draft.answers !== "object") return;
+    answers = draft.answers;
+    selectedChoices = draft.selectedChoices && typeof draft.selectedChoices === "object"
+      ? draft.selectedChoices
+      : {};
+    currentPhase = Math.min(PHASES.length - 1, Math.max(0, Number(draft.currentPhase || 0)));
+  } catch (error) {
+    localStorage.removeItem(QUIZ_DRAFT_KEY);
+  }
+}
+
+function clearQuizDraft() {
+  localStorage.removeItem(QUIZ_DRAFT_KEY);
+}
+
+async function postQuizMatch(quizData) {
+  const response = await fetch(`${API_BASE_URL}/match`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(quizData)
+  });
+
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const error = new Error(result.message || "Failed to fetch compatibility matches.");
+    error.status = response.status;
+    throw error;
+  }
+
+  return result;
+}
+
+function storeQuizResult(quizData, result) {
+  const matched = result.matches || [];
+  sessionStorage.setItem("animua_quiz_data", JSON.stringify(quizData));
+  sessionStorage.setItem("animua_match_results", JSON.stringify(matched));
+  sessionStorage.setItem("animua_match_metadata", JSON.stringify({
+    resultId: result.resultId,
+    completedAt: result.completedAt,
+    nextRetakeAt: result.nextRetakeAt,
+  }));
+  sessionStorage.setItem("animua_match_fresh", "1");
+  clearQuizDraft();
+}
+
+async function syncQueuedQuizSubmissions() {
+  if (isSyncingQueuedQuiz || !navigator.onLine) return;
+  isSyncingQueuedQuiz = true;
+
+  try {
+    const queued = await getQueuedPublicRequests("compatibilityQuiz");
+    for (const item of queued) {
+      try {
+        const result = await postQuizMatch(item.payload.quizData);
+        await deleteQueuedPublicRequest(item.id);
+        localStorage.setItem(QUIZ_PENDING_RESULT_KEY, JSON.stringify({
+          quizData: item.payload.quizData,
+          result,
+          syncedAt: new Date().toISOString(),
+        }));
+      } catch (error) {
+        await markQueuedPublicRequestAttempt(item.id, error);
+        if (isNetworkError(error)) break;
+      }
+    }
+  } catch (error) {
+    console.error("Failed to sync queued quiz submissions:", error);
+  } finally {
+    isSyncingQueuedQuiz = false;
+  }
+}
 
 function isPhaseComplete(phaseIdx = currentPhase) {
   return PHASES[phaseIdx].questions.every((q) => answers[q.key] !== undefined);
@@ -699,6 +803,7 @@ function handleAnswer(key, value, choiceId = "", silent = false) {
   updateProgress();
   updateAnswerChips();
   updateNavState();
+  saveQuizDraft();
   if (isPhaseComplete()) hideValidationMessage();
 }
 
@@ -815,27 +920,43 @@ async function handleSubmit() {
   };
 
   try {
-    const response = await fetch(`${API_BASE_URL}/match`, {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(quizData)
-    });
-
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || "Failed to fetch compatibility matches.");
-    const matched = result.matches || [];
-
-    sessionStorage.setItem("animua_quiz_data", JSON.stringify(quizData));
-    sessionStorage.setItem("animua_match_results", JSON.stringify(matched));
-    sessionStorage.setItem("animua_match_metadata", JSON.stringify({ resultId: result.resultId, completedAt: result.completedAt, nextRetakeAt: result.nextRetakeAt }));
-    sessionStorage.setItem("animua_match_fresh", "1");
+    const result = await postQuizMatch(quizData);
+    storeQuizResult(quizData, result);
 
     window.location.href = "/pages/public/compatibilityResults.html?source=quiz";
   } catch (err) {
     console.error("Matching failed:", err);
+    if (isNetworkError(err)) {
+      try {
+        await queuePublicRequest("compatibilityQuiz", { quizData });
+        sessionStorage.setItem("animua_quiz_data", JSON.stringify(quizData));
+        document.getElementById("quizMain").style.display = "none";
+        document.getElementById("completionScreen").style.display = "flex";
+        document.querySelector(".quiz-phase-nav")?.setAttribute("hidden", "");
+        document.getElementById("completionScreen").innerHTML = `
+          <div class="complete-card">
+            <span class="complete-icon"><i class="bi bi-cloud-arrow-up"></i></span>
+            <h2 class="complete-title">Quiz saved offline.</h2>
+            <p class="complete-sub">Your answers are saved on this device. ANIMUA will submit them when internet returns, then your matches can be opened from this device.</p>
+            <button class="btn-submit" id="retryMatchBtn" type="button">
+              <i class="bi bi-arrow-clockwise"></i>
+              Try Sync Now
+            </button>
+          </div>`;
+        document.getElementById("retryMatchBtn")?.addEventListener("click", async () => {
+          await syncQueuedQuizSubmissions();
+          const pendingResult = JSON.parse(localStorage.getItem(QUIZ_PENDING_RESULT_KEY) || "null");
+          if (pendingResult?.quizData && pendingResult?.result) {
+            storeQuizResult(pendingResult.quizData, pendingResult.result);
+            localStorage.removeItem(QUIZ_PENDING_RESULT_KEY);
+            window.location.href = "/pages/public/compatibilityResults.html?source=quiz";
+          }
+        });
+        return;
+      } catch (storageError) {
+        console.error("Failed to save quiz offline:", storageError);
+      }
+    }
     sessionStorage.setItem("animua_quiz_data", JSON.stringify(quizData));
     sessionStorage.setItem("animua_match_results", JSON.stringify([]));
     document.getElementById("quizMain").style.display = "none";
@@ -924,6 +1045,14 @@ async function initializeQuiz() {
   const access = document.getElementById("quizAccessCard");
   document.body.classList.remove("quiz-locked-result");
   access?.classList.remove("quiz-retake-note");
+  await syncQueuedQuizSubmissions();
+
+  const pendingResult = JSON.parse(localStorage.getItem(QUIZ_PENDING_RESULT_KEY) || "null");
+  if (pendingResult?.quizData && pendingResult?.result) {
+    storeQuizResult(pendingResult.quizData, pendingResult.result);
+    localStorage.removeItem(QUIZ_PENDING_RESULT_KEY);
+  }
+
   if (!hasUserSession()) {
     document.getElementById("questionArea").hidden = true;
     document.querySelector(".quiz-phase-nav")?.setAttribute("hidden", "");
@@ -934,7 +1063,9 @@ async function initializeQuiz() {
   try {
     const [response] = await Promise.all([
       fetch(`${API_BASE_URL}/match/eligibility`, { credentials: "include" }),
-      loadQuestionConfiguration(),
+      loadQuestionConfiguration().catch((error) => {
+        console.warn("Using bundled quiz questions:", error.message);
+      }),
     ]);
     const info = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(info.message || "Please log in again.");
@@ -993,14 +1124,30 @@ async function initializeQuiz() {
       document.getElementById("questionArea").hidden = false;
       document.querySelector(".quiz-phase-nav")?.removeAttribute("hidden");
     }
-    renderPhase(0); updateProgress();
+    restoreQuizDraft();
+    renderPhase(currentPhase); updateProgress();
   } catch (error) {
+    if (isNetworkError(error) && hasUserSession()) {
+      await loadQuestionConfiguration().catch((configError) => {
+        console.warn("Using bundled quiz questions while offline:", configError.message);
+      });
+      restoreQuizDraft();
+      access.hidden = false;
+      access.classList.add("quiz-retake-note");
+      access.innerHTML = `<strong>Offline quiz mode</strong><span>Your answers will be saved on this device and synced when internet returns.</span>`;
+      document.getElementById("questionArea").hidden = false;
+      document.querySelector(".quiz-phase-nav")?.removeAttribute("hidden");
+      renderPhase(currentPhase);
+      updateProgress();
+      return;
+    }
     document.getElementById("questionArea").hidden = true; access.hidden = false;
     access.innerHTML = `<h2>Unable to open the quiz</h2><p>${error.message}</p><a href="/pages/public/home.html#login">Log in again</a>`;
   }
 }
 updateLanguageToggle();
 initializeQuiz();
+window.addEventListener("online", syncQueuedQuizSubmissions);
 
 document.querySelectorAll("[data-quiz-language]").forEach((button) => {
   button.addEventListener("click", () => {

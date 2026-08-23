@@ -118,13 +118,90 @@ function normalizeTables(root = document) {
   });
 }
 
+function hasAccessibleName(button) {
+  if (!(button instanceof HTMLElement)) return true;
+  const ariaLabel = button.getAttribute("aria-label")?.trim();
+  if (ariaLabel) return true;
+
+  const labelledBy = button.getAttribute("aria-labelledby");
+  if (labelledBy) {
+    const labelText = labelledBy
+      .split(/\s+/)
+      .map((id) => document.getElementById(id)?.textContent?.trim() || "")
+      .join(" ")
+      .trim();
+    if (labelText) return true;
+  }
+
+  return Boolean(button.textContent?.trim() || button.getAttribute("title")?.trim());
+}
+
+function iconLabel(button) {
+  const icon = button.querySelector("i[class*='bi-']");
+  const classes = icon?.className || "";
+  const iconLabels = [
+    [/bi-list/, "Toggle management navigation"],
+    [/bi-bell/, "Open management notifications"],
+    [/bi-x|bi-x-lg|bi-x-circle/, "Close"],
+    [/bi-chevron-left|bi-arrow-left/, "Previous page"],
+    [/bi-chevron-right|bi-arrow-right/, "Next page"],
+    [/bi-arrow-counterclockwise|bi-arrow-clockwise/, "Reset"],
+    [/bi-eye/, "Show password"],
+    [/bi-pencil|bi-pen/, "Edit"],
+    [/bi-trash|bi-archive/, "Delete"],
+    [/bi-search/, "Search"],
+    [/bi-plus|bi-plus-lg|bi-plus-circle/, "Add"],
+    [/bi-dash|bi-dash-lg/, "Remove"],
+    [/bi-check|bi-check-lg|bi-check-circle/, "Confirm"],
+    [/bi-calendar/, "Open date action"],
+    [/bi-file|bi-clipboard/, "Open record"],
+  ];
+  return iconLabels.find(([pattern]) => pattern.test(classes))?.[1] || "";
+}
+
+function inferredButtonLabel(button) {
+  const id = button.id || "";
+  const className = button.className || "";
+  const action = button.dataset?.action || button.dataset?.clearanceDecision || "";
+  const combined = `${id} ${className} ${action}`.toLowerCase();
+
+  if (button.getAttribute("title")?.trim()) return button.getAttribute("title").trim();
+  if (button.closest(PAGINATION_SELECTOR)) {
+    if (/prev|previous|chevron-left|arrow-left/.test(combined)) return "Previous page";
+    if (/next|chevron-right|arrow-right/.test(combined)) return "Next page";
+    if (/^\d+$/.test(button.textContent?.trim() || "")) return `Go to page ${button.textContent.trim()}`;
+  }
+
+  const patternLabels = [
+    [/sidebar.*toggle|menu-toggle|nav-toggle|icon-btn/, "Toggle management navigation"],
+    [/notif|notification|attention/, "Open management notifications"],
+    [/close|dismiss|drawerclose|modalclose|x\b/, "Close"],
+    [/cancel/, "Cancel"],
+    [/save|draft/, "Save"],
+    [/submit|send/, "Submit"],
+    [/confirm|approve|clear/, "Confirm"],
+    [/reject|danger|deactivate|delete|remove/, "Reject or remove"],
+    [/restore/, "Restore"],
+    [/edit|update/, "Edit"],
+    [/view|detail|review|open/, "View details"],
+    [/filter|clear/, "Clear filters"],
+    [/add|create|new/, "Add record"],
+    [/refresh|reload/, "Refresh"],
+    [/arrival/, "Confirm arrival"],
+    [/noshow|no-show/, "Mark no-show"],
+    [/extend/, "Extend deadline"],
+    [/logout|signout|sign-out/, "Sign out"],
+  ];
+
+  return patternLabels.find(([pattern]) => pattern.test(combined))?.[1] || iconLabel(button) || "Button";
+}
+
 function normalizeActionButtons(root = document) {
-  root.querySelectorAll(".tbl-action-btn, .detail-btn, .view-btn, .audit-review-btn, .modal-close-btn, .drawer-close-btn").forEach((button) => {
+  root.querySelectorAll("button").forEach((button) => {
     if (button instanceof HTMLButtonElement) button.type = "button";
-    if (!button.hasAttribute("aria-label") && button.getAttribute("title")) {
-      button.setAttribute("aria-label", button.getAttribute("title"));
-    }
     button.querySelectorAll("i").forEach((icon) => icon.setAttribute("aria-hidden", "true"));
+    if (hasAccessibleName(button)) return;
+    button.setAttribute("aria-label", inferredButtonLabel(button));
   });
 }
 

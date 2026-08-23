@@ -1,5 +1,6 @@
 // admin-frontend/src/services/intake.service.js
 import { apiFetch } from "../utils/api.js";
+import { queuedAdminApiFetch } from "./offlineAdminQueue.service.js";
 
 // GET /api/intake  (optional params: status, source, species)
 export async function getAllIntake(params = {}) {
@@ -16,18 +17,18 @@ export async function getIntakeById(id) {
 
 // POST /api/intake
 export async function createIntake(payload) {
-  return await apiFetch("/intake", {
+  return await queuedAdminApiFetch("/intake", {
     method: "POST",
     body:   JSON.stringify(payload),
-  });
+  }, { record: { ...payload, offlinePending: true } });
 }
 
 // PUT /api/intake/:id
 export async function updateIntake(id, payload) {
-  return await apiFetch(`/intake/${encodeURIComponent(id)}`, {
+  return await queuedAdminApiFetch(`/intake/${encodeURIComponent(id)}`, {
     method: "PUT",
     body:   JSON.stringify(payload),
-  });
+  }, { record: { id, ...payload, offlinePending: true } });
 }
 
 // PATCH /api/intake/:id/approve

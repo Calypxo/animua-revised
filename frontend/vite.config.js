@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
-import { resolve } from 'path';
+import { existsSync, readdirSync, statSync, writeFileSync } from 'fs';
+import { relative, resolve } from 'path';
 
 const projectRoot = import.meta.dirname;
 
@@ -28,9 +29,36 @@ const deferPublicSharedCss = () => ({
   },
 });
 
+const createPwaAssetManifest = () => ({
+  name: 'create-pwa-asset-manifest',
+  closeBundle() {
+    const distDir = resolve(projectRoot, 'dist');
+    const assetsDir = resolve(distDir, 'assets');
+    if (!existsSync(assetsDir)) return;
+
+    const files = [];
+    const walk = (dir) => {
+      for (const entry of readdirSync(dir)) {
+        const fullPath = resolve(dir, entry);
+        if (statSync(fullPath).isDirectory()) {
+          walk(fullPath);
+        } else {
+          files.push(`/${relative(distDir, fullPath).replace(/\\/g, '/')}`);
+        }
+      }
+    };
+
+    walk(assetsDir);
+    writeFileSync(
+      resolve(distDir, 'pwa-assets.json'),
+      `${JSON.stringify(files.sort(), null, 2)}\n`
+    );
+  },
+});
+
 export default defineConfig({
   root: '.',
-  plugins: [deferPublicSharedCss()],
+  plugins: [deferPublicSharedCss(), createPwaAssetManifest()],
   build: {
     outDir: 'dist',
     rollupOptions: {

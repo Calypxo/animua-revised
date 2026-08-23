@@ -1,4 +1,5 @@
-const CACHE_VERSION = "animua-public-v11";
+const CACHE_VERSION = "animua-public-v12";
+const BUILD_ASSET_MANIFEST = "/pwa-assets.json";
 const APP_SHELL = [
   "/",
   "/index.html",
@@ -29,7 +30,7 @@ const LIVE_DATA_HOSTS = new Set([
 
 const isLiveDataRequest = (requestUrl) => (
   requestUrl.pathname.startsWith("/api/") ||
-  LIVE_DATA_HOSTS.has(requestUrl.hostname)
+  (LIVE_DATA_HOSTS.has(requestUrl.hostname) && requestUrl.pathname.startsWith("/api/"))
 );
 
 const isFreshAssetRequest = (request) => (
@@ -47,10 +48,31 @@ const cacheFreshResponse = (request, response) => {
   return response;
 };
 
+const getBuildAssets = async () => {
+  try {
+    const response = await fetch(BUILD_ASSET_MANIFEST, { cache: "no-store" });
+    if (!response.ok) return [];
+    const assets = await response.json();
+    return Array.isArray(assets)
+      ? assets.filter((asset) => typeof asset === "string" && asset.startsWith("/"))
+      : [];
+  } catch (error) {
+    return [];
+  }
+};
+
+const cacheUrls = async (cache, urls) => {
+  const uniqueUrls = [...new Set(urls)];
+  await Promise.allSettled(uniqueUrls.map((url) => cache.add(url)));
+};
+
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_VERSION)
-      .then((cache) => cache.addAll(APP_SHELL))
+      .then(async (cache) => {
+        const buildAssets = await getBuildAssets();
+        await cacheUrls(cache, [...APP_SHELL, BUILD_ASSET_MANIFEST, ...buildAssets]);
+      })
       .then(() => self.skipWaiting())
   );
 });

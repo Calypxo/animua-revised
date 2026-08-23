@@ -8836,7 +8836,8 @@ body.home-page .home-match-quiz-copy h2 {
   letter-spacing: 0;
 }
 
-body.home-page .home-match-quiz-copy > p {
+body.home-page .home-match-quiz-copy > p,
+body.home-page .home-match-quiz-heading-row > p {
   max-width: 520px;
   margin: 0 0 24px;
   color: var(--animua-muted);
@@ -12978,6 +12979,7 @@ body.home-page .home-match-quiz-copy h2 {
 }
 
 body.home-page .home-match-quiz-copy > p,
+body.home-page .home-match-quiz-heading-row > p,
 body.home-page .home-match-quiz-points p {
   color: rgba(43, 23, 25, 0.76);
   font-weight: 500;
@@ -14230,6 +14232,12 @@ body.home-page .about-shelter-card span::before {
 }
 
 @media (max-width: 720px) {
+  body.home-page .about-animua-section {
+    padding-bottom: 16px !important;
+    background:
+      linear-gradient(180deg, #5d1118 0%, #5d1118 100%) !important;
+  }
+
   body.home-page .about-animua-copy {
     padding: 30px 22px;
   }
@@ -14237,6 +14245,7 @@ body.home-page .about-shelter-card span::before {
   body.home-page .about-shelter-gallery {
     grid-template-columns: 1fr 1fr;
     grid-template-rows: minmax(210px, 1.25fr) repeat(2, minmax(140px, 0.85fr));
+    background: #5d1118 !important;
   }
 
   body.home-page .about-shelter-card-large {
@@ -14514,6 +14523,110 @@ body.home-page > .footer .footer-paw {
 
   body.home-page > .footer .footer-grid {
     gap: 14px;
+  }
+}
+
+@media (max-width: 720px) {
+  body.home-page > .footer {
+    padding-top: 14px !important;
+  }
+
+  body.home-page > .footer .footer-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    align-items: start !important;
+    gap: 9px 14px !important;
+    padding-bottom: 9px !important;
+  }
+
+  body.home-page > .footer .footer-brand {
+    grid-column: 1 / -1 !important;
+    gap: 3px !important;
+  }
+
+  body.home-page > .footer .footer-logo {
+    margin-bottom: 4px !important;
+    gap: 7px !important;
+  }
+
+  body.home-page > .footer .footer-logo-img {
+    width: 34px !important;
+    height: auto !important;
+  }
+
+  body.home-page > .footer .footer-brand-name {
+    font-size: 16px !important;
+    line-height: 1 !important;
+  }
+
+  body.home-page > .footer .footer-brand-tagline {
+    font-size: 0.52rem !important;
+    line-height: 1.15 !important;
+  }
+
+  body.home-page > .footer .footer-brand p {
+    display: none !important;
+  }
+
+  body.home-page > .footer .footer-social {
+    gap: 7px !important;
+  }
+
+  body.home-page > .footer .footer-social a {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 0.72rem !important;
+  }
+
+  body.home-page > .footer .footer-links h4 {
+    margin-bottom: 4px !important;
+    font-size: 0.62rem !important;
+    line-height: 1.1 !important;
+  }
+
+  body.home-page > .footer .footer-links a,
+  body.home-page > .footer .footer-contact p,
+  body.home-page > .footer .footer-contact a {
+    min-height: 24px !important;
+    margin-bottom: 2px !important;
+    font-size: 0.68rem !important;
+    line-height: 1.25 !important;
+  }
+
+  body.home-page > .footer .footer-contact {
+    grid-column: 1 / -1 !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 3px 10px !important;
+  }
+
+  body.home-page > .footer .footer-contact h4 {
+    grid-column: 1 / -1 !important;
+  }
+
+  body.home-page > .footer .footer-contact i {
+    width: 14px !important;
+    font-size: 0.68rem !important;
+  }
+
+  body.home-page > .footer .footer-bottom-inner {
+    gap: 6px !important;
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+  }
+
+  body.home-page > .footer .footer-bottom p {
+    font-size: 0.6rem !important;
+    line-height: 1.22 !important;
+  }
+
+  body.home-page > .footer .footer-bottom p:not(:first-child),
+  body.home-page > .footer .footer-paw {
+    display: none !important;
+  }
+
+  body.home-page > .footer .footer-paw {
+    font-size: 20px !important;
   }
 }
 
@@ -15788,6 +15901,10 @@ body.home-page .home-match-quiz-secondary {
   overflow-wrap: anywhere !important;
 }
 
+body.home-page .home-match-quiz-title-media {
+  display: none !important;
+}
+
 @media (max-width: 760px) {
   body.home-page .home-match-quiz-section {
     overflow-x: hidden !important;
@@ -15804,12 +15921,66 @@ body.home-page .home-match-quiz-secondary {
   body.home-page .home-match-quiz-copy {
     width: 100% !important;
     max-width: 100% !important;
+    position: relative !important;
   }
 
   body.home-page .home-match-quiz-copy .section-label {
     max-width: 100% !important;
     white-space: normal !important;
     line-height: 1.25 !important;
+  }
+
+  body.home-page .home-match-quiz-heading-row {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 132px !important;
+    grid-template-areas:
+      "title paper"
+      "intro paper" !important;
+    align-items: start !important;
+    gap: 12px !important;
+    margin-bottom: 22px !important;
+    padding-right: 0 !important;
+  }
+
+  body.home-page .home-match-quiz-heading-row h2 {
+    grid-area: title !important;
+    margin: 0 !important;
+  }
+
+  body.home-page .home-match-quiz-title-media {
+    grid-area: paper !important;
+    width: 132px !important;
+    max-width: 100% !important;
+    display: block !important;
+    justify-self: end !important;
+    margin: 0 !important;
+    position: relative !important;
+    top: auto !important;
+    right: auto !important;
+    transform: rotate(-7deg) !important;
+    transform-origin: center !important;
+    z-index: 1 !important;
+  }
+
+  body.home-page .home-match-quiz-title-media img {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 206px !important;
+    object-fit: contain !important;
+    object-position: center bottom !important;
+    filter: drop-shadow(0 16px 24px rgba(75, 43, 33, 0.18)) !important;
+  }
+
+  body.home-page .home-match-quiz-copy > p {
+    max-width: 100% !important;
+    padding-right: 0 !important;
+  }
+
+  body.home-page .home-match-quiz-heading-row > p {
+    grid-area: intro !important;
+    margin: 0 !important;
+    font-size: clamp(13px, 3.4vw, 15px) !important;
+    line-height: 1.42 !important;
   }
 
   body.home-page .home-match-quiz-points article {
@@ -15851,9 +16022,9 @@ body.home-page .home-match-quiz-secondary {
   }
 
   body.home-page .home-match-quiz-media {
+    display: none !important;
     width: min(100%, 330px) !important;
     max-width: 100% !important;
-    display: block !important;
     order: 2 !important;
     justify-self: center !important;
     margin: 8px auto 0 !important;
@@ -15871,6 +16042,40 @@ body.home-page .home-match-quiz-secondary {
     height: clamp(220px, 72vw, 330px) !important;
     max-height: 330px !important;
     object-fit: contain !important;
+  }
+}
+
+@media (max-width: 430px) {
+  body.home-page .home-match-quiz-heading-row {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 108px !important;
+    grid-template-areas:
+      "title paper"
+      "intro paper" !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin-bottom: 18px !important;
+    padding-right: 0 !important;
+  }
+
+  body.home-page .home-match-quiz-title-media {
+    width: 108px !important;
+    max-width: 100% !important;
+    top: auto !important;
+    transform: rotate(-7deg) !important;
+  }
+
+  body.home-page .home-match-quiz-title-media img {
+    max-height: 174px !important;
+  }
+
+  body.home-page .home-match-quiz-copy > p {
+    padding-right: 0 !important;
+  }
+
+  body.home-page .home-match-quiz-heading-row > p {
+    font-size: clamp(12.5px, 3.5vw, 14px) !important;
+    line-height: 1.38 !important;
   }
 }
 
@@ -16051,6 +16256,999 @@ body.home-page .home-match-quiz-secondary {
 @media (max-width: 340px) {
   body.home-page .navbar {
     width: calc(100vw - 18px) !important;
+  }
+}
+
+/* Phone hero/header cleanup: keep the top bar calm and move account access into the open menu. */
+@media (max-width: 760px) {
+  body.home-page .header {
+    background: linear-gradient(180deg, rgba(9, 12, 15, 0.72), rgba(9, 12, 15, 0.22) 72%, transparent) !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+  }
+
+  body.home-page .header.scrolled {
+    background: rgba(255, 253, 252, 0.96) !important;
+    box-shadow: 0 8px 24px rgba(20, 24, 28, 0.08) !important;
+    backdrop-filter: blur(12px) !important;
+  }
+
+  body.home-page .nav-shell {
+    min-height: 62px !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    gap: 12px !important;
+    padding-inline: 14px !important;
+  }
+
+  body.home-page .header .logo {
+    min-width: 0 !important;
+    min-height: 50px !important;
+    gap: 3px !important;
+  }
+
+  body.home-page .header .navbar-logo-img {
+    width: 45px !important;
+    min-width: 45px !important;
+    height: 45px !important;
+    flex-basis: 45px !important;
+  }
+
+  body.home-page .navbar-brand-name {
+    margin-left: 0 !important;
+    font-size: clamp(25px, 8vw, 30px) !important;
+    line-height: 0.86 !important;
+  }
+
+  body.home-page .navbar-brand-tagline {
+    margin-left: 0 !important;
+    max-width: 138px !important;
+    font-size: 8px !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+  }
+
+  body.home-page .navbar-brand-copy {
+    align-self: center !important;
+    justify-content: center !important;
+    transform: translate(0, 8px) !important;
+  }
+
+  body.home-page .nav-actions {
+    position: static !important;
+    min-height: 44px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0 !important;
+  }
+
+  body.home-page .menu-toggle {
+    width: 46px !important;
+    height: 46px !important;
+    min-width: 46px !important;
+    max-width: 46px !important;
+    flex-basis: 46px !important;
+    border-color: rgba(255, 255, 255, 0.48) !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.2) !important;
+  }
+
+  body.home-page .header.scrolled .menu-toggle {
+    border-color: rgba(142, 42, 32, 0.22) !important;
+    background: rgba(142, 42, 32, 0.08) !important;
+    box-shadow: none !important;
+  }
+
+  body.home-page .user-actions-wrap {
+    position: absolute !important;
+    top: calc(100% + 8px) !important;
+    right: 0 !important;
+    z-index: 1280 !important;
+    width: min(300px, calc(100vw - 24px)) !important;
+    min-height: 56px !important;
+    display: none !important;
+    padding: 10px 12px 8px !important;
+    border-radius: 8px 8px 0 0 !important;
+    border-bottom: 1px solid rgba(107, 79, 63, 0.12) !important;
+    background: rgba(255, 253, 249, 0.98) !important;
+    pointer-events: none !important;
+  }
+
+  body.home-page.menu-open .user-actions-wrap {
+    display: flex !important;
+    pointer-events: auto !important;
+  }
+
+  body.home-page .notification-wrap {
+    display: none !important;
+  }
+
+  body.home-page #userLoggedInBox.user-pill {
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+  }
+
+  body.home-page .login-btn,
+  body.home-page .user-menu-btn {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
+    padding: 0 12px !important;
+    border: 1px solid rgba(142, 42, 32, 0.18) !important;
+    border-radius: 999px !important;
+    background: rgba(142, 42, 32, 0.08) !important;
+    color: #780116 !important;
+    text-shadow: none !important;
+  }
+
+  body.home-page .login-btn span,
+  body.home-page .user-menu-chevron {
+    display: inline-grid !important;
+  }
+
+  body.home-page .user-avatar-mini {
+    width: 32px !important;
+    min-width: 32px !important;
+    height: 32px !important;
+    flex-basis: 32px !important;
+  }
+
+  body.home-page .navbar {
+    top: calc(100% + 8px) !important;
+    right: 0 !important;
+    width: min(300px, calc(100vw - 24px)) !important;
+    max-width: calc(100vw - 24px) !important;
+    padding-top: 0 !important;
+    background: rgba(255, 253, 249, 0.98) !important;
+    box-shadow: 0 18px 42px rgba(20, 24, 28, 0.18) !important;
+  }
+
+  body.home-page .navbar.show {
+    padding-top: 68px !important;
+  }
+
+  body.home-page.menu-open .navbar.show {
+    border-top-color: transparent !important;
+  }
+
+  body.home-page .user-dropdown {
+    top: calc(100% + 8px) !important;
+    right: 0 !important;
+    width: min(300px, calc(100vw - 24px)) !important;
+  }
+
+  body.home-page .hero::before {
+    background-position: 66% 42% !important;
+    filter: brightness(0.98) contrast(1.03) saturate(0.96) !important;
+  }
+
+  body.home-page .hero::after {
+    background:
+      linear-gradient(180deg, rgba(0, 0, 0, 0.46) 0%, rgba(0, 0, 0, 0.18) 24%, rgba(0, 0, 0, 0.08) 100%),
+      linear-gradient(90deg, rgba(0, 0, 0, 0.66) 0%, rgba(0, 0, 0, 0.48) 58%, rgba(0, 0, 0, 0.18) 100%) !important;
+  }
+
+  body.home-page .hero-left {
+    width: min(100%, 560px) !important;
+    max-width: 560px !important;
+    margin-top: clamp(-96px, -11vh, -76px) !important;
+  }
+
+  body.home-page .hero-layout {
+    padding: 86px 20px 152px !important;
+  }
+
+  body.home-page .hero-left h1 {
+    max-width: 540px !important;
+    margin-bottom: 16px !important;
+    font-size: clamp(42px, 10.6vw, 52px) !important;
+    line-height: 1.02 !important;
+  }
+
+  body.home-page .hero-left p {
+    max-width: 540px !important;
+    margin-bottom: 28px !important;
+    font-size: clamp(16px, 4vw, 19px) !important;
+    line-height: 1.46 !important;
+  }
+
+  body.home-page .hero-actions {
+    gap: 12px !important;
+  }
+
+  body.home-page .hero .primary-btn,
+  body.home-page .hero-link-btn {
+    min-height: 48px !important;
+    padding-inline: 18px !important;
+    font-size: 1rem !important;
+  }
+}
+
+@media (max-width: 430px) {
+  body.home-page .navbar,
+  body.home-page .user-actions-wrap,
+  body.home-page .user-dropdown {
+    right: 0 !important;
+    width: min(286px, calc(100vw - 20px)) !important;
+    max-width: calc(100vw - 20px) !important;
+  }
+
+  body.home-page .menu-toggle {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
+    flex-basis: 44px !important;
+  }
+
+  body.home-page .header .navbar-logo-img {
+    width: 40px !important;
+    min-width: 40px !important;
+    height: 40px !important;
+    flex-basis: 40px !important;
+  }
+
+  body.home-page .navbar-brand-name {
+    margin-left: 0 !important;
+    font-size: 25px !important;
+  }
+
+  body.home-page .navbar-brand-tagline {
+    margin-left: 0 !important;
+    max-width: 126px !important;
+    font-size: 7px !important;
+  }
+
+  body.home-page .hero-layout {
+    padding: 80px 18px 144px !important;
+  }
+
+  body.home-page .hero-left {
+    margin-top: clamp(-88px, -10vh, -68px) !important;
+  }
+
+  body.home-page .hero-left h1 {
+    font-size: clamp(38px, 10.4vw, 47px) !important;
+    line-height: 1.03 !important;
+  }
+
+  body.home-page .hero-left p {
+    margin-bottom: 26px !important;
+    font-size: clamp(15px, 4vw, 17px) !important;
+  }
+
+  body.home-page .hero .primary-btn,
+  body.home-page .hero-link-btn {
+    min-height: 46px !important;
+    font-size: 0.96rem !important;
+  }
+}
+
+/* The mobile nav is an overlay, so opening it should not move the hero copy. */
+@media (max-width: 900px) {
+  body.home-page.menu-open .hero-left {
+    margin-top: clamp(-96px, -11vh, -76px) !important;
+  }
+}
+
+@media (max-width: 430px) {
+  body.home-page.menu-open .hero-left {
+    margin-top: clamp(-88px, -10vh, -68px) !important;
+  }
+}
+
+/* Keep mobile highlight stories swipeable without showing the bottom scrollbar. */
+body.home-page .home-highlights-track {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+body.home-page .home-highlights-track::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* Phone header correction: keep account beside the menu button, not as a floating panel. */
+@media (max-width: 760px) {
+  body.home-page .nav-actions {
+    position: relative !important;
+    width: auto !important;
+    min-height: 46px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
+    overflow: visible !important;
+  }
+
+  body.home-page .user-actions-wrap,
+  body.home-page.menu-open .user-actions-wrap {
+    position: static !important;
+    top: auto !important;
+    right: auto !important;
+    z-index: auto !important;
+    width: auto !important;
+    min-height: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    pointer-events: auto !important;
+    overflow: visible !important;
+  }
+
+  body.home-page .notification-wrap {
+    display: none !important;
+  }
+
+  body.home-page #userLoggedInBox.user-pill {
+    position: relative !important;
+    width: auto !important;
+    max-width: none !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    overflow: visible !important;
+  }
+
+  body.home-page .login-btn,
+  body.home-page .user-menu-btn {
+    width: auto !important;
+    min-width: 46px !important;
+    max-width: 62px !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    padding: 4px 8px 4px 4px !important;
+    border: 1px solid rgba(255, 255, 255, 0.46) !important;
+    border-radius: 999px !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff !important;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.2) !important;
+    text-shadow: none !important;
+  }
+
+  body.home-page .header.scrolled .login-btn,
+  body.home-page .header.scrolled .user-menu-btn {
+    border-color: rgba(142, 42, 32, 0.2) !important;
+    background: rgba(142, 42, 32, 0.08) !important;
+    color: #780116 !important;
+    box-shadow: none !important;
+  }
+
+  body.home-page .login-btn span,
+  body.home-page .user-pill-name {
+    display: none !important;
+  }
+
+  body.home-page .user-menu-chevron {
+    width: 12px !important;
+    min-width: 12px !important;
+    height: 12px !important;
+    display: inline-grid !important;
+    place-items: center !important;
+    font-size: 0.66rem !important;
+  }
+
+  body.home-page .user-avatar-mini {
+    width: 34px !important;
+    min-width: 34px !important;
+    height: 34px !important;
+    flex: 0 0 34px !important;
+  }
+
+  body.home-page .menu-toggle {
+    box-sizing: border-box !important;
+    width: 46px !important;
+    min-width: 46px !important;
+    max-width: 46px !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    max-height: 46px !important;
+    flex: 0 0 46px !important;
+    aspect-ratio: 1 / 1 !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+  }
+
+  body.home-page .navbar.show {
+    padding-top: 12px !important;
+  }
+
+  body.home-page .user-dropdown:not(.hidden) {
+    position: fixed !important;
+    top: 70px !important;
+    right: 14px !important;
+    z-index: 2200 !important;
+    width: min(294px, calc(100vw - 28px)) !important;
+    max-width: calc(100vw - 28px) !important;
+    display: block !important;
+  }
+}
+
+@media (max-width: 430px) {
+  body.home-page .nav-actions {
+    gap: 6px !important;
+  }
+
+  body.home-page .login-btn,
+  body.home-page .user-menu-btn {
+    min-width: 42px !important;
+    max-width: 58px !important;
+    height: 42px !important;
+    min-height: 42px !important;
+  }
+
+  body.home-page .user-avatar-mini {
+    width: 31px !important;
+    min-width: 31px !important;
+    height: 31px !important;
+    flex-basis: 31px !important;
+  }
+
+  body.home-page .menu-toggle {
+    width: 42px !important;
+    min-width: 42px !important;
+    max-width: 42px !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    max-height: 42px !important;
+    flex-basis: 42px !important;
+  }
+
+  body.home-page .user-dropdown:not(.hidden) {
+    top: 66px !important;
+    right: 10px !important;
+    width: min(286px, calc(100vw - 20px)) !important;
+    max-width: calc(100vw - 20px) !important;
+  }
+}
+
+/* Phone hero scale: keep the first screen lighter and leave more room for stories. */
+@media (max-width: 760px) {
+  body.home-page .hero-left {
+    margin-top: clamp(-96px, -10.5vh, -72px) !important;
+    width: min(66vw, 440px) !important;
+    max-width: none !important;
+  }
+
+  body.home-page .hero-left h1 {
+    max-width: 100% !important;
+    font-size: clamp(31px, 8.2vw, 38px) !important;
+    line-height: 1.04 !important;
+  }
+
+  body.home-page .hero-left p {
+    max-width: 100% !important;
+    margin-bottom: 20px !important;
+    font-size: clamp(13.25px, 3.35vw, 14.5px) !important;
+    line-height: 1.48 !important;
+  }
+
+  body.home-page .hero-actions {
+    width: min(74%, 330px) !important;
+    gap: 12px !important;
+  }
+
+  body.home-page .hero .primary-btn,
+  body.home-page .hero-link-btn {
+    width: 100% !important;
+    min-height: 42px !important;
+    padding: 10px 22px !important;
+    font-size: 0.9rem !important;
+  }
+}
+
+@media (max-width: 430px) {
+  body.home-page .hero-left {
+    margin-top: clamp(-88px, -9.5vh, -66px) !important;
+    width: min(68vw, 320px) !important;
+    max-width: none !important;
+  }
+
+  body.home-page .hero-left h1 {
+    max-width: 100% !important;
+    font-size: clamp(29px, 8.8vw, 34px) !important;
+  }
+
+  body.home-page .hero-left p {
+    max-width: 100% !important;
+    margin-bottom: 18px !important;
+    font-size: clamp(12.75px, 3.6vw, 14px) !important;
+  }
+
+  body.home-page .hero-actions {
+    width: min(80%, 280px) !important;
+  }
+
+  body.home-page .hero .primary-btn,
+  body.home-page .hero-link-btn {
+    width: 100% !important;
+    min-height: 40px !important;
+    padding-block: 9px !important;
+    font-size: 0.86rem !important;
+  }
+}
+
+/* Fluid phone pass: keep the tuned home hero consistent across phone sizes. */
+@media (max-width: 760px) {
+  body.home-page .hero {
+    height: clamp(500px, 146vw, 620px) !important;
+    min-height: 0 !important;
+    max-height: clamp(500px, 146vw, 620px) !important;
+  }
+
+  body.home-page .hero-layout {
+    padding-top: clamp(76px, 22vw, 96px) !important;
+    padding-right: clamp(16px, 4vw, 24px) !important;
+    padding-bottom: clamp(120px, 34vw, 152px) !important;
+    padding-left: clamp(16px, 4vw, 24px) !important;
+  }
+
+  body.home-page .hero-left {
+    width: clamp(220px, 68vw, 380px) !important;
+    margin-top: clamp(-96px, -27vw, -64px) !important;
+  }
+
+  body.home-page .hero-left h1 {
+    font-size: clamp(29px, 8.4vw, 40px) !important;
+  }
+
+  body.home-page .hero-left p {
+    font-size: clamp(12.75px, 3.45vw, 14.75px) !important;
+  }
+
+  body.home-page .hero-actions {
+    width: min(100%, clamp(196px, 56vw, 286px)) !important;
+  }
+
+  body.home-page .hero .primary-btn,
+  body.home-page .hero-link-btn {
+    min-height: clamp(39px, 11vw, 43px) !important;
+    font-size: clamp(0.84rem, 2.7vw, 0.91rem) !important;
+  }
+}
+
+/* Keep homepage story highlights perfectly circular on every phone width. */
+@media (max-width: 760px) {
+  body.home-page .home-highlight-story {
+    flex: 0 0 auto !important;
+    width: clamp(64px, 17vw, 86px) !important;
+    min-width: clamp(64px, 17vw, 86px) !important;
+    justify-items: center !important;
+  }
+
+  body.home-page .highlight-cover {
+    width: clamp(58px, 15vw, 76px) !important;
+    min-width: clamp(58px, 15vw, 76px) !important;
+    max-width: clamp(58px, 15vw, 76px) !important;
+    height: clamp(58px, 15vw, 76px) !important;
+    min-height: clamp(58px, 15vw, 76px) !important;
+    max-height: clamp(58px, 15vw, 76px) !important;
+    aspect-ratio: 1 / 1 !important;
+    flex: 0 0 auto !important;
+    border-radius: 999px !important;
+    box-sizing: border-box !important;
+  }
+
+  body.home-page .highlight-cover picture,
+  body.home-page .highlight-cover img {
+    width: 100% !important;
+    height: 100% !important;
+    aspect-ratio: 1 / 1 !important;
+    border-radius: 999px !important;
+    object-fit: cover !important;
+  }
+}
+
+/* Final mobile hero recovery: keep copy below header and stories below buttons. */
+@media (max-width: 760px) {
+  body.home-page .hero {
+    height: clamp(670px, 174vw, 780px) !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: hidden !important;
+  }
+
+  body.home-page .hero-layout {
+    min-height: 0 !important;
+    align-items: flex-start !important;
+    padding-top: clamp(112px, 29vw, 138px) !important;
+    padding-right: clamp(18px, 5vw, 26px) !important;
+    padding-bottom: clamp(178px, 42vw, 220px) !important;
+    padding-left: clamp(18px, 5vw, 26px) !important;
+  }
+
+  body.home-page .hero-left,
+  body.home-page.menu-open .hero-left {
+    width: min(88vw, 430px) !important;
+    max-width: min(88vw, 430px) !important;
+    margin-top: clamp(92px, 20vw, 132px) !important;
+  }
+
+  body.home-page .hero-left h1 {
+    max-width: 100% !important;
+    margin-bottom: 16px !important;
+    font-size: clamp(35px, 9.2vw, 44px) !important;
+    line-height: 0.98 !important;
+  }
+
+  body.home-page .hero-left p {
+    max-width: min(82vw, 390px) !important;
+    margin-bottom: 22px !important;
+    font-size: clamp(14px, 3.7vw, 16px) !important;
+    line-height: 1.38 !important;
+  }
+
+  body.home-page .hero-actions {
+    width: min(100%, 320px) !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  body.home-page .hero .primary-btn,
+  body.home-page .hero-link-btn {
+    width: 100% !important;
+    min-height: 46px !important;
+    padding: 10px 18px !important;
+    border-radius: 999px !important;
+    font-size: 0.94rem !important;
+    line-height: 1.1 !important;
+  }
+
+  body.home-page .home-highlights-section {
+    bottom: clamp(20px, 6vw, 34px) !important;
+  }
+
+  body.home-page .home-highlights-track {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: clamp(10px, 3.3vw, 18px) !important;
+    padding: 0 clamp(14px, 4vw, 22px) !important;
+  }
+
+  body.home-page .home-highlight-story {
+    width: 100% !important;
+    min-width: 0 !important;
+    gap: 7px !important;
+  }
+
+  body.home-page .highlight-cover {
+    width: clamp(56px, 15vw, 72px) !important;
+    min-width: clamp(56px, 15vw, 72px) !important;
+    max-width: clamp(56px, 15vw, 72px) !important;
+    height: clamp(56px, 15vw, 72px) !important;
+    min-height: clamp(56px, 15vw, 72px) !important;
+    max-height: clamp(56px, 15vw, 72px) !important;
+  }
+
+  body.home-page .home-highlight-story > span:last-child {
+    width: min-content !important;
+    min-width: 64px !important;
+    max-width: 78px !important;
+    font-size: clamp(0.84rem, 3.45vw, 0.98rem) !important;
+    line-height: 0.96 !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+    hyphens: none !important;
+  }
+}
+
+@media (max-width: 380px) {
+  body.home-page .hero {
+    height: clamp(650px, 178vw, 720px) !important;
+  }
+
+  body.home-page .hero-layout {
+    padding-top: clamp(102px, 28vw, 118px) !important;
+    padding-bottom: clamp(168px, 45vw, 198px) !important;
+  }
+
+  body.home-page .hero-left h1 {
+    font-size: clamp(32px, 9.4vw, 37px) !important;
+  }
+
+  body.home-page .hero-left p {
+    font-size: clamp(13px, 3.7vw, 14px) !important;
+  }
+
+  body.home-page .hero .primary-btn,
+  body.home-page .hero-link-btn {
+    min-height: 42px !important;
+    font-size: 0.88rem !important;
+  }
+
+  body.home-page .home-highlight-story > span:last-child {
+    min-width: 58px !important;
+    max-width: 66px !important;
+    font-size: 0.82rem !important;
+  }
+}
+
+/* Story viewer media recovery: keep the photo as the full story canvas. */
+.story-modal-card .story-modal-image {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.story-modal-card .story-modal-image img {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+}
+
+.story-modal-card::before {
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.34) 0%, rgba(0, 0, 0, 0.1) 30%, rgba(0, 0, 0, 0.12) 54%, rgba(0, 0, 0, 0.58) 100%) !important;
+}
+
+.story-modal-card[data-story-key="success-stories"] .story-modal-image img {
+  object-fit: contain !important;
+  object-position: center center !important;
+  background: #121212 !important;
+}
+
+/* Phone story viewer: keep the photo as the full-screen canvas behind the copy. */
+@media (max-width: 760px) {
+  .story-modal-card {
+    display: block !important;
+    overflow: hidden !important;
+    background: #121212 !important;
+  }
+
+  .story-modal-card .story-modal-image {
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    background: #121212 !important;
+  }
+
+  .story-modal-card .story-modal-image img,
+  .story-modal-card[data-story-key="success-stories"] .story-modal-image img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center center !important;
+    background: transparent !important;
+  }
+
+  .story-modal-card::before {
+    z-index: 1 !important;
+    background:
+      linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.08) 28%, rgba(0, 0, 0, 0.18) 56%, rgba(0, 0, 0, 0.76) 100%) !important;
+  }
+
+  .story-modal-copy {
+    background: transparent !important;
+  }
+}
+
+/* Final phone-width guard: avoid tuning the hero to only one device width. */
+@media (max-width: 760px) {
+  body.home-page .hero {
+    height: clamp(650px, 172vw, 760px) !important;
+    min-height: 0 !important;
+    max-height: none !important;
+  }
+
+  body.home-page .hero-layout {
+    min-height: 0 !important;
+    padding-top: clamp(104px, 28vw, 134px) !important;
+    padding-right: clamp(16px, 5vw, 26px) !important;
+    padding-bottom: clamp(166px, 42vw, 212px) !important;
+    padding-left: clamp(16px, 5vw, 26px) !important;
+  }
+
+  body.home-page .hero-left,
+  body.home-page.menu-open .hero-left {
+    width: min(88vw, 430px) !important;
+    max-width: min(88vw, 430px) !important;
+    margin-top: 0 !important;
+  }
+
+  body.home-page .hero-left h1 {
+    font-size: clamp(32px, 9vw, 43px) !important;
+    line-height: 0.99 !important;
+  }
+
+  body.home-page .hero-left p {
+    max-width: min(82vw, 390px) !important;
+    font-size: clamp(13px, 3.55vw, 15.75px) !important;
+    line-height: 1.4 !important;
+  }
+
+  body.home-page .hero .primary-btn,
+  body.home-page .hero-link-btn {
+    min-height: clamp(42px, 11vw, 46px) !important;
+    font-size: clamp(0.88rem, 2.45vw, 0.94rem) !important;
+  }
+
+  body.home-page .home-highlights-section {
+    bottom: clamp(18px, 5.4vw, 32px) !important;
+  }
+
+  body.home-page .home-highlights-track {
+    gap: clamp(10px, 3.2vw, 18px) !important;
+    padding-inline: clamp(8px, 3vw, 18px) !important;
+  }
+
+  body.home-page .highlight-cover {
+    width: clamp(64px, 16.5vw, 86px) !important;
+    min-width: clamp(64px, 16.5vw, 86px) !important;
+    max-width: clamp(64px, 16.5vw, 86px) !important;
+    height: clamp(64px, 16.5vw, 86px) !important;
+    min-height: clamp(64px, 16.5vw, 86px) !important;
+    max-height: clamp(64px, 16.5vw, 86px) !important;
+  }
+
+  body.home-page .home-highlight-story > span:last-child {
+    min-width: clamp(66px, 17vw, 78px) !important;
+    max-width: clamp(76px, 19vw, 90px) !important;
+    font-size: clamp(0.88rem, 2.65vw, 1.06rem) !important;
+  }
+}
+
+/* Final mobile header icon centering. */
+@media (max-width: 760px) {
+  body.home-page .login-btn,
+  body.home-page .user-menu-btn {
+    box-sizing: border-box !important;
+    width: 46px !important;
+    min-width: 46px !important;
+    max-width: 46px !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    max-height: 46px !important;
+    display: inline-grid !important;
+    place-items: center !important;
+    gap: 0 !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    aspect-ratio: 1 / 1 !important;
+  }
+
+  body.home-page .login-btn i,
+  body.home-page .user-menu-btn > i,
+  body.home-page .user-avatar-mini,
+  body.home-page .user-avatar-mini i {
+    display: grid !important;
+    place-items: center !important;
+    margin: 0 !important;
+    line-height: 1 !important;
+    text-align: center !important;
+  }
+
+  body.home-page .user-avatar-mini {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    flex: 0 0 auto !important;
+  }
+
+  body.home-page .user-menu-chevron {
+    display: none !important;
+  }
+}
+
+@media (max-width: 430px) {
+  body.home-page .login-btn,
+  body.home-page .user-menu-btn {
+    width: 42px !important;
+    min-width: 42px !important;
+    max-width: 42px !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    max-height: 42px !important;
+  }
+}
+
+/* Final mobile quiz modal sizing: compact popup, not a full-height panel. */
+@media (max-width: 760px) {
+  body.home-page .quiz-intro-modal:not(.hidden) {
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 14px !important;
+  }
+
+  body.home-page .quiz-intro-card {
+    width: min(300px, calc(100vw - 52px)) !important;
+    max-width: calc(100vw - 52px) !important;
+    max-height: min(54dvh, 420px) !important;
+    padding: 14px 13px 14px !important;
+    border-radius: 12px !important;
+    overflow-y: auto !important;
+  }
+
+  body.home-page .quiz-intro-close {
+    top: 10px !important;
+    right: 10px !important;
+    width: 30px !important;
+    height: 30px !important;
+    font-size: 0.82rem !important;
+  }
+
+  body.home-page .quiz-intro-label {
+    gap: 8px !important;
+    margin: 0 34px 5px 0 !important;
+    font-size: 0.48rem !important;
+    letter-spacing: 0.1em !important;
+  }
+
+  body.home-page .quiz-intro-label::before {
+    width: 20px !important;
+  }
+
+  body.home-page .quiz-intro-copy h2 {
+    max-width: 100% !important;
+    font-size: clamp(1.08rem, 5.7vw, 1.42rem) !important;
+    line-height: 1 !important;
+  }
+
+  body.home-page .quiz-intro-copy > p {
+    margin: 6px 0 7px !important;
+    font-size: 0.56rem !important;
+    line-height: 1.2 !important;
+  }
+
+  body.home-page .quiz-intro-details {
+    grid-template-columns: 1fr !important;
+    gap: 0 !important;
+    margin-bottom: 8px !important;
+  }
+
+  body.home-page .quiz-intro-details span,
+  body.home-page .quiz-intro-details span:first-child,
+  body.home-page .quiz-intro-details span:last-child {
+    min-height: 25px !important;
+    justify-content: flex-start !important;
+    gap: 7px !important;
+    padding: 3px 8px !important;
+    border-right: 0 !important;
+    font-size: 0.54rem !important;
+    text-align: left !important;
+  }
+
+  body.home-page .quiz-intro-details i {
+    font-size: 0.72rem !important;
+  }
+
+  body.home-page .quiz-intro-how {
+    display: none !important;
+  }
+
+  body.home-page .quiz-intro-reminder {
+    display: none !important;
+  }
+
+  body.home-page .quiz-intro-primary {
+    min-width: 120px !important;
+    min-height: 30px !important;
+    padding: 0 12px !important;
+    font-size: 0.62rem !important;
   }
 }
 

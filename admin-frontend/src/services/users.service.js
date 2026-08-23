@@ -1,5 +1,6 @@
 // admin-frontend/src/services/users.service.js
 import { apiFetch } from "../utils/api.js";
+import { queuedAdminApiFetch } from "./offlineAdminQueue.service.js";
 
 /**
  * Fetch all users (Admin only).
@@ -23,10 +24,10 @@ export async function getUserById(id) {
  * POST /api/users
  */
 export async function createUser(payload) {
-  return await apiFetch("/users", {
+  return await queuedAdminApiFetch("/users", {
     method: "POST",
     body:   JSON.stringify(payload),
-  });
+  }, { user: { ...payload, offlinePending: true } });
 }
 
 /**
@@ -34,10 +35,10 @@ export async function createUser(payload) {
  * PUT /api/users/:id
  */
 export async function updateUser(id, payload) {
-  return await apiFetch(`/users/${encodeURIComponent(id)}`, {
+  return await queuedAdminApiFetch(`/users/${encodeURIComponent(id)}`, {
     method: "PUT",
     body:   JSON.stringify(payload),
-  });
+  }, { user: { id, ...payload, offlinePending: true } });
 }
 
 /**

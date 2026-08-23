@@ -1,3 +1,11 @@
+import {
+  clearUserSession,
+  endUserSession,
+  ensureUserSession,
+  getUserSession,
+  hasUserSession,
+} from "../../utils/storage.js";
+
 const menuToggle = document.getElementById("menuToggle");
 const navbar = document.getElementById("navbar");
 const header = document.querySelector(".header");
@@ -9,7 +17,8 @@ const userDropdown = document.getElementById("userDropdown");
 const profileModal = document.getElementById("profileModal");
 
 function firstName(name = "User") {
-  return name.trim().split(/\s+/)[0] || "User";
+  const first = String(name || "").trim().split(/\s+/)[0] || "User";
+  return first.charAt(0).toUpperCase() + first.slice(1);
 }
 
 function initial(name = "User") {
@@ -22,9 +31,10 @@ function renderAvatar(element, fullName = "User", photoDataUrl = "") {
 }
 
 function updateAuthUI() {
-  const hasToken = Boolean(localStorage.getItem("animua_token"));
-  const userName = localStorage.getItem("user_name") || "User";
-  const userPhoto = localStorage.getItem("user_profile_photo") || "";
+  const session = getUserSession();
+  const hasToken = hasUserSession();
+  const userName = session?.fullName || "User";
+  const userPhoto = session?.profilePhotoDataUrl || "";
   const displayName = firstName(userName);
   const userLoggedInBox = document.getElementById("userLoggedInBox");
   const loggedUserName = document.getElementById("loggedUserName");
@@ -43,23 +53,16 @@ function updateAuthUI() {
 }
 
 function clearSession() {
-  [
-    "animua_token",
-    "user_role",
-    "user_name",
-    "user_email",
-    "user_profile_photo",
-    "is_logged_in",
-    "show_welcome_toast",
-  ].forEach((key) => localStorage.removeItem(key));
+  clearUserSession();
 }
 
 function openProfileModal() {
   if (!profileModal) return;
 
-  const userName = localStorage.getItem("user_name") || "Account";
-  const userEmail = localStorage.getItem("user_email") || "";
-  const userPhoto = localStorage.getItem("user_profile_photo") || "";
+  const session = getUserSession();
+  const userName = session?.fullName || "Account";
+  const userEmail = session?.email || "";
+  const userPhoto = session?.profilePhotoDataUrl || "";
   const fullName = document.getElementById("profileFullName");
   const email = document.getElementById("profileEmail");
 
@@ -113,8 +116,8 @@ function bindMenus() {
     if (!event.target.closest(".user-menu")) userDropdown?.classList.add("hidden");
   });
 
-  document.getElementById("logoutBtn")?.addEventListener("click", () => {
-    clearSession();
+  document.getElementById("logoutBtn")?.addEventListener("click", async () => {
+    await endUserSession();
     updateAuthUI();
     window.location.href = "home.html";
   });
@@ -137,7 +140,13 @@ function bindMenus() {
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  clearSession();
+  try {
+    await ensureUserSession();
+  } catch (error) {
+    console.warn("Unable to restore account session:", error.message);
+  }
   bindHeader();
   bindMenus();
   updateAuthUI();
