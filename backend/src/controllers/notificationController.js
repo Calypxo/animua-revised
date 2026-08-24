@@ -1,5 +1,10 @@
 const { db, admin } = require("../config/firebase");
 const { normalizeNotificationSettings } = require("../services/notificationService");
+const {
+  normalizeToken,
+  registerPushSubscription,
+  unregisterPushSubscription,
+} = require("../services/pushNotificationService");
 
 const NOTIFICATION_COL = "notifications";
 const EVENT_COL = "events";
@@ -131,5 +136,49 @@ exports.markMyNotificationsRead = async (req, res) => {
   } catch (error) {
     console.error("[markMyNotificationsRead]", error.message);
     return res.status(500).json({ message: "Failed to update notifications." });
+  }
+};
+
+exports.registerMyPushSubscription = async (req, res) => {
+  try {
+    const token = normalizeToken(req.body?.token);
+    if (!token) {
+      return res.status(400).json({ message: "A valid browser notification token is required." });
+    }
+
+    const subscriptionId = await registerPushSubscription({
+      user: req.user,
+      token,
+      userAgent: req.body?.userAgent || req.get("user-agent") || "",
+    });
+    if (!subscriptionId) {
+      return res.status(400).json({ message: "Unable to register this browser for notifications." });
+    }
+
+    return res.status(201).json({
+      message: "Browser notifications are enabled.",
+      subscriptionId,
+    });
+  } catch (error) {
+    console.error("[registerMyPushSubscription]", error.message);
+    return res.status(500).json({ message: "Failed to enable browser notifications." });
+  }
+};
+
+exports.unregisterMyPushSubscription = async (req, res) => {
+  try {
+    const token = normalizeToken(req.body?.token);
+    if (!token) {
+      return res.status(400).json({ message: "A valid browser notification token is required." });
+    }
+
+    const removed = await unregisterPushSubscription({ user: req.user, token });
+    return res.json({
+      message: "Browser notifications are disabled for this device.",
+      removed,
+    });
+  } catch (error) {
+    console.error("[unregisterMyPushSubscription]", error.message);
+    return res.status(500).json({ message: "Failed to disable browser notifications." });
   }
 };

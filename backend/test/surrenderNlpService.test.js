@@ -7,10 +7,10 @@ const {
   buildFallbackAnalysis,
 } = require("../src/services/surrenderNlpService");
 
-test("uses port 8002 for surrender sentiment by default", () => {
+test("uses the deployed Cloud Run surrender sentiment service by default", () => {
   assert.equal(
     PYTHON_SENTIMENT_API_URL,
-    "http://127.0.0.1:8002/analyze-surrender-sentiment"
+    "https://animua-sentiment-3wy62l2fta-as.a.run.app/analyze-surrender-sentiment"
   );
 });
 

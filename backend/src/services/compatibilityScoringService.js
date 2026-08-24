@@ -142,7 +142,8 @@ async function scoreMatches(
   topK = 5,
   {
     fetchImpl = global.fetch,
-    matcherUrl = process.env.PYTHON_MATCHER_URL || "http://127.0.0.1:8001/score",
+    matcherUrl = process.env.PYTHON_MATCHER_URL ||
+      "https://animua-matcher-3wy62l2fta-as.a.run.app/score",
     logger = console,
   } = {}
 ) {
@@ -153,7 +154,11 @@ async function scoreMatches(
       body: JSON.stringify({ preferences, animals, top_k: topK }),
     });
     if (!response.ok) throw new Error(`Matcher returned ${response.status}`);
-    const result = await response.json();
+    const rawResult = await response.json();
+    const result = typeof rawResult === "string" ? JSON.parse(rawResult) : rawResult;
+    if (!result || !Array.isArray(result.matches)) {
+      throw new Error("Matcher returned an invalid response payload");
+    }
     logger.info("[matchPets] Python matcher used successfully.");
     return result;
   } catch (error) {

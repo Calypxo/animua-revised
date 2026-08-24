@@ -1,6 +1,6 @@
 const PYTHON_SENTIMENT_API_URL =
   process.env.PYTHON_SENTIMENT_API_URL ||
-  "http://127.0.0.1:8002/analyze-surrender-sentiment";
+  "https://animua-sentiment-3wy62l2fta-as.a.run.app/analyze-surrender-sentiment";
 const SENTIMENT_TIMEOUT_MS = Number(process.env.PYTHON_SENTIMENT_TIMEOUT_MS || 15000);
 
 const CATEGORY_RULES = [

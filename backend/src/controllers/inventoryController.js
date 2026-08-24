@@ -1,4 +1,5 @@
 const { admin, db } = require("../config/firebase");
+const { notifyIfInventoryLevelWorsened } = require("../services/inventoryAlertService");
 
 const INVENTORY_COL = "inventoryItems";
 const PREDICTION_FIELDS = new Set([
@@ -179,6 +180,7 @@ async function performMovement(req, res, type) {
     const itemReference = db.collection(INVENTORY_COL).doc(itemId);
     const transactionReference = itemReference.collection("transactions").doc();
     let result;
+    let inventoryAlert = null;
 
     await db.runTransaction(async (transaction) => {
       const itemSnapshot = await transaction.get(itemReference);
@@ -216,7 +218,22 @@ async function performMovement(req, res, type) {
         item: { docId: itemId, id: itemSnapshot.data().id || itemId, ...itemSnapshot.data(), ...itemUpdates },
         transaction: { id: transactionReference.id, ...movement },
       };
+      if (type === "out") {
+        inventoryAlert = {
+          itemId,
+          item: itemSnapshot.data(),
+          beforeStock: currentStock,
+          afterStock: nextStock,
+          afterItem: itemUpdates,
+        };
+      }
     });
+
+    if (inventoryAlert) {
+      await notifyIfInventoryLevelWorsened(inventoryAlert).catch((error) => {
+        console.warn("[inventoryStockNotification]", error.message);
+      });
+    }
 
     return res.status(201).json(result);
   } catch (error) {

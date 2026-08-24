@@ -3,6 +3,9 @@ import Swal from "sweetalert2";
 import { endUserSession, getUserName, getUserRole } from "../../utils/storage.js";
 import { apiFetch } from "../../utils/api.js";
 import { getManagementNotificationDestination } from "./notificationNavigation.js";
+import { syncManagementPushNotifications } from "../../services/pushNotifications.js";
+
+let pushSyncStarted = false;
 
 const managementSwalClasses = {
   popup: "animua-management-swal",
@@ -204,6 +207,10 @@ function bindAttentionCenter(button, role) {
     }
   });
 
+  window.addEventListener("animua:push-notification", () => {
+    void loadAttentionCenter(panel, button, role, { forceRefresh: true });
+  });
+
   void loadAttentionCenter(panel, button, role, {
     showLoading: false,
   });
@@ -352,5 +359,12 @@ export function renderTopbarUser() {
     }
     const accountMenu = ensureAccountMenu(chip, name, role, initials);
     bindAccountMenu(chip, accountMenu);
+  }
+
+  if (!pushSyncStarted) {
+    pushSyncStarted = true;
+    void syncManagementPushNotifications().catch((error) => {
+      console.warn("Unable to refresh browser notifications:", error.message);
+    });
   }
 }
