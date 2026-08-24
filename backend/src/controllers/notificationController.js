@@ -14,6 +14,21 @@ function normalizeEmail(value = "") {
   return String(value || "").trim().toLowerCase();
 }
 
+function isManagementUser(user = {}) {
+  return ["Admin", "Staff", "Veterinarian"].includes(user.role);
+}
+
+function notificationAudience(req) {
+  const requested = String(req.query?.audience || "").trim().toLowerCase();
+  if (requested === "public") return "public";
+  return isManagementUser(req.user) ? "management" : "public";
+}
+
+function belongsToAudience(notification = {}, audience = "public") {
+  const isManagementNotification = notification.category === "management";
+  return audience === "management" ? isManagementNotification : !isManagementNotification;
+}
+
 function serializeDate(value) {
   if (!value) return "";
   if (value.toDate) return value.toDate().toISOString();
@@ -68,13 +83,14 @@ exports.getMyNotifications = async (req, res) => {
     const userDoc = await db.collection("users").doc(email).get();
     const settings = normalizeNotificationSettings(userDoc.exists ? userDoc.data().notificationSettings : {});
 
+    const audience = notificationAudience(req);
     const snapshot = await db.collection(NOTIFICATION_COL).where("userEmail", "==", email).get();
     const stored = snapshot.docs
       .map((doc) => ({ id: doc.id, ...doc.data(), createdAt: serializeDate(doc.data().createdAt) }))
+      .filter((item) => belongsToAudience(item, audience))
       .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
 
-    const managementUser = ["Admin", "Staff", "Veterinarian"].includes(req.user?.role);
-    const eventNotices = !managementUser && settings.announcementsEvents ? await getEventNotices() : [];
+    const eventNotices = audience === "public" && settings.announcementsEvents ? await getEventNotices() : [];
     const notifications = [...stored, ...eventNotices]
       .sort((a, b) => new Date(b.createdAt || b.eventDate || 0) - new Date(a.createdAt || a.eventDate || 0))
       .slice(0, 20);
@@ -96,7 +112,12 @@ exports.markMyNotificationRead = async (req, res) => {
     if (!email) return res.status(401).json({ message: "Please log in to update notifications." });
     const ref = db.collection(NOTIFICATION_COL).doc(String(req.params.id || ""));
     const snap = await ref.get();
-    if (!snap.exists || normalizeEmail(snap.data().userEmail) !== email) {
+    const audience = notificationAudience(req);
+    if (
+      !snap.exists ||
+      normalizeEmail(snap.data().userEmail) !== email ||
+      !belongsToAudience(snap.data(), audience)
+    ) {
       return res.status(404).json({ message: "Notification not found." });
     }
     if (snap.data().read !== true) {
@@ -118,13 +139,15 @@ exports.markMyNotificationsRead = async (req, res) => {
     const email = normalizeEmail(req.user?.email);
     if (!email) return res.status(401).json({ message: "Please log in to update notifications." });
 
+    const audience = notificationAudience(req);
     const snapshot = await db.collection(NOTIFICATION_COL)
       .where("userEmail", "==", email)
       .where("read", "==", false)
       .get();
 
     const batch = db.batch();
-    snapshot.docs.forEach((doc) => {
+    const matchingDocs = snapshot.docs.filter((doc) => belongsToAudience(doc.data(), audience));
+    matchingDocs.forEach((doc) => {
       batch.update(doc.ref, {
         read: true,
         readAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -132,7 +155,7 @@ exports.markMyNotificationsRead = async (req, res) => {
     });
     await batch.commit();
 
-    return res.json({ message: "Notifications marked as read.", updated: snapshot.size });
+    return res.json({ message: "Notifications marked as read.", updated: matchingDocs.length });
   } catch (error) {
     console.error("[markMyNotificationsRead]", error.message);
     return res.status(500).json({ message: "Failed to update notifications." });

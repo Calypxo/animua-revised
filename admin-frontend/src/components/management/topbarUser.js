@@ -104,7 +104,7 @@ async function loadAttentionCenter(panel, button, role, options = {}) {
   if (showLoading) panel.classList.add("is-refreshing");
   refresh?.setAttribute("aria-busy", "true");
   try {
-    const data = await apiFetch("/notifications");
+    const data = await apiFetch("/notifications?audience=management");
     renderAttentionCenter(panel, button, data);
   } catch (error) {
     const summary = panel.querySelector("#attentionSummary");
@@ -175,7 +175,7 @@ function bindAttentionCenter(button, role) {
     if (!panel.querySelector("[data-notification-id]") && !remaining) panel.querySelector("#attentionList").innerHTML = `<div class="attention-empty"><span><i class="bi bi-check2-circle"></i></span><strong>You're all caught up</strong><small>New management updates will appear here.</small></div>`;
     try {
       await Promise.race([
-        apiFetch(`/notifications/${encodeURIComponent(notificationId)}/read`, { method: "PATCH", keepalive: true }),
+        apiFetch(`/notifications/${encodeURIComponent(notificationId)}/read?audience=management`, { method: "PATCH", keepalive: true }),
         new Promise((resolve) => setTimeout(resolve, 900)),
       ]);
     } catch (error) {
@@ -199,7 +199,7 @@ function bindAttentionCenter(button, role) {
     if (markButton.disabled) return;
     markButton.disabled = true;
     try {
-      await apiFetch("/notifications/read", { method: "PATCH" });
+      await apiFetch("/notifications/read?audience=management", { method: "PATCH" });
       await loadAttentionCenter(panel, button, role);
     } catch (error) {
       markButton.disabled = false;

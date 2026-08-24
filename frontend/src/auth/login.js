@@ -108,12 +108,30 @@ export async function handleLogin(event) {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ email, password, captchaToken })
+      body: JSON.stringify({ email, password, captchaToken, portal: "public" })
     });
 
     const data = await response.json();
 
     if (!response.ok) {
+      if (response.status === 403 && data.code === "MANAGEMENT_PORTAL_REQUIRED") {
+        clearFailedLogin(email);
+        resetLoginCaptcha();
+        hideLoginCaptcha();
+        await Swal.fire({
+          icon: "warning",
+          title: "Use the Management Portal",
+          text: data.message || "Management accounts cannot sign in through the public portal.",
+          confirmButtonText: "OK",
+          customClass: {
+            popup: "animua-popup animua-auth-feedback-popup",
+            confirmButton: "animua-confirm"
+          },
+          buttonsStyling: false
+        });
+        return;
+      }
+
       if (response.status === 403 && data.verificationRequired === true) {
         try {
           await signInWithEmailAndPassword(auth, email, password);
