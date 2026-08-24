@@ -1,10 +1,28 @@
 const { db, admin } = require("../config/firebase");
+const { sendPushNotificationToUser } = require("./pushNotificationService");
 
 const NOTIFICATION_COL = "notifications";
 const USERS_COL = "users";
+const MANAGEMENT_RESOURCE_ROUTES = {
+  surrender_request: ["/pages/surrenders.html", "id"],
+  adoption_application: ["/pages/adoptionApplications.html", "id"],
+  intake_record: ["/pages/intakeList.html", "id"],
+  contact_message: ["/pages/contactMessages.html", "id"],
+  compatibility_result: ["/pages/compatibilityQuiz.html", "id"],
+  inventory_item: ["/pages/inventory.html", "id"],
+  animal_record: ["/pages/animalProfile.html", "id"],
+};
 
 function normalizeEmail(value = "") {
   return String(value || "").trim().toLowerCase();
+}
+
+function managementResourceLink(resourceType, relatedResourceId) {
+  const route = MANAGEMENT_RESOURCE_ROUTES[String(resourceType || "")];
+  if (!route) return "/pages/dashboard.html";
+  const [page, parameter] = route;
+  const id = String(relatedResourceId || "").trim();
+  return id ? `${page}?${parameter}=${encodeURIComponent(id)}` : page;
 }
 
 function normalizeSettings(settings = {}) {
@@ -63,6 +81,19 @@ async function createUserNotification({
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
   });
 
+  if (category === "management") {
+    await sendPushNotificationToUser({
+      userEmail: email,
+      title,
+      message,
+      link,
+      type,
+      referenceId,
+    }).catch((error) => {
+      console.warn("[pushNotification]", error.message);
+    });
+  }
+
   return docRef.id;
 }
 
@@ -110,6 +141,7 @@ async function createManagementNotification({
     type,
     title,
     message,
+    link: metadata.link || managementResourceLink(resourceType, relatedResourceId),
     referenceId: relatedResourceId,
     metadata: {
       ...metadata,

@@ -10372,7 +10372,6 @@ body.furbabies-page .pet-meta .pet-meta-item:nth-child(3)::before,
 body.furbabies-page .pet-meta .pet-meta-item:nth-child(5)::before {
   content: none !important;
 }
-
 /* Adoption completion reuses the compact account-feedback modal. */
 body .adoption-submission-success-popup .swal2-actions {
   justify-content: center !important;

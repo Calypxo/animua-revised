@@ -2191,6 +2191,7 @@
 .animal-profile-page .form-lbl { color: #524b46; font-family: "Poppins", sans-serif; font-size: .7rem; }
 .animal-profile-page .form-inp { min-height: 42px; border-color: #ddd0c5; border-radius: 9px; color: var(--profile-ink); background: #FFFFFF; font-family: "Poppins", sans-serif; font-size: .77rem; }
 .animal-profile-page .form-inp:focus { border-color: var(--profile-red); box-shadow: 0 0 0 3px rgba(120, 1, 22,.1); }
+.animal-profile-page .form-inp.invalid { border-color: var(--profile-red); background: #fff5f3; }
 .animal-profile-page .um-modal-footer { border-top-color: var(--profile-line); background: #FFF8EE; }
 .animal-profile-page .ap-dropdown { border-color: var(--profile-line); border-radius: 10px; }
 .animal-profile-page .ap-dropdown .dropdown-item { font-family: "Poppins", sans-serif; font-size: .76rem; }
@@ -2432,6 +2433,10 @@
   border-color: var(--profile-red);
   box-shadow: 0 0 0 3px rgba(120, 1, 22, .1);
 }
+.animal-profile-page .medical-inventory-search.invalid {
+  border-color: var(--profile-red);
+  background: #fff5f3;
+}
 .animal-profile-page .behavior-observation-empty > i {
   width: 38px;
   height: 38px;
@@ -2495,6 +2500,10 @@
 .animal-profile-page .behavioral-modal .um-modal-footer .btn-primary-clay { height: 38px; min-height: 38px; font-size: .69rem; }
 
 .animal-profile-page :is(button, a, input, select, textarea):focus-visible { outline: 3px solid rgba(245,173,25,.48); outline-offset: 2px; }
+.animal-profile-page .medical-inventory-search .form-inp:focus-visible {
+  outline: none;
+  outline-offset: 0;
+}
 
 @media (max-width: 1180px) {
   .animal-profile-page .profile-hero { grid-template-columns: 140px minmax(0,1fr) 250px; }

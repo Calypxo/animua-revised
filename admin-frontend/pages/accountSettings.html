@@ -70,6 +70,7 @@
           <nav class="settings-nav" aria-label="Account settings sections">
             <a href="#profileSettings"><i class="bi bi-person-badge"></i><span>Profile information</span><i class="bi bi-chevron-right"></i></a>
             <a href="#securitySettings"><i class="bi bi-key"></i><span>Password &amp; security</span><i class="bi bi-chevron-right"></i></a>
+            <a href="#browserAlerts"><i class="bi bi-bell"></i><span>Browser alerts</span><i class="bi bi-chevron-right"></i></a>
           </nav>
 
           <div class="account-support-note">
@@ -165,6 +166,28 @@
                 </button>
               </div>
             </form>
+          </section>
+
+          <section class="account-card notification-card" id="browserAlerts">
+            <div class="account-card-heading">
+              <div class="account-card-icon notification"><i class="bi bi-bell-fill"></i></div>
+              <div>
+                <h2>Browser alerts</h2>
+                <p>Receive management notifications for new applications, urgent surrender requests, unread contact messages, and low inventory even when this page is in the background.</p>
+              </div>
+              <span class="section-state" id="pushNotificationState"><i class="bi bi-hourglass-split"></i> Checking</span>
+            </div>
+            <div class="push-notification-setting">
+              <span class="push-notification-visual" id="pushNotificationVisual"><i class="bi bi-bell"></i></span>
+              <div class="push-notification-copy">
+                <strong id="pushNotificationTitle">Checking this browser</strong>
+                <span id="pushNotificationDescription">Please wait while ANIMUA checks notification support and permission.</span>
+                <small><i class="bi bi-shield-check"></i> Permission applies only to this browser and device.</small>
+              </div>
+              <button class="account-primary-button" id="pushNotificationButton" type="button" disabled>
+                <i class="bi bi-bell"></i> Enable alerts
+              </button>
+            </div>
           </section>
         </div>
         </div>

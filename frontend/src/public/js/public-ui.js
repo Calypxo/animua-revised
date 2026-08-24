@@ -2253,7 +2253,7 @@ function renderNotificationsLoading() {
 async function fetchNotifications({ markRead = false } = {}) {
   if (!hasUserSession()) throw new Error("Please log in to view notifications.");
 
-  const response = await fetch(`${API_BASE_URL}/notifications`, {
+  const response = await fetch(`${API_BASE_URL}/notifications?audience=public`, {
     credentials: "include"
   });
   const data = await response.json().catch(() => ({}));
@@ -2266,7 +2266,7 @@ async function fetchNotifications({ markRead = false } = {}) {
   renderNotificationsPopup(data.notifications || [], Number(data.unreadCount || 0));
 
   if (markRead && Number(data.unreadCount || 0) > 0) {
-    fetch(`${API_BASE_URL}/notifications/read`, {
+    fetch(`${API_BASE_URL}/notifications/read?audience=public`, {
       method: "PATCH",
       credentials: "include"
     }).then(() => {

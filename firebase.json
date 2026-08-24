@@ -61,7 +61,7 @@
           "headers": [
             {
               "key": "Content-Security-Policy",
-              "value": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdn.sheetjs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https://animua-backend.onrender.com https://storage.googleapis.com https://firebasestorage.googleapis.com; connect-src 'self' https://animua-backend.onrender.com https://cdn.jsdelivr.net; frame-src 'self'; worker-src 'self' blob:; manifest-src 'self'; media-src 'self' https://animua-backend.onrender.com"
+              "value": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdn.sheetjs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https://animua-backend.onrender.com https://storage.googleapis.com https://firebasestorage.googleapis.com; connect-src 'self' https://animua-backend.onrender.com https://firebaseinstallations.googleapis.com https://fcmregistrations.googleapis.com https://cdn.jsdelivr.net; frame-src 'self'; worker-src 'self' blob:; manifest-src 'self'; media-src 'self' https://animua-backend.onrender.com"
             },
             {
               "key": "X-Frame-Options",

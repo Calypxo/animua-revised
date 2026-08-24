@@ -806,6 +806,10 @@ body.management-consistent-ui.surrender-requests-page .sr-table-panel {
   background: linear-gradient(135deg, #FFF8EE, #FFFFFF 70%) !important;
 }
 
+.surrender-requests-page .surrender-records-toolbar .records-heading {
+  background: transparent !important;
+}
+
 .surrender-requests-page .surrender-heading-row {
   display: flex;
   align-items: center;

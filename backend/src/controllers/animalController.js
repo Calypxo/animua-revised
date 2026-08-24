@@ -8,6 +8,7 @@ const {
   getSignedReadUrl,
 } = require("../services/storageUrlService");
 const { validateImageFile } = require("../utils/imageUploadPolicy");
+const { notifyIfInventoryLevelWorsened } = require("../services/inventoryAlertService");
 const {
   BEHAVIOR_GROUPS,
   BEHAVIOR_DIMENSIONS,
@@ -52,7 +53,7 @@ async function getBehavioralQuestionConfiguration() {
 
 const MEDICAL_INVENTORY_CATEGORIES = new Set([
   "Antibiotic", "Antiparasitic", "Antifungal", "Anesthetic",
-  "Supplement", "Vaccine", "Surgical Supply", "Topical Medicine",
+  "Supplement", "Vaccine", "Consumable", "Surgical Supply", "Disinfectant", "Topical Medicine",
   "Hormonal Medicine", "Respiratory Medicine", "Pain Relief",
   "Sedative", "Diagnostic",
 ]);
@@ -672,6 +673,7 @@ exports.addMedicalRecord = async (req, res) => {
       : null;
     const medId = `MR-${Date.now()}`;
     let inventoryResult = null;
+    let inventoryAlert = null;
 
     await db.runTransaction(async (transaction) => {
       const animalDoc = await transaction.get(animalRef);
@@ -790,9 +792,14 @@ exports.addMedicalRecord = async (req, res) => {
           inventoryData.itemDescription ||
           inventoryData.name ||
           resolvedInventoryId;
+        const inventoryUpdates = calculateInventoryUpdates(
+          inventoryData,
+          currentStock,
+          newStock
+        );
         transaction.update(
           inventoryRef,
-          calculateInventoryUpdates(inventoryData, currentStock, newStock)
+          inventoryUpdates
         );
         transaction.set(
           inventoryRef.collection("transactions").doc(),
@@ -835,8 +842,21 @@ exports.addMedicalRecord = async (req, res) => {
           quantityUsed: normalizedQuantity,
           newStock,
         };
+        inventoryAlert = {
+          itemId: resolvedInventoryId,
+          item: inventoryData,
+          beforeStock: currentStock,
+          afterStock: newStock,
+          afterItem: inventoryUpdates,
+        };
       }
     });
+
+    if (inventoryAlert) {
+      await notifyIfInventoryLevelWorsened(inventoryAlert).catch((error) => {
+        console.warn("[medicalInventoryNotification]", error.message);
+      });
+    }
 
     res.status(201).json({
       message: "Medical record added.",
@@ -1125,6 +1145,7 @@ exports.updateMedicalRecord = async (req, res) => {
       ...new Set([oldInventoryId, newInventoryId].filter(Boolean)),
     ];
     let inventoryAdjustments = [];
+    let inventoryAlerts = [];
 
     await db.runTransaction(async (transaction) => {
       const animalDoc = await transaction.get(animalRef);
@@ -1308,13 +1329,14 @@ exports.updateMedicalRecord = async (req, res) => {
         const quantityChanged = Math.abs(difference);
         const inventoryName =
           state.data.itemDescription || state.data.name || inventoryId;
+        const inventoryUpdates = calculateInventoryUpdates(
+          state.data,
+          state.currentStock,
+          state.newStock
+        );
         transaction.update(
           state.ref,
-          calculateInventoryUpdates(
-            state.data,
-            state.currentStock,
-            state.newStock
-          )
+          inventoryUpdates
         );
         transaction.set(
           state.ref.collection("transactions").doc(),
@@ -1364,9 +1386,22 @@ exports.updateMedicalRecord = async (req, res) => {
           quantity: quantityChanged,
           newStock: state.newStock,
         });
+        if (!isReturn) {
+          inventoryAlerts.push({
+            itemId: inventoryId,
+            item: state.data,
+            beforeStock: state.currentStock,
+            afterStock: state.newStock,
+            afterItem: inventoryUpdates,
+          });
+        }
       }
       inventoryAdjustments = adjustments;
     });
+
+    await Promise.allSettled(
+      inventoryAlerts.map((alert) => notifyIfInventoryLevelWorsened(alert))
+    );
 
     res.status(200).json({
       message: "Medical record updated.",

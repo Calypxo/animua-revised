@@ -23098,7 +23098,6 @@ body.home-page #register-section .auth-submit-btn,
     gap: 6px !important;
   }
 }
-
 /* Password completion reuses the compact login-feedback modal component. */
 body .password-update-success-popup .swal2-actions {
   justify-content: center !important;

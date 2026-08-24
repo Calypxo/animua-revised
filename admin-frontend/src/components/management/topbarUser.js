@@ -3,6 +3,9 @@ import Swal from "sweetalert2";
 import { endUserSession, getUserName, getUserRole } from "../../utils/storage.js";
 import { apiFetch } from "../../utils/api.js";
 import { getManagementNotificationDestination } from "./notificationNavigation.js";
+import { syncManagementPushNotifications } from "../../services/pushNotifications.js";
+
+let pushSyncStarted = false;
 
 const managementSwalClasses = {
   popup: "animua-management-swal",
@@ -101,7 +104,7 @@ async function loadAttentionCenter(panel, button, role, options = {}) {
   if (showLoading) panel.classList.add("is-refreshing");
   refresh?.setAttribute("aria-busy", "true");
   try {
-    const data = await apiFetch("/notifications");
+    const data = await apiFetch("/notifications?audience=management");
     renderAttentionCenter(panel, button, data);
   } catch (error) {
     const summary = panel.querySelector("#attentionSummary");
@@ -172,7 +175,7 @@ function bindAttentionCenter(button, role) {
     if (!panel.querySelector("[data-notification-id]") && !remaining) panel.querySelector("#attentionList").innerHTML = `<div class="attention-empty"><span><i class="bi bi-check2-circle"></i></span><strong>You're all caught up</strong><small>New management updates will appear here.</small></div>`;
     try {
       await Promise.race([
-        apiFetch(`/notifications/${encodeURIComponent(notificationId)}/read`, { method: "PATCH", keepalive: true }),
+        apiFetch(`/notifications/${encodeURIComponent(notificationId)}/read?audience=management`, { method: "PATCH", keepalive: true }),
         new Promise((resolve) => setTimeout(resolve, 900)),
       ]);
     } catch (error) {
@@ -196,12 +199,16 @@ function bindAttentionCenter(button, role) {
     if (markButton.disabled) return;
     markButton.disabled = true;
     try {
-      await apiFetch("/notifications/read", { method: "PATCH" });
+      await apiFetch("/notifications/read?audience=management", { method: "PATCH" });
       await loadAttentionCenter(panel, button, role);
     } catch (error) {
       markButton.disabled = false;
       console.warn("Unable to mark management notifications as read:", error.message);
     }
+  });
+
+  window.addEventListener("animua:push-notification", () => {
+    void loadAttentionCenter(panel, button, role, { forceRefresh: true });
   });
 
   void loadAttentionCenter(panel, button, role, {
@@ -352,5 +359,12 @@ export function renderTopbarUser() {
     }
     const accountMenu = ensureAccountMenu(chip, name, role, initials);
     bindAccountMenu(chip, accountMenu);
+  }
+
+  if (!pushSyncStarted) {
+    pushSyncStarted = true;
+    void syncManagementPushNotifications().catch((error) => {
+      console.warn("Unable to refresh browser notifications:", error.message);
+    });
   }
 }

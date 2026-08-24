@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   clearUserSession,
+  ensureUserSession,
   getUserSession,
   isAuthenticationFailure,
   setUserSession,
@@ -62,5 +63,21 @@ describe("UT-035 — Public Client Session Handling", () => {
       profilePhotoDataUrl: "",
     });
     expect(getUserSession()).toEqual(session);
+  });
+
+  it("does not restore a management account into the public portal", async () => {
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ account: { email: "admin@example.test", fullName: "Admin", role: "Admin" } }),
+    });
+
+    try {
+      await expect(ensureUserSession({ force: true })).resolves.toBeNull();
+      expect(getUserSession()).toBeNull();
+    } finally {
+      globalThis.fetch = originalFetch;
+      clearUserSession();
+    }
   });
 });

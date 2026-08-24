@@ -330,7 +330,9 @@ const MEDICAL_CATEGORIES = [
   "Anesthetic",
   "Supplement",
   "Vaccine",
+  "Consumable",
   "Surgical Supply",
+  "Disinfectant",
   "Topical Medicine",
   "Hormonal Medicine",
   "Respiratory Medicine",
@@ -363,6 +365,127 @@ function selectedMedicalInventoryItem() {
   return medicalInventoryItems.find((item) => item.docId === id || item.itemId === id) || null;
 }
 
+const MEDICAL_ERROR_IDS = {
+  fMedType: "errMedType",
+  fMedDate: "errMedDate",
+  fMedWeight: "errMedWeight",
+  fMedInventorySearch: "errMedInventoryItem",
+  fMedQuantityUsed: "errMedQuantityUsed",
+};
+
+function clearMedicalFieldError(fieldId) {
+  const field = document.getElementById(fieldId);
+  const error = document.getElementById(MEDICAL_ERROR_IDS[fieldId]);
+  field?.classList.remove("invalid");
+  field?.removeAttribute("aria-invalid");
+  if (fieldId === "fMedInventorySearch") {
+    document.querySelector(".medical-inventory-search")?.classList.remove("invalid");
+  }
+  if (error) error.textContent = "";
+}
+
+function setMedicalFieldError(fieldId, message) {
+  const field = document.getElementById(fieldId);
+  const error = document.getElementById(MEDICAL_ERROR_IDS[fieldId]);
+  field?.classList.add("invalid");
+  field?.setAttribute("aria-invalid", "true");
+  if (fieldId === "fMedInventorySearch") {
+    document.querySelector(".medical-inventory-search")?.classList.add("invalid");
+  }
+  if (error) error.textContent = message;
+}
+
+function clearMedicalFormErrors() {
+  Object.keys(MEDICAL_ERROR_IDS).forEach(clearMedicalFieldError);
+}
+
+function validateMedicalRecordForm() {
+  clearMedicalFormErrors();
+
+  const typeInput = document.getElementById("fMedType");
+  const dateInput = document.getElementById("fMedDate");
+  const weightInput = document.getElementById("fMedWeight");
+  const inventorySearch = document.getElementById("fMedInventorySearch");
+  const inventoryIdInput = document.getElementById("fMedInventoryItem");
+  const quantityInput = document.getElementById("fMedQuantityUsed");
+  const type = typeInput?.value || "";
+  const date = dateInput?.value || "";
+  const weightRaw = weightInput?.value.trim() || "";
+  const inventorySearchValue = inventorySearch?.value.trim() || "";
+  const inventoryItemId = inventoryIdInput?.value || "";
+  const quantityRaw = quantityInput?.value.trim() || "";
+  const weight = weightRaw === "" ? null : Number(weightRaw);
+  const quantityUsed = quantityRaw === "" ? 0 : Number(quantityRaw);
+  const errors = [];
+  const addError = (fieldId, message) => {
+    setMedicalFieldError(fieldId, message);
+    errors.push(fieldId);
+  };
+
+  const validTypes = new Set(
+    [...(typeInput?.options || [])].map((option) => option.value).filter(Boolean)
+  );
+  if (!type) addError("fMedType", "Record type is required.");
+  else if (!validTypes.has(type)) addError("fMedType", "Select a valid record type.");
+
+  if (!date) addError("fMedDate", "Date is required.");
+  else if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(Date.parse(`${date}T00:00:00`))) {
+    addError("fMedDate", "Enter a valid date.");
+  }
+
+  if (weightRaw !== "" && (!Number.isFinite(weight) || weight < 0)) {
+    addError("fMedWeight", "Weight must be zero or greater.");
+  }
+
+  if (quantityRaw !== "" && (!Number.isInteger(quantityUsed) || quantityUsed < 0)) {
+    addError("fMedQuantityUsed", "Quantity must be a non-negative whole number.");
+  }
+
+  if (inventorySearchValue && !inventoryItemId) {
+    addError("fMedInventorySearch", "Select an item from the search results.");
+  } else if (quantityUsed > 0 && !inventoryItemId) {
+    addError("fMedInventorySearch", "Select the medicine or medical supply used.");
+  }
+
+  if (inventoryItemId && Number.isInteger(quantityUsed) && quantityUsed < 1) {
+    addError("fMedQuantityUsed", "Enter a quantity of at least 1.");
+  }
+
+  const selectedInventory = selectedMedicalInventoryItem();
+  if (
+    selectedInventory &&
+    Number.isInteger(quantityUsed) &&
+    quantityUsed > selectedInventory.currentStock
+  ) {
+    addError(
+      "fMedQuantityUsed",
+      `Only ${selectedInventory.currentStock} ${selectedInventory.unit || "pcs"} available.`
+    );
+  }
+
+  if (errors.some((fieldId) => fieldId === "fMedInventorySearch" || fieldId === "fMedQuantityUsed")) {
+    const inventoryDetails = document.querySelector(".medical-optional-section");
+    if (inventoryDetails) inventoryDetails.open = true;
+  }
+
+  if (errors.length) {
+    document.getElementById(errors[0])?.focus();
+    return null;
+  }
+
+  return { type, date, weight, inventoryItemId, quantityUsed };
+}
+
+function bindMedicalFormValidation() {
+  Object.keys(MEDICAL_ERROR_IDS).forEach((fieldId) => {
+    const field = document.getElementById(fieldId);
+    if (!field || field.dataset.validationBound === "true") return;
+    field.dataset.validationBound = "true";
+    const eventName = field.tagName === "SELECT" ? "change" : "input";
+    field.addEventListener(eventName, () => clearMedicalFieldError(fieldId));
+  });
+}
+
 function syncMedicalInventoryPicker() {
   const hidden = document.getElementById("fMedInventoryItem");
   const search = document.getElementById("fMedInventorySearch");
@@ -383,6 +506,7 @@ function selectMedicalInventoryItem(id = "") {
   const hidden = document.getElementById("fMedInventoryItem");
   if (hidden) hidden.value = id;
   syncMedicalInventoryPicker();
+  clearMedicalFieldError("fMedInventorySearch");
   closeMedicalInventoryOptions();
 }
 
@@ -580,17 +704,14 @@ function renderHero() {
     `;
 
     btn.onclick = sendToQuarantine;
-  } else if (
-    animal.status === "Quarantine" &&
-    can("mark_ready")
-  ) {
+  } else if (animal.status === "Quarantine") {
     const clearanceStatus = getLatestClearanceStatus();
 
     const requirementsComplete =
       clearanceStatus === "Cleared" &&
       Boolean(animal.behavioralAssessment);
 
-    if (requirementsComplete) {
+    if (requirementsComplete && can("mark_ready")) {
       btn.hidden = false;
 
       btn.innerHTML = `
@@ -599,6 +720,35 @@ function renderHero() {
       `;
 
       btn.onclick = markReadyForAdoption;
+    } else {
+      const targetTab = clearanceStatus !== "Cleared"
+        ? "medical"
+        : !animal.behavioralAssessment
+          ? "behavioral"
+          : "adoption";
+      const actionLabel = targetTab === "medical"
+        ? "Review Quarantine"
+        : targetTab === "behavioral"
+          ? "Review Assessment"
+          : "View Readiness";
+      const actionIcon = targetTab === "medical"
+        ? "bi-shield-check"
+        : targetTab === "behavioral"
+          ? "bi-sliders"
+          : "bi-clipboard2-check";
+
+      btn.hidden = false;
+      btn.innerHTML = `
+        <i class="bi ${actionIcon}"></i>
+        ${actionLabel}
+      `;
+      btn.onclick = () => {
+        activateProfileTab(targetTab);
+        document.getElementById(`tab-${targetTab}`)?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      };
     }
   } else if (
     animal.status === "Ready" &&
@@ -1360,6 +1510,7 @@ if (!can(requiredPermission)) {
     "Record the visit first; add care details and inventory only when applicable.";
 
   document.getElementById("medicalForm").reset();
+  clearMedicalFormErrors();
   document.getElementById("fMedVet").value = signedInUserName();
   const inventoryDetails = document.querySelector(".medical-optional-section");
   if (inventoryDetails) inventoryDetails.open = false;
@@ -1371,20 +1522,6 @@ const quantityInput =
 
 if (quantityInput) {
   quantityInput.value = "";
-}
-
-const itemErr =
-  document.getElementById("errMedInventoryItem");
-
-if (itemErr) {
-  itemErr.textContent = "";
-}
-
-const qtyErr =
-  document.getElementById("errMedQuantityUsed");
-
-if (qtyErr) {
-  qtyErr.textContent = "";
 }
 
   document.getElementById("fMedDate").value =
@@ -1475,58 +1612,12 @@ async function saveMedicalRecord() {
     return;
   }
 
-  const type =
-    document.getElementById("fMedType").value;
-
-  const date =
-    document.getElementById("fMedDate").value;
-
-  if (!type) {
-    showToast(
-      "error",
-      "Please select a record type."
-    );
+  const formValues = validateMedicalRecordForm();
+  if (!formValues) {
+    showToast("error", "Please correct the highlighted fields.");
     return;
   }
-
-  if (!date) {
-    showToast(
-      "error",
-      "Please select a date."
-    );
-    return;
-  }
-
-  const inventoryItemId =
-    document.getElementById(
-      "fMedInventoryItem"
-    )?.value || "";
-
-  const quantityUsed =
-    parseInt(
-      document.getElementById(
-        "fMedQuantityUsed"
-      )?.value,
-      10
-    ) || 0;
-
-  if (quantityUsed > 0 && !inventoryItemId) {
-    showToast(
-      "error",
-      "Please select the medicine or medical supply used."
-    );
-
-    return;
-  }
-
-  if (inventoryItemId && quantityUsed < 1) {
-    showToast(
-      "error",
-      "Please enter the quantity used."
-    );
-
-    return;
-  }
+  const { type, date, weight, inventoryItemId, quantityUsed } = formValues;
 
   const payload = {
   type,
@@ -1558,10 +1649,7 @@ async function saveMedicalRecord() {
 
   clearance: null,
 
-  weight:
-    parseFloat(
-      document.getElementById("fMedWeight").value
-    ) || null,
+  weight,
 
   inventoryItemId,
   quantityUsed,
@@ -2067,6 +2155,7 @@ async function init() {
     await loadBehavioralQuestionConfig();
     await loadMedicalInventoryItems();
     bindMedicalInventoryPicker();
+    bindMedicalFormValidation();
     bindBehaviorObservationEditor();
 
     renderAllTabs();

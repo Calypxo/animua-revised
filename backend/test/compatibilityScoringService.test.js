@@ -102,6 +102,23 @@ test("Python transport failure uses the equivalent local ranking", async () => {
   assert.equal(warnings.length, 1);
 });
 
+test("a malformed successful Python response uses the equivalent local ranking", async () => {
+  const input = preferences(2);
+  const animals = [animal("far", 5), animal("exact", 2), animal("close", 3)];
+  const expected = scoreMatchesLocally(input, animals, 3);
+  const warnings = [];
+  const actual = await scoreMatches(input, animals, 3, {
+    fetchImpl: async () => ({
+      ok: true,
+      json: async () => ({ status: "online" }),
+    }),
+    logger: { warn: (message) => warnings.push(message) },
+  });
+
+  assert.deepEqual(actual, expected);
+  assert.match(warnings[0], /invalid response payload/);
+});
+
 test("eligibility filters run independently before compatibility ranking", () => {
   const exactButExcluded = animal("excluded", 3, {
     species: "Cat",

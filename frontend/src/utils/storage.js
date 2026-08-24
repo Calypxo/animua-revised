@@ -126,11 +126,17 @@ export async function ensureUserSession({ force = false } = {}) {
       }
 
       const data = await response.json();
-      return setUserSession(data.account || data.user || {});
+      const account = data.account || data.user || {};
+      if (String(account.role || "").trim().toLowerCase() !== "public") {
+        clearUserSession();
+        return null;
+      }
+      return setUserSession(account);
     })
     .catch((error) => {
       const cachedUser = getCachedUserSession();
-      if ((error instanceof TypeError || !navigator.onLine) && cachedUser) {
+      const isPublicAccount = String(cachedUser?.role || "").trim().toLowerCase() === "public";
+      if ((error instanceof TypeError || !navigator.onLine) && cachedUser && isPublicAccount) {
         return setUserSession(cachedUser);
       }
       throw error;

@@ -327,7 +327,7 @@
         <div class="form-grid">
           <div class="form-group">
             <label class="form-lbl" for="fMedType">Record Type <span class="req">*</span></label>
-            <select class="form-inp" id="fMedType">
+            <select class="form-inp" id="fMedType" required aria-describedby="errMedType">
               <option value="">Select type…</option>
               <option value="Checkup">General Checkup</option>
               <option value="Vaccination">Vaccination</option>
@@ -339,12 +339,13 @@
           </div>
           <div class="form-group">
             <label class="form-lbl" for="fMedDate">Date <span class="req">*</span></label>
-            <input type="date" class="form-inp" id="fMedDate" />
+            <input type="date" class="form-inp" id="fMedDate" required aria-describedby="errMedDate" />
             <span class="form-err" id="errMedDate"></span>
           </div>
           <div class="form-group">
             <label class="form-lbl" for="fMedWeight">Weight at Visit (kg)</label>
-            <input type="number" class="form-inp" id="fMedWeight" min="0" step="0.1" placeholder="Optional" />
+            <input type="number" class="form-inp" id="fMedWeight" min="0" step="0.1" placeholder="Optional" aria-describedby="errMedWeight" />
+            <span class="form-err" id="errMedWeight"></span>
           </div>
           <div class="form-group form-full">
             <label class="form-lbl" for="fMedVet">Recorded by</label>
@@ -369,7 +370,7 @@
           <div class="medical-inventory-picker" id="medicalInventoryPicker">
             <div class="medical-inventory-search">
               <i class="bi bi-search" aria-hidden="true"></i>
-              <input class="form-inp" type="search" id="fMedInventorySearch" role="combobox" aria-autocomplete="list" aria-controls="medicalInventoryOptions" aria-expanded="false" autocomplete="off" placeholder="Search medicine or supply…" />
+              <input class="form-inp" type="search" id="fMedInventorySearch" role="combobox" aria-autocomplete="list" aria-controls="medicalInventoryOptions" aria-expanded="false" aria-describedby="medicalInventorySelectionHint errMedInventoryItem" autocomplete="off" placeholder="Search medicine or supply…" />
               <button id="clearMedicalInventory" type="button" aria-label="Clear selected inventory item" title="Clear selection"><i class="bi bi-x-lg"></i></button>
             </div>
             <input type="hidden" id="fMedInventoryItem" />
@@ -388,6 +389,7 @@
             min="0"
             step="1"
             placeholder="0"
+            aria-describedby="errMedQuantityUsed"
           />
           <span class="form-err" id="errMedQuantityUsed"></span>
         </div>

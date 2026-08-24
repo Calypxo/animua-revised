@@ -243,6 +243,7 @@
 }
 
 .account-card-icon.security { color: #416884; background: #edf4f8; }
+.account-card-icon.notification { color: #805300; background: #fff1cf; }
 
 .section-state {
   display: inline-flex;
@@ -257,6 +258,53 @@
 }
 
 .section-state.secure { color: #416884; background: #edf4f8; }
+.section-state.is-off { color: #786d68; background: #f1ece8; }
+.section-state.is-warning { color: #805300; background: #fff1cf; }
+
+.notification-card {
+  background:
+    radial-gradient(circle at 100% 0, rgba(247, 181, 56, .1), transparent 220px),
+    #FFFFFF;
+}
+
+.push-notification-setting {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 17px;
+  background: #FFF8EE;
+}
+
+.push-notification-visual {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  color: var(--clay);
+  background: var(--clay-soft);
+  font-size: 1.08rem;
+}
+.push-notification-visual.is-enabled { color: var(--green); background: var(--green-soft); }
+.push-notification-visual.is-warning { color: #805300; background: #fff1cf; }
+.push-notification-visual.is-off { color: var(--stone); background: #f1ece8; }
+
+.push-notification-copy { min-width: 0; display: grid; gap: 4px; }
+.push-notification-copy strong { color: var(--ink); font-size: .82rem; }
+.push-notification-copy span { color: var(--stone); font-size: .72rem; line-height: 1.5; }
+.push-notification-copy small { display: flex; align-items: center; gap: 6px; color: #8a7d76; font-size: .66rem; }
+.push-notification-copy small i { color: var(--green); }
+
+.account-primary-button.account-secondary-button {
+  border: 1px solid var(--border-md);
+  color: var(--clay);
+  background: #FFFFFF;
+  box-shadow: none;
+}
+.account-primary-button.account-secondary-button:hover { color: #FFFFFF; background: var(--clay); }
 
 .profile-form-grid,
 .security-form-grid {
@@ -482,6 +530,8 @@
   .field-full { grid-column: auto; }
   .confirm-field { max-width: none; }
   .password-rules { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .push-notification-setting { grid-template-columns: 48px minmax(0, 1fr); }
+  .push-notification-setting .account-primary-button { grid-column: 1 / -1; width: 100%; }
 }
 
 @media (max-width: 520px) {

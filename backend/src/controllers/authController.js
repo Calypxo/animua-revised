@@ -1049,8 +1049,14 @@ exports.login = async (req, res) => {
       userData.password = passwordHash;
     }
 
-    const managementRoles = ["Admin", "Staff", "Veterinarian"];
-const isManagementUser = managementRoles.includes(userData.role);
+    const requestedPortal = String(req.body.portal || "").trim().toLowerCase();
+    const isManagementUser = isEligibleManagementUserData(userData);
+    if (requestedPortal === "public" && isManagementUser) {
+      return res.status(403).json({
+        code: "MANAGEMENT_PORTAL_REQUIRED",
+        message: "Management accounts must sign in through the management portal."
+      });
+    }
 
 if (!userData.emailVerified && !userData.phoneVerified) {
   if (isManagementUser) {

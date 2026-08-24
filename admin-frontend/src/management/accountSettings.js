@@ -7,6 +7,11 @@ import { renderPageHeader } from "../components/management/pageHeader.js";
 import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.js";
 import { apiFetch } from "../utils/api.js";
 import { endUserSession, setUserSession } from "../utils/storage.js";
+import {
+  disableManagementPushNotifications,
+  enableManagementPushNotifications,
+  getManagementPushState,
+} from "../services/pushNotifications.js";
 
 let account = null;
 const rules = {
@@ -159,6 +164,95 @@ function bindPasswordToggles() {
   });
 }
 
+function renderPushNotificationState(state) {
+  const badge = document.getElementById("pushNotificationState");
+  const visual = document.getElementById("pushNotificationVisual");
+  const title = document.getElementById("pushNotificationTitle");
+  const description = document.getElementById("pushNotificationDescription");
+  const button = document.getElementById("pushNotificationButton");
+  if (!badge || !visual || !title || !description || !button) return;
+
+  badge.className = "section-state";
+  visual.className = "push-notification-visual";
+  button.classList.remove("account-secondary-button");
+  button.disabled = false;
+  button.dataset.enabled = "false";
+
+  if (!state.supported) {
+    badge.innerHTML = '<i class="bi bi-x-circle"></i> Unsupported';
+    badge.classList.add("is-off");
+    visual.innerHTML = '<i class="bi bi-browser-edge"></i>';
+    title.textContent = "Browser alerts are unavailable";
+    description.textContent = "Use a current version of Chrome, Edge, Firefox, or another browser that supports web push.";
+    button.disabled = true;
+    return;
+  }
+
+  if (!state.configured) {
+    badge.innerHTML = '<i class="bi bi-gear"></i> Setup needed';
+    badge.classList.add("is-warning");
+    visual.classList.add("is-warning");
+    visual.innerHTML = '<i class="bi bi-key"></i>';
+    title.textContent = "Firebase Web Push key required";
+    description.textContent = "Add VITE_FIREBASE_VAPID_KEY to the management deployment configuration, then rebuild the admin site.";
+    button.disabled = true;
+    return;
+  }
+
+  if (state.permission === "denied") {
+    badge.innerHTML = '<i class="bi bi-bell-slash"></i> Blocked';
+    badge.classList.add("is-off");
+    visual.classList.add("is-off");
+    visual.innerHTML = '<i class="bi bi-bell-slash"></i>';
+    title.textContent = "Notifications are blocked";
+    description.textContent = "Open this site's browser permissions, allow Notifications, and reload the page.";
+    button.disabled = true;
+    return;
+  }
+
+  if (state.enabled) {
+    badge.innerHTML = '<i class="bi bi-check-circle-fill"></i> Enabled';
+    visual.classList.add("is-enabled");
+    visual.innerHTML = '<i class="bi bi-bell-fill"></i>';
+    title.textContent = "Management alerts are enabled";
+    description.textContent = "This device can receive ANIMUA alerts while the management site is in the background.";
+    button.dataset.enabled = "true";
+    button.classList.add("account-secondary-button");
+    button.innerHTML = '<i class="bi bi-bell-slash"></i> Disable alerts';
+    return;
+  }
+
+  badge.innerHTML = '<i class="bi bi-circle"></i> Disabled';
+  badge.classList.add("is-off");
+  visual.innerHTML = '<i class="bi bi-bell"></i>';
+  title.textContent = "Enable management browser alerts";
+  description.textContent = "Your browser will ask for permission before ANIMUA registers this device.";
+  button.classList.remove("account-secondary-button");
+  button.innerHTML = '<i class="bi bi-bell"></i> Enable alerts';
+}
+
+async function refreshPushNotificationState() {
+  renderPushNotificationState(await getManagementPushState());
+}
+
+async function togglePushNotifications() {
+  const button = document.getElementById("pushNotificationButton");
+  const disabling = button.dataset.enabled === "true";
+  try {
+    setBusy(button, true, disabling ? "Disabling" : "Enabling");
+    if (disabling) await disableManagementPushNotifications();
+    else await enableManagementPushNotifications();
+    document.getElementById("accountStatus").textContent = disabling
+      ? "Browser alerts disabled for this device."
+      : "Browser alerts enabled for this device.";
+  } catch (error) {
+    document.getElementById("accountStatus").textContent = error.message || "Unable to update browser alerts.";
+  } finally {
+    setBusy(button, false);
+    await refreshPushNotificationState();
+  }
+}
+
 async function init() {
   try {
     await protectManagementPage();
@@ -172,6 +266,8 @@ async function init() {
     document.getElementById("passwordForm").addEventListener("submit", changePassword);
     document.getElementById("newPassword").addEventListener("input", renderStrength);
     bindPasswordToggles();
+    document.getElementById("pushNotificationButton").addEventListener("click", togglePushNotifications);
+    await refreshPushNotificationState();
   } catch (error) {
     console.error("[Account Settings]", error);
     document.getElementById("accountStatus").textContent = error.message || "Unable to load account settings.";

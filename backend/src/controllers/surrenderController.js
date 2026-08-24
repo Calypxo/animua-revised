@@ -343,12 +343,15 @@ async function createSurrenderRequest(req, res) {
       .collection(COLLECTION_NAME)
       .doc(requestId)
       .set(surrenderRequest);
+    const urgentRequest = ["Critical", "High"].includes(nlpResult.urgencyLabel);
     await createManagementNotification({
-      type: "surrender_request_created",
+      type: urgentRequest ? "urgent_surrender_request_created" : "surrender_request_created",
       resourceType: "surrender_request",
       relatedResourceId: requestId,
-      title: "New surrender request received",
-      message: `${surrenderRequest.owner.name} submitted a surrender request for ${surrenderRequest.pet.name || "an animal"}.`,
+      title: urgentRequest ? "Urgent surrender request received" : "New surrender request received",
+      message: urgentRequest
+        ? `${surrenderRequest.owner.name} submitted a ${nlpResult.urgencyLabel.toLowerCase()}-urgency request for ${surrenderRequest.pet.name || "an animal"}.`
+        : `${surrenderRequest.owner.name} submitted a surrender request for ${surrenderRequest.pet.name || "an animal"}.`,
     }).catch((error) => console.warn("[createSurrenderRequest notification]", error.message));
 
     return res.status(201).json({

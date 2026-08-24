@@ -118,3 +118,50 @@ self.addEventListener("fetch", (event) => {
       .catch(() => caches.match(request))
   );
 });
+
+self.addEventListener("push", (event) => {
+  let payload = {};
+  try {
+    payload = event.data?.json() || {};
+  } catch {
+    payload = { notification: { body: event.data?.text() || "" } };
+  }
+
+  const notification = payload.notification || {};
+  const data = payload.data || {};
+  const title = notification.title || data.title || "ANIMUA management update";
+  const body = notification.body || data.body || "Open Management to review this update.";
+  const target = data.link || payload.fcmOptions?.link || "/pages/dashboard.html";
+
+  event.waitUntil(self.registration.showNotification(title, {
+    body,
+    icon: notification.icon || "/pwa-192.png",
+    badge: notification.badge || "/favicon.png",
+    tag: notification.tag || `${data.type || "animua"}-${data.referenceId || "management"}`,
+    renotify: notification.renotify !== false,
+    data: { url: target },
+  }));
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  let target = new URL("/pages/dashboard.html", self.location.origin);
+  try {
+    const requested = new URL(event.notification.data?.url || target.href, self.location.origin);
+    if (requested.origin === self.location.origin) target = requested;
+  } catch {
+    // Keep the safe dashboard destination.
+  }
+
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true })
+      .then(async (windows) => {
+        const existing = windows.find((client) => new URL(client.url).origin === self.location.origin);
+        if (existing) {
+          await existing.navigate(target.href);
+          return existing.focus();
+        }
+        return self.clients.openWindow(target.href);
+      })
+  );
+});

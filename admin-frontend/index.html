@@ -26,6 +26,7 @@
           <img class="login-brand-logo" src="/images/animua_logo1.svg" alt="" aria-hidden="true">
           <span>nimua</span>
         </div>
+
         <div class="visual-icons" aria-hidden="true"><i class="fa-solid fa-dog"></i><i class="fa-solid fa-heart"></i><i class="fa-solid fa-cat"></i></div>
         <div class="visual-content">
           <h1>Welcome back.</h1>
@@ -57,14 +58,68 @@
               </div>
               <div class="field-error" id="err-password" role="alert"></div>
             </div>
+
+            <div class="login-help-row">
+              <button type="button" class="forgot-password-link" id="forgotPasswordBtn">Forgot password?</button>
+            </div>
             
-            <button type="submit" class="btn-submit" id="loginBtn"><span class="spinner" id="loginSpinner" aria-hidden="true"></span><span id="loginBtnText">Log in</span></button>
+            <button type="submit" class="btn-submit" id="loginBtn"><span class="spinner" id="loginSpinner" aria-hidden="true"></span><span id="loginBtnText">Sign In</span></button>
           </form>
           <p class="access-note"><i class="fa-solid fa-lock" aria-hidden="true"></i>Authorized Animua personnel only</p>
         </div>
       </div>
     </section>
   </main>
+
+  <div class="recovery-backdrop" id="managementRecovery" hidden>
+    <section class="recovery-dialog" role="dialog" aria-modal="true" aria-labelledby="recoveryTitle" aria-describedby="recoveryDescription">
+      <button type="button" class="recovery-close" id="recoveryClose" aria-label="Close account recovery"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+      <div class="recovery-brand"><span><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></span><div><strong>ANIMUA</strong><small>Management account recovery</small></div></div>
+
+      <div class="recovery-step" id="recoveryEmailStep">
+        <span class="recovery-kicker">Step 1 of 3</span>
+        <h2 id="recoveryTitle">Forgot Password</h2>
+        <p id="recoveryDescription">Enter your registered management email. If the account is eligible, we’ll send a six-digit verification code.</p>
+        <form id="recoveryEmailForm" novalidate>
+          <label class="recovery-field" for="recoveryEmail"><span>Management email</span><div><input type="email" id="recoveryEmail" autocomplete="email" placeholder="name@animua.com" required><i class="fa-regular fa-envelope" aria-hidden="true"></i></div><small class="recovery-error" id="recoveryEmailError" role="alert"></small></label>
+          <button type="submit" class="recovery-primary" id="sendRecoveryOtp"><i class="fa-regular fa-paper-plane" aria-hidden="true"></i><span>Send verification code</span></button>
+        </form>
+        <button type="button" class="recovery-secondary" data-recovery-close>Back to Management Login</button>
+      </div>
+
+      <div class="recovery-step" id="recoveryOtpStep" hidden>
+        <span class="recovery-kicker">Step 2 of 3</span>
+        <h2 id="recoveryOtpTitle">Verify Code</h2>
+        <p id="recoveryOtpDescription">Enter the six-digit code sent to <strong id="recoveryEmailDisplay"></strong>. The code expires after 10 minutes.</p>
+        <form id="recoveryOtpForm" novalidate>
+          <label class="recovery-field recovery-code-field" for="recoveryOtp"><span>Verification code</span><input type="text" id="recoveryOtp" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" placeholder="000000" required><small class="recovery-error" id="recoveryOtpError" role="alert"></small></label>
+          <button type="submit" class="recovery-primary" id="verifyRecoveryOtp"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i><span>Verify code</span></button>
+        </form>
+        <div class="recovery-resend"><span>Didn’t receive the code?</span><button type="button" id="resendRecoveryOtp" disabled>Resend in 60s</button></div>
+        <button type="button" class="recovery-secondary" id="changeRecoveryEmail">Use another email</button>
+      </div>
+
+      <div class="recovery-step" id="recoveryPasswordStep" hidden>
+        <span class="recovery-kicker">Step 3 of 3</span>
+        <h2 id="recoveryPasswordTitle">Create New Password</h2>
+        <p id="recoveryPasswordDescription">Use a new password for your management account. You’ll sign in normally after the reset.</p>
+        <form id="recoveryPasswordForm" novalidate>
+          <input class="recovery-username-field" type="email" id="recoveryUsername" name="username" autocomplete="username" tabindex="-1" aria-hidden="true">
+          <label class="recovery-field" for="recoveryNewPassword"><span>New password</span><div><input type="password" id="recoveryNewPassword" autocomplete="new-password" maxlength="128" required><button type="button" class="recovery-password-toggle" data-password-target="recoveryNewPassword" aria-label="Show new password"><i class="fa-regular fa-eye" aria-hidden="true"></i></button></div><small>At least 8 characters with uppercase, lowercase, number, and special character.</small></label>
+          <label class="recovery-field" for="recoveryConfirmPassword"><span>Confirm new password</span><div><input type="password" id="recoveryConfirmPassword" autocomplete="new-password" maxlength="128" required><button type="button" class="recovery-password-toggle" data-password-target="recoveryConfirmPassword" aria-label="Show confirmed password"><i class="fa-regular fa-eye" aria-hidden="true"></i></button></div><small class="recovery-error" id="recoveryPasswordError" role="alert"></small></label>
+          <button type="submit" class="recovery-primary" id="completeRecovery"><i class="fa-solid fa-key" aria-hidden="true"></i><span>Reset password</span></button>
+        </form>
+      </div>
+
+      <div class="recovery-step recovery-success" id="recoverySuccessStep" hidden>
+        <span class="recovery-success-icon"><i class="fa-solid fa-check" aria-hidden="true"></i></span>
+        <span class="recovery-kicker">Recovery complete</span>
+        <h2 id="recoverySuccessTitle">Password Reset Successful</h2>
+        <p id="recoverySuccessDescription">Your management password has been updated and existing management sessions have been invalidated.</p>
+        <button type="button" class="recovery-primary" data-recovery-close><i class="fa-solid fa-arrow-right-to-bracket" aria-hidden="true"></i><span>Return to Management Login</span></button>
+      </div>
+    </section>
+  </div>
   <script type="module" src="/src/management/admin-login.js"></script>
 
   <script type="module" src="/src/management/pwa-register.js"></script>

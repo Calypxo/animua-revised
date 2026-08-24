@@ -877,6 +877,15 @@ exports.addContactFollowUp = async (req, res) => {
       }),
     });
     invalidateAttentionCache();
+    await createManagementNotification({
+      type: "contact_message_follow_up",
+      resourceType: "contact_message",
+      relatedResourceId: contactId,
+      title: "Unread contact reply",
+      message: `${contact.fullName || req.user?.fullName || "A public user"} replied to ${contact.subject || "a contact inquiry"}.`,
+    }).catch((notificationError) => {
+      console.warn("[addContactFollowUp notification]", notificationError.message);
+    });
 
     return res.status(200).json({
       message: "Your reply has been added to the conversation.",

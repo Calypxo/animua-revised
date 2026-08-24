@@ -198,7 +198,9 @@ function inferredButtonLabel(button) {
 
 function normalizeActionButtons(root = document) {
   root.querySelectorAll("button").forEach((button) => {
-    if (button instanceof HTMLButtonElement) button.type = "button";
+    if (button instanceof HTMLButtonElement && !button.hasAttribute("type")) {
+      button.type = "button";
+    }
     button.querySelectorAll("i").forEach((icon) => icon.setAttribute("aria-hidden", "true"));
     if (hasAccessibleName(button)) return;
     button.setAttribute("aria-label", inferredButtonLabel(button));
