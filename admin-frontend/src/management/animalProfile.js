@@ -1818,6 +1818,9 @@ function openEditModal() {
   document.getElementById("eNotes").value =
     animal.notes || "";
 
+  document.getElementById("ePublicDescription").value =
+    animal.publicDescription || "";
+
   document.getElementById("eCageNumber").value =
     animal.cageNumber || "";
 
@@ -1868,6 +1871,9 @@ async function saveEditProfile() {
 
   notes:
     document.getElementById("eNotes").value.trim(),
+
+  publicDescription:
+    document.getElementById("ePublicDescription").value.trim(),
 
   cageNumber:
     document.getElementById("eCageNumber").value.trim(),

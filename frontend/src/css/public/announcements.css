@@ -383,6 +383,7 @@ body.announcements-page main {
   min-width: 0;
   display: flex;
   flex-direction: column;
+  font-family: "Poppins", sans-serif;
   padding: 17px 18px 15px;
 }
 
@@ -424,6 +425,7 @@ body.announcements-page main {
   margin: 0 0 7px;
   overflow: hidden;
   color: var(--announce-burgundy-dark);
+  font-family: "Poppins", sans-serif;
   font-weight: 800;
   line-height: 1.16;
   -webkit-box-orient: vertical;
@@ -444,6 +446,7 @@ body.announcements-page main {
   margin: 0;
   overflow: hidden;
   color: #5d6267;
+  font-family: "Poppins", sans-serif;
   font-size: 0.76rem;
   line-height: 1.42;
   -webkit-box-orient: vertical;
@@ -2564,15 +2567,25 @@ body.announcements-page .post-open-button {
     font-size: 0.78rem !important;
   }
 
-  body.announcements-page .announcement-detail-copy {
-    gap: 7px !important;
-    margin-top: 2px !important;
-  }
+body.announcements-page .announcement-detail-copy {
+  gap: 7px !important;
+  margin-top: 2px !important;
+}
 
-  body.announcements-page .announcement-detail-copy p {
-    font-size: 0.68rem !important;
-    line-height: 1.32 !important;
-  }
+body.announcements-page .announcement-detail-info {
+  display: none !important;
+  margin: 0 !important;
+  border: 0 !important;
+}
+
+body.announcements-page .announcement-detail-note {
+  margin-top: 8px !important;
+}
+
+body.announcements-page .announcement-detail-copy p {
+  font-size: 0.68rem !important;
+  line-height: 1.32 !important;
+}
 
   body.announcements-page .announcement-detail-actions {
     grid-template-columns: 1fr !important;
@@ -2634,5 +2647,220 @@ body.announcements-page .post-open-button {
   body.announcements-page .announcement-detail-popup {
     width: calc(100vw - 14px) !important;
     max-width: calc(100vw - 14px) !important;
+  }
+}
+
+/* Keep every announcement surface on one type system, including SweetAlert
+   modals that render outside <main>. */
+body.announcements-page :is(
+  .public-announcement-card,
+  .public-side-card,
+  .shelter-action-card,
+  .show-all-posts,
+  .announcement-topic-menu,
+  .announcement-topic-toggle,
+  .announcement-search,
+  .announcement-status,
+  .announcement-empty,
+  .announcement-detail-popup,
+  .announcement-detail,
+  .announcement-detail-info,
+  .announcement-detail-note,
+  .announcement-detail-actions,
+  .announcement-photo-popup
+) :is(h1, h2, h3, h4, p, a, button, input, select, textarea, span, small, strong, label, time) {
+  font-family: "Poppins", sans-serif !important;
+  letter-spacing: 0 !important;
+}
+
+body.announcements-page :is(
+  .public-announcement-card,
+  .public-side-card,
+  .shelter-action-card,
+  .show-all-posts,
+  .announcement-detail-popup
+) {
+  font-family: "Poppins", sans-serif !important;
+  letter-spacing: 0 !important;
+}
+
+body.announcements-page .announcement-detail :is(h2, .announcement-type, .announcement-detail-info strong, .announcement-detail-note strong, .announcement-detail-actions button) {
+  font-family: "Poppins", sans-serif !important;
+  font-weight: 800 !important;
+}
+
+body.announcements-page .announcement-detail :is(p, small, .announcement-detail-meta span, .announcement-detail-note span) {
+  font-family: "Poppins", sans-serif !important;
+  font-weight: 400 !important;
+}
+
+body.announcements-page .announcement-detail-info {
+  display: none !important;
+  margin: 0 !important;
+  border: 0 !important;
+}
+
+body.announcements-page .announcement-detail-note {
+  margin-top: 8px !important;
+  min-height: 62px !important;
+  max-height: 62px !important;
+  grid-template-columns: 42px minmax(0, 1fr) !important;
+  align-items: center !important;
+  overflow: hidden !important;
+  padding: 9px 16px !important;
+}
+
+body.announcements-page .announcement-detail-note i {
+  width: 36px !important;
+  height: 36px !important;
+  font-size: 0.82rem !important;
+}
+
+body.announcements-page .announcement-detail-note span {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  display: -webkit-box !important;
+  font-size: 0.72rem !important;
+  line-height: 1.22 !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+}
+
+body.announcements-page .announcement-detail-note strong {
+  display: inline !important;
+}
+
+body.announcements-page .announcement-detail-actions {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
+  gap: 10px !important;
+}
+
+body.announcements-page .announcement-detail-actions button {
+  min-width: 0 !important;
+  width: 100% !important;
+  min-height: 42px !important;
+  white-space: nowrap !important;
+}
+
+body.announcements-page .announcement-detail-secondary {
+  border: 1.5px solid rgba(120, 1, 22, 0.32) !important;
+  background: #fffdf8 !important;
+  color: #780116 !important;
+  box-shadow: none !important;
+}
+
+body.announcements-page .announcement-detail-secondary:hover,
+body.announcements-page .announcement-detail-secondary:focus-visible {
+  border-color: #780116 !important;
+  background: #f8ead0 !important;
+  color: #5f0012 !important;
+}
+
+@media (max-width: 640px) {
+  body.announcements-page .announcement-detail-actions {
+    grid-template-columns: 1fr !important;
+  }
+
+  body.announcements-page .announcement-detail-actions button {
+    min-height: 36px !important;
+    white-space: normal !important;
+  }
+
+  body.announcements-page .announcement-detail-note {
+    min-height: 58px !important;
+    max-height: 58px !important;
+    grid-template-columns: 34px minmax(0, 1fr) !important;
+    padding: 8px 10px !important;
+  }
+
+  body.announcements-page .announcement-detail-note i {
+    width: 30px !important;
+    height: 30px !important;
+    font-size: 0.72rem !important;
+  }
+}
+
+/* Equalize feed-card rows even when events have extra date/time/location meta. */
+body.announcements-page .public-announcement-feed {
+  grid-auto-rows: 232px !important;
+  align-items: stretch !important;
+}
+
+body.announcements-page .public-announcement-feed .public-announcement-card {
+  height: 100% !important;
+  min-height: 0 !important;
+}
+
+body.announcements-page .public-announcement-feed .announcement-card-media {
+  height: 100% !important;
+  min-height: 0 !important;
+}
+
+body.announcements-page .public-announcement-feed .announcement-card-body {
+  min-height: 0 !important;
+  overflow: hidden !important;
+  padding: 15px 18px 13px !important;
+}
+
+body.announcements-page .public-announcement-feed .announcement-card-heading {
+  margin-bottom: 7px !important;
+}
+
+body.announcements-page .public-announcement-feed .announcement-card-body h3 {
+  margin-bottom: 6px !important;
+  font-size: 1rem !important;
+  line-height: 1.12 !important;
+}
+
+body.announcements-page .public-announcement-feed .announcement-card-body > p {
+  font-size: 0.72rem !important;
+  line-height: 1.34 !important;
+}
+
+body.announcements-page .public-announcement-feed .announcement-event-meta {
+  max-height: 49px !important;
+  gap: 3px !important;
+  margin-top: 8px !important;
+  overflow: hidden !important;
+}
+
+body.announcements-page .public-announcement-feed .announcement-event-meta span {
+  overflow: hidden !important;
+  display: -webkit-box !important;
+  font-size: 0.6rem !important;
+  line-height: 1.25 !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 1 !important;
+}
+
+body.announcements-page .public-announcement-feed .announcement-event-meta span:last-child {
+  -webkit-line-clamp: 1 !important;
+}
+
+body.announcements-page .public-announcement-feed .public-post-footer {
+  gap: 6px 14px !important;
+  padding-top: 10px !important;
+}
+
+body.announcements-page .public-announcement-feed .post-open-button {
+  right: 14px !important;
+  bottom: 14px !important;
+  width: 36px !important;
+  min-width: 36px !important;
+  max-width: 36px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  flex-basis: 36px !important;
+}
+
+@media (max-width: 720px) {
+  body.announcements-page .public-announcement-feed {
+    grid-auto-rows: auto !important;
+  }
+
+  body.announcements-page .public-announcement-feed .public-announcement-card {
+    height: auto !important;
+    min-height: 0 !important;
   }
 }

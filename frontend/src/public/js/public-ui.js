@@ -153,6 +153,10 @@ function openAuthModal(event) {
   if (!authModal) return;
   if (event) event.preventDefault();
 
+  // The redirect hand-off has been consumed once a page can open its modal.
+  // Clearing it here prevents a later Home navigation from reopening login.
+  sessionStorage.removeItem("animua_open_auth_modal");
+
   if (hasUserSession()) {
     closeAuthModal();
     updateAuthUI();

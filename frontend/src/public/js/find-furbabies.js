@@ -93,6 +93,11 @@ function textOr(value, fallback = "Not recorded") {
   return text || fallback;
 }
 
+function formatAgeLabel(value) {
+  const text = String(value ?? "").trim();
+  return text && !/^unknown(?:\s+age)?$/i.test(text) ? text : "UNKNOWN";
+}
+
 function escapeHtml(value) {
   return String(value ?? "")
     .replaceAll("&", "&amp;")
@@ -892,10 +897,11 @@ function mapPetFromBackend(pet) {
     type,
     species: pet.species || (type === "dog" ? "Dog" : type === "cat" ? "Cat" : "Other"),
     breed: textOr(pet.breed, "Mixed / not recorded"),
-    age: pet.ageEstimate || "Unknown age",
+    age: formatAgeLabel(pet.ageEstimate || pet.age),
     sex: pet.sex || "Unknown",
     color: textOr(pet.colorMarkings || pet.color),
     status: pet.status || "Ready for Adoption",
+    size: pet.size || pet.weight,
     sortDate:
       dateValue(pet.readyForAdoptionAt) ||
       dateValue(pet.updatedAt) ||
@@ -910,6 +916,7 @@ function mapPetFromBackend(pet) {
       ...behaviorLabels(pet.behavioralAssessment),
     ].filter(Boolean),
     description:
+      textOr(pet.publicDescription, "") ||
       [
         pet.conditionNotes,
         pet.visibleDefects
@@ -917,7 +924,7 @@ function mapPetFromBackend(pet) {
           : "",
       ].filter(Boolean).join(" ") ||
       pet.initialCondition ||
-      "Ready to meet adopters and find a safe, caring home.",
+      "",
     match: "Best for adopters ready to provide a safe, caring, and responsible home.",
     image:
     pet.photoURL ||
@@ -932,7 +939,7 @@ function mapPetFromBackend(pet) {
 
 async function loadPublicPets() {
   try {
-    const res = await fetch(`${API_BASE_URL}/public/pets`, { cache: "force-cache" });
+    const res = await fetch(`${API_BASE_URL}/public/pets`, { cache: "no-store" });
 
     if (!res.ok) {
       throw new Error("Failed to load public pets");
@@ -1019,21 +1026,29 @@ function renderPets(list) {
 
     const meta = card.querySelector(".pet-meta");
     if (meta) {
-      const sexIcon = String(pet.sex || "").toLowerCase().startsWith("f") ? "fa-venus" : "fa-mars";
-      const sizeLabel = pet.size || pet.weight || "Medium";
+      const sexText = String(pet.sex || "Unknown").toLowerCase();
+      const sexIcon = String(sexText).toLowerCase().startsWith("f")
+        ? "fa-venus"
+        : String(sexText).toLowerCase().startsWith("m")
+          ? "fa-mars"
+          : "fa-venus-mars";
+      const sizeLabel = String(pet.size || pet.weight || "Medium").toLowerCase();
       meta.innerHTML = `
-        <i class="fa-solid ${sexIcon}" aria-hidden="true"></i>
-        <span>${escapeHtml(pet.sex)}</span>
-        <span aria-hidden="true">•</span>
-        <span>${escapeHtml(pet.age)}</span>
-        <span aria-hidden="true">•</span>
-        <span>${escapeHtml(sizeLabel)}</span>
+        <strong class="pet-meta-item pet-meta-sex">
+          <i class="fa-solid ${sexIcon}" aria-hidden="true"></i>
+          ${escapeHtml(sexText)}
+        </strong>
+        <b class="pet-meta-dot" aria-hidden="true">&bull;</b>
+        <strong class="pet-meta-item pet-meta-age">${escapeHtml(pet.age)}</strong>
+        <b class="pet-meta-dot" aria-hidden="true">&bull;</b>
+        <strong class="pet-meta-item pet-meta-size">${escapeHtml(sizeLabel)}</strong>
       `;
     }
 
     const temperament = card.querySelector(".pet-temperament");
     if (temperament) {
-      const traitChips = (pet.traits && pet.traits.length ? pet.traits : ["Friendly"]).slice(0, 2);
+      const traitChips = (pet.traits && pet.traits.length ? pet.traits : ["Friendly"]).slice(0, 3);
+      temperament.classList.toggle("trait-count-3", traitChips.length === 3);
       temperament.innerHTML = traitChips
         .map((trait) => `<span>${escapeHtml(trait)}</span>`)
         .join("");
@@ -1199,13 +1214,26 @@ function openProfileModal(pet) {
   "Pet";
   const petTypeLabel = pet.type === "dog" ? "Dog" : pet.type === "cat" ? "Cat" : "Pet";
   profileName.textContent = pet.name;
-  profileDescription.textContent = [
-    `A ${pet.age || "young"} ${String(pet.sex || "").toLowerCase()} ${petTypeLabel.toLowerCase()}${pet.color ? ` with ${String(pet.color).toLowerCase()} markings` : ""}.`,
-    pet.breed ? `${pet.breed} breed.` : "",
-    pet.description && !["good", "fair", "poor", "unknown"].includes(String(pet.description).trim().toLowerCase())
-      ? pet.description
-      : ""
-  ].filter(Boolean).join(" ");
+  const recordedDescription = String(pet.description || "").trim();
+  const ageMatch = String(pet.age || "").trim().match(/^(\d+)\s+(years?|months?)$/i);
+  const ageDescription = ageMatch
+    ? `${ageMatch[1]}-${ageMatch[2].toLowerCase().replace(/s$/, "")}-old`
+    : "";
+  const sexDescription = ["male", "female"].includes(String(pet.sex || "").toLowerCase())
+    ? String(pet.sex).toLowerCase()
+    : "";
+  const breedDescription = pet.breed && !String(pet.breed).toLowerCase().includes("not recorded")
+    ? String(pet.breed)
+    : "";
+  const identity = [ageDescription, sexDescription, breedDescription, petTypeLabel.toLowerCase()]
+    .filter(Boolean)
+    .join(" ");
+  const article = /^[aeiou]/i.test(identity) ? "an" : "a";
+  const fallbackDescription = `${pet.name} is ${article} ${identity} ready to meet adopters and find a safe, caring home.`;
+  profileDescription.textContent =
+    recordedDescription && !["good", "fair", "poor", "unknown"].includes(recordedDescription.toLowerCase())
+      ? recordedDescription
+      : fallbackDescription;
   profileAge.textContent = pet.age;
   profileSex.textContent = pet.sex;
   profileBreed.textContent = pet.breed;
@@ -1226,6 +1254,43 @@ function openProfileModal(pet) {
 
   profileModal.classList.add("show");
   document.body.classList.add("menu-open");
+
+  const aboutPanel = profileModal.querySelector(".profile-about-card");
+  const traitsPanel = profileModal.querySelector(".profile-section-card");
+  if (aboutPanel && traitsPanel) {
+    aboutPanel.style.removeProperty("height");
+    aboutPanel.style.removeProperty("min-height");
+    aboutPanel.style.removeProperty("max-height");
+    const minimumAboutHeight = Math.ceil(aboutPanel.scrollHeight);
+
+    const alignPanelBottoms = () => {
+      if (!window.matchMedia("(min-width: 641px)").matches) {
+        aboutPanel.style.removeProperty("height");
+        aboutPanel.style.removeProperty("min-height");
+        aboutPanel.style.removeProperty("max-height");
+        aboutPanel.style.alignSelf = "";
+        return;
+      }
+
+      const aboutRect = aboutPanel.getBoundingClientRect();
+      const traitsRect = traitsPanel.getBoundingClientRect();
+      const currentHeight = parseFloat(getComputedStyle(aboutPanel).height) || aboutRect.height;
+      const alignedHeight = Math.max(
+        minimumAboutHeight,
+        Math.round(currentHeight + traitsRect.bottom - aboutRect.bottom)
+      );
+
+      aboutPanel.style.setProperty("height", `${alignedHeight}px`, "important");
+      aboutPanel.style.setProperty("min-height", `${alignedHeight}px`, "important");
+      aboutPanel.style.setProperty("max-height", `${alignedHeight}px`, "important");
+      aboutPanel.style.alignSelf = "start";
+    };
+
+    requestAnimationFrame(() => {
+      alignPanelBottoms();
+      requestAnimationFrame(alignPanelBottoms);
+    });
+  }
 }
 
 function openPetPhotoLightbox() {
@@ -1330,13 +1395,16 @@ function openAdoptModal(pet) {
   sessionStorage.setItem("animua_selected_pet_timestamp", String(Date.now()));
 
   if (!hasUserSession()) {
-    sessionStorage.setItem("animua_open_auth_modal", "true");
     sessionStorage.setItem(ADOPTION_RESUME_FLAG, "true");
 
     const authModal = document.getElementById("authModal");
     if (authModal) {
+      sessionStorage.removeItem("animua_open_auth_modal");
       authModal.classList.remove("hidden");
       document.body.classList.add("modal-open");
+    } else {
+      sessionStorage.setItem("animua_open_auth_modal", "true");
+      window.location.href = "/pages/public/home.html";
     }
     return;
   }

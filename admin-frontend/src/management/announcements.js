@@ -86,6 +86,10 @@ function normalize(value) {
   return String(value || "").toLowerCase().trim();
 }
 
+function normalizeText(value = "") {
+  return String(value || "").normalize("NFKC").trim();
+}
+
 function normalizePostType(value) {
   const type = normalize(value);
   if (type.includes("event")) return "Upcoming Events";
@@ -839,11 +843,11 @@ function closeModal() {
 
 function getFormPayload() {
   return {
-    title: getEl("fTitle").value.trim(),
+    title: normalizeText(getEl("fTitle").value),
     type: normalizePostType(getEl("fType").value),
-    caption: getEl("fCaption").value.trim(),
-    eventDate: getEl("fEventDate").value,
-    location: getEl("fLocation").value.trim(),
+    caption: normalizeText(getEl("fCaption").value),
+    eventDate: normalizeText(getEl("fEventDate").value),
+    location: normalizeText(getEl("fLocation").value),
     status: getEl("fStatus").value,
     visibleToPublic: getEl("fVisibleToPublic").value === "true",
   };

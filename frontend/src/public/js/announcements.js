@@ -65,6 +65,10 @@ function escapeHtml(value = "") {
   }[character]));
 }
 
+function displayText(value = "") {
+  return String(value || "").normalize("NFKC").trim();
+}
+
 async function getSwal() {
   swalModulePromise ||= import("sweetalert2").then((module) => module.default);
   return swalModulePromise;
@@ -119,7 +123,7 @@ function getImage(item, type) {
 }
 
 function getCaption(item) {
-  return item.caption || item.description || item.summary || "Official ANIMUA community update from the Angeles City Veterinary Office.";
+  return displayText(item.caption || item.description || item.summary) || "Official ANIMUA community update from the Angeles City Veterinary Office.";
 }
 
 function getStoryId(item = {}) {
@@ -140,7 +144,7 @@ function getStoryDetails(item = {}) {
   const seen = new Set();
   return paragraphSources
     .flatMap((value) => String(value || "").split(/\n{1,}/))
-    .map((paragraph) => paragraph.trim())
+    .map((paragraph) => displayText(paragraph))
     .filter(Boolean)
     .filter((paragraph) => {
       const key = paragraph.toLowerCase();
@@ -219,7 +223,7 @@ function createMedia(item, type) {
 
   const image = document.createElement("img");
   image.src = getImage(item, type);
-  image.alt = item.title ? `${item.title} cover` : `${type} cover`;
+  image.alt = item.title ? `${displayText(item.title)} cover` : `${type} cover`;
   image.loading = "lazy";
   image.decoding = "async";
   image.addEventListener("error", () => {
@@ -251,7 +255,7 @@ function createPost(item, { isFeatured = false } = {}) {
   heading.appendChild(typeBadge(type));
 
   const title = document.createElement(isFeatured ? "h2" : "h3");
-  title.textContent = item.title || "ANIMUA community update";
+  title.textContent = displayText(item.title) || "ANIMUA community update";
 
   const copy = document.createElement("p");
   copy.textContent = getCaption(item);
@@ -278,7 +282,7 @@ function createPost(item, { isFeatured = false } = {}) {
   const openButton = document.createElement("button");
   openButton.type = "button";
   openButton.className = "post-open-button";
-  openButton.setAttribute("aria-label", `Read ${item.title || "announcement"}`);
+  openButton.setAttribute("aria-label", `Read ${displayText(item.title) || "announcement"}`);
   openButton.append(icon("fa-solid fa-arrow-right"));
   openButton.addEventListener("click", () => showAnnouncementDetail(item));
 
@@ -305,7 +309,7 @@ function getFilteredPosts() {
   const term = state.search.toLowerCase();
   return state.announcements.filter((item) => {
     const type = normalizeType(item.type);
-    const content = `${item.title || ""} ${getCaption(item)} ${item.location || ""}`.toLowerCase();
+    const content = `${displayText(item.title)} ${getCaption(item)} ${displayText(item.location)}`.toLowerCase();
     const matchesFilters = (!state.type || type === state.type) && (!term || content.includes(term));
     if (!matchesFilters) return false;
 
@@ -345,11 +349,11 @@ function renderEvents() {
 
     const copy = document.createElement("div");
     const title = document.createElement("strong");
-    title.textContent = item.title || "ANIMUA event";
+    title.textContent = displayText(item.title) || "ANIMUA event";
     const meta = document.createElement("small");
     meta.innerHTML = `
-      ${item.eventTime ? `<span><i class="fa-regular fa-clock" aria-hidden="true"></i>${escapeHtml(item.eventTime)}</span>` : ""}
-      <span><i class="fa-solid fa-location-dot" aria-hidden="true"></i>${escapeHtml(item.location || "Angeles City")}</span>
+      ${item.eventTime ? `<span><i class="fa-regular fa-clock" aria-hidden="true"></i>${escapeHtml(displayText(item.eventTime))}</span>` : ""}
+      <span><i class="fa-solid fa-location-dot" aria-hidden="true"></i>${escapeHtml(displayText(item.location) || "Angeles City")}</span>
     `;
     copy.append(title, meta);
     row.append(date, copy);
@@ -424,12 +428,16 @@ async function showAnnouncementDetail(item) {
   const Swal = await getSwal();
   const type = normalizeType(item.type);
   const details = getStoryDetails(item);
-  const title = item.title || "ANIMUA community update";
+  const title = displayText(item.title) || "ANIMUA community update";
   const image = getImage(item, type);
-  const source = item.source || "ANIMUA City Government";
+  const source = displayText(item.source) || "ANIMUA City Government";
   const readMinutes = Math.max(1, Math.ceil(details.join(" ").split(/\s+/).filter(Boolean).length / 180));
   const shareText = `${title} - ${getCaption(item)}`;
-  const postedTime = item.eventTime || "Official update";
+  const storyId = getStoryId(item);
+  const shareUrl = storyId
+    ? `${window.location.origin}${window.location.pathname}?story=${encodeURIComponent(storyId)}`
+    : window.location.href;
+  const postedTime = displayText(item.eventTime) || "Official update";
   const priority = type === "Upcoming Events" ? "Event" : type === "Success Stories" ? "Story" : "Medium";
   const detailLabel = type === "News & Article" ? "News & Alerts" : TYPES[type].label;
   const titleClass = title.length > 58 ? " is-long-title" : "";
@@ -462,7 +470,7 @@ async function showAnnouncementDetail(item) {
           <span>
             <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
             <strong>Affected Areas</strong>
-            <small>${escapeHtml(item.location || "Angeles City")}</small>
+            <small>${escapeHtml(displayText(item.location) || "Angeles City")}</small>
           </span>
           <span>
             <i class="fa-solid fa-tag" aria-hidden="true"></i>
@@ -480,10 +488,7 @@ async function showAnnouncementDetail(item) {
           <span><strong>Stay Safe, ANIMUA.</strong> Monitor official channels and follow safety protocols. Your safety is our top priority.</span>
         </div>
         <div class="announcement-detail-actions">
-          <button type="button" class="announcement-detail-share" data-announcement-detail-share data-share-title="${escapeHtml(title)}" data-share-text="${escapeHtml(shareText)}">
-            <i class="fa-solid fa-share-nodes" aria-hidden="true"></i>
-            <span>Share Update</span>
-          </button>
+          ${announcementActionButtonsHtml(type, item, title, shareText)}
         </div>
       </article>
     `,
@@ -528,21 +533,45 @@ async function showAnnouncementDetail(item) {
           },
         });
       });
+      popup.querySelectorAll("[data-announcement-link]").forEach((button) => {
+        button.addEventListener("click", () => {
+          window.location.href = button.dataset.announcementLink;
+        });
+      });
       popup.querySelector("[data-announcement-detail-share]")?.addEventListener("click", async (event) => {
         const button = event.currentTarget;
         const payload = {
           title: button.dataset.shareTitle || title,
           text: button.dataset.shareText || shareText,
-          url: window.location.href,
+          url: shareUrl,
         };
         try {
           if (navigator.share) {
             await navigator.share(payload);
           } else if (navigator.clipboard) {
-            await navigator.clipboard.writeText(`${payload.title}\n${payload.url}`);
+            await navigator.clipboard.writeText(`${payload.title}\n${payload.text}\n${payload.url}`);
+          } else {
+            window.prompt("Copy this announcement link:", `${payload.title}\n${payload.url}`);
           }
+          const label = button.querySelector("span");
+          const iconNode = button.querySelector("i");
+          const originalLabel = label?.textContent || "Share Update";
+          if (label) label.textContent = navigator.share ? "Shared" : "Link Copied";
+          iconNode?.classList.remove("fa-share-nodes");
+          iconNode?.classList.add("fa-check");
+          window.setTimeout(() => {
+            if (label) label.textContent = originalLabel;
+            iconNode?.classList.remove("fa-check");
+            iconNode?.classList.add("fa-share-nodes");
+          }, 1800);
         } catch (error) {
           console.warn("[Announcement share failed]", error);
+          const label = button.querySelector("span");
+          const originalLabel = label?.textContent || "Share Update";
+          if (label) label.textContent = "Unable to Share";
+          window.setTimeout(() => {
+            if (label) label.textContent = originalLabel;
+          }, 1800);
         }
       });
     },
@@ -556,6 +585,19 @@ async function showAnnouncementDetail(item) {
 function typeBadgeHtml(type, label = "") {
   const config = TYPES[type];
   return `<span class="announcement-type type-${config.slug}"><i class="${config.icon}" aria-hidden="true"></i>${escapeHtml(label || config.label)}</span>`;
+}
+
+function announcementActionButtonsHtml(type, item, title, shareText) {
+  return `
+    <button type="button" class="announcement-detail-secondary" data-announcement-link="contact.html">
+      <i class="fa-regular fa-message" aria-hidden="true"></i>
+      <span>Contact Shelter</span>
+    </button>
+    <button type="button" class="announcement-detail-share" data-announcement-detail-share data-share-title="${escapeHtml(title)}" data-share-text="${escapeHtml(shareText)}">
+      <i class="fa-solid fa-share-nodes" aria-hidden="true"></i>
+      <span>Share Update</span>
+    </button>
+  `;
 }
 
 function mergeAnnouncements(items = []) {
