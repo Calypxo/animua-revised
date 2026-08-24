@@ -6,6 +6,8 @@ Cypress.on("window:before:load", (window) => {
     value: {
       controller: null,
       addEventListener() {},
+      getRegistration: () => Promise.resolve(null),
+      getRegistrations: () => Promise.resolve([]),
       register: () =>
         Promise.resolve({
           waiting: null,

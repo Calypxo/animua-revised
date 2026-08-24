@@ -17,6 +17,7 @@ const SESSION_KEYS = [
 
 const INTENTIONAL_LOCAL_STORAGE_KEYS = new Set([
   "animua_contact_message_count",
+  "animua_management_session_cache",
   "animua_quiz_language",
 ]);
 
