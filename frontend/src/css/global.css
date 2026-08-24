@@ -14973,7 +14973,7 @@ button#chatbotSend.chatbot-input-send i {
 .password-otp-cancel,
 .password-change-otp-screen .auth-submit-btn {
   min-height: 44px;
-  border-radius: 7px;
+  border-radius: 999px;
   font-family: "Poppins", sans-serif;
   font-size: 0.86rem;
   font-weight: 600;
@@ -15019,8 +15019,9 @@ button#chatbotSend.chatbot-input-send i {
 }
 
 .password-change-otp-screen .password-otp-actions {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
+  grid-template-columns: minmax(220px, 306px);
+  justify-content: center;
+  gap: 0;
 }
 
 .password-change-otp-screen .password-otp-cancel,
@@ -15034,7 +15035,7 @@ button#chatbotSend.chatbot-input-send i {
   gap: 8px;
   margin: 0;
   padding: 0 18px;
-  border-radius: 8px;
+  border-radius: 999px;
   font-family: "Poppins", sans-serif;
   font-size: 0.9rem;
   font-weight: 600;
@@ -15308,7 +15309,7 @@ button#chatbotSend.chatbot-input-send i {
 .change-password-popup.swal2-loading .swal2-actions {
   display: grid !important;
   grid-template-columns: minmax(220px, 0.48fr) !important;
-  justify-content: end !important;
+  justify-content: center !important;
 }
 
 .change-password-popup.swal2-loading .change-password-confirm {
@@ -15397,7 +15398,7 @@ button#chatbotSend.chatbot-input-send i {
 
 .forgot-password-popup .password-change-otp-screen .password-otp-cancel,
 .forgot-password-popup .password-change-otp-screen #confirm-password-change-otp-btn.auth-submit-btn {
-  border-radius: 8px !important;
+  border-radius: 999px !important;
 }
 
 @media (max-width: 560px) {
@@ -19067,7 +19068,7 @@ textarea {
   }
 }
 
-/* Final override: keep My Profile compact after shared modal width rules. */
+/* Preserve the original narrow, vertically stacked profile layout. */
 body #profileModal.profile-modal-overlay .profile-modal-card,
 body #profileModal.profile-modal-overlay .profile-modal-card.profile-modal-card--compact {
   --modal-max-width: 640px !important;
@@ -20578,7 +20579,7 @@ body #profileModal.profile-modal-overlay .profile-modal-card.profile-modal-card-
     min-width: 0 !important;
     min-height: 38px !important;
     padding: 0 10px !important;
-    border-radius: 8px !important;
+    border-radius: 999px !important;
     font-size: 0.76rem !important;
     line-height: 1 !important;
     white-space: nowrap !important;
@@ -23095,5 +23096,75 @@ body.home-page #register-section .auth-submit-btn,
 
   body.home-page .home-match-quiz-primary {
     gap: 6px !important;
+  }
+}
+
+/* Password completion reuses the compact login-feedback modal component. */
+body .password-update-success-popup .swal2-actions {
+  justify-content: center !important;
+}
+
+body .password-update-success-popup .swal2-cancel {
+  display: none !important;
+}
+
+/* Keep the single OTP action centered and pill-shaped in every state. */
+body .change-password-popup .password-change-otp-screen .password-otp-actions {
+  grid-template-columns: minmax(0, 306px) !important;
+  justify-content: center !important;
+  gap: 0 !important;
+}
+
+body .change-password-popup .password-change-otp-screen #confirm-password-change-otp-btn.auth-submit-btn,
+body .change-password-popup .password-change-otp-screen #confirm-password-change-otp-btn.auth-submit-btn:disabled,
+body .change-password-popup .password-change-otp-screen #confirm-password-change-otp-btn.auth-submit-btn[aria-busy="true"] {
+  border-radius: 999px !important;
+}
+
+/* Phone header: keep notifications beside the account and menu controls. */
+@media (max-width: 760px) {
+  body.home-page .notification-wrap {
+    width: 42px !important;
+    min-width: 42px !important;
+    height: 42px !important;
+    display: block !important;
+    flex: 0 0 42px !important;
+  }
+
+  body.home-page .notification-btn {
+    box-sizing: border-box !important;
+    width: 42px !important;
+    min-width: 42px !important;
+    max-width: 42px !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    max-height: 42px !important;
+    display: inline-grid !important;
+    place-items: center !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+  }
+
+  body.home-page .header.scrolled .notification-btn {
+    border: 0 !important;
+    background: transparent !important;
+    color: #780116 !important;
+    box-shadow: none !important;
+  }
+}
+
+@media (max-width: 430px) {
+  body.home-page .notification-wrap,
+  body.home-page .notification-btn {
+    width: 40px !important;
+    min-width: 40px !important;
+    max-width: 40px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    max-height: 40px !important;
+    flex-basis: 40px !important;
   }
 }

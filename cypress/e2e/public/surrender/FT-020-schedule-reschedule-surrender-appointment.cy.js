@@ -81,6 +81,6 @@ describe("FT-020 — Schedule and Reschedule Surrender Appointment", () => {
     cy.get(".surrender-detail-modal")
       .should("contain.text", "Appointment reschedule request pending admin approval.")
       .and("contain.text", "2:30 PM")
-      .and("contain.text", "Attendance Reminder");
+      .and("not.contain.text", "Attendance Reminder");
   });
 });

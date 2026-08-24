@@ -1,5 +1,5 @@
 import { API_BASE_URL } from "/src/utils/api.js";
-import { ensureUserSession, hasUserSession } from "/src/utils/storage.js";
+import { ensureUserSession, getUserSession, hasUserSession } from "/src/utils/storage.js";
 import {
   deleteQueuedPublicRequest,
   getQueuedPublicRequests,
@@ -1045,6 +1045,13 @@ async function initializeQuiz() {
   const access = document.getElementById("quizAccessCard");
   document.body.classList.remove("quiz-locked-result");
   access?.classList.remove("quiz-retake-note");
+
+  const accountRole = String(getUserSession()?.role || "").trim().toLowerCase();
+  if (!hasUserSession() || accountRole !== "public") {
+    window.location.replace("/pages/public/home.html#login");
+    return;
+  }
+
   await syncQueuedQuizSubmissions();
 
   const pendingResult = JSON.parse(localStorage.getItem(QUIZ_PENDING_RESULT_KEY) || "null");
@@ -1053,13 +1060,6 @@ async function initializeQuiz() {
     localStorage.removeItem(QUIZ_PENDING_RESULT_KEY);
   }
 
-  if (!hasUserSession()) {
-    document.getElementById("questionArea").hidden = true;
-    document.querySelector(".quiz-phase-nav")?.setAttribute("hidden", "");
-    access.hidden = false;
-    access.innerHTML = `<i class="bi bi-person-lock"></i><h2>Log in to take the compatibility quiz</h2><p>Your result is securely saved to your ANIMUA account.</p><a href="/pages/public/home.html#login">Log in</a>`;
-    return;
-  }
   try {
     const [response] = await Promise.all([
       fetch(`${API_BASE_URL}/match/eligibility`, { credentials: "include" }),

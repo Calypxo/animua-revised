@@ -242,13 +242,15 @@
 .identity-document-field { min-width: 0; }
 .identity-document-title { display: inline-block; margin-bottom: 8px; color: #493f3b; font-size: .76rem; font-weight: 850; }
 .identity-document-field input[type="file"] { position: absolute; width: 1px !important; height: 1px !important; min-height: 1px !important; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-.identity-document-upload { min-height: 96px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; margin-top: 0; padding: 11px; border: 1px dashed rgba(120, 1, 22, 0.2); border-radius: 11px; background: rgba(255, 253, 249, 0.86); text-align: center; cursor: pointer; transition: border-color .16s ease, background .16s ease, box-shadow .16s ease; }
+.identity-document-upload { min-width: 0; max-width: 100%; min-height: 96px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; overflow: hidden; margin-top: 0; padding: 11px; border: 1px dashed rgba(120, 1, 22, 0.2); border-radius: 11px; background: rgba(255, 253, 249, 0.86); text-align: center; cursor: pointer; transition: border-color .16s ease, background .16s ease, box-shadow .16s ease; }
 .identity-document-upload:hover, .identity-document-field:focus-within .identity-document-upload { border-color: rgba(120, 1, 22, 0.52); background: rgba(255, 248, 242, 0.72); box-shadow: 0 0 0 2px rgba(120, 1, 22, .055); }
 .identity-document-field.is-invalid .identity-document-upload { border-color: #bd332a; background: #fff8f6; box-shadow: 0 0 0 3px rgba(189, 51, 42, .08); }
 .identity-document-preview { width: 30px; height: 30px; display: grid; place-items: center; overflow: hidden; border: 1px solid rgba(120, 1, 22, 0.13); border-radius: 8px; color: var(--sr-red); background: rgba(120, 1, 22, 0.045); font-size: 0.8rem; }
-.identity-document-preview img { width: 100%; height: 100%; object-fit: cover; }
+.identity-document-preview.has-image { width: min(100%, 160px); height: 70px; background: #fff; }
+.identity-document-preview img { width: 100%; height: 100%; object-fit: contain; }
+.identity-document-copy { width: 100%; min-width: 0; max-width: 100%; overflow: hidden; }
 .identity-document-copy strong, .identity-document-copy small { display: block; }
-.identity-document-copy strong { overflow: hidden; color: var(--sr-ink); font-size: .68rem; text-overflow: ellipsis; white-space: nowrap; }
+.identity-document-copy strong { width: 100%; max-width: 100%; overflow: hidden; color: var(--sr-ink); font-size: .68rem; text-overflow: ellipsis; white-space: nowrap; }
 .identity-document-copy small { margin-top: 2px; color: #81746d; font-size: .58rem; line-height: 1.25; }
 .surrender-page .surrender-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 19px 16px; margin-top: 24px; }
 .surrender-page .surrender-form-grid .full { grid-column: 1 / -1; }

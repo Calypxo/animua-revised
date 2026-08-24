@@ -83,13 +83,13 @@ const closeAuthModalBtn = document.getElementById("closeAuthModal");
 const quizIntroModal = document.getElementById("quiz-match-info");
 const quizIntroTriggers = document.querySelectorAll("[data-quiz-intro-trigger]");
 const quizIntroCloseButtons = document.querySelectorAll("[data-quiz-intro-close]");
+const quizStartTriggers = document.querySelectorAll("[data-quiz-start-trigger]");
 const quizPageModal = document.getElementById("quizPageModal");
 const quizPageFrame = document.getElementById("quizPageFrame");
 const quizPageTriggers = document.querySelectorAll("[data-quiz-page-trigger]");
 const quizPageCloseButtons = document.querySelectorAll("[data-quiz-page-close]");
 let lastQuizIntroTrigger = null;
 let profileModal = document.querySelector("#profileModal.profile-modal-overlay");
-let profileModalCard = profileModal?.querySelector(".profile-modal-card");
 let profileCloseButtons = document.querySelectorAll("[data-profile-close]");
 let profileForm = document.getElementById("profileForm");
 let profileEditBtn = document.getElementById("profileEditBtn");
@@ -101,6 +101,7 @@ let profilePasswordBtn = document.getElementById("profilePasswordBtn");
 let profileNotificationsBtn = document.getElementById("profileNotificationsBtn");
 const PROFILE_PHOTO_MAX_SIDE = 420;
 const PROFILE_PHOTO_MAX_BYTES = 320000;
+const PENDING_PROFILE_ACTION_KEY = "animua_pending_profile_action";
 const DEFAULT_NOTIFICATION_SETTINGS = {
   applicationUpdates: true,
   surrenderRequestUpdates: true,
@@ -218,6 +219,23 @@ function closeQuizIntroModal(event) {
   }
 }
 
+function hasPublicQuizSession() {
+  return hasUserSession() &&
+    String(getUserSession()?.role || "").trim().toLowerCase() === "public";
+}
+
+function handleQuizStart(event) {
+  if (hasPublicQuizSession()) return;
+
+  event.preventDefault();
+  if (quizIntroModal && !quizIntroModal.classList.contains("hidden")) {
+    closeQuizIntroModal();
+  }
+  if (hasUserSession()) clearUserSession();
+  showLoginView();
+  openAuthModal();
+}
+
 function openQuizPageModal(event) {
   if (event) event.preventDefault();
   if (!quizPageModal || !quizPageFrame) return;
@@ -243,7 +261,7 @@ function getAccountProfileModalMarkup() {
   return `
     <section class="profile-modal-overlay hidden" id="profileModal" aria-hidden="true" aria-labelledby="profileModalTitle">
       <button type="button" class="profile-modal-backdrop" data-profile-close aria-label="Close profile"></button>
-      <article class="profile-modal-card profile-modal-card--compact" role="dialog" aria-modal="true" tabindex="-1" style="width: min(640px, calc(100vw - 64px)); max-width: 640px;">
+      <article class="profile-modal-card" role="dialog" aria-modal="true" tabindex="-1">
         <button type="button" class="profile-modal-close" data-profile-close aria-label="Close profile">
           <i class="fa-solid fa-xmark" aria-hidden="true"></i>
         </button>
@@ -338,8 +356,6 @@ function getAccountProfileModalMarkup() {
 
 function refreshProfileModalElements() {
   profileModal = document.querySelector("#profileModal.profile-modal-overlay");
-  profileModalCard = profileModal?.querySelector(".profile-modal-card");
-  profileModalCard?.classList.add("profile-modal-card--compact");
   profileCloseButtons = document.querySelectorAll("[data-profile-close]");
   profileForm = document.getElementById("profileForm");
   profileEditBtn = document.getElementById("profileEditBtn");
@@ -357,13 +373,6 @@ function ensureAccountProfileModal() {
   }
   refreshProfileModalElements();
   return profileModal;
-}
-
-function lockCompactProfileModalSize() {
-  if (!profileModalCard) return;
-  profileModalCard.classList.add("profile-modal-card--compact");
-  profileModalCard.style.setProperty("width", "min(640px, calc(100vw - 64px))", "important");
-  profileModalCard.style.setProperty("max-width", "640px", "important");
 }
 
 function showLoginView() {
@@ -2347,6 +2356,10 @@ quizIntroCloseButtons.forEach((button) => {
   button.addEventListener("click", closeQuizIntroModal);
 });
 
+quizStartTriggers.forEach((trigger) => {
+  trigger.addEventListener("click", handleQuizStart);
+});
+
 quizPageTriggers.forEach((trigger) => {
   trigger.addEventListener("click", openQuizPageModal);
 });
@@ -2509,7 +2522,6 @@ async function openProfileModal(trigger = null) {
   }
 
   lastProfileTrigger = trigger;
-  lockCompactProfileModalSize();
   profileModal.classList.remove("hidden");
   profileModal.setAttribute("aria-hidden", "false");
   document.body.classList.add("modal-open");
@@ -3363,7 +3375,6 @@ function showForgotPasswordOtpStep() {
             <button type="button" class="auth-secondary-action" id="resend-password-change-otp-btn">Resend Code</button>
           </div>
           <div class="password-otp-actions">
-            <button type="button" class="password-otp-cancel">Cancel</button>
             <button type="button" class="auth-submit-btn" id="confirm-password-change-otp-btn">
               <i class="fa-solid fa-shield" aria-hidden="true"></i>
               <span>Verify OTP</span>
@@ -3399,7 +3410,6 @@ function showForgotPasswordOtpStep() {
       startPasswordOtpCooldown();
       document.getElementById("confirm-password-change-otp-btn")?.addEventListener("click", handleForgotPasswordOtpConfirm);
       document.getElementById("resend-password-change-otp-btn")?.addEventListener("click", handleForgotPasswordOtpResend);
-      document.querySelector(".password-otp-cancel")?.addEventListener("click", () => Swal.close());
       document.querySelector(".password-change-otp-back")?.addEventListener("click", () => {
         Swal.close();
         window.setTimeout(showForgotPasswordDialog, 0);
@@ -3638,7 +3648,6 @@ function showPasswordOtpStep() {
             <button type="button" class="auth-secondary-action" id="resend-password-change-otp-btn">Resend Code</button>
           </div>
           <div class="password-otp-actions">
-            <button type="button" class="password-otp-cancel">Cancel</button>
             <button type="button" class="auth-submit-btn" id="confirm-password-change-otp-btn">
               <i class="fa-solid fa-shield" aria-hidden="true"></i>
               <span>Verify OTP</span>
@@ -3661,7 +3670,6 @@ function showPasswordOtpStep() {
   startPasswordOtpCooldown();
   document.getElementById("confirm-password-change-otp-btn")?.addEventListener("click", handlePasswordOtpConfirm);
   document.getElementById("resend-password-change-otp-btn")?.addEventListener("click", handlePasswordOtpResend);
-  document.querySelector(".password-otp-cancel")?.addEventListener("click", () => Swal.close());
   document.querySelector(".password-change-otp-back")?.addEventListener("click", () => {
     const returnToProfile = Boolean(pendingPasswordChange?.returnToProfile);
     Swal.close();
@@ -3703,19 +3711,24 @@ function setupPasswordOtpInput() {
 }
 
 function setPasswordOtpSwalActionsHidden(hidden) {
-  const displayValue = hidden ? "none" : "";
   const applyDisplay = () => {
     const actions = Swal.getActions();
     const confirmButton = Swal.getConfirmButton();
     const cancelButton = Swal.getCancelButton();
 
-    if (actions) actions.style.display = displayValue;
-    if (confirmButton) confirmButton.style.display = displayValue;
-    if (cancelButton) cancelButton.style.display = displayValue;
+    [actions, confirmButton, cancelButton].forEach((element) => {
+      if (!element) return;
+      if (hidden) {
+        element.style.setProperty("display", "none", "important");
+      } else {
+        element.style.removeProperty("display");
+      }
+    });
   };
 
   applyDisplay();
   window.requestAnimationFrame(applyDisplay);
+  window.setTimeout(applyDisplay, 50);
 }
 
 function removePasswordOtpSwalActions() {
@@ -3730,9 +3743,9 @@ function removePasswordOtpSwalActions() {
 }
 
 function stylePasswordOtpActionButtons() {
-  document.querySelectorAll(".password-change-otp-screen .password-otp-cancel, .password-change-otp-screen #confirm-password-change-otp-btn")
+  document.querySelectorAll(".password-change-otp-screen #confirm-password-change-otp-btn")
     .forEach((button) => {
-      button.style.borderRadius = "8px";
+      button.style.setProperty("border-radius", "999px", "important");
     });
 }
 
@@ -3872,60 +3885,43 @@ function formatPasswordOtpResendTime(seconds = 0) {
   return `${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
 }
 
-function showChangePasswordSuccess() {
-  const popup = Swal.getPopup();
+function showPasswordSuccessFeedback(title, message) {
   Swal.hideLoading();
-  setPasswordOtpSwalActionsHidden(false);
+  stopPasswordOtpCooldown();
+  Swal.close();
 
-  if (popup) {
-    popup.dataset.passwordUpdated = "true";
-    popup.classList.remove("change-password-popup--loading");
-    popup.classList.add("change-password-popup--success");
-  }
+  window.setTimeout(() => {
+    void Swal.fire({
+      icon: "success",
+      title,
+      text: message,
+      confirmButtonText: "Done",
+      showConfirmButton: true,
+      showCancelButton: false,
+      showCloseButton: true,
+      customClass: {
+        popup: "animua-popup animua-auth-feedback-popup password-update-success-popup",
+        icon: "animua-auth-feedback-icon",
+        closeButton: "animua-feedback-close",
+        confirmButton: "animua-confirm"
+      },
+      buttonsStyling: false
+    });
+  }, 0);
+}
 
-  Swal.update({
-    html: `
-      <div class="change-password-modal change-password-success">
-        <div class="change-password-icon change-password-success-icon" aria-hidden="true">
-          <i class="fa-solid fa-check"></i>
-        </div>
-        <span class="change-password-accent" aria-hidden="true"></span>
-        <h2>Password Updated</h2>
-        <p>Your password has been changed.</p>
-      </div>
-    `,
-    showCancelButton: false,
-    showConfirmButton: true,
-    confirmButtonText: "OK"
-  });
+function showChangePasswordSuccess() {
+  showPasswordSuccessFeedback(
+    "Password Updated",
+    "Your new password is ready to use."
+  );
 }
 
 function showForgotPasswordSuccess() {
-  const popup = Swal.getPopup();
-  Swal.hideLoading();
-  setPasswordOtpSwalActionsHidden(false);
-
-  if (popup) {
-    popup.dataset.passwordUpdated = "true";
-    popup.classList.remove("change-password-popup--loading");
-    popup.classList.add("change-password-popup--success");
-  }
-
-  Swal.update({
-    html: `
-      <div class="change-password-modal change-password-success">
-        <div class="change-password-icon change-password-success-icon" aria-hidden="true">
-          <i class="fa-solid fa-check"></i>
-        </div>
-        <span class="change-password-accent" aria-hidden="true"></span>
-        <h2>Password Reset</h2>
-        <p>Your password has been changed. You can log in with your new password.</p>
-      </div>
-    `,
-    showCancelButton: false,
-    showConfirmButton: true,
-    confirmButtonText: "OK"
-  });
+  showPasswordSuccessFeedback(
+    "Password Reset",
+    "You can now sign in with your new password."
+  );
 }
 
 function bindChangePasswordControls({ returnToProfile = false } = {}) {
@@ -4060,6 +4056,21 @@ function setupProfileModal() {
   setProfileEditing(false);
 }
 
+async function openPendingProfileAction() {
+  const action = sessionStorage.getItem(PENDING_PROFILE_ACTION_KEY);
+  if (!action) return;
+
+  sessionStorage.removeItem(PENDING_PROFILE_ACTION_KEY);
+  if (!hasUserSession()) return;
+
+  await openProfileModal();
+  if (action === "password") {
+    profilePasswordBtn?.click();
+  } else if (action === "notifications") {
+    profileNotificationsBtn?.click();
+  }
+}
+
 function setupProcessLucideIcons() {
   const iconPaths = {
     search: `
@@ -4128,6 +4139,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   updateAuthUI();
   refreshNotificationDot();
   showWelcomeToastIfNeeded();
+  await openPendingProfileAction();
 
   if (loginSection && registerSection) {
     showLoginView();
@@ -4137,7 +4149,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     openAuthModal();
   }
 
-  if (window.location.hash === "#login" && authModal && !hasUserSession()) {
+  if (window.location.hash === "#login" && authModal && !hasPublicQuizSession()) {
+    if (hasUserSession()) clearUserSession();
     showLoginView();
     openAuthModal();
     window.history.replaceState(null, "", window.location.pathname + window.location.search);

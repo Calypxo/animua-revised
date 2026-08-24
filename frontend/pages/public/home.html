@@ -19,7 +19,7 @@
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
   <link rel="stylesheet" href="../../src/css/public/home.css">
-  <link rel="stylesheet" href="../../src/css/global.css?v=welcome-toast-balanced-20260821">
+  <link rel="stylesheet" href="../../src/css/global.css?v=mobile-notification-icon-20260824">
 </head>
 <body class="home-page">
 
@@ -313,7 +313,7 @@
         </div>
 
         <div class="home-match-quiz-actions">
-          <a href="/pages/public/petCompatibility.html" class="home-match-quiz-primary">
+          <a href="/pages/public/petCompatibility.html" class="home-match-quiz-primary" data-quiz-start-trigger>
             <span>Start Match Quiz</span>
             <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
           </a>
@@ -570,7 +570,7 @@
 
 <section class="profile-modal-overlay hidden" id="profileModal" aria-hidden="true" aria-labelledby="profileModalTitle">
     <button type="button" class="profile-modal-backdrop" data-profile-close aria-label="Close profile"></button>
-    <article class="profile-modal-card profile-modal-card--compact" role="dialog" aria-modal="true" tabindex="-1" style="width: min(640px, calc(100vw - 64px)); max-width: 640px;">
+    <article class="profile-modal-card" role="dialog" aria-modal="true" tabindex="-1">
       <button type="button" class="profile-modal-close" data-profile-close aria-label="Close profile">
         <i class="fa-solid fa-xmark" aria-hidden="true"></i>
       </button>
@@ -737,7 +737,7 @@
       </div>
 
       <div class="quiz-intro-actions">
-        <a href="/pages/public/petCompatibility.html" class="quiz-intro-primary"><i class="fa-solid fa-paw" aria-hidden="true"></i>Start the Quiz</a>
+        <a href="/pages/public/petCompatibility.html" class="quiz-intro-primary" data-quiz-start-trigger><i class="fa-solid fa-paw" aria-hidden="true"></i>Start the Quiz</a>
       </div>
     </article>
   </section>
@@ -917,7 +917,7 @@
   </div>
 </div>
 
-  <script type="module" src="../../src/public/js/public-ui.js?v=welcome-toast-balanced-20260821"></script>
+  <script type="module" src="../../src/public/js/public-ui.js?v=password-feedback-modal-20260824"></script>
   <script type="module" src="../../src/public/js/chatbot-widget.js"></script>
 
   <script type="module" src="/src/public/js/pwa-register.js"></script>

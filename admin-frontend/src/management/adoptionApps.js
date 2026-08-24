@@ -535,6 +535,23 @@ function renderDrawerContent(app) {
       </div>
     </div>` : "";
 
+  const pickupRescheduleCount = Number(app.pickupSchedule?.rescheduleCount || 0)
+    || (app.pickupSchedule?.rescheduledAt ? 1 : 0);
+  const pickupRescheduleHistory = Array.isArray(app.pickupSchedule?.rescheduleHistory)
+    ? app.pickupSchedule.rescheduleHistory
+    : [];
+  const rescheduleHistoryMarkup = pickupRescheduleHistory.length ? `
+    <div class="info-banner banner-approved mt-2">
+      <strong>User rescheduled this pickup ${pickupRescheduleCount} of 2 times.</strong>
+      ${pickupRescheduleHistory.map((entry) => `
+        <div class="mt-1">
+          Reschedule ${entry.number || ""}: ${formatDate(entry.from?.date)} ${entry.from?.time || ""}
+          &rarr; ${formatDate(entry.to?.date)} ${entry.to?.time || ""}
+        </div>
+      `).join("")}
+    </div>
+  ` : "";
+
   const deadlineSection = ["Approved", "Expired"].includes(app.status) ? `
     <div class="drawer-section deadline-workflow-card ${app.noShowRisk ? "is-risk" : ""}">
       <div class="drawer-section-title"><i class="bi bi-calendar2-check"></i> Attendance Deadline</div>
@@ -542,17 +559,10 @@ function renderDrawerContent(app) {
         <div class="drawer-info-item"><div class="drawer-info-lbl">Deadline</div><div class="drawer-info-val">${formatDate(app.attendanceDeadlineAt)}</div></div>
         <div class="drawer-info-item"><div class="drawer-info-lbl">Current State</div><div class="drawer-info-val">${app.deadlineStatus || "Awaiting appointment"}</div></div>
         <div class="drawer-info-item"><div class="drawer-info-lbl">Pickup Schedule</div><div class="drawer-info-val">${app.pickupSchedule?.date ? `${formatDate(app.pickupSchedule.date)} ${app.pickupSchedule.time || ""}` : "Not scheduled"}</div></div>
+        <div class="drawer-info-item"><div class="drawer-info-lbl">Reschedules Used</div><div class="drawer-info-val">${pickupRescheduleCount} of 2</div></div>
         <div class="drawer-info-item"><div class="drawer-info-lbl">Arrival</div><div class="drawer-info-val">${app.arrivalConfirmedAt ? `Confirmed ${formatDate(app.arrivalConfirmedAt)}` : "Not confirmed"}</div></div>
       </div>
-      ${String(app.pickupRescheduleRequest?.status || "").toLowerCase() === "pending" ? `
-        <div class="info-banner banner-approved mt-2">
-          <strong>Pickup reschedule awaiting review</strong>
-          <div class="mt-1">${formatDate(app.pickupRescheduleRequest.date)} ${app.pickupRescheduleRequest.time || ""}</div>
-          <div class="mt-2">
-            <button class="btn-approve-app" id="drawerApproveRescheduleBtn"><i class="bi bi-check-lg"></i> Approve New Date</button>
-            <button class="btn-danger-outline" id="drawerRejectRescheduleBtn"><i class="bi bi-x-lg"></i> Reject Change</button>
-          </div>
-        </div>` : ""}
+      ${rescheduleHistoryMarkup}
       ${app.expirationReason ? `<div class="info-banner banner-rejected mt-2">${app.expirationReason}</div>` : ""}
     </div>` : "";
 

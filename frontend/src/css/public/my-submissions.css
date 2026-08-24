@@ -442,14 +442,26 @@
   align-items: center;
   gap: 10px;
   min-width: 104px;
-  height: 100%;
+  height: 29px;
   padding: 0 0 0 10px;
   border: 0;
-  border-left: 1.5px solid rgba(209, 178, 143, 0.78);
   background: transparent;
   color: #8e211c;
   font: 800 0.78rem "Inter", sans-serif;
   cursor: pointer;
+}
+
+.submission-sort-btn::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 1.5px;
+  height: 20px;
+  border-radius: 999px;
+  background: rgba(209, 178, 143, 0.78);
+  transform: translateY(-50%);
+  pointer-events: none;
 }
 
 .submission-sort-btn i {
@@ -1905,6 +1917,18 @@
   cursor: pointer;
 }
 
+.adoption-detail-modal .schedule-card header button.is-disabled,
+.adoption-detail-modal .schedule-card header button:disabled,
+.adoption-detail-modal .schedule-card header button.is-disabled:hover,
+.adoption-detail-modal .schedule-card header button:disabled:hover {
+  border: 1px solid #c8c8c8;
+  background: #dedede;
+  color: #777;
+  box-shadow: none;
+  opacity: 1;
+  cursor: not-allowed !important;
+}
+
 .surrender-detail-modal .schedule-card header button::before,
 .adoption-detail-modal .schedule-card header button::before,
 .adoption-detail-modal .application-schedule-btn::before,
@@ -1919,6 +1943,11 @@
 .surrender-detail-modal .application-schedule-btn::before,
 .adoption-detail-modal .application-schedule-btn::before {
   content: none;
+}
+
+.adoption-detail-modal .schedule-card header button.is-disabled:hover::before,
+.adoption-detail-modal .schedule-card header button:disabled:hover::before {
+  content: "\f00d";
 }
 
 .surrender-detail-modal .schedule-info-grid,
@@ -2068,6 +2097,44 @@
   color: #62646e;
   font-size: 0.76rem;
   font-weight: 500;
+}
+
+.schedule-final-reschedule-notice {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border: 1px solid rgba(159, 42, 36, 0.34);
+  border-radius: 10px;
+  background: #fff4ef;
+  color: #7f1d1d;
+  text-align: left;
+}
+
+.schedule-final-reschedule-notice > i {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #9f2a24;
+  color: #fff;
+  font-size: 0.78rem;
+}
+
+.schedule-final-reschedule-notice p {
+  margin: 0;
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.schedule-final-reschedule-notice strong {
+  display: block;
+  margin-bottom: 2px;
+  font-weight: 850;
 }
 
 .schedule-picker-section {
@@ -2750,16 +2817,56 @@
     min-width: 0;
   }
 
+  .schedule-picker-popup {
+    width: min(390px, calc(100vw - 32px)) !important;
+    max-height: min(80dvh, 720px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  .schedule-picker-popup .swal2-html-container {
+    min-height: 0 !important;
+    flex: 1 1 auto !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+  }
+
+  .schedule-picker {
+    padding-top: 16px;
+  }
+
+  .schedule-picker header {
+    margin: 0 30px 12px 0;
+  }
+
+  .schedule-final-reschedule-notice {
+    margin-bottom: 10px;
+    padding: 8px 10px;
+  }
+
+  .schedule-selected-summary {
+    margin-top: 8px;
+    padding: 9px;
+  }
+
   .schedule-picker-popup .swal2-actions {
-    flex-direction: column-reverse !important;
-    gap: 10px !important;
-    padding: 14px 12px 16px !important;
+    flex: 0 0 auto !important;
+    flex-direction: row !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    padding: 10px 12px max(12px, env(safe-area-inset-bottom)) !important;
+    background: #fffdf9 !important;
   }
 
   .schedule-picker-save,
   .schedule-picker-cancel {
-    width: 100% !important;
+    width: auto !important;
     min-width: 0 !important;
+    height: 38px !important;
+    padding-inline: 8px !important;
+    font-size: 0.62rem !important;
   }
 }
 
@@ -2870,7 +2977,7 @@ body.home-page.submissions-page .user-dropdown.hidden {
   display: none !important;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 960px) {
   body.home-page.submissions-page .header,
   body.home-page.submissions-page .main-nav-wrap {
     min-height: 62px !important;
@@ -2936,6 +3043,34 @@ body.home-page.submissions-page .user-dropdown.hidden {
     max-width: 44px !important;
     flex: 0 0 44px !important;
     display: inline-flex !important;
+  }
+}
+
+/* Keep the logged-in account controls from crowding the links on wide tablets. */
+@media (min-width: 961px) and (max-width: 1180px) {
+  body.home-page.submissions-page .nav-shell {
+    grid-template-columns: max-content minmax(0, 1fr) max-content !important;
+    gap: clamp(12px, 1.5vw, 18px) !important;
+    padding-inline: clamp(18px, 2.5vw, 30px) !important;
+  }
+
+  body.home-page.submissions-page .navbar {
+    min-width: 0 !important;
+    gap: clamp(10px, 1.35vw, 18px) !important;
+  }
+
+  body.home-page.submissions-page .navbar a {
+    padding-inline: 0 !important;
+    font-size: clamp(0.78rem, 1.4vw, 0.9rem) !important;
+  }
+
+  body.home-page.submissions-page .user-actions-wrap {
+    gap: 10px !important;
+  }
+
+  body.home-page.submissions-page #loggedUserName,
+  body.home-page.submissions-page .user-pill-name {
+    max-width: clamp(64px, 8vw, 94px) !important;
   }
 }
 
@@ -3243,6 +3378,392 @@ body.submissions-page .compatibility-matches li{grid-template-columns:24px 34px 
 
   body.submissions-page .application-reference {
     font-size: 0.66rem !important;
+  }
+}
+
+/* Application details: one fluid dialog from small phones through tablets. */
+@media (min-width: 681px) and (max-width: 1024px) {
+  body.submissions-page .application-detail-popup,
+  body.submissions-page .adoption-detail-popup,
+  body.submissions-page .surrender-detail-popup {
+    width: min(720px, calc(100vw - 32px)) !important;
+    max-width: calc(100vw - 32px) !important;
+    max-height: calc(100vh - 32px) !important;
+    max-height: calc(100dvh - 32px) !important;
+  }
+
+  body.submissions-page .application-detail-popup .swal2-html-container,
+  body.submissions-page .adoption-detail-popup .swal2-html-container,
+  body.submissions-page .surrender-detail-popup .swal2-html-container {
+    max-height: calc(100vh - 32px) !important;
+    max-height: calc(100dvh - 32px) !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+  }
+
+  body.submissions-page .adoption-detail-modal .application-detail-header,
+  body.submissions-page .surrender-detail-modal .application-detail-header {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    border-bottom: 1px solid var(--surrender-modal-line);
+  }
+
+  body.submissions-page .adoption-detail-modal .application-detail-hero,
+  body.submissions-page .surrender-detail-modal .application-detail-hero {
+    grid-template-columns: clamp(120px, 19vw, 148px) minmax(0, 1fr) !important;
+  }
+
+  body.submissions-page .adoption-detail-modal .application-detail-hero img,
+  body.submissions-page .surrender-detail-modal .application-detail-hero img {
+    width: 100% !important;
+    height: clamp(120px, 19vw, 148px) !important;
+  }
+
+  body.submissions-page .adoption-detail-modal .application-modal-status,
+  body.submissions-page .surrender-detail-modal .application-modal-status {
+    grid-column: 2 !important;
+    justify-self: start !important;
+    margin-top: 0 !important;
+  }
+
+  body.submissions-page .adoption-detail-modal .application-timeline,
+  body.submissions-page .surrender-detail-modal .application-timeline {
+    padding-inline: clamp(28px, 7vw, 60px) !important;
+  }
+
+  body.submissions-page .adoption-detail-modal .approved-next-steps,
+  body.submissions-page .surrender-detail-modal .approved-next-steps {
+    width: 100% !important;
+    margin-inline: 0 !important;
+  }
+
+  body.submissions-page .adoption-detail-modal .approved-next-steps > :is(
+    .approved-message,
+    .attendance-deadline-card,
+    .schedule-feedback,
+    .schedule-card,
+    .schedule-card-action-row,
+    .reschedule-request-note
+  ),
+  body.submissions-page .surrender-detail-modal .approved-next-steps > :is(
+    .approved-message,
+    .attendance-deadline-card,
+    .schedule-feedback,
+    .schedule-card,
+    .schedule-card-action-row,
+    .reschedule-request-note
+  ) {
+    width: auto !important;
+    margin-inline: 18px !important;
+  }
+}
+
+@media (max-width: 680px) {
+  body.submissions-page .swal2-container {
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 14px !important;
+  }
+
+  body.submissions-page .application-detail-popup,
+  body.submissions-page .adoption-detail-popup,
+  body.submissions-page .surrender-detail-popup {
+    width: min(520px, calc(100vw - 28px)) !important;
+    max-width: calc(100vw - 28px) !important;
+    height: auto !important;
+    max-height: min(84vh, 760px) !important;
+    max-height: min(84svh, 760px) !important;
+    max-height: min(84dvh, 760px) !important;
+    display: block !important;
+    border-radius: 14px !important;
+  }
+
+  body.submissions-page .application-detail-popup .swal2-html-container,
+  body.submissions-page .adoption-detail-popup .swal2-html-container,
+  body.submissions-page .surrender-detail-popup .swal2-html-container {
+    width: 100% !important;
+    height: auto !important;
+    max-height: min(84vh, 760px) !important;
+    max-height: min(84svh, 760px) !important;
+    max-height: min(84dvh, 760px) !important;
+    display: block !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    scrollbar-gutter: stable;
+    overscroll-behavior: contain !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  body.submissions-page .application-detail-modal,
+  body.submissions-page .adoption-detail-modal,
+  body.submissions-page .surrender-detail-modal {
+    min-height: 0 !important;
+    padding-bottom: max(20px, env(safe-area-inset-bottom)) !important;
+    background: #fffdf9 !important;
+  }
+
+  body.submissions-page .adoption-detail-modal .application-detail-header,
+  body.submissions-page .surrender-detail-modal .application-detail-header {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 10 !important;
+    grid-template-columns: 36px minmax(0, 1fr) 40px !important;
+    border-bottom: 1px solid var(--surrender-modal-line) !important;
+    background: rgba(255, 253, 249, 0.97) !important;
+    box-shadow: 0 6px 18px rgba(44, 35, 30, 0.06) !important;
+    backdrop-filter: blur(12px);
+  }
+
+  body.submissions-page .adoption-detail-modal .application-detail-x,
+  body.submissions-page .surrender-detail-modal .application-detail-x {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+  }
+
+  body.submissions-page .adoption-detail-modal :is(p, span, strong, small, button),
+  body.submissions-page .surrender-detail-modal :is(p, span, strong, small, button) {
+    max-width: 100%;
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
+  }
+
+  body.submissions-page .adoption-detail-modal .application-detail-hero img,
+  body.submissions-page .surrender-detail-modal .application-detail-hero img {
+    height: auto !important;
+    aspect-ratio: 16 / 7;
+    object-fit: cover !important;
+  }
+
+  body.submissions-page .adoption-detail-modal .application-reference,
+  body.submissions-page .surrender-detail-modal .application-reference {
+    flex-wrap: wrap !important;
+    white-space: normal !important;
+  }
+
+  body.submissions-page .adoption-detail-modal .application-reference strong,
+  body.submissions-page .surrender-detail-modal .application-reference strong {
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  body.submissions-page .adoption-detail-modal .approved-next-steps,
+  body.submissions-page .surrender-detail-modal .approved-next-steps {
+    width: 100% !important;
+    margin: 0 !important;
+  }
+
+  body.submissions-page .adoption-detail-modal .approved-next-steps > :is(
+    .approved-message,
+    .attendance-deadline-card,
+    .schedule-feedback,
+    .schedule-card,
+    .schedule-card-action-row,
+    .reschedule-request-note
+  ),
+  body.submissions-page .surrender-detail-modal .approved-next-steps > :is(
+    .approved-message,
+    .attendance-deadline-card,
+    .schedule-feedback,
+    .schedule-card,
+    .schedule-card-action-row,
+    .reschedule-request-note
+  ) {
+    width: auto !important;
+    margin-inline: 12px !important;
+  }
+
+  body.submissions-page .adoption-detail-modal .approved-next-steps > .attendance-deadline-card,
+  body.submissions-page .surrender-detail-modal .approved-next-steps > .attendance-deadline-card {
+    margin-bottom: 0 !important;
+  }
+
+  body.submissions-page .adoption-detail-modal .approved-next-steps .schedule-info-grid article,
+  body.submissions-page .surrender-detail-modal .approved-next-steps .schedule-info-grid article {
+    padding: 12px !important;
+  }
+
+  body.submissions-page .adoption-detail-modal .schedule-card-action-row,
+  body.submissions-page .surrender-detail-modal .schedule-card-action-row {
+    width: auto !important;
+    display: block !important;
+    margin: 4px 12px 2px !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  body.submissions-page .adoption-detail-modal .schedule-card-action-row > .schedule-card-primary-btn,
+  body.submissions-page .surrender-detail-modal .schedule-card-action-row > .schedule-card-primary-btn {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    min-height: 44px !important;
+    height: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 11px 16px !important;
+    border-radius: 10px !important;
+    font-size: 0.68rem !important;
+    line-height: 1.2 !important;
+    text-align: center !important;
+    white-space: normal !important;
+    overflow: visible !important;
+  }
+}
+
+@media (max-width: 360px) {
+  body.submissions-page .swal2-container {
+    padding: 8px !important;
+  }
+
+  body.submissions-page .application-detail-popup,
+  body.submissions-page .adoption-detail-popup,
+  body.submissions-page .surrender-detail-popup {
+    width: calc(100vw - 16px) !important;
+    max-width: calc(100vw - 16px) !important;
+    height: auto !important;
+    max-height: min(88dvh, 680px) !important;
+  }
+
+  body.submissions-page .application-detail-popup .swal2-html-container,
+  body.submissions-page .adoption-detail-popup .swal2-html-container,
+  body.submissions-page .surrender-detail-popup .swal2-html-container {
+    max-height: min(88dvh, 680px) !important;
+  }
+
+  body.submissions-page .adoption-detail-modal .application-detail-header,
+  body.submissions-page .surrender-detail-modal .application-detail-header {
+    grid-template-columns: 32px minmax(0, 1fr) 36px !important;
+    gap: 8px !important;
+    padding-inline: 10px !important;
+  }
+
+  body.submissions-page .adoption-detail-modal .application-detail-accent,
+  body.submissions-page .surrender-detail-modal .application-detail-accent {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+  }
+
+  body.submissions-page .adoption-detail-modal .application-detail-x,
+  body.submissions-page .surrender-detail-modal .application-detail-x {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+  }
+
+  body.submissions-page .adoption-detail-modal .application-detail-header h2,
+  body.submissions-page .surrender-detail-modal .application-detail-header h2 {
+    font-size: 0.94rem !important;
+  }
+
+  body.submissions-page .adoption-detail-modal .application-detail-hero,
+  body.submissions-page .surrender-detail-modal .application-detail-hero,
+  body.submissions-page .adoption-detail-modal .application-timeline,
+  body.submissions-page .surrender-detail-modal .application-timeline,
+  body.submissions-page .adoption-detail-modal .approved-next-steps > :is(
+    .approved-message,
+    .attendance-deadline-card,
+    .schedule-feedback,
+    .schedule-card,
+    .schedule-card-action-row,
+    .reschedule-request-note
+  ),
+  body.submissions-page .surrender-detail-modal .approved-next-steps > :is(
+    .approved-message,
+    .attendance-deadline-card,
+    .schedule-feedback,
+    .schedule-card,
+    .schedule-card-action-row,
+    .reschedule-request-note
+  ) {
+    margin-inline: 10px !important;
+  }
+
+  body.submissions-page .adoption-detail-modal .application-timeline,
+  body.submissions-page .surrender-detail-modal .application-timeline {
+    padding-inline: 4px !important;
+  }
+
+  body.submissions-page .adoption-detail-modal .schedule-card-action-row,
+  body.submissions-page .surrender-detail-modal .schedule-card-action-row {
+    margin-inline: 10px !important;
+  }
+}
+
+@media (max-width: 1024px) and (max-height: 600px) {
+  body.submissions-page .swal2-container {
+    padding: 12px !important;
+  }
+
+  body.submissions-page .application-detail-popup,
+  body.submissions-page .adoption-detail-popup,
+  body.submissions-page .surrender-detail-popup {
+    height: auto !important;
+    max-height: calc(100dvh - 24px) !important;
+  }
+
+  body.submissions-page .application-detail-popup .swal2-html-container,
+  body.submissions-page .adoption-detail-popup .swal2-html-container,
+  body.submissions-page .surrender-detail-popup .swal2-html-container {
+    max-height: calc(100dvh - 24px) !important;
+  }
+
+  body.submissions-page .adoption-detail-modal .application-detail-header,
+  body.submissions-page .surrender-detail-modal .application-detail-header {
+    padding-block: 10px !important;
+  }
+
+  body.submissions-page .adoption-detail-modal .application-detail-hero,
+  body.submissions-page .surrender-detail-modal .application-detail-hero {
+    gap: 10px !important;
+    padding: 10px !important;
+  }
+
+  body.submissions-page .adoption-detail-modal .application-detail-hero img,
+  body.submissions-page .surrender-detail-modal .application-detail-hero img {
+    height: 104px !important;
+    aspect-ratio: auto;
+  }
+
+  body.submissions-page .adoption-detail-modal .application-timeline,
+  body.submissions-page .surrender-detail-modal .application-timeline {
+    margin-block: 8px !important;
+    padding-block: 8px !important;
+  }
+}
+
+/* Keep the mobile follow-up actions compact instead of stretching edge-to-edge. */
+@media (max-width: 680px) {
+  body.home-page.submissions-page .submission-next-card {
+    padding: 22px clamp(14px, 5vw, 22px) !important;
+  }
+
+  body.home-page.submissions-page .submission-next-actions {
+    width: min(100%, 300px) !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 10px !important;
+    justify-self: center !important;
+    margin-inline: auto !important;
+  }
+
+  body.home-page.submissions-page .submission-primary-link,
+  body.home-page.submissions-page .submission-secondary-link {
+    width: 100% !important;
+    max-width: 300px !important;
+    min-width: 0 !important;
+    min-height: 44px !important;
+    height: auto !important;
+    padding: 10px 16px !important;
+    box-sizing: border-box !important;
+    line-height: 1.2 !important;
+    text-align: center !important;
+    white-space: normal !important;
   }
 }
 

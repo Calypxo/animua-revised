@@ -7530,6 +7530,115 @@ body.furbabies-page .calendar-select {
   outline: none !important;
 }
 
+body.furbabies-page .calendar-month-menu,
+body.furbabies-page .calendar-year-menu {
+  position: relative !important;
+  min-width: 0 !important;
+}
+
+body.furbabies-page .calendar-month-trigger,
+body.furbabies-page .calendar-year-trigger {
+  width: 100% !important;
+  min-height: 34px !important;
+  padding: 0 9px !important;
+  border: 1px solid rgba(111, 42, 31, 0.14) !important;
+  border-radius: 9px !important;
+  background: rgba(255, 253, 248, 0.96) !important;
+  color: #111 !important;
+  font: inherit !important;
+  font-size: 0.76rem !important;
+  font-weight: 600 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  cursor: pointer !important;
+}
+
+body.furbabies-page .calendar-month-trigger:hover,
+body.furbabies-page .calendar-month-trigger:focus-visible,
+body.furbabies-page .calendar-year-trigger:hover,
+body.furbabies-page .calendar-year-trigger:focus-visible {
+  border-color: rgba(123, 16, 24, 0.38) !important;
+  outline: none !important;
+}
+
+body.furbabies-page .calendar-month-trigger i,
+body.furbabies-page .calendar-year-trigger i {
+  font-size: 0.65rem !important;
+  transition: transform 160ms ease !important;
+}
+
+body.furbabies-page .calendar-month-trigger[aria-expanded="true"] i,
+body.furbabies-page .calendar-year-trigger[aria-expanded="true"] i {
+  transform: rotate(180deg) !important;
+}
+
+body.furbabies-page .calendar-month-options,
+body.furbabies-page .calendar-year-options {
+  position: absolute !important;
+  top: calc(100% + 5px) !important;
+  right: 0 !important;
+  z-index: 3 !important;
+  width: 100% !important;
+  max-height: 180px !important;
+  padding: 4px !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  border: 1px solid rgba(111, 42, 31, 0.18) !important;
+  border-radius: 9px !important;
+  background: #fffdf8 !important;
+  box-shadow: 0 10px 22px rgba(64, 49, 34, 0.16) !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(123, 16, 24, 0.42) transparent !important;
+}
+
+body.furbabies-page .calendar-month-options[hidden],
+body.furbabies-page .calendar-year-options[hidden] {
+  display: none !important;
+}
+
+body.furbabies-page .calendar-month-options button,
+body.furbabies-page .calendar-year-options button {
+  width: 100% !important;
+  min-height: 32px !important;
+  padding: 5px 8px !important;
+  border: 0 !important;
+  border-radius: 6px !important;
+  background: transparent !important;
+  color: #342b28 !important;
+  font: inherit !important;
+  font-size: 0.76rem !important;
+  font-weight: 600 !important;
+  text-align: left !important;
+  cursor: pointer !important;
+}
+
+body.furbabies-page .calendar-month-options button:hover,
+body.furbabies-page .calendar-month-options button:focus-visible,
+body.furbabies-page .calendar-year-options button:hover,
+body.furbabies-page .calendar-year-options button:focus-visible {
+  background: rgba(123, 43, 35, 0.09) !important;
+  color: #6f1119 !important;
+  outline: none !important;
+}
+
+body.furbabies-page .calendar-month-options button[aria-selected="true"],
+body.furbabies-page .calendar-year-options button[aria-selected="true"] {
+  background: #7b1018 !important;
+  color: #fff !important;
+}
+
+body.furbabies-page .calendar-month-options button:disabled {
+  color: #9d9690 !important;
+  cursor: not-allowed !important;
+  opacity: 0.45 !important;
+}
+
+body.furbabies-page .calendar-month-options button:disabled:hover {
+  background: transparent !important;
+}
+
 body.furbabies-page .calendar-nav {
   display: flex !important;
   align-items: center !important;
@@ -10262,4 +10371,209 @@ body.furbabies-page .pet-meta .pet-meta-item:nth-child(5) {
 body.furbabies-page .pet-meta .pet-meta-item:nth-child(3)::before,
 body.furbabies-page .pet-meta .pet-meta-item:nth-child(5)::before {
   content: none !important;
+}
+
+/* Adoption completion reuses the compact account-feedback modal. */
+body .adoption-submission-success-popup .swal2-actions {
+  justify-content: center !important;
+}
+
+body .adoption-submission-success-popup .swal2-cancel {
+  display: none !important;
+}
+
+body .adoption-submission-success-popup .adoption-success-reference {
+  width: 100% !important;
+  margin-top: 15px !important;
+  padding: 10px 14px !important;
+  border: 1px solid rgba(111, 42, 31, 0.12) !important;
+  border-radius: 10px !important;
+  background: #fff8ee !important;
+  display: grid !important;
+  gap: 2px !important;
+}
+
+body .adoption-submission-success-popup .adoption-success-reference span {
+  color: #81746d !important;
+  font-size: 0.68rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+}
+
+body .adoption-submission-success-popup .adoption-success-reference strong {
+  color: #780116 !important;
+  font-size: 0.94rem !important;
+  overflow-wrap: anywhere !important;
+}
+
+/* Desktop adoption workspace: clearer hierarchy with less visual bulk. */
+@media (min-width: 901px) {
+  body.furbabies-page .adoption-wizard-modal {
+    width: min(940px, calc(100vw - 40px)) !important;
+    max-height: calc(100dvh - 32px) !important;
+    border-radius: 20px !important;
+  }
+
+  body.furbabies-page .adoption-form-header {
+    gap: 12px !important;
+    padding: 18px 72px 14px 24px !important;
+    border-bottom: 1px solid rgba(111, 42, 31, 0.08) !important;
+  }
+
+  body.furbabies-page .adoption-form-logo {
+    width: 44px !important;
+    height: 44px !important;
+    flex-basis: 44px !important;
+    font-size: 1rem !important;
+  }
+
+  body.furbabies-page .adoption-form-title h2 {
+    font-size: 1.36rem !important;
+  }
+
+  body.furbabies-page .adoption-form-title p {
+    max-width: 660px !important;
+    font-size: 0.78rem !important;
+  }
+
+  body.furbabies-page .adoption-wizard-close {
+    top: 17px !important;
+    right: 20px !important;
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  body.furbabies-page .adoption-wizard-modal > .adoption-stepper {
+    left: 22px !important;
+    top: 94px !important;
+    width: 174px !important;
+    gap: 6px !important;
+  }
+
+  body.furbabies-page .adoption-stepper-item {
+    grid-template-columns: 30px minmax(0, 1fr) !important;
+    gap: 2px 10px !important;
+    min-height: 72px !important;
+    padding: 10px 11px !important;
+    border: 1px solid transparent !important;
+    border-radius: 12px !important;
+  }
+
+  body.furbabies-page .adoption-stepper-item span {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 0.76rem !important;
+  }
+
+  body.furbabies-page .adoption-stepper-item strong {
+    font-size: 0.8rem !important;
+    line-height: 1.08 !important;
+  }
+
+  body.furbabies-page .adoption-stepper-item small {
+    font-size: 0.66rem !important;
+    line-height: 1.28 !important;
+  }
+
+  body.furbabies-page .adoption-stepper-item.active {
+    border-color: rgba(120, 1, 22, 0.13) !important;
+    border-left-color: rgba(120, 1, 22, 0.13) !important;
+    background: linear-gradient(135deg, #fff8ef, #fffdf9) !important;
+    box-shadow: 0 10px 24px rgba(65, 35, 29, 0.07) !important;
+  }
+
+  body.furbabies-page .adopt-form-panel .adoption-form {
+    min-height: 0 !important;
+    padding: 12px 24px 12px 216px !important;
+  }
+
+  body.furbabies-page .selected-pet-box {
+    grid-template-columns: 72px minmax(0, 1fr) auto !important;
+    grid-template-rows: auto auto auto !important;
+    align-items: center !important;
+    gap: 2px 14px !important;
+    margin: 12px 24px 12px 216px !important;
+    padding: 11px 14px !important;
+    border-color: rgba(120, 1, 22, 0.11) !important;
+    border-radius: 12px !important;
+    background: linear-gradient(135deg, #fff9f0, #fffdf9 72%) !important;
+    box-shadow: 0 8px 20px rgba(65, 35, 29, 0.045) !important;
+  }
+
+  body.furbabies-page .selected-pet-preview,
+  body.furbabies-page .selected-pet-preview > div {
+    display: contents !important;
+  }
+
+  body.furbabies-page .selected-pet-image {
+    grid-column: 1 !important;
+    grid-row: 1 / 4 !important;
+    width: 72px !important;
+    height: 62px !important;
+    border-radius: 9px !important;
+    object-fit: cover !important;
+  }
+
+  body.furbabies-page .selected-pet-box h3 {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    align-self: end !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #8b7065 !important;
+    font-size: 0.56rem !important;
+    letter-spacing: 0.11em !important;
+    line-height: 1 !important;
+    text-transform: uppercase !important;
+  }
+
+  body.furbabies-page .selected-pet-box strong {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    font-size: 1.02rem !important;
+    line-height: 1.05 !important;
+  }
+
+  body.furbabies-page .selected-pet-box span {
+    grid-column: 2 !important;
+    grid-row: 3 !important;
+    margin: 1px 0 0 !important;
+    color: #6f6760 !important;
+    font-size: 0.7rem !important;
+  }
+
+  body.furbabies-page .selected-pet-box em {
+    grid-column: 3 !important;
+    grid-row: 1 / 4 !important;
+    align-self: center !important;
+    min-height: 26px !important;
+    margin: 0 !important;
+    padding: 0 13px !important;
+    font-size: 0.68rem !important;
+  }
+
+  body.furbabies-page .adoption-section-title {
+    margin-bottom: 12px !important;
+    padding-top: 8px !important;
+  }
+
+  body.furbabies-page .adoption-grid {
+    gap: 12px 16px !important;
+  }
+
+  body.furbabies-page .adoption-wizard-actions {
+    justify-content: flex-end !important;
+    margin-top: 14px !important;
+    padding: 0 !important;
+    border-top: 0 !important;
+  }
+
+  body.furbabies-page .adoption-wizard-actions .btn {
+    min-width: 178px !important;
+    min-height: 40px !important;
+    padding-inline: 24px !important;
+  }
 }
