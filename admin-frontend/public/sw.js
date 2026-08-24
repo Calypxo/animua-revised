@@ -1,4 +1,4 @@
-const CACHE_VERSION = "animua-admin-v6";
+const CACHE_VERSION = "animua-admin-v7";
 const BUILD_ASSET_MANIFEST = "/pwa-assets.json";
 const RENDER_API_ORIGIN = "https://animua-backend.onrender.com";
 const APP_SHELL = [

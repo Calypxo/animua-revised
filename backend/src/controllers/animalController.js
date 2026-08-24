@@ -295,6 +295,7 @@ exports.updateAnimal = async (req, res) => {
       "color",
       "weight",
       "notes",
+      "publicDescription",
       "photoURL",
       "cageNumber",
       "housingType",
@@ -304,6 +305,15 @@ exports.updateAnimal = async (req, res) => {
     allowed.forEach((k) => {
       if (req.body[k] !== undefined) updates[k] = req.body[k];
     });
+
+    if (updates.publicDescription !== undefined) {
+      updates.publicDescription = String(updates.publicDescription).trim();
+      if (updates.publicDescription.length > 600) {
+        return res.status(400).json({
+          message: "Public description must be 600 characters or fewer.",
+        });
+      }
+    }
 
     console.log("[updateAnimal] Incoming req.body:", req.body);
     console.log("[updateAnimal] Updates object:", updates);

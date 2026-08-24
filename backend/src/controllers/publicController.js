@@ -299,6 +299,7 @@ const serializePublicPet = async (doc) => {
     intakeLocation: data.intakeLocation || "",
     initialCondition: data.initialCondition || "",
     conditionNotes: data.conditionNotes || "",
+    publicDescription: data.publicDescription || "",
     vaccinated: data.vaccinated || "Unknown",
     alteredStatus: data.alteredStatus || "Unknown",
     visibleDefects: data.visibleDefects || "",
