@@ -2439,6 +2439,14 @@ body.announcements-page .announcement-detail-photo-button img {
   }
 }
 
+/* The hero already includes the header, so compact tablets do not need a
+   second navbar-height offset before the community feed. */
+@media (min-width: 761px) and (max-width: 900px) {
+  body.announcements-page .announcements-section {
+    padding-top: clamp(32px, 4.5vw, 42px) !important;
+  }
+}
+
 body.announcements-page .post-open-button {
   width: 42px !important;
   min-width: 42px !important;
