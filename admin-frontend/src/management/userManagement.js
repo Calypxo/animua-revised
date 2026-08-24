@@ -969,7 +969,7 @@ function bindEye(btnId, inputId) {
     if(!input||!button||!icon) return;
     const show=input.type==="password";
     input.type=show?"text":"password";
-    icon.className=show?"bi bi-eye-slash":"bi bi-eye";
+    icon.className=show?"bi bi-eye":"bi bi-eye-slash";
     button.setAttribute("aria-label", show ? "Hide password" : "Show password");
     button.setAttribute("aria-pressed", String(show));
     button.title=show?"Hide password":"Show password";
@@ -982,7 +982,7 @@ function resetPasswordVisibility() {
     const button = document.getElementById(buttonId);
     const icon = button?.querySelector("i");
     if (input) input.type = "password";
-    if (icon) icon.className = "bi bi-eye";
+    if (icon) icon.className = "bi bi-eye-slash";
     if (button) {
       button.setAttribute("aria-label", "Show password");
       button.setAttribute("aria-pressed", "false");
