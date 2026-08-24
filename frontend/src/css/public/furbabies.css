@@ -6961,7 +6961,15 @@ body.furbabies-page .pet-actions .btn {
 
 @media (max-width: 1180px) and (min-width: 901px) {
   body.furbabies-page .pets-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 1180px) and (min-width: 641px) {
+  body.furbabies-page .pet-card:last-child:nth-child(odd) {
+    grid-column: 1 / -1 !important;
+    width: calc((100% - 22px) / 2) !important;
+    justify-self: center !important;
   }
 }
 
@@ -9505,21 +9513,20 @@ body.furbabies-page .profile-meta-icon {
   }
 }
 
-/* Keep pet-card sex, age, and size on one compact line. */
+/* Keep pet-card sex, age, and size compact without cropping text. */
 body.furbabies-page .pet-meta {
-  display: grid !important;
-  grid-template-columns: auto auto auto auto auto auto !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
   align-items: center !important;
   justify-content: start !important;
   max-width: 100% !important;
-  column-gap: clamp(3px, 0.45vw, 8px) !important;
-  row-gap: 0 !important;
+  gap: 4px 7px !important;
   min-width: 0 !important;
   min-height: 18px !important;
-  overflow: hidden !important;
-  white-space: nowrap !important;
-  font-size: clamp(0.58rem, 0.68vw, 0.66rem) !important;
-  line-height: 1 !important;
+  overflow: visible !important;
+  white-space: normal !important;
+  font-size: 0.64rem !important;
+  line-height: 1.2 !important;
 }
 
 body.furbabies-page .pet-meta i,
@@ -9527,19 +9534,11 @@ body.furbabies-page .pet-meta span {
   min-width: 0 !important;
 }
 
-body.furbabies-page .pet-meta span:nth-child(3),
-body.furbabies-page .pet-meta span:nth-child(5) {
-  width: 4px !important;
-  overflow: hidden !important;
-  color: transparent !important;
-  font-size: 0 !important;
-}
-
-body.furbabies-page .pet-meta span:nth-child(3)::before,
-body.furbabies-page .pet-meta span:nth-child(5)::before {
-  content: "\2022" !important;
+body.furbabies-page .pet-meta .pet-meta-dot {
+  width: auto !important;
+  overflow: visible !important;
   color: rgba(76, 74, 79, 0.9) !important;
-  font-size: 10px !important;
+  font-size: 0.7em !important;
   line-height: 1 !important;
 }
 
@@ -9562,9 +9561,11 @@ body.furbabies-page .profile-hero-image-wrap {
 }
 
 body.furbabies-page .profile-image-zoom-btn {
+  position: relative !important;
   width: 100% !important;
   height: 100% !important;
   display: block !important;
+  overflow: hidden !important;
   padding: 0 !important;
   border: 0 !important;
   border-radius: 8px !important;
@@ -9572,9 +9573,44 @@ body.furbabies-page .profile-image-zoom-btn {
   cursor: zoom-in !important;
 }
 
+body.furbabies-page .profile-image-expand-icon {
+  position: absolute !important;
+  right: 12px !important;
+  bottom: 12px !important;
+  z-index: 2 !important;
+  width: 36px !important;
+  height: 36px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 50% !important;
+  background: rgba(120, 1, 22, 0.88) !important;
+  color: #fff8ee !important;
+  box-shadow: 0 10px 22px rgba(43, 23, 25, 0.18) !important;
+  pointer-events: none !important;
+}
+
+body.furbabies-page .profile-image-expand-icon i {
+  color: inherit !important;
+  font-size: 1rem !important;
+  line-height: 1 !important;
+}
+
+body.furbabies-page .profile-image-zoom-btn:hover .profile-hero-image,
+body.furbabies-page .profile-image-zoom-btn:focus-visible .profile-hero-image {
+  filter: brightness(0.96) !important;
+}
+
+@media (max-width: 640px) {
+  body.furbabies-page .profile-image-expand-icon {
+    right: 8px !important;
+    bottom: 8px !important;
+  }
+}
+
 body.furbabies-page .profile-image-zoom-btn:focus-visible {
-  outline: 3px solid rgba(120, 1, 22, 0.35) !important;
-  outline-offset: 4px !important;
+  outline: 3px solid rgba(240, 195, 77, 0.55) !important;
+  outline-offset: 3px !important;
 }
 
 body.furbabies-page .profile-hero-image {
@@ -9657,20 +9693,38 @@ body.furbabies-page .pet-photo-lightbox.hidden {
 
 body.furbabies-page .pet-photo-lightbox-panel {
   position: relative !important;
-  width: min(980px, 100%) !important;
-  max-height: min(86vh, 820px) !important;
-  display: grid !important;
+  width: fit-content !important;
+  max-width: calc(100vw - 36px) !important;
+  max-height: calc(100dvh - 36px) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
   gap: 12px !important;
-  justify-items: center !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
   outline: none !important;
 }
 
-body.furbabies-page .pet-photo-lightbox-panel img {
+body.furbabies-page .pet-photo-lightbox-image-frame {
+  position: relative !important;
+  width: fit-content !important;
   max-width: 100% !important;
-  max-height: calc(86vh - 68px) !important;
-  object-fit: contain !important;
+  display: block !important;
+  overflow: hidden !important;
   border-radius: 12px !important;
+  background: transparent !important;
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.38) !important;
+}
+
+body.furbabies-page .pet-photo-lightbox-image-frame img {
+  width: auto !important;
+  max-width: 100% !important;
+  max-height: calc(100dvh - 100px) !important;
+  display: block !important;
+  object-fit: contain !important;
+  border-radius: 0 !important;
 }
 
 body.furbabies-page .pet-photo-lightbox-panel p {
@@ -9681,8 +9735,9 @@ body.furbabies-page .pet-photo-lightbox-panel p {
 
 body.furbabies-page .pet-photo-lightbox-close {
   position: absolute !important;
-  top: -14px !important;
-  right: -14px !important;
+  top: 12px !important;
+  right: 12px !important;
+  z-index: 2 !important;
   width: 44px !important;
   height: 44px !important;
   display: inline-grid !important;
@@ -9974,4 +10029,237 @@ body.furbabies-page #adoptModal .adoption-wizard-close {
 
 body.furbabies-page #adoptModal.modal-overlay:not(.show) {
   display: none !important;
+}
+
+/* Keep pet details as a centered viewport modal instead of page content. */
+body.furbabies-page #petProfileModal.modal-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  display: none !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 12px !important;
+  overflow: hidden !important;
+  z-index: 2000 !important;
+}
+
+body.furbabies-page #petProfileModal.modal-overlay.show {
+  display: flex !important;
+}
+
+/* Keep every pet card's content bands aligned, regardless of text length. */
+body.furbabies-page .pet-card {
+  height: 398px !important;
+  min-height: 398px !important;
+}
+
+body.furbabies-page .pet-card-image,
+body.furbabies-page .pet-card-image img {
+  height: 194px !important;
+  flex: 0 0 194px !important;
+}
+
+body.furbabies-page .pet-card-body {
+  height: 204px !important;
+  min-height: 204px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+body.furbabies-page .pet-card-top {
+  height: 46px !important;
+  min-height: 46px !important;
+  flex: 0 0 46px !important;
+  margin: 0 !important;
+  overflow: visible !important;
+}
+
+body.furbabies-page .pet-card-top h3 {
+  display: block !important;
+  height: 26px !important;
+  min-height: 26px !important;
+  max-height: 26px !important;
+  margin: 0 !important;
+  line-height: 1.1 !important;
+  overflow: hidden !important;
+}
+
+body.furbabies-page .pet-card-top .pet-meta {
+  height: 22px !important;
+  min-height: 22px !important;
+  margin: 0 !important;
+  overflow: visible !important;
+}
+
+body.furbabies-page .pet-facts {
+  height: 29px !important;
+  min-height: 29px !important;
+  flex: 0 0 29px !important;
+  overflow: hidden !important;
+  transform: translateY(4px) !important;
+}
+
+body.furbabies-page .pet-temperament {
+  height: 55px !important;
+  min-height: 55px !important;
+  max-height: 55px !important;
+  flex: 0 0 55px !important;
+  align-content: flex-start !important;
+  gap: 7px !important;
+  overflow: hidden !important;
+}
+
+body.furbabies-page .pet-temperament.trait-count-3 {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 7px !important;
+}
+
+body.furbabies-page .pet-temperament.trait-count-3 > span {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  padding: 0 11px !important;
+  font-size: 0.64rem !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  overflow-wrap: normal !important;
+}
+
+@media (min-width: 641px) {
+  body.furbabies-page .pet-temperament {
+    transform: translateY(-8px) !important;
+  }
+}
+
+body.furbabies-page .pet-actions {
+  height: 36px !important;
+  min-height: 36px !important;
+  flex: 0 0 36px !important;
+  margin-top: 0 !important;
+}
+
+@media (max-width: 640px) {
+  body.furbabies-page .pet-card,
+  body.furbabies-page .pet-card-body {
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  body.furbabies-page .pet-card-image,
+  body.furbabies-page .pet-card-image img {
+    height: 205px !important;
+    flex-basis: 205px !important;
+  }
+}
+
+@media (min-width: 641px) {
+  /* Only reduce the personality panel to match the existing About panel. */
+  body.furbabies-page .profile-section-card {
+    height: 145px !important;
+    min-height: 145px !important;
+    max-height: 145px !important;
+    align-self: start !important;
+    box-sizing: border-box !important;
+  }
+
+  body.furbabies-page .profile-body-sections,
+  body.furbabies-page .profile-body-sections .profile-section-card {
+    width: 100% !important;
+    height: 145px !important;
+    min-height: 145px !important;
+    max-height: 145px !important;
+    align-self: stretch !important;
+  }
+
+  body.furbabies-page .profile-section-card .modern-traits {
+    align-content: start !important;
+    min-height: 78px !important;
+  }
+}
+
+/* Keep all pet-card meta text visible on every card. */
+body.furbabies-page .pet-meta {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 5px 10px !important;
+  min-height: 22px !important;
+  height: auto !important;
+  max-width: 100% !important;
+  overflow: visible !important;
+  white-space: normal !important;
+  font-size: 0.64rem !important;
+  line-height: 1.2 !important;
+}
+
+body.furbabies-page .pet-meta-item,
+body.furbabies-page .pet-meta-dot {
+  display: inline-flex !important;
+  align-items: center !important;
+  flex: 0 0 auto !important;
+  width: auto !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow: visible !important;
+  color: #9a938b !important;
+  font-size: inherit !important;
+  line-height: inherit !important;
+  white-space: nowrap !important;
+}
+
+body.furbabies-page .pet-meta * {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: nowrap !important;
+}
+
+body.furbabies-page .pet-meta-sex {
+  gap: 7px !important;
+}
+
+body.furbabies-page .pet-meta .pet-meta-item,
+body.furbabies-page .pet-meta .pet-meta-item * {
+  color: #9a938b !important;
+}
+
+body.furbabies-page .pet-meta .pet-meta-item.pet-meta-sex > i {
+  flex: 0 0 auto !important;
+  color: #780116 !important;
+  font-size: 0.72rem !important;
+  line-height: 1 !important;
+}
+
+body.furbabies-page .pet-meta-dot::before {
+  content: none !important;
+}
+
+body.furbabies-page .pet-meta .pet-meta-dot {
+  width: auto !important;
+  min-width: auto !important;
+  color: #9a938b !important;
+  font-size: 0.7em !important;
+  line-height: 1 !important;
+  padding: 0 1px !important;
+}
+
+body.furbabies-page .pet-meta .pet-meta-item:nth-child(3),
+body.furbabies-page .pet-meta .pet-meta-item:nth-child(5) {
+  width: auto !important;
+  max-width: 100% !important;
+  overflow: visible !important;
+  color: #9a938b !important;
+  font-size: inherit !important;
+}
+
+body.furbabies-page .pet-meta .pet-meta-item:nth-child(3)::before,
+body.furbabies-page .pet-meta .pet-meta-item:nth-child(5)::before {
+  content: none !important;
 }

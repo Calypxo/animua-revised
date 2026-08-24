@@ -174,10 +174,12 @@ body.contact-page .contact-hero::before {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 11px !important;
+  height: auto;
+  min-height: 0;
+  margin-bottom: 10px !important;
   width: fit-content;
   max-width: 100%;
-  padding: 6px 14px;
+  padding: 4px 9px;
   border-radius: 999px;
   background: rgba(120, 1, 22, 0.075);
   color: #780116 !important;
@@ -191,6 +193,17 @@ body.contact-page .contact-hero::before {
   color: #780116;
   font-weight: 850;
   text-decoration: none;
+}
+
+/* Do not let the global coarse-pointer touch target add empty space inside
+   these compact value pills. The surrounding card buttons remain 44px tall. */
+body.contact-page .contact-method-primary a,
+body.contact-page .contact-method-primary strong {
+  width: auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  line-height: inherit !important;
 }
 
 .contact-small-button {
@@ -1694,7 +1707,7 @@ body.contact-page .contact-hero::before {
     justify-content: center;
     margin: 0 auto 13px !important;
     padding: 5px 12px !important;
-    border-radius: 12px !important;
+    border-radius: 999px !important;
     font-size: clamp(0.68rem, 3.7vw, 0.78rem) !important;
     line-height: 1.05 !important;
   }
@@ -1710,5 +1723,79 @@ body.contact-page .contact-hero::before {
   body.contact-page .contact-method-copy {
     max-width: 30ch;
     margin-inline: auto;
+  }
+}
+
+/* Keep all three contact options on one row across tablet viewports. */
+@media (min-width: 761px) and (max-width: 1180px) {
+  body.contact-page .contact-method-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(14px, 2vw, 22px);
+  }
+
+  body.contact-page .contact-method-card:last-child {
+    grid-column: auto;
+  }
+}
+
+@media (min-width: 761px) and (max-width: 900px) {
+  body.contact-page .contact-method-card {
+    min-width: 0;
+    min-height: 230px;
+    padding: 20px 14px 18px;
+  }
+
+  body.contact-page .contact-method-icon {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 12px;
+    font-size: 1.18rem;
+  }
+
+  body.contact-page .contact-method-card h2 {
+    font-size: 1rem;
+  }
+
+  body.contact-page .contact-method-card p {
+    font-size: 0.74rem;
+  }
+
+  body.contact-page .contact-method-primary {
+    max-width: 100%;
+    height: auto;
+    min-height: 0;
+    padding: 3px 7px;
+    border-radius: 999px;
+    font-size: 0.72rem !important;
+  }
+
+  body.contact-page .contact-method-primary a,
+  body.contact-page .contact-method-primary strong {
+    max-width: 100%;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    overflow-wrap: anywhere;
+  }
+
+  body.contact-page .contact-small-button {
+    min-width: 120px;
+    min-height: 38px;
+    padding-inline: 14px;
+    font-size: 0.74rem;
+  }
+
+  body.contact-page .contact-hours-list {
+    gap: 6px;
+  }
+
+  body.contact-page .contact-hours-list li {
+    gap: 6px;
+    padding: 8px;
+    font-size: 0.68rem;
+  }
+
+  body.contact-page .contact-hours-list strong {
+    white-space: nowrap;
   }
 }

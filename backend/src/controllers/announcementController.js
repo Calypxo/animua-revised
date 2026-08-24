@@ -25,26 +25,32 @@ function normalizeAnnouncementStatus(value) {
     : "Draft";
 }
 
+function normalizeAnnouncementText(value = "") {
+  return String(value || "").normalize("NFKC").trim();
+}
+
 function normalizeAnnouncement(data = {}) {
   const payload = {
-    title: String(data.title || "").trim(),
+    title: normalizeAnnouncementText(data.title),
     type: normalizeAnnouncementType(data.type),
-    caption: String(data.caption || "").trim(),
-    eventDate: String(data.eventDate || "").trim(),
-    location: String(data.location || "").trim(),
+    caption: normalizeAnnouncementText(data.caption),
+    eventDate: normalizeAnnouncementText(data.eventDate),
+    location: normalizeAnnouncementText(data.location),
     status: normalizeAnnouncementStatus(data.status),
     visibleToPublic: data.visibleToPublic !== false,
   };
 
   ["description", "body", "content", "summary", "source", "eventTime"].forEach((field) => {
     if (Object.prototype.hasOwnProperty.call(data, field)) {
-      payload[field] = String(data[field] || "").trim();
+      payload[field] = normalizeAnnouncementText(data[field]);
     }
   });
 
   ["details", "storyParagraphs"].forEach((field) => {
     if (Object.prototype.hasOwnProperty.call(data, field)) {
-      payload[field] = Array.isArray(data[field]) ? data[field] : [];
+      payload[field] = Array.isArray(data[field])
+        ? data[field].map((item) => normalizeAnnouncementText(item)).filter(Boolean)
+        : [];
     }
   });
 
@@ -62,6 +68,28 @@ async function serializeAnnouncementImage(id, data = {}) {
   delete announcement.imageURL;
   delete announcement.coverImage;
   return announcement;
+}
+
+function normalizeSerializedAnnouncement(data = {}) {
+  return {
+    ...data,
+    title: normalizeAnnouncementText(data.title),
+    caption: normalizeAnnouncementText(data.caption),
+    description: normalizeAnnouncementText(data.description),
+    body: normalizeAnnouncementText(data.body),
+    content: normalizeAnnouncementText(data.content),
+    summary: normalizeAnnouncementText(data.summary),
+    source: normalizeAnnouncementText(data.source),
+    eventDate: normalizeAnnouncementText(data.eventDate),
+    eventTime: normalizeAnnouncementText(data.eventTime),
+    location: normalizeAnnouncementText(data.location),
+    details: Array.isArray(data.details)
+      ? data.details.map((detail) => normalizeAnnouncementText(detail)).filter(Boolean)
+      : [],
+    storyParagraphs: Array.isArray(data.storyParagraphs)
+      ? data.storyParagraphs.map((paragraph) => normalizeAnnouncementText(paragraph)).filter(Boolean)
+      : [],
+  };
 }
 
 function shouldNotifyEventAnnouncement(data = {}) {
@@ -110,20 +138,24 @@ exports.getPublicAnnouncements = async (req, res) => {
         const signed = await serializeAnnouncementImage(item.id, item);
         return {
           id: item.id,
-          title: item.title,
+          title: normalizeAnnouncementText(item.title),
           type: normalizeAnnouncementType(item.type),
-          caption: item.caption,
-          description: item.description || "",
-          body: item.body || "",
-          content: item.content || "",
-          summary: item.summary || "",
-          details: Array.isArray(item.details) ? item.details : [],
-          storyParagraphs: Array.isArray(item.storyParagraphs) ? item.storyParagraphs : [],
+          caption: normalizeAnnouncementText(item.caption),
+          description: normalizeAnnouncementText(item.description),
+          body: normalizeAnnouncementText(item.body),
+          content: normalizeAnnouncementText(item.content),
+          summary: normalizeAnnouncementText(item.summary),
+          details: Array.isArray(item.details)
+            ? item.details.map((detail) => normalizeAnnouncementText(detail)).filter(Boolean)
+            : [],
+          storyParagraphs: Array.isArray(item.storyParagraphs)
+            ? item.storyParagraphs.map((paragraph) => normalizeAnnouncementText(paragraph)).filter(Boolean)
+            : [],
           imageUrl: signed.imageUrl,
-          eventDate: item.eventDate,
-          eventTime: item.eventTime || "",
-          location: item.location,
-          source: item.source || item.createdByName || "ANIMUA City Government",
+          eventDate: normalizeAnnouncementText(item.eventDate),
+          eventTime: normalizeAnnouncementText(item.eventTime),
+          location: normalizeAnnouncementText(item.location),
+          source: normalizeAnnouncementText(item.source || item.createdByName || "ANIMUA City Government"),
           createdAt: item.createdAt,
           updatedAt: item.updatedAt,
         };
@@ -161,12 +193,12 @@ exports.getAllAnnouncements = async (req, res) => {
     const announcements = await Promise.all(snapshot.docs
       .map(async (doc) => {
         const data = doc.data();
-        return serializeAnnouncementImage(doc.id, {
+        return serializeAnnouncementImage(doc.id, normalizeSerializedAnnouncement({
           ...data,
           type: normalizeAnnouncementType(data.type),
           status: normalizeAnnouncementStatus(data.status),
           visibleToPublic: data.visibleToPublic !== false,
-        });
+        }));
       }));
     announcements.sort((a, b) => {
         const dateA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;

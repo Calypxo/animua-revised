@@ -12,6 +12,7 @@ const header = document.querySelector(".header");
 const notificationBtn = document.getElementById("notificationBtn");
 const notificationPopup = document.getElementById("notificationPopup");
 const loginNavBtn = document.getElementById("loginNavBtn");
+const viewApplicationsCta = document.getElementById("viewApplicationsCta");
 const authModal = document.getElementById("authModal");
 const closeAuthModalBtn = document.getElementById("closeAuthModal");
 const userMenuBtn = document.getElementById("userMenuBtn");
@@ -216,6 +217,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   bindPasswordToggles();
   updateAuthUI();
   loginNavBtn?.addEventListener("click", openAuthModal);
+  viewApplicationsCta?.addEventListener("click", (event) => {
+    if (hasUserSession()) return;
+    openAuthModal(event);
+  });
   closeAuthModalBtn?.addEventListener("click", closeAuthModal);
   authModal?.addEventListener("click", (event) => {
     if (event.target === authModal) closeAuthModal();
