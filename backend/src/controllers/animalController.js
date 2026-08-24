@@ -53,7 +53,7 @@ async function getBehavioralQuestionConfiguration() {
 
 const MEDICAL_INVENTORY_CATEGORIES = new Set([
   "Antibiotic", "Antiparasitic", "Antifungal", "Anesthetic",
-  "Supplement", "Vaccine", "Surgical Supply", "Topical Medicine",
+  "Supplement", "Vaccine", "Consumable", "Surgical Supply", "Disinfectant", "Topical Medicine",
   "Hormonal Medicine", "Respiratory Medicine", "Pain Relief",
   "Sedative", "Diagnostic",
 ]);
