@@ -10576,3 +10576,57 @@ body .adoption-submission-success-popup .adoption-success-reference strong {
     padding-inline: 24px !important;
   }
 }
+
+/* Compact tablets have enough width for the profile's desktop composition.
+   Keep the visual/about column beside the pet details instead of leaving a
+   wide empty area above a long single-column modal. */
+@media (min-width: 761px) and (max-width: 900px) {
+  body.furbabies-page .redesigned-profile-modal {
+    width: min(760px, calc(100vw - 32px)) !important;
+    max-width: calc(100vw - 32px) !important;
+    max-height: calc(100dvh - 32px) !important;
+  }
+
+  body.furbabies-page .redesigned-profile-modal::before {
+    height: 52px !important;
+    flex-basis: 52px !important;
+  }
+
+  body.furbabies-page .profile-hero {
+    display: grid !important;
+    grid-template-columns: minmax(250px, 0.9fr) minmax(0, 1.1fr) !important;
+    gap: clamp(16px, 2.4vw, 22px) !important;
+    align-items: start !important;
+    padding: 16px 18px 14px !important;
+  }
+
+  body.furbabies-page .profile-visual-column {
+    width: 100% !important;
+    min-width: 0 !important;
+    justify-content: stretch !important;
+  }
+
+  body.furbabies-page .profile-hero-image-wrap {
+    width: 100% !important;
+    height: clamp(250px, 34vw, 285px) !important;
+  }
+
+  body.furbabies-page .profile-hero-content {
+    min-width: 0 !important;
+    gap: 10px !important;
+    padding-top: 0 !important;
+  }
+
+  body.furbabies-page .profile-title-wrap h2 {
+    font-size: clamp(1.35rem, 3.2vw, 1.65rem) !important;
+  }
+
+  body.furbabies-page .profile-meta-grid,
+  body.furbabies-page .profile-highlight-box {
+    transform: none !important;
+  }
+
+  body.furbabies-page .profile-body-sections {
+    margin-top: 0 !important;
+  }
+}
