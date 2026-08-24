@@ -1,4 +1,5 @@
 import "../components/global/welcome.js";
+import "../css/adminDashboard.css";
 import "../css/managementTables.css";
 import { protectManagementPage } from "../auth/authGuard.js";
 import { renderTopbarUser } from "../components/management/topbarUser.js";
@@ -176,7 +177,7 @@ function renderActivities(filter = "all") {
     ? activities
     : activities.filter((item) => item.action.toLowerCase().includes(filter));
   document.getElementById("activityTableBody").innerHTML = rows.length
-    ? rows.map((item) => "<tr><td><strong>" + escapeHtml(item.name) + '</strong><div class="animal-id-text">' + escapeHtml(item.id) + "</div></td><td>" + escapeHtml(item.module) + "</td><td>" + escapeHtml(item.action.replaceAll(".", " ")) + "</td><td>" + escapeHtml(item.staff) + '</td><td class="table-date-cell">' + dateText(item.date) + "</td><td>" + statusBadge(item.status) + "</td></tr>").join("")
+    ? rows.map((item) => "<tr class=\"management-card-row\"><td class=\"management-card-primary\" data-label=\"Animal\"><strong>" + escapeHtml(item.name) + '</strong><div class="animal-id-text">' + escapeHtml(item.id) + "</div></td><td data-label=\"Type\">" + escapeHtml(item.module) + "</td><td data-label=\"Event\">" + escapeHtml(item.action.replaceAll(".", " ")) + "</td><td data-label=\"Staff\">" + escapeHtml(item.staff) + '</td><td data-label="Date" class="table-date-cell">' + dateText(item.date) + "</td><td data-label=\"Status\">" + statusBadge(item.status) + "</td></tr>").join("")
     : '<tr><td colspan="6" class="text-center py-4 text-muted">No recorded activity.</td></tr>';
 }
 
@@ -187,7 +188,27 @@ function renderAnimals(query = "") {
       .some((value) => String(value || "").toLowerCase().includes(search))
   );
   document.getElementById("recentAnimalsBody").innerHTML = rows.length
-    ? rows.map((item) => '<tr><td class="table-id-cell">' + escapeHtml(item.id) + '</td><td><div class="animal-name-cell"><div class="animal-thumb">' + speciesEmoji(item.species) + '</div><div class="animal-name-text">' + escapeHtml(item.label) + "</div></div></td><td>" + escapeHtml(item.species) + "</td><td>" + escapeHtml(item.breed) + "</td><td>" + escapeHtml(item.age) + "</td><td>" + statusBadge(item.status) + '</td><td><span class="days-badge">' + item.days + "d</span></td><td>" + (item.assessmentComplete ? "✓ Complete" : "Pending") + '</td><td><a class="tbl-action-btn" title="View details" aria-label="View animal profile" href="/pages/animalProfile.html?id=' + encodeURIComponent(item.id) + '"><i class="bi bi-eye"></i></a></td></tr>').join("")
+    ? rows.map((item) => `
+      <tr class="management-card-row">
+        <td class="table-id-cell" data-label="Animal ID">${escapeHtml(item.id)}</td>
+        <td class="management-card-primary" data-label="Shelter description">
+          <div class="animal-name-cell">
+            <div class="animal-thumb">${speciesEmoji(item.species)}</div>
+            <div class="animal-name-text">${escapeHtml(item.label)}</div>
+          </div>
+        </td>
+        <td data-label="Species">${escapeHtml(item.species)}</td>
+        <td data-label="Breed">${escapeHtml(item.breed)}</td>
+        <td data-label="Age">${escapeHtml(item.age)}</td>
+        <td data-label="Status">${statusBadge(item.status)}</td>
+        <td data-label="Days in shelter"><span class="days-badge">${item.days}d</span></td>
+        <td data-label="Behavioral assessment">${item.assessmentComplete ? "✓ Complete" : "Pending"}</td>
+        <td class="management-card-actions" data-label="Actions">
+          <a class="tbl-action-btn management-card-open" title="View animal" aria-label="View animal profile" href="/pages/animalProfile.html?id=${encodeURIComponent(item.id)}">
+            <i class="bi bi-eye" aria-hidden="true"></i><span class="management-action-text">View animal</span>
+          </a>
+        </td>
+      </tr>`).join("")
     : '<tr><td colspan="9" class="text-center py-4 text-muted">No animals found.</td></tr>';
 }
 

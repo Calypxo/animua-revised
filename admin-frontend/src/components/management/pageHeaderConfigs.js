@@ -100,6 +100,7 @@ export const PAGE_HEADER_CONFIGS = Object.freeze({
     ]
   },
   users: {
+    variant: "workspace",
     image: "/images/user-management.jpg",
     imagePosition: "center 45%",
     headingId: "userManagementTitle",
@@ -141,7 +142,7 @@ export const PAGE_HEADER_CONFIGS = Object.freeze({
     actions: [{ href: "#aaTablePanel", icon: "bi-inbox", label: "Review applications" }],
     summaryLabel: "Adoption summary",
     metrics: [
-      { id: "statTotal", icon: "bi-file-earmark-heart-fill", label: "Total Applications" },
+      { id: "statTotal", icon: "bi-file-earmark-text-fill", label: "Total Applications" },
       { id: "statPending", icon: "bi-hourglass-split", label: "Pending Review", tone: "amber" },
       { id: "statApproved", icon: "bi-clipboard2-check-fill", label: "Approved", tone: "blue" },
       { id: "statFinalized", icon: "bi-balloon-heart-fill", label: "Finalized", tone: "green" },
@@ -150,6 +151,7 @@ export const PAGE_HEADER_CONFIGS = Object.freeze({
     ]
   },
   inventory: {
+    variant: "workspace",
     image: "/images/inventory.jpg",
     imagePosition: "center 45%", 
     headingId: "pageTitle",
@@ -200,6 +202,7 @@ export const PAGE_HEADER_CONFIGS = Object.freeze({
     ]
   },
   contactMessages: {
+    variant: "workspace",
     headingId: "pageTitle",
     image: "/images/contact-messages.jpg",
     imagePosition: "center 85%",
@@ -230,6 +233,7 @@ export const PAGE_HEADER_CONFIGS = Object.freeze({
     ]
   },
   reports: {
+    variant: "workspace",
     headingId: "pageTitle",
     image: "/images/reports.jpg",
     imagePosition: "center 25%",
@@ -256,6 +260,7 @@ export const PAGE_HEADER_CONFIGS = Object.freeze({
     ]
   },
   auditTrail: {
+    variant: "workspace",
     headingId: "pageTitle",
     image: "/images/audit-trail.jpg",
     imagePosition: "center 85%",  
@@ -282,6 +287,7 @@ export const PAGE_HEADER_CONFIGS = Object.freeze({
     ]
   },
   archivedRecords: {
+    variant: "workspace",
     headingId: "pageTitle",
     image: "/images/archived-records.jpg",
     imagePosition: "center 55%",
@@ -309,6 +315,7 @@ export const PAGE_HEADER_CONFIGS = Object.freeze({
     ]
   },
   accountSettings: {
+    variant: "workspace",
     headingId: "pageTitle",
     image: "/images/account-settings.jpg",
     imagePosition: "center 45%",

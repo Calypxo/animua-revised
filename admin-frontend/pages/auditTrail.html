@@ -69,6 +69,7 @@
             <div class="records-heading">
               <span class="records-heading-icon"><i class="bi bi-activity"></i></span>
               <div>
+                <span class="section-kicker">Activity register</span>
                 <h2>Activity explorer</h2>
                 <p>Search and review staff actions, affected records, and system outcomes.</p>
               </div>
@@ -88,7 +89,7 @@
                   <input
                     type="text"
                     id="searchAudit"
-                    placeholder="Search actor, action, module, record..."
+                    placeholder="Actor, action, module or record…"
                     autocomplete="off"
                   />
                 </div>
@@ -141,7 +142,7 @@
           </div>
 
           <div class="table-responsive records-table-wrap">
-            <table class="shelter-table management-data-table audit-log-table">
+            <table class="shelter-table management-data-table management-card-table audit-log-table" data-card-until="1439">
               <thead>
                 <tr>
                   <th scope="col">Event time</th>
@@ -173,6 +174,7 @@
     <div class="um-modal audit-modal intake-modal management-side-modal" role="dialog" aria-modal="true">
       <div class="um-modal-header">
         <div>
+          <span class="modal-kicker">Audit record</span>
           <h2>Audit Log Details</h2>
           <p class="modal-subtitle">Detailed activity information</p>
         </div>

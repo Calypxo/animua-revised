@@ -296,6 +296,7 @@ function renderDetail() {
   document.querySelector(".cm-workspace")?.classList.add("conversation-open");
 
   setText("detailUserName", user.fullName || "Unknown user");
+  setText("detailUserEmail", user.email || "No email recorded");
 
   const history = el("userMessageHistory");
   if (history) {

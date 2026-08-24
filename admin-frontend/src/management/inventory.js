@@ -536,11 +536,13 @@ function renderTable() {
         <tr
           data-id="${item.id}"
           class="
+            management-card-row
             ${item.id === activeItemId ? "row-active" : ""}
             ${rowStatusClass}
           "
         >
-          <td>
+          <td class="management-card-primary">
+            <span class="management-mobile-label" aria-hidden="true">Inventory item</span>
             <div class="item-name-cell">
               <div class="item-icon">
                 <i class="bi ${itemIcon}"></i>
@@ -563,38 +565,45 @@ function renderTable() {
           </td>
 
           <td>
+            <span class="management-mobile-label" aria-hidden="true">Category</span>
             ${catBadge(item.category)}
           </td>
 
           <td>
+            <span class="management-mobile-label" aria-hidden="true">Availability</span>
             ${stockBar(item)}
           </td>
 
           <td>
+            <span class="management-mobile-label" aria-hidden="true">Stock forecast</span>
             ${daysBadge(item)}
           </td>
 
           <td>
+            <span class="management-mobile-label" aria-hidden="true">RF movement</span>
             ${movementBadge(item)}
           </td>
 
           <td>
+            <span class="management-mobile-label" aria-hidden="true">Stock health</span>
             <span class="${stockHealthClass}">
               <i class="bi ${stockHealthIcon}"></i>
               ${stockHealthText}
             </span>
           </td>
 
-          <td>
+          <td class="management-card-actions">
+            <span class="management-mobile-label" aria-hidden="true">Actions</span>
             <div class="table-actions">
               <button
-                class="tbl-action-btn action-view"
-                title="View"
+                class="tbl-action-btn action-view management-card-open"
+                title="View item"
                 data-action="view"
                 data-id="${item.id}"
                 aria-label="View ${item.name.trim()}"
               >
                 <i class="bi bi-eye"></i>
+                <span class="inventory-action-text">View item</span>
               </button>
 
               ${
@@ -602,12 +611,13 @@ function renderTable() {
                   ? `
                     <button
                       class="tbl-action-btn stock-in"
-                      title="Stock In"
+                      title="Increase stock"
                       data-action="stockin"
                       data-id="${item.id}"
-                      aria-label="Stock in ${item.name.trim()}"
+                      aria-label="Increase stock for ${item.name.trim()}"
                     >
                       <i class="bi bi-plus-lg"></i>
+                      <span class="inventory-action-text">Stock in</span>
                     </button>
                   `
                   : ""
@@ -618,12 +628,13 @@ function renderTable() {
                   ? `
                     <button
                       class="tbl-action-btn use"
-                      title="Record Usage"
+                      title="Decrease stock"
                       data-action="use"
                       data-id="${item.id}"
-                      aria-label="Record usage for ${item.name.trim()}"
+                      aria-label="Decrease stock for ${item.name.trim()}"
                     >
                       <i class="bi bi-dash-lg"></i>
+                      <span class="inventory-action-text">Use stock</span>
                     </button>
                   `
                   : ""
@@ -979,7 +990,7 @@ function renderDrawer(item) {
 
   ${
     can("consume_general")
-      ? `<button class="btn-primary-clay" style="background:var(--amber);flex:1" id="drawerUseBtn">
+      ? `<button class="btn-primary-clay ${can("stock_in") ? "management-secondary-action" : "management-primary-action"}" style="background:var(--amber);flex:1" id="drawerUseBtn">
           <i class="bi bi-dash-lg"></i> Record Usage
         </button>`
       : ""
@@ -987,7 +998,7 @@ function renderDrawer(item) {
 
   ${
     can("stock_in")
-      ? `<button class="btn-primary-clay" style="flex:1" id="drawerStockInBtn">
+      ? `<button class="btn-primary-clay management-primary-action" style="flex:1" id="drawerStockInBtn">
           <i class="bi bi-plus-lg"></i> Stock In
         </button>`
       : ""

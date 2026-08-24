@@ -53,8 +53,8 @@ function workspace() {
         <div class="print-management-brief"><span>Purpose and scope</span><p id="printReportNarrative"></p><strong id="printReportFinding"></strong></div>
       </section>
       <footer class="print-document-footer" aria-hidden="true"><span>ANIMUA Shelter Management · Internal operational report</span><span>Generated from live shelter records</span></footer>
-      <section class="report-command-card">
-        <div class="command-card-heading"><span class="command-icon"><i class="bi bi-sliders"></i></span><div><span>Report controls</span><h2>Focus the operational view</h2><p>Use a quick period or set exact dates, then search inside the selected dataset.</p></div></div>
+      <section class="report-command-card" aria-labelledby="reportControlsTitle">
+        <div class="command-card-heading"><span class="command-icon" aria-hidden="true"><i class="bi bi-sliders"></i></span><div><span>Report controls</span><h2 id="reportControlsTitle">Focus the operational view</h2><p>Use a quick period or set exact dates, then search inside the selected dataset.</p></div></div>
         <div class="report-preset-row" aria-label="Quick reporting periods">
           <span>Quick period</span>
           <button type="button" data-period="30">Last 30 days</button>
@@ -69,11 +69,14 @@ function workspace() {
           <label><span>Barangay</span><div class="report-input"><i class="bi bi-geo-alt"></i><select id="barangayFilter" aria-label="Filter report by barangay"><option value="">All barangays</option></select></div></label>
           <label class="report-search-field"><span>Search current report</span><div class="report-input"><i class="bi bi-search"></i><input type="search" id="reportSearch" placeholder="Animal, status, staff, barangay…"></div></label>
           <button class="report-apply-btn" id="btnApply" type="button"><i class="bi bi-funnel-fill"></i><span>Apply period</span></button>
-          <button class="report-clear-btn" id="btnClear" type="button" aria-label="Clear all report filters" title="Clear filters"><i class="bi bi-arrow-counterclockwise"></i></button>
+          <button class="report-clear-btn" id="btnClear" type="button" aria-label="Clear all report filters" title="Clear filters"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i><span>Reset</span></button>
         </div>
       </section>
       <section class="report-catalog-section"><div class="section-heading"><div><span class="section-kicker">Report catalog</span><h2>Choose a live operational dataset</h2></div><span class="live-data-pill"><i></i> Live shelter data</span></div><div class="report-tabs" id="liveReportTabs" role="tablist" aria-label="Operational report datasets"></div></section>
-      <section class="report-overview-grid report-print-summary"><div class="report-summary-grid" id="reportSummary"></div><aside class="report-insight-card" id="reportInsight"></aside></section>
+      <section class="report-overview-section" aria-labelledby="reportOverviewTitle">
+        <div class="section-heading report-overview-heading"><div><span class="section-kicker">Management snapshot</span><h2 id="reportOverviewTitle">What the current report is showing</h2></div><span class="current-dataset-pill" id="currentDatasetLabel">Live report</span></div>
+        <div class="report-overview-grid report-print-summary"><div class="report-summary-grid" id="reportSummary"></div><aside class="report-insight-card" id="reportInsight"></aside></div>
+      </section>
       <section class="report-analytics-grid" aria-label="Report visual analysis">
         <article class="rpt-card report-chart-card">
           <div class="rpt-card-head"><div><span class="section-kicker">Movement over time</span><h3>Operational trend</h3><p id="trendChartMeta">Records grouped by reporting period</p></div><span class="chart-context-pill" id="trendTotal">0 events</span></div>
@@ -84,9 +87,9 @@ function workspace() {
           <div class="report-doughnut-layout"><div class="report-doughnut-wrap"><canvas id="reportBreakdownChart" role="img" aria-label="Current report category breakdown"></canvas><div class="chart-center-label"><strong id="breakdownTotal">0</strong><span>records</span></div></div><div class="report-chart-legend" id="reportChartLegend"></div></div>
         </article>
       </section>
-      <section class="rpt-card report-data-card">
-        <div class="rpt-card-head"><div><span class="section-kicker">Detailed records</span><h3 id="reportTitle">Operational report</h3><p id="reportMeta">Loading live records…</p></div><span class="table-record-count" id="tableRecordCount">0 rows</span></div>
-        <div class="table-responsive report-table-wrap"><table class="rpt-table management-data-table"><thead><tr id="reportHead"></tr></thead><tbody id="reportBody"><tr><td colspan="8" class="text-center py-5"><div class="um-spinner"></div></td></tr></tbody></table></div>
+      <section class="rpt-card report-data-card" id="reportDataPanel" role="tabpanel">
+        <div class="rpt-card-head"><div><span class="section-kicker">Detailed records</span><h3 id="reportTitle">Operational report</h3><p id="reportMeta">Loading live records…</p></div><span class="table-record-count" id="tableRecordCount" aria-live="polite">0 rows</span></div>
+        <div class="table-responsive report-table-wrap"><table class="rpt-table management-data-table management-card-table" data-card-until="1279" aria-describedby="reportMeta"><caption class="visually-hidden" id="reportTableCaption">Detailed operational report records</caption><thead><tr id="reportHead"></tr></thead><tbody id="reportBody"><tr><td colspan="8" class="text-center py-5"><div class="um-spinner"></div></td></tr></tbody></table></div>
         <div class="report-table-footer"><span id="reportTableFooter">Live data is shown exactly as recorded by shelter workflows.</span><div class="report-pagination" id="reportPagination" aria-label="Report table pagination"></div></div>
       </section>
     </div>`;
@@ -129,6 +132,7 @@ async function load() {
   if (from) query.set("from", from);
   if (to) query.set("to", to);
   document.getElementById("btnApply")?.classList.add("is-loading");
+  document.getElementById("reportDataPanel")?.setAttribute("aria-busy", "true");
   try {
     payload = await apiFetch(`/reports${query.size ? `?${query.toString()}` : ""}`);
     if (!payload.available.includes(active)) active = payload.available[0] || "";
@@ -136,6 +140,7 @@ async function load() {
     render();
   } finally {
     document.getElementById("btnApply")?.classList.remove("is-loading");
+    document.getElementById("reportDataPanel")?.setAttribute("aria-busy", "false");
   }
 }
 
@@ -144,7 +149,7 @@ function tabs() {
   target.innerHTML = payload.available.map((key) => {
     const config = CONFIG[key];
     const count = payload.reports[key]?.length || 0;
-    return `<button class="report-tab tone-${config.tone} ${key === active ? "active" : ""}" type="button" data-report="${key}" role="tab" aria-selected="${key === active}"><span class="report-tab-icon"><i class="bi ${config.icon}"></i></span><span class="report-tab-copy"><strong>${esc(config.label)}</strong><small>${esc(config.description)}</small></span><span class="report-tab-count">${count}</span></button>`;
+    return `<button class="report-tab tone-${config.tone} ${key === active ? "active" : ""}" id="report-tab-${key}" type="button" data-report="${key}" role="tab" aria-selected="${key === active}" aria-controls="reportDataPanel"><span class="report-tab-icon" aria-hidden="true"><i class="bi ${config.icon}"></i></span><span class="report-tab-copy"><strong>${esc(config.label)}</strong><small>${esc(config.description)}</small></span><span class="report-tab-count" aria-label="${count} records">${count}</span></button>`;
   }).join("");
   target.querySelectorAll("[data-report]").forEach((button) => button.addEventListener("click", () => { active = button.dataset.report; activePage = 1; tabs(); render(); }));
 }
@@ -353,11 +358,14 @@ function render() {
   const allCount = Object.values(payload.reports).reduce((total, records) => total + (Array.isArray(records) ? records.length : 0), 0);
   [["reportSourceCount", payload.available.length], ["reportAllCount", allCount], ["reportVisibleCount", list.length], ["heroReportCount", list.length]].forEach(([id, value]) => { const element = document.getElementById(id); if (element) element.textContent = value; });
   document.getElementById("activePeriodLabel").textContent = periodLabel();
+  document.getElementById("currentDatasetLabel").textContent = config.label;
+  document.getElementById("reportDataPanel").setAttribute("aria-labelledby", `report-tab-${active}`);
   document.getElementById("reportTitle").textContent = `${config.label} report`;
+  document.getElementById("reportTableCaption").textContent = `${config.label} report records for ${periodLabel()}`;
   document.getElementById("reportMeta").textContent = `Generated ${new Date(payload.generatedAt).toLocaleString("en-PH")} · ${config.description}`;
   document.getElementById("tableRecordCount").textContent = `${list.length} row${list.length === 1 ? "" : "s"}`;
-  document.getElementById("reportHead").innerHTML = config.columns.map(([, label]) => `<th>${esc(label)}</th>`).join("");
-  document.getElementById("reportBody").innerHTML = list.length ? pageRows.map((row) => `<tr>${config.columns.map(([key]) => `<td>${cellMarkup(key, row[key])}</td>`).join("")}</tr>`).join("") : `<tr><td colspan="${config.columns.length}"><div class="report-empty-state"><span><i class="bi bi-bar-chart"></i></span><strong>No matching report records</strong><small>Adjust the date range, barangay, or search to broaden this dataset.</small></div></td></tr>`;
+  document.getElementById("reportHead").innerHTML = config.columns.map(([, label]) => `<th scope="col">${esc(label)}</th>`).join("");
+  document.getElementById("reportBody").innerHTML = list.length ? pageRows.map((row) => `<tr class="management-card-row report-record-card">${config.columns.map(([key, label], index) => `<td class="report-cell report-cell-${esc(key)} ${index < 2 ? "management-card-primary" : ""}"><span class="management-mobile-label" aria-hidden="true">${esc(label)}</span><span class="report-cell-value">${cellMarkup(key, row[key])}</span></td>`).join("")}</tr>`).join("") : `<tr><td colspan="${config.columns.length}"><div class="report-empty-state"><span><i class="bi bi-bar-chart"></i></span><strong>No matching report records</strong><small>Adjust the date range, barangay, or search to broaden this dataset.</small></div></td></tr>`;
   const lastRecord = printing ? list.length : Math.min(firstRecord + pageRows.length - 1, list.length);
   document.getElementById("reportTableFooter").textContent = list.length
     ? `Showing ${printing ? 1 : firstRecord}–${lastRecord} of ${list.length} filtered records (${(payload.reports[active] || []).length} total in ${config.label}).`

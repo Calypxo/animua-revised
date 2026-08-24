@@ -17,6 +17,17 @@ router.get(
   ctrl.getAllAnimals
 );
 
+// Register this static path before /:id so it can never be interpreted as an animal ID.
+router.route("/behavioral-questions")
+  .get(
+    authorize("Admin", "Veterinarian"),
+    ctrl.getBehavioralQuestions
+  )
+  .put(
+    authorize("Admin", "Veterinarian"),
+    ctrl.replaceBehavioralQuestions
+  );
+
 // View individual animal profile
 router.get(
   "/:id",

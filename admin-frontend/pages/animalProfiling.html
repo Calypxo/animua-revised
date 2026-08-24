@@ -38,7 +38,7 @@
       <section class="ap-workflow" aria-labelledby="workflowTitle">
         <div class="ap-workflow-intro"><span class="ap-section-kicker">Lifecycle workflow</span><h2 id="workflowTitle">A clear path from profile to placement</h2><p>Each stage keeps the team aligned on the next action and the animal’s current care status.</p></div>
         <div class="ap-workflow-steps">
-          <div class="ap-workflow-step is-active"><span><i class="bi bi-person-vcard"></i></span><small>01</small><strong>Profile</strong></div>
+          <div class="ap-workflow-step is-active" aria-current="step"><span><i class="bi bi-person-vcard"></i></span><small>01</small><strong>Profile</strong></div>
           <div class="ap-workflow-step"><span><i class="bi bi-shield-plus"></i></span><small>02</small><strong>Quarantine</strong></div>
           <div class="ap-workflow-step"><span><i class="bi bi-heart-pulse"></i></span><small>03</small><strong>Medical</strong></div>
           <div class="ap-workflow-step"><span><i class="bi bi-house-check"></i></span><small>04</small><strong>Ready</strong></div>
@@ -75,10 +75,12 @@
         </div>
         <div class="um-pagination" id="paginationBar"></div>
       </section>
+
     </main>
   </div>
 </div>
 <div class="um-toast" id="umToast" role="status" aria-live="polite"><i class="bi" id="toastIcon"></i><span id="toastMsg"></span></div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 <script type="module" src="/src/management/animalProfiling.js"></script>
 

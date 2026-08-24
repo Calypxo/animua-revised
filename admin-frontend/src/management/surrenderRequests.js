@@ -391,8 +391,8 @@ function renderTable() {
   }
 
   tbody.innerHTML = page.map(r => `
-    <tr data-id="${r.id}" class="${r.id===activeId?"row-active":""}">
-      <td data-label="Owner">
+    <tr data-id="${r.id}" class="management-card-row ${r.id===activeId?"row-active":""}">
+      <td class="management-card-primary" data-label="Owner">
         <div class="owner-cell">
           <div class="owner-avatar">${r.owner.initials}</div>
           <div>
@@ -414,9 +414,9 @@ function renderTable() {
       <td data-label="Urgency"><span class="urgency-badge ${urgencyCls(r.nlp.urgencyLabel)}">${r.nlp.urgencyLabel}</span></td>
       <td data-label="Submitted" class="submitted-date">${formatDate(r.submittedAt)}</td>
       <td data-label="Status">${statusBadge(r.status)}</td>
-      <td data-label="Actions">
-        <button class="tbl-action-btn" data-action="view" data-id="${r.id}" title="View details" aria-label="View surrender request details">
-          <i class="bi bi-eye"></i>
+      <td class="management-card-actions" data-label="Actions">
+        <button class="tbl-action-btn management-card-open" data-action="view" data-id="${r.id}" title="View request" aria-label="View surrender request details">
+          <i class="bi bi-eye" aria-hidden="true"></i><span class="management-action-text">View request</span>
         </button>
       </td>
     </tr>`).join("");
@@ -810,11 +810,16 @@ function renderDrawer(r) {
 }
   if (r.status === "Approved") {
     footerBtns += r.arrivalConfirmedAt
-      ? `<button class="btn-convert-confirm" id="drawerConvertBtn"><i class="bi bi-clipboard2-plus-fill"></i> Start Intake</button>`
+      ? `<button class="btn-convert-confirm management-primary-action" id="drawerConvertBtn"><i class="bi bi-clipboard2-plus-fill"></i> Start Intake</button>`
       : `
-        <button class="btn-ghost-clay" id="drawerExtendDeadlineBtn"><i class="bi bi-calendar-plus"></i> Extend</button>
-        <button class="btn-approve-confirm" id="drawerArrivalBtn"><i class="bi bi-person-check"></i> Confirm Arrival</button>
-        <button class="btn-danger-outline" id="drawerNoShowBtn"><i class="bi bi-calendar-x"></i> No Show</button>`;
+        <details class="management-more-actions">
+          <summary>More actions <i class="bi bi-chevron-down" aria-hidden="true"></i></summary>
+          <div>
+            <button class="btn-ghost-clay" id="drawerExtendDeadlineBtn"><i class="bi bi-calendar-plus"></i> Extend deadline</button>
+            <button class="btn-danger-outline" id="drawerNoShowBtn"><i class="bi bi-calendar-x"></i> Mark no show</button>
+          </div>
+        </details>
+        <button class="btn-approve-confirm management-primary-action" id="drawerArrivalBtn"><i class="bi bi-person-check"></i> Confirm Arrival</button>`;
   }
   if (r.status === "Expired") {
     footerBtns += `<button class="btn-approve-confirm" id="drawerRestoreBtn"><i class="bi bi-arrow-counterclockwise"></i> Restore Request</button>`;

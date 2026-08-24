@@ -272,8 +272,8 @@ function renderTable() {
   }
 
   tbody.innerHTML = page.map(a => `
-    <tr data-id="${a.id}" class="${a.id===activeAppId?"row-active":""}">
-      <td class="app-id-cell" data-label="Application">${a.applicationId}</td>
+    <tr data-id="${a.id}" class="management-card-row ${a.id===activeAppId?"row-active":""}">
+      <td class="app-id-cell management-card-primary" data-label="Application">${a.applicationId}</td>
       <td data-label="Applicant">
         <div class="applicant-cell">
           <div class="applicant-avatar">${a.adopter.initials}</div>
@@ -299,9 +299,9 @@ function renderTable() {
       </td>
       <td data-label="Match">${compatPill(a.compatScore, a.type)}</td>
       <td data-label="Status">${statusBadge(a.status)}</td>
-      <td data-label="Actions">
-        <button class="tbl-action-btn" data-action="view" data-id="${a.id}" title="View details" aria-label="View adoption application details">
-          <i class="bi bi-eye"></i>
+      <td class="management-card-actions" data-label="Actions">
+        <button class="tbl-action-btn management-card-open" data-action="view" data-id="${a.id}" title="View application" aria-label="View adoption application details">
+          <i class="bi bi-eye" aria-hidden="true"></i><span class="management-action-text">View application</span>
         </button>
       </td>
     </tr>`).join("");
@@ -578,19 +578,24 @@ function renderDrawerContent(app) {
 
 if (app.status === "Approved") {
   footerBtns += `
-    ${
-      can("reject")
-        ? `<button class="btn-danger-outline" id="drawerRejectBtn">
-            <i class="bi bi-x-lg"></i> Reject
-          </button>`
-        : ""
-    }
-    <button class="btn-ghost-clay" id="drawerExtendDeadlineBtn"><i class="bi bi-calendar-plus"></i> Extend</button>
-    <button class="btn-ghost-clay" id="drawerArrivalBtn"><i class="bi bi-person-check"></i> Confirm Arrival</button>
-    <button class="btn-danger-outline" id="drawerNoShowBtn"><i class="bi bi-calendar-x"></i> No Show</button>
+    <details class="management-more-actions">
+      <summary>More actions <i class="bi bi-chevron-down" aria-hidden="true"></i></summary>
+      <div>
+        ${
+          can("reject")
+            ? `<button class="btn-danger-outline" id="drawerRejectBtn">
+                <i class="bi bi-x-lg"></i> Reject
+              </button>`
+            : ""
+        }
+        <button class="btn-ghost-clay" id="drawerExtendDeadlineBtn"><i class="bi bi-calendar-plus"></i> Extend deadline</button>
+        <button class="btn-danger-outline" id="drawerNoShowBtn"><i class="bi bi-calendar-x"></i> Mark no show</button>
+      </div>
+    </details>
+    <button class="btn-ghost-clay ${can("finalize") ? "" : "management-primary-action"}" id="drawerArrivalBtn"><i class="bi bi-person-check"></i> Confirm Arrival</button>
     ${
       can("finalize")
-        ? `<button class="btn-finalize" id="drawerFinalizeBtn">
+        ? `<button class="btn-finalize management-primary-action" id="drawerFinalizeBtn">
             <i class="bi bi-balloon-heart-fill"></i> Finalize Adoption
           </button>`
         : ""
@@ -608,7 +613,7 @@ if (app.status === "Expired") {
         <h3>Adoption Application Details</h3>
         <p>${app.applicationId} · Submitted ${formatDate(app.submitted)} · ${app.type}</p>
       </div>
-      <button class="drawer-close-btn" id="drawerCloseX"><i class="bi bi-x-lg"></i></button>
+      <button class="drawer-close-btn" id="drawerCloseX" aria-label="Close adoption application details"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
     </div>
     <div class="drawer-body">
       <section class="application-journey" aria-label="Applicant and animal summary">

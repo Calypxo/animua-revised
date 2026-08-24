@@ -44,6 +44,17 @@ export async function saveBehavioralAssessment(id, payload) {
   }, { offlineQueued: true });
 }
 
+export async function getBehavioralQuestions() {
+  return await apiFetch("/animals/behavioral-questions");
+}
+
+export async function saveBehavioralQuestions(questions, version) {
+  return await apiFetch("/animals/behavioral-questions", {
+    method: "PUT",
+    body: JSON.stringify({ questions, version }),
+  });
+}
+
 export async function addMedicalRecord(id, payload) {
   return await queuedAdminApiFetch(`/animals/${encodeURIComponent(id)}/medical`, {
     method: "POST",

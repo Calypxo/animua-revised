@@ -2185,9 +2185,11 @@
   display: grid;
   place-items: center;
   flex: 0 0 18px;
-  border-radius: 0;
+  border: 0 !important;
+  border-radius: 0 !important;
   color: #786d68;
-  background: transparent;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 .inventory-page .inventory-search input {
@@ -2285,15 +2287,6 @@
   color: #786d68;
   font: 600 .67rem/1.35 "Poppins", sans-serif;
 }
-
-.inventory-page .inventory-filter-summary span:last-child {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  white-space: nowrap;
-}
-
-.inventory-page .inventory-filter-summary i { color: #ffb51b; }
 
 .inventory-page .inventory-table-wrap {
   width: 100%;
@@ -2487,10 +2480,161 @@
   .inventory-page .inv-table-panel > .panel-head { padding: 16px !important; }
   .inventory-page .inv-category-strip { grid-template-columns: 1fr; gap: 8px; }
   .inventory-page .inventory-filter-controls { grid-template-columns: 1fr 1fr; }
-  .inventory-page .inventory-filter-summary span:last-child { display: none; }
 }
 
 @media (max-width: 540px) {
   .inventory-page .inventory-filter-controls { grid-template-columns: 1fr; }
   .inventory-page .inventory-clear-filters { width: 100%; }
+}
+
+@media (max-width: 700px) {
+  body.management-consistent-ui.inventory-page .inventory-table-wrap {
+    overflow: visible !important;
+  }
+
+  body.management-consistent-ui.inventory-page .inventory-smart-table .item-name-cell {
+    align-items: flex-start;
+  }
+
+  body.management-consistent-ui.inventory-page .inventory-smart-table .item-name {
+    overflow: visible;
+    line-height: 1.4;
+    text-overflow: clip;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  body.management-consistent-ui.inventory-page .inventory-smart-table :is(
+    .cat-badge, .days-cell, .movement-badge,
+    .risk-review, .risk-ok, .risk-critical
+  ) {
+    max-width: 100%;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    line-height: 1.35;
+  }
+
+  body.management-consistent-ui.inventory-page .inventory-smart-table .stock-cell {
+    width: 100%;
+  }
+
+  body.management-consistent-ui.inventory-page .inventory-smart-table .table-actions {
+    width: 100%;
+    min-width: 0;
+    justify-content: flex-start !important;
+    flex-wrap: wrap !important;
+  }
+
+  body.management-consistent-ui.inventory-page .inventory-smart-table .table-actions .tbl-action-btn {
+    width: 44px !important;
+    height: 44px !important;
+    flex: 0 0 44px !important;
+  }
+
+  body.management-consistent-ui.inventory-page .inventory-smart-table tr.row-critical {
+    border-left: 4px solid #780116;
+  }
+
+  body.management-consistent-ui.inventory-page .inventory-smart-table tr.row-low {
+    border-left: 4px solid #b86a00;
+  }
+}
+
+.inventory-action-text {
+  display: none;
+}
+
+@media (max-width: 700px) {
+  body.management-consistent-ui.inventory-page .inventory-smart-table tbody > tr.management-card-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 14px;
+    padding: 13px;
+  }
+
+  body.management-consistent-ui.inventory-page .inventory-smart-table tbody > tr.management-card-row > td {
+    grid-column: auto;
+  }
+
+  body.management-consistent-ui.inventory-page .inventory-smart-table tbody > tr.management-card-row > :is(
+    .management-card-primary, .management-card-actions
+  ) {
+    grid-column: 1 / -1;
+  }
+
+  body.management-consistent-ui.inventory-page .inventory-smart-table .management-card-primary > .management-mobile-label,
+  body.management-consistent-ui.inventory-page .inventory-smart-table .management-card-actions > .management-mobile-label {
+    display: none;
+  }
+
+  body.management-consistent-ui.inventory-page .inventory-smart-table .item-icon {
+    width: 42px !important;
+    height: 42px !important;
+    flex-basis: 42px !important;
+  }
+
+  body.management-consistent-ui.inventory-page .inventory-smart-table .item-name {
+    font-size: .94rem;
+    font-weight: 800;
+  }
+
+  body.management-consistent-ui.inventory-page .inventory-smart-table .item-meta {
+    margin-top: 3px;
+    font-size: .7rem;
+  }
+
+  body.management-consistent-ui.inventory-page .inventory-smart-table .stock-main {
+    line-height: 1.25;
+  }
+
+  body.management-consistent-ui.inventory-page .inventory-smart-table .stock-bar-wrap {
+    margin-top: 5px;
+  }
+
+  body.management-consistent-ui.inventory-page .inventory-smart-table .table-actions {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  body.management-consistent-ui.inventory-page .inventory-smart-table .table-actions .tbl-action-btn {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 44px !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    flex: 1 1 auto !important;
+    padding-inline: 7px !important;
+  }
+
+  body.management-consistent-ui.inventory-page .inventory-action-text {
+    display: inline;
+    font-size: .66rem;
+    font-weight: 750;
+    line-height: 1.2;
+  }
+
+  body.management-consistent-ui.inventory-page .table-actions .tbl-action-btn.use {
+    color: #780116 !important;
+    border-color: rgba(120, 1, 22, .22) !important;
+    background: #fff4f5 !important;
+  }
+}
+
+@media (max-width: 360px) {
+  html body.management-consistent-ui.inventory-page .inventory-smart-table tbody > tr.management-card-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  html body.management-consistent-ui.inventory-page .inventory-smart-table tbody > tr.management-card-row > td {
+    grid-column: auto;
+  }
+
+  html body.management-consistent-ui.inventory-page .inventory-smart-table tbody > tr.management-card-row > :is(
+    .management-card-primary, .management-card-actions
+  ) {
+    grid-column: 1 / -1;
+  }
 }

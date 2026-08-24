@@ -11,10 +11,10 @@
 
 .contact-messages-page .cm-workspace {
   display: grid;
-  grid-template-columns: minmax(300px, 0.62fr) minmax(560px, 1.38fr);
+  grid-template-columns: minmax(320px, 360px) minmax(0, 1fr);
   align-items: start;
-  gap: 16px;
-  margin: 0 22px 22px;
+  gap: 12px;
+  margin: 0 18px 18px;
 }
 
 .contact-messages-page .cm-workspace:not(.conversation-open) {
@@ -45,16 +45,18 @@
 
 .contact-messages-page .cm-inbox-panel {
   display: flex;
-  min-height: 740px;
+  height: clamp(560px, 70vh, 700px);
+  min-height: 0;
   flex-direction: column;
 }
 
 .contact-messages-page .cm-message-list {
+  flex: 1 1 auto;
   display: grid;
   align-content: start;
   gap: 8px;
   min-height: 0;
-  max-height: 650px;
+  max-height: none;
   padding: 10px;
   overflow-y: auto;
 }
@@ -135,7 +137,7 @@
 .contact-messages-page .cm-message-meta strong {
   overflow: hidden;
   color: var(--ap-ink);
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   font-weight: 800;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -163,7 +165,7 @@
 .contact-messages-page .cm-message-sender > span {
   overflow: hidden;
   color: var(--ap-muted);
-  font-size: 0.64rem;
+  font-size: 0.67rem;
   font-weight: 500;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -173,7 +175,7 @@
   display: -webkit-box;
   overflow: hidden;
   color: var(--ap-muted);
-  font-size: 0.67rem;
+  font-size: 0.71rem;
   font-weight: 500;
   line-height: 1.45;
   -webkit-box-orient: vertical;
@@ -455,13 +457,13 @@ button.cm-chat-bubble.active {
 }
 
 .contact-messages-page .cm-chat-subject {
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   font-weight: 800;
   letter-spacing: 0.025em;
 }
 
 .contact-messages-page .cm-chat-message {
-  font-size: 0.75rem;
+  font-size: 0.81rem;
   font-weight: 500;
   line-height: 1.65;
   white-space: pre-wrap;
@@ -473,7 +475,7 @@ button.cm-chat-bubble.active {
   justify-content: space-between;
   gap: 15px;
   color: var(--ap-muted);
-  font-size: 0.56rem;
+  font-size: 0.61rem;
   font-weight: 600;
 }
 
@@ -968,7 +970,7 @@ button.cm-chat-bubble.active {
 
 @media (min-width: 1051px) {
   .contact-messages-page .cm-workspace:not(.conversation-open) {
-    grid-template-columns: minmax(300px, 0.62fr) minmax(560px, 1.38fr);
+    grid-template-columns: minmax(320px, 360px) minmax(0, 1fr);
   }
 
   .contact-messages-page .cm-workspace:not(.conversation-open) .cm-detail-panel {
@@ -976,7 +978,7 @@ button.cm-chat-bubble.active {
   }
 
   .contact-messages-page .cm-workspace:not(.conversation-open) .cm-inbox-panel {
-    min-height: 740px;
+    min-height: 0;
   }
 
   .contact-messages-page .cm-workspace:not(.conversation-open) .cm-message-list {
@@ -1137,5 +1139,633 @@ button.cm-chat-bubble.active {
     align-items: flex-start;
     flex-direction: column;
     gap: 2px;
+  }
+}
+
+@media (max-width: 720px) {
+  .contact-messages-page .cm-message-list {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .contact-messages-page .cm-message-item {
+    grid-template-columns: 38px minmax(0, 1fr) 10px;
+    gap: 9px;
+    padding: 10px;
+  }
+
+  .contact-messages-page .cm-message-avatar {
+    width: 38px;
+    height: 38px;
+  }
+
+  .contact-messages-page .cm-message-meta strong,
+  .contact-messages-page .cm-message-copy > strong,
+  .contact-messages-page .cm-message-sender b {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .contact-messages-page .cm-message-sender > span:first-child {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .contact-messages-page .cm-detail-panel,
+  html body.management-consistent-ui.contact-messages-page .cm-detail-panel {
+    height: min(680px, calc(100dvh - 120px));
+    min-height: min(460px, calc(100dvh - 120px)) !important;
+  }
+
+  .contact-messages-page .cm-user-summary { padding: 10px 12px; }
+  .contact-messages-page .cm-user-summary h2,
+  .contact-messages-page .cm-user-summary p {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .contact-messages-page .cm-chat-thread {
+    gap: 10px;
+    padding: 12px 9px;
+    scrollbar-gutter: auto;
+  }
+
+  .contact-messages-page .cm-chat-row { gap: 6px; }
+  .contact-messages-page .cm-chat-avatar { width: 28px; height: 28px; }
+  .contact-messages-page .cm-chat-bubble {
+    max-width: calc(100% - 34px);
+    gap: 6px;
+    padding: 10px 11px;
+  }
+
+  .contact-messages-page .cm-chat-message,
+  .contact-messages-page .cm-chat-subject { overflow-wrap: anywhere; }
+  .contact-messages-page .cm-chat-meta { flex-wrap: wrap; gap: 5px 10px; }
+
+  .contact-messages-page .cm-chat-composer {
+    grid-template-columns: minmax(0, 1fr) 44px;
+    gap: 5px;
+    margin: 8px 8px max(24px, env(safe-area-inset-bottom));
+    padding: 4px 5px 4px 11px;
+  }
+
+  .contact-messages-page .cm-compose-send {
+    width: 44px;
+    height: 44px;
+    border-radius: 9px;
+  }
+
+  .contact-messages-page .cm-compose-status {
+    left: 10px;
+    bottom: -17px;
+    max-width: calc(100% - 20px);
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 360px) {
+  .contact-messages-page .cm-message-meta { align-items: flex-start; flex-direction: column; gap: 2px; }
+  .contact-messages-page .cm-message-meta time { white-space: normal; }
+}
+
+.contact-messages-page .cm-compose-send > span {
+  font-size: .7rem;
+  font-weight: 750;
+}
+
+@media (max-width: 720px) {
+  .contact-messages-page .cm-detail-panel,
+  html body.management-consistent-ui.contact-messages-page .cm-detail-panel {
+    height: auto;
+    min-height: 0 !important;
+  }
+
+  .contact-messages-page .cm-detail {
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .contact-messages-page .cm-conversation-history {
+    min-height: 0;
+    max-height: 55dvh;
+    flex: 0 1 auto;
+  }
+
+  .contact-messages-page .cm-chat-thread {
+    min-height: 128px;
+    max-height: 55dvh;
+    flex: 0 1 auto;
+    gap: 12px;
+    padding: 14px 10px;
+  }
+
+  .contact-messages-page .cm-chat-row {
+    gap: 8px;
+  }
+
+  .contact-messages-page .cm-chat-avatar {
+    width: 32px;
+    height: 32px;
+    font-size: .7rem;
+  }
+
+  .contact-messages-page .cm-chat-row.is-outgoing .cm-chat-avatar {
+    display: none;
+  }
+
+  .contact-messages-page .cm-chat-bubble {
+    max-width: 86%;
+    gap: 7px;
+    padding: 12px 13px;
+    border-radius: 14px 14px 14px 4px;
+  }
+
+  .contact-messages-page .is-outgoing .cm-chat-bubble {
+    max-width: 86%;
+    border-radius: 14px 14px 4px 14px;
+  }
+
+  .contact-messages-page .cm-chat-subject {
+    font-size: .73rem;
+    line-height: 1.4;
+  }
+
+  .contact-messages-page .cm-chat-message {
+    font-size: .84rem;
+    line-height: 1.58;
+  }
+
+  .contact-messages-page .cm-chat-meta {
+    gap: 6px 12px;
+    font-size: .65rem;
+    line-height: 1.35;
+  }
+
+  .contact-messages-page .cm-chat-composer {
+    grid-template-columns: minmax(0, 1fr) auto;
+    min-height: 56px;
+    gap: 7px;
+    margin: 10px 8px max(25px, env(safe-area-inset-bottom));
+    padding: 5px 6px 5px 12px;
+    border-radius: 14px;
+    box-shadow: 0 5px 16px rgba(55, 32, 28, .07);
+    scroll-margin-bottom: 16px;
+  }
+
+  .contact-messages-page .cm-chat-composer textarea {
+    min-height: 44px;
+    padding-block: 10px;
+    font-size: 16px;
+  }
+
+  .contact-messages-page .cm-compose-send {
+    width: auto;
+    min-width: 72px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding-inline: 12px;
+    border-radius: 10px;
+    color: #fff;
+    background: #780116;
+  }
+
+  .contact-messages-page .cm-compose-send:hover:not(:disabled),
+  .contact-messages-page .cm-compose-send:focus-visible {
+    color: #fff;
+    background: #650112;
+  }
+
+  .contact-messages-page .cm-compose-status {
+    left: 12px;
+    bottom: -18px;
+    font-size: .62rem;
+    font-weight: 500;
+  }
+}
+
+@media (max-width: 360px) {
+  .contact-messages-page .cm-chat-bubble,
+  .contact-messages-page .is-outgoing .cm-chat-bubble {
+    max-width: calc(100% - 38px);
+  }
+
+  .contact-messages-page .is-outgoing .cm-chat-bubble {
+    max-width: 90%;
+  }
+
+  .contact-messages-page .cm-compose-send {
+    min-width: 64px;
+    padding-inline: 9px;
+  }
+}
+
+/* Contact Messages visual system: a calm, focused inbox using ANIMUA colors. */
+.contact-messages-page {
+  --cm-red: #780116;
+  --cm-red-deep: #610112;
+  --cm-red-soft: #f9edef;
+  --cm-gold: #f7b538;
+  --cm-gold-soft: #fff6df;
+  --cm-cream: #fbf8f4;
+  --cm-warm-line: #e8dfd8;
+  --cm-shadow: 0 12px 30px rgba(55, 35, 29, 0.07);
+}
+
+.contact-messages-page .cm-records-panel {
+  position: relative;
+  overflow: hidden;
+  border-color: var(--cm-warm-line);
+  background: #fff;
+  box-shadow: var(--cm-shadow);
+}
+
+.contact-messages-page .cm-records-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 2;
+  height: 3px;
+  background: var(--cm-red);
+}
+
+.contact-messages-page .cm-records-panel > .ap-records-heading {
+  position: relative;
+  align-items: center;
+  padding-block: 24px 20px;
+  border-bottom: 1px solid var(--cm-warm-line);
+  background: #fff;
+}
+
+.contact-messages-page .cm-records-panel > .ap-records-heading .reference-records-icon {
+  color: var(--cm-red);
+  border: 1px solid rgba(120, 1, 22, 0.1);
+  background: var(--cm-gold-soft);
+  box-shadow: none;
+}
+
+.contact-messages-page .cm-records-panel > .ap-records-heading .ap-section-kicker {
+  color: var(--cm-red);
+}
+
+.contact-messages-page .cm-records-panel > .ap-records-heading h2,
+.contact-messages-page .cm-records-panel > .ap-records-heading p,
+.contact-messages-page .cm-records-panel > .ap-records-heading .ap-records-legend {
+  color: var(--ap-ink);
+}
+
+.contact-messages-page .cm-records-panel > .ap-records-heading p {
+  color: var(--ap-muted);
+}
+
+.contact-messages-page .cm-records-panel > .ap-records-heading .ap-records-legend {
+  padding: 8px 12px;
+  border: 1px solid var(--cm-warm-line);
+  border-radius: 999px;
+  background: var(--cm-cream);
+}
+
+.contact-messages-page .cm-records-panel > .ap-records-heading .ap-records-legend i {
+  color: var(--cm-gold);
+}
+
+.contact-messages-page .cm-records-panel > .ap-toolbar {
+  border-color: var(--cm-warm-line);
+  background: #fcfaf8;
+  box-shadow: none;
+}
+
+.contact-messages-page .cm-records-panel .ap-tabs-wrap {
+  border-bottom-color: rgba(120, 1, 22, 0.14);
+}
+
+.contact-messages-page .cm-records-panel .ap-tab {
+  color: #756760;
+}
+
+.contact-messages-page .cm-records-panel .ap-tab::after {
+  height: 3px;
+  background: var(--cm-red);
+}
+
+.contact-messages-page .cm-records-panel .ap-tab:hover,
+.contact-messages-page .cm-records-panel .ap-tab.active {
+  color: var(--cm-red);
+}
+
+.contact-messages-page .cm-records-panel .ap-tab.active i,
+.contact-messages-page .cm-records-panel .ap-tab.active span {
+  color: var(--cm-red);
+}
+
+.contact-messages-page .cm-records-panel .ap-control:focus-within,
+.contact-messages-page .cm-records-panel .ap-filter-field select:focus {
+  border-color: var(--cm-red);
+  box-shadow: 0 0 0 4px rgba(247, 181, 56, 0.22);
+}
+
+.contact-messages-page .cm-inbox-panel,
+.contact-messages-page .cm-detail-panel {
+  border-color: var(--cm-warm-line);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: none;
+}
+
+.contact-messages-page .cm-inbox-panel .reference-table-section-head {
+  position: relative;
+  border-bottom: 1px solid var(--cm-warm-line);
+  background: var(--cm-cream);
+}
+
+.contact-messages-page .cm-inbox-panel .reference-table-section-head::before {
+  content: "";
+  position: absolute;
+  top: 16px;
+  bottom: 16px;
+  left: 0;
+  width: 4px;
+  border-radius: 0 999px 999px 0;
+  background: var(--cm-red);
+}
+
+.contact-messages-page .cm-inbox-panel .reference-table-section-head span,
+.contact-messages-page .cm-inbox-panel .reference-table-section-head > strong {
+  color: var(--cm-red);
+}
+
+.contact-messages-page .cm-inbox-panel .reference-table-section-head > strong {
+  padding: 6px 10px;
+  border: 1px solid rgba(120, 1, 22, 0.14);
+  border-radius: 999px;
+  background: #fff;
+}
+
+.contact-messages-page .cm-message-list {
+  gap: 0;
+  padding: 6px;
+  background: #fff;
+}
+
+.contact-messages-page .cm-message-item {
+  padding: 14px 12px;
+  border: 0;
+  border-bottom: 1px solid #eee7e1;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.contact-messages-page .cm-message-item:hover,
+.contact-messages-page .cm-message-item:focus-visible {
+  border-color: rgba(247, 181, 56, 0.88);
+  background: var(--cm-cream);
+  box-shadow: none;
+  transform: none;
+}
+
+.contact-messages-page .cm-message-item.active {
+  border-color: transparent;
+  background: var(--cm-red-soft);
+  box-shadow: inset 3px 0 0 var(--cm-red);
+}
+
+.contact-messages-page .cm-message-avatar {
+  color: #fff;
+  border: 0;
+  background: var(--cm-red);
+  box-shadow: none;
+}
+
+.contact-messages-page .cm-message-status.is-new,
+.contact-messages-page .cm-status-pill.is-new {
+  color: var(--cm-red);
+  border: 1px solid rgba(247, 181, 56, 0.5);
+  background: var(--cm-gold-soft);
+}
+
+.contact-messages-page .cm-detail-empty {
+  border-color: var(--cm-warm-line);
+  background: var(--cm-cream);
+}
+
+.contact-messages-page .cm-detail-empty > span {
+  color: var(--cm-red);
+  border: 0;
+  background: var(--cm-gold-soft);
+  box-shadow: none;
+}
+
+.contact-messages-page .cm-detail-empty small {
+  color: var(--cm-red);
+}
+
+.contact-messages-page .cm-user-summary {
+  min-height: 72px;
+  padding: 12px 18px;
+  border-bottom-color: var(--cm-warm-line);
+  background: #fff;
+}
+
+.contact-messages-page .cm-user-summary-mark {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  color: var(--cm-red);
+  background: var(--cm-gold-soft);
+  font-size: 0.92rem;
+}
+
+.contact-messages-page .cm-user-summary small {
+  color: var(--cm-red);
+}
+
+.contact-messages-page .cm-user-summary h2 {
+  color: var(--ap-ink);
+}
+
+.contact-messages-page .cm-user-summary p {
+  color: var(--ap-muted);
+}
+
+.contact-messages-page .cm-back-button {
+  border-color: rgba(247, 181, 56, 0.72);
+  color: var(--cm-red);
+  background: var(--cm-gold);
+}
+
+.contact-messages-page .cm-back-button:hover,
+.contact-messages-page .cm-back-button:focus-visible {
+  outline: 3px solid rgba(255, 255, 255, 0.5);
+  outline-offset: 2px;
+  background: #ffd369;
+}
+
+.contact-messages-page .cm-chat-thread {
+  background: #faf8f6;
+  scrollbar-color: var(--cm-red) var(--cm-gold-soft);
+}
+
+.contact-messages-page .cm-chat-avatar {
+  border: 0;
+  background: #6b5147;
+}
+
+.contact-messages-page .cm-chat-avatar.is-animua {
+  color: #fff;
+  border-color: transparent;
+  background: var(--cm-red);
+}
+
+.contact-messages-page .cm-chat-bubble {
+  border-color: #eadfd5;
+  border-radius: 14px 14px 14px 4px;
+  background: #fff;
+  box-shadow: 0 3px 10px rgba(65, 39, 31, 0.05);
+}
+
+.contact-messages-page button.cm-chat-bubble:hover,
+.contact-messages-page button.cm-chat-bubble:focus-visible {
+  border-color: var(--cm-gold);
+  box-shadow: 0 0 0 3px rgba(247, 181, 56, 0.2), 0 8px 20px rgba(65, 39, 31, 0.08);
+}
+
+.contact-messages-page button.cm-chat-bubble.active {
+  border-color: var(--cm-red);
+  box-shadow: inset 4px 0 0 var(--cm-gold), 0 0 0 3px rgba(120, 1, 22, 0.09);
+}
+
+.contact-messages-page .is-outgoing .cm-chat-bubble {
+  border-color: var(--cm-red);
+  border-radius: 14px 14px 4px 14px;
+  color: #fff;
+  background: var(--cm-red);
+  box-shadow: none;
+}
+
+.contact-messages-page .is-outgoing .cm-chat-subject {
+  color: var(--cm-gold);
+}
+
+.contact-messages-page .is-outgoing .cm-chat-message {
+  color: #fff;
+}
+
+.contact-messages-page .is-outgoing .cm-chat-meta {
+  color: rgba(255, 255, 255, 0.76);
+}
+
+.contact-messages-page .cm-chat-composer {
+  margin: 12px 14px 29px;
+  padding: 7px 8px 7px 15px;
+  border-color: var(--cm-warm-line);
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(74, 37, 28, 0.07);
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.contact-messages-page .cm-chat-composer:focus-within {
+  border-color: var(--cm-red);
+  box-shadow: 0 0 0 4px rgba(247, 181, 56, 0.22), 0 9px 24px rgba(74, 37, 28, 0.11);
+}
+
+.contact-messages-page .cm-compose-send {
+  width: auto;
+  min-width: 82px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 14px;
+  border: 1px solid var(--cm-red);
+  border-radius: 11px;
+  color: #fff;
+  background: var(--cm-red);
+  box-shadow: none;
+}
+
+.contact-messages-page .cm-compose-send > i {
+  color: #fff;
+}
+
+.contact-messages-page .cm-compose-send:hover:not(:disabled),
+.contact-messages-page .cm-compose-send:focus-visible {
+  color: #fff;
+  background: var(--cm-red-deep);
+  box-shadow: 0 0 0 3px rgba(247, 181, 56, 0.3), 0 9px 20px rgba(120, 1, 22, 0.22);
+  outline: none;
+}
+
+.contact-messages-page .cm-compose-status {
+  color: #7c6b62;
+}
+
+@media (max-width: 720px) {
+  .contact-messages-page .cm-records-panel > .ap-records-heading {
+    padding-block: 20px 16px;
+  }
+
+  .contact-messages-page .cm-records-panel > .ap-records-heading .ap-records-legend {
+    width: fit-content;
+    border-radius: 12px;
+  }
+
+  .contact-messages-page .cm-inbox-panel,
+  .contact-messages-page .cm-detail-panel {
+    border-radius: 16px;
+  }
+
+  .contact-messages-page .cm-inbox-panel {
+    height: auto;
+  }
+
+  .contact-messages-page .cm-user-summary {
+    min-height: 70px;
+    padding: 10px 12px;
+  }
+
+  .contact-messages-page .cm-user-summary-mark {
+    width: 36px;
+    height: 36px;
+  }
+
+  .contact-messages-page .cm-chat-bubble,
+  .contact-messages-page .is-outgoing .cm-chat-bubble {
+    border-radius: 15px 15px 15px 5px;
+  }
+
+  .contact-messages-page .is-outgoing .cm-chat-bubble {
+    border-radius: 15px 15px 5px 15px;
+  }
+
+  .contact-messages-page .cm-chat-composer {
+    margin: 10px 8px max(25px, env(safe-area-inset-bottom));
+    padding: 5px 6px 5px 12px;
+  }
+
+  .contact-messages-page .cm-compose-send {
+    min-width: 72px;
+    height: 44px;
+    padding-inline: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-messages-page .cm-message-item,
+  .contact-messages-page .cm-chat-composer {
+    transition: none;
   }
 }

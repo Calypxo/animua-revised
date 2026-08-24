@@ -114,11 +114,11 @@ function renderAlertBar() {
   const restorable = state.filteredRecords.filter((item) => item.sourceType === "animal").length;
   bar.innerHTML = `
     <div class="archive-signal-card">
-      <span class="signal-icon"><i class="bi bi-archive-fill"></i></span>
+      <span class="signal-icon"><i class="bi bi-shield-lock"></i></span>
       <div class="signal-copy">
-        <span class="signal-kicker">Vault overview</span>
+        <span class="signal-kicker">Protected records vault</span>
         <strong>${state.filteredRecords.length} retained record${state.filteredRecords.length === 1 ? "" : "s"} in this view</strong>
-        <small>${restorable ? `${restorable} animal profile${restorable === 1 ? " is" : "s are"} eligible for controlled restoration.` : "These records are retained as read-only management history."}</small>
+        <small>Archived data remains available for review. ${restorable ? `${restorable} eligible animal profile${restorable === 1 ? " may" : "s may"} be restored.` : "Other retained records remain read-only for governance."}</small>
       </div>
       <span class="vault-count"><strong>${restorable}</strong><small>restorable</small></span>
     </div>
@@ -203,8 +203,9 @@ function renderTable() {
   }
 
   tbody.innerHTML = rows.map((item) => `
-    <tr class="archive-row">
-      <td>
+    <tr class="archive-row management-card-row">
+      <td class="management-card-primary">
+        <span class="management-mobile-label" aria-hidden="true">Archived record</span>
         <div class="archive-record-cell">
           <span class="record-icon ${getModuleClass(item.module)}"><i class="bi ${getModuleIcon(item.module)}"></i></span>
           <span><strong class="record-title">${escapeHtml(item.title)}</strong><small class="record-sub">${escapeHtml(item.recordId)} · ${escapeHtml(item.id)}</small></span>
@@ -212,33 +213,38 @@ function renderTable() {
       </td>
 
       <td>
+        <span class="management-mobile-label" aria-hidden="true">Module</span>
         <span class="module-badge ${getModuleClass(item.module)}">
           ${escapeHtml(item.module)}
         </span>
       </td>
 
       <td>
+        <span class="management-mobile-label" aria-hidden="true">Type</span>
         <span class="type-badge">${escapeHtml(item.type)}</span>
       </td>
 
       <td>
+        <span class="management-mobile-label" aria-hidden="true">Reason</span>
         <span class="reason-badge ${getReasonClass(item.reason)}">
           ${escapeHtml(item.reason)}
         </span>
       </td>
 
       <td>
+        <span class="management-mobile-label" aria-hidden="true">Date archived</span>
         <div class="date-cell">
           ${escapeHtml(item.archivedDate)}<br />
           ${escapeHtml(item.archivedTime)}
         </div>
       </td>
 
-      <td><span class="archiver-cell"><i class="bi bi-person-check"></i>${escapeHtml(item.archivedBy)}</span></td>
+      <td><span class="management-mobile-label" aria-hidden="true">Archived by</span><span class="archiver-cell"><i class="bi bi-person-check"></i>${escapeHtml(item.archivedBy)}</span></td>
 
-      <td>
+      <td class="management-card-actions">
+        <span class="management-mobile-label" aria-hidden="true">Actions</span>
         <div class="action-group table-actions">
-          <button class="tbl-action-btn" data-view-id="${escapeHtml(item.id)}" title="View details" aria-label="View archived record details"><i class="bi bi-eye"></i></button>
+          <button class="tbl-action-btn management-card-open" data-view-id="${escapeHtml(item.id)}" title="View details" aria-label="View archived record details"><i class="bi bi-eye"></i><span class="archive-action-text">View details</span></button>
           ${
               can("restore") && item.sourceType === "animal"
           ? `
@@ -249,6 +255,7 @@ function renderTable() {
               aria-label="Restore archived record"
             >
               <i class="bi bi-arrow-clockwise"></i>
+              <span class="archive-action-text">Restore</span>
             </button>
           `
           : ""
@@ -578,7 +585,9 @@ if (reasonFilter) {
 }
 
   document.querySelectorAll(".archive-tab").forEach((btn) => {
-    btn.classList.toggle("active", btn.dataset.tab === "all");
+    const isSelected = btn.dataset.tab === "all";
+    btn.classList.toggle("active", isSelected);
+    btn.setAttribute("aria-selected", String(isSelected));
   });
 
   applyFilters();
@@ -592,9 +601,10 @@ function bindTabs() {
       state.currentPage = 1;
 
       document.querySelectorAll(".archive-tab").forEach((tab) => {
-        tab.classList.remove("active");
+        const isSelected = tab === btn;
+        tab.classList.toggle("active", isSelected);
+        tab.setAttribute("aria-selected", String(isSelected));
       });
-      btn.classList.add("active");
 
       applyFilters();
     });
@@ -736,11 +746,9 @@ function syncArchiveTabs() {
   document
     .querySelectorAll(".archive-tab")
     .forEach((button) => {
-      button.classList.toggle(
-        "active",
-        button.dataset.tab ===
-          state.activeTab
-      );
+      const isSelected = button.dataset.tab === state.activeTab;
+      button.classList.toggle("active", isSelected);
+      button.setAttribute("aria-selected", String(isSelected));
     });
 }
 

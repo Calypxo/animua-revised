@@ -22,6 +22,8 @@ const escapeHtml = (value) => String(value ?? "")
 const normalizePath = (path = "") => path.split("?")[0].split("#")[0].replace(/\/+$/, "") || "/";
 const EMBED_PARAM = "animuaShell";
 const WORKSPACE_FRAME_NAME = "animua-management-workspace";
+const MOBILE_NAV_MAX_WIDTH = 768;
+const TABLET_RAIL_MAX_WIDTH = 1100;
 
 function ensureCompactTopbarBrand() {
   const topbarLeft = document.querySelector(".topbar-left");
@@ -217,37 +219,108 @@ function bindSidebar(container, sidebar, overlay) {
   const toggle = document.getElementById("sidebarToggle");
   if (toggle) {
     toggle.type = "button";
-    toggle.setAttribute("aria-label", "Toggle management navigation");
+    toggle.setAttribute("aria-controls", "sidebar");
   }
-  const closeMobile = () => {
-    sidebar.classList.remove("mobile-show");
-    overlay.classList.remove("active");
-    toggle?.setAttribute("aria-expanded", "false");
+
+  const layoutMode = () => {
+    if (window.innerWidth <= MOBILE_NAV_MAX_WIDTH) return "mobile";
+    if (window.innerWidth <= TABLET_RAIL_MAX_WIDTH) return "tablet";
+    return "desktop";
   };
 
-  toggle?.setAttribute("aria-controls", "sidebar");
+  const setToggleState = (expanded, { restoreFocus = false } = {}) => {
+    const mode = layoutMode();
+    toggle?.setAttribute("aria-expanded", String(expanded));
+    toggle?.setAttribute(
+      "aria-label",
+      expanded
+        ? `${mode === "mobile" ? "Close" : "Collapse"} management navigation`
+        : "Open management navigation"
+    );
+    container.dispatchEvent(new CustomEvent("animua:sidebar-state", {
+      detail: { expanded, restoreFocus },
+    }));
+    if (restoreFocus) toggle?.focus();
+  };
+
+  const focusNavigation = () => {
+    window.requestAnimationFrame(() => {
+      (sidebar.querySelector(".nav-item.active") || sidebar.querySelector(".nav-item, .nav-group-toggle"))?.focus();
+    });
+  };
+
+  const closeMobile = ({ restoreFocus = false } = {}) => {
+    const wasOpen = sidebar.classList.contains("mobile-show");
+    sidebar.classList.remove("mobile-show");
+    overlay.classList.remove("active");
+    if (wasOpen || layoutMode() === "mobile") setToggleState(false, { restoreFocus: wasOpen && restoreFocus });
+  };
+
+  const closeTablet = ({ restoreFocus = false } = {}) => {
+    const wasExpanded = container.classList.contains("tablet-expanded");
+    container.classList.remove("tablet-expanded");
+    if (wasExpanded || layoutMode() === "tablet") setToggleState(false, { restoreFocus: wasExpanded && restoreFocus });
+  };
+
   const toggleSidebar = () => {
-    if (window.innerWidth <= 768) {
+    const mode = layoutMode();
+    if (mode === "mobile") {
       const open = sidebar.classList.toggle("mobile-show");
       overlay.classList.toggle("active", open);
-      toggle?.setAttribute("aria-expanded", String(open));
-      return;
+      setToggleState(open);
+      if (open) focusNavigation();
+      return open;
+    }
+    if (mode === "tablet") {
+      sidebar.classList.remove("collapsed");
+      container.classList.remove("sidebar-collapsed");
+      const expanded = container.classList.toggle("tablet-expanded");
+      setToggleState(expanded);
+      return expanded;
     }
     const collapsed = sidebar.classList.toggle("collapsed");
     container.classList.toggle("sidebar-collapsed", collapsed);
-    toggle?.setAttribute("aria-expanded", String(!collapsed));
+    setToggleState(!collapsed);
+    return !collapsed;
+  };
+
+  const syncLayout = () => {
+    const mode = layoutMode();
+    if (mode !== "mobile") closeMobile();
+    if (mode !== "tablet") container.classList.remove("tablet-expanded");
+    if (mode === "mobile") {
+      sidebar.classList.remove("collapsed");
+      container.classList.remove("sidebar-collapsed", "tablet-expanded");
+      setToggleState(sidebar.classList.contains("mobile-show"));
+      return;
+    }
+    if (mode === "tablet") {
+      sidebar.classList.remove("collapsed");
+      container.classList.remove("sidebar-collapsed");
+      setToggleState(container.classList.contains("tablet-expanded"));
+      return;
+    }
+    setToggleState(!sidebar.classList.contains("collapsed"));
   };
 
   toggle?.addEventListener("click", toggleSidebar);
-  container.__animuaSidebarController = { toggle: toggleSidebar, closeMobile };
+  container.__animuaSidebarController = {
+    toggle: toggleSidebar,
+    closeMobile,
+    closeNavigation: ({ restoreFocus = false } = {}) => {
+      if (layoutMode() === "mobile") closeMobile({ restoreFocus });
+      if (layoutMode() === "tablet") closeTablet({ restoreFocus });
+    },
+  };
 
-  overlay.addEventListener("click", closeMobile);
+  overlay.addEventListener("click", () => closeMobile({ restoreFocus: true }));
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") closeMobile();
+    if (event.key !== "Escape") return;
+    if (layoutMode() === "mobile") closeMobile({ restoreFocus: true });
+    if (layoutMode() === "tablet") closeTablet({ restoreFocus: true });
   });
-  window.addEventListener("resize", () => {
-    if (window.innerWidth > 768) closeMobile();
-  });
+  window.addEventListener("resize", syncLayout);
+  syncLayout();
 }
 
 function setupEmbeddedBridge(container) {
@@ -257,9 +330,25 @@ function setupEmbeddedBridge(container) {
 
   const send = (message) => window.parent.postMessage(message, window.location.origin);
   const toggle = document.getElementById("sidebarToggle");
+  toggle?.setAttribute("aria-controls", "sidebar");
+  toggle?.setAttribute("aria-expanded", "false");
+  toggle?.setAttribute("aria-label", "Open management navigation");
   toggle?.addEventListener("click", (event) => {
     event.preventDefault();
     send({ type: "animua:toggle-sidebar" });
+  });
+
+  window.addEventListener("message", (event) => {
+    if (event.origin !== window.location.origin || event.source !== window.parent) return;
+    if (event.data?.type !== "animua:sidebar-state") return;
+    const expanded = Boolean(event.data.expanded);
+    toggle?.setAttribute("aria-expanded", String(expanded));
+    toggle?.setAttribute("aria-label", expanded ? "Collapse management navigation" : "Open management navigation");
+    if (event.data.restoreFocus) toggle?.focus();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") send({ type: "animua:close-sidebar" });
   });
 
   document.addEventListener("click", (event) => {
@@ -310,6 +399,10 @@ function setupPersistentNavigation(container, sidebar) {
 
   const markReady = () => {
     window.clearTimeout(state.fallbackTimer);
+    state.loader?.classList.remove("is-delayed");
+    state.loader?.querySelector(".persistent-load-delay")?.remove();
+    state.loader?.setAttribute("role", "status");
+    state.loader?.setAttribute("aria-label", "Loading ANIMUA workspace");
     state.stage.classList.remove("is-navigating");
     state.stage.setAttribute("aria-busy", "false");
     state.frame?.classList.add("is-ready");
@@ -318,6 +411,42 @@ function setupPersistentNavigation(container, sidebar) {
     } catch {
       // The management pages are same-origin; keep the existing title if access is unavailable.
     }
+  };
+
+  container.addEventListener("animua:sidebar-state", (event) => {
+    state.frame?.contentWindow?.postMessage({
+      type: "animua:sidebar-state",
+      expanded: Boolean(event.detail?.expanded),
+      restoreFocus: Boolean(event.detail?.restoreFocus),
+    }, window.location.origin);
+  });
+
+  const showLoadDelay = () => {
+    if (!state.stage.classList.contains("is-navigating") || !state.loader || !state.frame) return;
+    state.loader.classList.add("is-delayed");
+    state.loader.setAttribute("role", "alert");
+    state.loader.setAttribute("aria-label", "The management page did not finish loading");
+
+    if (state.loader.querySelector(".persistent-load-delay")) return;
+    state.loader.insertAdjacentHTML("beforeend", `
+      <div class="persistent-load-delay">
+        <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+        <div>
+          <strong>This page is taking longer than expected</strong>
+          <p>No data has been changed. Retry the current management page or use the sidebar to open another area.</p>
+        </div>
+        <button type="button">Retry page</button>
+      </div>`);
+
+    state.loader.querySelector(".persistent-load-delay button")?.addEventListener("click", () => {
+      window.clearTimeout(state.fallbackTimer);
+      state.loader.classList.remove("is-delayed");
+      state.loader.querySelector(".persistent-load-delay")?.remove();
+      state.loader.setAttribute("role", "status");
+      state.loader.setAttribute("aria-label", "Loading ANIMUA workspace");
+      state.frame.classList.remove("is-ready");
+      state.frame.contentWindow?.location.reload();
+    });
   };
 
   const ensureFrame = () => {
@@ -342,11 +471,17 @@ function setupPersistentNavigation(container, sidebar) {
           window.location.replace("/pages/admin-login.html");
           return;
         }
+
+        const embeddedBody = frame.contentDocument?.body;
+        if (embeddedBody && !embeddedBody.classList.contains("loading")) {
+          markReady();
+          return;
+        }
       } catch {
         // Same-origin management routes normally expose their path here.
       }
       window.clearTimeout(state.fallbackTimer);
-      state.fallbackTimer = window.setTimeout(markReady, 5000);
+      state.fallbackTimer = window.setTimeout(showLoadDelay, 8000);
     });
 
     state.frame = frame;
@@ -379,6 +514,10 @@ function setupPersistentNavigation(container, sidebar) {
     const frame = ensureFrame();
     frame.dataset.destination = destination;
     frame.classList.remove("is-ready");
+    state.loader?.classList.remove("is-delayed");
+    state.loader?.querySelector(".persistent-load-delay")?.remove();
+    state.loader?.setAttribute("role", "status");
+    state.loader?.setAttribute("aria-label", "Loading ANIMUA workspace");
     state.stage.classList.add("is-navigating");
     state.stage.setAttribute("aria-busy", "true");
     frame.src = cleanLocation(embeddedUrl);
@@ -401,6 +540,7 @@ function setupPersistentNavigation(container, sidebar) {
     if (event.origin !== window.location.origin || event.source !== state.frame?.contentWindow) return;
     if (event.data?.type === "animua:navigate") state.navigate(event.data.href);
     if (event.data?.type === "animua:toggle-sidebar") state.container.__animuaSidebarController?.toggle();
+    if (event.data?.type === "animua:close-sidebar") state.container.__animuaSidebarController?.closeNavigation({ restoreFocus: true });
     if (event.data?.type === "animua:page-ready") markReady();
     if (event.data?.type === "animua:contact-count") {
       updateContactMessageBadge(state.sidebar, event.data.count);

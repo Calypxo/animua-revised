@@ -2,6 +2,7 @@
 import "../css/animalProfiling.css";
 import "../css/managementTables.css";
 import "../css/recordsPanelReference.css";
+import "../css/managementModal.css";
 import { renderPageHeader } from "../components/management/pageHeader.js";
 import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.js";
 
@@ -335,12 +336,9 @@ function showToast(type, msg) {
 ══════════════════════════════════════════════════════ */
 async function init() {
   try {
-    await protectManagementPage();
+    const session = await protectManagementPage();
     renderTopbarUser();
-    loadSidebar();
-    
-
-
+    await loadSidebar();
     await loadAnimals();
 
     document.querySelectorAll(".ap-tab").forEach(btn => {

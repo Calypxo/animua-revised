@@ -8,10 +8,47 @@ const {
   getSignedReadUrl,
 } = require("../services/storageUrlService");
 const { validateImageFile } = require("../utils/imageUploadPolicy");
+const {
+  BEHAVIOR_GROUPS,
+  BEHAVIOR_DIMENSIONS,
+  REQUIRED_TRAITS,
+  cloneDefaultQuestions,
+  validateAndNormalizeBehavioralQuestions,
+  validateBehavioralAnswers,
+  buildBehavioralQuestionSnapshot,
+} = require("../services/behavioralQuestionService");
 
 const ANIMAL_COL = "animals";
 const AUDIT_COL  = "auditLogs";
 const INVENTORY_COL = "inventoryItems";
+const BEHAVIOR_CONFIG_REF = db
+  .collection("behavioralAssessmentConfigs")
+  .doc("animalBehavioralAssessment");
+
+async function getBehavioralQuestionConfiguration() {
+  const snapshot = await BEHAVIOR_CONFIG_REF.get();
+  if (!snapshot.exists) {
+    return { questions: cloneDefaultQuestions(), version: 1, persisted: false };
+  }
+  const data = snapshot.data() || {};
+  const validated = validateAndNormalizeBehavioralQuestions(data.questions);
+  if (validated.error) {
+    console.error("[behavioralQuestionConfig] Stored configuration is invalid:", validated.error);
+    return {
+      questions: cloneDefaultQuestions(),
+      version: 1,
+      persisted: false,
+      recoveryReason: validated.error,
+    };
+  }
+  return {
+    questions: validated.questions,
+    version: Number.isInteger(data.version) && data.version > 0 ? data.version : 1,
+    persisted: true,
+    updatedAt: data.updatedAt || null,
+    updatedBy: data.updatedBy || null,
+  };
+}
 
 const MEDICAL_INVENTORY_CATEGORIES = new Set([
   "Antibiotic", "Antiparasitic", "Antifungal", "Anesthetic",
@@ -457,44 +494,91 @@ exports.deleteAnimalProfileImage = async (req, res) => {
 };
 
 // ── SAVE BEHAVIORAL ASSESSMENT ────────────────────────
+exports.getBehavioralQuestions = async (_req, res) => {
+  try {
+    const config = await getBehavioralQuestionConfiguration();
+    return res.status(200).json({
+      questions: config.questions,
+      dimensions: BEHAVIOR_DIMENSIONS,
+      groups: Object.values(BEHAVIOR_GROUPS),
+      version: config.version,
+      persisted: config.persisted,
+      recoveryReason: config.recoveryReason || null,
+    });
+  } catch (error) {
+    console.error("[getBehavioralQuestions]", error.message);
+    return res.status(500).json({ message: "Failed to load behavioral assessment questions." });
+  }
+};
+
+exports.replaceBehavioralQuestions = async (req, res) => {
+  try {
+    const validated = validateAndNormalizeBehavioralQuestions(req.body?.questions);
+    if (validated.error) return res.status(400).json({ message: validated.error });
+
+    const expectedVersion = Number(req.body?.version);
+    let previousVersion = 1;
+    let nextVersion = 2;
+    await db.runTransaction(async (transaction) => {
+      const snapshot = await transaction.get(BEHAVIOR_CONFIG_REF);
+      const data = snapshot.exists ? snapshot.data() || {} : {};
+      previousVersion = Number.isInteger(data.version) && data.version > 0 ? data.version : 1;
+      if (Number.isInteger(expectedVersion) && expectedVersion !== previousVersion) {
+        throw requestError(409, "The behavioral question configuration changed. Reload it before saving.");
+      }
+      nextVersion = previousVersion + 1;
+      transaction.set(BEHAVIOR_CONFIG_REF, {
+        questions: validated.questions,
+        version: nextVersion,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedBy: {
+          id: req.user?.id || "",
+          email: req.user?.email || "",
+          name: req.user?.fullName || "",
+        },
+      }, { merge: true });
+    });
+
+    await writeAuditLog({
+      action: "animal.behavioral_questions_updated",
+      module: "Animal Profiling",
+      targetId: BEHAVIOR_CONFIG_REF.id,
+      targetName: "Behavioral Assessment Questions",
+      performedBy: req.user?.email,
+      performedByName: req.user?.fullName,
+      before: { version: previousVersion },
+      after: { version: nextVersion, questionCount: validated.questions.length },
+    });
+    return res.status(200).json({
+      message: "Behavioral assessment questions saved.",
+      questions: validated.questions,
+      version: nextVersion,
+    });
+  } catch (error) {
+    console.error("[replaceBehavioralQuestions]", error.message);
+    return res.status(error.statusCode || 500).json({
+      message: error.statusCode ? error.message : "Failed to save behavioral assessment questions.",
+    });
+  }
+};
+
 exports.saveBehavioralAssessment = async (req, res) => {
   try {
     const { id } = req.params;
-    const { traits, notes } = req.body;
-
-    if (!traits || typeof traits !== "object") {
-      return res.status(400).json({ message: "Trait scores object is required." });
+    const { notes } = req.body;
+    const config = await getBehavioralQuestionConfiguration();
+    const submittedVersion = Number(req.body?.configurationVersion);
+    if (Number.isInteger(submittedVersion) && submittedVersion !== config.version) {
+      return res.status(409).json({
+        message: "Behavioral questions changed while this assessment was open. Reopen the assessment and review the current questions.",
+      });
     }
-
-    const REQUIRED_TRAITS = [
-      "energyLevel",
-      "exerciseNeeds",
-      "independenceLevel",
-      "attentionNeeds",
-      "playfulness",
-      "friendlinessToHumans",
-      "goodWithKids",
-      "goodWithOtherPets",
-      "strangerTolerance",
-      "noiseLevel",
-      "spaceNeeds",
-      "adaptability",
-      "trainingDifficulty",
-      "affectionLevel",
-      "separationAnxiety",
-      "aggressive",
-      "specialNeeds",
-    ];
-
-    for (const t of REQUIRED_TRAITS) {
-      if (traits[t] === undefined) {
-        return res.status(400).json({ message: `Missing trait: ${t}` });
-      }
-
-      if (traits[t] < 1 || traits[t] > 5) {
-        return res.status(400).json({ message: `Trait ${t} must be between 1 and 5.` });
-      }
-    }
+    const validatedAnswers = validateBehavioralAnswers({
+      traits: req.body?.traits,
+      answerSelections: req.body?.answerSelections,
+    }, config.questions);
+    if (validatedAnswers.error) return res.status(400).json({ message: validatedAnswers.error });
+    const { traits, answerSelections } = validatedAnswers;
 
     const doc = await db.collection(ANIMAL_COL).doc(id).get();
     if (!doc.exists) {
@@ -502,6 +586,16 @@ exports.saveBehavioralAssessment = async (req, res) => {
     }
 
     const compatibilityVector = REQUIRED_TRAITS.map((traitKey) => traits[traitKey]);
+    const completedAt = new Date().toISOString();
+    const questionSnapshot = buildBehavioralQuestionSnapshot(config.questions, traits, answerSelections);
+    const assessmentHistoryEntry = {
+      configurationVersion: config.version,
+      questionSnapshot,
+      traits,
+      notes: String(notes || ""),
+      assessor: req.user?.fullName || req.user?.email || "Staff",
+      completedAt,
+    };
 
     const historyEntry = {
       date: new Date().toISOString().split("T")[0],
@@ -515,6 +609,9 @@ exports.saveBehavioralAssessment = async (req, res) => {
       behavioralNotes: notes || "",
       behavioralAssessor: req.user?.fullName || req.user?.email || "Staff",
       behavioralDate: new Date().toISOString().split("T")[0],
+      behavioralConfigurationVersion: config.version,
+      behavioralQuestionSnapshot: questionSnapshot,
+      behavioralAssessmentHistory: admin.firestore.FieldValue.arrayUnion(assessmentHistoryEntry),
       compatibilityVector,
       history: admin.firestore.FieldValue.arrayUnion(historyEntry),
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -529,7 +626,8 @@ exports.saveBehavioralAssessment = async (req, res) => {
       performedBy: req.user?.email,
       performedByName: req.user?.fullName,
       after: {
-        traitsRecorded: REQUIRED_TRAITS.length
+        traitsRecorded: REQUIRED_TRAITS.length,
+        configurationVersion: config.version,
       },
     });
 

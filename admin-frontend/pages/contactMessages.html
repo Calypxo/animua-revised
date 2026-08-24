@@ -56,14 +56,14 @@
             <div class="reference-records-heading">
               <span class="reference-records-icon"><i class="bi bi-envelope-paper-fill"></i></span>
               <div>
-                <span class="ap-section-kicker">Account conversations</span>
-                <h2 id="messagesTitle">Chat</h2>
-                <p>Messages from ANIMUA users</p>
+                <span class="ap-section-kicker">Community inbox</span>
+                <h2 id="messagesTitle">Contact conversations</h2>
+                <p>Read public inquiries and send official ANIMUA replies.</p>
               </div>
             </div>
             <span class="ap-records-legend">
               <i class="bi bi-people" aria-hidden="true"></i>
-              Messages are grouped by account
+              Grouped by sender
             </span>
           </div>
 
@@ -132,8 +132,11 @@
                   <button id="backToUsersBtn" class="cm-back-button" type="button" aria-label="Back to conversations">
                     <i class="bi bi-arrow-left" aria-hidden="true"></i>
                   </button>
+                  <span class="cm-user-summary-mark" aria-hidden="true"><i class="bi bi-person-fill"></i></span>
                   <div>
+                    <small>Active conversation</small>
                     <h2 id="detailUserName">User name</h2>
+                    <p id="detailUserEmail">Official ANIMUA response thread</p>
                   </div>
                 </header>
 
@@ -148,6 +151,7 @@
                   <div class="cm-compose-tools" aria-label="Message actions">
                     <button id="sendReplyBtn" class="cm-compose-send" type="submit" aria-label="Send reply" title="Send reply">
                       <i class="bi bi-send" aria-hidden="true"></i>
+                      <span>Send</span>
                     </button>
                   </div>
                   <small id="replyDraftStatus" class="cm-compose-status">Enter to send &middot; Shift+Enter for a new line</small>

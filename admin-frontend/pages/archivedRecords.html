@@ -17,7 +17,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" integrity="sha384-tViUnnbYAV00FLIhhi3v/dWt3Jxw4gZQcNoSCxCIFNJVCx7/D55/wXsrNIRANwdD" crossorigin="anonymous" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 </head>
-<body class="loading">
+<body class="loading archived-records-page">
   <div class="shell">
     <div id="sidebar-container"></div>
 
@@ -54,14 +54,6 @@
 
         <section class="archive-signal-layout" aria-label="Archive summary">
           <div id="archiveAlertBar"></div>
-          <aside class="retention-card">
-            <span class="retention-icon"><i class="bi bi-shield-lock"></i></span>
-            <div>
-              <span class="retention-kicker">Protected records vault</span>
-              <strong>Archived data stays available for review</strong>
-              <small>Only eligible animal profiles can be restored. Other records remain read-only for governance.</small>
-            </div>
-          </aside>
         </section>
 
         <section class="panel archive-panel">
@@ -69,6 +61,7 @@
             <div class="records-heading">
               <span class="records-heading-icon"><i class="bi bi-archive-fill"></i></span>
               <div>
+                <span class="section-kicker">Archive register</span>
                 <h2>Records vault</h2>
                 <p>Find retained records and review their archive history before restoring eligible profiles.</p>
               </div>
@@ -91,7 +84,7 @@
                   <input
                     type="text"
                     id="searchArchive"
-                    placeholder="Search ID, title, module, archived by..."
+                    placeholder="ID, title, module or staff…"
                     autocomplete="off"
                   />
                 </div>
@@ -131,7 +124,7 @@
           </div>
 
           <div class="table-responsive records-table-wrap">
-            <table class="shelter-table management-data-table">
+            <table class="shelter-table management-data-table management-card-table archive-records-table" data-card-until="1439">
               <thead>
                 <tr>
                   <th>Archived Record</th>
@@ -163,6 +156,7 @@
     <div class="um-modal archive-modal intake-modal management-side-modal" role="dialog" aria-modal="true">
       <div class="um-modal-header">
         <div>
+          <span class="modal-kicker">Archive record</span>
           <h2>Archived Record Details</h2>
           <p class="modal-subtitle">Review the archived item information</p>
         </div>

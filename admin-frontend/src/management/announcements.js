@@ -338,7 +338,9 @@ function revealCalendarEvent(id) {
   if (getEl("filterStatus")) getEl("filterStatus").value = "";
 
   document.querySelectorAll("[data-category-type]").forEach((item) => {
-    item.classList.toggle("is-active", item.dataset.categoryType === state.type);
+    const selected = item.dataset.categoryType === state.type;
+    item.classList.toggle("is-active", selected);
+    item.setAttribute("aria-pressed", String(selected));
   });
 
   applyFilters();
@@ -361,7 +363,9 @@ function showAllCalendarEvents() {
   if (getEl("filterStatus")) getEl("filterStatus").value = "";
 
   document.querySelectorAll("[data-category-type]").forEach((item) => {
-    item.classList.toggle("is-active", item.dataset.categoryType === state.type);
+    const selected = item.dataset.categoryType === state.type;
+    item.classList.toggle("is-active", selected);
+    item.setAttribute("aria-pressed", String(selected));
   });
 
   applyFilters();
@@ -655,6 +659,7 @@ function resetForm() {
   getEl("fVisibleToPublic").value = "true";
   updateMediaPreview("");
   syncEventFields();
+  syncComposerAction();
 }
 
 function clearImageSelection() {
@@ -679,6 +684,33 @@ function syncEventFields() {
     input.required = isEvent && input.id === "fEventDate";
     if (!isEvent) input.value = "";
   });
+}
+
+function syncComposerAction() {
+  const status = getEl("fStatus")?.value;
+  const label = getEl("announcementSubmitLabel");
+  const icon = getEl("announcementSubmitIcon");
+  const draftButton = getEl("announcementDraftBtn");
+  if (draftButton) draftButton.hidden = status === "Draft";
+  if (!label || !icon) return;
+
+  if (status === "Draft") {
+    label.textContent = state.editingId ? "Update Draft" : "Save Draft";
+    icon.className = "bi bi-file-earmark-check-fill";
+    return;
+  }
+
+  label.textContent = state.editingId ? "Update Post" : "Publish Post";
+  icon.className = state.editingId ? "bi bi-check2-circle" : "bi bi-send-fill";
+}
+
+function saveAnnouncementDraft() {
+  const status = getEl("fStatus");
+  const form = getEl("announcementForm");
+  if (!status || !form) return;
+  status.value = "Draft";
+  syncComposerAction();
+  form.requestSubmit();
 }
 
 function updateMediaPreview(value, options = {}) {
@@ -768,6 +800,8 @@ function openCreateModal(defaultType = "News & Article") {
   getEl("fType").value = normalizePostType(defaultType);
   syncEventFields();
   getEl("announcementModalTitle").textContent = "Create Community Post";
+  getEl("announcementModalSubtitle").textContent = "Share a clear update, story, or event with the ANIMUA community.";
+  syncComposerAction();
   getEl("announcementModalBackdrop").classList.add("open");
 }
 
@@ -783,6 +817,7 @@ function openEditModal(id) {
   state.editingId = id;
 
   getEl("announcementModalTitle").textContent = "Edit Community Post";
+  getEl("announcementModalSubtitle").textContent = "Update the post details, audience, status, or cover image.";
   getEl("fTitle").value = item.title || "";
   getEl("fType").value = normalizePostType(item.type);
   getEl("fCaption").value = item.caption || "";
@@ -796,6 +831,7 @@ function openEditModal(id) {
     getEl("fLocation").value = item.location || "";
   }
   updateMediaPreview(state.existingImageUrl);
+  syncComposerAction();
 
   getEl("announcementModalBackdrop").classList.add("open");
 }
@@ -948,6 +984,7 @@ function bindEvents() {
   }
 
   getEl("announcementForm")?.addEventListener("submit", saveAnnouncement);
+  getEl("announcementDraftBtn")?.addEventListener("click", saveAnnouncementDraft);
   getEl("announcementModalClose")?.addEventListener("click", closeModal);
   getEl("announcementCancelBtn")?.addEventListener("click", closeModal);
   getEl("fImageFile")?.addEventListener("change", (event) => {
@@ -955,6 +992,7 @@ function bindEvents() {
   });
   getEl("removeImageBtn")?.addEventListener("click", removeAnnouncementImage);
   getEl("fType")?.addEventListener("change", syncEventFields);
+  getEl("fStatus")?.addEventListener("change", syncComposerAction);
   getEl("eventCalendarPrev")?.addEventListener("click", () => moveEventCalendar(-1));
   getEl("eventCalendarNext")?.addEventListener("click", () => moveEventCalendar(1));
   getEl("showManagementCalendarEvents")?.addEventListener("click", showAllCalendarEvents);
@@ -981,7 +1019,9 @@ function bindEvents() {
   getEl("filterType")?.addEventListener("change", (event) => {
     state.type = event.target.value;
     document.querySelectorAll("[data-category-type]").forEach((item) => {
-      item.classList.toggle("is-active", item.dataset.categoryType === state.type);
+      const selected = item.dataset.categoryType === state.type;
+      item.classList.toggle("is-active", selected);
+      item.setAttribute("aria-pressed", String(selected));
     });
     applyFilters();
   });
@@ -997,7 +1037,9 @@ function bindEvents() {
       state.type = state.type === selected ? "" : selected;
       getEl("filterType").value = state.type;
       document.querySelectorAll("[data-category-type]").forEach((item) => {
-        item.classList.toggle("is-active", item.dataset.categoryType === state.type);
+        const isSelected = item.dataset.categoryType === state.type;
+        item.classList.toggle("is-active", isSelected);
+        item.setAttribute("aria-pressed", String(isSelected));
       });
       applyFilters();
     });

@@ -6,12 +6,29 @@ function loadAuthHelpersWithoutFirebase() {
   const middlewarePath = require.resolve("../src/middleware/authMiddleware");
   const controllerPath = require.resolve("../src/controllers/authController");
   const originalFirebaseModule = require.cache[firebasePath];
+  const fakeUsers = new Map();
+  const fakeDb = {
+    collection(name) {
+      if (name !== "users") throw new Error(`Unexpected collection: ${name}`);
+      return {
+        doc(email) {
+          return {
+            id: email,
+            async get() {
+              const value = fakeUsers.get(email);
+              return { exists: Boolean(value), id: email, data: () => value };
+            },
+          };
+        },
+      };
+    },
+  };
 
   require.cache[firebasePath] = {
     id: firebasePath,
     filename: firebasePath,
     loaded: true,
-    exports: { db: {}, admin: {} },
+    exports: { db: fakeDb, admin: {} },
   };
 
   delete require.cache[middlewarePath];
@@ -23,11 +40,16 @@ function loadAuthHelpersWithoutFirebase() {
     return {
       normalizeRole: middleware.normalizeRole,
       getBearerToken: middleware.getBearerToken,
+      isSessionVersionCurrent: middleware.isSessionVersionCurrent,
       validateNewPasswordValue: controller.validateNewPasswordValue,
       isBcryptHash: controller.isBcryptHash,
       verifyStoredPassword: controller.verifyStoredPassword,
       getEmailCredentials: controller.getEmailCredentials,
       storeAndSendOtp: controller.storeAndSendOtp,
+      isEligibleManagementUserData: controller.isEligibleManagementUserData,
+      requestManagementPasswordResetOtp: controller.requestManagementPasswordResetOtp,
+      managementResetNeutralMessage: controller.MANAGEMENT_RESET_NEUTRAL_MESSAGE,
+      setFakeUser(email, data) { fakeUsers.set(email, data); },
     };
   } finally {
     delete require.cache[middlewarePath];
@@ -40,11 +62,16 @@ function loadAuthHelpersWithoutFirebase() {
 const {
   normalizeRole,
   getBearerToken,
+  isSessionVersionCurrent,
   validateNewPasswordValue,
   isBcryptHash,
   verifyStoredPassword,
   getEmailCredentials,
   storeAndSendOtp,
+  isEligibleManagementUserData,
+  requestManagementPasswordResetOtp,
+  managementResetNeutralMessage,
+  setFakeUser,
 } = loadAuthHelpersWithoutFirebase();
 
 test("UT-001 normalizeRole recognizes only canonical ANIMUA roles", () => {
@@ -187,4 +214,40 @@ test("successful OTP delivery keeps the stored code", async () => {
     ["set", { otpHash: "hash" }],
     ["send"],
   ]);
+});
+
+test("management recovery eligibility is restricted to active management roles", () => {
+  for (const role of ["Admin", "Staff", "Veterinarian", "Vet"]) {
+    assert.equal(isEligibleManagementUserData({ role, status: "Active" }), true, role);
+  }
+  assert.equal(isEligibleManagementUserData({ role: "Public", status: "Active" }), false);
+  assert.equal(isEligibleManagementUserData({ role: "Admin", status: "Inactive" }), false);
+  assert.equal(isEligibleManagementUserData({ role: "Unknown", status: "Active" }), false);
+});
+
+test("session versions invalidate prior management tokens while preserving legacy version zero", () => {
+  assert.equal(isSessionVersionCurrent({}, {}), true, "legacy token and account use version zero");
+  assert.equal(isSessionVersionCurrent({ sessionVersion: 2 }, { sessionVersion: 2 }), true);
+  assert.equal(isSessionVersionCurrent({ sessionVersion: 1 }, { sessionVersion: 2 }), false);
+  assert.equal(isSessionVersionCurrent({}, { sessionVersion: 1 }), false);
+});
+
+test("management recovery request is enumeration-safe for unknown and public-only accounts", async () => {
+  setFakeUser("public@animua.test", { role: "Public", status: "Active" });
+  const invoke = async (email) => {
+    const response = {
+      statusCode: 200,
+      payload: null,
+      status(code) { this.statusCode = code; return this; },
+      json(payload) { this.payload = payload; return this; },
+    };
+    await requestManagementPasswordResetOtp({ body: { email } }, response);
+    return response;
+  };
+  const unknown = await invoke("unknown@animua.test");
+  const publicOnly = await invoke("public@animua.test");
+  assert.equal(unknown.statusCode, 200);
+  assert.equal(publicOnly.statusCode, 200);
+  assert.equal(unknown.payload.message, managementResetNeutralMessage);
+  assert.equal(publicOnly.payload.message, managementResetNeutralMessage);
 });

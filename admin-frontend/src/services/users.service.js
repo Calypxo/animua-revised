@@ -52,12 +52,11 @@ export async function toggleUserStatus(id) {
 }
 
 /**
- * Reset a user's password (Admin only).
+ * Send password recovery to a management account holder (Admin only).
  * PATCH /api/users/:id/reset-password
  */
-export async function resetPassword(id, newPassword) {
+export async function sendPasswordReset(id) {
   return await apiFetch(`/users/${encodeURIComponent(id)}/reset-password`, {
     method: "PATCH",
-    body:   JSON.stringify({ newPassword }),
   });
 }

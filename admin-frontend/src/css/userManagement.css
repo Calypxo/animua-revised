@@ -1933,3 +1933,254 @@ select.form-inp { cursor: pointer; }
   .user-management-page #userModalBackdrop .perm-grid { grid-template-columns: 1fr; }
   .user-management-page #userModalBackdrop .um-modal-footer .btn-primary-clay { flex: 1 1 100%; order: -1; justify-content: center; }
 }
+
+/* Readability pass for the directory and account workflow. */
+.user-management-page .um-user-table th {
+  font-size: .66rem;
+  letter-spacing: .05em;
+}
+
+.user-management-page :is(.user-access-scope small, .user-last-activity small) {
+  font-size: .65rem;
+  line-height: 1.4;
+}
+
+.user-management-page .um-user-table tbody tr[data-id] td::before {
+  font-size: .62rem;
+  letter-spacing: .04em;
+}
+
+.user-management-page #userModalBackdrop .modal-subtitle {
+  font-size: .72rem;
+  line-height: 1.45;
+}
+
+.user-management-page #userModalBackdrop :is(.user-form-section-title, .perm-section-title) {
+  font-size: .74rem;
+  line-height: 1.35;
+}
+
+.user-management-page #userModalBackdrop :is(.form-lbl, .avatar-preview-row strong) {
+  font-size: .7rem;
+  line-height: 1.35;
+}
+
+.user-management-page #userModalBackdrop .form-inp {
+  min-height: 44px;
+  font-size: .78rem;
+}
+
+.user-management-page #userModalBackdrop .form-err {
+  min-height: 1em;
+  font-size: .66rem;
+  line-height: 1.35;
+}
+
+/* Modern account composer built on the shared Create Intake modal contract. */
+html body.management-consistent-ui.user-management-page #userModalBackdrop.management-modal-layer > #userModal.user-create-modal {
+  width: min(900px, calc(100vw - 32px)) !important;
+  max-width: 900px !important;
+  color: #1f2329 !important;
+  background: #f6eee3 !important;
+  font: 500 12px/1.5 "Poppins", sans-serif !important;
+}
+
+html body.management-consistent-ui.user-management-page #userModalBackdrop #userModal > .um-modal-header {
+  min-height: 96px !important;
+  align-items: flex-start !important;
+  padding: 21px 28px 19px !important;
+  background: #FFF8EE !important;
+}
+
+.user-modal-eyebrow {
+  display: block;
+  margin-bottom: 4px;
+  color: #780116;
+  font: 800 10px/1.2 "Poppins", sans-serif;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+html body.management-consistent-ui.user-management-page #userModalBackdrop #userModal .um-modal-header h2 {
+  color: #1f2329 !important;
+  font: 800 18px/1.25 "Poppins", sans-serif !important;
+  letter-spacing: -.02em !important;
+}
+
+html body.management-consistent-ui.user-management-page #userModalBackdrop #userModal .modal-subtitle {
+  max-width: 520px;
+  margin-top: 4px !important;
+  color: #756b67 !important;
+  font: 500 11px/1.5 "Poppins", sans-serif !important;
+}
+
+html body.management-consistent-ui.user-management-page #userModalBackdrop #userModal > .um-modal-body {
+  padding: 22px 24px 26px !important;
+  background: #f6eee3 !important;
+}
+
+#userModalBackdrop .user-account-form-layout {
+  display: grid;
+  grid-template-columns: minmax(300px, .82fr) minmax(0, 1.28fr);
+  align-items: start;
+  gap: 18px;
+}
+
+html body.management-consistent-ui.user-management-page #userModalBackdrop #userModal .user-form-section {
+  min-width: 0;
+  margin: 0 !important;
+  padding: 18px !important;
+  border: 1px solid #eadfd4 !important;
+  border-radius: 15px !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 8px 22px rgba(61, 36, 28, .045) !important;
+}
+
+html body.management-consistent-ui.user-management-page #userModalBackdrop #userModal .user-form-section-title {
+  min-height: 30px;
+  margin: 0 0 15px !important;
+  padding: 0 0 11px !important;
+  border-bottom: 1px solid #eee1d7 !important;
+  color: #2b2528 !important;
+  font: 800 12px/1.2 "Poppins", sans-serif !important;
+}
+
+html body.management-consistent-ui.user-management-page #userModalBackdrop #userModal .user-form-section-title i {
+  width: 30px !important;
+  height: 30px !important;
+  margin-block: -4px !important;
+  color: #780116 !important;
+  background: #fff1c9 !important;
+}
+
+html body.management-consistent-ui.user-management-page #userModalBackdrop #userModal .avatar-preview-row {
+  min-height: 72px;
+  margin: 0 0 15px !important;
+  padding: 11px 13px !important;
+  border-color: #eadfd4 !important;
+  border-left: 3px solid #f0b72f !important;
+  border-radius: 12px !important;
+  background: #fffaf3 !important;
+}
+
+html body.management-consistent-ui.user-management-page #userModalBackdrop #userModal .avatar-preview-circle {
+  width: 52px !important;
+  height: 52px !important;
+  flex: 0 0 52px !important;
+  box-shadow: 0 0 0 4px #fff0c6 !important;
+}
+
+html body.management-consistent-ui.user-management-page #userModalBackdrop #userModal .form-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 13px 14px !important;
+}
+
+html body.management-consistent-ui.user-management-page #userModalBackdrop #userModal .form-full {
+  grid-column: 1 / -1 !important;
+}
+
+html body.management-consistent-ui.user-management-page #userModalBackdrop #userModal .form-inp {
+  min-height: 44px !important;
+  border-radius: 10px !important;
+  background: #FFFFFF !important;
+  font: 500 12px/1.4 "Poppins", sans-serif !important;
+}
+
+html body.management-consistent-ui.user-management-page #userModalBackdrop #userModal .form-err:empty {
+  display: none;
+}
+
+html body.management-consistent-ui.user-management-page #userModalBackdrop #userModal .permissions-section {
+  margin-top: 16px !important;
+  padding: 14px !important;
+  border: 1px solid #eadfd4 !important;
+  border-radius: 13px !important;
+  background: #fffaf3 !important;
+}
+
+#userModalBackdrop .perm-section-title {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 11px;
+}
+
+#userModalBackdrop .perm-title-main {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #2b2528;
+  font-weight: 800;
+}
+
+#userModalBackdrop .perm-title-main i { color: #780116; }
+#userModalBackdrop .perm-hint { margin-left: 0; font-size: 10px; line-height: 1.4; }
+
+html body.management-consistent-ui.user-management-page #userModalBackdrop #userModal .perm-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 7px !important;
+}
+
+html body.management-consistent-ui.user-management-page #userModalBackdrop #userModal .perm-item {
+  min-width: 0;
+  min-height: 38px;
+  padding: 7px 9px !important;
+  border-radius: 9px !important;
+}
+
+#userModalBackdrop .perm-name {
+  min-width: 0;
+  font-size: 10px;
+  overflow-wrap: anywhere;
+}
+
+html body.management-consistent-ui.user-management-page #userModalBackdrop #userModal > .um-modal-footer {
+  min-height: 70px !important;
+  padding: 13px 24px !important;
+  background: #FFF8EE !important;
+}
+
+html body.management-consistent-ui.user-management-page #userModalBackdrop #userModal .um-modal-footer button {
+  min-height: 42px !important;
+  padding-inline: 18px !important;
+  border-radius: 999px !important;
+  font: 800 11px/1 "Poppins", sans-serif !important;
+}
+
+#userModalBackdrop .button-spinner {
+  width: 14px;
+  height: 14px;
+  display: inline-block;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+
+@media (max-width: 900px) {
+  #userModalBackdrop .user-account-form-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  html body.management-consistent-ui.user-management-page #userModalBackdrop #userModal > :is(.um-modal-header, .um-modal-body, .um-modal-footer) {
+    padding-inline: 16px !important;
+  }
+
+  html body.management-consistent-ui.user-management-page #userModalBackdrop #userModal .form-grid,
+  html body.management-consistent-ui.user-management-page #userModalBackdrop #userModal .perm-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  html body.management-consistent-ui.user-management-page #userModalBackdrop #userModal > .um-modal-footer {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  html body.management-consistent-ui.user-management-page #userModalBackdrop #userModal .um-modal-footer button {
+    width: 100% !important;
+  }
+
+  #userModalBackdrop #modalSaveBtn { order: -1; }
+}
