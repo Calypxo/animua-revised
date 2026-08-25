@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "../../utils/api.js";
+import Swal from "sweetalert2";
 import dogFallbackImage from "../../assets/images/optimized/home/hero-shelter-dog-kennel-768.webp";
 import catFallbackImage from "../../assets/images/optimized/home/highlight-new-furbabies-cat-360.webp";
 import { createSelectionFocusGuard } from "./adoption-ui-state.js";
@@ -50,7 +51,6 @@ const selectedPetName = document.getElementById("selectedPetName");
 const selectedPetImage = document.getElementById("selectedPetImage");
 const selectedPetMeta = document.getElementById("selectedPetMeta");
 const selectedPetStatus = document.getElementById("selectedPetStatus");
-const selectedPetIdLabel = document.getElementById("selectedPetId");
 const petIdField = document.getElementById("petIdField");
 const petNameField = document.getElementById("petNameField");
 const adoptionForm = document.getElementById("adoptionForm");
@@ -214,7 +214,55 @@ function setupBirthdatePicker() {
     viewDate.getFullYear() === today.getFullYear() &&
     viewDate.getMonth() === today.getMonth();
 
+  const closeMonthMenu = ({ restoreFocus = false } = {}) => {
+    const menu = picker.querySelector("[data-calendar-month-options]");
+    const trigger = picker.querySelector("[data-calendar-month-trigger]");
+    if (!menu || !trigger || menu.hidden) return;
+    menu.hidden = true;
+    trigger.setAttribute("aria-expanded", "false");
+    if (restoreFocus) trigger.focus();
+  };
+
+  const openMonthMenu = () => {
+    const menu = picker.querySelector("[data-calendar-month-options]");
+    const trigger = picker.querySelector("[data-calendar-month-trigger]");
+    if (!menu || !trigger) return;
+    closeYearMenu();
+    menu.hidden = false;
+    trigger.setAttribute("aria-expanded", "true");
+    requestAnimationFrame(() => {
+      const selectedMonth = menu.querySelector('[aria-selected="true"]');
+      selectedMonth?.scrollIntoView({ block: "center" });
+      selectedMonth?.focus({ preventScroll: true });
+    });
+  };
+
+  const closeYearMenu = ({ restoreFocus = false } = {}) => {
+    const menu = picker.querySelector("[data-calendar-year-options]");
+    const trigger = picker.querySelector("[data-calendar-year-trigger]");
+    if (!menu || !trigger || menu.hidden) return;
+    menu.hidden = true;
+    trigger.setAttribute("aria-expanded", "false");
+    if (restoreFocus) trigger.focus();
+  };
+
+  const openYearMenu = () => {
+    const menu = picker.querySelector("[data-calendar-year-options]");
+    const trigger = picker.querySelector("[data-calendar-year-trigger]");
+    if (!menu || !trigger) return;
+    closeMonthMenu();
+    menu.hidden = false;
+    trigger.setAttribute("aria-expanded", "true");
+    requestAnimationFrame(() => {
+      const selectedYear = menu.querySelector('[aria-selected="true"]');
+      selectedYear?.scrollIntoView({ block: "center" });
+      selectedYear?.focus({ preventScroll: true });
+    });
+  };
+
   const closePicker = () => {
+    closeMonthMenu();
+    closeYearMenu();
     picker.hidden = true;
     birthdatePickerBtn.setAttribute("aria-expanded", "false");
   };
@@ -245,12 +293,14 @@ function setupBirthdatePicker() {
     const yearEnd = today.getFullYear();
     const yearOptions = Array.from({ length: yearEnd - yearStart + 1 }, (_, index) => {
       const year = yearEnd - index;
-      return `<option value="${year}"${year === viewDate.getFullYear() ? " selected" : ""}>${year}</option>`;
+      const isSelected = year === viewDate.getFullYear();
+      return `<button type="button" role="option" data-calendar-year-option="${year}" aria-selected="${isSelected}" tabindex="${isSelected ? "0" : "-1"}">${year}</button>`;
     }).join("");
     const monthOptions = monthNames
       .map((month, index) => {
         const isFutureMonth = viewDate.getFullYear() === today.getFullYear() && index > today.getMonth();
-        return `<option value="${index}"${index === viewDate.getMonth() ? " selected" : ""}${isFutureMonth ? " disabled" : ""}>${escapeHtml(month)}</option>`;
+        const isSelected = index === viewDate.getMonth();
+        return `<button type="button" role="option" data-calendar-month-option="${index}" aria-selected="${isSelected}" tabindex="${isSelected ? "0" : "-1"}"${isFutureMonth ? " disabled aria-disabled=\"true\"" : ""}>${escapeHtml(month)}</button>`;
       })
       .join("");
 
@@ -273,12 +323,24 @@ function setupBirthdatePicker() {
     picker.innerHTML = `
       <div class="calendar-head">
         <div class="calendar-selects">
-          <select class="calendar-select" data-calendar-month aria-label="Birth month">
-            ${monthOptions}
-          </select>
-          <select class="calendar-select calendar-year-select" data-calendar-year aria-label="Birth year">
-            ${yearOptions}
-          </select>
+          <div class="calendar-month-menu" data-calendar-month-menu>
+            <button type="button" class="calendar-month-trigger" data-calendar-month-trigger aria-label="Choose birth month" aria-haspopup="listbox" aria-expanded="false">
+              <span>${escapeHtml(monthNames[viewDate.getMonth()])}</span>
+              <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+            </button>
+            <div class="calendar-month-options" data-calendar-month-options role="listbox" aria-label="Birth month" hidden>
+              ${monthOptions}
+            </div>
+          </div>
+          <div class="calendar-year-menu" data-calendar-year-menu>
+            <button type="button" class="calendar-year-trigger" data-calendar-year-trigger aria-label="Choose birth year" aria-haspopup="listbox" aria-expanded="false">
+              <span>${viewDate.getFullYear()}</span>
+              <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+            </button>
+            <div class="calendar-year-options" data-calendar-year-options role="listbox" aria-label="Birth year" hidden>
+              ${yearOptions}
+            </div>
+          </div>
         </div>
         <div class="calendar-nav">
           <button type="button" data-calendar-action="prev" aria-label="Previous month"><i class="fa-solid fa-chevron-up" aria-hidden="true"></i></button>
@@ -318,6 +380,44 @@ function setupBirthdatePicker() {
   picker.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
+
+    const monthTrigger = event.target.closest("[data-calendar-month-trigger]");
+    if (monthTrigger) {
+      const monthMenu = picker.querySelector("[data-calendar-month-options]");
+      if (monthMenu?.hidden) openMonthMenu();
+      else closeMonthMenu({ restoreFocus: true });
+      return;
+    }
+
+    const monthOption = event.target.closest("[data-calendar-month-option]");
+    if (monthOption) {
+      if (monthOption.disabled) return;
+      const month = Number(monthOption.dataset.calendarMonthOption);
+      if (Number.isInteger(month)) {
+        viewDate = clampToToday(new Date(viewDate.getFullYear(), month, 1));
+        renderPicker();
+      }
+      return;
+    }
+
+    const yearTrigger = event.target.closest("[data-calendar-year-trigger]");
+    if (yearTrigger) {
+      const yearMenu = picker.querySelector("[data-calendar-year-options]");
+      if (yearMenu?.hidden) openYearMenu();
+      else closeYearMenu({ restoreFocus: true });
+      return;
+    }
+
+    const yearOption = event.target.closest("[data-calendar-year-option]");
+    if (yearOption) {
+      const year = Number(yearOption.dataset.calendarYearOption);
+      if (Number.isInteger(year)) {
+        viewDate = clampToToday(new Date(year, viewDate.getMonth(), 1));
+        renderPicker();
+      }
+      return;
+    }
+
     const dayButton = event.target.closest("[data-date]");
     if (dayButton) {
       const selectedDate = parseDateValue(dayButton.dataset.date);
@@ -343,16 +443,62 @@ function setupBirthdatePicker() {
     }
   });
 
-  picker.addEventListener("change", (event) => {
-    event.stopPropagation();
-    const monthSelect = event.target.closest("[data-calendar-month]");
-    const yearSelect = event.target.closest("[data-calendar-year]");
-    if (monthSelect || yearSelect) {
-      const month = Number(picker.querySelector("[data-calendar-month]")?.value ?? viewDate.getMonth());
-      const year = Number(picker.querySelector("[data-calendar-year]")?.value ?? viewDate.getFullYear());
-      viewDate = clampToToday(new Date(year, month, 1));
-      renderPicker();
+  picker.addEventListener("keydown", (event) => {
+    const monthTrigger = event.target.closest("[data-calendar-month-trigger]");
+    if (monthTrigger && event.key === "ArrowDown") {
+      event.preventDefault();
+      event.stopPropagation();
+      openMonthMenu();
+      return;
     }
+
+    const monthOption = event.target.closest("[data-calendar-month-option]");
+    if (monthOption) {
+      const options = [...picker.querySelectorAll("[data-calendar-month-option]:not(:disabled)")];
+      const currentIndex = options.indexOf(monthOption);
+      let nextIndex = currentIndex;
+      if (event.key === "ArrowDown") nextIndex = Math.min(currentIndex + 1, options.length - 1);
+      else if (event.key === "ArrowUp") nextIndex = Math.max(currentIndex - 1, 0);
+      else if (event.key === "Home") nextIndex = 0;
+      else if (event.key === "End") nextIndex = options.length - 1;
+      else if (event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
+        closeMonthMenu({ restoreFocus: true });
+        return;
+      } else return;
+
+      event.preventDefault();
+      options[nextIndex]?.focus();
+      return;
+    }
+
+    const yearTrigger = event.target.closest("[data-calendar-year-trigger]");
+    if (yearTrigger && event.key === "ArrowDown") {
+      event.preventDefault();
+      event.stopPropagation();
+      openYearMenu();
+      return;
+    }
+
+    const yearOption = event.target.closest("[data-calendar-year-option]");
+    if (!yearOption) return;
+    const options = [...picker.querySelectorAll("[data-calendar-year-option]")];
+    const currentIndex = options.indexOf(yearOption);
+    let nextIndex = currentIndex;
+    if (event.key === "ArrowDown") nextIndex = Math.min(currentIndex + 1, options.length - 1);
+    else if (event.key === "ArrowUp") nextIndex = Math.max(currentIndex - 1, 0);
+    else if (event.key === "Home") nextIndex = 0;
+    else if (event.key === "End") nextIndex = options.length - 1;
+    else if (event.key === "Escape") {
+      event.preventDefault();
+      event.stopPropagation();
+      closeYearMenu({ restoreFocus: true });
+      return;
+    } else return;
+
+    event.preventDefault();
+    options[nextIndex]?.focus();
   });
 
   document.addEventListener("click", (event) => {
@@ -674,6 +820,33 @@ function closeAdoptionModalWithoutPrompt() {
   }
 }
 
+function showAdoptionSubmissionSuccess(referenceNumber) {
+  closeAdoptionModalWithoutPrompt();
+
+  return Swal.fire({
+    icon: "success",
+    title: "Application Submitted",
+    html: `
+      <p>Your adoption application has been received for shelter review.</p>
+      <div class="adoption-success-reference">
+        <span>Reference number</span>
+        <strong>${escapeHtml(referenceNumber || "Not available")}</strong>
+      </div>
+    `,
+    confirmButtonText: "Done",
+    showConfirmButton: true,
+    showCancelButton: false,
+    showCloseButton: true,
+    customClass: {
+      popup: "animua-popup animua-auth-feedback-popup adoption-submission-success-popup",
+      icon: "animua-auth-feedback-icon",
+      closeButton: "animua-feedback-close",
+      confirmButton: "animua-confirm"
+    },
+    buttonsStyling: false
+  });
+}
+
 function showAdoptionExitConfirm() {
   if (!adoptModal?.classList.contains("show")) return;
   adoptionExitConfirm?.removeAttribute("hidden");
@@ -723,7 +896,6 @@ function renderAdoptionReview() {
   const sections = [
     ["Selected pet", [
       ["Name", currentPetForAdoption?.name],
-      ["Animal ID", currentPetForAdoption?.id],
       ["Details", `${currentPetForAdoption?.age || ""} ${currentPetForAdoption?.sex || ""} ${petTypeLabel}`.trim()],
       ["Status", currentPetForAdoption?.status || "Ready"]
     ]],
@@ -1369,9 +1541,6 @@ function showAdoptModalForPet(pet) {
   if (selectedPetStatus) {
     selectedPetStatus.textContent = pet.status || "Ready for Adoption";
   }
-  if (selectedPetIdLabel) {
-    selectedPetIdLabel.textContent = `Animal ID: ${pet.id}`;
-  }
   if (selectedPetImage) {
     selectedPetImage.src = pet.image;
     selectedPetImage.alt = pet.name;
@@ -1677,15 +1846,12 @@ if (adoptionForm) {
       const result = await submitAdoptionApplication(formData);
 
       const referenceNumber = result.applicationId || formData.application_reference;
-      formMessage.textContent = `Adoption request submitted successfully! Reference: ${referenceNumber}`;
-      formMessage.style.color = "green";
 
       adoptionForm.reset();
       currentPetForAdoption = null;
       selectedPetName.textContent = "";
       if (selectedPetMeta) selectedPetMeta.textContent = "";
       if (selectedPetStatus) selectedPetStatus.textContent = "";
-      if (selectedPetIdLabel) selectedPetIdLabel.textContent = "";
       if (petIdField) petIdField.value = "";
       if (petNameField) petNameField.value = "";
       idFrontFileData = null;
@@ -1693,11 +1859,7 @@ if (adoptionForm) {
       renderUploadPreview(idFrontPreview, null, idFrontUpload);
       renderUploadPreview(idBackPreview, null, idBackUpload);
       setAdoptionStep(1);
-
-      setTimeout(() => {
-        adoptModal.classList.remove("show");
-        document.body.classList.remove("menu-open");
-      }, 1200);
+      await showAdoptionSubmissionSuccess(referenceNumber);
     } catch (error) {
       console.error("Adoption submit error:", error);
       if (formData && isNetworkError(error)) {
@@ -1710,7 +1872,6 @@ if (adoptionForm) {
           selectedPetName.textContent = "";
           if (selectedPetMeta) selectedPetMeta.textContent = "";
           if (selectedPetStatus) selectedPetStatus.textContent = "";
-          if (selectedPetIdLabel) selectedPetIdLabel.textContent = "";
           if (petIdField) petIdField.value = "";
           if (petNameField) petNameField.value = "";
           idFrontFileData = null;

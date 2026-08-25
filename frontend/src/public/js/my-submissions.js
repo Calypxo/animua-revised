@@ -531,6 +531,11 @@ function hasUsedReschedule(schedule) {
   return Boolean(schedule?.rescheduledAt || Number(schedule?.rescheduleCount || 0) >= 1);
 }
 
+function getScheduleRescheduleCount(schedule) {
+  const explicitCount = Number(schedule?.rescheduleCount || 0);
+  return explicitCount > 0 ? explicitCount : schedule?.rescheduledAt ? 1 : 0;
+}
+
 function getPendingReschedule(details, fieldName) {
   const request = details?.[fieldName] || {};
   return String(request.status || "").toLowerCase() === "pending" ? request : null;
@@ -564,7 +569,29 @@ function renderScheduleFeedback(item) {
   `;
 }
 
-function getScheduleSavedFeedback(kind) {
+function getScheduleSavedFeedback(kind, isReschedule = false, rescheduleCount = 0) {
+  if (kind === "adoption") {
+    if (!isReschedule) {
+      return {
+        type: "warning",
+        title: "Schedule Saved",
+        message: "Please attend before the displayed 14-day deadline. You may reschedule up to two times.",
+      };
+    }
+
+    return rescheduleCount >= 2
+      ? {
+          type: "warning",
+          title: "Pickup Rescheduled",
+          message: "You have used both reschedules. This pickup schedule is final. If you cannot attend, your account may be suspended.",
+        }
+      : {
+          type: "warning",
+          title: "Pickup Rescheduled",
+          message: "Your new schedule was saved immediately. You have one reschedule remaining.",
+        };
+  }
+
   const action = kind === "surrender" ? "surrender appointment" : "pickup schedule";
   return {
     type: "warning",
@@ -573,12 +600,22 @@ function getScheduleSavedFeedback(kind) {
   };
 }
 
-function renderSchedulePolicyWarning(kind) {
-  const action = kind === "surrender" ? "surrender appointment" : "pickup schedule";
+function renderPickupRescheduleWarning(rescheduleCount) {
+  const title = rescheduleCount >= 2
+    ? "Reschedule limit reached"
+    : rescheduleCount === 1
+      ? "Final reschedule available"
+      : "Two reschedules available";
+  const message = rescheduleCount >= 2
+    ? "You have used both reschedules. This pickup schedule is final. If you cannot attend, your account may be suspended."
+    : rescheduleCount === 1
+      ? "You have one reschedule remaining. Your next pickup schedule will be final. If you cannot attend, your account may be suspended."
+      : "You may change this pickup schedule up to two times. The second reschedule will be your final pickup schedule.";
+
   return `
-    <div class="schedule-feedback warning">
+    <div class="schedule-feedback warning final-reschedule-warning">
       <i class="fa-solid fa-triangle-exclamation"></i>
-      <p><strong>Attendance Reminder</strong>Please attend your ${action} before the 14-day deadline. One reschedule request is allowed and requires staff approval.</p>
+      <p><strong>${escapeHtml(title)}</strong>${escapeHtml(message)}</p>
     </div>
   `;
 }
@@ -742,8 +779,8 @@ function renderApprovedAdoptionNextSteps(item) {
   const schedule = details.pickupSchedule || {};
   const scheduleDate = getScheduleDate(schedule, details.adoptionDate);
   const hasSchedule = hasScheduleValue(schedule);
-  const canReschedule = hasSchedule && !hasUsedReschedule(schedule);
-  const pendingReschedule = getPendingReschedule(details, "pickupRescheduleRequest");
+  const rescheduleCount = getScheduleRescheduleCount(schedule);
+  const canReschedule = hasSchedule && rescheduleCount < 2;
   const scheduleLabel = scheduleDate
     ? `${formatScheduleValue(scheduleDate, "Not scheduled")} ${scheduleTimeOrFallback(schedule)}`
     : "Not scheduled yet";
@@ -764,7 +801,13 @@ function renderApprovedAdoptionNextSteps(item) {
             <h3>Schedule Pet Pickup</h3>
             <p>Choose a convenient date and time to pick up ${escapeHtml(item.name)} from the shelter.</p>
           </div>
-          ${hasSchedule && canReschedule ? `<button type="button" data-schedule-kind="adoption">Request Re-sched</button>` : ""}
+          ${hasSchedule ? `
+            <button
+              type="button"
+              data-schedule-kind="adoption"
+              ${canReschedule ? "" : 'class="is-disabled" disabled aria-disabled="true" title="Maximum of two reschedules used"'}
+            >Reschedule</button>
+          ` : ""}
         </header>
         <div class="schedule-info-grid">
           <article>
@@ -787,9 +830,8 @@ function renderApprovedAdoptionNextSteps(item) {
           </article>
         </div>
       </section>
-      ${!hasSchedule ? '<div class="schedule-card-action-row"><button type="button" data-schedule-kind="adoption">Schedule Pickup</button></div>' : ""}
-      ${hasSchedule ? renderSchedulePolicyWarning("adoption") : ""}
-      ${renderPendingReschedule(pendingReschedule, "Pickup reschedule request")}
+      ${!hasSchedule ? '<div class="schedule-card-action-row"><button type="button" class="schedule-card-primary-btn" data-schedule-kind="adoption">Schedule Pickup</button></div>' : ""}
+      ${hasSchedule ? renderPickupRescheduleWarning(rescheduleCount) : ""}
     </div>
   `;
 }
@@ -845,8 +887,7 @@ function renderAcceptedSurrenderNextSteps(item) {
           </article>
         </div>
       </section>
-      ${!hasSchedule && !arrivalConfirmed ? '<div class="schedule-card-action-row"><button type="button" data-schedule-kind="surrender">Schedule Appointment</button></div>' : ""}
-      ${hasSchedule && !arrivalConfirmed ? renderSchedulePolicyWarning("surrender") : ""}
+      ${!hasSchedule && !arrivalConfirmed ? '<div class="schedule-card-action-row"><button type="button" class="schedule-card-primary-btn" data-schedule-kind="surrender">Schedule Appointment</button></div>' : ""}
       ${!arrivalConfirmed ? renderPendingReschedule(pendingReschedule, "Appointment reschedule request") : ""}
       ${arrivalConfirmed ? `
         <div class="schedule-feedback saved">
@@ -911,6 +952,9 @@ const SCHEDULE_TIME_OPTIONS = [
   { label: "10:00 AM", value: "10:00" },
   { label: "1:30 PM", value: "13:30" },
   { label: "2:30 PM", value: "14:30" },
+  { label: "3:30 PM", value: "15:30" },
+  { label: "4:30 PM", value: "16:30" },
+  { label: "5:00 PM", value: "17:00" },
 ];
 const SCHEDULE_WINDOW_DAYS = 14;
 
@@ -1045,8 +1089,18 @@ function renderScheduleCalendar(monthDate, selectedDate, minDate, maxDate) {
 async function promptForSchedule(kind, item) {
   const Swal = await getSwal();
   const isSurrender = kind === "surrender";
+  const existingSchedule = isSurrender
+    ? item?.details?.surrenderAppointment
+    : item?.details?.pickupSchedule;
+  const isReschedule = hasScheduleValue(existingSchedule);
+  const rescheduleCount = getScheduleRescheduleCount(existingSchedule);
+  const isFinalPickupReschedule = !isSurrender && isReschedule && rescheduleCount >= 1;
   const { minDate, maxDate } = getScheduleWindow(kind, item);
-  const title = isSurrender ? "Schedule Surrender Appointment" : "Schedule Pet Pickup";
+  const title = isSurrender
+    ? "Schedule Surrender Appointment"
+    : isReschedule
+      ? "Reschedule Pet Pickup"
+      : "Schedule Pet Pickup";
   const subtitle = isSurrender
     ? `Choose an available date and time to bring ${escapeHtml(item?.name || "your pet")} to the shelter.`
     : `Choose an available date and time to pick up ${escapeHtml(item?.name || "your pet")} from the shelter.`;
@@ -1076,6 +1130,13 @@ async function promptForSchedule(kind, item) {
             <p>${subtitle}</p>
           </div>
         </header>
+
+        ${isFinalPickupReschedule ? `
+          <div class="schedule-final-reschedule-notice" role="alert">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <p><strong>This is your final reschedule.</strong>If you cannot attend the new pickup schedule, your account may be suspended.</p>
+          </div>
+        ` : ""}
 
         <div class="schedule-picker-section">
           <div class="schedule-limit-reminder">
@@ -1114,7 +1175,13 @@ async function promptForSchedule(kind, item) {
     `,
     showConfirmButton: true,
     showCancelButton: true,
-    confirmButtonText: isSurrender ? "Confirm Appointment" : "Confirm Pickup Schedule",
+    confirmButtonText: isSurrender
+      ? "Confirm Appointment"
+      : isFinalPickupReschedule
+        ? "Confirm Final Reschedule"
+        : isReschedule
+          ? "Confirm Reschedule"
+          : "Confirm Pickup Schedule",
     cancelButtonText: "Reset",
     customClass: {
       popup: "schedule-picker-popup",
@@ -1256,13 +1323,16 @@ async function promptForSchedule(kind, item) {
 }
 
 async function saveSchedule(item, kind) {
+  const isSurrender = kind === "surrender";
+  const existingSchedule = isSurrender
+    ? item?.details?.surrenderAppointment
+    : item?.details?.pickupSchedule;
+  const isReschedule = hasScheduleValue(existingSchedule);
   const schedule = await promptForSchedule(kind, item);
   if (!schedule) {
     showSubmissionDetails(item);
     return;
   }
-
-  const isSurrender = kind === "surrender";
 
   const endpoint = kind === "surrender"
     ? `${API_BASE_URL}/surrenders/my-requests/${encodeURIComponent(item.id)}/appointment`
@@ -1313,9 +1383,16 @@ async function saveSchedule(item, kind) {
     }
   }
 
+  const savedSchedule = isSurrender
+    ? result.surrenderAppointment || item.details?.surrenderAppointment
+    : result.pickupSchedule || item.details?.pickupSchedule;
   item.scheduleFeedback = result.requiresApproval
     ? null
-    : getScheduleSavedFeedback(kind);
+    : getScheduleSavedFeedback(
+        kind,
+        isReschedule,
+        getScheduleRescheduleCount(savedSchedule),
+      );
 
   showSubmissionDetails(item);
 }
@@ -1419,7 +1496,7 @@ async function showSubmissionDetails(item) {
       `,
       showConfirmButton: false,
       showCloseButton: false,
-      width: "min(620px, calc(100vw - 28px))",
+      width: "min(720px, calc(100vw - 28px))",
       padding: 0,
       background: "transparent",
       customClass: {
@@ -1438,6 +1515,7 @@ async function showSubmissionDetails(item) {
         });
 
         popup.querySelectorAll("[data-schedule-kind]").forEach((button) => button.addEventListener("click", async (event) => {
+          if (event.currentTarget.disabled) return;
           try {
             Swal.close();
             await saveSchedule(item, event.currentTarget.dataset.scheduleKind);
@@ -1559,7 +1637,7 @@ async function showSubmissionDetails(item) {
     `,
     showConfirmButton: false,
     showCloseButton: false,
-    width: "min(620px, calc(100vw - 28px))",
+    width: "min(720px, calc(100vw - 28px))",
     padding: 0,
     background: "transparent",
     customClass: {
@@ -1578,6 +1656,7 @@ async function showSubmissionDetails(item) {
       });
 
       popup.querySelectorAll("[data-schedule-kind]").forEach((button) => button.addEventListener("click", async (event) => {
+        if (event.currentTarget.disabled) return;
         try {
           Swal.close();
           await saveSchedule(item, event.currentTarget.dataset.scheduleKind);

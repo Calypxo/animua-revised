@@ -18,6 +18,93 @@ const {
   getAdoptionFinalizationError,
 } = require("../services/adoptionWorkflowService");
 
+function getPickupRescheduleCount(schedule = {}) {
+  const explicitCount = Number(schedule.rescheduleCount || 0);
+  return explicitCount > 0 ? explicitCount : schedule.rescheduledAt ? 1 : 0;
+}
+
+function pickupScheduleError(statusCode, message) {
+  const error = new Error(message);
+  error.statusCode = statusCode;
+  return error;
+}
+
+function buildRescheduledPickup(existingSchedule, { date, time, changedAt, changedBy }) {
+  const rescheduleCount = getPickupRescheduleCount(existingSchedule) + 1;
+  const previousSchedule = {
+    date: existingSchedule.date || "",
+    time: existingSchedule.time || "",
+    location: existingSchedule.location || SHELTER_LOCATION,
+    scheduledAt: existingSchedule.scheduledAt || null,
+  };
+  const historyEntry = {
+    number: rescheduleCount,
+    from: previousSchedule,
+    to: {
+      date,
+      time,
+      location: SHELTER_LOCATION,
+    },
+    changedAt,
+    changedBy,
+  };
+
+  return {
+    date,
+    time,
+    location: SHELTER_LOCATION,
+    scheduledAt: existingSchedule.scheduledAt || changedAt,
+    rescheduledAt: changedAt,
+    rescheduledBy: changedBy,
+    rescheduleCount,
+    previousSchedule,
+    rescheduleHistory: [
+      ...(Array.isArray(existingSchedule.rescheduleHistory)
+        ? existingSchedule.rescheduleHistory
+        : []),
+      historyEntry,
+    ],
+  };
+}
+
+async function applyLegacyPendingPickupReschedule(adoptionRef, data) {
+  const request = data.pickupRescheduleRequest || {};
+  const existingSchedule = data.pickupSchedule || {};
+  if (
+    String(request.status || "").toLowerCase() !== "pending" ||
+    !request.date ||
+    !request.time ||
+    (!existingSchedule.date && !existingSchedule.time)
+  ) {
+    return data;
+  }
+
+  const changedAt = request.requestedAt || new Date().toISOString();
+  const pickupSchedule = buildRescheduledPickup(existingSchedule, {
+    date: request.date,
+    time: request.time,
+    changedAt,
+    changedBy: request.requestedBy || "Legacy reschedule",
+  });
+  const normalized = {
+    ...data,
+    pickupSchedule,
+    pickupRescheduleRequest: null,
+    deadlineStatus: "Appointment Scheduled",
+    noShowRisk: false,
+  };
+
+  await adoptionRef.update({
+    pickupSchedule,
+    pickupRescheduleRequest: null,
+    deadlineStatus: "Appointment Scheduled",
+    noShowRisk: false,
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
+
+  return normalized;
+}
+
 exports.createAdoption = async (req, res) => {
   try {
     const {
@@ -238,7 +325,7 @@ exports.getAllAdoptions = async (req, res) => {
 
     let adoptions = await Promise.all(
       snapshot.docs.map(async (doc) => {
-        const data = doc.data();
+        const data = await applyLegacyPendingPickupReschedule(doc.ref, doc.data() || {});
 
         let animal = {
           id: data.pet_id || "",
@@ -352,9 +439,15 @@ exports.getMyAdoptions = async (req, res) => {
 
     const snapshot = await db.collection(ADOPTION_COL).get();
 
+    const normalizedAdoptionDocs = await Promise.all(
+      snapshot.docs.map(async (doc) => ({
+        id: doc.id,
+        data: await applyLegacyPendingPickupReschedule(doc.ref, doc.data() || {}),
+      }))
+    );
+
     const adoptions = await Promise.all(
-      snapshot.docs
-        .map((doc) => ({ id: doc.id, data: doc.data() || {} }))
+      normalizedAdoptionDocs
         .filter(({ data }) => {
           const applicantEmail = String(
             data.account?.email ||
@@ -476,7 +569,7 @@ exports.scheduleMyAdoptionPickup = async (req, res) => {
       });
     }
 
-    const data = adoptionDoc.data() || {};
+    let data = adoptionDoc.data() || {};
     const applicantEmail = String(
       data.account?.email ||
       data.applicant?.email ||
@@ -498,75 +591,100 @@ exports.scheduleMyAdoptionPickup = async (req, res) => {
       });
     }
 
+    data = await applyLegacyPendingPickupReschedule(adoptionRef, data);
+
     if (!validateScheduleDate(data, date)) {
       return res.status(400).json({
         message: "Pickup date must be today or later and within the 14-day attendance deadline.",
       });
     }
 
-    const existingSchedule = data.pickupSchedule || null;
-    const alreadyScheduled = Boolean(existingSchedule?.date || existingSchedule?.time);
-    const now = new Date().toISOString();
-
-    if (alreadyScheduled) {
-      const rescheduleCount = Number(existingSchedule?.rescheduleCount || 0);
-      if (rescheduleCount >= 1 || existingSchedule?.rescheduledAt) {
-        return res.status(400).json({
-          message: "Pickup can only be rescheduled once.",
-        });
+    const scheduleResult = await db.runTransaction(async (transaction) => {
+      const currentDoc = await transaction.get(adoptionRef);
+      if (!currentDoc.exists) {
+        throw pickupScheduleError(404, "Adoption application not found.");
       }
 
-      const pickupRescheduleRequest = {
-        date,
-        time,
-        location: SHELTER_LOCATION,
-        status: "Pending",
-        requestedAt: now,
-        requestedBy: email,
-        previousSchedule: existingSchedule,
-      };
+      const currentData = currentDoc.data() || {};
+      const currentApplicantEmail = String(
+        currentData.account?.email ||
+        currentData.applicant?.email ||
+        currentData.userEmail ||
+        ""
+      ).trim().toLowerCase();
+      if (currentApplicantEmail !== email) {
+        throw pickupScheduleError(403, "You can only schedule your own adoption pickup.");
+      }
+      if (String(currentData.status || "").toLowerCase() !== "approved") {
+        throw pickupScheduleError(400, "Only approved applications can schedule a pickup.");
+      }
+      if (!validateScheduleDate(currentData, date)) {
+        throw pickupScheduleError(
+          400,
+          "Pickup date must be today or later and within the 14-day attendance deadline."
+        );
+      }
 
-      await adoptionRef.update({
-        pickupRescheduleRequest,
-        deadlineStatus: "Reschedule Pending",
+      const existingSchedule = currentData.pickupSchedule || null;
+      const alreadyScheduled = Boolean(existingSchedule?.date || existingSchedule?.time);
+      const now = new Date().toISOString();
+      let pickupSchedule;
+
+      if (alreadyScheduled) {
+        const rescheduleCount = getPickupRescheduleCount(existingSchedule);
+        if (rescheduleCount >= 2) {
+          throw pickupScheduleError(400, "Pickup can only be rescheduled twice.");
+        }
+        pickupSchedule = buildRescheduledPickup(existingSchedule, {
+          date,
+          time,
+          changedAt: now,
+          changedBy: email,
+        });
+      } else {
+        pickupSchedule = {
+          date,
+          time,
+          location: SHELTER_LOCATION,
+          scheduledAt: now,
+        };
+      }
+
+      transaction.update(adoptionRef, {
+        pickupSchedule,
+        pickupRescheduleRequest: null,
+        deadlineStatus: "Appointment Scheduled",
+        noShowRisk: false,
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
 
-      const updatedDoc = await adoptionRef.get();
-
-      return res.status(200).json({
-        message: "Pickup reschedule request sent for staff approval.",
-        requiresApproval: true,
-        request: updatedDoc.data(),
-        pickupRescheduleRequest,
-      });
-    }
-
-    const pickupSchedule = {
-      date,
-      time,
-      location: SHELTER_LOCATION,
-      scheduledAt: now,
-    };
-
-    await adoptionRef.update({
-      pickupSchedule,
-      deadlineStatus: "Appointment Scheduled",
-      noShowRisk: false,
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      return { pickupSchedule, isReschedule: alreadyScheduled };
     });
 
     const updatedDoc = await adoptionRef.get();
 
+    if (scheduleResult.isReschedule) {
+      const { pickupSchedule } = scheduleResult;
+      return res.status(200).json({
+        message: pickupSchedule.rescheduleCount >= 2
+          ? "Pickup rescheduled successfully. This is your final pickup schedule."
+          : "Pickup rescheduled successfully. You have one reschedule remaining.",
+        finalReschedule: pickupSchedule.rescheduleCount >= 2,
+        reschedulesRemaining: Math.max(0, 2 - pickupSchedule.rescheduleCount),
+        request: updatedDoc.data(),
+        pickupSchedule,
+      });
+    }
+
     res.status(200).json({
       message: "Pickup schedule saved.",
       request: updatedDoc.data(),
-      pickupSchedule,
+      pickupSchedule: scheduleResult.pickupSchedule,
     });
   } catch (error) {
     console.error("[scheduleMyAdoptionPickup]", error.message);
-    res.status(500).json({
-      message: "Failed to save pickup schedule.",
+    res.status(error.statusCode || 500).json({
+      message: error.statusCode ? error.message : "Failed to save pickup schedule.",
     });
   }
 };

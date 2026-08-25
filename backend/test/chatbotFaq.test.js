@@ -596,9 +596,11 @@ test("answers adoption pickup reschedule questions", () => {
 
   const reply = _test.getLocalReply(message, { pets: [], events: [] }, "english");
 
-  assert.match(reply, /Request Re-sched/i);
-  assert.match(reply, /only be rescheduled once/i);
-  assert.match(reply, /staff approval/i);
+  assert.match(reply, /Reschedule/i);
+  assert.match(reply, /up to two times/i);
+  assert.match(reply, /saved immediately/i);
+  assert.match(reply, /without admin approval/i);
+  assert.match(reply, /account may be suspended/i);
 });
 
 test("answers Tagalog adoption pickup reschedule questions", () => {
@@ -609,9 +611,11 @@ test("answers Tagalog adoption pickup reschedule questions", () => {
 
   const reply = _test.getLocalReply(message, { pets: [], events: [] }, "tagalog");
 
-  assert.match(reply, /Request Re-sched/i);
-  assert.match(reply, /Isang beses/i);
-  assert.match(reply, /staff/i);
+  assert.match(reply, /Reschedule/i);
+  assert.match(reply, /dalawang beses/i);
+  assert.match(reply, /Agad mase-save/i);
+  assert.match(reply, /walang admin approval/i);
+  assert.match(reply, /maaaring ma-suspend/i);
 });
 
 test("answers home preparation questions before adoption", () => {

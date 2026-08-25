@@ -1,5 +1,7 @@
 import { getUserSession } from "../../utils/storage.js";
 
+const PENDING_PROFILE_ACTION_KEY = "animua_pending_profile_action";
+
 function firstName(name = "User") {
   const first = String(name || "").trim().split(/\s+/)[0] || "User";
   return first.charAt(0).toUpperCase() + first.slice(1);
@@ -18,7 +20,7 @@ function profileMarkup() {
   return `
     <section class="profile-modal-overlay hidden" id="profileModal" aria-hidden="true" aria-labelledby="profileModalTitle">
       <button type="button" class="profile-modal-backdrop" data-profile-close aria-label="Close profile"></button>
-      <article class="profile-modal-card profile-modal-card--compact" role="dialog" aria-modal="true" tabindex="-1" style="width: min(640px, calc(100vw - 64px)); max-width: 640px;">
+      <article class="profile-modal-card" role="dialog" aria-modal="true" tabindex="-1">
         <button type="button" class="profile-modal-close" data-profile-close aria-label="Close profile">
           <i class="fa-solid fa-xmark" aria-hidden="true"></i>
         </button>
@@ -69,6 +71,19 @@ function profileMarkup() {
                 <span><strong>Mobile Number</strong><input type="tel" id="profilePhone" autocomplete="tel" readonly placeholder="Not added yet"></span>
               </label>
             </section>
+            <section class="profile-info-card profile-settings-card">
+              <h3><i class="fa-solid fa-gear" aria-hidden="true"></i> Account Settings</h3>
+              <button type="button" class="profile-settings-row" id="profilePasswordBtn" data-profile-action="password">
+                <i class="fa-solid fa-lock" aria-hidden="true"></i>
+                <span><strong>Password</strong><small>Update your account password</small></span>
+                <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+              </button>
+              <button type="button" class="profile-settings-row" id="profileNotificationsBtn" data-profile-action="notifications">
+                <i class="fa-regular fa-bell" aria-hidden="true"></i>
+                <span><strong>Notifications</strong><small>Manage email and push notifications</small></span>
+                <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+              </button>
+            </section>
           </form>
         </div>
       </article>
@@ -113,5 +128,11 @@ export function openProfileModal() {
   document.body.classList.add("modal-open");
   modal.querySelectorAll("[data-profile-close]").forEach((button) => {
     button.addEventListener("click", closeProfileModal, { once: true });
+  });
+  modal.querySelectorAll("[data-profile-action]").forEach((button) => {
+    button.addEventListener("click", () => {
+      sessionStorage.setItem(PENDING_PROFILE_ACTION_KEY, button.dataset.profileAction);
+      window.location.href = "/pages/public/home.html";
+    }, { once: true });
   });
 }

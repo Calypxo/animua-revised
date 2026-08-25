@@ -1054,7 +1054,7 @@ exports.login = async (req, res) => {
     if (requestedPortal === "public" && isManagementUser) {
       return res.status(403).json({
         code: "MANAGEMENT_PORTAL_REQUIRED",
-        message: "Management accounts must sign in through the management portal."
+        message: "This account is for management use only. Please sign in through the ANIMUA Management Portal."
       });
     }
 

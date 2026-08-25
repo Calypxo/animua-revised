@@ -1,5 +1,6 @@
 import { API_BASE_URL } from "../../utils/api.js";
 import { ensureUserSession, hasUserSession } from "../../utils/storage.js";
+import { compareEventDates, isUpcomingEventDate } from "./announcement-date-utils.js";
 
 const NEWS_CCA_CAT_RESCUE_IMAGE = new URL(
   "../../assets/images/optimized/announcements/news-cca-cat-rescue-720.jpg",
@@ -319,6 +320,10 @@ function getFilteredPosts() {
       return date ? date < new Date() : true;
     }
 
+    if (state.type === "Upcoming Events") {
+      return isUpcomingEventDate(item.eventDate);
+    }
+
     return true;
   });
 }
@@ -327,7 +332,11 @@ function renderEvents() {
   if (!eventList) return;
   eventList.replaceChildren();
   const events = state.announcements
-    .filter((item) => normalizeType(item.type) === "Upcoming Events")
+    .filter((item) => (
+      normalizeType(item.type) === "Upcoming Events"
+      && isUpcomingEventDate(item.eventDate)
+    ))
+    .sort((left, right) => compareEventDates(left.eventDate, right.eventDate))
     .slice(0, 3);
 
   if (!events.length) {

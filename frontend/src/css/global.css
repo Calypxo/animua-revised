@@ -2433,6 +2433,46 @@ button {
   font-weight: 750 !important;
 }
 
+/* Public-login guidance for management accounts uses a tighter alert scale. */
+.management-only-popup {
+  width: min(360px, calc(100% - 28px)) !important;
+  padding: 21px 26px 20px !important;
+}
+
+.management-only-popup .swal2-icon {
+  width: 58px !important;
+  height: 58px !important;
+  margin-bottom: 11px !important;
+}
+
+.management-only-popup .swal2-icon::before {
+  font-size: 1.55rem !important;
+}
+
+.management-only-popup .swal2-title {
+  font-size: 1.3rem !important;
+  line-height: 1.08 !important;
+}
+
+.management-only-popup .swal2-html-container {
+  max-width: 290px !important;
+  margin: 8px auto 0 !important;
+  font-size: 0.82rem !important;
+  line-height: 1.32 !important;
+}
+
+.management-only-popup .swal2-actions {
+  margin-top: 14px !important;
+}
+
+.management-only-popup .animua-confirm {
+  min-width: 128px !important;
+  min-height: 36px !important;
+  padding: 8px 18px !important;
+  border-radius: 7px !important;
+  font-size: 0.8rem !important;
+}
+
 .animua-feedback-close,
 .animua-logout-close {
   top: 16px !important;
@@ -14973,7 +15013,7 @@ button#chatbotSend.chatbot-input-send i {
 .password-otp-cancel,
 .password-change-otp-screen .auth-submit-btn {
   min-height: 44px;
-  border-radius: 7px;
+  border-radius: 999px;
   font-family: "Poppins", sans-serif;
   font-size: 0.86rem;
   font-weight: 600;
@@ -15019,8 +15059,9 @@ button#chatbotSend.chatbot-input-send i {
 }
 
 .password-change-otp-screen .password-otp-actions {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
+  grid-template-columns: minmax(220px, 306px);
+  justify-content: center;
+  gap: 0;
 }
 
 .password-change-otp-screen .password-otp-cancel,
@@ -15034,7 +15075,7 @@ button#chatbotSend.chatbot-input-send i {
   gap: 8px;
   margin: 0;
   padding: 0 18px;
-  border-radius: 8px;
+  border-radius: 999px;
   font-family: "Poppins", sans-serif;
   font-size: 0.9rem;
   font-weight: 600;
@@ -15308,7 +15349,7 @@ button#chatbotSend.chatbot-input-send i {
 .change-password-popup.swal2-loading .swal2-actions {
   display: grid !important;
   grid-template-columns: minmax(220px, 0.48fr) !important;
-  justify-content: end !important;
+  justify-content: center !important;
 }
 
 .change-password-popup.swal2-loading .change-password-confirm {
@@ -15397,7 +15438,7 @@ button#chatbotSend.chatbot-input-send i {
 
 .forgot-password-popup .password-change-otp-screen .password-otp-cancel,
 .forgot-password-popup .password-change-otp-screen #confirm-password-change-otp-btn.auth-submit-btn {
-  border-radius: 8px !important;
+  border-radius: 999px !important;
 }
 
 @media (max-width: 560px) {
@@ -19067,7 +19108,7 @@ textarea {
   }
 }
 
-/* Final override: keep My Profile compact after shared modal width rules. */
+/* Preserve the original narrow, vertically stacked profile layout. */
 body #profileModal.profile-modal-overlay .profile-modal-card,
 body #profileModal.profile-modal-overlay .profile-modal-card.profile-modal-card--compact {
   --modal-max-width: 640px !important;
@@ -20578,7 +20619,7 @@ body #profileModal.profile-modal-overlay .profile-modal-card.profile-modal-card-
     min-width: 0 !important;
     min-height: 38px !important;
     padding: 0 10px !important;
-    border-radius: 8px !important;
+    border-radius: 999px !important;
     font-size: 0.76rem !important;
     line-height: 1 !important;
     white-space: nowrap !important;
@@ -22793,18 +22834,19 @@ body.home-page #register-section .auth-submit-btn,
   }
 
   body.home-page > .footer .footer-grid {
-    grid-template-columns:
-      minmax(165px, 1.2fr)
-      repeat(3, minmax(80px, 0.66fr))
-      minmax(175px, 1.15fr) !important;
-    gap: 12px !important;
+    grid-template-columns: minmax(190px, 1.08fr) repeat(2, minmax(0, 1fr)) !important;
+    grid-auto-flow: row !important;
+    column-gap: clamp(20px, 3.2vw, 30px) !important;
+    row-gap: 16px !important;
     align-items: start !important;
-    padding-right: 18px !important;
-    padding-left: 18px !important;
+    padding-right: 28px !important;
+    padding-bottom: 24px !important;
+    padding-left: 28px !important;
   }
 
   body.home-page > .footer .footer-brand {
-    grid-column: auto !important;
+    grid-column: 1 !important;
+    grid-row: 1 / span 2 !important;
   }
 
   body.home-page > .footer .footer-brand,
@@ -22814,36 +22856,46 @@ body.home-page #register-section .auth-submit-btn,
   }
 
   body.home-page > .footer .footer-contact {
-    grid-column: auto !important;
+    grid-column: 3 !important;
   }
 
   body.home-page > .footer .footer-brand-name {
-    font-size: 18px !important;
+    font-size: 20px !important;
   }
 
   body.home-page > .footer .footer-brand-tagline {
-    font-size: 0.52rem !important;
+    font-size: 0.58rem !important;
   }
 
   body.home-page > .footer .footer-brand p {
     max-width: none !important;
     margin-bottom: 12px !important;
-    font-size: 0.68rem !important;
-    line-height: 1.4 !important;
+    font-size: 0.76rem !important;
+    line-height: 1.45 !important;
   }
 
   body.home-page > .footer .footer-links h4 {
-    margin-bottom: 8px !important;
-    font-size: 0.62rem !important;
+    margin-bottom: 10px !important;
+    font-size: 0.72rem !important;
   }
 
   body.home-page > .footer .footer-links a,
   body.home-page > .footer .footer-contact p,
   body.home-page > .footer .footer-contact a {
-    margin-bottom: 6px !important;
-    font-size: 0.66rem !important;
-    line-height: 1.35 !important;
+    margin-bottom: 8px !important;
+    font-size: 0.74rem !important;
+    line-height: 1.4 !important;
     overflow-wrap: anywhere !important;
+  }
+
+  body.home-page > .footer .footer-grid > .footer-links > a {
+    width: fit-content !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    align-items: flex-start !important;
+    padding: 0 !important;
   }
 
   body.home-page > .footer .footer-social {
@@ -22866,18 +22918,25 @@ body.home-page #register-section .auth-submit-btn,
   }
 
   body.home-page > .footer .footer-bottom-inner {
-    grid-template-columns: minmax(110px, 0.8fr) minmax(145px, 1fr) minmax(175px, 1.25fr) auto !important;
-    gap: 10px !important;
-    padding-right: 18px !important;
-    padding-left: 18px !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) auto !important;
+    gap: 8px 20px !important;
+    padding-right: 28px !important;
+    padding-left: 28px !important;
+  }
+
+  body.home-page > .footer .footer-bottom-inner > p:nth-child(3) {
+    grid-column: 1 / 3 !important;
   }
 
   body.home-page > .footer .footer-bottom p {
-    font-size: 0.6rem !important;
-    line-height: 1.35 !important;
+    font-size: 0.68rem !important;
+    line-height: 1.4 !important;
   }
 
   body.home-page > .footer .footer-paw {
+    grid-column: 3 !important;
+    grid-row: 1 / 3 !important;
+    align-self: center !important;
     justify-self: end !important;
   }
 }
@@ -22952,9 +23011,24 @@ body.home-page #register-section .auth-submit-btn,
 
   body.home-page .how-animua-process::before {
     content: "" !important;
+    position: absolute !important;
     display: block !important;
+    top: 58px !important;
+    bottom: auto !important;
     left: 12% !important;
     right: 12% !important;
+    width: auto !important;
+    height: 3px !important;
+    border-radius: 999px !important;
+    background: repeating-linear-gradient(
+      to right,
+      #d8b558 0 6px,
+      transparent 6px 18px
+    ) !important;
+    background-size: 18px 3px !important;
+    background-repeat: repeat-x !important;
+    transform: none !important;
+    pointer-events: none !important;
   }
 
   body.home-page .how-animua-step > div,
@@ -23051,6 +23125,10 @@ body.home-page #register-section .auth-submit-btn,
     scroll-padding-top: 76px;
   }
 
+  body.home-page .header {
+    border-bottom: 1px solid rgba(120, 1, 22, 0.32) !important;
+  }
+
   body.home-page :is(
     #home-highlights,
     #about-animua,
@@ -23095,5 +23173,74 @@ body.home-page #register-section .auth-submit-btn,
 
   body.home-page .home-match-quiz-primary {
     gap: 6px !important;
+  }
+}
+/* Password completion reuses the compact login-feedback modal component. */
+body .password-update-success-popup .swal2-actions {
+  justify-content: center !important;
+}
+
+body .password-update-success-popup .swal2-cancel {
+  display: none !important;
+}
+
+/* Keep the single OTP action centered and pill-shaped in every state. */
+body .change-password-popup .password-change-otp-screen .password-otp-actions {
+  grid-template-columns: minmax(0, 306px) !important;
+  justify-content: center !important;
+  gap: 0 !important;
+}
+
+body .change-password-popup .password-change-otp-screen #confirm-password-change-otp-btn.auth-submit-btn,
+body .change-password-popup .password-change-otp-screen #confirm-password-change-otp-btn.auth-submit-btn:disabled,
+body .change-password-popup .password-change-otp-screen #confirm-password-change-otp-btn.auth-submit-btn[aria-busy="true"] {
+  border-radius: 999px !important;
+}
+
+/* Phone header: keep notifications beside the account and menu controls. */
+@media (max-width: 760px) {
+  body.home-page .notification-wrap {
+    width: 42px !important;
+    min-width: 42px !important;
+    height: 42px !important;
+    display: block !important;
+    flex: 0 0 42px !important;
+  }
+
+  body.home-page .notification-btn {
+    box-sizing: border-box !important;
+    width: 42px !important;
+    min-width: 42px !important;
+    max-width: 42px !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    max-height: 42px !important;
+    display: inline-grid !important;
+    place-items: center !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+  }
+
+  body.home-page .header.scrolled .notification-btn {
+    border: 0 !important;
+    background: transparent !important;
+    color: #780116 !important;
+    box-shadow: none !important;
+  }
+}
+
+@media (max-width: 430px) {
+  body.home-page .notification-wrap,
+  body.home-page .notification-btn {
+    width: 40px !important;
+    min-width: 40px !important;
+    max-width: 40px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    max-height: 40px !important;
+    flex-basis: 40px !important;
   }
 }

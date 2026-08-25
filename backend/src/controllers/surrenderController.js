@@ -83,7 +83,8 @@ async function createSurrenderListThumbnail(dataUrl = "") {
 async function summarizeMySurrenderRequest(request = {}) {
   const owner = request.owner || {};
   const pet = request.pet || {};
-  const photoDataUrl = await createSurrenderListThumbnail(pet.photoDataUrl);
+  const originalPhotoDataUrl = typeof pet.photoDataUrl === "string" ? pet.photoDataUrl.trim() : "";
+  const photoDataUrl = (await createSurrenderListThumbnail(originalPhotoDataUrl)) || originalPhotoDataUrl;
 
   return {
     ...request,
@@ -400,13 +401,19 @@ async function getMySurrenderRequests(req, res) {
       .where("account.email", "==", req.user.email)
       .get();
 
-    const requests = snapshot.docs
-      .map((doc) => summarizeMySurrenderRequest(doc.data()))
-      .sort((a, b) => {
-        const aTime = new Date(a.createdAt || a.submittedAt || 0).getTime();
-        const bTime = new Date(b.createdAt || b.submittedAt || 0).getTime();
-        return (Number.isNaN(bTime) ? 0 : bTime) - (Number.isNaN(aTime) ? 0 : aTime);
-      });
+    const requests = (await Promise.all(
+      snapshot.docs.map((doc) => {
+        const data = doc.data() || {};
+        return summarizeMySurrenderRequest({
+          ...data,
+          id: data.id || doc.id,
+        });
+      })
+    )).sort((a, b) => {
+      const aTime = new Date(a.createdAt || a.submittedAt || 0).getTime();
+      const bTime = new Date(b.createdAt || b.submittedAt || 0).getTime();
+      return (Number.isNaN(bTime) ? 0 : bTime) - (Number.isNaN(aTime) ? 0 : aTime);
+    });
 
     return res.json({
       requests,

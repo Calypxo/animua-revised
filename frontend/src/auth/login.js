@@ -119,7 +119,7 @@ export async function handleLogin(event) {
         clearFailedLogin(email);
         resetLoginCaptcha();
         hideLoginCaptcha();
-        await showManagementLoginDialog(authModal, data.message);
+        await showManagementLoginDialog(authModal);
         return;
       }
 
@@ -290,16 +290,19 @@ function closeModal(authModal) {
   document.body.classList.remove("auth-open");
 }
 
-async function showManagementLoginDialog(authModal, message = "") {
+async function showManagementLoginDialog(authModal) {
   closeModal(authModal);
 
   await Swal.fire({
     icon: "warning",
-    title: "Use Management Login",
-    text: message || "This email belongs to a management account and cannot sign in through the public portal.",
+    title: "Management Use Only",
+    html: `
+      <p>This account is for management use only.</p>
+      <p>Please sign in through the ANIMUA Management Portal.</p>
+    `,
     confirmButtonText: "OK",
     customClass: {
-      popup: "animua-popup animua-auth-feedback-popup",
+      popup: "animua-popup animua-auth-feedback-popup management-only-popup",
       confirmButton: "animua-confirm"
     },
     buttonsStyling: false

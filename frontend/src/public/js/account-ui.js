@@ -15,6 +15,7 @@ const loginNavBtn = document.getElementById("loginNavBtn");
 const userMenuBtn = document.getElementById("userMenuBtn");
 const userDropdown = document.getElementById("userDropdown");
 const profileModal = document.getElementById("profileModal");
+const PENDING_PROFILE_ACTION_KEY = "animua_pending_profile_action";
 
 function firstName(name = "User") {
   const first = String(name || "").trim().split(/\s+/)[0] || "User";
@@ -138,6 +139,14 @@ function bindMenus() {
   document.getElementById("compatibilityResultsBtn")?.addEventListener("click", () => {
     window.location.href = "compatibilityResults.html";
   });
+
+  for (const action of ["password", "notifications"]) {
+    const buttonId = action === "password" ? "profilePasswordBtn" : "profileNotificationsBtn";
+    document.getElementById(buttonId)?.addEventListener("click", () => {
+      sessionStorage.setItem(PENDING_PROFILE_ACTION_KEY, action);
+      window.location.href = "/pages/public/home.html";
+    });
+  }
 }
 
 document.addEventListener("DOMContentLoaded", async () => {

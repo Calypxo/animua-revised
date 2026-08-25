@@ -969,11 +969,6 @@ function isPendingStatus(status = "") {
   return lower.includes("pending") || lower.includes("review");
 }
 
-function getPendingPickupReschedule(adoption = {}) {
-  const request = adoption.pickupRescheduleRequest || {};
-  return String(request.status || "").toLowerCase() === "pending" ? request : null;
-}
-
 function getScheduledPickupReply(adoption, language = "english") {
   if (!adoption) {
     return localizedReply(
@@ -984,7 +979,6 @@ function getScheduledPickupReply(adoption, language = "english") {
   }
 
   const schedule = adoption.pickupSchedule || {};
-  const pendingReschedule = getPendingPickupReschedule(adoption);
   const scheduleDate = schedule.date || adoption.adoptionDate || "";
   const scheduleTime = formatTime(schedule.time);
   const scheduleText = [formatDate(scheduleDate), scheduleTime].filter(Boolean).join(" at ");
@@ -995,8 +989,8 @@ function getScheduledPickupReply(adoption, language = "english") {
   if (scheduleText) {
     return localizedReply(
       language,
-      `Your pickup schedule for ${petName}${reference} is ${scheduleText}. Please go to the Angeles City Veterinary Office on that schedule and bring the required documents shown in My Applications.${pendingReschedule ? " Your reschedule request is still pending staff approval." : ""}`,
-      `Ang pickup schedule mo para kay ${petName}${reference} ay ${scheduleText}. Pumunta sa Angeles City Veterinary Office sa schedule na iyon at dalhin ang required documents na nakalagay sa My Applications.${pendingReschedule ? " Pending pa ang reschedule request mo at kailangan pang i-approve ng staff." : ""}`
+      `Your pickup schedule for ${petName}${reference} is ${scheduleText}. Please go to the Angeles City Veterinary Office on that schedule and bring the required documents shown in My Applications.`,
+      `Ang pickup schedule mo para kay ${petName}${reference} ay ${scheduleText}. Pumunta sa Angeles City Veterinary Office sa schedule na iyon at dalhin ang required documents na nakalagay sa My Applications.`
     );
   }
 
@@ -2482,8 +2476,8 @@ function getLocalReply(message, context = {}, language = "english") {
   if (hasAdoptionPickupRescheduleIntent(lower)) {
     return localizedReply(
       language,
-      "If you already have a pickup schedule, open My Applications and use Request Re-sched if the option is available. Pickup can only be rescheduled once and the request needs staff approval. If the option is not shown, contact the Angeles City Veterinary Office before missing your schedule.",
-      "Kung may pickup schedule ka na, buksan ang My Applications at gamitin ang Request Re-sched kung available ang option. Isang beses lang puwedeng mag-request ng reschedule at kailangan pa itong i-approve ng staff. Kung walang option, kontakin ang Angeles City Veterinary Office bago ma-miss ang schedule."
+      "If you already have a pickup schedule, open My Applications and use Reschedule if the option is available. Pickup can be rescheduled up to two times, and each change is saved immediately without admin approval. The second reschedule is final; if you cannot attend, your account may be suspended.",
+      "Kung may pickup schedule ka na, buksan ang My Applications at gamitin ang Reschedule kung available ang option. Agad mase-save ang bawat pagbabago nang walang admin approval at hanggang dalawang beses puwedeng mag-reschedule. Final na ang pangalawang reschedule; kung hindi ka makakadalo, maaaring ma-suspend ang account mo."
     );
   }
 

@@ -1,0 +1,186 @@
+/*
+ * Shared browser-zoom guardrails for every public page.
+ *
+ * Browser zoom changes the effective CSS viewport. Normal desktop layouts are
+ * left untouched; only very wide effective viewports progressively gain more
+ * usable space so fixed max-width shells do not collapse into a narrow strip.
+ */
+:root {
+  --public-wide-shell: clamp(1280px, 60vw, 1600px);
+  --public-wide-grid-shell: clamp(1280px, 72vw, 1920px);
+  --public-wide-nav-shell: clamp(1540px, 82vw, 2200px);
+}
+
+html,
+body {
+  max-width: 100%;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+:is(
+  main,
+  section,
+  header,
+  footer,
+  .container,
+  .shell,
+  .quiz-shell,
+  .quiz-main,
+  .finder-shell,
+  .submissions-main,
+  .compatibility-results-main,
+  .contact-main,
+  .surrender-form-wrap
+) {
+  min-width: 0;
+}
+
+:is(img, picture, video, svg, canvas) {
+  max-width: 100%;
+}
+
+body.home-page section[id] {
+  scroll-margin-top: 76px;
+}
+
+/*
+ * Desktop page heroes must be allowed to grow with their copy. Their original
+ * fixed heights could hide descriptions and actions when zoom changed line
+ * wrapping. The existing mobile hero sizing remains untouched.
+ */
+@media (min-width: 761px) {
+  body.furbabies-page .furbabies-hero,
+  body.announcements-page .community-cover,
+  body.surrender-page .surrender-page-hero {
+    height: auto !important;
+    max-height: none !important;
+  }
+
+  body.furbabies-page .furbabies-hero,
+  body.furbabies-page .furbabies-hero > .container,
+  body.announcements-page .community-cover,
+  body.announcements-page .community-cover-inner {
+    min-height: 600px !important;
+  }
+
+  body.furbabies-page .furbabies-hero > .container,
+  body.announcements-page .community-cover-inner,
+  body.surrender-page .surrender-page-hero-grid {
+    height: auto !important;
+  }
+
+  body.surrender-page .surrender-page-hero,
+  body.surrender-page .surrender-page-hero-grid {
+    min-height: 648px !important;
+  }
+
+  /*
+   * surrender.css has an intentionally high-specificity desktop hero rule.
+   * Match it here so its old 648px max-height cannot crop the care note.
+   */
+  html body.home-page.surrender-page .surrender-page-hero {
+    height: auto !important;
+    min-height: 648px !important;
+    max-height: none !important;
+  }
+
+  html body.home-page.surrender-page .surrender-page-hero > .surrender-page-hero-grid {
+    height: auto !important;
+    min-height: 648px !important;
+  }
+}
+
+@media (min-width: 1600px) {
+  body.home-page .nav-shell {
+    width: min(calc(100% - 48px), var(--public-wide-nav-shell)) !important;
+    max-width: var(--public-wide-nav-shell) !important;
+  }
+
+  body.home-page .container:not(.nav-shell) {
+    width: min(calc(100% - 64px), var(--public-wide-shell)) !important;
+    max-width: var(--public-wide-shell) !important;
+  }
+
+  /* Keep the edge-to-edge hero composition while giving its copy room to fit. */
+  body.furbabies-page .furbabies-hero > .container {
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  body.furbabies-page .finder-left {
+    width: min(900px, 100%) !important;
+    max-width: 900px !important;
+  }
+
+  body.furbabies-page .finder-left h1 {
+    max-width: 900px !important;
+    font-size: clamp(62px, 2.5vw, 72px) !important;
+    text-wrap: wrap !important;
+  }
+
+  body.furbabies-page .finder-left :is(p, .finder-hero-copy) {
+    max-width: 660px !important;
+  }
+
+  /* The pet browser uses added columns at zoom-out instead of oversized cards. */
+  body.furbabies-page .pet-browser-section > .container {
+    width: min(calc(100% - 64px), var(--public-wide-grid-shell)) !important;
+    max-width: var(--public-wide-grid-shell) !important;
+  }
+
+  body.furbabies-page .pets-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+  }
+
+  /*
+   * A permanent 100vh hero does not appear to zoom because it always refills
+   * the physical viewport. Cap it only on wide effective viewports so the
+   * homepage image scales down naturally at stronger browser zoom-out levels.
+   */
+  body.home-page:not(.furbabies-page):not(.announcements-page):not(.contact-page):not(.surrender-page):not(.submissions-page):not(.compatibility-results-page) > .hero {
+    height: clamp(800px, 78vh, 940px) !important;
+    min-height: 800px !important;
+    max-height: 940px !important;
+  }
+
+  /*
+   * The homepage stories are absolutely anchored to the bottom of the hero.
+   * Reserve their own vertical lane when zoom-out creates a wide effective
+   * viewport, otherwise the first story can overlap the hero CTA buttons.
+   */
+  body.home-page:not(.furbabies-page):not(.announcements-page):not(.contact-page):not(.surrender-page):not(.submissions-page):not(.compatibility-results-page) > .hero > .hero-layout {
+    box-sizing: border-box !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    padding-top: clamp(72px, 6.5vh, 92px) !important;
+    padding-bottom: clamp(238px, 24vh, 276px) !important;
+  }
+
+  body.home-page:not(.furbabies-page):not(.announcements-page):not(.contact-page):not(.surrender-page):not(.submissions-page):not(.compatibility-results-page) > .hero .hero-left {
+    width: min(800px, 100%) !important;
+    max-width: 800px !important;
+    margin-top: 0 !important;
+  }
+
+  body.home-page:not(.furbabies-page):not(.announcements-page):not(.contact-page):not(.surrender-page):not(.submissions-page):not(.compatibility-results-page) > .hero .hero-left h1 {
+    max-width: 800px !important;
+    font-size: clamp(58px, 3.2vw, 72px) !important;
+  }
+
+  /* Standalone public quiz pages do not use the shared .container wrapper. */
+  body > .bg-canvas + .shell {
+    width: min(calc(100% - 64px), var(--public-wide-shell)) !important;
+    max-width: var(--public-wide-shell) !important;
+    margin-inline: auto !important;
+  }
+
+  body > .bg-canvas + .quiz-shell.quiz-shell {
+    width: min(calc(100% - 64px), var(--public-wide-shell)) !important;
+    max-width: var(--public-wide-shell) !important;
+    margin-inline: auto !important;
+  }
+}

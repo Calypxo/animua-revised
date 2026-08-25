@@ -13,6 +13,7 @@ let nextAllowedRetakeDate = null;
 let loadedResults = [];
 let currentResultsMode = "saved";
 let swalModulePromise;
+const compatibilityPhotoCache = new Map();
 
 async function getSwal() {
   swalModulePromise ||= import("sweetalert2").then((module) => module.default);
@@ -87,6 +88,59 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+function getCompatibilityAnimalPhoto(animal) {
+  if (!animal || typeof animal !== "object") return "";
+  const candidates = [
+    animal.photoURL,
+    animal.photoUrl,
+    animal.imageUrl,
+    animal.imageURL,
+    animal.image,
+    animal.photo,
+    animal.thumbnailUrl,
+    animal.primaryPhotoUrl,
+    animal.animalPhotoUrl,
+    animal.pet?.photoURL,
+    animal.pet?.photoUrl,
+    animal.animal?.photoURL,
+    animal.animal?.photoUrl,
+    ...(Array.isArray(animal.photos) ? animal.photos : []),
+  ];
+  return candidates.find((value) => typeof value === "string" && value.trim())?.trim() || "";
+}
+
+function getCompatibilityAnimalFallback(animal) {
+  const species = String(animal?.species || animal?.type || "").toLowerCase();
+  return species.includes("cat") ? CAT_IMAGE : DOG_IMAGE;
+}
+
+async function resolveCompatibilityAnimalPhoto(match) {
+  const directPhoto = getCompatibilityAnimalPhoto(match);
+  const directFallback = getCompatibilityAnimalFallback(match);
+  if (directPhoto) return { src: directPhoto, fallback: directFallback };
+
+  const animalId = String(match?.animalId || match?.petId || match?.id || "");
+  if (!animalId) return { src: directFallback, fallback: directFallback };
+  if (compatibilityPhotoCache.has(animalId)) return compatibilityPhotoCache.get(animalId);
+
+  const request = (async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/public/pets/${encodeURIComponent(animalId)}`);
+      if (!response.ok) throw new Error(`Animal photo request failed (${response.status})`);
+      const data = await response.json().catch(() => ({}));
+      const pet = data.pet || data.animal || data;
+      const fallback = getCompatibilityAnimalFallback(pet);
+      return { src: getCompatibilityAnimalPhoto(pet) || fallback, fallback };
+    } catch (error) {
+      console.warn("[compatibility result photo]", error.message);
+      return { src: directFallback, fallback: directFallback };
+    }
+  })();
+
+  compatibilityPhotoCache.set(animalId, request);
+  return request;
 }
 
 function formatDate(value) {
@@ -277,7 +331,7 @@ function renderEmpty(message, actionText = "Take the quiz") {
   `;
 }
 
-function renderResults(results, mode = "saved") {
+async function renderResults(results, mode = "saved") {
   loadedResults = results;
   currentResultsMode = mode;
   setAccountHeader(mode === "fresh" ? "fresh" : "results");
@@ -285,24 +339,10 @@ function renderResults(results, mode = "saved") {
   if (compatibilityCompletedDate) compatibilityCompletedDate.textContent = formatDate(latest.completedAt);
   if (compatibilityRetakeDate) compatibilityRetakeDate.textContent = formatDate(latest.nextRetakeAt);
   updateRetakeState(latest.nextRetakeAt);
-  const traits = Object.entries(latest.preferences || {})
-    .map(([key, value]) => {
-      const amount = Math.max(0, Math.min(100, Number(value) * 20));
-      return `
-        <article class="compatibility-trait">
-          <div>
-            <strong>${escapeHtml(traitLabels[key] || key)}</strong>
-            <span>${escapeHtml(value)}<small>/5</small></span>
-          </div>
-          <div class="compatibility-trait-track"><i style="width:${amount}%"></i></div>
-        </article>
-      `;
-    })
-    .join("");
 
-  const matches = (latest.matches || [])
+  const matches = (await Promise.all((latest.matches || [])
     .slice(0, 5)
-    .map((match, index) => {
+    .map(async (match, index) => {
       const score = Number(match.compatibilityPercent ?? match.matchPercent ?? match.score ?? 0);
       const animalId = match.animalId || match.petId || match.id || "";
       const animalName =
@@ -314,26 +354,27 @@ function renderResults(results, mode = "saved") {
         "Shelter animal";
       const subtitle = index === 0
         ? "Best match for your profile"
-        : mode === "fresh"
-          ? "Recommended match"
-          : "Saved recommendation";
+        : "Recommended match";
+      const photo = await resolveCompatibilityAnimalPhoto(match);
       return `
         <li class="${index === 0 ? "is-top-match" : ""}">
-          <span class="compatibility-rank">${index + 1}</span>
-          <span class="compatibility-pet-icon"><i class="fa-solid fa-paw"></i></span>
-          <div>
+          <span class="compatibility-rank" aria-label="Rank ${index + 1}">${index + 1}</span>
+          <div class="compatibility-photo-wrap">
+            <img class="compatibility-pet-photo" src="${escapeHtml(photo.src)}" data-fallback-photo="${escapeHtml(photo.fallback)}" data-match-photo alt="${escapeHtml(animalName)}" loading="${index === 0 ? "eager" : "lazy"}" decoding="async">
+            ${index === 0 ? '<span class="compatibility-top-chip"><i class="fa-solid fa-star"></i>Top match</span>' : ""}
+          </div>
+          <div class="compatibility-pet-copy">
             <strong>${escapeHtml(animalName)}</strong>
             <small>${escapeHtml(subtitle)}</small>
           </div>
-          <span class="compatibility-score">${score.toFixed(1)}%</span>
+          <span class="compatibility-score" aria-label="${score.toFixed(1)} percent compatibility">${score.toFixed(1)}%</span>
           <button class="compatibility-view-pet" type="button" data-saved-animal-id="${escapeHtml(animalId)}" data-saved-animal-name="${escapeHtml(animalName)}" data-saved-animal-score="${score.toFixed(1)}">
             <i class="fa-regular fa-eye"></i>
-            <span>Details</span>
+            <span>View details</span>
           </button>
         </li>
       `;
-    })
-    .join("");
+    }))).join("");
 
   const history = results
     .slice(1)
@@ -342,23 +383,24 @@ function renderResults(results, mode = "saved") {
 
   compatibilityAccountBody.innerHTML = `
     <div class="compatibility-result-grid">
-      <section>
-        <div class="compatibility-section-title">
-          <span>Your profile</span>
-          <h3>Compatibility traits</h3>
-        </div>
-        <div class="compatibility-traits">${traits || "<p>No trait profile saved yet.</p>"}</div>
-      </section>
-      <section>
+      <section class="compatibility-recommendations-section">
         <div class="compatibility-section-title">
           <span>Ranked for you</span>
           <h3>Top recommended animals</h3>
+          <p>Your closest matches based on the preferences from your latest quiz.</p>
         </div>
         <ol class="compatibility-matches">${matches || "<li>No animals matched the selected filters.</li>"}</ol>
       </section>
     </div>
     ${history ? `<details><summary>Previous result history (${results.length - 1})</summary><ul>${history}</ul></details>` : ""}
   `;
+
+  compatibilityAccountBody.querySelectorAll("[data-match-photo]").forEach((image) => {
+    image.addEventListener("error", () => {
+      const fallback = image.dataset.fallbackPhoto;
+      if (fallback && image.src !== fallback) image.src = fallback;
+    }, { once: true });
+  });
 }
 
 async function showSavedAnimalDetails(button) {
@@ -448,7 +490,7 @@ async function showSavedAnimalDetails(button) {
 async function loadCompatibilityAccount() {
   const freshResult = getFreshQuizResult();
   if (freshResult) {
-    renderResults([freshResult], "fresh");
+    await renderResults([freshResult], "fresh");
     sessionStorage.removeItem("animua_match_fresh");
     return;
   }
@@ -473,25 +515,25 @@ async function loadCompatibilityAccount() {
     }
 
     loadedResults = results;
-    renderResults(results, "saved");
+    await renderResults(results, "saved");
   } catch (error) {
     renderEmpty(error.message || "Unable to load compatibility results.", "Try the quiz");
   }
 }
 
-compatibilityAccountBody?.addEventListener("click", (event) => {
+compatibilityAccountBody?.addEventListener("click", async (event) => {
   const button = event.target.closest("[data-saved-animal-id]");
   if (button) showSavedAnimalDetails(button);
 
   if (event.target.closest("[data-view-results]")) {
-    renderResults(loadedResults, currentResultsMode);
+    await renderResults(loadedResults, currentResultsMode);
   }
 });
 
-compatibilityAccountAction?.addEventListener("click", (event) => {
+compatibilityAccountAction?.addEventListener("click", async (event) => {
   event.preventDefault();
   if (event.currentTarget.dataset.viewResults) {
-    renderResults(loadedResults, currentResultsMode);
+    await renderResults(loadedResults, currentResultsMode);
     return;
   }
   renderQuizAnswers(loadedResults);

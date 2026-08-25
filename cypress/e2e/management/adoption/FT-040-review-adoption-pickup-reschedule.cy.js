@@ -1,9 +1,9 @@
 const { resetAndVerifyBaseline } = require("../../../support/integration");
 
-describe("FT-040 - Review Adoption Pickup Reschedule", () => {
+describe("FT-040 - View Adoption Pickup Reschedule History", () => {
   after(() => resetAndVerifyBaseline());
 
-  it("approves the controlled pending pickup reschedule", () => {
+  it("automatically applies a legacy pending reschedule and shows its usage to admin", () => {
     cy.loginAdmin();
     cy.intercept(
       { method: "GET", url: "**/api/adoptions", middleware: true },
@@ -12,11 +12,6 @@ describe("FT-040 - Review Adoption Pickup Reschedule", () => {
         delete request.headers["if-modified-since"];
       },
     ).as("adoptions");
-    cy.intercept(
-      "PATCH",
-      "**/api/adoptions/FT_ADOPTION_RESCHEDULE_PENDING/reschedule/approve",
-    ).as("approveReschedule");
-
     cy.visitManagementPage(
       "/pages/adoptionApplications.html?id=FT_ADOPTION_RESCHEDULE_PENDING",
     );
@@ -24,31 +19,17 @@ describe("FT-040 - Review Adoption Pickup Reschedule", () => {
       const application = response?.body?.adoptions?.find(
         ({ id }) => id === "FT_ADOPTION_RESCHEDULE_PENDING",
       );
-      expect(application?.deadlineStatus).to.equal("Reschedule Pending");
-      expect(application?.pickupRescheduleRequest?.status).to.equal("Pending");
-    });
-    cy.get("#aaDrawerInner")
-      .should("contain.text", "Pickup reschedule awaiting review")
-      .and("contain.text", "Reschedule Pending");
-    cy.get("#drawerApproveRescheduleBtn").click();
-    cy.get(".swal2-title").should("have.text", "Approve pickup schedule");
-    cy.get(".swal2-confirm").click();
-    cy.wait("@approveReschedule", { timeout: 30000 }).then(({ response }) => {
-      expect(response?.statusCode).to.equal(200);
-      expect(response?.body?.pickupSchedule?.rescheduledAt).to.be.a("string").and.not.be.empty;
-    });
-    cy.wait("@adoptions", { timeout: 30000 }).then(({ response }) => {
-      const application = response?.body?.adoptions?.find(
-        ({ id }) => id === "FT_ADOPTION_RESCHEDULE_PENDING",
-      );
       expect(application?.deadlineStatus).to.equal("Appointment Scheduled");
-      expect(application?.pickupRescheduleRequest?.status).to.equal("Approved");
-      expect(application?.pickupSchedule?.date).to.equal(
-        application?.pickupRescheduleRequest?.date,
-      );
+      expect(application?.pickupRescheduleRequest).to.equal(null);
+      expect(application?.pickupSchedule?.rescheduleCount).to.equal(1);
+      expect(application?.pickupSchedule?.rescheduleHistory).to.have.length(1);
     });
     cy.get("#aaDrawerInner")
       .should("contain.text", "Appointment Scheduled")
+      .and("contain.text", "Reschedules Used")
+      .and("contain.text", "1 of 2")
+      .and("contain.text", "User rescheduled this pickup 1 of 2 times")
       .and("not.contain.text", "Pickup reschedule awaiting review");
+    cy.get("#drawerApproveRescheduleBtn").should("not.exist");
   });
 });
