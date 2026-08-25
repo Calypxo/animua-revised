@@ -8,7 +8,10 @@ import Swal from "sweetalert2";
 import { protectPageByModule } from "../auth/authGuard.js";
 import { hasPermission } from "../auth/permissions.js";
 import { renderTopbarUser } from "../components/management/topbarUser.js";
-import { loadSidebar } from "../components/management/sidebarLoader.js";
+import {
+  loadSidebar,
+  navigateManagementPage,
+} from "../components/management/sidebarLoader.js";
 import { renderPageHeader } from "../components/management/pageHeader.js";
 import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.js";
 import { cacheContactMessageCount } from "../components/management/contactMessageBadge.js";
@@ -21,7 +24,15 @@ import {
 } from "./contactReplyComposer.js";
 
 window.Swal = Swal;
-renderPageHeader(PAGE_HEADER_CONFIGS.contactMessages);
+
+const CONTACT_MESSAGES_ROUTE = "/pages/contactMessages.html";
+const CONTACT_CONVERSATION_ROUTE = "/pages/contactConversation.html";
+const PHONE_CONVERSATION_MEDIA = "(max-width: 720px)";
+const isConversationPage = document.body.classList.contains("contact-conversation-page");
+
+if (!isConversationPage) {
+  renderPageHeader(PAGE_HEADER_CONFIGS.contactMessages);
+}
 
 const state = {
   messages: [],
@@ -277,6 +288,47 @@ function getSelectedUser() {
   return state.users.find((user) => user.key === state.selectedUserKey) || null;
 }
 
+function preferredMessageForUser(user) {
+  return (
+    user?.messages.find((message) => messageStatus(message) === "New") ||
+    user?.messages[0] ||
+    null
+  );
+}
+
+function conversationUrl(messageId) {
+  const url = new URL(CONTACT_CONVERSATION_ROUTE, window.location.origin);
+  url.searchParams.set("id", messageId);
+  return `${url.pathname}${url.search}`;
+}
+
+function shouldOpenConversationPage() {
+  return !isConversationPage && window.matchMedia(PHONE_CONVERSATION_MEDIA).matches;
+}
+
+function syncConversationViewport() {
+  if (!isConversationPage) return;
+  const viewportHeight = Math.round(window.visualViewport?.height || window.innerHeight);
+  if (viewportHeight > 0) {
+    document.documentElement.style.setProperty("--cm-viewport-height", `${viewportHeight}px`);
+  }
+}
+
+function showUnavailableConversation(requestedId) {
+  if (!isConversationPage) return;
+  setText(
+    "conversationEmptyTitle",
+    requestedId ? "Conversation unavailable" : "No conversation selected"
+  );
+  setText(
+    "conversationEmptyDescription",
+    requestedId
+      ? "This conversation may no longer exist. Return to Contact Messages and choose a user."
+      : "Return to Contact Messages and choose a user to open their conversation."
+  );
+  el("conversationEmptyBack")?.classList.remove("hidden");
+}
+
 function renderDetail() {
   const detail = el("messageDetail");
   const empty = el("messageDetailEmpty");
@@ -400,15 +452,16 @@ function renderDetail() {
 function selectMessage(id) {
   state.selectedId = id;
   renderDetail();
+
+  if (isConversationPage && id) {
+    window.history.replaceState(null, "", conversationUrl(id));
+  }
 }
 
 function selectUser(key) {
   const user = state.users.find((item) => item.key === key);
   state.selectedUserKey = user?.key || "";
-  state.selectedId =
-    user?.messages.find((message) => messageStatus(message) === "New")?.id ||
-    user?.messages[0]?.id ||
-    "";
+  state.selectedId = preferredMessageForUser(user)?.id || "";
   renderMessageList();
   renderDetail();
   requestAnimationFrame(() => {
@@ -417,7 +470,25 @@ function selectUser(key) {
   });
 }
 
+function openUserConversation(key) {
+  const user = state.users.find((item) => item.key === key);
+  const message = preferredMessageForUser(user);
+  if (!user || !message) return;
+
+  if (shouldOpenConversationPage()) {
+    navigateManagementPage(conversationUrl(message.id));
+    return;
+  }
+
+  selectUser(key);
+}
+
 function closeConversation() {
+  if (isConversationPage) {
+    navigateManagementPage(CONTACT_MESSAGES_ROUTE);
+    return;
+  }
+
   state.selectedUserKey = "";
   state.selectedId = "";
   renderMessageList();
@@ -511,6 +582,12 @@ async function sendReply(event) {
 }
 
 function bindEvents() {
+  if (isConversationPage) {
+    syncConversationViewport();
+    window.addEventListener("resize", syncConversationViewport);
+    window.visualViewport?.addEventListener("resize", syncConversationViewport);
+  }
+
   el("refreshMessagesBtn")?.addEventListener("click", loadMessages);
   el("messageSearch")?.addEventListener("input", (event) => {
     state.search = event.target.value;
@@ -537,7 +614,7 @@ function bindEvents() {
 
   el("messageList")?.addEventListener("click", (event) => {
     const item = event.target.closest(".cm-message-item");
-    if (item) selectUser(item.dataset.userKey);
+    if (item) openUserConversation(item.dataset.userKey);
   });
   el("userMessageHistory")?.addEventListener("click", (event) => {
     const item = event.target.closest("[data-message-id]");
@@ -561,6 +638,12 @@ function bindEvents() {
     event.preventDefault();
     el("replyForm")?.requestSubmit();
   });
+  el("replyMessage")?.addEventListener("focus", () => {
+    syncConversationViewport();
+    requestAnimationFrame(() => {
+      el("replyForm")?.scrollIntoView({ block: "nearest" });
+    });
+  });
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -575,8 +658,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     const requestedId = new URLSearchParams(window.location.search).get("id");
     const requestedMessage = state.messages.find((message) => message.id === requestedId);
     if (requestedMessage) {
+      if (shouldOpenConversationPage()) {
+        navigateManagementPage(conversationUrl(requestedMessage.id));
+        return;
+      }
+
       selectUser(messageUserKey(requestedMessage));
       selectMessage(requestedMessage.id);
+    } else {
+      showUnavailableConversation(requestedId);
     }
   } catch (error) {
     console.error("[contact messages init]", error);

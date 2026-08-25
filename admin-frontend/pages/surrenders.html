@@ -76,9 +76,9 @@
       <div class="sr-layout" id="srLayout">
 
         <!-- Table panel -->
-        <section class="panel sr-table-panel archive-panel" id="srTablePanel" aria-labelledby="requestsTitle">
-          <div class="records-toolbar archive-toolbar surrender-records-toolbar">
-            <div class="surrender-heading-row">
+        <section class="panel sr-table-panel archive-panel management-review-panel" id="srTablePanel" aria-labelledby="requestsTitle">
+          <div class="records-toolbar archive-toolbar surrender-records-toolbar management-review-toolbar">
+            <div class="surrender-heading-row management-review-intro">
               <div class="records-heading">
                 <span class="records-heading-icon"><i class="bi bi-inbox-fill" aria-hidden="true"></i></span>
                 <div>
@@ -91,7 +91,7 @@
                 <span><i class="bi bi-circle-fill legend-ready"></i> Ready for intake</span>
               </div>
             </div>
-            <div class="archive-tabs sr-tabs" role="tablist" aria-label="Filter by request status">
+            <div class="archive-tabs sr-tabs management-review-tabs" role="tablist" aria-label="Filter by request status">
               <button class="archive-tab sr-tab active" type="button" role="tab" aria-selected="true" data-tab="all"><i class="bi bi-collection"></i>All</button>
               <button class="archive-tab sr-tab" type="button" role="tab" aria-selected="false" data-tab="Pending"><i class="bi bi-clock-history"></i>Pending</button>
               <button class="archive-tab sr-tab" type="button" role="tab" aria-selected="false" data-tab="Approved"><i class="bi bi-check-circle"></i>Approved</button>
@@ -99,9 +99,8 @@
               <button class="archive-tab sr-tab" type="button" role="tab" aria-selected="false" data-tab="Rejected"><i class="bi bi-x-circle"></i>Rejected</button>
               <button class="archive-tab sr-tab" type="button" role="tab" aria-selected="false" data-tab="Expired"><i class="bi bi-calendar-x"></i>Expired</button>
             </div>
-          </div>
-          <div class="surrender-toolbar">
-            <div class="archive-filter-grid surrender-filter-grid filter-toolbar" aria-label="Surrender request filters">
+            <div class="surrender-toolbar">
+              <div class="archive-filter-grid surrender-filter-grid filter-toolbar management-review-filters" aria-label="Surrender request filters">
               <label class="filter-field search-filter" for="searchSR">
                 <span>Search requests</span>
                 <div class="search-pill-sm">
@@ -134,16 +133,17 @@
                 </select>
               </label>
               <button class="reference-clear-filters" id="clearSurrenderFilters" type="button"><i class="bi bi-arrow-counterclockwise"></i> Clear</button>
+              </div>
             </div>
           </div>
 
-          <div class="table-section-head reference-table-section-head">
+          <div class="table-section-head reference-table-section-head management-review-section-head">
             <div><span>Review queue</span><h3>Submitted surrender requests</h3></div>
             <strong id="surrenderResultLabel">0 records</strong>
           </div>
 
-          <div class="table-responsive records-table-wrap">
-            <table class="shelter-table management-data-table management-card-table" data-card-until="1365">
+          <div class="table-responsive records-table-wrap management-review-table-wrap">
+            <table class="shelter-table management-data-table management-card-table management-review-table" data-card-until="1365">
               <colgroup>
                 <col class="col-owner" />
                 <col class="col-pet" />

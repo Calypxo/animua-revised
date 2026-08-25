@@ -2,6 +2,7 @@
 import "../css/adoptionApps.css";
 import "../css/managementTables.css";
 import "../css/recordsPanelReference.css";
+import "../css/reviewQueueRecords.css";
 import { renderPageHeader } from "../components/management/pageHeader.js";
 import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.js";
 
@@ -273,8 +274,8 @@ function renderTable() {
 
   tbody.innerHTML = page.map(a => `
     <tr data-id="${a.id}" class="management-card-row ${a.id===activeAppId?"row-active":""}">
-      <td class="app-id-cell management-card-primary" data-label="Application">${a.applicationId}</td>
-      <td data-label="Applicant">
+      <td class="app-id-cell management-review-application-field" data-label="Application">${a.applicationId}</td>
+      <td class="management-card-primary management-review-card-header management-review-identity management-review-applicant-field" data-label="Applicant">
         <div class="applicant-cell">
           <div class="applicant-avatar">${a.adopter.initials}</div>
           <div>
@@ -283,7 +284,7 @@ function renderTable() {
           </div>
         </div>
       </td>
-      <td data-label="Animal">
+      <td class="management-review-identity management-review-animal-field" data-label="Animal">
         <div class="animal-mini">
           <div class="animal-mini-thumb ${thumbCls(a.animal.species)}">${a.animal.photoURL ? `<img src="${a.animal.photoURL}" alt="">` : '<i class="bi bi-heart-pulse-fill" aria-hidden="true"></i>'}</div>
           <div>
@@ -292,15 +293,15 @@ function renderTable() {
           </div>
         </div>
       </td>
-      <td data-label="Type">
+      <td class="management-review-type-field" data-label="Type">
         <span class="app-type-badge ${a.type==="Quiz Match"?"type-quiz":"type-direct"}">
           <i class="bi ${a.type==="Quiz Match"?"bi-cpu":"bi-cursor"}"></i>${a.type}
         </span>
       </td>
-      <td data-label="Match">${compatPill(a.compatScore, a.type)}</td>
-      <td data-label="Status">${statusBadge(a.status)}</td>
-      <td class="management-card-actions" data-label="Actions">
-        <button class="tbl-action-btn management-card-open" data-action="view" data-id="${a.id}" title="View application" aria-label="View adoption application details">
+      <td class="management-review-match-field" data-label="Match">${compatPill(a.compatScore, a.type)}</td>
+      <td class="management-review-status-field" data-label="Status">${statusBadge(a.status)}</td>
+      <td class="management-card-actions management-review-actions-field" data-label="Actions">
+        <button class="tbl-action-btn management-card-open management-view-action management-view-action--compact" data-action="view" data-id="${a.id}" title="View application" aria-label="View adoption application details">
           <i class="bi bi-eye" aria-hidden="true"></i><span class="management-action-text">View application</span>
         </button>
       </td>
@@ -557,7 +558,7 @@ function renderDrawerContent(app) {
     </div>` : "";
 
   // ── Footer action buttons ─────────────────────────────
-  let footerBtns = `<button class="btn-ghost-clay" id="drawerCloseBtn"><i class="bi bi-x"></i> Close</button>`;
+  let footerBtns = `<button type="button" class="btn-ghost-clay" id="drawerCloseBtn"><i class="bi bi-x"></i> Close</button>`;
   if (app.status === "Pending") {
   footerBtns += `
     ${
@@ -579,23 +580,26 @@ function renderDrawerContent(app) {
 if (app.status === "Approved") {
   footerBtns += `
     <details class="management-more-actions">
-      <summary>More actions <i class="bi bi-chevron-down" aria-hidden="true"></i></summary>
+      <summary>Other actions <i class="bi bi-chevron-down" aria-hidden="true"></i></summary>
       <div>
         ${
           can("reject")
-            ? `<button class="btn-danger-outline" id="drawerRejectBtn">
+            ? `<button type="button" class="btn-danger-outline" id="drawerRejectBtn">
                 <i class="bi bi-x-lg"></i> Reject
               </button>`
             : ""
         }
-        <button class="btn-ghost-clay" id="drawerExtendDeadlineBtn"><i class="bi bi-calendar-plus"></i> Extend deadline</button>
-        <button class="btn-danger-outline" id="drawerNoShowBtn"><i class="bi bi-calendar-x"></i> Mark no show</button>
+        <button type="button" class="btn-ghost-clay" id="drawerExtendDeadlineBtn"><i class="bi bi-calendar-plus"></i> Extend deadline</button>
+        <button type="button" class="btn-danger-outline" id="drawerNoShowBtn"><i class="bi bi-calendar-x"></i> Mark no show</button>
       </div>
     </details>
-    <button class="btn-ghost-clay ${can("finalize") ? "" : "management-primary-action"}" id="drawerArrivalBtn"><i class="bi bi-person-check"></i> Confirm Arrival</button>
     ${
-      can("finalize")
-        ? `<button class="btn-finalize management-primary-action" id="drawerFinalizeBtn">
+      !app.arrivalConfirmedAt
+        ? `<button type="button" class="btn-approve-app management-primary-action" id="drawerArrivalBtn">
+            <i class="bi bi-person-check"></i> Confirm Arrival
+          </button>`
+        : can("finalize")
+        ? `<button type="button" class="btn-finalize management-primary-action" id="drawerFinalizeBtn">
             <i class="bi bi-balloon-heart-fill"></i> Finalize Adoption
           </button>`
         : ""

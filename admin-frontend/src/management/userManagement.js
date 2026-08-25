@@ -436,29 +436,32 @@ function renderTable() {
       : "";
 
     return `
-      <article class="animal-record-card user-record-card ${isPublic ? "public-row" : ""}" data-id="${u.id}" role="listitem" tabindex="0" aria-label="Open account details for ${dname}">
-        <div class="animal-record-media user-record-media" style="--user-avatar-color:${avatarColor(u.role)}">
-          <div class="animal-record-fallback user-record-avatar"><span>${initials(u)}</span><small>${rc.label}</small></div>
-        </div>
-        <div class="animal-record-content">
-          <div class="animal-record-badges"><span class="animal-type-badge role-badge ${rc.cls}"><i class="bi ${rc.icon}"></i>${rc.label}</span><span class="status-badge ${isActive ? "badge-active" : "badge-inactive"}"><i class="bi bi-circle-fill"></i>${isActive ? "Active" : "Inactive"}</span></div>
-          <div class="animal-record-heading"><div><h3>${dname}</h3><p><i class="bi bi-envelope"></i>${email}</p></div><div class="animal-care-time" aria-label="${permissionCount} assigned permissions"><strong>${permissionCount}</strong><span>permissions</span></div></div>
-          <div class="animal-record-facts">
-            <div class="animal-record-source"><i class="bi bi-person-badge"></i><span><small>Access role</small><strong>${rc.label}</strong></span></div>
-            <div><i class="bi bi-calendar3"></i><span><small>Created</small><strong>${formatCreatedDate(u.createdAt)}</strong></span></div>
-            <div><i class="bi bi-activity"></i><span><small>Last activity</small><strong>${formatLastActivity(u.lastLogin)}</strong></span></div>
+      <article class="animal-record-card user-record-card ${isPublic ? "public-row" : ""}" style="--user-avatar-color:${avatarColor(u.role)}" data-id="${u.id}" role="listitem" tabindex="0" aria-label="Open account details for ${dname}">
+        <header class="user-card-header">
+          <div class="user-record-avatar" aria-hidden="true"><span>${initials(u)}</span><i class="bi ${rc.icon}"></i></div>
+          <div class="user-card-identity">
+            <span class="user-card-kicker">${isPublic ? "Community account" : "Management account"}</span>
+            <h3>${dname}</h3>
+            <p><i class="bi bi-envelope"></i><span>${email}</span></p>
+            <div class="user-card-badges"><span class="animal-type-badge role-badge ${rc.cls}"><i class="bi ${rc.icon}"></i>${rc.label}</span><span class="status-badge ${isActive ? "badge-active" : "badge-inactive"}"><i class="bi bi-circle-fill"></i>${isActive ? "Active" : "Inactive"}</span></div>
           </div>
-          <div class="animal-record-footer">
-            <div class="animal-record-note"><i class="bi ${isActive ? "bi-shield-check" : "bi-shield-exclamation"}"></i><span>${isActive ? "This account currently has system access." : "This account is inactive and cannot access the system."}</span></div>
-            <div class="user-card-footer-actions">
-              <button class="animal-record-open" type="button" data-action="view" data-id="${u.id}" aria-label="View account for ${dname}"><span>View account details</span><i class="bi bi-arrow-up-right"></i></button>
-              <div class="user-action-menu">
-                <button type="button" class="user-menu-trigger" aria-label="More actions for ${dname}" aria-haspopup="menu" aria-expanded="false" aria-controls="${menuId}" data-action="menu"><i class="bi bi-three-dots-vertical"></i></button>
-                <div class="user-menu-popover" id="${menuId}" role="menu" hidden><button type="button" role="menuitem" data-action="view" data-id="${u.id}"><i class="bi bi-eye"></i><span>View account</span></button>${editAction}${recoveryAction}${toggleAction}</div>
-              </div>
+          <div class="user-permission-count" aria-label="${permissionCount} assigned permissions"><span><i class="bi bi-key"></i><strong>${permissionCount}</strong></span><small>Permissions</small></div>
+        </header>
+        <div class="user-card-facts" role="list" aria-label="Account information">
+          <div role="listitem"><i class="bi bi-person-badge"></i><span><small>Access role</small><strong>${rc.label}</strong></span></div>
+          <div role="listitem"><i class="bi bi-calendar3"></i><span><small>Created</small><strong>${formatCreatedDate(u.createdAt)}</strong></span></div>
+          <div role="listitem"><i class="bi bi-activity"></i><span><small>Last activity</small><strong>${formatLastActivity(u.lastLogin)}</strong></span></div>
+        </div>
+        <footer class="user-card-footer">
+          <div class="user-card-access-note"><i class="bi ${isActive ? "bi-shield-check" : "bi-shield-exclamation"}"></i><span>${isActive ? "System access is enabled for this account." : "This account is inactive and cannot access the system."}</span></div>
+          <div class="user-card-footer-actions">
+            <button class="animal-record-open management-view-action management-view-action--labeled" type="button" data-action="view" data-id="${u.id}" aria-label="View account for ${dname}"><i class="bi bi-eye" aria-hidden="true"></i><span>View account details</span></button>
+            <div class="user-action-menu">
+              <button type="button" class="user-menu-trigger" aria-label="More actions for ${dname}" aria-haspopup="menu" aria-expanded="false" aria-controls="${menuId}" data-action="menu"><i class="bi bi-three-dots-vertical"></i></button>
+              <div class="user-menu-popover" id="${menuId}" role="menu" hidden><button type="button" role="menuitem" data-action="view" data-id="${u.id}"><i class="bi bi-eye"></i><span>View account</span></button>${editAction}${recoveryAction}${toggleAction}</div>
             </div>
           </div>
-        </div>
+        </footer>
       </article>`;
   }).join("");
 

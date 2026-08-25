@@ -82,6 +82,11 @@
           </div>
         </div>
 
+        <div class="reference-table-section-head">
+          <div><span>Intake register</span><h3>Incoming animal records</h3></div>
+          <strong id="intakeResultLabel">0 records</strong>
+        </div>
+
         <div class="panel-head intake-toolbar">
           <div class="toolbar-tabs">
             <!-- Status tabs -->
@@ -99,7 +104,7 @@
               <span>Search records</span>
               <div class="search-pill-sm">
                 <i class="bi bi-search"></i>
-                <input type="search" id="searchIntake" placeholder="Animal name, breed, or intake ID" autocomplete="off" />
+                <input type="search" id="searchIntake" placeholder="Name, breed, or intake ID" autocomplete="off" />
               </div>
             </label>
             <label class="filter-field"><span>Source</span>
@@ -119,11 +124,6 @@
             <label class="filter-field date-filter"><span>To</span><input class="filter-select" type="date" id="filterDateTo" aria-label="Filter to date" /></label>
             <button class="clear-filters-btn" type="button" id="clearIntakeFilters"><i class="bi bi-arrow-counterclockwise"></i> Clear</button>
           </div>
-        </div>
-
-        <div class="reference-table-section-head">
-          <div><span>Intake register</span><h3>Incoming animal records</h3></div>
-          <strong id="intakeResultLabel">0 records</strong>
         </div>
 
         <div class="table-responsive">

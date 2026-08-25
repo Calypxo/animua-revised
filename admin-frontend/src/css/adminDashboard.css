@@ -1195,17 +1195,17 @@ button { font: inherit; cursor: pointer; border: none; background: none; }
     text-transform: uppercase;
   }
 
-  html body.management-consistent-ui #activityTable tbody td[data-label="Animal"],
+  html body.management-consistent-ui #activityTable tbody td[data-label="Record"],
   html body.management-consistent-ui #activityTable tbody td[data-label="Event"] {
     grid-column: 1 / -1;
   }
 
-  html body.management-consistent-ui #activityTable tbody td[data-label="Animal"] {
+  html body.management-consistent-ui #activityTable tbody td[data-label="Record"] {
     padding-bottom: 10px !important;
     border-bottom: 1px solid #eee5df !important;
   }
 
-  html body.management-consistent-ui #activityTable tbody td[data-label="Animal"]::before { display: none; }
+  html body.management-consistent-ui #activityTable tbody td[data-label="Record"]::before { display: none; }
   html body.management-consistent-ui #activityTable tbody td[data-label="Status"] > span { width: fit-content; }
 }
 
@@ -1459,7 +1459,16 @@ html body.management-consistent-ui.dashboard-page .dashboard-panel .panel-head h
   background: #fff0cc !important;
 }
 
-.dashboard-animal-search { width: min(210px, 36vw); }
+.dashboard-animal-search-shell {
+  width: min(210px, 36vw);
+}
+
+.dashboard-animal-search {
+  width: 100%;
+  cursor: text !important;
+}
+
+.dashboard-animal-id-mobile { display: none; }
 
 .dashboard-panel .text-btn {
   min-height: 34px;
@@ -1500,7 +1509,7 @@ html body.management-consistent-ui.dashboard-page .dashboard-panel .panel-head h
   .dashboard-chart-frame-donut { height: 190px; }
   .dashboard-chart-frame-stay { height: 205px; }
   .dashboard-panel .chart-stat-row > div { min-height: 58px; }
-  .dashboard-animal-search { width: min(190px, 48vw); }
+  .dashboard-animal-search-shell { width: min(190px, 48vw); }
 }
 
 @media (max-width: 575.98px) {
@@ -1516,7 +1525,95 @@ html body.management-consistent-ui.dashboard-page .dashboard-panel .panel-head h
   .dashboard-chart-panel .chart-legend { grid-column: 1 / -1; }
   .dashboard-chart-panel .chart-range-select { width: 100%; }
   .dashboard-recent-panel .panel-head > .d-flex { align-items: stretch !important; }
-  .dashboard-animal-search { width: 100%; min-width: 0; }
+  .dashboard-animal-search-shell { width: 100%; min-width: 0; }
+
+  html body.management-consistent-ui.dashboard-page .dashboard-recent-panel > .table-responsive {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    overflow: visible !important;
+  }
+
+  html body.management-consistent-ui.dashboard-page #recentAnimalsTable tbody {
+    gap: 10px !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  html body.management-consistent-ui.dashboard-page #recentAnimalsTable tbody > tr.dashboard-animal-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-areas:
+      "identity identity"
+      "species breed"
+      "age status"
+      "days assessment"
+      "actions actions" !important;
+    gap: 12px 14px !important;
+    padding: 14px !important;
+    overflow: hidden !important;
+    border-radius: 15px !important;
+  }
+
+  html body.management-consistent-ui.dashboard-page #recentAnimalsTable tbody > tr.dashboard-animal-row > td {
+    min-width: 0 !important;
+    grid-column: auto !important;
+    padding: 0 !important;
+    font-size: .74rem !important;
+    line-height: 1.4 !important;
+  }
+
+  html body.management-consistent-ui.dashboard-page #recentAnimalsTable .dashboard-animal-id-cell {
+    display: none !important;
+  }
+
+  html body.management-consistent-ui.dashboard-page #recentAnimalsTable .dashboard-animal-identity {
+    grid-area: identity !important;
+    padding-bottom: 11px !important;
+    border-bottom: 1px solid #eee5df !important;
+  }
+
+  html body.management-consistent-ui.dashboard-page #recentAnimalsTable .dashboard-animal-name-copy {
+    min-width: 0;
+    display: grid;
+    gap: 3px;
+  }
+
+  html body.management-consistent-ui.dashboard-page #recentAnimalsTable .dashboard-animal-id-mobile {
+    display: block;
+    color: #847771;
+    font-size: .64rem;
+    font-weight: 650;
+    line-height: 1.3;
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+  }
+
+  html body.management-consistent-ui.dashboard-page #recentAnimalsTable .animal-name-text {
+    color: #2b1719 !important;
+    font-size: .84rem !important;
+    line-height: 1.25 !important;
+  }
+
+  html body.management-consistent-ui.dashboard-page #recentAnimalsTable .dashboard-animal-species { grid-area: species !important; }
+  html body.management-consistent-ui.dashboard-page #recentAnimalsTable .dashboard-animal-breed { grid-area: breed !important; }
+  html body.management-consistent-ui.dashboard-page #recentAnimalsTable .dashboard-animal-age { grid-area: age !important; }
+  html body.management-consistent-ui.dashboard-page #recentAnimalsTable .dashboard-animal-status { grid-area: status !important; }
+  html body.management-consistent-ui.dashboard-page #recentAnimalsTable .dashboard-animal-days { grid-area: days !important; }
+  html body.management-consistent-ui.dashboard-page #recentAnimalsTable .dashboard-animal-assessment { grid-area: assessment !important; }
+
+  html body.management-consistent-ui.dashboard-page #recentAnimalsTable .dashboard-animal-actions {
+    grid-area: actions !important;
+    padding-top: 11px !important;
+    border-top: 1px solid #eee5df !important;
+  }
+
+  html body.management-consistent-ui.dashboard-page #recentAnimalsTable td[data-label]::before {
+    margin-bottom: 3px !important;
+    font-size: .62rem !important;
+    line-height: 1.3 !important;
+    letter-spacing: .01em !important;
+    text-transform: none !important;
+  }
 }
 
 @media (max-width: 359.98px) {

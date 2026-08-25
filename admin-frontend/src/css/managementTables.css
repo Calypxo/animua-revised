@@ -448,6 +448,108 @@ body.management-consistent-ui :is(.audit-panel, .archive-panel) .um-pagination {
   }
 }
 
+/* Canonical record-level View action. Renderers also opt into either the
+   compact eye-only or labeled eye-and-text variant; overflow-menu items,
+   destructive controls, and View-all links retain their own presentation. */
+html body.management-consistent-ui .page-body
+  :is(button, a).management-view-action:not([hidden]):not([aria-hidden="true"]) {
+  box-sizing: border-box !important;
+  width: auto !important;
+  max-width: 100% !important;
+  min-width: 118px !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 auto !important;
+  gap: 7px !important;
+  margin: 0 !important;
+  padding: 0 14px !important;
+  border: 1px solid #c77b00 !important;
+  border-radius: 999px !important;
+  color: #432d08 !important;
+  background: #f7b538 !important;
+  box-shadow: 0 5px 12px rgba(199, 123, 0, .12) !important;
+  font: 750 .7rem/1 "Poppins", sans-serif !important;
+  letter-spacing: 0 !important;
+  text-align: center !important;
+  text-decoration: none !important;
+  text-transform: none !important;
+  white-space: nowrap !important;
+  cursor: pointer !important;
+  appearance: none !important;
+  transform: none !important;
+  transition: border-color 160ms ease, background-color 160ms ease,
+    box-shadow 160ms ease, transform 160ms ease !important;
+}
+
+html body.management-consistent-ui .page-body
+  :is(button, a).management-view-action:not([hidden]):not([aria-hidden="true"]) > i {
+  margin: 0 !important;
+  color: #432d08 !important;
+  font-size: .8rem !important;
+  line-height: 1 !important;
+}
+
+html body.management-consistent-ui .page-body
+  :is(button, a).management-view-action:not([hidden]):not([aria-hidden="true"]) > span {
+  display: inline !important;
+  color: inherit !important;
+  font: inherit !important;
+  white-space: nowrap !important;
+}
+
+html body.management-consistent-ui .page-body
+  :is(button, a).management-view-action:not([hidden]):not([aria-hidden="true"]):hover {
+  border-color: #a86700 !important;
+  color: #2f1b00 !important;
+  background: #eaa82b !important;
+  box-shadow: 0 7px 16px rgba(199, 123, 0, .2) !important;
+  transform: translateY(-1px) !important;
+}
+
+html body.management-consistent-ui .page-body
+  :is(button, a).management-view-action:not([hidden]):not([aria-hidden="true"]):focus-visible {
+  border-color: #a86700 !important;
+  color: #2f1b00 !important;
+  background: #eaa82b !important;
+  outline: 3px solid rgba(120, 1, 22, .22) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 7px 16px rgba(199, 123, 0, .18) !important;
+}
+
+html body.management-consistent-ui .page-body
+  button.management-view-action:not([hidden]):not([aria-hidden="true"]):disabled,
+html body.management-consistent-ui .page-body
+  a.management-view-action:not([hidden]):not([aria-hidden="true"])[aria-disabled="true"] {
+  opacity: .46 !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* Responsive register cards and directory-card footers use the available
+   action column; only width changes, while the canonical 44px height remains. */
+html body.management-consistent-ui .page-body
+  .management-card-table.management-card-active .management-card-actions
+  :is(button, a).management-view-action:not([hidden]):not([aria-hidden="true"]),
+html body.management-consistent-ui .page-body
+  :is(.animal-record-footer, .user-card-footer-actions)
+  > :is(button, a).management-view-action:not([hidden]):not([aria-hidden="true"]) {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 44px !important;
+  min-height: 44px !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body.management-consistent-ui .page-body
+    :is(button, a).management-view-action:not([hidden]):not([aria-hidden="true"]) {
+    transition: none !important;
+  }
+}
+
 /*
  * Canonical management data table contract.
  * Every true management table opts in with .management-data-table so local
@@ -700,6 +802,90 @@ html body.management-consistent-ui .management-data-table :is(.tbl-action-btn, .
   opacity: .42 !important;
   cursor: not-allowed !important;
   transform: none !important;
+}
+
+/* Labeled View controls keep the canonical filled treatment inside roomy
+   table action columns. This follows the generic icon-button block so older
+   table rules cannot flatten them back into outline buttons. */
+html body.management-consistent-ui .page-body .management-data-table:not(.management-card-active)
+  td :is(button, a).management-view-action--labeled:not([hidden]):not([aria-hidden="true"]) {
+  width: 100% !important;
+  max-width: 156px !important;
+  min-width: 0 !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  margin-inline: auto !important;
+  padding: 0 12px !important;
+  border: 1px solid #c77b00 !important;
+  border-radius: 999px !important;
+  color: #432d08 !important;
+  background: #f7b538 !important;
+  box-shadow: 0 5px 12px rgba(199, 123, 0, .12) !important;
+  font: 750 .68rem/1 "Poppins", sans-serif !important;
+  white-space: nowrap !important;
+}
+
+html body.management-consistent-ui .page-body .management-data-table:not(.management-card-active)
+  td :is(button, a).management-view-action--labeled:not([hidden]):not([aria-hidden="true"]) > i {
+  color: #432d08 !important;
+}
+
+html body.management-consistent-ui .page-body .management-data-table:not(.management-card-active)
+  td :is(button, a).management-view-action--labeled:not([hidden]):not([aria-hidden="true"]):is(:hover, :focus-visible) {
+  border-color: #a86700 !important;
+  color: #2f1b00 !important;
+  background: #eaa82b !important;
+  box-shadow: 0 7px 16px rgba(199, 123, 0, .2) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Dense operational tables use a compact eye-only action. The full accessible
+   name remains on the control through aria-label/title, and card mode falls
+   back to the labeled shared layout for smaller screens. */
+html body.management-consistent-ui .page-body .management-data-table:not(.management-card-active)
+  td :is(button, a).management-view-action--compact:not([hidden]):not([aria-hidden="true"]) {
+  width: 42px !important;
+  max-width: 42px !important;
+  min-width: 42px !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  flex: 0 0 42px !important;
+  gap: 0 !important;
+  margin-inline: auto !important;
+  padding: 0 !important;
+  border: 1px solid #c77b00 !important;
+  border-radius: 50% !important;
+  color: #432d08 !important;
+  background: #f7b538 !important;
+  box-shadow: 0 5px 12px rgba(199, 123, 0, .12) !important;
+}
+
+html body.management-consistent-ui .page-body .management-data-table:not(.management-card-active)
+  td :is(button, a).management-view-action--compact:not([hidden]):not([aria-hidden="true"]) > span {
+  display: none !important;
+}
+
+html body.management-consistent-ui .page-body .management-data-table:not(.management-card-active)
+  td :is(button, a).management-view-action--compact:not([hidden]):not([aria-hidden="true"]) > i {
+  margin: 0 !important;
+  color: #432d08 !important;
+  font-size: .82rem !important;
+  line-height: 1 !important;
+}
+
+html body.management-consistent-ui .page-body .management-data-table:not(.management-card-active)
+  td :is(button, a).management-view-action--compact:not([hidden]):not([aria-hidden="true"]):is(:hover, :focus-visible) {
+  border-color: #a86700 !important;
+  color: #2f1b00 !important;
+  background: #eaa82b !important;
+  box-shadow: 0 7px 16px rgba(199, 123, 0, .2) !important;
+  transform: translateY(-1px) !important;
 }
 
 html body.management-consistent-ui .page-body .um-pagination.um-pagination {

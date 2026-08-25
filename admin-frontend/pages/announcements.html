@@ -23,7 +23,7 @@
   <script type="module" src="../src/management/announcements.js"></script>
 </head>
 
-<body class="loading">
+<body class="loading announcements-page">
   <div class="shell">
     <div id="sidebar-container"></div>
 
@@ -262,20 +262,12 @@
                 <textarea class="form-inp form-textarea" id="fCaption" rows="6" placeholder="Share news, event details, or an important advisory..." required></textarea>
               </label>
 
-              <label class="composer-control form-group">
+              <label class="composer-control composer-type-control form-group">
                 <span class="form-lbl">Post Type</span>
                 <select class="form-inp" id="fType">
                   <option value="News & Article">News &amp; Article</option>
                   <option value="Success Stories">Success Stories</option>
                   <option value="Upcoming Events">Upcoming Events</option>
-                </select>
-              </label>
-
-              <label class="composer-control form-group">
-                <span class="form-lbl">Status</span>
-                <select class="form-inp" id="fStatus">
-                  <option value="Published">Publish now</option>
-                  <option value="Draft">Save as draft</option>
                 </select>
               </label>
 
@@ -292,13 +284,43 @@
                 </label>
               </div>
 
-              <label class="composer-control form-group form-full">
-                <span class="form-lbl">Audience</span>
-                <select class="form-inp" id="fVisibleToPublic">
-              <option value="true">Public — visible on the public portal</option>
-              <option value="false">Internal — hidden from the public portal</option>
-                </select>
-              </label>
+              <div class="publishing-settings form-full" role="group" aria-labelledby="publishingSettingsTitle">
+                <div class="publishing-settings-heading">
+                  <span class="publishing-settings-icon" aria-hidden="true">
+                    <i class="bi bi-send-check-fill"></i>
+                  </span>
+                  <span class="publishing-settings-copy">
+                    <strong id="publishingSettingsTitle">Publishing settings</strong>
+                    <small>Control when the post appears and who can see it.</small>
+                  </span>
+                </div>
+
+                <div class="publishing-settings-grid">
+                  <label class="composer-control publishing-control form-group">
+                    <span class="form-lbl">Status</span>
+                    <small class="publishing-control-help" id="fStatusHelp">Choose when this announcement should be published.</small>
+                    <span class="publishing-select-shell">
+                      <select class="form-inp" id="fStatus" aria-describedby="fStatusHelp">
+                        <option value="Published">Publish now</option>
+                        <option value="Draft">Save as draft</option>
+                      </select>
+                      <i class="bi bi-chevron-down" aria-hidden="true"></i>
+                    </span>
+                  </label>
+
+                  <label class="composer-control publishing-control form-group">
+                    <span class="form-lbl">Audience</span>
+                    <small class="publishing-control-help" id="fAudienceHelp">Choose who can view this announcement.</small>
+                    <span class="publishing-select-shell">
+                      <select class="form-inp" id="fVisibleToPublic" aria-describedby="fAudienceHelp">
+                        <option value="true">Public — visible on the public portal</option>
+                        <option value="false">Internal — hidden from the public portal</option>
+                      </select>
+                      <i class="bi bi-chevron-down" aria-hidden="true"></i>
+                    </span>
+                  </label>
+                </div>
+              </div>
 
             </div>
           </section>
@@ -320,7 +342,7 @@
   </div>
 
   <!-- Toast -->
-  <div id="announcementToast" class="announcement-toast">
+  <div id="announcementToast" class="um-toast" role="status" aria-live="polite">
     <i id="toastIcon" class="bi bi-check-circle-fill"></i>
     <span id="toastMsg">Saved.</span>
   </div>

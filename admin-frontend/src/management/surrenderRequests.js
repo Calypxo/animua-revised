@@ -3,6 +3,7 @@ import "../css/surrenderRequests.css";
 import "../css/managementTables.css";
 import "../css/recordsWorkspace.css";
 import "../css/recordsPanelReference.css";
+import "../css/reviewQueueRecords.css";
 import { renderPageHeader } from "../components/management/pageHeader.js";
 import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.js";
 
@@ -392,7 +393,7 @@ function renderTable() {
 
   tbody.innerHTML = page.map(r => `
     <tr data-id="${r.id}" class="management-card-row ${r.id===activeId?"row-active":""}">
-      <td class="management-card-primary" data-label="Owner">
+      <td class="management-card-primary management-review-card-header management-review-identity surrender-owner-field" data-label="Owner">
         <div class="owner-cell">
           <div class="owner-avatar">${r.owner.initials}</div>
           <div>
@@ -401,7 +402,7 @@ function renderTable() {
           </div>
         </div>
       </td>
-      <td data-label="Pet">
+      <td class="management-review-identity surrender-pet-field" data-label="Pet">
         <div class="pet-mini">
           <div class="pet-mini-thumb ${thumbCls(r.pet.species)}">${r.pet.photoDataUrl ? `<img src="${r.pet.photoDataUrl}" alt="">` : emoji(r.pet.species)}</div>
           <div>
@@ -410,12 +411,12 @@ function renderTable() {
           </div>
         </div>
       </td>
-      <td data-label="Category">${catBadge(r.nlp.category)}</td>
-      <td data-label="Urgency"><span class="urgency-badge ${urgencyCls(r.nlp.urgencyLabel)}">${r.nlp.urgencyLabel}</span></td>
-      <td data-label="Submitted" class="submitted-date">${formatDate(r.submittedAt)}</td>
-      <td data-label="Status">${statusBadge(r.status)}</td>
-      <td class="management-card-actions" data-label="Actions">
-        <button class="tbl-action-btn management-card-open" data-action="view" data-id="${r.id}" title="View request" aria-label="View surrender request details">
+      <td class="surrender-category-field" data-label="Category">${catBadge(r.nlp.category)}</td>
+      <td class="surrender-urgency-field" data-label="Urgency"><span class="urgency-badge ${urgencyCls(r.nlp.urgencyLabel)}">${r.nlp.urgencyLabel}</span></td>
+      <td data-label="Submitted" class="submitted-date surrender-submitted-field">${formatDate(r.submittedAt)}</td>
+      <td class="surrender-status-field" data-label="Status">${statusBadge(r.status)}</td>
+      <td class="management-card-actions surrender-actions-field" data-label="Actions">
+        <button type="button" class="tbl-action-btn management-card-open management-view-action management-view-action--compact" data-action="view" data-id="${r.id}" title="View request" aria-label="View surrender request details">
           <i class="bi bi-eye" aria-hidden="true"></i><span class="management-action-text">View request</span>
         </button>
       </td>

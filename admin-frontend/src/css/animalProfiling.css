@@ -1266,14 +1266,14 @@
 
 .animal-profile-page .medical-inventory-search {
   position: relative;
-  min-height: 42px;
+  min-height: 44px;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 8px;
   padding: 0 7px 0 13px;
   border: 1px solid #ddd0c5;
-  border-radius: 9px;
+  border-radius: 11px;
   background: #FFFFFF;
 }
 
@@ -1288,9 +1288,16 @@
   min-height: 40px;
   padding: 0;
   border: 0 !important;
-  border-radius: 0;
-  background: transparent;
+  border-radius: 0 !important;
+  background: transparent !important;
   box-shadow: none !important;
+  outline: 0 !important;
+}
+
+.animal-profile-page .medical-inventory-search input[type="search"]::-webkit-search-cancel-button,
+.animal-profile-page .medical-inventory-search input[type="search"]::-webkit-search-decoration {
+  display: none;
+  appearance: none;
 }
 
 .animal-profile-page .medical-inventory-search button {
@@ -1310,6 +1317,8 @@
   background: #780116;
 }
 
+.animal-profile-page .medical-inventory-search button[hidden] { display: none; }
+
 .animal-profile-page .medical-inventory-options {
   position: absolute;
   top: calc(100% + 7px);
@@ -1318,6 +1327,7 @@
   z-index: 80;
   max-height: 260px;
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 7px;
   border: 1px solid #dfd1c8;
   border-radius: 14px;
@@ -1376,6 +1386,94 @@
 .animal-profile-page .medical-inventory-hint { display: block; margin-top: 6px; color: #8a7a73; font-size: .62rem; }
 .animal-profile-page .medical-inventory-hint.is-selected { color: #23734c; font-weight: 700; }
 .animal-profile-page .medical-inventory-empty { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 76px; color: #82736d; font-size: .7rem; }
+
+@media (max-width: 760px) {
+  .animal-profile-page .medical-inventory-search {
+    min-height: 44px;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 7px;
+    padding-inline: 12px 6px;
+  }
+
+  .animal-profile-page .medical-inventory-search .form-inp,
+  .animal-profile-page .medical-inventory-search .form-inp:focus {
+    min-height: 42px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .animal-profile-page .medical-inventory-search button {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+  }
+
+  .animal-profile-page .medical-inventory-options {
+    max-height: min(220px, 34dvh);
+    padding: 5px;
+    border-radius: 12px;
+  }
+
+  .animal-profile-page .medical-inventory-option {
+    grid-template-columns: 32px minmax(0, 1fr) auto;
+    gap: 8px;
+    min-height: 48px;
+    padding: 7px 8px;
+  }
+
+  .animal-profile-page .medical-inventory-option-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+  }
+
+  .animal-profile-page .medical-inventory-option-copy strong {
+    display: -webkit-box;
+    overflow: hidden;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+
+  .animal-profile-page .medical-inventory-option-copy small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  html body.management-consistent-ui.animal-profile-page .medical-modal-footer {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  html body.management-consistent-ui.animal-profile-page .medical-modal-footer .modal-draft-status,
+  html body.management-consistent-ui.animal-profile-page .medical-modal-footer .medical-primary-action {
+    grid-column: 1 / -1 !important;
+  }
+
+  html body.management-consistent-ui.animal-profile-page .medical-modal-footer .modal-draft-status:empty {
+    display: none;
+  }
+
+  html body.management-consistent-ui.animal-profile-page .medical-modal-footer .medical-primary-action { grid-row: 1; }
+  html body.management-consistent-ui.animal-profile-page .medical-modal-footer .medical-draft-action,
+  html body.management-consistent-ui.animal-profile-page .medical-modal-footer .medical-cancel-action { grid-row: 2; }
+  html body.management-consistent-ui.animal-profile-page .medical-modal-footer .modal-draft-status:not(:empty) { grid-row: 3; }
+}
+
+@media (max-width: 340px) {
+  html body.management-consistent-ui.animal-profile-page .medical-modal-footer {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  html body.management-consistent-ui.animal-profile-page .medical-modal-footer > * {
+    grid-column: 1 !important;
+    grid-row: auto !important;
+  }
+}
 
 .animal-profile-page .quarantine-decision-panel {
   display: grid;
@@ -2430,8 +2528,10 @@
 }
 
 .animal-profile-page .medical-inventory-search:focus-within {
-  border-color: var(--profile-red);
-  box-shadow: 0 0 0 3px rgba(120, 1, 22, .1);
+  border-color: #f7b538 !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 0 0 3px rgba(247, 181, 56, .3) !important;
+  outline: 0 !important;
 }
 .animal-profile-page .medical-inventory-search.invalid {
   border-color: var(--profile-red);

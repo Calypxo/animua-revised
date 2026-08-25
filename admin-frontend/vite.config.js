@@ -54,6 +54,7 @@ export default defineConfig({
         archivedRecords:        resolve(projectRoot, 'pages/archivedRecords.html'),
         announcements:          resolve(projectRoot, 'pages/announcements.html'),
         contactMessages:        resolve(projectRoot, 'pages/contactMessages.html'),
+        contactConversation:    resolve(projectRoot, 'pages/contactConversation.html'),
         accountSettings:         resolve(projectRoot, 'pages/accountSettings.html'),
         compatibilityQuiz:       resolve(projectRoot, 'pages/compatibilityQuiz.html'),
       },

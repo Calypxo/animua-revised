@@ -190,7 +190,10 @@ function systemNavigation(role) {
 }
 
 function setActiveNavigation(sidebar, pathname = window.location.pathname) {
-  const current = normalizePath(pathname);
+  const currentPath = normalizePath(pathname);
+  const current = currentPath === "/pages/contactConversation.html"
+    ? "/pages/contactMessages.html"
+    : currentPath;
   sidebar.querySelectorAll("a.nav-item").forEach((item) => {
     const active = current === normalizePath(item.getAttribute("href"));
     item.classList.toggle("active", active);

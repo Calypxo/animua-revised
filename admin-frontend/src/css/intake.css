@@ -1038,7 +1038,12 @@ select.form-inp { cursor: pointer; }
   background: #FFF8EE;
   color: var(--brand-red);
 }
-.search-pill-sm:focus-within,
+.search-pill-sm:focus-within {
+  border-color: #f7b538;
+  background: #FFFFFF;
+  box-shadow: 0 0 0 3px rgba(247, 181, 56, .28);
+  outline: 0;
+}
 .filter-select:focus { border-color: var(--brand-red); background: #FFFFFF; box-shadow: 0 0 0 3px rgba(120, 1, 22,.1); outline: 0; }
 .clear-filters-btn {
   display: inline-flex;
@@ -2112,6 +2117,7 @@ html body.management-consistent-ui #intakeTableBody td.table-actions {
   }
 
   body.management-consistent-ui.intake-management-page #intakeTableBody .intake-action-group {
+    width: 100%;
     display: flex;
     flex-wrap: wrap;
     gap: 7px;
@@ -2119,13 +2125,24 @@ html body.management-consistent-ui #intakeTableBody td.table-actions {
 
   body.management-consistent-ui.intake-management-page #intakeTableBody .tbl-action-btn {
     width: auto !important;
-    min-width: 64px !important;
+    min-width: 118px !important;
+    height: 44px !important;
     min-height: 44px !important;
+    flex: 1 1 118px !important;
     display: inline-flex !important;
     align-items: center;
     justify-content: center;
     gap: 6px;
     padding: 0 12px !important;
+    box-sizing: border-box;
+    white-space: nowrap;
+  }
+
+  body.management-consistent-ui.intake-management-page #intakeTableBody .tbl-action-btn > i {
+    position: static !important;
+    inset: auto !important;
+    flex: 0 0 auto;
+    margin: 0 !important;
   }
 
   body.management-consistent-ui.intake-management-page .intake-action-label {

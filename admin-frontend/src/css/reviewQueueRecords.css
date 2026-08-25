@@ -1,0 +1,439 @@
+/*
+ * Shared Adoption and Surrender review-queue presentation.
+ * Workflow styles own data and behavior; this file owns the panel, table,
+ * responsive record cards, and their compact small-screen surfaces.
+ */
+
+html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-panel {
+  min-width: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: 1px solid #eadfd4 !important;
+  border-radius: 20px !important;
+  background: #ffffff !important;
+  box-shadow: 0 14px 34px rgba(64, 34, 29, .065) !important;
+}
+
+html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-panel > .management-review-toolbar {
+  margin: 0 !important;
+  padding: 20px !important;
+  border: 0 !important;
+  border-bottom: 1px solid #eee3d9 !important;
+  border-radius: 0 !important;
+  background: #ffffff !important;
+  box-shadow: none !important;
+}
+
+html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .management-review-toolbar > .surrender-toolbar {
+  margin: 16px 0 0 !important;
+  padding: 16px 0 0 !important;
+  border-top: 1px solid #f0e7df !important;
+  background: transparent !important;
+}
+
+html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .management-review-intro {
+  min-width: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .management-review-toolbar {
+  gap: 16px !important;
+}
+
+html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .management-review-toolbar :is(
+  .aa-toolbar-layout,
+  .surrender-toolbar
+) {
+  background: transparent !important;
+}
+
+html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .management-review-toolbar > .aa-toolbar-layout {
+  margin: 0 !important;
+  padding: 16px 0 0 !important;
+  border-top: 1px solid #f0e7df !important;
+}
+
+html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .management-review-toolbar .records-heading {
+  min-height: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .management-review-tabs {
+  max-width: 100% !important;
+  margin-inline: 0 !important;
+}
+
+html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .management-review-filters {
+  width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-section-head {
+  min-height: 72px !important;
+  margin: 0 !important;
+  padding: 15px 20px !important;
+  border: 0 !important;
+  border-bottom: 1px solid #eadfd4 !important;
+  background: #ffffff !important;
+}
+
+html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-section-head > div > span {
+  color: #780116 !important;
+  font: 800 .62rem/1.3 "Poppins", sans-serif !important;
+  letter-spacing: .075em !important;
+  text-transform: uppercase !important;
+}
+
+html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-section-head h3 {
+  margin-top: 3px !important;
+  color: #780116 !important;
+  font: 800 1.03rem/1.25 "Poppins", sans-serif !important;
+}
+
+html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-section-head > strong {
+  min-height: 30px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 6px 11px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  color: #780116 !important;
+  background: #efe5d2 !important;
+  font: 800 .66rem/1 "Poppins", sans-serif !important;
+  white-space: nowrap !important;
+}
+
+html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-table-wrap {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow-x: clip !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: #ffffff !important;
+  box-shadow: none !important;
+}
+
+html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-table:not(.management-card-active) {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  table-layout: fixed !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  background: #ffffff !important;
+}
+
+html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-table:not(.management-card-active) thead,
+html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-table:not(.management-card-active) thead th {
+  border-color: #ded1c1 !important;
+  color: #780116 !important;
+  background: #efe5d2 !important;
+}
+
+html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-table:not(.management-card-active) thead th {
+  height: 48px !important;
+  padding: 12px 14px !important;
+  font: 800 .625rem/1.35 "Poppins", sans-serif !important;
+  letter-spacing: .065em !important;
+  white-space: normal !important;
+}
+
+html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-table:not(.management-card-active) tbody td {
+  min-width: 0 !important;
+  padding: 13px 14px !important;
+  border-bottom: 1px solid #f0e7df !important;
+  color: #2d2322 !important;
+  background: #ffffff !important;
+  vertical-align: middle !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+}
+
+html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-table:not(.management-card-active) tbody tr:is(:hover, .row-active) td {
+  background: #fff8ee !important;
+}
+
+html body.management-consistent-ui.adoption-applications-page .management-review-table:not(.management-card-active) :is(th, td):nth-child(1) { width: 12%; }
+html body.management-consistent-ui.adoption-applications-page .management-review-table:not(.management-card-active) :is(th, td):nth-child(2) { width: 22%; }
+html body.management-consistent-ui.adoption-applications-page .management-review-table:not(.management-card-active) :is(th, td):nth-child(3) { width: 19%; }
+html body.management-consistent-ui.adoption-applications-page .management-review-table:not(.management-card-active) :is(th, td):nth-child(4) { width: 14%; }
+html body.management-consistent-ui.adoption-applications-page .management-review-table:not(.management-card-active) :is(th, td):nth-child(5) { width: 10%; }
+html body.management-consistent-ui.adoption-applications-page .management-review-table:not(.management-card-active) :is(th, td):nth-child(6) { width: 13%; }
+html body.management-consistent-ui.adoption-applications-page .management-review-table:not(.management-card-active) :is(th, td):nth-child(7) { width: 10%; text-align: center !important; }
+
+html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-panel > .um-pagination {
+  min-height: 62px !important;
+  margin: 0 !important;
+  padding: 13px 20px !important;
+  border-top: 1px solid #eadfd4 !important;
+  background: #ffffff !important;
+}
+
+@media (max-width: 1365px) {
+  html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-table.management-card-active tbody {
+    width: 100% !important;
+    display: grid !important;
+    gap: 12px !important;
+    padding: 14px !important;
+    background: #fff8ee !important;
+  }
+
+  html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-table.management-card-active tbody > tr.management-card-row {
+    width: 100% !important;
+    min-width: 0 !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    align-content: start !important;
+    gap: 11px 14px !important;
+    padding: 14px !important;
+    overflow: visible !important;
+    border: 1px solid #eadfd4 !important;
+    border-radius: 16px !important;
+    background: #ffffff !important;
+    box-shadow: 0 7px 18px rgba(64, 34, 29, .05) !important;
+  }
+
+  html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-table.management-card-active tbody > tr.management-card-row.row-active {
+    border-color: rgba(120, 1, 22, .34) !important;
+    background: #ffffff !important;
+    box-shadow: inset 3px 0 0 #780116, 0 7px 18px rgba(64, 34, 29, .055) !important;
+  }
+
+  html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-table.management-card-active tbody > tr.management-card-row > td {
+    width: auto !important;
+    min-width: 0 !important;
+    height: auto !important;
+    display: block !important;
+    grid-template-columns: none !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    border: 0 !important;
+    background: transparent !important;
+    text-align: left !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-table.management-card-active tbody > tr.management-card-row > :is(
+    .management-card-primary,
+    .management-card-actions
+  ) {
+    grid-column: 1 / -1 !important;
+  }
+
+  html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-table.management-card-active .management-card-primary {
+    padding-bottom: 10px !important;
+    border-bottom: 1px solid #f0e7df !important;
+  }
+
+  html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-table.management-card-active .management-card-actions {
+    padding-top: 10px !important;
+    border-top: 1px solid #f0e7df !important;
+  }
+
+  html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-table.management-card-active td[data-label]::before {
+    display: block !important;
+    margin: 0 0 4px !important;
+    color: #857a74 !important;
+    font: 700 .64rem/1.25 "Poppins", sans-serif !important;
+    letter-spacing: .01em !important;
+    text-transform: none !important;
+  }
+
+  html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-table.management-card-active :is(
+    .management-card-primary,
+    .management-card-actions
+  )[data-label]::before {
+    display: none !important;
+  }
+
+  html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-table.management-card-active .management-card-actions .management-view-action {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    min-height: 44px !important;
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1365px) {
+  html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-table.management-card-active tbody {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+/* Card mode has no enclosing table surface: each record is its own card from
+   tablet widths down, while the controls remain one compact working surface. */
+@media (max-width: 1365px) {
+  html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-panel {
+    overflow: visible !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-panel > .management-review-toolbar {
+    margin-bottom: 10px !important;
+    padding: 14px !important;
+    border: 1px solid #eadfd4 !important;
+    border-radius: 16px !important;
+    background: #ffffff !important;
+    box-shadow: 0 7px 18px rgba(64, 34, 29, .045) !important;
+  }
+
+  html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-section-head {
+    min-height: 0 !important;
+    padding: 7px 2px 10px !important;
+    border: 0 !important;
+    background: transparent !important;
+  }
+
+  html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-table-wrap {
+    overflow: visible !important;
+    background: transparent !important;
+  }
+
+  html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-table.management-card-active tbody {
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-panel > .um-pagination {
+    min-height: 0 !important;
+    margin-top: 10px !important;
+    padding: 10px 0 0 !important;
+    border-top: 1px solid #eadfd4 !important;
+    background: transparent !important;
+  }
+}
+
+@media (max-width: 599px) {
+  html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .management-review-toolbar > .surrender-toolbar {
+    margin-top: 12px !important;
+    padding-top: 12px !important;
+  }
+
+  html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .management-review-intro :is(
+    .aa-panel-tip,
+    .records-legend,
+    .aa-panel-heading small,
+    .records-heading p
+  ) {
+    display: none !important;
+  }
+
+  html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-table.management-card-active tbody > tr.management-card-row {
+    gap: 10px 12px !important;
+    padding: 12px !important;
+    border-radius: 14px !important;
+    box-shadow: 0 5px 15px rgba(64, 34, 29, .045) !important;
+  }
+
+  html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-table.management-card-active tbody {
+    gap: 9px !important;
+    padding-inline: 2px !important;
+  }
+
+  html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-table.management-card-active tbody > tr.management-card-row > td {
+    grid-column: auto !important;
+  }
+
+  html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-table.management-card-active .management-review-card-header[data-label]::before {
+    display: block !important;
+  }
+
+  html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-table.management-card-active :is(
+    .applicant-name,
+    .animal-mini-name,
+    .owner-name,
+    .pet-mini-name
+  ) {
+    font-size: .82rem !important;
+    line-height: 1.35 !important;
+  }
+
+  html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-table.management-card-active :is(
+    .applicant-email,
+    .animal-mini-breed,
+    .owner-barangay,
+    .pet-mini-breed,
+    .app-id-cell
+  ) {
+    font-size: .64rem !important;
+    line-height: 1.4 !important;
+  }
+
+  html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-table.management-card-active :is(
+    .app-type-badge,
+    .compat-pill,
+    .status-badge,
+    .nlp-cat-badge,
+    .urgency-badge
+  ) {
+    font-size: .64rem !important;
+    line-height: 1.3 !important;
+  }
+
+  html body.management-consistent-ui.adoption-applications-page .page-body .management-review-table.management-card-active tbody > tr.management-card-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-areas:
+      "applicant applicant"
+      "animal animal"
+      "application type"
+      "match status"
+      "actions actions" !important;
+  }
+
+  html body.management-consistent-ui.adoption-applications-page .management-review-applicant-field { grid-area: applicant !important; }
+  html body.management-consistent-ui.adoption-applications-page .management-review-animal-field { grid-area: animal !important; }
+  html body.management-consistent-ui.adoption-applications-page .management-review-application-field { grid-area: application !important; }
+  html body.management-consistent-ui.adoption-applications-page .management-review-type-field { grid-area: type !important; }
+  html body.management-consistent-ui.adoption-applications-page .management-review-match-field { grid-area: match !important; }
+  html body.management-consistent-ui.adoption-applications-page .management-review-status-field { grid-area: status !important; }
+  html body.management-consistent-ui.adoption-applications-page .management-review-actions-field { grid-area: actions !important; }
+
+  html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-section-head h3 {
+    font-size: .95rem !important;
+  }
+}
+
+@media (max-width: 380px) {
+  html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-panel > .management-review-toolbar {
+    padding: 12px !important;
+  }
+
+  html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-table.management-card-active tbody > tr.management-card-row {
+    grid-template-columns: minmax(0, 1fr) !important;
+    padding: 12px !important;
+  }
+
+  html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-table.management-card-active tbody > tr.management-card-row > td {
+    grid-column: 1 !important;
+  }
+}
+
+@media (max-width: 339px) {
+  html body.management-consistent-ui.adoption-applications-page .page-body .management-review-table.management-card-active tbody > tr.management-card-row {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-areas:
+      "applicant"
+      "animal"
+      "application"
+      "type"
+      "match"
+      "status"
+      "actions" !important;
+  }
+}

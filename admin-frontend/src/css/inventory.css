@@ -2548,8 +2548,8 @@
 @media (max-width: 700px) {
   body.management-consistent-ui.inventory-page .inventory-smart-table tbody > tr.management-card-row {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px 14px;
-    padding: 13px;
+    gap: 8px 12px;
+    padding: 12px;
   }
 
   body.management-consistent-ui.inventory-page .inventory-smart-table tbody > tr.management-card-row > td {
@@ -2593,8 +2593,12 @@
 
   body.management-consistent-ui.inventory-page .inventory-smart-table .table-actions {
     display: grid !important;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 7px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  body.management-consistent-ui.inventory-page .inventory-smart-table .table-actions .action-view {
+    grid-column: 1 / -1;
   }
 
   body.management-consistent-ui.inventory-page .inventory-smart-table .table-actions .tbl-action-btn {
@@ -2606,7 +2610,9 @@
     justify-content: center;
     gap: 5px;
     flex: 1 1 auto !important;
-    padding-inline: 7px !important;
+    padding-inline: 10px !important;
+    overflow: visible !important;
+    white-space: nowrap !important;
   }
 
   body.management-consistent-ui.inventory-page .inventory-action-text {
@@ -2614,6 +2620,7 @@
     font-size: .66rem;
     font-weight: 750;
     line-height: 1.2;
+    white-space: nowrap;
   }
 
   body.management-consistent-ui.inventory-page .table-actions .tbl-action-btn.use {
@@ -2636,5 +2643,41 @@
     .management-card-primary, .management-card-actions
   ) {
     grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 700px) {
+  html body.management-consistent-ui.inventory-page .inv-table-panel {
+    overflow: visible !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html body.management-consistent-ui.inventory-page .inv-table-panel > .panel-head {
+    margin-bottom: 11px;
+    border: 1px solid #eadfd4;
+    border-radius: 16px;
+    background: #fff;
+  }
+
+  html body.management-consistent-ui.inventory-page .inventory-smart-table.management-card-active tbody {
+    gap: 11px !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  html body.management-consistent-ui.inventory-page .inventory-smart-table.management-card-active tbody > tr.management-card-row {
+    gap: 8px 12px !important;
+    padding: 12px !important;
+  }
+
+  html body.management-consistent-ui.inventory-page .inventory-smart-table.management-card-active .table-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  html body.management-consistent-ui.inventory-page .inventory-smart-table.management-card-active .table-actions .action-view {
+    grid-column: 1 / -1 !important;
   }
 }
