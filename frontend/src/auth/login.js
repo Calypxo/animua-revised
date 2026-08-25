@@ -48,10 +48,11 @@ export async function handleLogin(event) {
     closeModal(authModal);
     Swal.fire({
       icon: "warning",
-      title: "Invalid Email",
-      text: "Please enter a valid email address.",
+      title: "Use Management Login",
+      text: "Management accounts must sign in through the ANIMUA Management Portal.",
+      confirmButtonText: "OK",
       customClass: {
-        popup: "animua-popup",
+        popup: "animua-popup animua-auth-feedback-popup",
         confirmButton: "animua-confirm"
       },
       buttonsStyling: false
@@ -118,17 +119,7 @@ export async function handleLogin(event) {
         clearFailedLogin(email);
         resetLoginCaptcha();
         hideLoginCaptcha();
-        await Swal.fire({
-          icon: "warning",
-          title: "Use the Management Portal",
-          text: data.message || "Management accounts cannot sign in through the public portal.",
-          confirmButtonText: "OK",
-          customClass: {
-            popup: "animua-popup animua-auth-feedback-popup",
-            confirmButton: "animua-confirm"
-          },
-          buttonsStyling: false
-        });
+        await showManagementLoginDialog(authModal, data.message);
         return;
       }
 
@@ -297,6 +288,22 @@ function closeModal(authModal) {
   if (authModal) authModal.classList.add("hidden");
   document.body.classList.remove("modal-open");
   document.body.classList.remove("auth-open");
+}
+
+async function showManagementLoginDialog(authModal, message = "") {
+  closeModal(authModal);
+
+  await Swal.fire({
+    icon: "warning",
+    title: "Use Management Login",
+    text: message || "This email belongs to a management account and cannot sign in through the public portal.",
+    confirmButtonText: "OK",
+    customClass: {
+      popup: "animua-popup animua-auth-feedback-popup",
+      confirmButton: "animua-confirm"
+    },
+    buttonsStyling: false
+  });
 }
 
 function setSubmitLoading(button, isLoading, loadingText = "Please wait...") {
