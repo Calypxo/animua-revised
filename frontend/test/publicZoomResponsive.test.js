@@ -32,7 +32,7 @@ test("every public page loads the shared browser-zoom guardrails", async () => {
   for (const { page, markup } of pages) {
     assert.match(
       markup,
-      /src\/css\/public\/zoom-responsive\.css\?v=public-zoom-20260825-3/,
+      /src\/css\/public\/zoom-responsive\.css\?v=public-zoom-20260825-4/,
       `${page} must load the shared zoom stylesheet`,
     );
   }
@@ -50,12 +50,20 @@ test("wide effective viewports gain fluid shells without cancelling browser zoom
   assert.doesNotMatch(css, /transform:\s*scale\(/);
 });
 
-test("the fullscreen homepage photo can visibly scale down at strong zoom-out", async () => {
+test("the fullscreen homepage keeps its stories below the actions at strong zoom-out", async () => {
   const css = await readFile(zoomStylesUrl, "utf8");
 
   assert.match(
     css,
-    />\s*\.hero\s*\{[\s\S]*?height:\s*clamp\(760px,\s*70vh,\s*900px\)\s*!important;[\s\S]*?max-height:\s*900px\s*!important;/,
+    />\s*\.hero\s*\{[\s\S]*?height:\s*clamp\(800px,\s*78vh,\s*940px\)\s*!important;[\s\S]*?max-height:\s*940px\s*!important;/,
+  );
+  assert.match(
+    css,
+    />\s*\.hero\s*>\s*\.hero-layout\s*\{[\s\S]*?height:\s*100%\s*!important;[\s\S]*?display:\s*flex\s*!important;[\s\S]*?padding-bottom:\s*clamp\(238px,\s*24vh,\s*276px\)\s*!important;/,
+  );
+  assert.match(
+    css,
+    />\s*\.hero \.hero-left\s*\{[\s\S]*?max-width:\s*800px\s*!important;[\s\S]*?margin-top:\s*0\s*!important;/,
   );
 });
 

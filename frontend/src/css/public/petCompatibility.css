@@ -10664,3 +10664,97 @@ html body.quiz-locked-result .saved-trait-profile .saved-state-kicker {
     font-size: 0.74rem !important;
   }
 }
+
+/*
+ * Responsive answer-scale recovery.
+ *
+ * The questionnaire frame intentionally clips its outer decoration. On
+ * tablets and narrow/zoomed desktop viewports that also clipped the fixed
+ * five-choice scale. Give each scale its own touch-scroll surface so every
+ * answer remains reachable without making the whole page scroll sideways.
+ */
+@media (max-width: 1399px) {
+  html body:not(.quiz-locked-result) .question-area,
+  html body:not(.quiz-locked-result) .question-card {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  html body:not(.quiz-locked-result) .question-area .question-card {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  html body:not(.quiz-locked-result) .question-area .question-card .q-num,
+  html body:not(.quiz-locked-result) .question-area .question-card .q-text,
+  html body:not(.quiz-locked-result) .question-area .question-card .q-hint,
+  html body:not(.quiz-locked-result) .question-area .question-card .option-group {
+    grid-column: 1 !important;
+    grid-row: auto !important;
+  }
+
+  html body:not(.quiz-locked-result) .question-area .option-group {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    display: flex !important;
+    grid-template-columns: none !important;
+    gap: 10px !important;
+    margin: 4px 0 0 !important;
+    padding: 4px 4px 12px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    overscroll-behavior-inline: contain !important;
+    scroll-padding-inline: 4px !important;
+    scroll-snap-type: inline proximity !important;
+    scrollbar-color: #780116 rgba(120, 1, 22, 0.12) !important;
+    scrollbar-width: thin !important;
+    touch-action: pan-x pan-y !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  html body:not(.quiz-locked-result) .question-area .option-group::-webkit-scrollbar {
+    height: 6px !important;
+  }
+
+  html body:not(.quiz-locked-result) .question-area .option-group::-webkit-scrollbar-track {
+    border-radius: 999px !important;
+    background: rgba(120, 1, 22, 0.12) !important;
+  }
+
+  html body:not(.quiz-locked-result) .question-area .option-group::-webkit-scrollbar-thumb {
+    border-radius: 999px !important;
+    background: #780116 !important;
+  }
+
+  html body:not(.quiz-locked-result) .question-area .option-btn {
+    flex: 0 0 clamp(112px, 14vw, 142px) !important;
+    width: clamp(112px, 14vw, 142px) !important;
+    min-width: clamp(112px, 14vw, 142px) !important;
+    min-height: 74px !important;
+    height: auto !important;
+    scroll-snap-align: start !important;
+    scroll-snap-stop: normal !important;
+  }
+}
+
+@media (max-width: 760px) {
+  html body:not(.quiz-locked-result) .question-area .option-group {
+    gap: 8px !important;
+    padding-bottom: 10px !important;
+  }
+
+  html body:not(.quiz-locked-result) .question-area .option-btn {
+    flex-basis: clamp(96px, 30vw, 122px) !important;
+    width: clamp(96px, 30vw, 122px) !important;
+    min-width: clamp(96px, 30vw, 122px) !important;
+    min-height: 68px !important;
+    padding-inline: 8px !important;
+  }
+
+  html body:not(.quiz-locked-result) .question-area .option-label {
+    font-size: clamp(0.58rem, 2.65vw, 0.7rem) !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+  }
+}
