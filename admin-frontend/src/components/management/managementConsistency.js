@@ -2,6 +2,8 @@ import "../../css/managementConsistency.css";
 import "../../css/brandTheme.css";
 import "../../css/managementResponsive.css";
 import "../../css/managementTabs.css";
+import "../../css/managementTypography.css";
+import { enhanceResponsiveFilters } from "./responsiveFilters.js";
 
 const PAGINATION_SELECTOR = ".um-pagination, .report-pagination";
 const TABLIST_SELECTOR = [
@@ -12,6 +14,17 @@ const TAB_SELECTOR = TABLIST_SELECTOR.split(",")
   .map((selector) => `${selector} > button`)
   .join(",");
 const RESPONSIVE_TABLE_SELECTOR = ".management-card-table[data-card-until]";
+const MANAGEMENT_SEARCH_INPUT_SELECTOR = [
+  "#searchIntake", "#searchApps", "#searchSR", "#searchInventory",
+  "#reportSearch", "#searchAudit", "#searchArchive", "#resultSearch",
+  "#searchUsers", "#searchAnimals", "#messageSearch", "#searchAnnouncement",
+  "#globalSearch", "#animalSearch", "input#filterCategory", "#fMedInventorySearch",
+].join(",");
+const MANAGEMENT_SEARCH_CONTROL_SELECTOR = [
+  ".search-pill", ".search-pill-sm", ".ap-control", ".cq-search",
+  ".report-input", ".feed-search", ".medical-inventory-search",
+  ".dashboard-animal-search-shell",
+].join(",");
 
 function managementViewportWidth() {
   try {
@@ -118,6 +131,19 @@ function normalizeTables(root = document) {
   });
 }
 
+function normalizeSearchControls(root = document) {
+  root.querySelectorAll(MANAGEMENT_SEARCH_INPUT_SELECTOR).forEach((input) => {
+    if (!(input instanceof HTMLInputElement)) return;
+    const control = input.closest(MANAGEMENT_SEARCH_CONTROL_SELECTOR);
+    if (!(control instanceof HTMLElement)) return;
+
+    control.classList.add("management-search-control");
+    input.classList.add("management-search-input");
+    const icon = control.querySelector(":scope > i.bi-search, :scope > i.bi-tag");
+    icon?.classList.add("management-search-icon");
+  });
+}
+
 function hasAccessibleName(button) {
   if (!(button instanceof HTMLElement)) return true;
   const ariaLabel = button.getAttribute("aria-label")?.trim();
@@ -208,6 +234,8 @@ function normalizeActionButtons(root = document) {
 }
 
 function normalizeInterface(root = document) {
+  enhanceResponsiveFilters(root);
+  normalizeSearchControls(root);
   syncResponsiveTables(root);
   normalizePagination(root);
   normalizeTabs(root);

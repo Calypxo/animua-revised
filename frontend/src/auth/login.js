@@ -48,10 +48,11 @@ export async function handleLogin(event) {
     closeModal(authModal);
     Swal.fire({
       icon: "warning",
-      title: "Invalid Email",
-      text: "Please enter a valid email address.",
+      title: "Use Management Login",
+      text: "Management accounts must sign in through the ANIMUA Management Portal.",
+      confirmButtonText: "OK",
       customClass: {
-        popup: "animua-popup",
+        popup: "animua-popup animua-auth-feedback-popup",
         confirmButton: "animua-confirm"
       },
       buttonsStyling: false
@@ -118,20 +119,7 @@ export async function handleLogin(event) {
         clearFailedLogin(email);
         resetLoginCaptcha();
         hideLoginCaptcha();
-        await Swal.fire({
-          icon: "warning",
-          title: "Management Use Only",
-          html: `
-            <p>This account is for management use only.</p>
-            <p>Please sign in through the ANIMUA Management Portal.</p>
-          `,
-          confirmButtonText: "OK",
-          customClass: {
-            popup: "animua-popup animua-auth-feedback-popup management-only-popup",
-            confirmButton: "animua-confirm"
-          },
-          buttonsStyling: false
-        });
+        await showManagementLoginDialog(authModal);
         return;
       }
 
@@ -300,6 +288,25 @@ function closeModal(authModal) {
   if (authModal) authModal.classList.add("hidden");
   document.body.classList.remove("modal-open");
   document.body.classList.remove("auth-open");
+}
+
+async function showManagementLoginDialog(authModal) {
+  closeModal(authModal);
+
+  await Swal.fire({
+    icon: "warning",
+    title: "Management Use Only",
+    html: `
+      <p>This account is for management use only.</p>
+      <p>Please sign in through the ANIMUA Management Portal.</p>
+    `,
+    confirmButtonText: "OK",
+    customClass: {
+      popup: "animua-popup animua-auth-feedback-popup management-only-popup",
+      confirmButton: "animua-confirm"
+    },
+    buttonsStyling: false
+  });
 }
 
 function setSubmitLoading(button, isLoading, loadingText = "Please wait...") {

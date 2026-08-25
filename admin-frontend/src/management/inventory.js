@@ -596,13 +596,13 @@ function renderTable() {
             <span class="management-mobile-label" aria-hidden="true">Actions</span>
             <div class="table-actions">
               <button
-                class="tbl-action-btn action-view management-card-open"
+                class="tbl-action-btn action-view management-card-open management-view-action management-view-action--compact"
                 title="View item"
                 data-action="view"
                 data-id="${item.id}"
                 aria-label="View ${item.name.trim()}"
               >
-                <i class="bi bi-eye"></i>
+                <i class="bi bi-eye" aria-hidden="true"></i>
                 <span class="inventory-action-text">View item</span>
               </button>
 

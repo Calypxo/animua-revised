@@ -25,6 +25,28 @@ body.management-consistent-ui :is(
   max-width: 100%;
 }
 
+/* The top bar and workspace are sibling flex rows. Reassert that contract so
+   legacy page rules and same-origin embedded navigation cannot place content
+   underneath the management header. */
+html body.management-consistent-ui .shell > .stage {
+  min-height: 0;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+html body.management-consistent-ui .shell > .stage > .topbar {
+  position: relative !important;
+  inset: auto !important;
+  flex: 0 0 auto !important;
+}
+
+html body.management-consistent-ui .shell > .stage > :is(.page-body, .main-content, .contact-message-page-body) {
+  min-height: 0;
+  flex: 1 1 auto !important;
+  box-sizing: border-box;
+  scroll-padding-top: 16px;
+}
+
 body.management-consistent-ui :is(
   .shell, .stage, .topbar, .topbar-left, .topbar-right,
   .page-body, .main-content, .system-page-header,
@@ -187,6 +209,11 @@ body.management-consistent-ui :is(
     padding-right: max(12px, env(safe-area-inset-right)) !important;
     padding-bottom: max(28px, calc(20px + env(safe-area-inset-bottom))) !important;
     padding-left: max(12px, env(safe-area-inset-left)) !important;
+  }
+
+  body.management-consistent-ui :is(.page-body, .main-content) > * {
+    min-width: 0;
+    max-width: 100%;
   }
 
   body.management-consistent-ui :is(
@@ -910,6 +937,22 @@ body.management-consistent-ui :is(
     box-shadow: 0 8px 22px rgba(64, 34, 29, .06);
   }
 
+  body.management-consistent-ui .management-card-table :is(
+    .item-name,
+    .actor-cell strong,
+    .audit-record-cell strong
+  ) {
+    max-width: none !important;
+    display: -webkit-box !important;
+    overflow: hidden !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    text-overflow: clip !important;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+
   body.management-consistent-ui .management-card-table tbody > tr:not(.management-card-row) {
     width: 100%;
     display: block;
@@ -1156,6 +1199,7 @@ html body.management-consistent-ui :is(.modal-close-btn, .drawer-close-btn) {
   place-items: center !important;
   flex: 0 0 44px !important;
   padding: 0 !important;
+  border: 1px solid rgba(120, 1, 22, .16) !important;
   border-radius: 50% !important;
   line-height: 1 !important;
 }
@@ -1163,6 +1207,7 @@ html body.management-consistent-ui :is(.modal-close-btn, .drawer-close-btn) {
 html body.management-consistent-ui :is(.modal-close-btn, .drawer-close-btn) > i {
   display: block !important;
   margin: 0 !important;
+  font-size: .78rem !important;
   line-height: 1 !important;
 }
 
@@ -1989,11 +2034,11 @@ html body.management-consistent-ui .management-card-table.management-card-active
 html body.management-consistent-ui .management-card-table.management-card-active .management-card-actions > .management-card-open,
 html body.management-consistent-ui .management-card-table.management-card-active .management-card-actions > :is(.table-actions, .action-group) .management-card-open {
   min-height: 44px !important;
-  border-color: #780116 !important;
-  border-radius: 10px !important;
-  color: #FFFFFF !important;
-  background: #780116 !important;
-  box-shadow: none !important;
+  border-color: #c77b00 !important;
+  border-radius: 999px !important;
+  color: #432d08 !important;
+  background: #f7b538 !important;
+  box-shadow: 0 5px 12px rgba(199, 123, 0, .12) !important;
 }
 
 html body.management-consistent-ui .management-card-table.management-card-active .management-card-actions > .management-card-open {
@@ -2002,9 +2047,9 @@ html body.management-consistent-ui .management-card-table.management-card-active
 }
 
 html body.management-consistent-ui .management-card-table.management-card-active .management-card-actions .management-card-open:is(:hover, :focus-visible) {
-  border-color: #5e0011 !important;
-  color: #FFFFFF !important;
-  background: #5e0011 !important;
+  border-color: #a86700 !important;
+  color: #2f1b00 !important;
+  background: #eaa82b !important;
   transform: translateY(-1px);
 }
 
@@ -2073,4 +2118,2205 @@ html body.management-consistent-ui :is(
   text-overflow: clip !important;
   white-space: normal !important;
   overflow-wrap: anywhere !important;
+}
+
+/* Shared responsive filter workspace. Existing controls are reused so every
+   module keeps its current query, pagination, and clear/apply behavior. */
+html body.management-consistent-ui .mrf-workspace {
+  width: 100%;
+  min-width: 0;
+}
+
+html body.management-consistent-ui .mrf-search-slot,
+html body.management-consistent-ui .mrf-search-slot > label,
+html body.management-consistent-ui .mrf-fields,
+html body.management-consistent-ui .mrf-fields > * {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+html body.management-consistent-ui .mrf-actions,
+html body.management-consistent-ui .mrf-chips,
+html body.management-consistent-ui .mrf-panel-header,
+html body.management-consistent-ui .mrf-panel-footer {
+  display: none;
+}
+
+html body.management-consistent-ui :is(.mrf-panel-backdrop, .mrf-panel, .mrf-panel-body) {
+  display: contents;
+}
+
+html body.management-consistent-ui .mrf-search-slot > label {
+  width: 100%;
+  margin: 0;
+}
+
+html body.management-consistent-ui .mrf-fields {
+  width: 100%;
+  margin: 0;
+}
+
+/* Search is moved into a sibling slot by responsiveFilters.js. On non-phone
+   layouts the workspace owns the toolbar surface so Search and the remaining
+   fields share one inset, baseline, and background instead of two offset
+   containers. */
+@media (min-width: 600px) {
+  html body.management-consistent-ui .mrf-workspace {
+    align-items: end !important;
+    gap: 12px !important;
+    padding: 18px 24px !important;
+    border-bottom: 1px solid #f0e6dd !important;
+    background: #fff8ee !important;
+    box-sizing: border-box !important;
+  }
+
+  html body.management-consistent-ui .mrf-workspace .mrf-fields {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html body.management-consistent-ui .mrf-workspace :is(
+    .mrf-search-slot > label,
+    .mrf-fields > label
+  ) {
+    min-width: 0 !important;
+    display: grid !important;
+    align-content: end !important;
+    gap: 7px !important;
+    margin: 0 !important;
+  }
+
+  html body.management-consistent-ui .mrf-workspace .mrf-fields > button {
+    align-self: end !important;
+    margin: 0 !important;
+  }
+}
+
+@media (min-width: 1025px) {
+  html body.management-consistent-ui .mrf-workspace {
+    display: grid;
+    grid-template-columns: minmax(240px, 1.35fr) minmax(0, 3fr);
+    align-items: end;
+    gap: 10px;
+  }
+
+  html body.management-consistent-ui .mrf-fields {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)) !important;
+    align-items: end !important;
+    gap: 10px !important;
+  }
+
+  html body.management-consistent-ui .mrf-fields > * {
+    width: 100% !important;
+    grid-column: auto !important;
+  }
+
+  html body.management-consistent-ui .mrf-workspace-intake {
+    grid-template-columns: minmax(250px, 1.4fr) minmax(0, 3fr) !important;
+  }
+
+  html body.management-consistent-ui .mrf-workspace-intake .filter-toolbar.mrf-fields {
+    grid-template-columns: repeat(4, minmax(112px, 1fr)) minmax(76px, auto) !important;
+  }
+
+  html body.management-consistent-ui .mrf-workspace-adoptions {
+    grid-template-columns: minmax(280px, 1.5fr) minmax(240px, .85fr) !important;
+  }
+
+  html body.management-consistent-ui .mrf-workspace-adoptions .aa-filter-toolbar.mrf-fields {
+    grid-template-columns: minmax(180px, 1fr) minmax(76px, auto) !important;
+  }
+
+  html body.management-consistent-ui .mrf-workspace-surrenders {
+    grid-template-columns: minmax(280px, 1.5fr) minmax(0, 1.4fr) !important;
+  }
+
+  html body.management-consistent-ui .mrf-workspace-surrenders .surrender-filter-grid.mrf-fields {
+    grid-template-columns: minmax(130px, .7fr) minmax(160px, .85fr) minmax(76px, auto) !important;
+  }
+
+  html body.management-consistent-ui .mrf-workspace-inventory {
+    grid-template-columns: minmax(280px, 1.2fr) minmax(0, 2.8fr) !important;
+  }
+
+  html body.management-consistent-ui .mrf-workspace-inventory .inventory-filter-controls.mrf-fields {
+    grid-template-columns: minmax(160px, 1.35fr) repeat(3, minmax(85px, .78fr)) minmax(76px, auto) !important;
+  }
+
+  html body.management-consistent-ui .mrf-workspace-reports {
+    grid-template-columns: minmax(250px, 1.1fr) minmax(0, 3fr) !important;
+  }
+
+  html body.management-consistent-ui .mrf-workspace-reports .report-filter-grid.mrf-fields {
+    grid-template-columns: repeat(2, minmax(96px, .65fr)) minmax(128px, .8fr) minmax(104px, auto) minmax(72px, auto) !important;
+  }
+
+  html body.management-consistent-ui .mrf-workspace-audit {
+    grid-template-columns: minmax(260px, 1.4fr) minmax(0, 2.6fr) !important;
+  }
+
+  html body.management-consistent-ui .mrf-workspace-audit .audit-filter-grid.mrf-fields {
+    grid-template-columns: repeat(3, minmax(110px, 1fr)) minmax(76px, auto) !important;
+  }
+
+  html body.management-consistent-ui .mrf-workspace-archive {
+    grid-template-columns: minmax(280px, 1.5fr) minmax(0, 1.6fr) !important;
+  }
+
+  html body.management-consistent-ui .mrf-workspace-archive .archive-filter-grid.mrf-fields {
+    grid-template-columns: repeat(2, minmax(150px, 1fr)) minmax(76px, auto) !important;
+  }
+
+  html body.management-consistent-ui .mrf-workspace-users {
+    grid-template-columns: minmax(250px, 1.4fr) minmax(0, 2.5fr) !important;
+  }
+
+  html body.management-consistent-ui .mrf-workspace-users .um-filter-bar.mrf-fields {
+    grid-template-columns: repeat(2, minmax(120px, 1fr)) minmax(90px, .7fr) minmax(76px, auto) !important;
+  }
+
+  html body.management-consistent-ui .mrf-workspace-animals {
+    grid-template-columns: minmax(280px, 2fr) minmax(0, 1.8fr) !important;
+  }
+
+  html body.management-consistent-ui .mrf-workspace-animals .ap-filter-toolbar.mrf-fields {
+    grid-template-columns: repeat(2, minmax(130px, 1fr)) minmax(76px, auto) !important;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 1024px) {
+  html body.management-consistent-ui .mrf-workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  html body.management-consistent-ui .mrf-fields {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    align-items: end !important;
+    gap: 10px 12px !important;
+  }
+
+  html body.management-consistent-ui .mrf-fields > * {
+    width: 100% !important;
+    grid-column: auto !important;
+  }
+
+  html body.management-consistent-ui .mrf-fields > :is(.report-apply-btn, .report-clear-btn) {
+    min-height: 44px !important;
+  }
+
+  html body.management-consistent-ui :is(
+    .mrf-workspace-intake #clearIntakeFilters,
+    .mrf-workspace-surrenders #clearSurrenderFilters,
+    .mrf-workspace-inventory #clearInventoryFilters,
+    .mrf-workspace-archive .mrf-generated-reset,
+    .mrf-workspace-animals #clearAnimalFilters
+  ) {
+    width: auto !important;
+    grid-column: 1 / -1 !important;
+    justify-self: end !important;
+  }
+
+  html body.management-consistent-ui .mrf-workspace-reports .report-filter-grid.mrf-fields > label:has(#barangayFilter) {
+    grid-column: 1 / -1 !important;
+  }
+}
+
+@media (max-width: 599px) {
+  html body.management-consistent-ui.mrf-sheet-open {
+    overflow: hidden !important;
+  }
+
+  html body.management-consistent-ui .mrf-workspace {
+    display: grid;
+    gap: 10px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  html body.management-consistent-ui .mrf-search-slot {
+    width: 100%;
+  }
+
+  html body.management-consistent-ui .mrf-search-slot > label {
+    display: grid;
+    gap: 6px;
+  }
+
+  html body.management-consistent-ui .mrf-search-slot > label > span:not(.sr-only) {
+    padding-left: 2px;
+    color: #5f534e;
+    font: 800 .67rem/1.3 "Poppins", sans-serif;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  html body.management-consistent-ui .mrf-search-slot :is(.search-pill-sm, .ap-control, .cq-search, .report-input, input[type="search"], input[type="text"]) {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 44px !important;
+    border-radius: 11px !important;
+  }
+
+  html body.management-consistent-ui .mrf-actions {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+
+  html body.management-consistent-ui .mrf-trigger,
+  html body.management-consistent-ui .mrf-quick-clear {
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 11px;
+    font: 800 .72rem/1 "Poppins", sans-serif;
+  }
+
+  html body.management-consistent-ui .mrf-trigger {
+    min-width: 126px;
+    padding: 0 14px;
+    border: 1px solid #780116;
+    color: #fff;
+    background: #780116;
+    box-shadow: 0 7px 16px rgba(120, 1, 22, .14);
+  }
+
+  html body.management-consistent-ui .mrf-trigger:is(:hover, :focus-visible) {
+    border-color: #5e0011;
+    background: #5e0011;
+  }
+
+  html body.management-consistent-ui .mrf-count {
+    min-width: 20px;
+    height: 20px;
+    display: inline-grid;
+    place-items: center;
+    padding: 0 5px;
+    border-radius: 999px;
+    color: #780116;
+    background: #f7b538;
+    font-size: .65rem;
+    font-weight: 900;
+  }
+
+  html body.management-consistent-ui .mrf-count[hidden],
+  html body.management-consistent-ui .mrf-quick-clear[hidden],
+  html body.management-consistent-ui .mrf-chips[hidden] {
+    display: none !important;
+  }
+
+  html body.management-consistent-ui .mrf-quick-clear {
+    min-width: 0;
+    margin-left: auto;
+    padding: 0 9px;
+    border: 0;
+    color: #780116;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  html body.management-consistent-ui .mrf-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+
+  html body.management-consistent-ui .mrf-chip {
+    min-width: 0;
+    min-height: 32px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border: 1px solid #ead9c7;
+    border-radius: 999px;
+    color: #654e48;
+    background: #fff8ee;
+    font: 700 .65rem/1.25 "Poppins", sans-serif;
+    white-space: normal;
+  }
+
+  html body.management-consistent-ui .mrf-chip i {
+    flex: 0 0 auto;
+    color: #780116;
+    font-size: .75rem;
+  }
+
+  html body.management-consistent-ui .mrf-panel-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 4200;
+    display: grid;
+    align-items: end;
+    padding: 0;
+    background: rgba(35, 22, 20, .58);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 180ms ease, visibility 180ms ease;
+  }
+
+  html body.management-consistent-ui .mrf-panel-backdrop.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  html body.management-consistent-ui .mrf-panel {
+    width: 100%;
+    max-height: min(78vh, 680px);
+    max-height: min(78dvh, 680px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, .68);
+    border-radius: 20px 20px 0 0;
+    background: #fff;
+    box-shadow: 0 -18px 48px rgba(35, 22, 20, .22);
+    transform: translateY(22px);
+    transition: transform 190ms ease;
+  }
+
+  html body.management-consistent-ui .mrf-panel-backdrop.is-open .mrf-panel {
+    transform: translateY(0);
+  }
+
+  html body.management-consistent-ui .mrf-panel-header {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px max(16px, env(safe-area-inset-right)) 13px max(16px, env(safe-area-inset-left));
+    border-bottom: 1px solid #eadfd4;
+    background: #fff8ee;
+  }
+
+  html body.management-consistent-ui .mrf-panel-header > div {
+    display: grid;
+    gap: 3px;
+  }
+
+  html body.management-consistent-ui .mrf-panel-header span {
+    color: #9b6418;
+    font: 800 .59rem/1.2 "Poppins", sans-serif;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  html body.management-consistent-ui .mrf-panel-header h2 {
+    margin: 0;
+    color: #2b1719;
+    font: 800 1rem/1.25 "Poppins", sans-serif;
+  }
+
+  html body.management-consistent-ui .mrf-close {
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 1px solid #e3d6cc;
+    border-radius: 10px;
+    color: #6f625d;
+    background: #fff;
+  }
+
+  html body.management-consistent-ui .mrf-close > span {
+    display: none;
+  }
+
+  html body.management-consistent-ui .mrf-panel-body {
+    min-height: 0;
+    display: block;
+    overflow-y: auto;
+    padding: 15px max(16px, env(safe-area-inset-right)) 16px max(16px, env(safe-area-inset-left));
+    overscroll-behavior: contain;
+  }
+
+  html body.management-consistent-ui .mrf-fields {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    align-items: end !important;
+    gap: 12px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html body.management-consistent-ui .mrf-fields > * {
+    width: 100% !important;
+    margin: 0 !important;
+    grid-column: auto !important;
+  }
+
+  html body.management-consistent-ui .mrf-fields > label {
+    display: grid !important;
+    gap: 6px !important;
+  }
+
+  html body.management-consistent-ui .mrf-fields > label > span:not(.sr-only) {
+    padding-left: 2px !important;
+    color: #5f534e !important;
+    font: 800 .67rem/1.3 "Poppins", sans-serif !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+  }
+
+  html body.management-consistent-ui .mrf-fields :is(input, select, .filter-select, .search-pill-sm, .ap-control, .cq-search, .report-input) {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 44px !important;
+    border-radius: 11px !important;
+    font-family: "Poppins", sans-serif !important;
+  }
+
+  html body.management-consistent-ui .mrf-fields > :is(button, .clear-filters-btn, .reference-clear-filters, .ap-clear-btn, .report-apply-btn, .report-clear-btn) {
+    min-height: 42px !important;
+    border-radius: 10px !important;
+  }
+
+  html body.management-consistent-ui .mrf-workspace-reports .mrf-fields #btnApply {
+    display: none !important;
+  }
+
+  html body.management-consistent-ui .mrf-fields > :is(
+    .clear-filters-btn,
+    .reference-clear-filters,
+    .aa-clear-filters,
+    .inventory-clear-filters,
+    .ap-clear-btn,
+    .report-clear-btn,
+    .mrf-generated-reset,
+    #clearFilters
+  ) {
+    border: 1px solid #dfd1c5 !important;
+    color: #780116 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+  }
+
+  html body.management-consistent-ui .mrf-panel-footer {
+    flex: 0 0 auto;
+    display: flex;
+    justify-content: flex-end;
+    padding: 12px max(16px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+    border-top: 1px solid #eadfd4;
+    background: #fff8ee;
+  }
+
+  html body.management-consistent-ui .mrf-done {
+    min-width: 142px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 16px;
+    border: 1px solid #780116;
+    border-radius: 11px;
+    color: #fff;
+    background: #780116;
+    font: 800 .72rem/1 "Poppins", sans-serif;
+  }
+
+  /* Remove the old phone-only stacked filter card footprint. */
+  html body.management-consistent-ui :is(.intake-toolbar, .surrender-toolbar, .aa-toolbar-layout) .mrf-workspace {
+    padding-inline: 0 !important;
+  }
+}
+
+@media (min-width: 430px) and (max-width: 599px) {
+  html body.management-consistent-ui .mrf-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  html body.management-consistent-ui .mrf-fields > :is(
+    button,
+    .clear-filters-btn,
+    .reference-clear-filters,
+    .aa-clear-filters,
+    .inventory-clear-filters,
+    .ap-clear-btn,
+    .report-apply-btn,
+    .report-clear-btn,
+    .mrf-generated-reset
+  ) {
+    grid-column: 1 / -1 !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body.management-consistent-ui :is(.mrf-panel-backdrop, .mrf-panel) {
+    transition-duration: .01ms !important;
+  }
+}
+
+/* Intake phone refinement: preserve the two-column record summary below the
+   generic 380px fallback and give the register nearly the full phone width. */
+@media (max-width: 599px) {
+  html body.management-consistent-ui.intake-management-page .page-body {
+    padding-inline: max(8px, env(safe-area-inset-left)) !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page .mrf-workspace-intake .mrf-search-slot > label > span:not(.sr-only) {
+    font-size: .64rem !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page .mrf-workspace-intake .mrf-search-slot input {
+    min-height: 44px !important;
+    font-size: 16px !important;
+    letter-spacing: -.01em;
+  }
+
+  html body.management-consistent-ui.intake-management-page .mrf-workspace-intake .mrf-search-slot .search-pill-sm:focus-within {
+    border-color: #f7b538 !important;
+    outline: 0 !important;
+    box-shadow: 0 0 0 3px rgba(247, 181, 56, .28) !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page .mrf-workspace-intake .mrf-search-slot input:is(:focus, :focus-visible) {
+    border-color: transparent !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page .mrf-workspace-intake .mrf-search-slot input::placeholder {
+    color: #9b8f89 !important;
+    font-size: .82rem !important;
+    letter-spacing: -.015em;
+    opacity: 1;
+  }
+
+  html body.management-consistent-ui.intake-management-page .management-card-table.management-card-active tbody > tr.management-card-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page .management-card-table.management-card-active tbody > tr.management-card-row > td {
+    grid-column: auto !important;
+    font-size: .76rem !important;
+    line-height: 1.35 !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page .management-card-table.management-card-active tbody > tr.management-card-row > :is(
+    td:first-child,
+    td.management-card-primary,
+    td[data-label="Animal"],
+    td.encoded-by,
+    td.management-card-actions
+  ) {
+    grid-column: 1 / -1 !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page .management-card-table.management-card-active tbody > tr.management-card-row > td[data-label]::before {
+    margin-bottom: 3px !important;
+    font-size: .63rem !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page .management-card-table.management-card-active .animal-name {
+    font-size: .86rem !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page .management-card-table.management-card-active :is(.source-badge, .cond-badge, .status-badge) {
+    max-width: 100% !important;
+    font-size: .62rem !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page .management-card-table.management-card-active .intake-action-group {
+    grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)) !important;
+  }
+}
+
+/* Surrender phone field map: the shared Inventory-style record surface owns
+   card spacing and borders; this module only defines its information order. */
+@media (max-width: 599px) {
+  html body.management-consistent-ui.surrender-requests-page .sr-table-panel > .reference-table-section-head {
+    min-height: 0 !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 12px 4px 11px !important;
+    border-bottom: 1px solid rgba(247, 181, 56, .58) !important;
+    background: transparent !important;
+  }
+
+  html body.management-consistent-ui.surrender-requests-page .sr-table-panel > .reference-table-section-head > div {
+    min-width: 0;
+  }
+
+  html body.management-consistent-ui.surrender-requests-page .sr-table-panel > .reference-table-section-head span {
+    margin-bottom: 4px;
+    font-size: .58rem;
+    line-height: 1;
+    letter-spacing: .09em;
+  }
+
+  html body.management-consistent-ui.surrender-requests-page .sr-table-panel > .reference-table-section-head h3 {
+    margin: 0;
+    font-size: .91rem;
+    line-height: 1.28;
+  }
+
+  html body.management-consistent-ui.surrender-requests-page .sr-table-panel > .reference-table-section-head > strong {
+    align-self: center;
+    justify-self: end;
+    padding: 7px 10px;
+    border: 1px solid rgba(155, 100, 24, .1);
+    background: #f4ead8;
+    font-size: .64rem;
+    line-height: 1;
+    overflow-wrap: normal;
+  }
+
+  html body.management-consistent-ui.surrender-requests-page .sr-table-panel .management-card-table.management-card-active tbody > tr.management-card-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-areas:
+      "owner owner"
+      "pet pet"
+      "category urgency"
+      "submitted status"
+      "actions actions" !important;
+  }
+
+  html body.management-consistent-ui.surrender-requests-page .sr-table-panel .management-card-table.management-card-active tbody > tr.management-card-row > td {
+    width: auto !important;
+    min-width: 0 !important;
+    grid-column: auto !important;
+    font-size: .76rem !important;
+    line-height: 1.35 !important;
+  }
+
+  html body.management-consistent-ui.surrender-requests-page .surrender-owner-field { grid-area: owner !important; }
+  html body.management-consistent-ui.surrender-requests-page .surrender-pet-field { grid-area: pet !important; }
+  html body.management-consistent-ui.surrender-requests-page .surrender-category-field { grid-area: category !important; }
+  html body.management-consistent-ui.surrender-requests-page .surrender-urgency-field { grid-area: urgency !important; }
+  html body.management-consistent-ui.surrender-requests-page .surrender-submitted-field { grid-area: submitted !important; }
+  html body.management-consistent-ui.surrender-requests-page .surrender-status-field { grid-area: status !important; }
+  html body.management-consistent-ui.surrender-requests-page .surrender-actions-field { grid-area: actions !important; }
+
+  html body.management-consistent-ui.surrender-requests-page .surrender-actions-field .tbl-action-btn {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 7px !important;
+    padding-inline: 14px !important;
+  }
+}
+
+@media (max-width: 339px) {
+  html body.management-consistent-ui.surrender-requests-page .sr-table-panel .management-card-table.management-card-active tbody > tr.management-card-row {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-areas:
+      "owner"
+      "pet"
+      "category"
+      "urgency"
+      "submitted"
+      "status"
+      "actions" !important;
+  }
+}
+
+/* The responsive filter workspace moves Announcement search outside its
+   original feed container. Rebuild it as one field so the icon and focus
+   treatment remain attached to the input. */
+html body.management-consistent-ui.announcements-page .mrf-workspace-announcements .feed-search {
+  position: relative !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 44px !important;
+  display: block !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  border: 1px solid #eadfd4 !important;
+  border-radius: 11px !important;
+  background: #ffffff !important;
+  box-shadow: none !important;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+html body.management-consistent-ui.announcements-page .mrf-workspace-announcements .feed-search > i {
+  position: absolute !important;
+  top: 50% !important;
+  left: 14px !important;
+  z-index: 1 !important;
+  display: block !important;
+  margin: 0 !important;
+  color: #780116 !important;
+  font-size: .82rem !important;
+  line-height: 1 !important;
+  pointer-events: none !important;
+  transform: translateY(-50%) !important;
+}
+
+html body.management-consistent-ui.announcements-page .mrf-workspace-announcements #searchAnnouncement {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 44px !important;
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 14px 0 42px !important;
+  border: 0 !important;
+  border-radius: 10px !important;
+  color: #2b1719 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: 0 !important;
+  box-sizing: border-box !important;
+}
+
+html body.management-consistent-ui.announcements-page .mrf-workspace-announcements .feed-search:focus-within {
+  border-color: #f7b538 !important;
+  box-shadow: 0 0 0 3px rgba(247, 181, 56, .28) !important;
+}
+
+html body.management-consistent-ui.announcements-page .mrf-workspace-announcements #searchAnnouncement:is(:focus, :focus-visible) {
+  border: 0 !important;
+  box-shadow: none !important;
+  outline: 0 !important;
+}
+
+/* Announcement filters share one toolbar surface on tablets and desktops.
+   Search is moved into its own slot by the responsive filter enhancer, so the
+   original feed filter card must become layout-only instead of a second card. */
+@media (min-width: 600px) {
+  html body.management-consistent-ui.announcements-page .mrf-workspace-announcements {
+    align-items: end !important;
+    gap: 12px !important;
+    padding: 16px !important;
+    border: 1px solid #eadfd4 !important;
+    border-radius: 20px !important;
+    background: #ffffff !important;
+    box-shadow: 0 8px 22px rgba(72, 43, 31, .05) !important;
+    box-sizing: border-box !important;
+  }
+
+  html body.management-consistent-ui.announcements-page .mrf-workspace-announcements .mrf-search-slot {
+    display: grid !important;
+    align-content: end !important;
+    gap: 7px !important;
+  }
+
+  html body.management-consistent-ui.announcements-page .mrf-workspace-announcements .mrf-search-slot::before {
+    content: "Search announcements";
+    padding-left: 1px;
+    color: #780116;
+    font: 700 .72rem/1.3 "Poppins", sans-serif;
+  }
+
+  html body.management-consistent-ui.announcements-page .mrf-workspace-announcements .feed-filters.mrf-fields {
+    align-items: end !important;
+    gap: 12px !important;
+    height: auto !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html body.management-consistent-ui.announcements-page .mrf-workspace-announcements .feed-filters.mrf-fields > label {
+    display: grid !important;
+    align-content: end !important;
+    gap: 7px !important;
+    margin: 0 !important;
+  }
+
+  html body.management-consistent-ui.announcements-page .mrf-workspace-announcements .mrf-generated-field-label {
+    padding-left: 1px !important;
+    color: #780116 !important;
+    font: 700 .72rem/1.3 "Poppins", sans-serif !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+  }
+
+  html body.management-consistent-ui.announcements-page .mrf-workspace-announcements :is(
+    .feed-search,
+    #searchAnnouncement,
+    .feed-filters select,
+    .mrf-generated-reset
+  ) {
+    min-height: 48px !important;
+  }
+
+  html body.management-consistent-ui.announcements-page .mrf-workspace-announcements .feed-filters select {
+    padding-inline: 14px 40px !important;
+    border: 1px solid #dfd3cb !important;
+    border-radius: 12px !important;
+    color: #2b1719 !important;
+    background-color: #ffffff !important;
+    font: 500 .78rem/1.35 "Poppins", sans-serif !important;
+    box-shadow: none !important;
+  }
+
+  html body.management-consistent-ui.announcements-page .mrf-workspace-announcements .feed-filters select:is(:focus, :focus-visible) {
+    border-color: #f7b538 !important;
+    box-shadow: 0 0 0 3px rgba(247, 181, 56, .28) !important;
+    outline: 0 !important;
+  }
+
+  html body.management-consistent-ui.announcements-page .mrf-workspace-announcements .mrf-generated-reset {
+    width: auto !important;
+    min-width: 104px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 7px !important;
+    margin: 0 !important;
+    padding: 0 16px !important;
+    border: 1px solid #e4d7cd !important;
+    border-radius: 12px !important;
+    color: #780116 !important;
+    background: #fff8ee !important;
+    font: 700 .75rem/1 "Poppins", sans-serif !important;
+    box-shadow: none !important;
+  }
+
+  html body.management-consistent-ui.announcements-page .mrf-workspace-announcements .mrf-generated-reset:is(:hover, :focus-visible) {
+    border-color: #f7b538 !important;
+    background: #fff3dc !important;
+    box-shadow: 0 0 0 3px rgba(247, 181, 56, .22) !important;
+    outline: 0 !important;
+  }
+}
+
+@media (min-width: 1025px) {
+  html body.management-consistent-ui.announcements-page .mrf-workspace-announcements {
+    grid-template-columns: minmax(260px, 1.15fr) minmax(0, 2.25fr) !important;
+  }
+
+  html body.management-consistent-ui.announcements-page .mrf-workspace-announcements .feed-filters.mrf-fields {
+    grid-template-columns: repeat(2, minmax(150px, 1fr)) auto !important;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 1024px) {
+  html body.management-consistent-ui.announcements-page .mrf-workspace-announcements .feed-filters.mrf-fields > .mrf-generated-reset {
+    grid-column: 1 / -1 !important;
+    justify-self: end !important;
+  }
+}
+
+/* Dashboard activity is an operational event feed, not an animal directory.
+   Give each mobile card a stable reading order and full panel width. */
+@media (max-width: 599px) {
+  html body.management-consistent-ui.dashboard-page .dashboard-activity-panel > .table-responsive:has(> #activityTable) {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  html body.management-consistent-ui.dashboard-page #activityTable,
+  html body.management-consistent-ui.dashboard-page #activityTable tbody,
+  html body.management-consistent-ui.dashboard-page #activityTable tbody > tr.activity-card-row {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  html body.management-consistent-ui.dashboard-page #activityTable tbody {
+    gap: 10px !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  html body.management-consistent-ui.dashboard-page #activityTable tbody > tr.activity-card-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-areas:
+      "record record"
+      "type status"
+      "event event"
+      "staff date" !important;
+    gap: 11px 12px !important;
+    padding: 13px !important;
+    overflow: hidden !important;
+    border-radius: 14px !important;
+  }
+
+  html body.management-consistent-ui.dashboard-page #activityTable tbody > tr.activity-card-row > td {
+    min-width: 0 !important;
+    grid-column: auto !important;
+    padding: 0 !important;
+    font-size: .75rem !important;
+    line-height: 1.4 !important;
+  }
+
+  html body.management-consistent-ui.dashboard-page #activityTable .activity-record-cell {
+    grid-area: record !important;
+    padding-bottom: 9px !important;
+    border-bottom: 1px solid #eee5df !important;
+  }
+
+  html body.management-consistent-ui.dashboard-page #activityTable .activity-type-cell { grid-area: type !important; }
+  html body.management-consistent-ui.dashboard-page #activityTable .activity-event-cell { grid-area: event !important; }
+  html body.management-consistent-ui.dashboard-page #activityTable .activity-staff-cell { grid-area: staff !important; }
+  html body.management-consistent-ui.dashboard-page #activityTable .activity-date-cell { grid-area: date !important; }
+  html body.management-consistent-ui.dashboard-page #activityTable .activity-status-cell { grid-area: status !important; }
+
+  html body.management-consistent-ui.dashboard-page #activityTable .activity-record-cell strong {
+    color: #2b1719;
+    font-size: .86rem;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+  }
+
+  html body.management-consistent-ui.dashboard-page #activityTable .activity-date-cell {
+    font-size: .68rem !important;
+    white-space: nowrap !important;
+    overflow-wrap: normal !important;
+  }
+
+  html body.management-consistent-ui.dashboard-page #activityTable td[data-label]::before {
+    margin-bottom: 3px !important;
+    font-size: .62rem !important;
+    letter-spacing: .01em !important;
+    text-transform: none !important;
+  }
+}
+
+@media (max-width: 339px) {
+  html body.management-consistent-ui.dashboard-page #activityTable tbody > tr.activity-card-row {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-areas:
+      "record"
+      "type"
+      "status"
+      "event"
+      "staff"
+      "date" !important;
+  }
+}
+
+/* Audit Trail phone refinement: the activity register, search workspace, and
+   event list share one flat page surface. Individual events remain the only
+   cards, which preserves scanability without stacking containers. */
+@media (max-width: 599px) {
+  html body.management-consistent-ui.audit-trail-page .audit-panel > .records-toolbar {
+    gap: 10px !important;
+    margin: 0 !important;
+    padding: 0 2px 11px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html body.management-consistent-ui.audit-trail-page .records-heading {
+    min-width: 0;
+    gap: 11px;
+  }
+
+  html body.management-consistent-ui.audit-trail-page .records-heading-icon {
+    width: 42px;
+    height: 42px;
+    flex-basis: 42px;
+    border-radius: 13px;
+    font-size: .9rem;
+  }
+
+  html body.management-consistent-ui.audit-trail-page .records-heading .section-kicker {
+    font-size: .58rem !important;
+    line-height: 1.2;
+    letter-spacing: .09em;
+  }
+
+  html body.management-consistent-ui.audit-trail-page .records-heading h2 {
+    margin-top: 3px;
+    font-size: .94rem;
+    line-height: 1.25;
+  }
+
+  html body.management-consistent-ui.audit-trail-page .audit-view-switch {
+    width: 100%;
+    gap: 4px !important;
+    padding: 4px !important;
+    border-radius: 14px !important;
+  }
+
+  html body.management-consistent-ui.audit-trail-page .audit-view-btn {
+    min-height: 42px !important;
+    padding: 6px 5px !important;
+    gap: 5px !important;
+    border-radius: 10px !important;
+    font-size: .65rem !important;
+    line-height: 1.28 !important;
+  }
+
+  html body.management-consistent-ui.audit-trail-page .audit-view-btn i {
+    font-size: .72rem;
+  }
+
+  html body.management-consistent-ui.audit-trail-page .mrf-workspace-audit {
+    gap: 8px;
+    margin: 0 !important;
+    padding: 0 2px 12px !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html body.management-consistent-ui.audit-trail-page .mrf-workspace-audit .mrf-search-slot > label {
+    gap: 5px;
+  }
+
+  html body.management-consistent-ui.audit-trail-page .mrf-workspace-audit .mrf-search-slot > label > span:not(.sr-only) {
+    padding-left: 1px;
+    font-size: .62rem;
+    line-height: 1.25;
+  }
+
+  html body.management-consistent-ui.audit-trail-page .mrf-workspace-audit .search-pill-sm {
+    height: 42px !important;
+    min-height: 42px !important;
+    padding-inline: 12px !important;
+    border-radius: 11px !important;
+  }
+
+  html body.management-consistent-ui.audit-trail-page .mrf-workspace-audit .search-pill-sm input {
+    min-height: 0 !important;
+    padding: 0 0 0 9px !important;
+    font-size: .76rem !important;
+    line-height: 1.3 !important;
+  }
+
+  html body.management-consistent-ui.audit-trail-page #searchAudit,
+  html body.management-consistent-ui.audit-trail-page #searchAudit:is(:focus, :focus-visible) {
+    height: auto !important;
+    min-height: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    outline: 0 !important;
+    outline-offset: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html body.management-consistent-ui.audit-trail-page .mrf-workspace-audit .search-pill-sm i {
+    flex: 0 0 auto;
+    font-size: .76rem;
+  }
+
+  html body.management-consistent-ui.audit-trail-page .mrf-workspace-audit .mrf-actions {
+    gap: 8px;
+  }
+
+  html body.management-consistent-ui.audit-trail-page .mrf-workspace-audit .mrf-trigger {
+    min-width: 118px;
+    min-height: 40px;
+    padding-inline: 13px;
+    font-size: .69rem;
+  }
+
+  html body.management-consistent-ui.audit-trail-page .audit-panel > .table-section-head {
+    min-height: 0 !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    gap: 10px !important;
+    margin: 0 !important;
+    padding: 11px 2px 10px !important;
+    border-top: 1px solid rgba(247, 181, 56, .52) !important;
+    background: transparent !important;
+  }
+
+  html body.management-consistent-ui.audit-trail-page .audit-panel > .table-section-head > div {
+    min-width: 0;
+  }
+
+  html body.management-consistent-ui.audit-trail-page .audit-panel > .table-section-head .section-kicker {
+    font-size: .57rem !important;
+    line-height: 1.15;
+    letter-spacing: .09em;
+  }
+
+  html body.management-consistent-ui.audit-trail-page .audit-panel > .table-section-head h3 {
+    margin-top: 4px;
+    font-size: .9rem;
+    line-height: 1.28;
+  }
+
+  html body.management-consistent-ui.audit-trail-page .audit-panel > .table-section-head .result-count {
+    justify-self: end;
+    padding: 6px 9px;
+    font-size: .62rem;
+    line-height: 1;
+    white-space: nowrap;
+    overflow-wrap: normal;
+  }
+
+  html body.management-consistent-ui.audit-trail-page .audit-panel > .records-table-wrap {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html body.management-consistent-ui.audit-trail-page .audit-log-table.management-card-active tbody {
+    gap: 9px !important;
+  }
+
+  html body.management-consistent-ui.audit-trail-page .audit-log-table.management-card-active tbody > tr.audit-row {
+    gap: 9px 11px !important;
+    padding: 12px !important;
+    border-radius: 14px !important;
+    box-shadow: 0 5px 15px rgba(64, 34, 29, .045) !important;
+  }
+
+  html body.management-consistent-ui.audit-trail-page .audit-log-table .event-time-cell strong,
+  html body.management-consistent-ui.audit-trail-page .audit-log-table .actor-cell strong,
+  html body.management-consistent-ui.audit-trail-page .audit-log-table .audit-record-cell strong {
+    font-size: .78rem !important;
+    line-height: 1.35 !important;
+  }
+
+  html body.management-consistent-ui.audit-trail-page .audit-log-table .event-time-cell small,
+  html body.management-consistent-ui.audit-trail-page .audit-log-table .actor-cell small,
+  html body.management-consistent-ui.audit-trail-page .audit-log-table .audit-record-cell small {
+    font-size: .65rem !important;
+    line-height: 1.4 !important;
+  }
+
+  html body.management-consistent-ui.audit-trail-page .audit-log-table :is(.module-cell, .action-badge, .status-badge) {
+    min-height: 29px;
+    font-size: .65rem !important;
+    line-height: 1.3 !important;
+  }
+
+  html body.management-consistent-ui.audit-trail-page .audit-log-table td[data-label]::before,
+  html body.management-consistent-ui.audit-trail-page .audit-log-table .management-mobile-label {
+    font-size: .59rem !important;
+    line-height: 1.25 !important;
+  }
+}
+
+/* Inventory filter alignment: responsiveFilters moves the search field into a
+   sibling slot. Keep the padding on the shared workspace so Search, Category,
+   and the remaining controls use one surface and one vertical rhythm. */
+@media (min-width: 600px) {
+  html body.management-consistent-ui.inventory-page .mrf-workspace-inventory {
+    box-sizing: border-box;
+    align-items: start !important;
+    gap: 12px !important;
+    margin: 0 !important;
+    padding: 18px 24px 10px !important;
+    border: 0 !important;
+    background: #FFFFFF !important;
+    box-shadow: none !important;
+  }
+
+  html body.management-consistent-ui.inventory-page .mrf-workspace-inventory .mrf-search-slot,
+  html body.management-consistent-ui.inventory-page .mrf-workspace-inventory .inventory-filter-controls.mrf-fields {
+    align-self: start !important;
+  }
+
+  html body.management-consistent-ui.inventory-page .mrf-workspace-inventory .inventory-filter-controls.mrf-fields {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html body.management-consistent-ui.inventory-page .mrf-workspace-inventory :is(
+    .mrf-search-slot > .inventory-reference-field,
+    .inventory-filter-controls.mrf-fields > .inventory-reference-field
+  ) {
+    min-width: 0;
+    display: grid !important;
+    grid-template-rows: minmax(16px, auto) 44px;
+    align-self: start !important;
+    gap: 7px !important;
+    margin: 0 !important;
+  }
+
+  html body.management-consistent-ui.inventory-page .mrf-workspace-inventory :is(
+    .inventory-search,
+    .filter-select,
+    .inventory-clear-filters
+  ) {
+    height: 44px !important;
+    min-height: 44px !important;
+  }
+
+  html body.management-consistent-ui.inventory-page .mrf-workspace-inventory .inventory-clear-filters {
+    align-self: end !important;
+  }
+
+  html body.management-consistent-ui.inventory-page .inventory-filter-summary {
+    min-height: 0 !important;
+    justify-content: flex-start !important;
+    margin: 0 !important;
+    padding: 0 24px 14px !important;
+    border-bottom: 1px solid #F0E6DD !important;
+    color: #756963 !important;
+    background: #FFFFFF !important;
+    font-size: .67rem !important;
+    line-height: 1.4 !important;
+  }
+
+  html body.management-consistent-ui.inventory-page .inventory-filter-summary #filterResultsCount {
+    display: inline;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+}
+
+@media (min-width: 1025px) {
+  html body.management-consistent-ui.inventory-page .mrf-workspace-inventory {
+    grid-template-columns: minmax(260px, 1.3fr) minmax(0, 3fr) !important;
+  }
+}
+
+/* Inventory phone refinement: remove the duplicate register shell, keep the
+   filter workspace compact, and pair related stock facts on ordinary phones. */
+@media (max-width: 599px) {
+  html body.management-consistent-ui.inventory-page .inv-table-panel > .inventory-records-heading {
+    display: none !important;
+  }
+
+  html body.management-consistent-ui.inventory-page .inv-table-panel > .panel-head {
+    gap: 8px !important;
+    margin: 0 !important;
+    padding: 4px 2px 11px !important;
+    overflow: visible !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html body.management-consistent-ui.inventory-page .mrf-workspace-inventory {
+    gap: 8px;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html body.management-consistent-ui.inventory-page .mrf-workspace-inventory .mrf-search-slot > label {
+    gap: 5px;
+  }
+
+  html body.management-consistent-ui.inventory-page .mrf-workspace-inventory .mrf-search-slot > label > span:not(.sr-only) {
+    padding-left: 1px;
+    font-size: .62rem;
+    line-height: 1.25;
+  }
+
+  html body.management-consistent-ui.inventory-page .mrf-workspace-inventory .inventory-search {
+    height: 42px !important;
+    min-height: 42px !important;
+    padding-inline: 12px !important;
+    border-radius: 11px !important;
+  }
+
+  html body.management-consistent-ui.inventory-page .mrf-workspace-inventory .inventory-search input {
+    min-height: 0 !important;
+    padding: 0 0 0 9px !important;
+    font-size: .76rem !important;
+    line-height: 1.3 !important;
+  }
+
+  html body.management-consistent-ui.inventory-page .mrf-workspace-inventory .inventory-search i {
+    flex: 0 0 16px;
+    width: 16px;
+    height: 16px;
+    font-size: .76rem;
+  }
+
+  html body.management-consistent-ui.inventory-page .mrf-workspace-inventory .mrf-actions {
+    gap: 8px;
+  }
+
+  html body.management-consistent-ui.inventory-page .mrf-workspace-inventory .mrf-trigger {
+    width: auto !important;
+    min-width: 118px !important;
+    min-height: 40px;
+    padding-inline: 13px;
+    font-size: .69rem;
+  }
+
+  html body.management-consistent-ui.inventory-page .mrf-workspace-inventory .mrf-quick-clear {
+    width: auto !important;
+  }
+
+  html body.management-consistent-ui.inventory-page .inventory-filter-summary {
+    min-height: 0;
+    justify-content: flex-end;
+    margin: 0;
+    padding: 0 2px;
+    color: #756963 !important;
+    background: transparent !important;
+    font-size: .61rem !important;
+    line-height: 1.3;
+  }
+
+  html body.management-consistent-ui.inventory-page .inv-table-panel > .reference-table-section-head {
+    min-height: 0 !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    gap: 10px !important;
+    margin: 0 !important;
+    padding: 11px 2px 10px !important;
+    border-top: 1px solid rgba(247, 181, 56, .52) !important;
+    background: transparent !important;
+  }
+
+  html body.management-consistent-ui.inventory-page .inv-table-panel > .reference-table-section-head > div {
+    min-width: 0;
+  }
+
+  html body.management-consistent-ui.inventory-page .inv-table-panel > .reference-table-section-head span {
+    font-size: .57rem;
+    line-height: 1.15;
+    letter-spacing: .09em;
+  }
+
+  html body.management-consistent-ui.inventory-page .inv-table-panel > .reference-table-section-head h3 {
+    margin-top: 4px;
+    font-size: .9rem;
+    line-height: 1.28;
+  }
+
+  html body.management-consistent-ui.inventory-page .inv-table-panel > .reference-table-section-head > strong {
+    justify-self: end;
+    padding: 6px 9px;
+    font-size: .62rem;
+    line-height: 1;
+    white-space: nowrap;
+    overflow-wrap: normal;
+  }
+
+  html body.management-consistent-ui.inventory-page .inventory-table-wrap {
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html body.management-consistent-ui.inventory-page .inventory-smart-table.management-card-active tbody {
+    gap: 9px !important;
+    padding: 0 2px !important;
+  }
+
+  html body.management-consistent-ui.inventory-page .inventory-smart-table.management-card-active tbody > tr.management-card-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-areas:
+      "item item"
+      "category availability"
+      "forecast movement"
+      "health health"
+      "actions actions" !important;
+    gap: 10px 12px !important;
+    padding: 12px !important;
+    border-radius: 14px !important;
+    box-shadow: 0 5px 15px rgba(64, 34, 29, .045) !important;
+  }
+
+  html body.management-consistent-ui.inventory-page .inventory-smart-table.management-card-active tbody > tr.management-card-row > td {
+    grid-column: auto !important;
+  }
+
+  html body.management-consistent-ui.inventory-page .inventory-smart-table.management-card-active tbody > tr.management-card-row > td:nth-child(1) { grid-area: item !important; }
+  html body.management-consistent-ui.inventory-page .inventory-smart-table.management-card-active tbody > tr.management-card-row > td:nth-child(2) { grid-area: category !important; }
+  html body.management-consistent-ui.inventory-page .inventory-smart-table.management-card-active tbody > tr.management-card-row > td:nth-child(3) { grid-area: availability !important; }
+  html body.management-consistent-ui.inventory-page .inventory-smart-table.management-card-active tbody > tr.management-card-row > td:nth-child(4) { grid-area: forecast !important; }
+  html body.management-consistent-ui.inventory-page .inventory-smart-table.management-card-active tbody > tr.management-card-row > td:nth-child(5) { grid-area: movement !important; }
+  html body.management-consistent-ui.inventory-page .inventory-smart-table.management-card-active tbody > tr.management-card-row > td:nth-child(6) { grid-area: health !important; }
+  html body.management-consistent-ui.inventory-page .inventory-smart-table.management-card-active tbody > tr.management-card-row > td:nth-child(7) { grid-area: actions !important; }
+
+  html body.management-consistent-ui.inventory-page .inventory-smart-table.management-card-active .management-mobile-label {
+    margin-bottom: 4px;
+    font-size: .61rem !important;
+    line-height: 1.25;
+  }
+
+  html body.management-consistent-ui.inventory-page .inventory-smart-table.management-card-active .item-name {
+    font-size: .82rem !important;
+    line-height: 1.35;
+  }
+
+  html body.management-consistent-ui.inventory-page .inventory-smart-table.management-card-active .item-meta {
+    font-size: .64rem !important;
+  }
+
+  html body.management-consistent-ui.inventory-page .inventory-smart-table.management-card-active :is(
+    .cat-badge, .days-cell, .movement-badge,
+    .risk-review, .risk-ok, .risk-critical
+  ) {
+    font-size: .64rem !important;
+    line-height: 1.3 !important;
+  }
+
+  html body.management-consistent-ui.inventory-page .inventory-smart-table.management-card-active .stock-cell {
+    font-size: .68rem;
+  }
+
+  html body.management-consistent-ui.inventory-page .inventory-smart-table.management-card-active .management-card-actions {
+    padding-top: 10px !important;
+  }
+
+  html body.management-consistent-ui.inventory-page .inventory-smart-table.management-card-active .table-actions .tbl-action-btn {
+    min-height: 42px !important;
+    height: 42px !important;
+    border-radius: 10px !important;
+  }
+
+  html body.management-consistent-ui.inventory-page .inventory-smart-table.management-card-active .inventory-action-text {
+    font-size: .68rem !important;
+  }
+}
+
+@media (max-width: 339px) {
+  html body.management-consistent-ui.inventory-page .inventory-smart-table.management-card-active tbody > tr.management-card-row {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-areas:
+      "item"
+      "category"
+      "availability"
+      "forecast"
+      "movement"
+      "health"
+      "actions" !important;
+  }
+}
+
+/* Compatibility user results use the full phone width: identity and actions
+   anchor the card while related attempt facts form balanced pairs. */
+@media (max-width: 599px) {
+  html body.management-consistent-ui.compatibility-management-page .compatibility-result-table.management-card-active tbody {
+    gap: 9px !important;
+    padding: 0 2px 2px !important;
+    background: transparent !important;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .compatibility-result-table.management-card-active tbody > tr.management-card-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-areas:
+      "user user"
+      "completed retake"
+      "recommendation recommendation"
+      "match version"
+      "actions actions" !important;
+    gap: 11px 13px !important;
+    padding: 12px !important;
+    border-radius: 14px !important;
+    box-shadow: 0 5px 15px rgba(64, 34, 29, .045) !important;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .compatibility-result-table.management-card-active tbody > tr.management-card-row > td {
+    min-width: 0 !important;
+    grid-column: auto !important;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .compatibility-result-table.management-card-active tbody > tr.management-card-row > td:nth-child(1) { grid-area: user !important; }
+  html body.management-consistent-ui.compatibility-management-page .compatibility-result-table.management-card-active tbody > tr.management-card-row > td:nth-child(2) { grid-area: completed !important; }
+  html body.management-consistent-ui.compatibility-management-page .compatibility-result-table.management-card-active tbody > tr.management-card-row > td:nth-child(3) { grid-area: retake !important; }
+  html body.management-consistent-ui.compatibility-management-page .compatibility-result-table.management-card-active tbody > tr.management-card-row > td:nth-child(4) { grid-area: recommendation !important; }
+  html body.management-consistent-ui.compatibility-management-page .compatibility-result-table.management-card-active tbody > tr.management-card-row > td:nth-child(5) { grid-area: match !important; }
+  html body.management-consistent-ui.compatibility-management-page .compatibility-result-table.management-card-active tbody > tr.management-card-row > td:nth-child(6) { grid-area: version !important; }
+  html body.management-consistent-ui.compatibility-management-page .compatibility-result-table.management-card-active tbody > tr.management-card-row > td:nth-child(7) { grid-area: actions !important; }
+
+  html body.management-consistent-ui.compatibility-management-page .compatibility-result-table.management-card-active .management-card-primary {
+    padding-bottom: 10px !important;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .compatibility-result-table.management-card-active .management-mobile-label {
+    margin-bottom: 4px;
+    font-size: .61rem !important;
+    line-height: 1.25 !important;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .compatibility-result-table.management-card-active .cq-user {
+    gap: 10px;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .compatibility-result-table.management-card-active .cq-user > span {
+    width: 40px !important;
+    height: 40px !important;
+    flex-basis: 40px !important;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .compatibility-result-table.management-card-active .cq-user strong,
+  html body.management-consistent-ui.compatibility-management-page .compatibility-result-table.management-card-active td > strong,
+  html body.management-consistent-ui.compatibility-management-page .compatibility-result-table.management-card-active .cq-animal strong {
+    font-size: .78rem !important;
+    line-height: 1.35 !important;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .compatibility-result-table.management-card-active .cq-user small,
+  html body.management-consistent-ui.compatibility-management-page .compatibility-result-table.management-card-active .cq-result-id {
+    max-width: 100%;
+    font-size: .63rem !important;
+    line-height: 1.4 !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .compatibility-result-table.management-card-active :is(
+    .cq-date, .cq-animal, .cq-score, .cq-version
+  ) {
+    font-size: .67rem !important;
+    line-height: 1.35 !important;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .compatibility-result-table.management-card-active .cq-recommendation-field {
+    padding-block: 1px !important;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .compatibility-result-table.management-card-active .management-card-actions {
+    padding-top: 10px !important;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .compatibility-result-table.management-card-active .cq-view-result {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 42px !important;
+    border-radius: 10px !important;
+    font-size: .68rem !important;
+  }
+}
+
+@media (max-width: 339px) {
+  html body.management-consistent-ui.compatibility-management-page .compatibility-result-table.management-card-active tbody > tr.management-card-row {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-areas:
+      "user"
+      "completed"
+      "retake"
+      "recommendation"
+      "match"
+      "version"
+      "actions" !important;
+  }
+}
+
+/* Management search focus contract: composite search controls own the single
+   visible focus ring. The nested input remains the keyboard focus target but
+   must not draw a second border, shadow, or offset outline inside the field. */
+html body.management-consistent-ui :is(
+  .search-pill-sm,
+  .ap-control,
+  .cq-search,
+  .report-input,
+  .feed-search
+):has(> input:is([type="search"], [type="text"])) {
+  border-color: #dfd3cb !important;
+  background: #FFFFFF !important;
+  box-shadow: none !important;
+  outline: 0 !important;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+
+html body.management-consistent-ui :is(
+  .search-pill-sm,
+  .ap-control,
+  .cq-search,
+  .report-input,
+  .feed-search
+):has(> input:is([type="search"], [type="text"])):focus-within {
+  border-color: #f7b538 !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 0 0 3px rgba(247, 181, 56, .3) !important;
+  outline: 0 !important;
+}
+
+html body.management-consistent-ui :is(
+  .search-pill-sm,
+  .ap-control,
+  .cq-search,
+  .report-input,
+  .feed-search
+):has(> input:is([type="search"], [type="text"])) > input:is(:focus, :focus-visible) {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: 0 !important;
+  outline-offset: 0 !important;
+}
+
+html body.management-consistent-ui :is(
+  .search-pill-sm,
+  .ap-control,
+  .cq-search,
+  .report-input,
+  .feed-search
+):has(> input:is([type="search"], [type="text"])):focus-within > i {
+  color: #780116 !important;
+}
+
+/* One compact, readable phone scale for every management search field.
+   Control height remains unchanged so touch targets stay comfortable. */
+@media (max-width: 599px) {
+  html body.management-consistent-ui :is(
+    #searchIntake,
+    #searchApps,
+    #searchSR,
+    #searchInventory,
+    #reportSearch,
+    #searchAudit,
+    #searchArchive,
+    #resultSearch,
+    #searchUsers,
+    #searchAnimals,
+    #messageSearch,
+    #searchAnnouncement,
+    #globalSearch,
+    #animalSearch,
+    #filterCategory,
+    #fMedInventorySearch
+  ) {
+    font-family: "Poppins", sans-serif !important;
+    font-size: .78rem !important;
+    font-weight: 500 !important;
+    line-height: 1.35 !important;
+    letter-spacing: -.005em !important;
+  }
+
+  html body.management-consistent-ui :is(
+    #searchIntake,
+    #searchApps,
+    #searchSR,
+    #searchInventory,
+    #reportSearch,
+    #searchAudit,
+    #searchArchive,
+    #resultSearch,
+    #searchUsers,
+    #searchAnimals,
+    #messageSearch,
+    #searchAnnouncement,
+    #globalSearch,
+    #animalSearch,
+    #filterCategory,
+    #fMedInventorySearch
+  )::placeholder {
+    color: #918680 !important;
+    font: inherit !important;
+    letter-spacing: inherit !important;
+    opacity: 1 !important;
+  }
+}
+
+/* Management data tables never require a second horizontal navigation axis.
+   Dense registers become record cards at their declared module breakpoint;
+   tables that remain tabular fit the available workspace and wrap long copy. */
+html body.management-consistent-ui .page-body :is(
+  .table-responsive,
+  .records-table-wrap,
+  .inventory-table-wrap,
+  .cq-table-wrap,
+  .report-table-wrap
+):has(> .management-data-table.management-card-table) {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: clip !important;
+  overscroll-behavior-x: none;
+}
+
+html body.management-consistent-ui .page-body .management-data-table.management-card-table:not(.management-card-active) {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  table-layout: fixed !important;
+}
+
+html body.management-consistent-ui .page-body .management-data-table.management-card-table:not(.management-card-active) :is(th, td) {
+  min-width: 0 !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+}
+
+html body.management-consistent-ui .page-body .management-data-table.management-card-table:not(.management-card-active) :is(
+  .animal-name,
+  .animal-name-text,
+  .owner-name,
+  .pet-mini-name,
+  .applicant-name,
+  .animal-mini-name,
+  .item-name,
+  .record-title,
+  .record-name,
+  .report-cell-value,
+  .cq-user,
+  .cq-animal
+) {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+}
+
+html body.management-consistent-ui .page-body .management-data-table.management-card-table.management-card-active {
+  max-width: 100% !important;
+}
+
+/* --------------------------------------------------------------------------
+   Canonical management record cards
+
+   Inventory is the reference for every responsive data table: the table
+   remains semantic, while each row becomes its own compact white card with a
+   real gap between records. Module styles may define field grid areas, but
+   they must not replace the shared surface, spacing, labels, or action rhythm.
+   -------------------------------------------------------------------------- */
+
+html body.management-consistent-ui .page-body :is(
+  .table-responsive,
+  .records-table-wrap,
+  .inventory-table-wrap,
+  .cq-table-wrap,
+  .report-table-wrap
+):has(> .management-data-table.management-card-table.management-card-active) {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-inline: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html body.management-consistent-ui .page-body .management-data-table.management-card-table.management-card-active {
+  width: 100% !important;
+  min-width: 0 !important;
+  display: block !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+html body.management-consistent-ui .page-body .management-data-table.management-card-table.management-card-active tbody {
+  width: 100% !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 10px !important;
+  padding: 2px !important;
+  background: transparent !important;
+}
+
+html body.management-consistent-ui .page-body .management-data-table.management-card-table.management-card-active tbody > tr.management-card-row {
+  width: 100% !important;
+  min-width: 0 !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  align-content: start !important;
+  gap: 10px 12px !important;
+  margin: 0 !important;
+  padding: 12px !important;
+  overflow: visible !important;
+  border: 1px solid #eadfd4 !important;
+  border-radius: 14px !important;
+  color: #2b1719 !important;
+  background: #ffffff !important;
+  box-shadow: 0 5px 15px rgba(64, 34, 29, .045) !important;
+  transform: none !important;
+}
+
+html body.management-consistent-ui .page-body .management-data-table.management-card-table.management-card-active tbody > tr.management-card-row:is(.row-active, [aria-selected="true"]) {
+  border-color: #eadfd4 !important;
+  background: #ffffff !important;
+  box-shadow: 0 5px 15px rgba(64, 34, 29, .045) !important;
+}
+
+html body.management-consistent-ui .page-body .management-data-table.management-card-table.management-card-active tbody > tr.management-card-row::after {
+  content: none !important;
+  display: none !important;
+}
+
+html body.management-consistent-ui .page-body .management-data-table.management-card-table.management-card-active tbody > tr.management-card-row > td {
+  min-width: 0 !important;
+  height: auto !important;
+  display: block !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  color: #443a37 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-family: "Poppins", sans-serif !important;
+  font-size: .74rem !important;
+  line-height: 1.4 !important;
+  text-align: left !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+}
+
+html body.management-consistent-ui .page-body .management-data-table.management-card-table.management-card-active tbody > tr.management-card-row > :is(
+  td.management-card-primary,
+  td.management-card-actions
+),
+html body.management-consistent-ui .page-body .management-data-table.management-card-table.management-card-active tbody > tr.management-card-row:not(:has(> td.management-card-primary)) > td:first-child {
+  grid-column: 1 / -1 !important;
+}
+
+html body.management-consistent-ui .page-body .management-data-table.management-card-table.management-card-active tbody > tr.management-card-row > td.management-card-primary {
+  padding-bottom: 10px !important;
+  border-bottom: 1px solid #f0e7df !important;
+}
+
+html body.management-consistent-ui .page-body .management-data-table.management-card-table.management-card-active tbody > tr.management-card-row > td.management-card-actions {
+  padding-top: 10px !important;
+  border-top: 1px solid #f0e7df !important;
+}
+
+html body.management-consistent-ui .page-body .management-data-table.management-card-table.management-card-active tbody > tr.management-card-row > td[data-label]::before,
+html body.management-consistent-ui .page-body .management-data-table.management-card-table.management-card-active .management-mobile-label {
+  min-height: 1em !important;
+  display: block !important;
+  margin: 0 0 4px !important;
+  color: #857a74 !important;
+  font: 700 .61rem/1.25 "Poppins", sans-serif !important;
+  letter-spacing: .01em !important;
+  text-transform: none !important;
+}
+
+html body.management-consistent-ui .page-body .management-data-table.management-card-table.management-card-active tbody > tr.management-card-row > td[data-label]::before {
+  content: attr(data-label) !important;
+}
+
+html body.management-consistent-ui .page-body .management-data-table.management-card-table.management-card-active tbody > tr.management-card-row > td:has(> .management-mobile-label)::before {
+  content: none !important;
+  display: none !important;
+}
+
+html body.management-consistent-ui .page-body .management-data-table.management-card-table.management-card-active .management-card-actions .management-card-open {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  min-height: 42px !important;
+  border-radius: 999px !important;
+}
+
+@media (min-width: 900px) {
+  html body.management-consistent-ui .page-body .management-data-table.management-card-table.management-card-active tbody {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+}
+
+@media (max-width: 339px) {
+  html body.management-consistent-ui .page-body .management-data-table.management-card-table.management-card-active tbody > tr.management-card-row {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Canonical management search controls
+
+   JavaScript marks every management search shell with one class, including
+   filters rendered after page load. This makes the shell own the icon and the
+   single gold focus ring; the input never draws a second inner highlight.
+   -------------------------------------------------------------------------- */
+
+html body.management-consistent-ui .management-search-control.management-search-control.management-search-control.management-search-control {
+  box-sizing: border-box !important;
+  position: relative !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 9px !important;
+  margin: 0 !important;
+  padding: 0 11px !important;
+  overflow: visible !important;
+  border: 1px solid #dfd3cb !important;
+  border-radius: 12px !important;
+  color: #2d2322 !important;
+  background: #ffffff !important;
+  box-shadow: none !important;
+  outline: 0 !important;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease !important;
+}
+
+html body.management-consistent-ui .management-search-control.management-search-control.management-search-control.management-search-control > .management-search-icon {
+  position: static !important;
+  inset: auto !important;
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  flex: 0 0 28px !important;
+  display: grid !important;
+  place-items: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  color: #780116 !important;
+  background: #fff8ee !important;
+  font-size: .76rem !important;
+  line-height: 1 !important;
+  pointer-events: none !important;
+  transform: none !important;
+}
+
+html body.management-consistent-ui .management-search-control.management-search-control.management-search-control.management-search-control > input.management-search-input,
+html body.management-consistent-ui .management-search-control.management-search-control.management-search-control.management-search-control > input.management-search-input:is(:focus, :focus-visible) {
+  box-sizing: border-box !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  flex: 1 1 auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  color: #302a28 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: 0 !important;
+  outline-offset: 0 !important;
+  font: 500 .74rem/1.35 "Poppins", sans-serif !important;
+  letter-spacing: 0 !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html body.management-consistent-ui .management-search-control.management-search-control.management-search-control.management-search-control > input.management-search-input::placeholder {
+  color: #918680 !important;
+  font: inherit !important;
+  opacity: 1 !important;
+}
+
+html body.management-consistent-ui .management-search-control.management-search-control.management-search-control.management-search-control:focus-within {
+  border-color: #f7b538 !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(247, 181, 56, .3) !important;
+  outline: 0 !important;
+}
+
+html body.management-consistent-ui .management-search-control.management-search-control.management-search-control.management-search-control:focus-within > .management-search-icon {
+  color: #5f0112 !important;
+  background: #fff0cc !important;
+}
+
+html body.management-consistent-ui .topbar .management-search-control.management-search-control.management-search-control.management-search-control {
+  height: 40px !important;
+  min-height: 40px !important;
+}
+
+html body.management-consistent-ui .dashboard-animal-search-shell.management-search-control {
+  width: min(210px, 36vw) !important;
+}
+
+/* Audit Trail and Archived Records use the Inventory table language on wide
+   screens: a warm header band, calm white rows, compact typography, and no
+   horizontal scroll needed to reach an action. */
+html body.management-consistent-ui .page-body :is(
+  .audit-log-table,
+  .archive-records-table
+):not(.management-card-active) thead th {
+  height: auto !important;
+  padding: 13px 12px !important;
+  border-top: 0 !important;
+  border-bottom: 1px solid #eadfd4 !important;
+  color: #7b6b64 !important;
+  background: #fff8ee !important;
+  font: 800 .63rem/1.3 "Poppins", sans-serif !important;
+  letter-spacing: .035em !important;
+  text-transform: none !important;
+  white-space: normal !important;
+}
+
+html body.management-consistent-ui .page-body :is(
+  .audit-log-table,
+  .archive-records-table
+):not(.management-card-active) tbody td {
+  height: auto !important;
+  padding: 13px 12px !important;
+  border: 0 !important;
+  border-bottom: 1px solid #f0e7df !important;
+  border-radius: 0 !important;
+  color: #443a37 !important;
+  background: #ffffff !important;
+  box-shadow: none !important;
+  font: 500 .72rem/1.45 "Poppins", sans-serif !important;
+  vertical-align: middle !important;
+}
+
+html body.management-consistent-ui .page-body :is(
+  .audit-log-table,
+  .archive-records-table
+):not(.management-card-active) tbody tr:hover td {
+  background: #fff8ee !important;
+  box-shadow: none !important;
+}
+
+html body.management-consistent-ui .page-body :is(
+  .audit-log-table,
+  .archive-records-table
+) .table-heading {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+html body.management-consistent-ui .page-body :is(
+  .audit-log-table,
+  .archive-records-table
+) .table-heading > i {
+  flex: 0 0 auto;
+  color: #780116;
+  font-size: .72rem;
+}
+
+html body.management-consistent-ui .page-body :is(
+  .records-table-wrap
+):has(> :is(.audit-log-table, .archive-records-table).management-card-active) {
+  padding: 0 14px 14px !important;
+}
+
+html body.management-consistent-ui .page-body :is(
+  .audit-panel,
+  .archive-panel
+) > .table-section-head {
+  min-height: 0 !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin: 0 14px !important;
+  padding: 12px 0 11px !important;
+  border-top: 1px solid rgba(247, 181, 56, .52) !important;
+  background: transparent !important;
+}
+
+html body.management-consistent-ui .page-body :is(
+  .audit-panel,
+  .archive-panel
+) > .table-section-head :is(.section-kicker, h3) {
+  display: block !important;
+}
+
+html body.management-consistent-ui .page-body :is(
+  .audit-panel,
+  .archive-panel
+) > .table-section-head h3 {
+  margin: 4px 0 0 !important;
+  font-size: .9rem !important;
+  line-height: 1.28 !important;
+}
+
+html body.management-consistent-ui .page-body :is(
+  .audit-panel,
+  .archive-panel
+) > .table-section-head .result-count {
+  justify-self: end;
+  padding: 6px 9px !important;
+  font-size: .62rem !important;
+  line-height: 1 !important;
+}
+
+html body.management-consistent-ui .page-body .audit-log-table.management-card-active tbody > tr.audit-row {
+  grid-template-areas:
+    "event event"
+    "actor module"
+    "activity outcome"
+    "record record"
+    "actions actions" !important;
+}
+
+html body.management-consistent-ui .page-body .audit-log-table.management-card-active tbody > tr.audit-row > td:nth-child(1) { grid-area: event !important; }
+html body.management-consistent-ui .page-body .audit-log-table.management-card-active tbody > tr.audit-row > td:nth-child(2) { grid-area: actor !important; }
+html body.management-consistent-ui .page-body .audit-log-table.management-card-active tbody > tr.audit-row > td:nth-child(3) { grid-area: module !important; }
+html body.management-consistent-ui .page-body .audit-log-table.management-card-active tbody > tr.audit-row > td:nth-child(4) { grid-area: activity !important; }
+html body.management-consistent-ui .page-body .audit-log-table.management-card-active tbody > tr.audit-row > td:nth-child(5) { grid-area: record !important; }
+html body.management-consistent-ui .page-body .audit-log-table.management-card-active tbody > tr.audit-row > td:nth-child(6) { grid-area: outcome !important; }
+html body.management-consistent-ui .page-body .audit-log-table.management-card-active tbody > tr.audit-row > td:nth-child(7) { grid-area: actions !important; }
+
+html body.management-consistent-ui .page-body .archive-records-table.management-card-active tbody > tr.archive-row {
+  grid-template-areas:
+    "record record"
+    "module type"
+    "reason date"
+    "staff staff"
+    "actions actions" !important;
+}
+
+html body.management-consistent-ui .page-body .archive-records-table.management-card-active .management-card-primary { grid-area: record !important; }
+html body.management-consistent-ui .page-body .archive-records-table.management-card-active .archive-module-field { grid-area: module !important; }
+html body.management-consistent-ui .page-body .archive-records-table.management-card-active .archive-type-field { grid-area: type !important; }
+html body.management-consistent-ui .page-body .archive-records-table.management-card-active .archive-reason-field { grid-area: reason !important; }
+html body.management-consistent-ui .page-body .archive-records-table.management-card-active .archive-date-field { grid-area: date !important; }
+html body.management-consistent-ui .page-body .archive-records-table.management-card-active .archive-staff-field { grid-area: staff !important; }
+html body.management-consistent-ui .page-body .archive-records-table.management-card-active .management-card-actions { grid-area: actions !important; }
+
+html body.management-consistent-ui .page-body .archive-records-table.management-card-active .table-actions {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 7px !important;
+}
+
+html body.management-consistent-ui .page-body .archive-records-table.management-card-active .table-actions .management-card-open {
+  grid-column: 1 / -1 !important;
+}
+
+@media (min-width: 900px) {
+  html body.management-consistent-ui:is(
+    .audit-trail-page,
+    .archived-records-page
+  ) .page-body .management-data-table.management-card-active tbody {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+@media (max-width: 575.98px) {
+  html body.management-consistent-ui .dashboard-animal-search-shell.management-search-control {
+    width: 100% !important;
+  }
+}
+
+@media (max-width: 399px) {
+  html body.management-consistent-ui .page-body :is(
+    .audit-log-table,
+    .archive-records-table
+  ).management-card-active tbody > tr.management-card-row {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-areas: none !important;
+  }
+
+  html body.management-consistent-ui .page-body :is(
+    .audit-log-table,
+    .archive-records-table
+  ).management-card-active tbody > tr.management-card-row > td {
+    grid-area: auto !important;
+  }
 }

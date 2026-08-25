@@ -1521,3 +1521,36 @@ html body.management-consistent-ui.adoption-applications-page :is(#rejectModalBa
     padding-inline: 16px !important;
   }
 }
+
+/* The adoption drawer exposes one workflow step at a time. On phones the
+   header close control replaces the redundant footer Close button, while
+   infrequent actions stay behind one full-width disclosure. */
+@media (max-width: 599px) {
+  html body.management-consistent-ui.adoption-applications-page .aa-drawer .drawer-footer {
+    min-height: 0 !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 8px !important;
+    padding: 12px 14px max(12px, env(safe-area-inset-bottom)) !important;
+  }
+
+  html body.management-consistent-ui.adoption-applications-page .aa-drawer .drawer-footer #drawerCloseBtn {
+    display: none !important;
+  }
+
+  html body.management-consistent-ui.adoption-applications-page .aa-drawer .drawer-footer > .management-primary-action {
+    grid-column: 1 !important;
+    order: -1 !important;
+    width: 100% !important;
+  }
+
+  html body.management-consistent-ui.adoption-applications-page .aa-drawer .drawer-footer > .management-more-actions {
+    width: 100% !important;
+    grid-column: 1 !important;
+  }
+
+  html body.management-consistent-ui.adoption-applications-page .aa-drawer .drawer-footer > .management-more-actions > summary {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+}

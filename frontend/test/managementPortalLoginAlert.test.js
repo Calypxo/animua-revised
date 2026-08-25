@@ -13,7 +13,11 @@ test("public login explains that valid management accounts use the management po
 
   assert.match(
     script,
-    /data\.code === "MANAGEMENT_PORTAL_REQUIRED"[\s\S]*?title:\s*"Management Use Only"[\s\S]*?This account is for management use only\.[\s\S]*?Please sign in through the ANIMUA Management Portal\./,
+    /data\.code === "MANAGEMENT_PORTAL_REQUIRED"[\s\S]*?showManagementLoginDialog\(authModal\)/,
+  );
+  assert.match(
+    script,
+    /function showManagementLoginDialog\(authModal\)[\s\S]*?closeModal\(authModal\)[\s\S]*?title:\s*"Management Use Only"[\s\S]*?This account is for management use only\.[\s\S]*?Please sign in through the ANIMUA Management Portal\./,
   );
   assert.match(
     script,

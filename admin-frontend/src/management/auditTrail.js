@@ -278,8 +278,8 @@ function renderTable() {
         <span class="management-mobile-label" aria-hidden="true">Performed by</span>
         <div class="actor-cell"><span class="actor-avatar ${getActorTone(log.role)}">${escapeHtml(getInitials(log.actor))}</span><span><strong>${escapeHtml(log.actor)}</strong><small>${escapeHtml(log.role)}</small></span></div>
       </td>
-      <td><span class="management-mobile-label" aria-hidden="true">System area</span><span class="module-cell ${getModuleTone(log.module)}"><i class="bi ${getModuleIcon(log.module)}"></i><span>${escapeHtml(log.module)}</span></span></td>
-      <td>
+      <td class="audit-module-field"><span class="management-mobile-label" aria-hidden="true">System area</span><span class="module-cell ${getModuleTone(log.module)}"><i class="bi ${getModuleIcon(log.module)}"></i><span>${escapeHtml(log.module)}</span></span></td>
+      <td class="audit-action-field">
         <span class="management-mobile-label" aria-hidden="true">Activity</span>
         <span class="action-badge ${getActionClass(log.action)}">
           <i class="bi ${getActionIcon(log.action)}"></i>${escapeHtml(log.action)}
@@ -289,15 +289,15 @@ function renderTable() {
         <span class="management-mobile-label" aria-hidden="true">Affected record</span>
         <span class="audit-record-cell"><strong>${escapeHtml(log.targetName || log.record)}</strong><small>${escapeHtml(log.record)}</small></span>
       </td>
-      <td>
+      <td class="audit-outcome-field">
         <span class="management-mobile-label" aria-hidden="true">Outcome</span>
         <span class="status-badge ${getStatusClass(log.status)}">
           <i class="bi ${log.status === "Success" ? "bi-check-circle-fill" : log.status === "Warning" ? "bi-exclamation-triangle-fill" : "bi-x-octagon-fill"}"></i>${escapeHtml(log.status)}
         </span>
       </td>
-      <td class="management-card-actions">
+      <td class="management-card-actions audit-review-field">
         <span class="management-mobile-label" aria-hidden="true">Review event</span>
-        <button class="audit-review-btn management-card-open" type="button" data-view-id="${escapeHtml(log.id)}" title="View event details" aria-label="View ${escapeHtml(log.record)} event details"><i class="bi bi-eye" aria-hidden="true"></i><span>View event</span></button>
+        <button class="audit-review-btn management-card-open management-view-action management-view-action--compact" type="button" data-view-id="${escapeHtml(log.id)}" title="View event details" aria-label="View ${escapeHtml(log.record)} event details"><i class="bi bi-eye" aria-hidden="true"></i><span>View event</span></button>
       </td>
     </tr>
   `).join("");

@@ -43,6 +43,7 @@ const state = {
   existingImageUrl: "",
   removeImageRequested: false,
   syncInProgress: false,
+  expandedCaptions: new Set(),
 };
 
 let currentRole = "";
@@ -388,8 +389,9 @@ function showToast(message, type = "success") {
     danger: "bi-x-circle-fill",
   };
 
+  const toastType = type === "danger" ? "error" : type;
   toastIcon.className = `bi ${iconMap[type] || iconMap.info}`;
-  toast.className = `announcement-toast show toast-${type}`;
+  toast.className = `um-toast toast-${toastType} show`;
 
   clearTimeout(showToast._timer);
   showToast._timer = setTimeout(() => {
@@ -445,11 +447,14 @@ function renderFeed() {
   }
 
   feed.innerHTML = state.filtered
-    .map((item) => {
+    .map((item, index) => {
       const canEdit = can("edit");
       const canDelete = can("delete");
       const postType = normalizePostType(item.type);
       const isPending = Boolean(item.offlinePending);
+      const canManagePost = !isPending && (canEdit || canDelete);
+      const captionId = `management-announcement-caption-${index}`;
+      const captionExpanded = state.expandedCaptions.has(String(item.id));
 
       return `
         <article class="post-card ${isPending ? "offline-pending-post" : ""}" data-post-type="${escapeHtml(postType)}" data-announcement-id="${escapeHtml(item.id)}">
@@ -470,6 +475,23 @@ function renderFeed() {
             <span class="status-pill ${isPending ? "pending" : item.status === "Published" ? "published" : "draft"}">
               ${isPending ? "Pending sync" : escapeHtml(item.status || "Draft")}
             </span>
+
+            ${canManagePost ? `
+              <details class="post-actions-menu">
+                <summary aria-label="Announcement options" title="Announcement options">
+                  <i class="bi bi-three-dots" aria-hidden="true"></i>
+                </summary>
+                <div aria-label="Announcement actions">
+                  ${canEdit ? `
+                    <button class="post-menu-action" type="button" data-edit-id="${escapeHtml(item.id)}" aria-label="Edit ${escapeHtml(item.title || "announcement")}">
+                      <i class="bi bi-pencil" aria-hidden="true"></i><span>Edit announcement</span>
+                    </button>` : ""}
+                  ${canDelete ? `
+                    <button class="post-menu-action is-danger" type="button" data-delete-id="${escapeHtml(item.id)}" aria-label="Delete ${escapeHtml(item.title || "announcement")}">
+                      <i class="bi bi-trash" aria-hidden="true"></i><span>Delete announcement</span>
+                    </button>` : ""}
+                </div>
+              </details>` : ""}
           </div>
 
           ${
@@ -484,7 +506,20 @@ function renderFeed() {
             </div>
 
             <h3>${escapeHtml(item.title)}</h3>
-            <p>${escapeHtml(item.caption)}</p>
+            <div class="post-caption-wrap">
+              <p id="${captionId}" class="post-caption is-collapsible ${captionExpanded ? "is-expanded" : ""}">${escapeHtml(item.caption)}</p>
+              <button
+                class="post-caption-toggle"
+                type="button"
+                data-caption-toggle="${escapeHtml(item.id)}"
+                aria-controls="${captionId}"
+                aria-expanded="${String(captionExpanded)}"
+                hidden
+              >
+                <span>${captionExpanded ? "Show less" : "Read more"}</span>
+                <i class="bi bi-chevron-down" aria-hidden="true"></i>
+              </button>
+            </div>
 
             ${
               item.eventDate || item.location
@@ -511,34 +546,65 @@ function renderFeed() {
             <span><i class="bi bi-layout-text-window-reverse"></i> ${escapeHtml(postType)}</span>
           </div>
 
-          <div class="post-actions">
-            ${
-              canEdit && !isPending
-                ? `<button class="secondary-btn small" type="button" data-edit-id="${escapeHtml(item.id)}" aria-label="Edit ${escapeHtml(item.title || "announcement")}">
-                    <i class="bi bi-pencil"></i> Edit
-                  </button>`
-                : ""
-            }
-
-            ${
-              canDelete && !isPending
-                ? `<button class="danger-btn small" type="button" data-delete-id="${escapeHtml(item.id)}" aria-label="Delete ${escapeHtml(item.title || "announcement")}">
-                    <i class="bi bi-trash"></i> Delete
-                  </button>`
-                : ""
-            }
-          </div>
         </article>
       `;
     })
     .join("");
 
   feed.querySelectorAll("[data-edit-id]").forEach((btn) => {
-    btn.addEventListener("click", () => openEditModal(btn.dataset.editId));
+    btn.addEventListener("click", () => {
+      btn.closest(".post-actions-menu")?.removeAttribute("open");
+      openEditModal(btn.dataset.editId);
+    });
   });
 
   feed.querySelectorAll("[data-delete-id]").forEach((btn) => {
-    btn.addEventListener("click", () => confirmDelete(btn.dataset.deleteId));
+    btn.addEventListener("click", () => {
+      btn.closest(".post-actions-menu")?.removeAttribute("open");
+      confirmDelete(btn.dataset.deleteId);
+    });
+  });
+
+  feed.querySelectorAll(".post-actions-menu").forEach((menu) => {
+    menu.addEventListener("toggle", () => {
+      if (!menu.open) return;
+      feed.querySelectorAll(".post-actions-menu[open]").forEach((otherMenu) => {
+        if (otherMenu !== menu) otherMenu.removeAttribute("open");
+      });
+    });
+  });
+
+  feed.querySelectorAll("[data-caption-toggle]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const id = String(button.dataset.captionToggle || "");
+      const caption = button.closest(".post-caption-wrap")?.querySelector(".post-caption");
+      const label = button.querySelector("span");
+      if (!caption || !id) return;
+
+      const expanded = !caption.classList.contains("is-expanded");
+      caption.classList.toggle("is-expanded", expanded);
+      button.setAttribute("aria-expanded", String(expanded));
+      if (label) label.textContent = expanded ? "Show less" : "Read more";
+      if (expanded) state.expandedCaptions.add(id);
+      else state.expandedCaptions.delete(id);
+    });
+  });
+
+  syncCaptionDisclosure(feed);
+}
+
+function syncCaptionDisclosure(feed = getEl("announcementFeed")) {
+  if (!feed) return;
+
+  feed.querySelectorAll(".post-caption.is-collapsible").forEach((caption) => {
+    const button = caption.parentElement?.querySelector("[data-caption-toggle]");
+    if (!button) return;
+
+    const expanded = caption.classList.contains("is-expanded");
+    if (expanded) caption.classList.remove("is-expanded");
+    const isOverflowing = caption.scrollHeight > caption.clientHeight + 1;
+    if (expanded) caption.classList.add("is-expanded");
+    button.hidden = !isOverflowing;
   });
 }
 
@@ -1011,6 +1077,19 @@ function bindEvents() {
     if (event.target.id === "announcementModalBackdrop") closeModal();
   });
 
+  document.addEventListener("click", (event) => {
+    if (event.target.closest(".post-actions-menu")) return;
+    document.querySelectorAll(".post-actions-menu[open]").forEach((menu) => menu.removeAttribute("open"));
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    const openMenu = document.querySelector(".post-actions-menu[open]");
+    if (!openMenu) return;
+    openMenu.removeAttribute("open");
+    openMenu.querySelector("summary")?.focus();
+  });
+
   getEl("searchAnnouncement")?.addEventListener("input", (event) => {
     state.search = event.target.value;
     applyFilters();
@@ -1029,6 +1108,12 @@ function bindEvents() {
   getEl("filterStatus")?.addEventListener("change", (event) => {
     state.status = event.target.value;
     applyFilters();
+  });
+
+  let captionResizeFrame = 0;
+  window.addEventListener("resize", () => {
+    window.cancelAnimationFrame(captionResizeFrame);
+    captionResizeFrame = window.requestAnimationFrame(() => syncCaptionDisclosure());
   });
 
   document.querySelectorAll("[data-category-type]").forEach((button) => {

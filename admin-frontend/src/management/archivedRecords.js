@@ -212,26 +212,26 @@ function renderTable() {
         </div>
       </td>
 
-      <td>
+      <td class="archive-module-field">
         <span class="management-mobile-label" aria-hidden="true">Module</span>
         <span class="module-badge ${getModuleClass(item.module)}">
           ${escapeHtml(item.module)}
         </span>
       </td>
 
-      <td>
+      <td class="archive-type-field">
         <span class="management-mobile-label" aria-hidden="true">Type</span>
         <span class="type-badge">${escapeHtml(item.type)}</span>
       </td>
 
-      <td>
+      <td class="archive-reason-field">
         <span class="management-mobile-label" aria-hidden="true">Reason</span>
         <span class="reason-badge ${getReasonClass(item.reason)}">
           ${escapeHtml(item.reason)}
         </span>
       </td>
 
-      <td>
+      <td class="archive-date-field">
         <span class="management-mobile-label" aria-hidden="true">Date archived</span>
         <div class="date-cell">
           ${escapeHtml(item.archivedDate)}<br />
@@ -239,12 +239,12 @@ function renderTable() {
         </div>
       </td>
 
-      <td><span class="management-mobile-label" aria-hidden="true">Archived by</span><span class="archiver-cell"><i class="bi bi-person-check"></i>${escapeHtml(item.archivedBy)}</span></td>
+      <td class="archive-staff-field"><span class="management-mobile-label" aria-hidden="true">Archived by</span><span class="archiver-cell"><i class="bi bi-person-check"></i>${escapeHtml(item.archivedBy)}</span></td>
 
       <td class="management-card-actions">
         <span class="management-mobile-label" aria-hidden="true">Actions</span>
         <div class="action-group table-actions">
-          <button class="tbl-action-btn management-card-open" data-view-id="${escapeHtml(item.id)}" title="View details" aria-label="View archived record details"><i class="bi bi-eye"></i><span class="archive-action-text">View details</span></button>
+          <button class="tbl-action-btn management-card-open management-view-action management-view-action--compact" data-view-id="${escapeHtml(item.id)}" title="View details" aria-label="View archived record details"><i class="bi bi-eye" aria-hidden="true"></i><span class="archive-action-text">View details</span></button>
           ${
               can("restore") && item.sourceType === "animal"
           ? `

@@ -177,7 +177,21 @@ function renderActivities(filter = "all") {
     ? activities
     : activities.filter((item) => item.action.toLowerCase().includes(filter));
   document.getElementById("activityTableBody").innerHTML = rows.length
-    ? rows.map((item) => "<tr class=\"management-card-row\"><td class=\"management-card-primary\" data-label=\"Animal\"><strong>" + escapeHtml(item.name) + '</strong><div class="animal-id-text">' + escapeHtml(item.id) + "</div></td><td data-label=\"Type\">" + escapeHtml(item.module) + "</td><td data-label=\"Event\">" + escapeHtml(item.action.replaceAll(".", " ")) + "</td><td data-label=\"Staff\">" + escapeHtml(item.staff) + '</td><td data-label="Date" class="table-date-cell">' + dateText(item.date) + "</td><td data-label=\"Status\">" + statusBadge(item.status) + "</td></tr>").join("")
+    ? rows.map((item) => {
+      const recordName = String(item.name || item.id || item.module || "System activity");
+      const recordId = String(item.id || "");
+      const secondaryId = recordId && recordId !== recordName
+        ? `<div class="animal-id-text">${escapeHtml(recordId)}</div>`
+        : "";
+      return `<tr class="management-card-row activity-card-row">
+        <td class="management-card-primary activity-record-cell" data-label="Record"><strong>${escapeHtml(recordName)}</strong>${secondaryId}</td>
+        <td class="activity-type-cell" data-label="Type">${escapeHtml(item.module)}</td>
+        <td class="activity-event-cell" data-label="Event">${escapeHtml(item.action.replaceAll(".", " "))}</td>
+        <td class="activity-staff-cell" data-label="Staff">${escapeHtml(item.staff)}</td>
+        <td class="table-date-cell activity-date-cell" data-label="Date">${dateText(item.date)}</td>
+        <td class="activity-status-cell" data-label="Status">${statusBadge(item.status)}</td>
+      </tr>`;
+    }).join("")
     : '<tr><td colspan="6" class="text-center py-4 text-muted">No recorded activity.</td></tr>';
 }
 
@@ -189,22 +203,25 @@ function renderAnimals(query = "") {
   );
   document.getElementById("recentAnimalsBody").innerHTML = rows.length
     ? rows.map((item) => `
-      <tr class="management-card-row">
-        <td class="table-id-cell" data-label="Animal ID">${escapeHtml(item.id)}</td>
-        <td class="management-card-primary" data-label="Shelter description">
+      <tr class="management-card-row dashboard-animal-row">
+        <td class="table-id-cell dashboard-animal-id-cell" data-label="Animal ID">${escapeHtml(item.id)}</td>
+        <td class="management-card-primary dashboard-animal-identity" data-label="Shelter description">
           <div class="animal-name-cell">
             <div class="animal-thumb">${speciesEmoji(item.species)}</div>
-            <div class="animal-name-text">${escapeHtml(item.label)}</div>
+            <div class="dashboard-animal-name-copy">
+              <div class="animal-name-text">${escapeHtml(item.label)}</div>
+              <div class="dashboard-animal-id-mobile">${escapeHtml(item.id)}</div>
+            </div>
           </div>
         </td>
-        <td data-label="Species">${escapeHtml(item.species)}</td>
-        <td data-label="Breed">${escapeHtml(item.breed)}</td>
-        <td data-label="Age">${escapeHtml(item.age)}</td>
-        <td data-label="Status">${statusBadge(item.status)}</td>
-        <td data-label="Days in shelter"><span class="days-badge">${item.days}d</span></td>
-        <td data-label="Behavioral assessment">${item.assessmentComplete ? "✓ Complete" : "Pending"}</td>
-        <td class="management-card-actions" data-label="Actions">
-          <a class="tbl-action-btn management-card-open" title="View animal" aria-label="View animal profile" href="/pages/animalProfile.html?id=${encodeURIComponent(item.id)}">
+        <td class="dashboard-animal-species" data-label="Species">${escapeHtml(item.species)}</td>
+        <td class="dashboard-animal-breed" data-label="Breed">${escapeHtml(item.breed)}</td>
+        <td class="dashboard-animal-age" data-label="Age">${escapeHtml(item.age)}</td>
+        <td class="dashboard-animal-status" data-label="Status">${statusBadge(item.status)}</td>
+        <td class="dashboard-animal-days" data-label="Days in shelter"><span class="days-badge">${item.days}d</span></td>
+        <td class="dashboard-animal-assessment" data-label="Behavioral assessment">${item.assessmentComplete ? "✓ Complete" : "Pending"}</td>
+        <td class="management-card-actions dashboard-animal-actions" data-label="Actions">
+          <a class="tbl-action-btn management-card-open management-view-action management-view-action--compact" title="View animal" aria-label="View animal profile" href="/pages/animalProfile.html?id=${encodeURIComponent(item.id)}">
             <i class="bi bi-eye" aria-hidden="true"></i><span class="management-action-text">View animal</span>
           </a>
         </td>

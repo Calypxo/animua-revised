@@ -490,10 +490,12 @@ function syncMedicalInventoryPicker() {
   const hidden = document.getElementById("fMedInventoryItem");
   const search = document.getElementById("fMedInventorySearch");
   const hint = document.getElementById("medicalInventorySelectionHint");
+  const clear = document.getElementById("clearMedicalInventory");
   const selected = selectedMedicalInventoryItem();
 
   if (!selected && hidden) hidden.value = "";
   if (search) search.value = selected?.name?.trim() || "";
+  if (clear) clear.hidden = !search?.value;
   if (hint) {
     hint.textContent = selected
       ? `${selected.currentStock} ${selected.unit || "pcs"} available · ${selected.category}`
@@ -572,6 +574,7 @@ function bindMedicalInventoryPicker() {
   search.addEventListener("input", () => {
     const hidden = document.getElementById("fMedInventoryItem");
     if (hidden) hidden.value = "";
+    if (clear) clear.hidden = !search.value;
     renderMedicalInventoryOptions(search.value);
   });
   search.addEventListener("keydown", (event) => {

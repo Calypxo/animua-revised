@@ -675,20 +675,20 @@
   color: #332d2b;
   font: 500 12px/1.35 'Poppins', sans-serif;
 }
-.surrender-requests-page .shelter-table .col-owner { width: 23%; }
+.surrender-requests-page .shelter-table .col-owner { width: 22%; }
 .surrender-requests-page .shelter-table .col-pet { width: 19%; }
-.surrender-requests-page .shelter-table .col-category { width: 15%; }
-.surrender-requests-page .shelter-table .col-urgency { width: 12%; }
+.surrender-requests-page .shelter-table .col-category { width: 17%; }
+.surrender-requests-page .shelter-table .col-urgency { width: 10%; }
 .surrender-requests-page .shelter-table .col-submitted { width: 12%; }
-.surrender-requests-page .shelter-table .col-status { width: 12%; }
-.surrender-requests-page .shelter-table .col-action { width: 7%; }
+.surrender-requests-page .shelter-table .col-status { width: 11%; }
+.surrender-requests-page .shelter-table .col-action { width: 9%; }
 .surrender-requests-page .shelter-table thead { background: linear-gradient(90deg,var(--brand-red-deep),var(--brand-red)); }
 .surrender-requests-page .shelter-table thead th { padding: 14px 15px; border-bottom: 0; background: transparent; color: #FFFFFF; font: 800 10px/1 'Poppins', sans-serif; letter-spacing: .07em; }
 .surrender-requests-page .shelter-table tbody td { padding: 15px; border-bottom: 1px solid #EADFD4; background: #FFF8EE; color: #4a413e; font: 500 12px/1.4 'Poppins', sans-serif; }
 .surrender-requests-page .shelter-table :is(th,td):first-child { padding-left: 26px !important; }
 .surrender-requests-page .shelter-table :is(th,td):last-child {
-  padding-right: 22px !important;
-  text-align: right;
+  padding-inline: 10px !important;
+  text-align: center;
 }
 .surrender-requests-page .shelter-table :is(th,td) { min-width: 0; box-sizing: border-box; }
 .surrender-requests-page .owner-cell,
@@ -1702,5 +1702,153 @@
     width: 100% !important;
     display: grid !important;
     grid-template-columns: 88px minmax(0, 1fr) !important;
+  }
+}
+
+/* Phone records use an app-style hierarchy instead of repeating the desktop
+   label/value column for every field. */
+@media (max-width: 720px) {
+  html body.management-consistent-ui.surrender-requests-page .page-body .sr-table-panel .table-responsive {
+    overflow: visible !important;
+  }
+
+  html body.management-consistent-ui.surrender-requests-page .page-body .sr-table-panel .shelter-table tbody {
+    gap: 11px !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  html body.management-consistent-ui.surrender-requests-page .page-body .sr-table-panel .shelter-table tbody tr[data-id] {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px 14px !important;
+    padding: 14px !important;
+    overflow: visible !important;
+    border-radius: 16px;
+  }
+
+  html body.management-consistent-ui.surrender-requests-page .page-body .sr-table-panel .shelter-table tbody tr[data-id] td {
+    width: auto !important;
+    min-width: 0 !important;
+    display: block !important;
+    grid-template-columns: none !important;
+    gap: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    border: 0 !important;
+    background: transparent !important;
+  }
+
+  html body.management-consistent-ui.surrender-requests-page .shelter-table tbody tr[data-id] > :is(
+    .surrender-owner-field,
+    .surrender-pet-field,
+    .surrender-actions-field
+  ) {
+    grid-column: 1 / -1 !important;
+  }
+
+  html body.management-consistent-ui.surrender-requests-page .shelter-table tbody tr[data-id] > :is(
+    .surrender-owner-field,
+    .surrender-pet-field,
+    .surrender-actions-field
+  )::before {
+    display: none !important;
+  }
+
+  html body.management-consistent-ui.surrender-requests-page .surrender-owner-field {
+    padding-bottom: 11px !important;
+    border-bottom: 1px solid #f0e7df !important;
+  }
+
+  html body.management-consistent-ui.surrender-requests-page .owner-cell {
+    align-items: flex-start;
+    gap: 11px;
+  }
+
+  html body.management-consistent-ui.surrender-requests-page .owner-name,
+  html body.management-consistent-ui.surrender-requests-page .pet-mini-name {
+    max-width: none !important;
+    display: -webkit-box !important;
+    overflow: hidden !important;
+    color: #2d2927;
+    font-size: .9rem;
+    line-height: 1.35;
+    text-overflow: clip !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+
+  html body.management-consistent-ui.surrender-requests-page .owner-barangay,
+  html body.management-consistent-ui.surrender-requests-page .pet-mini-breed {
+    overflow: visible;
+    font-size: .69rem;
+    line-height: 1.4;
+    text-overflow: clip;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  html body.management-consistent-ui.surrender-requests-page .surrender-pet-field {
+    padding-bottom: 2px !important;
+  }
+
+  html body.management-consistent-ui.surrender-requests-page .pet-mini-thumb {
+    width: 34px;
+    height: 34px;
+    flex-basis: 34px;
+  }
+
+  html body.management-consistent-ui.surrender-requests-page .shelter-table tbody tr[data-id] td::before {
+    display: block !important;
+    margin-bottom: 4px;
+    color: #8b7d76;
+    font: 700 .61rem/1.25 'Poppins', sans-serif;
+    letter-spacing: .02em;
+    text-transform: none;
+  }
+
+  html body.management-consistent-ui.surrender-requests-page .surrender-actions-field {
+    padding-top: 10px !important;
+    border-top: 1px solid #f0e7df !important;
+  }
+
+  html body.management-consistent-ui.surrender-requests-page .surrender-actions-field .tbl-action-btn {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 44px !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding-inline: 14px;
+    border-radius: 11px;
+    white-space: nowrap;
+  }
+
+  html body.management-consistent-ui.surrender-requests-page .surrender-actions-field .management-action-text {
+    display: inline !important;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 340px) {
+  html body.management-consistent-ui.surrender-requests-page .page-body .sr-table-panel .shelter-table tbody tr[data-id] {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  html body.management-consistent-ui.surrender-requests-page .shelter-table tbody tr[data-id] > td {
+    grid-column: 1 !important;
+  }
+}
+
+/* The full desktop queue fits its panel without a horizontal scroll track.
+   Card mode takes over at 1365px, so this only applies to the true table. */
+@media (min-width: 1366px) {
+  html body.management-consistent-ui.surrender-requests-page .page-body
+    .sr-table-panel .records-table-wrap:has(> .shelter-table:not(.management-card-active)) {
+    overflow-x: clip !important;
   }
 }

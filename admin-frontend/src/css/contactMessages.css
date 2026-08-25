@@ -1761,11 +1761,352 @@ button.cm-chat-bubble.active {
     height: 44px;
     padding-inline: 12px;
   }
+
+  /* The phone directory belongs to the main records surface. Remove the
+     redundant inset card so contacts do not appear inside nested containers. */
+  html body.management-consistent-ui.contact-messages-page .cm-workspace:not(.conversation-open) {
+    gap: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+  }
+
+  html body.management-consistent-ui.contact-messages-page .cm-workspace:not(.conversation-open) .cm-inbox-panel {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html body.management-consistent-ui.contact-messages-page .cm-inbox-panel .reference-table-section-head {
+    min-height: 72px !important;
+    padding: 16px 17px 14px !important;
+    border-top: 1px solid var(--cm-warm-line) !important;
+    border-bottom: 1px solid var(--cm-warm-line) !important;
+    border-radius: 0 !important;
+    background: #fffaf7 !important;
+  }
+
+  html body.management-consistent-ui.contact-messages-page .cm-inbox-panel .reference-table-section-head::before {
+    top: 14px;
+    bottom: 14px;
+  }
+
+  html body.management-consistent-ui.contact-messages-page .cm-workspace:not(.conversation-open) .cm-message-list {
+    min-height: 0 !important;
+    max-height: none !important;
+    gap: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    background: transparent !important;
+  }
+
+  html body.management-consistent-ui.contact-messages-page .cm-message-list .cm-message-item {
+    padding: 15px 17px !important;
+    border: 0 !important;
+    border-bottom: 1px solid #eee7e1 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html body.management-consistent-ui.contact-messages-page .cm-message-list .cm-message-item:last-child {
+    border-bottom: 0 !important;
+  }
+
+  html body.management-consistent-ui.contact-messages-page .cm-message-list .cm-message-item:is(:hover, :focus-visible, .active) {
+    background: var(--cm-red-soft) !important;
+  }
+
+  html body.management-consistent-ui.contact-messages-page .cm-inbox-panel > .um-pagination {
+    margin: 0 !important;
+    padding: 14px 17px !important;
+    border-top: 1px solid var(--cm-warm-line) !important;
+  }
+}
+
+/* Contacts use one records shell at every width. The inbox and conversation
+   columns are panes of that shell, not separate cards nested inside it. */
+html body.management-consistent-ui.contact-messages-page .cm-records-panel .cm-workspace {
+  gap: 0 !important;
+  margin: 0 !important;
+  background: #FFFFFF !important;
+}
+
+html body.management-consistent-ui.contact-messages-page .cm-records-panel :is(.cm-inbox-panel, .cm-detail-panel) {
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+@media (min-width: 1025px) {
+  /* Search is moved into a sibling slot by responsiveFilters.js. Padding the
+     shared workspace instead of only the remaining fields keeps every label
+     and control on the same baseline. */
+  html body.management-consistent-ui.contact-messages-page .mrf-workspace-messages {
+    grid-template-columns: minmax(300px, 1fr) minmax(300px, 390px) !important;
+    align-items: end !important;
+    gap: 12px !important;
+    padding: 18px 24px !important;
+    border-bottom: 1px solid #f0e6dd !important;
+    background: #fffaf7 !important;
+    box-sizing: border-box !important;
+  }
+
+  html body.management-consistent-ui.contact-messages-page .mrf-workspace-messages .cm-filter-toolbar.mrf-fields {
+    display: grid !important;
+    grid-template-columns: minmax(170px, 220px) auto !important;
+    align-items: end !important;
+    justify-content: end !important;
+    gap: 12px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+  }
+
+  html body.management-consistent-ui.contact-messages-page .mrf-workspace-messages :is(
+    .mrf-search-slot > label,
+    .cm-filter-toolbar > .ap-filter-field
+  ) {
+    min-width: 0 !important;
+    display: grid !important;
+    grid-template-rows: auto 42px !important;
+    align-content: end !important;
+    gap: 7px !important;
+    margin: 0 !important;
+  }
+
+  html body.management-consistent-ui.contact-messages-page .mrf-workspace-messages .cm-filter-toolbar > .ap-clear-btn {
+    align-self: end !important;
+    margin: 0 !important;
+  }
+}
+
+@media (min-width: 1051px) {
+  html body.management-consistent-ui.contact-messages-page .cm-records-panel .cm-workspace {
+    grid-template-columns: minmax(340px, 400px) minmax(0, 1fr) !important;
+    align-items: stretch !important;
+  }
+
+  html body.management-consistent-ui.contact-messages-page .cm-records-panel .cm-inbox-panel {
+    border-right: 1px solid var(--cm-warm-line) !important;
+  }
+}
+
+@media (min-width: 721px) and (max-width: 1050px) {
+  html body.management-consistent-ui.contact-messages-page .cm-workspace:not(.conversation-open) .cm-inbox-panel {
+    height: auto !important;
+    min-height: 0 !important;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .contact-messages-page .cm-message-item,
   .contact-messages-page .cm-chat-composer {
     transition: none;
+  }
+}
+
+/* Dedicated conversation route used by the compact phone workflow. */
+.contact-conversation-page .cm-conversation-page-body {
+  display: flex;
+  min-height: calc(100dvh - 78px);
+  padding: 24px;
+}
+
+.contact-conversation-page .cm-conversation-page-shell {
+  width: min(100%, 980px);
+  min-width: 0;
+  min-height: 0;
+  margin: 0 auto;
+}
+
+.contact-conversation-page .cm-detail-panel,
+html body.management-consistent-ui.contact-conversation-page .cm-detail-panel {
+  width: 100%;
+  height: calc(100dvh - 126px);
+  min-height: 560px !important;
+  border: 1px solid var(--cm-warm-line);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: var(--cm-shadow);
+}
+
+.contact-conversation-page .cm-back-button {
+  display: grid;
+}
+
+.contact-conversation-page .cm-user-summary h1 {
+  margin: 0;
+  overflow: hidden;
+  color: var(--ap-ink);
+  font: 800 1rem/1.3 "Poppins", sans-serif;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.contact-conversation-page .cm-empty-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 16px;
+  padding: 10px 14px;
+  border: 1px solid rgba(120, 1, 22, 0.18);
+  border-radius: 10px;
+  color: var(--cm-red);
+  background: #fff;
+  font: 700 0.74rem/1 "Poppins", sans-serif;
+  text-decoration: none;
+}
+
+.contact-conversation-page .cm-empty-back-link:hover,
+.contact-conversation-page .cm-empty-back-link:focus-visible {
+  border-color: var(--cm-gold);
+  outline: 3px solid rgba(247, 181, 56, 0.2);
+}
+
+@media (max-width: 720px) {
+  html:has(body.contact-conversation-page),
+  body.contact-conversation-page {
+    height: var(--cm-viewport-height, 100dvh);
+    min-height: 0;
+    overflow: hidden !important;
+    overscroll-behavior: none;
+  }
+
+  body.contact-conversation-page .shell,
+  body.contact-conversation-page .shell > .stage {
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .contact-conversation-page .cm-conversation-page-body {
+    height: auto !important;
+    min-height: 0 !important;
+    flex: 1 1 auto !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    background: #fff;
+  }
+
+  .contact-conversation-page .cm-conversation-page-shell {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .contact-conversation-page .cm-detail-panel,
+  html body.management-consistent-ui.contact-conversation-page .cm-detail-panel {
+    height: 100%;
+    min-height: 0 !important;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .contact-conversation-page .cm-detail {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .contact-conversation-page .cm-user-summary {
+    min-height: 68px;
+    gap: 9px;
+    padding: 10px 12px;
+    background: linear-gradient(180deg, #fff, #fffaf4);
+  }
+
+  .contact-conversation-page .cm-back-button {
+    width: 40px;
+    height: 40px;
+    border-color: rgba(247, 181, 56, .72);
+    border-radius: 12px;
+    background: #fff1cf;
+  }
+
+  .contact-conversation-page .cm-user-summary-mark {
+    width: 36px;
+    height: 36px;
+    background: #fff8ee;
+  }
+
+  .contact-conversation-page .cm-user-summary h1,
+  .contact-conversation-page .cm-user-summary p {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .contact-conversation-page .cm-conversation-history,
+  .contact-conversation-page .cm-chat-thread {
+    min-height: 0;
+    max-height: none;
+    flex: 1 1 auto;
+  }
+
+  .contact-conversation-page .cm-chat-thread {
+    padding: 14px 12px 18px;
+    background: #fcfaf8;
+  }
+
+  .contact-conversation-page .cm-chat-bubble,
+  .contact-conversation-page .is-outgoing .cm-chat-bubble {
+    max-width: 82%;
+  }
+
+  .contact-conversation-page button.cm-chat-bubble.active {
+    border-color: #e4d8cf;
+    box-shadow: inset 3px 0 0 #f7b538, 0 4px 12px rgba(65, 39, 31, .06);
+  }
+
+  .contact-conversation-page .cm-chat-composer {
+    position: relative;
+    z-index: 3;
+    grid-template-columns: minmax(0, 1fr) auto;
+    flex: 0 0 auto;
+    gap: 4px 7px;
+    margin: 8px 10px max(7px, env(safe-area-inset-bottom));
+    padding: 5px 6px 6px 12px;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 7px 20px rgba(55, 32, 28, .09);
+  }
+
+  html body.management-consistent-ui.contact-conversation-page #replyMessage,
+  html body.management-consistent-ui.contact-conversation-page #replyMessage:is(:focus, :focus-visible) {
+    min-height: 44px;
+    padding-block: 10px;
+    border: 0 !important;
+    border-radius: 0 !important;
+    outline: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    font-size: 16px !important;
+    pointer-events: auto;
+    touch-action: manipulation;
+  }
+
+  .contact-conversation-page .cm-compose-status {
+    position: static;
+    max-width: 100%;
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: 0 3px 1px;
+    overflow-wrap: anywhere;
+    font-size: .6rem;
+    line-height: 1.35;
+  }
+
+  .contact-conversation-page .cm-compose-send {
+    align-self: center;
+    min-width: 70px;
+    height: 44px;
   }
 }

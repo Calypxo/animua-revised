@@ -255,7 +255,7 @@ function renderTable() {
 
         <div class="animal-record-footer">
           <div class="animal-record-note"><i class="bi bi-info-circle"></i><span>${lifecycleMessage(a.status)}</span></div>
-          <button class="animal-record-open" type="button" aria-label="View profile for ${displayLabel}" data-id="${a.id || ""}"><span>View complete profile</span><i class="bi bi-arrow-up-right"></i></button>
+          <button class="animal-record-open management-view-action management-view-action--labeled" type="button" aria-label="View profile for ${displayLabel}" data-id="${a.id || ""}"><i class="bi bi-eye" aria-hidden="true"></i><span>View complete profile</span></button>
         </div>
       </div>
     </article>`;

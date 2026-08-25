@@ -1,0 +1,392 @@
+/*
+ * ANIMUA management typography contract
+ *
+ * Loaded after the page, brand, responsive, and shared-tab styles so repeated
+ * interface roles use one predictable scale throughout authenticated pages.
+ * Display heroes keep their responsive sizing; this file normalizes the dense
+ * operational UI beneath them.
+ */
+
+html body.management-consistent-ui {
+  --management-font-body: "Poppins", sans-serif;
+  --management-type-kicker: .625rem;
+  --management-type-label: .7rem;
+  --management-type-helper: .67rem;
+  --management-type-data: .74rem;
+  --management-type-control: .78rem;
+  --management-type-section: 1rem;
+  --management-type-dialog: 1.1rem;
+  font-family: var(--management-font-body) !important;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Remove page-level family drift without changing the intentional wordmark. */
+html body.management-consistent-ui :is(
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  span,
+  strong,
+  small,
+  label,
+  legend,
+  li,
+  dt,
+  dd,
+  th,
+  td,
+  button,
+  input,
+  select,
+  textarea,
+  summary,
+  dialog
+) {
+  font-family: var(--management-font-body) !important;
+}
+
+html body.management-consistent-ui :is(.brand-copy strong, .compact-topbar-brand span) {
+  font-family: "League Spartan", "Poppins", sans-serif !important;
+}
+
+html body.management-consistent-ui :is(
+  code,
+  .record-id,
+  .record-code,
+  .record-sub,
+  .app-id-cell,
+  .report-id,
+  .item-id,
+  .time-cell,
+  .date-cell
+) {
+  font-family: var(--management-font-body) !important;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .005em !important;
+}
+
+/* Eyebrows and kickers are always compact navigation cues, never body copy. */
+html body.management-consistent-ui :is(
+  [class*="-kicker"],
+  [class*="-eyebrow"],
+  .section-kicker,
+  .ap-section-kicker,
+  .modal-kicker,
+  .cq-modal-kicker,
+  .inventory-records-kicker,
+  .um-section-label
+) {
+  font-size: var(--management-type-kicker) !important;
+  font-weight: 800 !important;
+  line-height: 1.25 !important;
+  letter-spacing: .09em !important;
+  text-transform: uppercase !important;
+}
+
+html body.management-consistent-ui :is(.system-hero-eyebrow, .hero-eyebrow) {
+  font-size: .7rem !important;
+  line-height: 1.3 !important;
+  letter-spacing: .11em !important;
+}
+
+/* Operational section titles follow the Animal Profiling hierarchy. */
+html body.management-consistent-ui :is(
+  .records-heading,
+  .ap-records-heading,
+  .inventory-records-heading,
+  .reference-table-section-head,
+  .table-section-head,
+  .section-heading,
+  .panel-head,
+  .cq-card-head,
+  .account-card-heading,
+  .command-card-heading,
+  .rpt-card-head,
+  .ap-workflow-intro,
+  .publishing-settings-heading
+) :is(h2, h3, strong:first-child) {
+  font-size: var(--management-type-section) !important;
+  font-weight: 800 !important;
+  line-height: 1.25 !important;
+  letter-spacing: -.015em !important;
+}
+
+html body.management-consistent-ui :is(
+  .um-modal-header,
+  .modal-head,
+  .drawer-header,
+  .drawer-head
+) :is(h2, h3) {
+  font-size: var(--management-type-dialog) !important;
+  font-weight: 800 !important;
+  line-height: 1.25 !important;
+  letter-spacing: -.018em !important;
+}
+
+/* Descriptions, context, and supporting copy share one readable rhythm. */
+html body.management-consistent-ui :is(
+  .records-heading,
+  .ap-records-heading,
+  .inventory-records-heading,
+  .section-heading,
+  .panel-head,
+  .cq-card-head,
+  .account-card-heading,
+  .command-card-heading,
+  .rpt-card-head,
+  .ap-workflow-intro
+) p,
+html body.management-consistent-ui :is(
+  .modal-subtitle,
+  .drawer-header p,
+  .records-legend,
+  .ap-records-legend,
+  .um-directory-legend,
+  .cq-legend,
+  .inventory-records-tip,
+  .aa-panel-tip
+) {
+  font-size: var(--management-type-helper) !important;
+  font-weight: 500 !important;
+  line-height: 1.5 !important;
+  letter-spacing: 0 !important;
+}
+
+html body.management-consistent-ui :is(
+  .form-lbl,
+  .filter-field > span,
+  .ap-filter-field > span,
+  .cq-filter-field > span,
+  .um-select-field > span,
+  .inventory-reference-field > span,
+  .report-filter-grid label > span,
+  .report-search-field > span,
+  .mrf-fields > label > span:not(.sr-only),
+  .management-mobile-label,
+  .archive-detail-label,
+  .audit-detail-label,
+  .item-status-label,
+  .surrender-reason-label,
+  .triage-signal-label
+) {
+  font-size: var(--management-type-label) !important;
+  font-weight: 700 !important;
+  line-height: 1.35 !important;
+  letter-spacing: .01em !important;
+  text-transform: none !important;
+}
+
+html body.management-consistent-ui :is(
+  .field-help,
+  .form-help,
+  .form-hint,
+  .decision-field-help,
+  .event-date-help,
+  .publishing-control-help,
+  .medical-inventory-hint,
+  .quarantine-workflow-help,
+  .adoption-field-hint,
+  .account-linked-hint,
+  .perm-hint,
+  .behavioral-form-meta,
+  .profile-photo-caption,
+  figcaption
+) {
+  font-size: var(--management-type-helper) !important;
+  font-weight: 500 !important;
+  line-height: 1.5 !important;
+  letter-spacing: 0 !important;
+}
+
+/* Form values remain compact on desktop; the responsive layer retains 16px
+   anti-zoom sizing where needed and its smaller phone search-field override. */
+html body.management-consistent-ui :is(
+  .form-inp,
+  .filter-select,
+  .ap-control input,
+  .search-pill-sm input,
+  .cq-search input,
+  .report-input input,
+  .feed-search input,
+  input[type="search"],
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="date"],
+  input[type="number"],
+  select,
+  textarea
+) {
+  font-size: var(--management-type-control) !important;
+  font-weight: 500 !important;
+  line-height: 1.4 !important;
+  letter-spacing: 0 !important;
+}
+
+html body.management-consistent-ui :is(input, textarea)::placeholder {
+  font: inherit !important;
+  letter-spacing: inherit !important;
+}
+
+/* Tabs, actions, status markers, and pagination use a stable control scale. */
+html body.management-consistent-ui :is(
+  .intake-tab,
+  .aa-tab,
+  .sr-tab,
+  .archive-tab,
+  .ap-tab,
+  .um-tab,
+  .inv-tab,
+  .audit-view-btn,
+  .profile-tab,
+  .btn-primary-clay,
+  .btn-ghost-clay,
+  .btn-outline-add,
+  .primary-btn,
+  .secondary-btn,
+  .btn-export,
+  .btn-finalize,
+  .report-apply-btn,
+  .reference-clear-filters,
+  .ap-clear-btn,
+  .um-clear-filters,
+  .aa-clear-filters,
+  .tbl-action-btn,
+  .detail-btn,
+  .view-btn,
+  .audit-review-btn,
+  .cq-view,
+  .cm-send-btn
+) {
+  font-size: var(--management-type-data) !important;
+  font-weight: 750 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0 !important;
+}
+
+html body.management-consistent-ui :is(
+  .status-badge,
+  .status-pill,
+  .role-badge,
+  .module-badge,
+  .module-chip,
+  .type-badge,
+  .app-type-badge,
+  .stock-status,
+  .risk-badge,
+  .urgency-badge,
+  .cq-score,
+  .cq-version,
+  .result-count,
+  .table-record-count
+) {
+  font-size: var(--management-type-helper) !important;
+  font-weight: 750 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0 !important;
+}
+
+html body.management-consistent-ui :is(.page-btn, .report-page-btn, .page-info) {
+  font-size: var(--management-type-label) !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0 !important;
+}
+
+/* Table typography stays dense without changing any responsive card layout. */
+html body.management-consistent-ui :is(
+  .shelter-table,
+  .rpt-table,
+  .management-data-table,
+  .cq-table-wrap table,
+  .um-user-table
+) {
+  font-size: var(--management-type-data) !important;
+  line-height: 1.45 !important;
+}
+
+html body.management-consistent-ui :is(
+  .shelter-table,
+  .rpt-table,
+  .management-data-table,
+  .cq-table-wrap table,
+  .um-user-table
+) thead th {
+  font-size: .65rem !important;
+  font-weight: 800 !important;
+  line-height: 1.3 !important;
+  letter-spacing: .065em !important;
+  text-transform: uppercase !important;
+}
+
+html body.management-consistent-ui :is(
+  .shelter-table,
+  .rpt-table,
+  .management-data-table,
+  .cq-table-wrap table,
+  .um-user-table
+) tbody td {
+  font-size: var(--management-type-data) !important;
+  font-weight: 500 !important;
+  line-height: 1.45 !important;
+  letter-spacing: 0 !important;
+}
+
+html body.management-consistent-ui :is(
+  .shelter-table,
+  .rpt-table,
+  .management-data-table,
+  .cq-table-wrap table,
+  .um-user-table
+) tbody td :is(strong, b) {
+  font-weight: 750 !important;
+}
+
+@media (max-width: 768px) {
+  html body.management-consistent-ui :is(
+    .form-inp,
+    .filter-select,
+    input,
+    select,
+    textarea
+  ) {
+    font-size: max(16px, 1em) !important;
+  }
+}
+
+@media (max-width: 599px) {
+  html body.management-consistent-ui {
+    --management-type-section: .96rem;
+    --management-type-dialog: 1.02rem;
+  }
+
+  html body.management-consistent-ui :is(
+    #searchIntake,
+    #searchApps,
+    #searchSR,
+    #searchInventory,
+    #reportSearch,
+    #searchAudit,
+    #searchArchive,
+    #resultSearch,
+    #searchUsers,
+    #searchAnimals,
+    #messageSearch,
+    #searchAnnouncement,
+    #globalSearch,
+    #animalSearch,
+    #filterCategory,
+    #fMedInventorySearch
+  ) {
+    font-size: var(--management-type-control) !important;
+  }
+}

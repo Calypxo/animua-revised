@@ -157,57 +157,120 @@
 .ap-list-page.user-management-page .um-page-size-field > span { display: block; margin-bottom: 8px; color: #756b64; font: 800 .64rem/1 "Poppins", sans-serif; letter-spacing: .08em; text-transform: uppercase; }
 .ap-list-page.user-management-page .um-page-size-field select { width: 100%; height: 43px; padding: 0 34px 0 13px; border: 1px solid #ddcfc4; border-radius: 10px; color: var(--ap-ink); background: #FFFFFF; font: 500 .8rem/1 "Poppins", sans-serif; }
 
-.ap-list-page.user-management-page .user-record-media {
+.ap-list-page.user-management-page .user-record-card {
+  position: relative;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
-  border-right: 1px solid var(--ap-border);
-  background:
-    radial-gradient(circle at 18% 16%, color-mix(in srgb, var(--user-avatar-color) 10%, transparent) 0 54px, transparent 55px),
-    radial-gradient(circle at 92% 86%, rgba(247,181,56,.13) 0 68px, transparent 69px),
-    linear-gradient(145deg, #FFFFFF, #FFF8EE);
+  padding: 0;
+  border-radius: 16px;
 }
 
-.ap-list-page.user-management-page .user-record-media::before {
+.ap-list-page.user-management-page .user-record-card::before {
   content: "";
   position: absolute;
+  z-index: 1;
   inset: 0 auto 0 0;
-  width: 5px;
-  background: var(--user-avatar-color);
+  width: 4px;
+  background: linear-gradient(180deg, var(--user-avatar-color) 0 68%, #f7b538 68% 100%);
+}
+
+.ap-list-page.user-management-page .user-card-header {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 19px 20px 16px 23px;
 }
 
 .ap-list-page.user-management-page .user-record-avatar {
-  gap: 10px;
-  padding: 30px 20px 58px;
-  color: #FFFFFF;
-  background: transparent;
+  position: relative;
+  width: 58px;
+  height: 58px;
+  flex: 0 0 58px;
 }
 
 .ap-list-page.user-management-page .user-record-avatar span {
-  width: 104px;
-  height: 104px;
+  width: 54px;
+  height: 54px;
   display: grid;
   place-items: center;
-  border: 5px solid #FFFFFF;
-  border-radius: 50%;
+  border: 3px solid #FFFFFF;
+  border-radius: 17px;
   color: #FFFFFF;
   background:
-    radial-gradient(circle at 72% 24%, rgba(255,255,255,.22), transparent 42%),
-    linear-gradient(145deg, color-mix(in srgb, var(--user-avatar-color) 76%, #FFFFFF), var(--user-avatar-color));
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--user-avatar-color) 24%, #eadfd4), 0 14px 30px rgba(61,35,26,.15);
-  font: 800 2rem/1 "Poppins", sans-serif;
-  letter-spacing: -.04em;
-  text-shadow: 0 2px 9px rgba(0,0,0,.12);
+    radial-gradient(circle at 72% 22%, rgba(255,255,255,.22), transparent 40%),
+    linear-gradient(145deg, color-mix(in srgb, var(--user-avatar-color) 78%, #FFFFFF), var(--user-avatar-color));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--user-avatar-color) 22%, #eadfd4), 0 8px 18px rgba(61,35,26,.13);
+  font: 800 1.04rem/1 "Poppins", sans-serif;
+  letter-spacing: -.03em;
 }
 
-.ap-list-page.user-management-page .user-record-avatar small {
-  padding: 6px 10px;
-  border: 1px solid color-mix(in srgb, var(--user-avatar-color) 18%, #eadfd4);
-  border-radius: 999px;
+.ap-list-page.user-management-page .user-record-avatar > i {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border: 2px solid #FFFFFF;
+  border-radius: 50%;
+  color: var(--ap-red);
+  background: #fff1c9;
+  box-shadow: 0 3px 8px rgba(71,42,30,.11);
+  font-size: .62rem;
+}
+
+.ap-list-page.user-management-page .user-card-identity { min-width: 0; }
+.ap-list-page.user-management-page .user-card-kicker {
+  display: block;
+  margin-bottom: 4px;
   color: var(--user-avatar-color);
-  background: #FFFFFF;
-  font: 800 .6rem/1 "Poppins", sans-serif;
-  letter-spacing: .08em;
+  font: 800 .55rem/1.2 "Poppins", sans-serif;
+  letter-spacing: .1em;
   text-transform: uppercase;
 }
+
+.ap-list-page.user-management-page .user-card-identity h3 {
+  margin: 0 0 4px;
+  color: var(--ap-ink);
+  font: 800 1rem/1.22 "Poppins", sans-serif;
+  letter-spacing: -.015em;
+}
+
+.ap-list-page.user-management-page .user-card-identity > p {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: #81766f;
+  font: 600 .66rem/1.35 "Poppins", sans-serif;
+}
+
+.ap-list-page.user-management-page .user-card-identity > p i { flex: 0 0 auto; color: var(--ap-red); }
+.ap-list-page.user-management-page .user-card-identity > p span { min-width: 0; overflow-wrap: anywhere; }
+.ap-list-page.user-management-page .user-card-badges { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
+
+.ap-list-page.user-management-page .user-permission-count {
+  min-width: 76px;
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  padding: 10px 9px 8px;
+  border: 1px solid #eaded2;
+  border-radius: 12px;
+  color: #756961;
+  background: #fffaf3;
+}
+
+.ap-list-page.user-management-page .user-permission-count > span { display: flex; align-items: center; gap: 6px; }
+.ap-list-page.user-management-page .user-permission-count i { color: #c4830a; font-size: .7rem; }
+.ap-list-page.user-management-page .user-permission-count strong { color: var(--ap-ink); font: 800 1.05rem/1 "Poppins", sans-serif; }
+.ap-list-page.user-management-page .user-permission-count small { font: 800 .48rem/1 "Poppins", sans-serif; letter-spacing: .06em; text-transform: uppercase; }
 
 .ap-list-page.user-management-page .animal-type-badge.role-admin { color: #780116; background: #FFF8EE; border-color: #EADFD4; }
 .ap-list-page.user-management-page .animal-type-badge.role-staff { color: #17695f; background: #e2f2ef; border-color: #cde6e1; }
@@ -218,13 +281,58 @@
 .ap-list-page.user-management-page .status-badge.badge-active { color: #187b55; background: #e5f4ec; }
 .ap-list-page.user-management-page .status-badge.badge-inactive { color: var(--ap-red-deep); background: #FFF8EE; }
 
+.ap-list-page.user-management-page .user-card-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0 20px 0 23px;
+  overflow: hidden;
+  border: 1px solid #eaded2;
+  border-radius: 11px;
+  background: #fffaf5;
+}
+
+.ap-list-page.user-management-page .user-card-facts > div {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 12px;
+  border-right: 1px solid #eaded2;
+}
+
+.ap-list-page.user-management-page .user-card-facts > div:last-child { border-right: 0; }
+.ap-list-page.user-management-page .user-card-facts > div > i { flex: 0 0 auto; color: var(--ap-red); font-size: .76rem; }
+.ap-list-page.user-management-page .user-card-facts > div > span { min-width: 0; display: grid; gap: 3px; }
+.ap-list-page.user-management-page .user-card-facts small { color: #94877e; font: 800 .5rem/1 "Poppins", sans-serif; letter-spacing: .07em; text-transform: uppercase; }
+.ap-list-page.user-management-page .user-card-facts strong { color: #393330; font: 700 .64rem/1.35 "Poppins", sans-serif; overflow-wrap: anywhere; }
+
+.ap-list-page.user-management-page .user-card-footer {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(205px, .48fr);
+  align-items: center;
+  gap: 12px;
+  margin-top: auto;
+  padding: 14px 20px 16px 23px;
+}
+
+.ap-list-page.user-management-page .user-card-access-note {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #756b64;
+  font: 650 .61rem/1.4 "Poppins", sans-serif;
+}
+
+.ap-list-page.user-management-page .user-card-access-note i { flex: 0 0 auto; color: #c4830a; font-size: .76rem; }
+
 .ap-list-page.user-management-page .user-card-footer-actions { display: grid; grid-template-columns: minmax(0, 1fr) 38px; gap: 8px; }
 .ap-list-page.user-management-page .user-action-menu { position: relative; z-index: 40; }
 .ap-list-page.user-management-page .user-menu-trigger { width: 38px; height: 38px; display: grid; place-items: center; border: 1px solid #dfd1c6; border-radius: 8px; color: var(--ap-red-deep); background: #FFFFFF; }
 .ap-list-page.user-management-page .user-menu-trigger:hover { color: #FFFFFF; border-color: var(--ap-red); background: var(--ap-red); }
 .ap-list-page.user-management-page .user-menu-popover { z-index: 60; right: 0; bottom: calc(100% + 7px); top: auto; width: 230px; min-width: 190px; }
 .ap-list-page.user-management-page .user-record-card:has(.user-menu-trigger[aria-expanded="true"]) { overflow: visible; z-index: 50; }
-.ap-list-page.user-management-page .user-record-card:has(.user-menu-trigger[aria-expanded="true"]) .animal-record-media { overflow: hidden; border-radius: 16px 0 0 16px; }
 .ap-list-page.user-management-page .user-record-message { grid-column: 1 / -1; }
 
 @media (max-width: 1280px) {
@@ -349,29 +457,9 @@
   background: var(--ap-red);
 }
 
-.ap-list-page.user-management-page .user-record-list {
-  grid-template-columns: minmax(0, 1fr);
-  gap: 14px;
-}
-
-.ap-list-page.user-management-page .user-record-card {
-  min-height: 230px;
-  grid-template-columns: 210px minmax(0, 1fr);
-}
-
-.ap-list-page.user-management-page .user-record-card :is(.animal-record-photo,.animal-record-fallback) { min-height: 230px; }
-.ap-list-page.user-management-page .user-record-card .animal-record-content { padding: 20px 22px 18px; }
-.ap-list-page.user-management-page .user-record-card .animal-record-facts { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.ap-list-page.user-management-page .user-record-card .animal-record-facts > .animal-record-source {
-  grid-column: auto;
-  border-right: 1px solid var(--ap-border);
-  border-bottom: 0;
-}
-.ap-list-page.user-management-page .user-record-card .animal-record-footer {
-  grid-template-columns: minmax(0, 1fr) minmax(230px, .42fr);
-  align-items: stretch;
-  margin-top: auto;
-}
+/* Account directory: two compact cards on wide screens and a single record
+   lane at laptop width, matching the Animal Profiling list rhythm. */
+.ap-list-page.user-management-page .user-record-list { gap: 14px; }
 
 @media (max-width: 1280px) {
   .ap-list-page.user-management-page .um-filter-bar { grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(112px, auto); }
@@ -381,27 +469,48 @@
 @media (max-width: 900px) {
   .ap-list-page.user-management-page .um-filter-bar { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .ap-list-page.user-management-page .um-clear-filters { grid-column: 1 / -1; }
-  .ap-list-page.user-management-page .user-record-card { grid-template-columns: 190px minmax(0, 1fr); }
-  .ap-list-page.user-management-page .user-record-card .animal-record-facts { grid-template-columns: 1fr 1fr; }
-  .ap-list-page.user-management-page .user-record-card .animal-record-facts > .animal-record-source { grid-column: 1 / -1; border-right: 0; border-bottom: 1px solid var(--ap-border); }
+  .ap-list-page.user-management-page .user-card-footer { grid-template-columns: minmax(0, 1fr) minmax(205px, .42fr); }
 }
 
 @media (max-width: 760px) {
   .ap-list-page.user-management-page .um-filter-bar { grid-template-columns: 1fr; }
   .ap-list-page.user-management-page .um-search-field,
   .ap-list-page.user-management-page .um-clear-filters { grid-column: auto; }
-  .ap-list-page.user-management-page .user-record-card { grid-template-columns: 1fr; }
-  .ap-list-page.user-management-page .user-record-card .animal-record-media { height: 205px; }
-  .ap-list-page.user-management-page .user-record-card :is(.animal-record-photo,.animal-record-fallback) { min-height: 205px; }
-  .ap-list-page.user-management-page .user-record-avatar { padding-block: 22px 55px; }
-  .ap-list-page.user-management-page .user-record-avatar span { width: 92px; height: 92px; font-size: 1.75rem; }
-  .ap-list-page.user-management-page .user-record-card .animal-record-footer { grid-template-columns: 1fr; }
-  .ap-list-page.user-management-page .user-record-card:has(.user-menu-trigger[aria-expanded="true"]) .animal-record-media { border-radius: 16px 16px 0 0; }
+  .ap-list-page.user-management-page .user-card-header { padding: 17px 16px 14px 19px; }
+  .ap-list-page.user-management-page .user-card-facts { margin-inline: 19px 16px; }
+  .ap-list-page.user-management-page .user-card-footer { padding: 13px 16px 15px 19px; }
 }
 
-@media (max-width: 520px) {
-  .ap-list-page.user-management-page .user-record-card .animal-record-facts { grid-template-columns: 1fr; }
-  .ap-list-page.user-management-page .user-record-card .animal-record-facts > .animal-record-source { grid-column: auto; }
-  .ap-list-page.user-management-page .user-record-card .animal-record-facts > div { border-right: 0; border-bottom: 1px solid var(--ap-border); }
-  .ap-list-page.user-management-page .user-record-card .animal-record-facts > div:last-child { border-bottom: 0; }
+@media (max-width: 560px) {
+  .ap-list-page.user-management-page .user-card-header {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: 12px;
+  }
+  .ap-list-page.user-management-page .user-permission-count {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 11px;
+  }
+  .ap-list-page.user-management-page .user-permission-count small { order: -1; }
+  .ap-list-page.user-management-page .user-card-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ap-list-page.user-management-page .user-card-facts > div { border-bottom: 1px solid #eaded2; }
+  .ap-list-page.user-management-page .user-card-facts > div:nth-child(2) { border-right: 0; }
+  .ap-list-page.user-management-page .user-card-facts > div:last-child { grid-column: 1 / -1; border-bottom: 0; }
+  .ap-list-page.user-management-page .user-card-footer { grid-template-columns: 1fr; }
+  .ap-list-page.user-management-page .user-card-access-note { padding: 0 1px; }
+}
+
+@media (max-width: 380px) {
+  .ap-list-page.user-management-page .user-record-avatar { width: 52px; height: 52px; flex-basis: 52px; }
+  .ap-list-page.user-management-page .user-record-avatar span { width: 49px; height: 49px; border-radius: 15px; }
+  .ap-list-page.user-management-page .user-card-identity h3 { font-size: .91rem; }
+  .ap-list-page.user-management-page .user-card-facts { grid-template-columns: 1fr; }
+  .ap-list-page.user-management-page .user-card-facts > div { border-right: 0; }
+  .ap-list-page.user-management-page .user-card-facts > div:nth-child(2) { border-right: 0; }
+  .ap-list-page.user-management-page .user-card-facts > div:last-child { grid-column: auto; }
 }

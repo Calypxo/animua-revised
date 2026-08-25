@@ -968,3 +968,237 @@ body.management-consistent-ui.compatibility-management-page .compatibility-resul
     font-size: .9rem;
   }
 }
+
+/* User Records follows the same white-card hierarchy as Questions and Settings. */
+body.management-consistent-ui.compatibility-management-page .cq-records > .cq-record-head {
+  min-height: 0;
+  padding: 22px 24px;
+  border-bottom: 1px solid #eee4db;
+  background: #fff;
+}
+
+body.management-consistent-ui.compatibility-management-page .cq-records .cq-legend {
+  max-width: 330px;
+  padding: 8px 11px;
+  border: 1px solid #eee3db;
+  border-radius: 10px;
+  color: #776b65;
+  background: #faf7f3;
+  line-height: 1.4;
+}
+
+body.management-consistent-ui.compatibility-management-page .cq-records > :is(.cq-toolbar, .mrf-workspace) {
+  margin: 16px 24px 0;
+  padding: 14px;
+  border: 1px solid #eee3db;
+  border-radius: 14px;
+  background: #faf7f3;
+}
+
+body.management-consistent-ui.compatibility-management-page .cq-records .mrf-workspace .cq-toolbar {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+body.management-consistent-ui.compatibility-management-page .cq-records > .reference-table-section-head {
+  min-height: 0;
+  margin: 18px 24px 0;
+  padding: 14px 16px;
+  border: 1px solid #eee3db;
+  border-radius: 14px;
+  color: #504743;
+  background: #fffaf4 !important;
+  box-shadow: none;
+}
+
+body.management-consistent-ui.compatibility-management-page .cq-records > .reference-table-section-head span {
+  color: #780116;
+}
+
+body.management-consistent-ui.compatibility-management-page .cq-records > .reference-table-section-head h3 {
+  margin-top: 5px;
+  color: #2d2322;
+  font-size: .95rem;
+}
+
+body.management-consistent-ui.compatibility-management-page .cq-records > .reference-table-section-head > strong {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  color: #780116;
+  background: transparent;
+  box-shadow: none;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 700px) {
+  body.management-consistent-ui.compatibility-management-page .cq-records > .cq-record-head {
+    padding: 17px 16px;
+  }
+
+  body.management-consistent-ui.compatibility-management-page .cq-records > :is(.cq-toolbar, .mrf-workspace) {
+    margin: 14px 16px 0;
+  }
+
+  body.management-consistent-ui.compatibility-management-page .cq-records > .reference-table-section-head {
+    min-height: 0;
+    margin: 16px 16px 0;
+    padding: 12px;
+  }
+
+  body.management-consistent-ui.compatibility-management-page .cq-records > .reference-table-section-head h3 {
+    font-size: .9rem;
+  }
+}
+
+@media (max-width: 599px) {
+  body.management-consistent-ui.compatibility-management-page .cq-records > .mrf-workspace {
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
+}
+
+/* Keep the user-results filters on one intentional management surface. The
+   responsive filter enhancer moves Search results into its own slot, so the
+   original toolbar is layout-only here rather than a second nested card. */
+@media (min-width: 600px) {
+  html body.management-consistent-ui.compatibility-management-page .cq-records > .mrf-workspace-compatibility {
+    display: grid !important;
+    align-items: end !important;
+    gap: 12px !important;
+    margin: 16px 24px 0 !important;
+    padding: 16px 18px !important;
+    border: 1px solid #eadfd4 !important;
+    border-radius: 16px !important;
+    background: #fffaf7 !important;
+    box-shadow: none !important;
+    box-sizing: border-box !important;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .mrf-workspace-compatibility .mrf-search-slot,
+  html body.management-consistent-ui.compatibility-management-page .mrf-workspace-compatibility .mrf-search-slot > .cq-filter-field,
+  html body.management-consistent-ui.compatibility-management-page .mrf-workspace-compatibility .cq-toolbar.mrf-fields > .cq-filter-field {
+    width: 100% !important;
+    min-width: 0 !important;
+    display: grid !important;
+    align-content: end !important;
+    gap: 7px !important;
+    margin: 0 !important;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .mrf-workspace-compatibility .cq-toolbar.mrf-fields {
+    width: 100% !important;
+    min-width: 0 !important;
+    display: grid !important;
+    align-items: end !important;
+    gap: 12px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .mrf-workspace-compatibility .cq-filter-field > span {
+    padding-left: 1px !important;
+    color: #5f534e !important;
+    font: 700 .72rem/1.3 "Poppins", sans-serif !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .mrf-workspace-compatibility .cq-search,
+  html body.management-consistent-ui.compatibility-management-page .mrf-workspace-compatibility .cq-toolbar select,
+  html body.management-consistent-ui.compatibility-management-page .mrf-workspace-compatibility #clearFilters {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    margin: 0 !important;
+    border: 1px solid #dfd3cb !important;
+    border-radius: 12px !important;
+    color: #2d2322 !important;
+    background-color: #fff !important;
+    box-shadow: none !important;
+    box-sizing: border-box !important;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .mrf-workspace-compatibility .cq-search {
+    padding: 0 14px !important;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .mrf-workspace-compatibility .cq-search input {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 100% !important;
+    padding: 0 !important;
+    color: #2d2322 !important;
+    background: transparent !important;
+    font: 500 .78rem/1.35 "Poppins", sans-serif !important;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .mrf-workspace-compatibility .cq-search:focus-within,
+  html body.management-consistent-ui.compatibility-management-page .mrf-workspace-compatibility .cq-toolbar select:focus-visible,
+  html body.management-consistent-ui.compatibility-management-page .mrf-workspace-compatibility #clearFilters:focus-visible {
+    border-color: #f7b538 !important;
+    box-shadow: 0 0 0 3px rgba(247, 181, 56, .24) !important;
+    outline: 0 !important;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .mrf-workspace-compatibility #clearFilters {
+    min-width: 104px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 7px !important;
+    padding: 0 15px !important;
+    color: #780116 !important;
+    background: #fff8ee !important;
+    font: 700 .75rem/1 "Poppins", sans-serif !important;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .mrf-workspace-compatibility #clearFilters i {
+    margin: 0 !important;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .mrf-workspace-compatibility #clearFilters:hover {
+    border-color: #f7b538 !important;
+    background: #fff3dc !important;
+  }
+}
+
+@media (min-width: 1025px) {
+  html body.management-consistent-ui.compatibility-management-page .cq-records > .mrf-workspace-compatibility {
+    grid-template-columns: minmax(260px, 1.15fr) minmax(0, 2.35fr) !important;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .mrf-workspace-compatibility .cq-toolbar.mrf-fields {
+    grid-template-columns: repeat(2, minmax(155px, 1fr)) minmax(104px, auto) !important;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 1024px) {
+  html body.management-consistent-ui.compatibility-management-page .cq-records > .mrf-workspace-compatibility {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .mrf-workspace-compatibility .cq-toolbar.mrf-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .mrf-workspace-compatibility #clearFilters {
+    grid-column: 1 / -1 !important;
+    justify-self: end !important;
+    width: auto !important;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 700px) {
+  html body.management-consistent-ui.compatibility-management-page .cq-records > .mrf-workspace-compatibility {
+    margin-inline: 16px !important;
+    padding: 14px !important;
+  }
+}

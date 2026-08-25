@@ -27,7 +27,7 @@ let active = "";
 let trendChart;
 let breakdownChart;
 let activePage = 1;
-let pageSize = 25;
+const pageSize = 12;
 let printing = false;
 
 const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[char]));
@@ -88,9 +88,9 @@ function workspace() {
         </article>
       </section>
       <section class="rpt-card report-data-card" id="reportDataPanel" role="tabpanel">
-        <div class="rpt-card-head"><div><span class="section-kicker">Detailed records</span><h3 id="reportTitle">Operational report</h3><p id="reportMeta">Loading live records…</p></div><span class="table-record-count" id="tableRecordCount" aria-live="polite">0 rows</span></div>
-        <div class="table-responsive report-table-wrap"><table class="rpt-table management-data-table management-card-table" data-card-until="1279" aria-describedby="reportMeta"><caption class="visually-hidden" id="reportTableCaption">Detailed operational report records</caption><thead><tr id="reportHead"></tr></thead><tbody id="reportBody"><tr><td colspan="8" class="text-center py-5"><div class="um-spinner"></div></td></tr></tbody></table></div>
-        <div class="report-table-footer"><span id="reportTableFooter">Live data is shown exactly as recorded by shelter workflows.</span><div class="report-pagination" id="reportPagination" aria-label="Report table pagination"></div></div>
+        <div class="reference-table-section-head report-records-head"><div><span>Detailed records</span><h3 id="reportTitle">Operational report</h3><p id="reportMeta">Loading live records…</p></div><strong class="table-record-count" id="tableRecordCount" aria-live="polite">0 records</strong></div>
+        <div class="table-responsive report-table-wrap"><table class="shelter-table rpt-table report-reference-table management-data-table management-card-table" data-card-until="1439" aria-describedby="reportMeta"><caption class="visually-hidden" id="reportTableCaption">Detailed operational report records</caption><thead><tr id="reportHead"></tr></thead><tbody id="reportBody"><tr><td colspan="8" class="text-center py-5"><div class="um-spinner"></div></td></tr></tbody></table></div>
+        <div class="um-pagination report-table-footer"><span class="page-info" id="reportTableFooter">Live data is shown exactly as recorded by shelter workflows.</span><div class="report-pagination" id="reportPagination" aria-label="Report table pagination"></div></div>
       </section>
     </div>`;
 }
@@ -340,10 +340,17 @@ function renderPagination(totalRecords) {
   activePage = Math.min(activePage, totalPages);
   target.innerHTML = `
     <div class="report-page-buttons">
-      <button type="button" class="report-page-btn" data-page="${activePage - 1}" ${activePage === 1 ? "disabled" : ""} aria-label="Previous page"><i class="bi bi-chevron-left"></i></button>
-      ${paginationItems(totalPages).map((item) => item === "ellipsis" ? '<span class="report-page-ellipsis" aria-hidden="true">&hellip;</span>' : `<button type="button" data-page="${item}" class="report-page-btn ${item === activePage ? "active" : ""}" aria-label="Page ${item}" ${item === activePage ? 'aria-current="page"' : ""}>${item}</button>`).join("")}
-      <button type="button" class="report-page-btn" data-page="${activePage + 1}" ${activePage === totalPages ? "disabled" : ""} aria-label="Next page"><i class="bi bi-chevron-right"></i></button>
+      <button type="button" class="page-btn" data-page="${activePage - 1}" ${activePage === 1 ? "disabled" : ""} aria-label="Previous page"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+      ${paginationItems(totalPages).map((item) => item === "ellipsis" ? '<span class="page-ellipsis" aria-hidden="true">&hellip;</span>' : `<button type="button" data-page="${item}" class="page-btn ${item === activePage ? "active" : ""}" aria-label="Page ${item}" ${item === activePage ? 'aria-current="page"' : ""}>${item}</button>`).join("")}
+      <button type="button" class="page-btn" data-page="${activePage + 1}" ${activePage === totalPages ? "disabled" : ""} aria-label="Next page"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
     </div>`;
+}
+
+function reportPrimaryKey(config) {
+  if (active === "inventory") return "inventoryItem";
+  return config.columns.find(([key]) => key === "id")?.[0]
+    || config.columns.find(([key]) => key === "animalId")?.[0]
+    || config.columns[0]?.[0];
 }
 
 function render() {
@@ -363,9 +370,10 @@ function render() {
   document.getElementById("reportTitle").textContent = `${config.label} report`;
   document.getElementById("reportTableCaption").textContent = `${config.label} report records for ${periodLabel()}`;
   document.getElementById("reportMeta").textContent = `Generated ${new Date(payload.generatedAt).toLocaleString("en-PH")} · ${config.description}`;
-  document.getElementById("tableRecordCount").textContent = `${list.length} row${list.length === 1 ? "" : "s"}`;
-  document.getElementById("reportHead").innerHTML = config.columns.map(([, label]) => `<th scope="col">${esc(label)}</th>`).join("");
-  document.getElementById("reportBody").innerHTML = list.length ? pageRows.map((row) => `<tr class="management-card-row report-record-card">${config.columns.map(([key, label], index) => `<td class="report-cell report-cell-${esc(key)} ${index < 2 ? "management-card-primary" : ""}"><span class="management-mobile-label" aria-hidden="true">${esc(label)}</span><span class="report-cell-value">${cellMarkup(key, row[key])}</span></td>`).join("")}</tr>`).join("") : `<tr><td colspan="${config.columns.length}"><div class="report-empty-state"><span><i class="bi bi-bar-chart"></i></span><strong>No matching report records</strong><small>Adjust the date range, barangay, or search to broaden this dataset.</small></div></td></tr>`;
+  document.getElementById("tableRecordCount").textContent = `${list.length} record${list.length === 1 ? "" : "s"}`;
+  document.getElementById("reportHead").innerHTML = config.columns.map(([key, label]) => `<th class="report-column-${esc(key)}" scope="col">${esc(label)}</th>`).join("");
+  const primaryKey = reportPrimaryKey(config);
+  document.getElementById("reportBody").innerHTML = list.length ? pageRows.map((row) => `<tr class="management-card-row report-record-card">${config.columns.map(([key, label]) => `<td class="report-cell report-cell-${esc(key)} ${key === primaryKey ? "management-card-primary report-card-identity" : ""}"><span class="management-mobile-label" aria-hidden="true">${esc(label)}</span><span class="report-cell-value">${cellMarkup(key, row[key])}</span></td>`).join("")}</tr>`).join("") : `<tr><td colspan="${config.columns.length}"><div class="report-empty-state"><span><i class="bi bi-bar-chart"></i></span><strong>No matching report records</strong><small>Adjust the date range, barangay, or search to broaden this dataset.</small></div></td></tr>`;
   const lastRecord = printing ? list.length : Math.min(firstRecord + pageRows.length - 1, list.length);
   document.getElementById("reportTableFooter").textContent = list.length
     ? `Showing ${printing ? 1 : firstRecord}–${lastRecord} of ${list.length} filtered records (${(payload.reports[active] || []).length} total in ${config.label}).`
