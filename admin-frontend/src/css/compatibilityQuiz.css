@@ -1202,3 +1202,707 @@ body.management-consistent-ui.compatibility-management-page .cq-records > .refer
     padding: 14px !important;
   }
 }
+
+/* Compatibility result directory
+   Mirrors the Inventory register: a flat section heading, a compact desktop
+   table, and independent cards as soon as the columns no longer fit well. */
+html body.management-consistent-ui.compatibility-management-page .cq-records > .reference-table-section-head {
+  min-height: 72px;
+  margin: 18px 0 0;
+  padding: 19px 24px 14px;
+  border: 0;
+  border-top: 1px solid #eadfd4;
+  border-bottom: 1px solid #eadfd4;
+  border-radius: 0;
+  color: #2d2322;
+  background: #fff !important;
+  box-shadow: none;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-records > .reference-table-section-head span {
+  color: #780116;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-records > .reference-table-section-head h3 {
+  margin-top: 4px;
+  color: #2d2322;
+  font: 800 .95rem/1.25 "Poppins", sans-serif;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-records > .reference-table-section-head > strong {
+  min-height: 0;
+  padding: 7px 11px;
+  border: 0;
+  border-radius: 999px;
+  color: #780116;
+  background: #efe5d2;
+  box-shadow: none;
+  font: 800 .68rem/1 "Poppins", sans-serif;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-table-wrap {
+  width: 100%;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow-x: auto;
+  border: 0;
+  border-radius: 0;
+  background: #fff;
+  box-shadow: none;
+  scrollbar-width: thin;
+  scrollbar-color: #d8c9bf transparent;
+}
+
+html body.management-consistent-ui.compatibility-management-page .compatibility-result-table:not(.management-card-active) {
+  width: 100% !important;
+  min-width: 0 !important;
+  table-layout: fixed !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  font: 500 .75rem/1.4 "Poppins", sans-serif !important;
+}
+
+.compatibility-management-page .compatibility-result-table .cq-col-user { width: 22%; }
+.compatibility-management-page .compatibility-result-table .cq-col-completed { width: 14%; }
+.compatibility-management-page .compatibility-result-table .cq-col-retake { width: 14%; }
+.compatibility-management-page .compatibility-result-table .cq-col-recommendation { width: 23%; }
+.compatibility-management-page .compatibility-result-table .cq-col-match { width: 9%; }
+.compatibility-management-page .compatibility-result-table .cq-col-version { width: 7%; }
+.compatibility-management-page .compatibility-result-table .cq-col-actions { width: 11%; }
+
+html body.management-consistent-ui.compatibility-management-page .compatibility-result-table:not(.management-card-active) thead {
+  position: static;
+}
+
+html body.management-consistent-ui.compatibility-management-page .compatibility-result-table:not(.management-card-active) thead th {
+  height: auto;
+  padding: 13px 12px !important;
+  border: 0 !important;
+  border-bottom: 1px solid #eadfd4 !important;
+  color: #7b6b64 !important;
+  background: #fff8ee !important;
+  font: 800 .63rem/1.25 "Poppins", sans-serif !important;
+  letter-spacing: .04em !important;
+  text-align: left !important;
+  vertical-align: middle;
+}
+
+.compatibility-management-page .compatibility-result-table .table-heading {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.compatibility-management-page .compatibility-result-table .table-heading i {
+  flex: 0 0 auto;
+  color: #9b1c31;
+  font-size: .72rem;
+}
+
+html body.management-consistent-ui.compatibility-management-page .compatibility-result-table:not(.management-card-active) .actions-heading {
+  padding-right: 14px !important;
+  text-align: right !important;
+}
+
+html body.management-consistent-ui.compatibility-management-page .compatibility-result-table:not(.management-card-active) tbody tr {
+  transform: none !important;
+}
+
+html body.management-consistent-ui.compatibility-management-page .compatibility-result-table:not(.management-card-active) tbody td {
+  min-width: 0;
+  padding: 13px 12px !important;
+  overflow: hidden;
+  border: 0 !important;
+  border-bottom: 1px solid #f0e7df !important;
+  border-radius: 0 !important;
+  color: #443a37 !important;
+  background: #fff !important;
+  box-shadow: none !important;
+  font: 500 .72rem/1.4 "Poppins", sans-serif !important;
+  vertical-align: middle;
+}
+
+html body.management-consistent-ui.compatibility-management-page .compatibility-result-table:not(.management-card-active) tbody tr:hover td {
+  border-color: #f0e7df !important;
+  background: #fff8ee !important;
+  box-shadow: none !important;
+}
+
+html body.management-consistent-ui.compatibility-management-page .compatibility-result-table:not(.management-card-active) .cq-user {
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+}
+
+html body.management-consistent-ui.compatibility-management-page .compatibility-result-table:not(.management-card-active) .cq-user > span {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  border: 0;
+  border-radius: 11px;
+  color: #fff;
+  background: #8f001a;
+  box-shadow: none;
+}
+
+html body.management-consistent-ui.compatibility-management-page .compatibility-result-table:not(.management-card-active) .cq-user > div {
+  min-width: 0;
+}
+
+html body.management-consistent-ui.compatibility-management-page .compatibility-result-table:not(.management-card-active) .cq-user strong,
+html body.management-consistent-ui.compatibility-management-page .compatibility-result-table:not(.management-card-active) .cq-user small,
+html body.management-consistent-ui.compatibility-management-page .compatibility-result-table:not(.management-card-active) .cq-result-id,
+html body.management-consistent-ui.compatibility-management-page .compatibility-result-table:not(.management-card-active) .cq-animal strong {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html body.management-consistent-ui.compatibility-management-page .compatibility-result-table:not(.management-card-active) .cq-user strong {
+  display: block;
+  color: #1f2329;
+  font-size: .78rem;
+  line-height: 1.35;
+}
+
+html body.management-consistent-ui.compatibility-management-page .compatibility-result-table:not(.management-card-active) .cq-user small,
+html body.management-consistent-ui.compatibility-management-page .compatibility-result-table:not(.management-card-active) .cq-result-id {
+  display: block;
+  margin-top: 3px;
+  color: #857a74;
+  font-size: .62rem;
+  line-height: 1.35;
+}
+
+html body.management-consistent-ui.compatibility-management-page .compatibility-result-table:not(.management-card-active) .cq-date,
+html body.management-consistent-ui.compatibility-management-page .compatibility-result-table:not(.management-card-active) .cq-animal {
+  min-width: 0;
+  gap: 7px;
+}
+
+html body.management-consistent-ui.compatibility-management-page .compatibility-result-table:not(.management-card-active) :is(.cq-date, .cq-animal) i {
+  width: auto;
+  height: auto;
+  display: inline;
+  flex: 0 0 auto;
+  color: #8f001a;
+  background: transparent;
+}
+
+html body.management-consistent-ui.compatibility-management-page .compatibility-result-table:not(.management-card-active) :is(.cq-score, .cq-version) {
+  min-height: 28px !important;
+  padding: 5px 8px;
+  font-size: .64rem;
+}
+
+html body.management-consistent-ui.compatibility-management-page .compatibility-result-table:not(.management-card-active) .management-card-actions {
+  overflow: visible;
+  text-align: right !important;
+}
+
+.compatibility-management-page .compatibility-result-table .cq-result-actions {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.compatibility-management-page .compatibility-result-table .cq-result-action-text {
+  display: inline;
+}
+
+html body.management-consistent-ui.compatibility-management-page .compatibility-result-table.management-card-active {
+  min-width: 0 !important;
+}
+
+html body.management-consistent-ui.compatibility-management-page .page-body .cq-records .cq-table-wrap .compatibility-result-table.management-card-active tbody {
+  gap: 11px !important;
+  padding: 12px !important;
+  background: #fff8ee !important;
+}
+
+html body.management-consistent-ui.compatibility-management-page .compatibility-result-table.management-card-active .cq-result-actions {
+  justify-content: stretch;
+}
+
+html body.management-consistent-ui.compatibility-management-page .compatibility-result-table.management-card-active .cq-result-actions .cq-view-result {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+}
+
+@media (max-width: 700px) {
+  html body.management-consistent-ui.compatibility-management-page .cq-records > .reference-table-section-head {
+    min-height: 0;
+    margin-top: 14px;
+    padding: 15px 16px 12px;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .cq-table-wrap {
+    padding: 11px 14px 14px !important;
+    overflow: visible;
+    background: #fff8ee;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .page-body .cq-records .cq-table-wrap .compatibility-result-table.management-card-active tbody {
+    gap: 11px !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+}
+
+/* Questions and Settings share the same calm management workspace treatment. */
+html body.management-consistent-ui.compatibility-management-page .cq-workspace-panel {
+  min-width: 0;
+}
+
+html body.management-consistent-ui.compatibility-management-page [data-cq-panel="settings"] .cq-layout {
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+  align-items: stretch;
+  gap: 16px;
+  margin: 0;
+}
+
+html body.management-consistent-ui.compatibility-management-page :is(.cq-settings, .cq-health, .cq-question-config) {
+  overflow: hidden;
+  border: 1px solid #eadfd4;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 10px 26px rgba(64, 34, 29, .055);
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-settings {
+  padding: 0;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-settings > .cq-card-head,
+html body.management-consistent-ui.compatibility-management-page .cq-question-config-head {
+  min-height: 92px;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #eadfd4;
+  background: #fff;
+}
+
+html body.management-consistent-ui.compatibility-management-page :is(
+  .cq-settings > .cq-card-head,
+  .cq-question-config-head .cq-card-head
+) .cq-card-icon {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  border: 1px solid #f7b538;
+  border-radius: 14px;
+  color: #fff;
+  background: #8f001a;
+  box-shadow: 0 0 0 4px #fff1cf;
+}
+
+html body.management-consistent-ui.compatibility-management-page :is(
+  .cq-settings > .cq-card-head,
+  .cq-question-config-head .cq-card-head
+) :is(h2, p, small) {
+  font-family: "Poppins", sans-serif;
+}
+
+html body.management-consistent-ui.compatibility-management-page :is(
+  .cq-settings > .cq-card-head,
+  .cq-question-config-head .cq-card-head
+) small {
+  color: #780116;
+  font-size: .62rem;
+  letter-spacing: .09em;
+}
+
+html body.management-consistent-ui.compatibility-management-page :is(
+  .cq-settings > .cq-card-head,
+  .cq-question-config-head .cq-card-head
+) h2 {
+  margin-top: 5px;
+  color: #2d2322;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+html body.management-consistent-ui.compatibility-management-page :is(
+  .cq-settings > .cq-card-head,
+  .cq-question-config-head .cq-card-head
+) p {
+  margin-top: 4px;
+  color: #81746d;
+  font-size: .7rem;
+  line-height: 1.45;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-role-badge {
+  flex: 0 0 auto;
+  padding: 7px 10px;
+  border: 1px solid #b9ddc8;
+  border-radius: 999px;
+  color: #23734c;
+  background: #edf8f1;
+  font: 750 .62rem/1 "Poppins", sans-serif;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-settings form {
+  margin: 0;
+  padding: 4px 24px 20px;
+  border: 0;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-setting-row {
+  min-height: 76px;
+  gap: 12px;
+  padding: 15px 0;
+  border-bottom-color: #f0e7df;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-setting-icon {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  border: 1px solid #eadfd4;
+  border-radius: 11px;
+  color: #780116;
+  background: #fff8ee;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-setting-icon:is(.amber, .blue) {
+  color: #780116;
+  background: #fff8ee;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-setting-row strong {
+  color: #332b28;
+  font: 750 .75rem/1.35 "Poppins", sans-serif;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-setting-row small {
+  margin-top: 4px;
+  color: #857a74;
+  font: 500 .63rem/1.45 "Poppins", sans-serif;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-input-unit {
+  height: 44px;
+  min-width: 104px;
+  border-color: #dfd3cb;
+  border-radius: 11px;
+  background: #fff;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-input-unit:focus-within,
+html body.management-consistent-ui.compatibility-management-page .cq-setting-row > input:focus-visible + .cq-switch {
+  border-color: #f7b538;
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(247, 181, 56, .24);
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-input-unit input {
+  width: 66px;
+  color: #2d2322;
+  background: transparent;
+  font: 750 .74rem/1 "Poppins", sans-serif;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-input-unit b {
+  color: #81746d;
+  font: 650 .62rem/1 "Poppins", sans-serif;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-switch {
+  flex: 0 0 47px;
+  border: 1px solid #ddd0c7;
+  background: #eee8e3;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-setting-row > input:checked + .cq-switch {
+  border-color: #780116;
+  background: #780116;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-form-foot {
+  align-items: center;
+  margin-top: 2px;
+  padding-top: 18px;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-form-foot p {
+  color: #81746d;
+  font: 500 .62rem/1.45 "Poppins", sans-serif;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-form-foot button,
+html body.management-consistent-ui.compatibility-management-page .cq-question-actions .cq-btn-primary {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 16px;
+  border: 1px solid #780116;
+  border-radius: 11px;
+  color: #fff;
+  background: #780116;
+  box-shadow: 0 7px 15px rgba(120, 1, 22, .13);
+  font: 750 .7rem/1 "Poppins", sans-serif;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-form-foot button:hover,
+html body.management-consistent-ui.compatibility-management-page .cq-question-actions .cq-btn-primary:hover {
+  border-color: #59000f;
+  background: #59000f;
+  transform: translateY(-1px);
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-health {
+  padding: 0 20px 20px;
+  color: #2d2322;
+  background: #fffaf4;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-health > small {
+  display: block;
+  padding-top: 21px;
+  color: #780116;
+  font: 800 .62rem/1 "Poppins", sans-serif;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-health h2 {
+  margin: 6px 0 16px;
+  color: #2d2322;
+  font: 800 .92rem/1.35 "Poppins", sans-serif;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-health > div {
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  gap: 10px;
+  margin: 8px 0 0;
+  padding: 11px;
+  border: 1px solid #eadfd4;
+  border-radius: 12px;
+  background: #fff;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-health > div > span {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  color: #780116;
+  background: #fff1cf;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-health p strong {
+  color: #443a37;
+  font-size: .68rem;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-health p small {
+  margin-top: 2px;
+  color: #857a74;
+  font-size: .59rem;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-health > div > i {
+  color: #23734c;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-question-config {
+  margin: 0;
+  padding: 0;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-question-config-head {
+  justify-content: space-between;
+  gap: 18px;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-question-summary {
+  min-height: 62px;
+  margin: 0;
+  padding: 13px 24px;
+  border: 0;
+  border-bottom: 1px solid #eadfd4;
+  border-radius: 0;
+  background: #fff8ee;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-question-summary strong {
+  font-size: 1.08rem;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-question-summary p {
+  color: #766a64;
+  font-size: .64rem;
+  line-height: 1.45;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-question-list {
+  gap: 14px;
+  padding: 18px 24px 24px;
+  background: #fff;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-question-group {
+  border-color: #eadfd4;
+  border-radius: 14px;
+  box-shadow: 0 5px 14px rgba(64, 34, 29, .035);
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-question-group > header {
+  min-height: 46px;
+  padding: 11px 14px;
+  border-bottom-color: #eadfd4;
+  background: #fff8ee;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-question-row {
+  gap: 11px;
+  padding: 13px 14px;
+  border-bottom-color: #f0e7df;
+  background: #fff;
+  transition: background-color 160ms ease;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-question-row:hover {
+  background: #fffaf4;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-question-row.is-inactive {
+  background: #faf8f6;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-question-number {
+  border: 1px solid #eadfd4;
+  color: #780116;
+  background: #fff8ee;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-question-copy strong {
+  color: #332b28;
+  font-size: .77rem;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-question-copy p {
+  color: #70645e;
+  font-size: .68rem;
+  line-height: 1.45;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-row-actions button {
+  height: 36px;
+  min-width: 36px;
+  border-radius: 9px;
+  box-shadow: none;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-row-actions .cq-edit-action {
+  padding: 0 11px;
+  border-color: #780116;
+  color: #fff;
+  background: #780116;
+}
+
+html body.management-consistent-ui.compatibility-management-page .cq-row-actions .cq-edit-action:hover {
+  border-color: #59000f;
+  color: #fff;
+  background: #59000f;
+}
+
+@media (max-width: 1050px) {
+  html body.management-consistent-ui.compatibility-management-page [data-cq-panel="settings"] .cq-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .cq-health {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .cq-health > :is(small, h2) {
+    grid-column: 1 / -1;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .cq-health > div {
+    margin: 0;
+  }
+}
+
+@media (max-width: 700px) {
+  html body.management-consistent-ui.compatibility-management-page :is(.cq-settings, .cq-health, .cq-question-config) {
+    border-radius: 16px;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .cq-settings > .cq-card-head,
+  html body.management-consistent-ui.compatibility-management-page .cq-question-config-head {
+    min-height: 0;
+    align-items: flex-start;
+    padding: 17px 16px;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .cq-settings > .cq-card-head {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .cq-settings > .cq-card-head .cq-role-badge {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .cq-settings form {
+    padding: 2px 16px 16px;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .cq-form-foot {
+    align-items: stretch;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .cq-form-foot button {
+    width: 100%;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .cq-health {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 0 16px 16px;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .cq-question-summary {
+    min-height: 0;
+    margin: 0;
+    padding: 12px 16px;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .cq-question-list {
+    gap: 11px;
+    padding: 14px 16px 16px;
+  }
+}
+
+@media (max-width: 520px) {
+  html body.management-consistent-ui.compatibility-management-page .cq-setting-row {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr);
+    align-items: center;
+    gap: 8px 10px;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .cq-setting-row > :is(.cq-switch, .cq-input-unit) {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .cq-question-config-head {
+    flex-direction: column;
+  }
+
+  html body.management-consistent-ui.compatibility-management-page .cq-question-actions,
+  html body.management-consistent-ui.compatibility-management-page .cq-question-actions .cq-btn-primary {
+    width: 100%;
+  }
+}

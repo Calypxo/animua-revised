@@ -60,7 +60,31 @@
     <div><span>Result history</span><h3>Saved compatibility attempts</h3></div>
     <strong id="resultCount">Loading results…</strong>
   </div>
-  <div class="cq-table-wrap"><table class="management-data-table management-card-table compatibility-result-table" data-card-until="1439"><thead><tr><th>User account</th><th>Completed</th><th>Next retake</th><th>Top recommendation</th><th>Match</th><th>Version</th><th>Actions</th></tr></thead><tbody id="resultsBody"><tr><td colspan="7" class="text-center py-5"><div class="um-spinner"></div></td></tr></tbody></table></div>
+  <div class="table-responsive cq-table-wrap">
+    <table class="shelter-table management-data-table management-card-table compatibility-result-table" data-card-until="1365">
+      <colgroup>
+        <col class="cq-col-user" />
+        <col class="cq-col-completed" />
+        <col class="cq-col-retake" />
+        <col class="cq-col-recommendation" />
+        <col class="cq-col-match" />
+        <col class="cq-col-version" />
+        <col class="cq-col-actions" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th><span class="table-heading"><i class="bi bi-person" aria-hidden="true"></i>User account</span></th>
+          <th><span class="table-heading"><i class="bi bi-calendar-check" aria-hidden="true"></i>Completed</span></th>
+          <th><span class="table-heading"><i class="bi bi-arrow-repeat" aria-hidden="true"></i>Next retake</span></th>
+          <th><span class="table-heading"><i class="bi bi-heart" aria-hidden="true"></i>Top recommendation</span></th>
+          <th><span class="table-heading"><i class="bi bi-stars" aria-hidden="true"></i>Match</span></th>
+          <th><span class="table-heading"><i class="bi bi-diagram-3" aria-hidden="true"></i>Version</span></th>
+          <th class="actions-heading"><span class="table-heading">Actions</span></th>
+        </tr>
+      </thead>
+      <tbody id="resultsBody"><tr><td colspan="7" class="text-center py-5"><div class="um-spinner"></div></td></tr></tbody>
+    </table>
+  </div>
 </section>
 </section>
 </main></div></div>
