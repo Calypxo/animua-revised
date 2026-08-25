@@ -120,11 +120,14 @@ export async function handleLogin(event) {
         hideLoginCaptcha();
         await Swal.fire({
           icon: "warning",
-          title: "Use the Management Portal",
-          text: data.message || "Management accounts cannot sign in through the public portal.",
+          title: "Management Use Only",
+          html: `
+            <p>This account is for management use only.</p>
+            <p>Please sign in through the ANIMUA Management Portal.</p>
+          `,
           confirmButtonText: "OK",
           customClass: {
-            popup: "animua-popup animua-auth-feedback-popup",
+            popup: "animua-popup animua-auth-feedback-popup management-only-popup",
             confirmButton: "animua-confirm"
           },
           buttonsStyling: false

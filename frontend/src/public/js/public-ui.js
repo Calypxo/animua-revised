@@ -1172,18 +1172,19 @@ function setupHomeStories() {
   };
 
   const getPetDateValue = (pet = {}) => {
-    const value = pet.createdAt || pet.updatedAt || pet.intakeDate || "";
+    const value =
+      pet.readyForAdoptionAt ||
+      pet.updatedAt ||
+      pet.createdAt ||
+      pet.intakeDate ||
+      "";
     return getTimeValue(value);
   };
 
   const normalizePets = (data) => {
     const rawPets = Array.isArray(data) ? data : data?.pets || [];
     return rawPets
-      .filter((pet) => {
-        const status = String(pet.status || "").toLowerCase();
-        return (!status || status === "ready" || status.includes("adoption")) &&
-          isFreshStoryDate(pet.createdAt || pet.updatedAt || pet.intakeDate);
-      })
+      .filter((pet) => pet?.id)
       .sort((a, b) => getPetDateValue(b) - getPetDateValue(a))
       .slice(0, 3);
   };
@@ -1406,6 +1407,10 @@ function setupHomeStories() {
       titleHtml: `${escapeHtml(name)}<br><span>ready to meet</span>`,
       image: getPetImage(pet),
       imageAlt: `${name} available for adoption`,
+      date: formatStoryDate(
+        pet.readyForAdoptionAt || pet.updatedAt || pet.createdAt || pet.intakeDate,
+        "Newly available",
+      ),
       intro: `${name} is one of the newest furbabies available through ANIMUA.`,
       primary: { label: "View furbabies", href: "find-furbabies.html" },
       contentHtml: `
@@ -1845,7 +1850,12 @@ function setupFeaturedFurbabies() {
   };
 
   const getPetDateValue = (pet = {}) => {
-    const value = pet.createdAt || pet.updatedAt || pet.intakeDate || "";
+    const value =
+      pet.readyForAdoptionAt ||
+      pet.updatedAt ||
+      pet.createdAt ||
+      pet.intakeDate ||
+      "";
     if (value?._seconds) return value._seconds * 1000;
     if (typeof value === "number") return value;
     const parsed = Date.parse(value);

@@ -2433,6 +2433,46 @@ button {
   font-weight: 750 !important;
 }
 
+/* Public-login guidance for management accounts uses a tighter alert scale. */
+.management-only-popup {
+  width: min(360px, calc(100% - 28px)) !important;
+  padding: 21px 26px 20px !important;
+}
+
+.management-only-popup .swal2-icon {
+  width: 58px !important;
+  height: 58px !important;
+  margin-bottom: 11px !important;
+}
+
+.management-only-popup .swal2-icon::before {
+  font-size: 1.55rem !important;
+}
+
+.management-only-popup .swal2-title {
+  font-size: 1.3rem !important;
+  line-height: 1.08 !important;
+}
+
+.management-only-popup .swal2-html-container {
+  max-width: 290px !important;
+  margin: 8px auto 0 !important;
+  font-size: 0.82rem !important;
+  line-height: 1.32 !important;
+}
+
+.management-only-popup .swal2-actions {
+  margin-top: 14px !important;
+}
+
+.management-only-popup .animua-confirm {
+  min-width: 128px !important;
+  min-height: 36px !important;
+  padding: 8px 18px !important;
+  border-radius: 7px !important;
+  font-size: 0.8rem !important;
+}
+
 .animua-feedback-close,
 .animua-logout-close {
   top: 16px !important;

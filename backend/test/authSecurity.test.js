@@ -48,6 +48,7 @@ function loadAuthHelpersWithoutFirebase() {
       storeAndSendOtp: controller.storeAndSendOtp,
       isEligibleManagementUserData: controller.isEligibleManagementUserData,
       requestManagementPasswordResetOtp: controller.requestManagementPasswordResetOtp,
+      login: controller.login,
       managementResetNeutralMessage: controller.MANAGEMENT_RESET_NEUTRAL_MESSAGE,
       setFakeUser(email, data) { fakeUsers.set(email, data); },
     };
@@ -70,6 +71,7 @@ const {
   storeAndSendOtp,
   isEligibleManagementUserData,
   requestManagementPasswordResetOtp,
+  login,
   managementResetNeutralMessage,
   setFakeUser,
 } = loadAuthHelpersWithoutFirebase();
@@ -146,6 +148,39 @@ test("management login verifies bcrypt passwords without requesting migration", 
   assert.deepEqual(
     await verifyStoredPassword("wrong-password", passwordHash),
     { isMatch: false, needsRehash: false }
+  );
+});
+
+test("valid management credentials on the public portal return management-only guidance", async () => {
+  const bcrypt = require("bcryptjs");
+  const email = "staff.portal@animua.test";
+  setFakeUser(email, {
+    email,
+    fullName: "Portal Staff",
+    role: "Staff",
+    status: "Active",
+    password: await bcrypt.hash("SecurePass1!", 4),
+  });
+  const response = {
+    statusCode: 200,
+    payload: null,
+    status(code) { this.statusCode = code; return this; },
+    json(payload) { this.payload = payload; return this; },
+  };
+
+  await login({
+    body: {
+      email,
+      password: "SecurePass1!",
+      portal: "public",
+    },
+  }, response);
+
+  assert.equal(response.statusCode, 403);
+  assert.equal(response.payload.code, "MANAGEMENT_PORTAL_REQUIRED");
+  assert.equal(
+    response.payload.message,
+    "This account is for management use only. Please sign in through the ANIMUA Management Portal.",
   );
 });
 

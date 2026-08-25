@@ -49,10 +49,9 @@ let surrenderAcceptingRequests = true;
 let isSyncingQueuedSurrenders = false;
 const surrenderSelectMenus = [];
 
-const MAX_ANIMAL_PHOTO_SIZE = 650 * 1024;
-const MAX_ID_UPLOAD_SIZE = 5 * 1024 * 1024;
-const MAX_ID_PHOTO_SIZE = 400 * 1024;
-const MAX_ID_PHOTO_SIDE = 1600;
+const MAX_IMAGE_UPLOAD_SIZE = 5 * 1024 * 1024;
+const MAX_PROCESSED_IMAGE_SIZE = 400 * 1024;
+const MAX_PROCESSED_IMAGE_SIDE = 1600;
 
 function getFormValue(id) {
   return document.getElementById(id)?.value.trim() || "";
@@ -277,8 +276,9 @@ function bindAnimalPhotoUpload() {
   const input = document.getElementById("animalPhoto");
   if (!input) return;
 
-  input.addEventListener("change", () => {
+  input.addEventListener("change", async () => {
     const file = input.files?.[0];
+    input.setCustomValidity("");
     setAnimalPhotoError("");
     clearAnimalPhotoPreview();
     if (!file) return;
@@ -289,30 +289,36 @@ function bindAnimalPhotoUpload() {
       return;
     }
 
-    if (file.size > MAX_ANIMAL_PHOTO_SIZE) {
+    if (file.size > MAX_IMAGE_UPLOAD_SIZE) {
       input.value = "";
-      setAnimalPhotoError("Photo must be 650 KB or smaller.");
+      setAnimalPhotoError("Animal photo must be 5 MB or smaller.");
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = typeof reader.result === "string" ? reader.result : "";
-      if (!dataUrl) {
-        setAnimalPhotoError("We could not preview this photo. Please choose another image.");
-        return;
-      }
-      animalPhotoData = { name: file.name, type: file.type, size: file.size, dataUrl };
+    const label = document.getElementById("animalPhotoLabel");
+    if (label) label.textContent = "Optimizing photo...";
+    input.setCustomValidity("Please wait while the animal photo is prepared.");
+
+    try {
+      const fileData = await optimizeImageUpload(file, {
+        fallbackName: "animal-photo",
+        label: "animal photo",
+      });
+      if (input.files?.[0] !== file) return;
+      input.setCustomValidity("");
+      animalPhotoData = fileData;
       const preview = document.getElementById("animalPhotoPreview");
-      const label = document.getElementById("animalPhotoLabel");
-      if (preview) preview.innerHTML = `<img src="${dataUrl}" alt="">`;
-      if (label) label.textContent = file.name;
-    };
-    reader.onerror = () => {
+      if (preview) preview.innerHTML = `<img src="${fileData.dataUrl}" alt="">`;
+      if (label) {
+        label.textContent = fileData.name;
+        label.title = fileData.name;
+      }
+    } catch (error) {
+      input.setCustomValidity("");
       input.value = "";
-      setAnimalPhotoError("We could not read this photo. Please choose another image.");
-    };
-    reader.readAsDataURL(file);
+      clearAnimalPhotoPreview();
+      setAnimalPhotoError(error.message || "We could not prepare this animal photo. Please choose another image.");
+    }
   });
 }
 
@@ -349,31 +355,31 @@ function getDataUrlByteSize(dataUrl = "") {
   return Math.max(0, Math.ceil((encoded.length * 3) / 4) - padding);
 }
 
-function loadIdentityImage(file) {
+function loadUploadImage(file, label = "photo") {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
       const image = new Image();
       image.onload = () => resolve(image);
-      image.onerror = () => reject(new Error("We could not open this ID photo. Please choose another image."));
+      image.onerror = () => reject(new Error(`We could not open this ${label}. Please choose another image.`));
       image.src = reader.result;
     };
-    reader.onerror = () => reject(new Error("We could not read this ID photo. Please choose another image."));
+    reader.onerror = () => reject(new Error(`We could not read this ${label}. Please choose another image.`));
     reader.readAsDataURL(file);
   });
 }
 
-async function optimizeIdentityImage(file) {
-  const image = await loadIdentityImage(file);
+async function optimizeImageUpload(file, { fallbackName = "photo", label = "photo" } = {}) {
+  const image = await loadUploadImage(file, label);
   const originalMaxSide = Math.max(image.naturalWidth || image.width, image.naturalHeight || image.height);
-  let scale = Math.min(1, MAX_ID_PHOTO_SIDE / originalMaxSide);
+  let scale = Math.min(1, MAX_PROCESSED_IMAGE_SIDE / originalMaxSide);
 
   while (scale > 0.2) {
     const canvas = document.createElement("canvas");
     canvas.width = Math.max(1, Math.round((image.naturalWidth || image.width) * scale));
     canvas.height = Math.max(1, Math.round((image.naturalHeight || image.height) * scale));
     const context = canvas.getContext("2d");
-    if (!context) throw new Error("This browser could not prepare the ID photo.");
+    if (!context) throw new Error(`This browser could not prepare the ${label}.`);
 
     context.fillStyle = "#ffffff";
     context.fillRect(0, 0, canvas.width, canvas.height);
@@ -382,9 +388,9 @@ async function optimizeIdentityImage(file) {
     for (let quality = 0.9; quality >= 0.5; quality -= 0.08) {
       const dataUrl = canvas.toDataURL("image/jpeg", quality);
       const size = getDataUrlByteSize(dataUrl);
-      if (size <= MAX_ID_PHOTO_SIZE) {
+      if (size <= MAX_PROCESSED_IMAGE_SIZE) {
         return {
-          name: `${file.name.replace(/\.[^.]+$/, "") || "valid-id"}.jpg`,
+          name: `${file.name.replace(/\.[^.]+$/, "") || fallbackName}.jpg`,
           type: "image/jpeg",
           size,
           dataUrl,
@@ -395,7 +401,7 @@ async function optimizeIdentityImage(file) {
     scale *= 0.82;
   }
 
-  throw new Error("We could not optimize this ID photo. Please choose a clearer or smaller image.");
+  throw new Error(`We could not optimize this ${label}. Please choose a clearer or smaller image.`);
 }
 
 function bindIdentityDocumentUploads() {
@@ -414,7 +420,7 @@ function bindIdentityDocumentUploads() {
         return;
       }
 
-      if (file.size > MAX_ID_UPLOAD_SIZE) {
+      if (file.size > MAX_IMAGE_UPLOAD_SIZE) {
         input.value = "";
         setFieldError(input, "ID photo must be 5 MB or smaller.");
         return;
@@ -425,7 +431,10 @@ function bindIdentityDocumentUploads() {
       input.setCustomValidity("Please wait while the ID photo is prepared.");
 
       try {
-        const fileData = await optimizeIdentityImage(file);
+        const fileData = await optimizeImageUpload(file, {
+          fallbackName: "valid-id",
+          label: "ID photo",
+        });
         if (input.files?.[0] !== file) return;
         input.setCustomValidity("");
         identityDocumentData[side] = fileData;
