@@ -1,4 +1,4 @@
-const CACHE_VERSION = "animua-public-v25";
+const CACHE_VERSION = "animua-public-v26";
 const BUILD_ASSET_MANIFEST = "/pwa-assets.json";
 const APP_SHELL = [
   "/",

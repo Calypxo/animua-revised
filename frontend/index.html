@@ -1,122 +1,13 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <link rel="icon" type="image/png" href="/favicon.png?v=02cfed39065d" />
-  <link rel="manifest" href="/manifest.webmanifest" />
-  <link rel="apple-touch-icon" href="/favicon.png?v=02cfed39065d" />
-  <meta name="theme-color" content="#8E2A20" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-title" content="ANIMUA" />
-  <title>ANIMUA - Access Portal</title>
-
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="refresh" content="0; url=/pages/public/home.html">  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha384-PPIZEGYM1v8zp5Py7UjFb79S58UeqCL9pYVnVPURKEqvioPROaVAJKKLzvH2rDnI" crossorigin="anonymous">
-  <link rel="stylesheet" href="/src/css/global.css?v=welcome-toast-balanced-20260821">
+  <meta http-equiv="refresh" content="0; url=/pages/public/home.html" />
+  <title>ANIMUA</title>
+  <script>
+    window.location.replace("/pages/public/home.html");
+  </script>
 </head>
-<body>
-
-  <a href="/" class="login-btn" id="openAuthModal" aria-label="Login" style="margin:40px; display:inline-flex;">
-    <i class="fa-regular fa-user"></i>
-  </a>
-
-  <div class="auth-modal-overlay hidden" id="authModal">
-    <div class="auth-modal-card auth-modal-small" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
-
-      <button class="auth-close-btn" type="button" id="closeAuthModal" aria-label="Close">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-
-      <div class="auth-modal-left auth-modal-left-simple">
-        <div class="auth-brand-badge">ANIMUA</div>
-        <span class="auth-side-tag" id="authSideTag">Welcome Back</span>
-        <h1 id="authModalTitle">Hello,<br>Welcome back to Animua!</h1>
-        <p id="authSideText">
-          Log in to continue exploring rescued animals and shelter services.
-        </p>
-      </div>
-
-      <div class="auth-modal-right">
-        <div id="login-section">
-          <h2 class="auth-title">Login</h2>
-
-          <form id="login-form" novalidate>
-            <div class="auth-field">
-              <input type="email" id="login-email" placeholder="Email" required>
-              <span><i class="fa-regular fa-envelope"></i></span>
-            </div>
-            <small class="auth-error" id="login-email-error"></small>
-
-            <div class="auth-field">
-              <input type="password" id="login-password" placeholder="Password" required minlength="6">
-              <span class="toggle-password" data-target="login-password">
-                <i class="fa-regular fa-eye-slash"></i>
-              </span>
-            </div>
-            <small class="auth-error" id="login-password-error"></small>
-
-            <div class="auth-extra-row">
-              <a href="#" class="auth-muted-link">Forgot password?</a>
-            </div>
-
-            <button type="submit" class="auth-submit-btn">Login</button>
-          </form>
-
-          <div class="auth-switch-text">
-            Don’t have an account?
-            <button type="button" class="auth-switch-btn" onclick="toggleAuthView()">Register here</button>
-          </div>
-        </div>
-
-        <div id="register-section" class="hidden">
-          <h2 class="auth-title">Create Account</h2>
-
-          <form id="register-form" novalidate>
-            <div class="auth-field">
-              <input type="text" id="reg-name" placeholder="Full Name" required minlength="2">
-              <span><i class="fa-regular fa-user"></i></span>
-            </div>
-            <small class="auth-error" id="reg-name-error"></small>
-
-            <div class="auth-field">
-              <input type="email" id="reg-email" placeholder="Email Address" required>
-              <span><i class="fa-regular fa-envelope"></i></span>
-            </div>
-            <small class="auth-error" id="reg-email-error"></small>
-
-            <div class="auth-field">
-              <input type="password" id="reg-password" placeholder="Create Password" required minlength="6">
-              <span class="toggle-password" data-target="reg-password">
-                <i class="fa-regular fa-eye-slash"></i>
-              </span>
-            </div>
-
-            <!-- ✅ ADDED: Password strength meter -->
-            <div id="password-strength-box">
-              <small id="password-strength-text"></small>
-            </div>
-
-            <small class="auth-error" id="reg-password-error"></small>
-
-            <button type="submit" class="auth-submit-btn">Sign Up</button>
-          </form>
-
-          <div class="auth-switch-text">
-            Already a member?
-            <button type="button" class="auth-switch-btn" onclick="toggleAuthView()">Login here</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script type="module" src="./src/public/js/public-ui.js?v=welcome-toast-balanced-20260821"></script>
-
-  <script type="module" src="/src/public/js/pwa-register.js"></script>
-</body>
+<body></body>
 </html>

@@ -82,7 +82,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   shell.querySelectorAll(".adopt-btn").forEach(btn => {
     btn.addEventListener("click", () => {
       sessionStorage.setItem("animua_selected_pet_id", btn.dataset.petId);
-      if (!hasUserSession()) { window.location.href = "/index.html"; return; }
+      if (!hasUserSession()) { window.location.href = "/pages/public/home.html"; return; }
       window.location.href = "/pages/public/find-furbabies.html";
     });
   });

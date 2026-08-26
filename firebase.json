@@ -49,6 +49,18 @@
           ]
         }
       ],
+      "redirects": [
+        {
+          "source": "/",
+          "destination": "/pages/public/home.html",
+          "type": 302
+        },
+        {
+          "source": "/index.html",
+          "destination": "/pages/public/home.html",
+          "type": 302
+        }
+      ],
       "rewrites": [{ "source": "**", "destination": "/index.html" }]
     },
     {
