@@ -5,11 +5,11 @@ import {
   getUserSession,
   hasUserSession,
 } from "../../utils/storage.js";
+import { initializePublicNotifications } from "./public-notifications.js";
 
 const menuToggle = document.getElementById("menuToggle");
 const navbar = document.getElementById("navbar");
 const header = document.querySelector(".header");
-const notificationBtn = document.getElementById("notificationBtn");
 const notificationPopup = document.getElementById("notificationPopup");
 const loginNavBtn = document.getElementById("loginNavBtn");
 const authModal = document.getElementById("authModal");
@@ -151,11 +151,6 @@ function bindHeader() {
 }
 
 function bindMenus() {
-  notificationBtn?.addEventListener("click", (event) => {
-    event.stopPropagation();
-    notificationPopup?.classList.toggle("show");
-  });
-
   userMenuBtn?.addEventListener("click", (event) => {
     event.stopPropagation();
     userDropdown?.classList.toggle("hidden");
@@ -247,6 +242,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   bindAuthForms();
   bindPasswordToggles();
   updateAuthUI();
+  initializePublicNotifications();
   loginNavBtn?.addEventListener("click", openAuthModal);
   closeAuthModalBtn?.addEventListener("click", closeAuthModal);
   authModal?.addEventListener("click", (event) => {
