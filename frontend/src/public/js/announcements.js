@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "../../utils/api.js";
+import { optimizedPublicImageUrl } from "../../utils/image.js";
 import { ensureUserSession, hasUserSession } from "../../utils/storage.js";
 import { compareEventDates, isUpcomingEventDate } from "./announcement-date-utils.js";
 
@@ -218,16 +219,25 @@ function openTypeDropdown() {
   typeToggle?.setAttribute("aria-expanded", "true");
 }
 
-function createMedia(item, type) {
+function createMedia(item, type, { isFeatured = false } = {}) {
   const media = document.createElement("div");
   media.className = `announcement-card-media media-${TYPES[type].slug}`;
 
   const image = document.createElement("img");
-  image.src = getImage(item, type);
+  const originalSrc = getImage(item, type);
+  image.src = optimizedPublicImageUrl(originalSrc, isFeatured ? 720 : 520) || originalSrc;
+  image.dataset.originalSrc = originalSrc;
   image.alt = item.title ? `${displayText(item.title)} cover` : `${type} cover`;
   image.loading = "lazy";
   image.decoding = "async";
+  image.fetchPriority = "low";
   image.addEventListener("error", () => {
+    const fallbackSrc = image.dataset.originalSrc || "";
+    image.dataset.originalSrc = "";
+    if (fallbackSrc && image.src !== fallbackSrc) {
+      image.src = fallbackSrc;
+      return;
+    }
     image.remove();
     media.classList.add("is-placeholder");
     media.append(icon(TYPES[type].icon));
@@ -246,7 +256,7 @@ function createPost(item, { isFeatured = false } = {}) {
     article.dataset.announcementId = storyId;
     article.classList.toggle("is-targeted", storyId === state.targetedId);
   }
-  article.appendChild(createMedia(item, type));
+  article.appendChild(createMedia(item, type, { isFeatured }));
 
   const body = document.createElement("div");
   body.className = "announcement-card-body";
@@ -451,6 +461,7 @@ async function showAnnouncementDetail(item) {
   const detailLabel = type === "News & Article" ? "News & Alerts" : TYPES[type].label;
   const titleClass = title.length > 58 ? " is-long-title" : "";
   const fallbackImage = FALLBACK_IMAGES[type] || NEWS_CCA_CAT_RESCUE_IMAGE;
+  const optimizedDetailImage = optimizedPublicImageUrl(image, 900) || image;
 
   Swal.fire({
     html: `
@@ -467,7 +478,7 @@ async function showAnnouncementDetail(item) {
           <span><i class="fa-solid fa-building-columns" aria-hidden="true"></i>${escapeHtml(source)}</span>
         </div>
         <button type="button" class="announcement-detail-photo-button" data-announcement-photo-src="${escapeHtml(image)}" data-announcement-photo-title="${escapeHtml(title)}" aria-label="View full photo for ${escapeHtml(title)}">
-          <img src="${escapeHtml(image)}" alt="${escapeHtml(title)}" data-fallback-src="${escapeHtml(fallbackImage)}">
+          <img src="${escapeHtml(optimizedDetailImage)}" alt="${escapeHtml(title)}" data-original-src="${escapeHtml(image)}" data-fallback-src="${escapeHtml(fallbackImage)}" loading="eager" decoding="async" fetchpriority="high">
           <span><i class="fa-solid fa-expand" aria-hidden="true"></i></span>
         </button>
         <div class="announcement-detail-copy">
@@ -509,8 +520,15 @@ async function showAnnouncementDetail(item) {
       });
       popup.querySelectorAll(".announcement-detail-photo-button img").forEach((photo) => {
         photo.addEventListener("error", () => {
+          const originalSrc = photo.dataset.originalSrc;
+          if (originalSrc && photo.src !== originalSrc) {
+            photo.dataset.originalSrc = "";
+            photo.src = originalSrc;
+            return;
+          }
           const fallbackSrc = photo.dataset.fallbackSrc;
           if (fallbackSrc && photo.src !== fallbackSrc) {
+            photo.dataset.fallbackSrc = "";
             photo.src = fallbackSrc;
             const photoButton = photo.closest("[data-announcement-photo-src]");
             if (photoButton) photoButton.dataset.announcementPhotoSrc = fallbackSrc;
@@ -525,7 +543,7 @@ async function showAnnouncementDetail(item) {
         Swal.fire({
           html: `
             <figure class="announcement-photo-viewer">
-              <img src="${escapeHtml(photoSrc)}" alt="${escapeHtml(photoTitle)}">
+              <img src="${escapeHtml(photoSrc)}" alt="${escapeHtml(photoTitle)}" decoding="async">
               <button type="button" class="announcement-photo-inline-close" data-announcement-photo-close aria-label="Close full photo">
                 <i class="fa-solid fa-xmark" aria-hidden="true"></i>
               </button>

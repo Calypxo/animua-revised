@@ -2,6 +2,7 @@ import Swal from "sweetalert2";
 import { handleLogin } from "../../auth/login.js";
 import { handleRegistration } from "../../auth/register.js";
 import { API_BASE_URL } from "../../utils/api.js";
+import { optimizedPublicImageUrl } from "../../utils/image.js";
 import { auth } from "../../utils/firebase.js";
 import { signOut } from "firebase/auth";
 import {
@@ -16,6 +17,18 @@ import {
 
 const CHATBOT_MIN_TYPING_MS = 1000;
 const PASSWORD_OTP_RESEND_SECONDS = 60;
+
+function setOptimizedImageSource(image, source, width) {
+  if (!image) return;
+  const originalSrc = String(source || "").trim();
+  image.dataset.originalSrc = originalSrc;
+  image.onerror = () => {
+    const fallbackSrc = image.dataset.originalSrc || "";
+    image.dataset.originalSrc = "";
+    if (fallbackSrc && image.src !== fallbackSrc) image.src = fallbackSrc;
+  };
+  image.src = optimizedPublicImageUrl(originalSrc, width) || originalSrc;
+}
 const NEWS_CCA_CAT_RESCUE_IMAGE = new URL(
   "../../assets/images/news-cca-cat-rescue.png",
   import.meta.url
@@ -1135,12 +1148,12 @@ function setupHomeStories() {
     updateStoryNavigation(progressCount);
 
     if (storyModalImage) {
-      storyModalImage.src = config.image || "";
+      setOptimizedImageSource(storyModalImage, config.image || "", 900);
       storyModalImage.alt = config.imageAlt || config.title || "";
     }
     if (storyModalAvatar) {
       const avatarImage = config.avatarImage || config.image || "";
-      storyModalAvatar.src = avatarImage;
+      setOptimizedImageSource(storyModalAvatar, avatarImage, 180);
       storyModalAvatar.closest(".story-modal-avatar")?.classList.toggle("is-empty", !avatarImage);
     }
     if (storyModalTag) storyModalTag.textContent = config.tag || "";
@@ -1455,7 +1468,7 @@ function setupHomeStories() {
     const img = button?.querySelector(".highlight-cover img");
     if (!button || !img || !image) return;
 
-    img.src = image;
+    setOptimizedImageSource(img, image, 480);
     img.alt = alt || img.alt || "";
   };
 
@@ -1510,7 +1523,7 @@ function setupHomeStories() {
       upcomingEventMedia.hidden = !image;
       upcomingEventSection.classList.toggle("is-text-only", !image);
       if (image) {
-        upcomingEventImage.src = image;
+        setOptimizedImageSource(upcomingEventImage, image, 720);
         upcomingEventImage.alt = title;
       }
     }
@@ -1891,13 +1904,15 @@ function setupFeaturedFurbabies() {
 
     const cards = pets.slice(0, 3).map((pet, index) => {
       const name = getFeaturedName(pet);
+      const originalImage = pet.photoURL || fallbackPetImage(pet);
+      const cardImage = optimizedPublicImageUrl(originalImage, 560) || originalImage;
       const typeIcon = String(pet.species || "").toLowerCase().includes("dog") ? "fa-dog" : "fa-cat";
       const facts = getFeaturedFacts(pet)
         .map((fact) => `<span>${escapeHtml(fact)}</span>`)
         .join("");
       return `
         <button type="button" class="featured-furbaby-card ${index === 0 ? "is-featured" : ""}" data-pet-id="${escapeHtml(pet.id || "")}" aria-label="View profile for ${escapeHtml(name)}">
-          <img src="${escapeHtml(pet.photoURL || fallbackPetImage(pet))}" alt="${escapeHtml(name)} available for adoption" width="720" height="540" loading="lazy" decoding="async">
+          <img src="${escapeHtml(cardImage)}" data-original-src="${escapeHtml(originalImage)}" alt="${escapeHtml(name)} available for adoption" width="720" height="540" loading="lazy" decoding="async" fetchpriority="low">
           <span class="featured-furbaby-card-copy">
             <strong>${escapeHtml(name)}</strong>
             <em><i class="fa-solid ${typeIcon}" aria-hidden="true"></i>${facts}</em>
@@ -1936,8 +1951,14 @@ function setupFeaturedFurbabies() {
     grid.querySelectorAll(".featured-furbaby-card img").forEach((image, index) => {
       const pet = pets[index];
       image.addEventListener("error", () => {
+        const originalSrc = image.dataset.originalSrc || "";
+        image.dataset.originalSrc = "";
+        if (originalSrc && image.src !== originalSrc) {
+          image.src = originalSrc;
+          return;
+        }
         image.src = fallbackPetImage(pet);
-      }, { once: true });
+      });
     });
 
     grid.querySelectorAll(".featured-furbaby-card").forEach((button) => {

@@ -10,6 +10,10 @@ import { protectManagementPage } from "../auth/authGuard.js";
 import { renderTopbarUser }      from "../components/management/topbarUser.js";
 import { loadSidebar, navigateManagementPage } from "../components/management/sidebarLoader.js";
 import { getAllAnimals }         from "../services/animal.service.js";
+import {
+  installManagementImageFallbacks,
+  optimizedManagementImageUrl,
+} from "../utils/image.js";
 
 renderPageHeader(PAGE_HEADER_CONFIGS.animalProfiling);
 
@@ -222,14 +226,16 @@ function renderTable() {
   tbody.innerHTML = page.map(a => {
     const days = daysSince(a.intakeDate);
     const displayLabel = animalDisplayLabel(a);
+    const originalPhoto = String(a.photoURL || "").trim();
+    const cardPhoto = optimizedManagementImageUrl(originalPhoto, 480);
     const housingLabel = a.cageNumber
       ? `Cage ${a.cageNumber}`
       : a.housingType || "Unassigned";
     return `
     <article class="animal-record-card" data-id="${a.id || ""}" role="listitem" tabindex="0" aria-label="Open profile for ${displayLabel}">
       <div class="animal-record-media">
-        ${a.photoURL
-          ? `<img src="${a.photoURL}" alt="${displayLabel}" class="animal-record-photo">`
+        ${originalPhoto
+          ? `<img src="${cardPhoto}" data-original-src="${originalPhoto}" alt="${displayLabel}" class="animal-record-photo" loading="lazy" decoding="async" fetchpriority="low"><div class="animal-record-fallback" data-image-fallback hidden><span>${speciesInitial(a.species)}</span><small>${a.species || "Animal"}</small></div>`
           : `<div class="animal-record-fallback"><span>${speciesInitial(a.species)}</span><small>${a.species || "Animal"}</small></div>`}
         <span class="animal-record-id"><i class="bi bi-upc-scan"></i>${a.id || "No ID"}</span>
       </div>
@@ -260,6 +266,8 @@ function renderTable() {
       </div>
     </article>`;
   }).join("");
+
+  installManagementImageFallbacks(tbody);
 
   tbody.querySelectorAll(".animal-record-card[data-id]").forEach(card => {
     const openProfile = () => {

@@ -1,4 +1,8 @@
 import { API_BASE_URL } from "../utils/api.js";
+import {
+  installManagementImageFallbacks,
+  optimizedManagementImageUrl,
+} from "../utils/image.js";
 import "../css/animalProfiling.css";
 import "../css/managementTables.css";
 
@@ -672,9 +676,12 @@ function renderHero() {
   document.getElementById("profileName").textContent = displayLabel;
   document.getElementById("profileStatusBadge").innerHTML = statusBadge(animal.status);
   const profilePhotoEl = document.getElementById("profilePhoto");
-  profilePhotoEl.innerHTML = animal.photoURL
-    ? `<img src="${animal.photoURL}" alt="${displayLabel}" />`
+  const originalPhoto = String(animal.photoURL || "").trim();
+  const profilePhoto = optimizedManagementImageUrl(originalPhoto, 320);
+  profilePhotoEl.innerHTML = originalPhoto
+    ? `<img src="${profilePhoto}" data-original-src="${originalPhoto}" alt="${displayLabel}" loading="eager" decoding="async" fetchpriority="high" /><span class="profile-photo-initial" data-image-fallback hidden aria-label="${animal.species || "Animal"}">${speciesInitial(animal.species)}</span>`
     : `<span class="profile-photo-initial" aria-label="${animal.species || "Animal"}">${speciesInitial(animal.species)}</span>`;
+  installManagementImageFallbacks(profilePhotoEl);
   const removePhotoButton = document.getElementById("btnRemovePhoto");
   if (removePhotoButton) {
     removePhotoButton.style.display = animal.photoURL && can("upload_photo") ? "" : "none";
@@ -2260,6 +2267,7 @@ async function init() {
         <img
           src="${readerEvent.target.result}"
           alt="${animalDisplayLabel()}"
+          decoding="async"
         />
       `;
     };

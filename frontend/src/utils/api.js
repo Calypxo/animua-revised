@@ -1,6 +1,6 @@
 const PRODUCTION_API_BASE_URL = "https://animua-backend.onrender.com/api";
 
-const configuredApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim().replace(/\/+$/, "");
+const configuredApiBaseUrl = import.meta.env?.VITE_API_BASE_URL?.trim().replace(/\/+$/, "");
 
 const currentHostname = globalThis.window?.location?.hostname || "localhost";
 const isLocalHost =

@@ -4,6 +4,7 @@ import dogFallbackImage from "../../assets/images/optimized/home/hero-shelter-do
 import catFallbackImage from "../../assets/images/optimized/home/highlight-new-furbabies-cat-360.webp";
 import { createSelectionFocusGuard } from "./adoption-ui-state.js";
 import { ensureUserSession, getUserSession, hasUserSession } from "../../utils/storage.js";
+import { optimizedPublicImageUrl } from "../../utils/image.js";
 import {
   deleteQueuedPublicRequest,
   getQueuedPublicRequests,
@@ -87,6 +88,9 @@ let adoptionSelectMenus = [];
 const ADOPTION_PENDING_SOURCE = "find_furbabies_adopt_click";
 const ADOPTION_PENDING_MAX_AGE_MS = 15 * 60 * 1000;
 const ADOPTION_RESUME_FLAG = "animua_resume_adoption_after_auth";
+const PET_CARD_IMAGE_WIDTH = 560;
+const PET_PROFILE_IMAGE_WIDTH = 900;
+const PET_SELECTION_IMAGE_WIDTH = 320;
 
 function textOr(value, fallback = "Not recorded") {
   const text = String(value ?? "").trim();
@@ -1044,6 +1048,32 @@ function fallbackImageForPet(type) {
   return type === "cat" ? catFallbackImage : dogFallbackImage;
 }
 
+function setPetImageSource(image, pet, width) {
+  if (!image || !pet) return;
+  const originalSrc = String(pet.image || "").trim();
+  const fallbackSrc = fallbackImageForPet(pet.type);
+  image.dataset.originalSrc = originalSrc;
+  image.dataset.fallbackSrc = fallbackSrc;
+  image.onerror = () => recoverPetImage(image);
+  image.src = optimizedPublicImageUrl(originalSrc, width) || fallbackSrc;
+}
+
+function recoverPetImage(image) {
+  const originalSrc = image?.dataset?.originalSrc || "";
+  const fallbackSrc = image?.dataset?.fallbackSrc || "";
+
+  if (originalSrc && image.src !== originalSrc) {
+    image.dataset.originalSrc = "";
+    image.src = originalSrc;
+    return;
+  }
+
+  if (fallbackSrc && image.src !== fallbackSrc) {
+    image.dataset.fallbackSrc = "";
+    image.src = fallbackSrc;
+  }
+}
+
 function dateValue(value) {
   if (!value) return 0;
   if (value.seconds) return value.seconds * 1000;
@@ -1164,9 +1194,11 @@ function renderPets(list) {
       ["fa-paw", "Breed", pet.breed],
       ["fa-palette", "Color / Markings", pet.color],
     ];
+    const originalImage = String(pet.image || "").trim();
+    const cardImage = optimizedPublicImageUrl(originalImage, PET_CARD_IMAGE_WIDTH) || fallbackImageForPet(pet.type);
     card.innerHTML = `
       <div class="pet-card-image">
-        <img src="${escapeHtml(pet.image)}" alt="${escapeHtml(pet.name)}" data-fallback-src="${escapeHtml(fallbackImageForPet(pet.type))}" width="720" height="540" loading="lazy" decoding="async">
+        <img src="${escapeHtml(cardImage)}" alt="${escapeHtml(pet.name)}" data-original-src="${escapeHtml(originalImage)}" data-fallback-src="${escapeHtml(fallbackImageForPet(pet.type))}" width="720" height="540" loading="lazy" decoding="async" fetchpriority="low">
         <span class="pet-badge">${petType}</span>
         <span class="pet-ready-badge"><i class="fa-solid fa-circle" aria-hidden="true"></i> Ready</span>
       </div>
@@ -1230,9 +1262,7 @@ function renderPets(list) {
 
     const img = card.querySelector('.pet-card-image img');
     img.addEventListener('error', function() {
-      if (this.src !== this.dataset.fallbackSrc) {
-        this.src = this.dataset.fallbackSrc;
-      }
+      recoverPetImage(this);
     });
     img.addEventListener('load', function() {
       this.style.objectPosition = this.naturalHeight > this.naturalWidth
@@ -1377,7 +1407,7 @@ function openProfileModal(pet) {
   }
 
   currentPetForAdoption = pet;
-  profileImage.src = pet.image;
+  setPetImageSource(profileImage, pet, PET_PROFILE_IMAGE_WIDTH);
   profileImage.style.objectPosition = "center center";
   profileImage.alt = pet.name;
  profileType.textContent =
@@ -1542,7 +1572,7 @@ function showAdoptModalForPet(pet) {
     selectedPetStatus.textContent = pet.status || "Ready for Adoption";
   }
   if (selectedPetImage) {
-    selectedPetImage.src = pet.image;
+    setPetImageSource(selectedPetImage, pet, PET_SELECTION_IMAGE_WIDTH);
     selectedPetImage.alt = pet.name;
   }
   prefillApplicantFromAccount();

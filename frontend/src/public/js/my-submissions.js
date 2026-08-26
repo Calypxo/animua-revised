@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "../../utils/api.js";
+import { optimizedPublicImageUrl } from "../../utils/image.js";
 import { ensureUserSession, hasUserSession } from "../../utils/storage.js";
 import {
   mergeSubmissionResults,
@@ -132,11 +133,7 @@ function escapeHtml(value) {
 }
 
 function optimizedSubmissionImageUrl(imageUrl) {
-  const value = String(imageUrl || "").trim();
-  if (!value || value.startsWith("data:") || value.startsWith("blob:")) return value;
-  if (!/^https?:\/\//i.test(value)) return value;
-
-  return `${API_BASE_URL}/public/optimized-image?width=${OPTIMIZED_SUBMISSION_IMAGE_WIDTH}&src=${encodeURIComponent(value)}`;
+  return optimizedPublicImageUrl(imageUrl, OPTIMIZED_SUBMISSION_IMAGE_WIDTH);
 }
 
 function submissionImageSources(imageUrl, fallbackImage) {

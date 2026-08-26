@@ -16,6 +16,10 @@ import {
 } from "../components/management/managementAlerts.js";
 import { getUserName }           from "../utils/storage.js";
 import {
+  installManagementImageFallbacks,
+  optimizedManagementImageUrl,
+} from "../utils/image.js";
+import {
   getAllAdoptions,
   approveAdoption,
   rejectAdoption,
@@ -272,7 +276,10 @@ function renderTable() {
     return;
   }
 
-  tbody.innerHTML = page.map(a => `
+  tbody.innerHTML = page.map(a => {
+    const originalPhoto = String(a.animal.photoURL || "").trim();
+    const thumbnail = optimizedManagementImageUrl(originalPhoto, 128);
+    return `
     <tr data-id="${a.id}" class="management-card-row ${a.id===activeAppId?"row-active":""}">
       <td class="app-id-cell management-review-application-field" data-label="Application">${a.applicationId}</td>
       <td class="management-card-primary management-review-card-header management-review-identity management-review-applicant-field" data-label="Applicant">
@@ -286,7 +293,7 @@ function renderTable() {
       </td>
       <td class="management-review-identity management-review-animal-field" data-label="Animal">
         <div class="animal-mini">
-          <div class="animal-mini-thumb ${thumbCls(a.animal.species)}">${a.animal.photoURL ? `<img src="${a.animal.photoURL}" alt="">` : '<i class="bi bi-heart-pulse-fill" aria-hidden="true"></i>'}</div>
+          <div class="animal-mini-thumb ${thumbCls(a.animal.species)}">${originalPhoto ? `<img src="${thumbnail}" data-original-src="${originalPhoto}" alt="" loading="lazy" decoding="async" fetchpriority="low"><i class="bi bi-heart-pulse-fill" data-image-fallback hidden aria-hidden="true"></i>` : '<i class="bi bi-heart-pulse-fill" aria-hidden="true"></i>'}</div>
           <div>
             <div class="animal-mini-name">${a.animal.name}</div>
             <div class="animal-mini-breed">${a.animal.breed}</div>
@@ -305,7 +312,10 @@ function renderTable() {
           <i class="bi bi-eye" aria-hidden="true"></i><span class="management-action-text">View application</span>
         </button>
       </td>
-    </tr>`).join("");
+    </tr>`;
+  }).join("");
+
+  installManagementImageFallbacks(tbody);
 
   tbody.querySelectorAll("tr[data-id]").forEach(row => {
     row.addEventListener("click", e => {

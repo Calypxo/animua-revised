@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "../../utils/api.js";
+import { optimizedPublicImageUrl } from "../../utils/image.js";
 import { ensureUserSession, hasUserSession } from "../../utils/storage.js";
 
 const DOG_IMAGE = new URL("../../assets/images/dog.jpg", import.meta.url).href;
@@ -116,13 +117,22 @@ function getCompatibilityAnimalFallback(animal) {
   return species.includes("cat") ? CAT_IMAGE : DOG_IMAGE;
 }
 
+function compatibilityPhotoSources(source, fallback, width = 560) {
+  const original = String(source || "").trim() || fallback;
+  return {
+    src: optimizedPublicImageUrl(original, width) || original,
+    original,
+    fallback,
+  };
+}
+
 async function resolveCompatibilityAnimalPhoto(match) {
   const directPhoto = getCompatibilityAnimalPhoto(match);
   const directFallback = getCompatibilityAnimalFallback(match);
-  if (directPhoto) return { src: directPhoto, fallback: directFallback };
+  if (directPhoto) return compatibilityPhotoSources(directPhoto, directFallback);
 
   const animalId = String(match?.animalId || match?.petId || match?.id || "");
-  if (!animalId) return { src: directFallback, fallback: directFallback };
+  if (!animalId) return compatibilityPhotoSources(directFallback, directFallback);
   if (compatibilityPhotoCache.has(animalId)) return compatibilityPhotoCache.get(animalId);
 
   const request = (async () => {
@@ -132,10 +142,10 @@ async function resolveCompatibilityAnimalPhoto(match) {
       const data = await response.json().catch(() => ({}));
       const pet = data.pet || data.animal || data;
       const fallback = getCompatibilityAnimalFallback(pet);
-      return { src: getCompatibilityAnimalPhoto(pet) || fallback, fallback };
+      return compatibilityPhotoSources(getCompatibilityAnimalPhoto(pet) || fallback, fallback);
     } catch (error) {
       console.warn("[compatibility result photo]", error.message);
-      return { src: directFallback, fallback: directFallback };
+      return compatibilityPhotoSources(directFallback, directFallback);
     }
   })();
 
@@ -360,7 +370,7 @@ async function renderResults(results, mode = "saved") {
         <li class="${index === 0 ? "is-top-match" : ""}">
           <span class="compatibility-rank" aria-label="Rank ${index + 1}">${index + 1}</span>
           <div class="compatibility-photo-wrap">
-            <img class="compatibility-pet-photo" src="${escapeHtml(photo.src)}" data-fallback-photo="${escapeHtml(photo.fallback)}" data-match-photo alt="${escapeHtml(animalName)}" loading="${index === 0 ? "eager" : "lazy"}" decoding="async">
+            <img class="compatibility-pet-photo" src="${escapeHtml(photo.src)}" data-original-photo="${escapeHtml(photo.original)}" data-fallback-photo="${escapeHtml(photo.fallback)}" data-match-photo alt="${escapeHtml(animalName)}" loading="${index === 0 ? "eager" : "lazy"}" decoding="async" fetchpriority="${index === 0 ? "high" : "low"}">
             ${index === 0 ? '<span class="compatibility-top-chip"><i class="fa-solid fa-star"></i>Top match</span>' : ""}
           </div>
           <div class="compatibility-pet-copy">
@@ -397,9 +407,18 @@ async function renderResults(results, mode = "saved") {
 
   compatibilityAccountBody.querySelectorAll("[data-match-photo]").forEach((image) => {
     image.addEventListener("error", () => {
+      const original = image.dataset.originalPhoto;
+      if (original && image.src !== original) {
+        image.dataset.originalPhoto = "";
+        image.src = original;
+        return;
+      }
       const fallback = image.dataset.fallbackPhoto;
-      if (fallback && image.src !== fallback) image.src = fallback;
-    }, { once: true });
+      if (fallback && image.src !== fallback) {
+        image.dataset.fallbackPhoto = "";
+        image.src = fallback;
+      }
+    });
   });
 }
 
@@ -423,6 +442,7 @@ async function showSavedAnimalDetails(button) {
   const name = pet?.displayLabel || pet?.shelterLabel || pet?.identifyingDescription || savedName;
   const meta = pet ? [pet.sex, pet.species, pet.ageEstimate].filter(Boolean).join(" • ") : "Historical recommendation";
   const image = pet?.photoURL || (String(pet?.species || "").toLowerCase() === "cat" ? CAT_IMAGE : DOG_IMAGE);
+  const detailImage = optimizedPublicImageUrl(image, 900) || image;
   const traitSource = pet?.behavioralAssessment && typeof pet.behavioralAssessment === "object" ? pet.behavioralAssessment : latest.preferences || {};
   const traitRows = matchDetailTraits
     .map(({ key, icon }) => {
@@ -451,7 +471,7 @@ async function showSavedAnimalDetails(button) {
           <button type="button" data-close-saved-animal aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
         </header>
         <div class="match-detail-hero">
-          <img src="${escapeHtml(image)}" alt="${escapeHtml(name)}">
+          <img src="${escapeHtml(detailImage)}" data-original-photo="${escapeHtml(image)}" alt="${escapeHtml(name)}" loading="eager" decoding="async" fetchpriority="high">
           <div>
             <h2>${escapeHtml(name)}</h2>
             <p>${escapeHtml(meta)}</p>
@@ -478,6 +498,12 @@ async function showSavedAnimalDetails(button) {
     background: "transparent",
     customClass: { popup: "saved-animal-popup" },
     didOpen: (popup) => {
+      popup.querySelector(".match-detail-hero img")?.addEventListener("error", (event) => {
+        const photo = event.currentTarget;
+        const original = photo.dataset.originalPhoto || "";
+        photo.dataset.originalPhoto = "";
+        if (original && photo.src !== original) photo.src = original;
+      });
       popup.querySelectorAll("[data-close-saved-animal]").forEach((item) => item.addEventListener("click", () => Swal.close()));
       popup.querySelector("[data-open-saved-animal]")?.addEventListener("click", () => {
         sessionStorage.setItem("animua_selected_pet_id", animalId);

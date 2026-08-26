@@ -14,6 +14,7 @@ import { loadSidebar, navigateManagementPage } from "../components/management/si
 import { getUserName }           from "../utils/storage.js";
 import { API_BASE_URL }          from "../utils/api.js";
 import { compareSurrenderUrgency } from "./surrenderRequestSorting.js";
+import { installManagementImageFallbacks } from "../utils/image.js";
 
 renderPageHeader(PAGE_HEADER_CONFIGS.surrenders);
 
@@ -404,7 +405,7 @@ function renderTable() {
       </td>
       <td class="management-review-identity surrender-pet-field" data-label="Pet">
         <div class="pet-mini">
-          <div class="pet-mini-thumb ${thumbCls(r.pet.species)}">${r.pet.photoDataUrl ? `<img src="${r.pet.photoDataUrl}" alt="">` : emoji(r.pet.species)}</div>
+          <div class="pet-mini-thumb ${thumbCls(r.pet.species)}">${r.pet.photoDataUrl ? `<img src="${r.pet.photoDataUrl}" data-original-src="" alt="" loading="lazy" decoding="async" fetchpriority="low"><span data-image-fallback hidden>${emoji(r.pet.species)}</span>` : emoji(r.pet.species)}</div>
           <div>
             <div class="pet-mini-name">${r.pet.name}</div>
             <div class="pet-mini-breed">${r.pet.breed} · ${r.pet.sex}</div>
@@ -421,6 +422,8 @@ function renderTable() {
         </button>
       </td>
     </tr>`).join("");
+
+  installManagementImageFallbacks(tbody);
 
   tbody.querySelectorAll("tr[data-id]").forEach(row => {
     row.addEventListener("click", e => { if(e.target.closest("[data-action]"))return; openDrawer(row.dataset.id); });
@@ -573,11 +576,11 @@ function renderDrawer(r) {
           <div class="drawer-info-lbl">Submitted Valid ID</div>
           <div class="identity-document-strip">
             <figure class="${identityIdFrontUrl ? "" : "is-missing"}">
-              ${identityIdFrontUrl ? `<img src="${identityIdFrontUrl}" alt="Front of submitted valid ID">` : `<i class="bi bi-card-image"></i>`}
+              ${identityIdFrontUrl ? `<img src="${identityIdFrontUrl}" data-original-src="" alt="Front of submitted valid ID" loading="lazy" decoding="async"><i class="bi bi-card-image" data-image-fallback hidden></i>` : `<i class="bi bi-card-image"></i>`}
               <figcaption>${displayValue(owner.identityDocuments?.front?.name, "Front ID")}</figcaption>
             </figure>
             <figure class="${identityIdBackUrl ? "" : "is-missing"}">
-              ${identityIdBackUrl ? `<img src="${identityIdBackUrl}" alt="Back of submitted valid ID">` : `<i class="bi bi-card-image"></i>`}
+              ${identityIdBackUrl ? `<img src="${identityIdBackUrl}" data-original-src="" alt="Back of submitted valid ID" loading="lazy" decoding="async"><i class="bi bi-card-image" data-image-fallback hidden></i>` : `<i class="bi bi-card-image"></i>`}
               <figcaption>${displayValue(owner.identityDocuments?.back?.name, "Back ID")}</figcaption>
             </figure>
           </div>
@@ -623,7 +626,7 @@ function renderDrawer(r) {
   const submittedPhoto = safePhotoUrl(r.pet.photoDataUrl);
   const petPhotoBlock = submittedPhoto ? `
     <div class="surrender-pet-photo">
-      <img src="${submittedPhoto}" alt="Submitted photo of ${displayValue(r.pet.name, "the animal")}">
+      <img src="${submittedPhoto}" data-original-src="" alt="Submitted photo of ${displayValue(r.pet.name, "the animal")}" loading="lazy" decoding="async">
       <div>
         <span>Submitted Animal Photo</span>
         <strong>${r.pet.photoName || "Uploaded photo"}</strong>
@@ -864,6 +867,8 @@ function renderDrawer(r) {
       ${statusSection}
     </div>
     <div class="drawer-footer">${footerBtns}</div>`;
+
+  installManagementImageFallbacks(inner);
 
   document.getElementById("drawerCloseX")?.addEventListener("click",   closeDrawer);
   document.getElementById("drawerCloseBtn")?.addEventListener("click",  closeDrawer);

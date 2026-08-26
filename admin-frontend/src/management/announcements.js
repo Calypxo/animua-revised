@@ -8,6 +8,10 @@ import { renderTopbarUser } from "../components/management/topbarUser.js";
 import { loadSidebar } from "../components/management/sidebarLoader.js";
 import { renderPageHeader } from "../components/management/pageHeader.js";
 import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.js";
+import {
+  installManagementImageFallbacks,
+  optimizedManagementImageUrl,
+} from "../utils/image.js";
 
 import {
   getAnnouncements,
@@ -455,6 +459,8 @@ function renderFeed() {
       const canManagePost = !isPending && (canEdit || canDelete);
       const captionId = `management-announcement-caption-${index}`;
       const captionExpanded = state.expandedCaptions.has(String(item.id));
+      const originalImage = String(item.imageUrl || "").trim();
+      const cardImage = optimizedManagementImageUrl(originalImage, 900);
 
       return `
         <article class="post-card ${isPending ? "offline-pending-post" : ""}" data-post-type="${escapeHtml(postType)}" data-announcement-id="${escapeHtml(item.id)}">
@@ -495,8 +501,8 @@ function renderFeed() {
           </div>
 
           ${
-            item.imageUrl
-              ? `<img class="post-image" src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.title)}" />`
+            originalImage
+              ? `<img class="post-image" src="${escapeHtml(cardImage)}" data-original-src="${escapeHtml(originalImage)}" alt="${escapeHtml(item.title)}" loading="lazy" decoding="async" fetchpriority="low" />`
               : ""
           }
 
@@ -589,6 +595,8 @@ function renderFeed() {
       else state.expandedCaptions.delete(id);
     });
   });
+
+  installManagementImageFallbacks(feed);
 
   syncCaptionDisclosure(feed);
 }
@@ -784,6 +792,8 @@ function updateMediaPreview(value, options = {}) {
   const image = getEl("mediaPreviewImage");
   const status = getEl("mediaPreviewStatus");
   const url = String(value || "").trim();
+  const previewUrl = optimizedManagementImageUrl(url, 900);
+  let retriedOriginal = false;
 
   if (!preview || !image || !status) return;
 
@@ -809,6 +819,12 @@ function updateMediaPreview(value, options = {}) {
   };
 
   image.onerror = () => {
+    if (!retriedOriginal && previewUrl !== url) {
+      retriedOriginal = true;
+      image.src = url;
+      return;
+    }
+
     image.hidden = true;
     preview.classList.remove("has-image");
     preview.classList.add("invalid");
@@ -816,7 +832,8 @@ function updateMediaPreview(value, options = {}) {
     status.textContent = "This image could not be previewed. Choose another photo.";
   };
 
-  image.src = url;
+  image.decoding = "async";
+  image.src = previewUrl;
 }
 
 function selectAnnouncementImage(file) {
