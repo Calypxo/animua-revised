@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const homeStylesUrl = new URL("../src/css/public/home.css", import.meta.url);
+const globalStylesUrl = new URL("../src/css/global.css", import.meta.url);
 const homePageUrl = new URL("../pages/public/home.html", import.meta.url);
 
 test("desktop adoption process can grow when browser zoom changes text wrapping", async () => {
@@ -25,6 +26,42 @@ test("desktop adoption process uses stable type sizing and fixed-header offset",
   assert.match(css, /\.how-animua-works-head p\s*\{\s*font-size:\s*0\.8rem;/);
   assert.match(css, /\.how-animua-step h3\s*\{\s*font-size:\s*0\.875rem;/);
   assert.match(css, /\.how-animua-step p\s*\{\s*font-size:\s*0\.72rem;/);
+});
+
+test("adoption process numbers stay centered above their icon circles", async () => {
+  const [css, home] = await Promise.all([
+    readFile(homeStylesUrl, "utf8"),
+    readFile(homePageUrl, "utf8"),
+  ]);
+
+  assert.match(
+    css,
+    /body\.home-page \.how-animua-number\s*\{[\s\S]*?position:\s*static;[\s\S]*?display:\s*grid;[\s\S]*?place-items:\s*center;[\s\S]*?margin:\s*0 auto 14px;[\s\S]*?transform:\s*none;/,
+  );
+  assert.match(
+    home,
+    /home\.css\?v=story-photo-cover-20260825-process-number-alignment-20260826/,
+  );
+});
+
+test("narrow desktop adoption process keeps a continuous connector line", async () => {
+  const [css, home] = await Promise.all([
+    readFile(globalStylesUrl, "utf8"),
+    readFile(homePageUrl, "utf8"),
+  ]);
+
+  assert.match(
+    css,
+    /@media \(min-width:\s*761px\) and \(max-width:\s*1040px\)[\s\S]*?body\.home-page \.how-animua-process::before\s*\{[\s\S]*?top:\s*58px !important;[\s\S]*?background:\s*#d8b558 !important;/,
+  );
+  assert.doesNotMatch(
+    css,
+    /@media \(min-width:\s*761px\) and \(max-width:\s*1040px\)[\s\S]*?body\.home-page \.how-animua-process::before\s*\{[\s\S]*?repeating-linear-gradient/,
+  );
+  assert.match(
+    home,
+    /global\.css\?v=mobile-notification-icon-20260824-process-line-20260827/,
+  );
 });
 
 test("success-story photos cover the complete story canvas", async () => {

@@ -419,8 +419,8 @@ export async function showEmailVerificationScreen(email) {
   const authModal = registerSection.closest(".auth-modal-overlay") || document.getElementById("authModal");
   const authCard = authModal?.querySelector(".auth-modal-card");
   authModal?.classList.add("register-mode", "email-verification-mode");
-  authCard?.setAttribute("aria-hidden", "true");
-  authCard?.style.setProperty("display", "none", "important");
+  authCard?.removeAttribute("aria-hidden");
+  authCard?.style.removeProperty("display");
 
   const title = registerSection.querySelector(".auth-title");
   const intro = registerSection.querySelector(".auth-switch-inline");
@@ -439,11 +439,14 @@ export async function showEmailVerificationScreen(email) {
     screen = document.createElement("div");
     screen.id = "email-verification-screen";
     screen.className = "email-verification-screen";
-    screen.setAttribute("role", "dialog");
-    screen.setAttribute("aria-modal", "true");
-    screen.setAttribute("aria-labelledby", "email-verification-title");
-    (authModal || registerSection).appendChild(screen);
   }
+
+  if (screen.parentElement !== registerSection) {
+    registerSection.appendChild(screen);
+  }
+  screen.removeAttribute("role");
+  screen.removeAttribute("aria-modal");
+  screen.removeAttribute("aria-labelledby");
 
   const user = auth.currentUser;
 
@@ -472,9 +475,6 @@ function renderEmailVerificationStep(email) {
   const safeMaskedEmail = escapeHtml(maskEmail(email));
 
   screen.innerHTML = `
-    <button type="button" class="email-verification-close" id="close-email-verification" aria-label="Close email verification">
-      <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-    </button>
     <div class="email-verification-visual" aria-hidden="true">
       <span class="email-verification-mail-icon">
         <i class="fa-regular fa-envelope"></i>
@@ -511,9 +511,6 @@ function renderEmailVerificationStep(email) {
   `;
 
   setupEmailOtpInput();
-  document.getElementById("close-email-verification")?.addEventListener("click", () => {
-    document.getElementById("closeAuthModal")?.click();
-  });
   document.getElementById("check-email-verification-btn")?.addEventListener("click", handleEmailVerifiedClick);
   document.getElementById("resend-email-verification-btn")?.addEventListener("click", handleResendVerificationClick);
   document.getElementById("change-email-btn")?.addEventListener("click", handleChangeEmailClick);

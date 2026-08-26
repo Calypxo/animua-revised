@@ -10758,3 +10758,506 @@ html body.quiz-locked-result .saved-trait-profile .saved-state-kicker {
     word-break: normal !important;
   }
 }
+
+/* Phone phase banner: the icon is intentionally hidden, so let the copy use
+   the full first row instead of leaving it trapped in the old 40px icon track. */
+@media (max-width: 760px) {
+  html body:not(.quiz-locked-result) .phase-intro {
+    display: block !important;
+    min-height: 154px !important;
+    padding: 18px clamp(112px, 36vw, 142px) 18px 18px !important;
+  }
+
+  html body:not(.quiz-locked-result) .phase-intro > div:last-child {
+    position: relative !important;
+    z-index: 1 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  html body:not(.quiz-locked-result) .phase-intro-title,
+  html body:not(.quiz-locked-result) .phase-intro-desc {
+    max-width: none !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+  }
+
+  html body:not(.quiz-locked-result) .phase-intro::before {
+    width: clamp(126px, 40vw, 158px) !important;
+    height: clamp(84px, 27vw, 106px) !important;
+    right: 8px !important;
+  }
+
+  html body:not(.quiz-locked-result) .phase-intro::after {
+    width: clamp(54px, 18vw, 70px) !important;
+    height: clamp(54px, 18vw, 70px) !important;
+    right: clamp(34px, 11vw, 44px) !important;
+  }
+}
+
+/* Phone quiz chrome: mirror the desktop hierarchy without duplicating copy. */
+@media (max-width: 640px) {
+  html body:not(.quiz-locked-result) .quiz-header {
+    gap: 10px !important;
+    padding: 16px clamp(14px, 4.5vw, 20px) 14px !important;
+  }
+
+  html body:not(.quiz-locked-result) .header-brand::after {
+    display: none !important;
+    content: none !important;
+    padding: 0 !important;
+    border: 0 !important;
+  }
+
+  html body:not(.quiz-locked-result) .quiz-header-intro {
+    margin: 0 !important;
+    color: #4f4b48 !important;
+    font-weight: 500 !important;
+    letter-spacing: 0 !important;
+    text-align: left !important;
+  }
+
+  html body:not(.quiz-locked-result) .header-meta {
+    margin-top: 2px !important;
+  }
+
+  html body:not(.quiz-locked-result) .phase-step-dot {
+    display: grid !important;
+    place-items: center !important;
+    font-size: 0 !important;
+  }
+
+  html body:not(.quiz-locked-result) .phase-step-dot i {
+    display: none !important;
+  }
+
+  html body:not(.quiz-locked-result) .phase-step-dot::before {
+    display: block !important;
+    color: inherit !important;
+    font: 800 0.78rem/1 var(--animua-font) !important;
+  }
+}
+
+/* Phone quiz navigation: keep both actions within the questionnaire card. */
+@media (max-width: 640px) {
+  html body:not(.quiz-locked-result) .quiz-nav {
+    width: calc(100% - clamp(20px, 7vw, 32px)) !important;
+    max-width: calc(100% - clamp(20px, 7vw, 32px)) !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    justify-self: center !important;
+    justify-content: stretch !important;
+    gap: clamp(6px, 2.5vw, 10px) !important;
+    margin: 12px auto 0 !important;
+    padding: 10px 0 calc(10px + env(safe-area-inset-bottom)) !important;
+    left: auto !important;
+    right: auto !important;
+    transform: none !important;
+  }
+
+  html body:not(.quiz-locked-result) .quiz-nav::before {
+    display: none !important;
+    content: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+
+  html body:not(.quiz-locked-result) .quiz-nav .btn-prev,
+  html body:not(.quiz-locked-result) .quiz-nav .btn-next,
+  html body:not(.quiz-locked-result) .quiz-nav .btn-submit {
+    order: initial !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    min-height: 44px !important;
+    height: auto !important;
+    box-sizing: border-box !important;
+    padding: 9px clamp(8px, 3vw, 14px) !important;
+    line-height: 1.15 !important;
+    white-space: normal !important;
+  }
+
+  html body:not(.quiz-locked-result) .quiz-nav .btn-prev i,
+  html body:not(.quiz-locked-result) .quiz-nav .btn-next i,
+  html body:not(.quiz-locked-result) .quiz-nav .btn-submit i {
+    flex: 0 0 auto !important;
+  }
+}
+
+/* Phone phase artwork: keep the banner calm and give its copy the full width. */
+@media (max-width: 640px) {
+  html body:not(.quiz-locked-result) .phase-intro {
+    min-height: 0 !important;
+    padding: clamp(20px, 5.5vw, 24px) clamp(18px, 5vw, 22px) !important;
+    background: linear-gradient(135deg, #5f0112 0%, #780116 100%) !important;
+  }
+
+  html body:not(.quiz-locked-result) .phase-intro::before,
+  html body:not(.quiz-locked-result) .phase-intro::after {
+    display: none !important;
+    content: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    border: 0 !important;
+    background: none !important;
+    opacity: 0 !important;
+    transform: none !important;
+  }
+
+  html body:not(.quiz-locked-result) .phase-intro > div:last-child,
+  html body:not(.quiz-locked-result) .phase-intro-title,
+  html body:not(.quiz-locked-result) .phase-intro-desc {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+/* Explicitly requested iPad Air (820px), Surface (912px), and iPad Pro (1024px) layouts only. */
+@media (width: 820px), (min-width: 900px) and (max-width: 930px), (width: 1024px) {
+  html body:not(.quiz-locked-result) .quiz-shell {
+    display: grid !important;
+    grid-template-columns: clamp(220px, 25vw, 250px) minmax(0, 1fr) !important;
+    grid-template-rows: auto !important;
+    align-items: start !important;
+    gap: 0 clamp(12px, 1.8vw, 18px) !important;
+  }
+
+  html body:not(.quiz-locked-result) .quiz-shell > .quiz-sidebar {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    display: block !important;
+    align-self: start !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    position: sticky !important;
+    top: 16px !important;
+    overflow: visible !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+
+  html body:not(.quiz-locked-result) .quiz-main {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  html body:not(.quiz-locked-result) .quiz-header,
+  html body:not(.quiz-locked-result) .quiz-phase-nav {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    width: 100% !important;
+  }
+
+  html body:not(.quiz-locked-result) .quiz-header {
+    margin: 50px 0 0 !important;
+    padding: 16px 16px 12px !important;
+    overflow: hidden !important;
+  }
+
+  html body:not(.quiz-locked-result) .header-brand::after {
+    display: none !important;
+    content: none !important;
+    padding: 0 !important;
+    border: 0 !important;
+  }
+
+  html body:not(.quiz-locked-result) .quiz-header-intro {
+    margin: 6px 0 0 !important;
+    max-width: 100% !important;
+    font-size: clamp(0.64rem, 1.25vw, 0.72rem) !important;
+    line-height: 1.35 !important;
+  }
+
+  html body:not(.quiz-locked-result) .header-meta {
+    position: static !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 36px !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin-top: 10px !important;
+  }
+
+  html body:not(.quiz-locked-result) .quiz-language-toggle {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+  }
+
+  html body:not(.quiz-locked-result) .quiz-language-toggle button {
+    min-width: 0 !important;
+    padding-inline: 5px !important;
+    font-size: 0.58rem !important;
+  }
+
+  html body:not(.quiz-locked-result) .exit-quiz-link {
+    width: 36px !important;
+    min-width: 36px !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    display: grid !important;
+    place-items: center !important;
+    padding: 0 !important;
+  }
+
+  html body:not(.quiz-locked-result) .exit-quiz-link span {
+    display: none !important;
+  }
+
+  html body:not(.quiz-locked-result) .quiz-phase-nav {
+    margin: -1px 0 0 !important;
+    padding: 12px 16px 16px !important;
+  }
+
+  html body:not(.quiz-locked-result) .quiz-phase-nav .header-progress {
+    margin-top: 12px !important;
+  }
+
+  html body:not(.quiz-locked-result) .progress-label {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    gap: 6px !important;
+    font-size: clamp(0.52rem, 1.05vw, 0.6rem) !important;
+    line-height: 1.1 !important;
+  }
+
+  html body:not(.quiz-locked-result) #progressLabel,
+  html body:not(.quiz-locked-result) #progressPercentLabel {
+    min-width: 0 !important;
+    white-space: nowrap !important;
+  }
+
+  html body:not(.quiz-locked-result) #progressPercentLabel {
+    text-align: right !important;
+  }
+
+  html body:not(.quiz-locked-result) .quiz-sidebar-note {
+    display: none !important;
+  }
+}
+
+/* iPad Pro portrait only: match the desktop visual treatment without desktop overflow. */
+@media (width: 1024px) {
+  html body:not(.quiz-locked-result) .quiz-shell {
+    grid-template-columns: 300px minmax(0, 1fr) !important;
+    gap: 0 12px !important;
+    padding: 10px 18px !important;
+  }
+
+  html body:not(.quiz-locked-result) .quiz-shell > .quiz-sidebar {
+    width: 300px !important;
+    top: clamp(72px, 5vw, 92px) !important;
+  }
+
+  html body:not(.quiz-locked-result) .quiz-main {
+    padding-top: 68px !important;
+  }
+
+  html body:not(.quiz-locked-result) .quiz-header {
+    margin: 0 !important;
+    padding: 18px 20px 12px !important;
+    border-radius: 14px 14px 0 0 !important;
+    box-shadow: none !important;
+  }
+
+  html body:not(.quiz-locked-result) .quiz-header::after {
+    content: "" !important;
+    display: block !important;
+    height: 1px !important;
+    margin-top: 7px !important;
+    background: rgba(107, 79, 63, 0.16) !important;
+  }
+
+  html body:not(.quiz-locked-result) .header-brand {
+    grid-template-columns: 34px minmax(0, 1fr) !important;
+    gap: 12px !important;
+    font-size: 0.92rem !important;
+  }
+
+  html body:not(.quiz-locked-result) .header-brand::before {
+    width: 34px !important;
+    height: 34px !important;
+    font-size: 0.86rem !important;
+  }
+
+  html body:not(.quiz-locked-result) .quiz-header-intro {
+    margin: 5px 0 0 !important;
+    color: #4f4b48 !important;
+    font: 500 0.72rem/1.34 var(--animua-font) !important;
+    letter-spacing: 0 !important;
+    text-align: left !important;
+  }
+
+  html body:not(.quiz-locked-result) .header-meta {
+    position: fixed !important;
+    top: 22px !important;
+    right: 26px !important;
+    width: auto !important;
+    display: flex !important;
+    grid-template-columns: none !important;
+    gap: 10px !important;
+    margin: 0 !important;
+  }
+
+  html body:not(.quiz-locked-result) .quiz-language-toggle {
+    width: auto !important;
+    max-width: 220px !important;
+  }
+
+  html body:not(.quiz-locked-result) .quiz-language-toggle button {
+    min-height: 28px !important;
+    padding: 0 9px !important;
+    font-size: 0.64rem !important;
+  }
+
+  html body:not(.quiz-locked-result) .exit-quiz-link {
+    width: auto !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 36px !important;
+    display: inline-flex !important;
+    place-items: initial !important;
+    padding: 0 12px !important;
+    font-size: 0.72rem !important;
+  }
+
+  html body:not(.quiz-locked-result) .exit-quiz-link span {
+    display: inline !important;
+  }
+
+  html body:not(.quiz-locked-result) .quiz-phase-nav {
+    padding: 6px 20px 16px !important;
+    border-radius: 0 0 14px 14px !important;
+    box-shadow: none !important;
+  }
+
+  html body:not(.quiz-locked-result) .quiz-phase-nav .phase-steps {
+    gap: 9px !important;
+    padding-bottom: 15px !important;
+  }
+
+  html body:not(.quiz-locked-result) .quiz-phase-nav .phase-steps::before {
+    top: 17px !important;
+    bottom: 31px !important;
+    left: 17px !important;
+  }
+
+  html body:not(.quiz-locked-result) .quiz-phase-nav .phase-step,
+  html body:not(.quiz-locked-result) .quiz-phase-nav .phase-step.active,
+  html body:not(.quiz-locked-result) .quiz-phase-nav .phase-step.done {
+    min-height: 42px !important;
+    grid-template-columns: 34px minmax(0, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  html body:not(.quiz-locked-result) .quiz-phase-nav .phase-step-dot {
+    width: 34px !important;
+    height: 34px !important;
+    font-size: 0.72rem !important;
+  }
+
+  html body:not(.quiz-locked-result) .quiz-phase-nav .phase-step span {
+    min-height: 38px !important;
+    gap: 4px !important;
+    padding-left: 2px !important;
+    font-size: 0.76rem !important;
+    line-height: 1.15 !important;
+  }
+
+  html body:not(.quiz-locked-result) .quiz-phase-nav .phase-step.active span {
+    width: 100% !important;
+    padding: 7px 14px !important;
+    border: 1px solid rgba(241, 192, 69, 0.46) !important;
+    border-radius: 999px !important;
+    color: #780116 !important;
+    background: #fff8df !important;
+  }
+
+  html body:not(.quiz-locked-result) .quiz-phase-nav .phase-step span::after {
+    font-size: 0.62rem !important;
+    line-height: 1.18 !important;
+  }
+
+  html body:not(.quiz-locked-result) .quiz-phase-nav .header-progress {
+    margin-top: 12px !important;
+    gap: 6px !important;
+  }
+
+  html body:not(.quiz-locked-result) .quiz-phase-nav .progress-label {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: baseline !important;
+    gap: 12px !important;
+    font-size: 0.66rem !important;
+  }
+
+  html body:not(.quiz-locked-result) .quiz-phase-nav #progressPercentLabel {
+    font-size: 0.62rem !important;
+  }
+}
+
+/* iPad Air portrait only: reveal the scaled desktop sidebar and contain navigation. */
+@media (width: 820px) {
+  html body:not(.quiz-locked-result) .quiz-shell {
+    grid-template-columns: 220px minmax(0, 1fr) !important;
+    gap: 0 12px !important;
+    padding: 12px !important;
+  }
+
+  html body:not(.quiz-locked-result) .quiz-shell > .quiz-sidebar {
+    width: 220px !important;
+  }
+
+  html body:not(.quiz-locked-result) .quiz-phase-nav .phase-step.active span {
+    width: 100% !important;
+    padding: 6px 10px !important;
+    border: 1px solid rgba(241, 192, 69, 0.46) !important;
+    border-radius: 999px !important;
+    color: #780116 !important;
+    background: #fff8df !important;
+  }
+
+  html body:not(.quiz-locked-result) .quiz-nav {
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 76px minmax(0, 1fr) !important;
+    align-items: center !important;
+    justify-content: stretch !important;
+    gap: 10px !important;
+    margin: 12px 16px 14px !important;
+    padding: 10px 0 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  html body:not(.quiz-locked-result) .quiz-nav::before {
+    display: block !important;
+    content: "" !important;
+    order: 2 !important;
+    width: 76px !important;
+    max-width: 100% !important;
+    justify-self: center !important;
+  }
+
+  html body:not(.quiz-locked-result) .quiz-nav .btn-prev,
+  html body:not(.quiz-locked-result) .quiz-nav .btn-next,
+  html body:not(.quiz-locked-result) .quiz-nav .btn-submit {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    padding-inline: 10px !important;
+  }
+}

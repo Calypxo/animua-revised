@@ -13539,6 +13539,7 @@ body.home-page .how-animua-number {
   font-size: 1rem;
   font-weight: 700;
   line-height: 1;
+  transform: none;
 }
 
 body.home-page .how-animua-step > div,

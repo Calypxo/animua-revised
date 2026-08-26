@@ -30,6 +30,17 @@ function getNotificationIcon(category = "", type = "") {
   return "fa-solid fa-bell";
 }
 
+function isEventNotification(item = {}) {
+  const category = String(item.category || "").toLowerCase();
+  const type = String(item.type || "").toLowerCase();
+  return category === "event" || type.includes("event");
+}
+
+function getNotificationPreviewMessage(item = {}) {
+  if (isEventNotification(item)) return "Event announcement — tap to view details.";
+  return String(item.message || "").trim();
+}
+
 function formatNotificationTime(value = "") {
   if (!value) return "";
   const date = new Date(value);
@@ -77,7 +88,9 @@ function renderNotificationPopup(items = [], unreadCount = 0) {
               <span class="notification-item-icon"><i class="${getNotificationIcon(item.category, item.type || "")}" aria-hidden="true"></i></span>
               <span class="notification-item-copy">
                 <strong>${escapeHtml(item.title || "ANIMUA update")}</strong>
-                <small>${escapeHtml(item.message || "")}</small>
+                ${getNotificationPreviewMessage(item)
+                  ? `<small class="${isEventNotification(item) ? "notification-event-preview" : ""}">${escapeHtml(getNotificationPreviewMessage(item))}</small>`
+                  : ""}
                 <time>${escapeHtml(formatNotificationTime(item.createdAt || item.eventDate))}</time>
               </span>
             </a>
