@@ -44,23 +44,28 @@ test("adoption process numbers stay centered above their icon circles", async ()
   );
 });
 
-test("narrow desktop adoption process keeps a continuous connector line", async () => {
-  const [css, home] = await Promise.all([
+test("adoption process matches the compact-header breakpoint and keeps a solid desktop connector", async () => {
+  const [css, homeCss, home] = await Promise.all([
     readFile(globalStylesUrl, "utf8"),
+    readFile(homeStylesUrl, "utf8"),
     readFile(homePageUrl, "utf8"),
   ]);
 
   assert.match(
     css,
-    /@media \(min-width:\s*761px\) and \(max-width:\s*1040px\)[\s\S]*?body\.home-page \.how-animua-process::before\s*\{[\s\S]*?top:\s*58px !important;[\s\S]*?background:\s*#d8b558 !important;/,
+    /@media \(min-width:\s*961px\)\s*\{[\s\S]*?body\.home-page \.how-animua-process::before\s*\{[\s\S]*?background:\s*#d8b558 !important;[\s\S]*?background-image:\s*none !important;/,
   );
-  assert.doesNotMatch(
+  assert.match(
     css,
-    /@media \(min-width:\s*761px\) and \(max-width:\s*1040px\)[\s\S]*?body\.home-page \.how-animua-process::before\s*\{[\s\S]*?repeating-linear-gradient/,
+    /@media \(min-width:\s*961px\) and \(max-width:\s*1040px\)[\s\S]*?body\.home-page \.how-animua-process\s*\{[\s\S]*?grid-template-columns:\s*repeat\(4, minmax\(0, 1fr\)\) !important;/,
+  );
+  assert.match(
+    homeCss,
+    /@media \(max-width:\s*1040px\)[\s\S]*?body\.home-page \.how-animua-process\s*\{[\s\S]*?grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\);[\s\S]*?body\.home-page \.how-animua-process::before\s*\{[\s\S]*?content:\s*none;/,
   );
   assert.match(
     home,
-    /global\.css\?v=mobile-notification-icon-20260824-process-line-20260827/,
+    /global\.css\?v=mobile-notification-icon-20260824-process-layout-20260827-2/,
   );
 });
 

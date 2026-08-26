@@ -23005,8 +23005,19 @@ body.home-page #register-section .auth-submit-btn,
   }
 }
 
-/* Keep all four adoption steps on one row across tablet viewports. */
-@media (min-width: 761px) and (max-width: 1040px) {
+/*
+ * Keep the process layout in the same responsive mode as the navigation.
+ * Compact tablets use the two-column layout from home.css; once the desktop
+ * navigation fits again, all four steps can safely share one row.
+ */
+@media (min-width: 961px) {
+  body.home-page .how-animua-process::before {
+    background: #d8b558 !important;
+    background-image: none !important;
+  }
+}
+
+@media (min-width: 961px) and (max-width: 1040px) {
   body.home-page .how-animua-process {
     display: grid !important;
     grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
@@ -23026,6 +23037,7 @@ body.home-page #register-section .auth-submit-btn,
     height: 3px !important;
     border-radius: 999px !important;
     background: #d8b558 !important;
+    background-image: none !important;
     transform: none !important;
     pointer-events: none !important;
   }
