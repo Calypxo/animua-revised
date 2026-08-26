@@ -416,6 +416,12 @@ export async function showEmailVerificationScreen(email) {
   const registerSection = document.getElementById("register-section");
   if (!registerSection) return;
 
+  const authModal = registerSection.closest(".auth-modal-overlay") || document.getElementById("authModal");
+  const authCard = authModal?.querySelector(".auth-modal-card");
+  authModal?.classList.add("register-mode", "email-verification-mode");
+  authCard?.setAttribute("aria-hidden", "true");
+  authCard?.style.setProperty("display", "none", "important");
+
   const title = registerSection.querySelector(".auth-title");
   const intro = registerSection.querySelector(".auth-switch-inline");
   const form = document.getElementById("register-form");
@@ -433,7 +439,10 @@ export async function showEmailVerificationScreen(email) {
     screen = document.createElement("div");
     screen.id = "email-verification-screen";
     screen.className = "email-verification-screen";
-    registerSection.appendChild(screen);
+    screen.setAttribute("role", "dialog");
+    screen.setAttribute("aria-modal", "true");
+    screen.setAttribute("aria-labelledby", "email-verification-title");
+    (authModal || registerSection).appendChild(screen);
   }
 
   const user = auth.currentUser;
@@ -463,13 +472,16 @@ function renderEmailVerificationStep(email) {
   const safeMaskedEmail = escapeHtml(maskEmail(email));
 
   screen.innerHTML = `
+    <button type="button" class="email-verification-close" id="close-email-verification" aria-label="Close email verification">
+      <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+    </button>
     <div class="email-verification-visual" aria-hidden="true">
       <span class="email-verification-mail-icon">
         <i class="fa-regular fa-envelope"></i>
         <span><i class="fa-solid fa-shield"></i></span>
       </span>
     </div>
-    <h2>Verify your email</h2>
+    <h2 id="email-verification-title">Verify your email</h2>
     <p class="email-verification-copy">We'll send a 6-digit verification code to</p>
     <div class="email-verification-email-pill">${safeMaskedEmail}</div>
     <label class="auth-field-label email-verification-label" for="email-verification-code">Email OTP</label>
@@ -499,6 +511,9 @@ function renderEmailVerificationStep(email) {
   `;
 
   setupEmailOtpInput();
+  document.getElementById("close-email-verification")?.addEventListener("click", () => {
+    document.getElementById("closeAuthModal")?.click();
+  });
   document.getElementById("check-email-verification-btn")?.addEventListener("click", handleEmailVerifiedClick);
   document.getElementById("resend-email-verification-btn")?.addEventListener("click", handleResendVerificationClick);
   document.getElementById("change-email-btn")?.addEventListener("click", handleChangeEmailClick);
@@ -703,6 +718,8 @@ async function handleChangeEmailClick() {
     localStorage.removeItem("pending_verify_password");
 
     const registerSection = document.getElementById("register-section");
+    const authModal = registerSection?.closest(".auth-modal-overlay") || document.getElementById("authModal");
+    const authCard = authModal?.querySelector(".auth-modal-card");
     const title = registerSection?.querySelector(".auth-title");
     const intro = registerSection?.querySelector(".auth-switch-inline");
     const form = document.getElementById("register-form");
@@ -711,6 +728,9 @@ async function handleChangeEmailClick() {
     const emailInput = document.getElementById("reg-email");
 
     if (screen) screen.remove();
+    authModal?.classList.remove("email-verification-mode");
+    authCard?.removeAttribute("aria-hidden");
+    authCard?.style.removeProperty("display");
     if (title) title.classList.remove("hidden");
     if (intro) intro.classList.remove("hidden");
     if (form) form.classList.remove("hidden");

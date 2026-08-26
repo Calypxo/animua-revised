@@ -141,9 +141,29 @@ body.home-page section[id] {
    * homepage image scales down naturally at stronger browser zoom-out levels.
    */
   body.home-page:not(.furbabies-page):not(.announcements-page):not(.contact-page):not(.surrender-page):not(.submissions-page):not(.compatibility-results-page) > .hero {
-    height: clamp(760px, 70vh, 900px) !important;
-    min-height: 760px !important;
-    max-height: 900px !important;
+    height: clamp(800px, 78vh, 940px) !important;
+    min-height: 800px !important;
+    max-height: 940px !important;
+  }
+
+  body.home-page:not(.furbabies-page):not(.announcements-page):not(.contact-page):not(.surrender-page):not(.submissions-page):not(.compatibility-results-page) > .hero > .hero-layout {
+    box-sizing: border-box !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    padding-top: clamp(72px, 6.5vh, 92px) !important;
+    padding-bottom: clamp(238px, 24vh, 276px) !important;
+  }
+
+  body.home-page:not(.furbabies-page):not(.announcements-page):not(.contact-page):not(.surrender-page):not(.submissions-page):not(.compatibility-results-page) > .hero .hero-left {
+    width: min(800px, 100%) !important;
+    max-width: 800px !important;
+    margin-top: 0 !important;
+  }
+
+  body.home-page:not(.furbabies-page):not(.announcements-page):not(.contact-page):not(.surrender-page):not(.submissions-page):not(.compatibility-results-page) > .hero .hero-left h1 {
+    max-width: 800px !important;
+    font-size: clamp(58px, 3.2vw, 72px) !important;
   }
 
   /* Standalone public quiz pages do not use the shared .container wrapper. */
