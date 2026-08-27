@@ -1,6 +1,9 @@
 const { db } = require("../config/firebase");
 const sharp = require("sharp");
-const { analyzeSurrenderReason } = require("../services/surrenderNlpService");
+const {
+  analyzeSurrenderReason,
+  buildFallbackAnalysis,
+} = require("../services/surrenderNlpService");
 const {
   buildApprovalDeadlineFields,
   reconcileRequestDeadlines,
@@ -272,7 +275,10 @@ async function createSurrenderRequest(req, res) {
       });
     }
 
-    const nlpResult = await analyzeSurrenderReason(surrenderReason);
+    // Keep the public submission path fast and reliable. The local analysis is
+    // deterministic and available immediately; the remote model enriches the
+    // saved request after the user has received a successful response.
+    const nlpResult = buildFallbackAnalysis(surrenderReason);
 
     const requestId = body.id || generateRequestId();
 
@@ -345,7 +351,7 @@ async function createSurrenderRequest(req, res) {
       .doc(requestId)
       .set(surrenderRequest);
     const urgentRequest = ["Critical", "High"].includes(nlpResult.urgencyLabel);
-    await createManagementNotification({
+    createManagementNotification({
       type: urgentRequest ? "urgent_surrender_request_created" : "surrender_request_created",
       resourceType: "surrender_request",
       relatedResourceId: requestId,
@@ -354,6 +360,16 @@ async function createSurrenderRequest(req, res) {
         ? `${surrenderRequest.owner.name} submitted a ${nlpResult.urgencyLabel.toLowerCase()}-urgency request for ${surrenderRequest.pet.name || "an animal"}.`
         : `${surrenderRequest.owner.name} submitted a surrender request for ${surrenderRequest.pet.name || "an animal"}.`,
     }).catch((error) => console.warn("[createSurrenderRequest notification]", error.message));
+
+    analyzeSurrenderReason(surrenderReason)
+      .then(async (enrichedAnalysis) => {
+        if (!enrichedAnalysis || enrichedAnalysis.source === nlpResult.source) return;
+        await db.collection(COLLECTION_NAME).doc(requestId).update({
+          nlp: enrichedAnalysis,
+          nlpAnalyzedAt: new Date().toISOString(),
+        });
+      })
+      .catch((error) => console.warn("[createSurrenderRequest analysis]", error.message));
 
     return res.status(201).json({
       message: "Surrender request submitted successfully.",
