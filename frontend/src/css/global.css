@@ -435,6 +435,11 @@ button {
   line-height: 1.35;
 }
 
+.notification-item-copy small.notification-event-preview {
+  color: rgba(38, 27, 23, 0.48);
+  font-weight: 600;
+}
+
 .notification-item-copy time {
   color: rgba(38, 27, 23, 0.46);
   font-size: 0.6rem;
@@ -23000,8 +23005,19 @@ body.home-page #register-section .auth-submit-btn,
   }
 }
 
-/* Keep all four adoption steps on one row across tablet viewports. */
-@media (min-width: 761px) and (max-width: 1040px) {
+/*
+ * Keep the process layout in the same responsive mode as the navigation.
+ * Compact tablets use the two-column layout from home.css; once the desktop
+ * navigation fits again, all four steps can safely share one row.
+ */
+@media (min-width: 961px) {
+  body.home-page .how-animua-process::before {
+    background: #d8b558 !important;
+    background-image: none !important;
+  }
+}
+
+@media (min-width: 961px) and (max-width: 1040px) {
   body.home-page .how-animua-process {
     display: grid !important;
     grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
@@ -23020,13 +23036,8 @@ body.home-page #register-section .auth-submit-btn,
     width: auto !important;
     height: 3px !important;
     border-radius: 999px !important;
-    background: repeating-linear-gradient(
-      to right,
-      #d8b558 0 6px,
-      transparent 6px 18px
-    ) !important;
-    background-size: 18px 3px !important;
-    background-repeat: repeat-x !important;
+    background: #d8b558 !important;
+    background-image: none !important;
     transform: none !important;
     pointer-events: none !important;
   }
@@ -23245,8 +23256,8 @@ body .change-password-popup .password-change-otp-screen #confirm-password-change
   }
 }
 
-/* Email OTP modals: fit narrow phones, short viewports, and the soft keyboard. */
-@media (max-width: 820px) {
+/* Email OTP modal: phone-only containment for narrow and short viewports. */
+@media (max-width: 560px) {
   body #authModal.email-verification-mode {
     box-sizing: border-box !important;
     align-items: center !important;
@@ -23259,14 +23270,19 @@ body .change-password-popup .password-change-otp-screen #confirm-password-change
   }
 
   body #authModal.email-verification-mode .auth-modal-card {
-    width: min(100%, 560px) !important;
+    width: min(100%, 430px) !important;
     max-width: 100% !important;
-    height: calc(100vh - 16px) !important;
-    height: calc(100dvh - max(16px, env(safe-area-inset-top) + env(safe-area-inset-bottom))) !important;
+    height: min(86vh, 760px) !important;
+    height: min(86dvh, 760px) !important;
     min-height: 0 !important;
     max-height: calc(100dvh - max(16px, env(safe-area-inset-top) + env(safe-area-inset-bottom))) !important;
     border-radius: clamp(14px, 4vw, 22px) !important;
+    display: block !important;
     overflow: hidden !important;
+  }
+
+  body #authModal.email-verification-mode .auth-modal-left {
+    display: none !important;
   }
 
   body #authModal.email-verification-mode .auth-modal-right {
@@ -23275,6 +23291,7 @@ body .change-password-popup .password-change-otp-screen #confirm-password-change
     max-width: 100% !important;
     height: 100% !important;
     max-height: 100% !important;
+    display: block !important;
     padding: clamp(52px, 12vw, 66px) clamp(14px, 5vw, 28px) clamp(18px, 5vw, 28px) !important;
     overflow-x: hidden !important;
     overflow-y: auto !important;
@@ -23485,7 +23502,7 @@ body .change-password-popup .password-change-otp-screen #confirm-password-change
   }
 }
 
-@media (max-width: 820px) and (max-height: 760px) {
+@media (max-width: 560px) and (max-height: 760px) {
   body #authModal.email-verification-mode .auth-modal-right {
     padding: 48px 12px 12px !important;
   }
@@ -23591,7 +23608,7 @@ body .change-password-popup .password-change-otp-screen #confirm-password-change
   }
 }
 
-@media (max-width: 820px) and (max-height: 620px) {
+@media (max-width: 560px) and (max-height: 620px) {
   body #authModal.email-verification-mode .auth-modal-right {
     padding-top: 48px !important;
     padding-bottom: 14px !important;
@@ -23609,7 +23626,7 @@ body .change-password-popup .password-change-otp-screen #confirm-password-change
 }
 
 /* Standalone email verification card; isolated from the legacy auth card sizing. */
-body #authModal.email-verification-mode {
+body #authModal.email-verification-mode:has(> #email-verification-screen) {
   align-items: center !important;
   justify-content: center !important;
   padding:
@@ -23671,7 +23688,7 @@ body #authModal.email-verification-mode > #email-verification-screen {
   box-shadow: 0 10px 26px rgba(32, 24, 20, 0.18) !important;
 }
 
-@media (max-width: 820px) {
+@media (max-width: 560px) {
   body #authModal.email-verification-mode > #email-verification-screen {
     width: min(560px, calc(100vw - 16px)) !important;
     max-width: calc(100vw - 16px) !important;
