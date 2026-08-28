@@ -1,4 +1,3 @@
-import "../components/global/welcome.js";
 import "../css/adminDashboard.css";
 import "../css/managementTables.css";
 import { protectManagementPage } from "../auth/authGuard.js";

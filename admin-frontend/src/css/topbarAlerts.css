@@ -146,6 +146,217 @@
 .management-account-signout { grid-template-columns: 36px minmax(0, 1fr); color: #780116; }
 .management-account-signout .management-account-action-icon { color: #780116; }
 
+/* Management sign-out confirmation — paired with the login welcome design. */
+html body.management-consistent-ui .swal2-container.animua-logout-container {
+  padding: max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left)) !important;
+  background: rgba(31, 10, 12, .68) !important;
+  -webkit-backdrop-filter: blur(9px) saturate(.9) !important;
+  backdrop-filter: blur(9px) saturate(.9) !important;
+}
+
+html body.management-consistent-ui .swal2-popup.animua-logout-swal {
+  position: relative !important;
+  width: min(480px, calc(100vw - 36px)) !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(255, 255, 255, .84) !important;
+  border-radius: 27px !important;
+  color: #251d1f !important;
+  background:
+    radial-gradient(circle at 100% 0, rgba(247, 181, 56, .22), transparent 32%),
+    linear-gradient(180deg, #FFFFFF 0%, #FFFDF9 100%) !important;
+  box-shadow: 0 32px 90px rgba(31, 5, 9, .42) !important;
+  font-family: "Poppins", sans-serif !important;
+}
+
+html body.management-consistent-ui .swal2-popup.animua-logout-swal::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 2;
+  height: 7px;
+  background: linear-gradient(90deg, #780116 0 76%, #F7B538 76% 100%);
+}
+
+html body.management-consistent-ui .animua-logout-swal.swal2-show {
+  animation: managementLogoutIn .45s cubic-bezier(.16, 1, .3, 1) both !important;
+}
+
+html body.management-consistent-ui .animua-logout-swal.swal2-hide {
+  animation: managementLogoutOut .22s ease-in both !important;
+}
+
+html body.management-consistent-ui .swal2-icon.animua-logout-icon {
+  width: 72px !important;
+  height: 72px !important;
+  margin: 31px auto 13px !important;
+  border: 2px solid rgba(120, 1, 22, .28) !important;
+  border-radius: 23px !important;
+  color: #780116 !important;
+  background: #FFF8EE !important;
+  box-shadow: 0 0 0 8px rgba(120, 1, 22, .055) !important;
+  font-size: 2.2rem !important;
+}
+
+html body.management-consistent-ui .swal2-title.animua-logout-title {
+  padding: 0 28px !important;
+  color: #251d1f !important;
+  font: 800 clamp(1.25rem, 3vw, 1.48rem)/1.25 "Poppins", sans-serif !important;
+  letter-spacing: -.035em !important;
+}
+
+html body.management-consistent-ui .swal2-html-container.animua-logout-content {
+  margin: 10px 0 0 !important;
+  padding: 0 28px 22px !important;
+  overflow: visible !important;
+  color: #776b6e !important;
+  font: 500 .8rem/1.55 "Poppins", sans-serif !important;
+}
+
+.management-logout-copy {
+  min-width: 0;
+  display: grid;
+  gap: 11px;
+  text-align: left;
+}
+
+.management-logout-kicker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  color: #780116;
+  font-size: .64rem;
+  font-weight: 800;
+  letter-spacing: .105em;
+  text-transform: uppercase;
+}
+
+.management-logout-kicker i { color: #A76B00; font-size: .76rem; }
+
+.management-logout-copy > p {
+  max-width: 375px;
+  margin: 0 auto;
+  color: #74696B;
+  text-align: center;
+  font-size: .78rem;
+  line-height: 1.6;
+}
+
+.management-logout-account {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+  padding: 12px 13px;
+  border: 1px solid #EADFD4;
+  border-radius: 15px;
+  background: #FFF8EE;
+}
+
+.management-logout-account-icon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(120, 1, 22, .1);
+  border-radius: 13px;
+  color: #780116;
+  background: #FFFFFF;
+  box-shadow: 0 5px 14px rgba(56, 31, 25, .06);
+  font-size: 1rem;
+}
+
+.management-logout-identity { min-width: 0; display: grid; gap: 2px; }
+.management-logout-identity small { color: #8A7D7F; font-size: .61rem; font-weight: 600; }
+.management-logout-identity strong { overflow: hidden; color: #302629; font-size: .76rem; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+
+.management-logout-role {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 9px;
+  border: 1px solid rgba(120, 1, 22, .12);
+  border-radius: 999px;
+  color: #780116;
+  background: #FFFFFF;
+  font-size: .61rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.management-logout-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 0 3px;
+  color: #827579;
+  font-size: .65rem;
+  line-height: 1.5;
+}
+
+.management-logout-note i { flex: 0 0 auto; margin-top: 2px; color: #A76B00; }
+
+html body.management-consistent-ui .swal2-actions.animua-logout-actions {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+  margin: 0 !important;
+  padding: 15px 24px !important;
+  border-top: 1px solid #EADFD4 !important;
+  background: #FFF8EE !important;
+}
+
+html body.management-consistent-ui .animua-logout-actions :is(.animua-logout-confirm, .animua-logout-cancel) {
+  min-height: 44px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  margin: 0 !important;
+  padding: 0 20px !important;
+  border-radius: 999px !important;
+  font: 800 .75rem/1 "Poppins", sans-serif !important;
+}
+
+html body.management-consistent-ui .animua-logout-actions .animua-logout-confirm {
+  border: 1px solid #780116 !important;
+  color: #FFFFFF !important;
+  background: #780116 !important;
+  box-shadow: 0 10px 22px rgba(120, 1, 22, .18) !important;
+}
+
+html body.management-consistent-ui .animua-logout-actions .animua-logout-cancel {
+  border: 1px solid #DFD3CB !important;
+  color: #780116 !important;
+  background: #FFFFFF !important;
+  box-shadow: none !important;
+}
+
+html body.management-consistent-ui .animua-logout-actions .animua-logout-confirm:disabled {
+  cursor: wait !important;
+  opacity: .72 !important;
+}
+
+html body.management-consistent-ui .swal2-loader.animua-logout-loader {
+  width: 18px !important;
+  height: 18px !important;
+  margin: 0 8px !important;
+  border-width: 2px !important;
+  border-color: rgba(120, 1, 22, .22) transparent #780116 transparent !important;
+}
+
+@keyframes managementLogoutIn {
+  from { opacity: 0; transform: translateY(22px) scale(.955); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes managementLogoutOut {
+  to { opacity: 0; transform: translateY(8px) scale(.98); }
+}
+
 .user-chip[aria-expanded="true"] .caret { transform: rotate(180deg); }
 .user-chip .caret { transition: transform 150ms ease; }
 
@@ -366,9 +577,78 @@
   .management-account-menu { position: fixed; top: 66px; right: 12px; }
 }
 
+@media (max-width: 520px) {
+  html body.management-consistent-ui .swal2-container.animua-logout-container {
+    padding: max(10px, env(safe-area-inset-top)) 10px max(10px, env(safe-area-inset-bottom)) !important;
+  }
+
+  html body.management-consistent-ui .swal2-popup.animua-logout-swal {
+    width: 100% !important;
+    border-radius: 22px !important;
+  }
+
+  html body.management-consistent-ui .swal2-icon.animua-logout-icon {
+    width: 64px !important;
+    height: 64px !important;
+    margin: 27px auto 11px !important;
+    border-radius: 20px !important;
+    box-shadow: 0 0 0 6px rgba(120, 1, 22, .055) !important;
+  }
+
+  html body.management-consistent-ui .swal2-title.animua-logout-title {
+    padding-inline: 20px !important;
+    font-size: 1.25rem !important;
+  }
+
+  html body.management-consistent-ui .swal2-html-container.animua-logout-content {
+    padding: 0 18px 18px !important;
+  }
+
+  .management-logout-kicker { font-size: .58rem; letter-spacing: .085em; }
+  .management-logout-copy > p { font-size: .74rem; }
+  .management-logout-account { grid-template-columns: 40px minmax(0, 1fr) auto; gap: 9px; padding: 10px; }
+  .management-logout-account-icon { width: 40px; height: 40px; border-radius: 12px; }
+  .management-logout-role { padding: 6px 8px; font-size: .57rem; }
+
+  html body.management-consistent-ui .swal2-actions.animua-logout-actions {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    padding: 13px 18px calc(13px + env(safe-area-inset-bottom)) !important;
+  }
+
+  html body.management-consistent-ui .animua-logout-actions :is(.animua-logout-confirm, .animua-logout-cancel) {
+    width: 100% !important;
+  }
+
+  html body.management-consistent-ui .animua-logout-actions .animua-logout-confirm { order: -1; }
+}
+
+@media (max-width: 360px) {
+  .management-logout-account { grid-template-columns: 40px minmax(0, 1fr); }
+  .management-logout-role { grid-column: 2; justify-self: start; margin-top: -2px; }
+}
+
+@media (max-height: 600px) {
+  html body.management-consistent-ui .swal2-popup.animua-logout-swal {
+    max-height: calc(100dvh - 20px) !important;
+    overflow-y: auto !important;
+  }
+
+  html body.management-consistent-ui .swal2-icon.animua-logout-icon {
+    width: 58px !important;
+    height: 58px !important;
+    margin: 23px auto 8px !important;
+  }
+
+  html body.management-consistent-ui .swal2-html-container.animua-logout-content { padding-bottom: 14px !important; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .management-attention-center,
   .management-account-menu,
   .attention-refresh[aria-busy="true"] i,
   .attention-loading span { animation: none !important; }
+
+  html body.management-consistent-ui .animua-logout-swal.swal2-show,
+  html body.management-consistent-ui .animua-logout-swal.swal2-hide { animation-duration: .01ms !important; }
 }

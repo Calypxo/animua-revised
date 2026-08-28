@@ -7,10 +7,16 @@ import { syncManagementPushNotifications } from "../../services/pushNotification
 
 let pushSyncStarted = false;
 
-const managementSwalClasses = {
-  popup: "animua-management-swal",
-  confirmButton: "animua-management-swal-confirm",
-  cancelButton: "animua-management-swal-cancel",
+const logoutSwalClasses = {
+  container: "animua-logout-container",
+  popup: "animua-management-swal animua-logout-swal",
+  icon: "animua-logout-icon",
+  title: "animua-logout-title",
+  htmlContainer: "animua-logout-content",
+  actions: "animua-logout-actions",
+  confirmButton: "animua-management-swal-confirm animua-logout-confirm",
+  cancelButton: "animua-management-swal-cancel animua-logout-cancel",
+  loader: "animua-logout-loader",
 };
 
 const escapeHtml = (value) => String(value ?? "")
@@ -250,6 +256,54 @@ function ensureAccountMenu(chip, name, role, initials) {
   return menu;
 }
 
+function confirmManagementLogout() {
+  const name = getUserName() || "Admin User";
+  const role = getUserRole() || "Admin";
+
+  return Swal.fire({
+    title: "Ready to sign out?",
+    html: `
+      <div class="management-logout-copy">
+        <span class="management-logout-kicker">
+          <i class="bi bi-shield-lock" aria-hidden="true"></i>
+          Management session
+        </span>
+        <p>Your secure session will end and you’ll return to the ANIMUA management login.</p>
+        <div class="management-logout-account" aria-label="Account to be signed out">
+          <span class="management-logout-account-icon" aria-hidden="true">
+            <i class="bi bi-person-fill"></i>
+          </span>
+          <span class="management-logout-identity">
+            <small>Currently signed in as</small>
+            <strong>${escapeHtml(name)}</strong>
+          </span>
+          <span class="management-logout-role">${escapeHtml(role)}</span>
+        </div>
+        <div class="management-logout-note">
+          <i class="bi bi-info-circle" aria-hidden="true"></i>
+          <span>You’ll need to sign in again to continue managing shelter records.</span>
+        </div>
+      </div>
+    `,
+    icon: "question",
+    iconColor: "#780116",
+    showCancelButton: true,
+    reverseButtons: true,
+    focusCancel: true,
+    confirmButtonText: '<i class="bi bi-box-arrow-right" aria-hidden="true"></i><span>Sign Out</span>',
+    cancelButtonText: '<i class="bi bi-arrow-left" aria-hidden="true"></i><span>Stay Signed In</span>',
+    customClass: logoutSwalClasses,
+    buttonsStyling: false,
+    showLoaderOnConfirm: true,
+    allowOutsideClick: () => !Swal.isLoading(),
+    allowEscapeKey: () => !Swal.isLoading(),
+    preConfirm: async () => {
+      await endUserSession();
+      return true;
+    },
+  });
+}
+
 function bindAccountMenu(chip, menu) {
   if (chip.dataset.accountMenuBound === "true") return;
   chip.dataset.accountMenuBound = "true";
@@ -293,21 +347,8 @@ function bindAccountMenu(chip, menu) {
   menu.querySelector('a[href="/pages/accountSettings.html"]')?.addEventListener("click", () => close());
   menu.querySelector(".management-account-signout")?.addEventListener("click", async () => {
     close();
-    const result = await Swal.fire({
-      title: "Sign out?",
-      html: "Your current management session will end and you will return to the login screen.",
-      icon: "question",
-      iconColor: "#780116",
-      showCancelButton: true,
-      reverseButtons: true,
-      focusCancel: true,
-      confirmButtonText: '<i class="bi bi-box-arrow-right"></i> Sign Out',
-      cancelButtonText: "Stay Signed In",
-      customClass: managementSwalClasses,
-      buttonsStyling: false,
-    });
+    const result = await confirmManagementLogout();
     if (!result.isConfirmed) return;
-    await endUserSession();
     window.location.replace("/pages/admin-login.html");
   });
   document.addEventListener("click", () => close());

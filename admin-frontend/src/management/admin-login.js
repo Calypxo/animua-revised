@@ -7,6 +7,15 @@ import { initializeManagementRecovery } from "./managementRecovery.js";
 // ── HELPERS ────────────────────────────────────────────
 function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
 function getVal(id) { return document.getElementById(id)?.value?.trim() || ""; }
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;",
+  })[character]);
+}
 function showErr(id, msg) {
   const el = document.getElementById(id);
   if (el) { el.textContent = msg; el.style.display = "block"; }
@@ -36,6 +45,53 @@ const swalCfg = {
   customClass: { popup: "animua-swal-popup", confirmButton: "animua-swal-btn" },
   buttonsStyling: false,
 };
+
+function showLoginWelcome({ fullName, role }) {
+  const safeName = escapeHtml(fullName);
+  const safeRole = escapeHtml(role);
+  const firstName = escapeHtml(String(fullName || "User").trim().split(/\s+/)[0]);
+
+  return Swal.fire({
+    icon: "success",
+    title: `Welcome back, ${firstName}!`,
+    html: `
+      <div class="login-welcome-copy">
+        <span class="login-welcome-kicker">
+          <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+          Secure management session
+        </span>
+        <p>Good to have you back. Your ANIMUA shelter workspace is ready.</p>
+        <div class="login-welcome-access" aria-label="Active signed-in account">
+          <span class="login-welcome-access-icon" aria-hidden="true">
+            <i class="fa-solid fa-user-check"></i>
+          </span>
+          <span class="login-welcome-identity">
+            <small>Signed in as</small>
+            <strong>${safeName}</strong>
+          </span>
+          <span class="login-welcome-role">
+            <span class="login-welcome-status-dot" aria-hidden="true"></span>
+            ${safeRole}
+          </span>
+        </div>
+      </div>
+    `,
+    timer: 2200,
+    timerProgressBar: true,
+    showConfirmButton: false,
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    buttonsStyling: false,
+    customClass: {
+      container: "animua-login-welcome-container",
+      popup: "animua-swal-popup animua-login-welcome",
+      icon: "animua-login-welcome-icon",
+      title: "animua-login-welcome-title",
+      htmlContainer: "animua-login-welcome-content",
+      timerProgressBar: "animua-login-welcome-progress",
+    },
+  });
+}
  
 // ── LOGIN ──────────────────────────────────────────────
 async function handleAdminLogin(e) {
@@ -98,12 +154,8 @@ async function handleAdminLogin(e) {
  
     clearUserSession();
     setUserSession({ role, fullName, email: data.email || email.toLowerCase() });
-    sessionStorage.setItem("show_welcome_toast", "true");
  
-    await Swal.fire({
-      icon: "success", title: "Welcome back", text: `Signed in as ${fullName}`,
-      timer: 1600, showConfirmButton: false, timerProgressBar: true, ...swalCfg,
-    });
+    await showLoginWelcome({ fullName, role });
  
     window.location.replace("/pages/dashboard.html");
  
