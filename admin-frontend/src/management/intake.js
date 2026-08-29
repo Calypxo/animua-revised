@@ -226,21 +226,6 @@ function renderTable() {
   }
 
   tbody.innerHTML = page.map(r => {
-  const canReject =
-    r.status === "Pending" &&
-    can("reject");
-
-  const canConvert =
-    can("convert") &&
-    (
-      r.status === "Approved" ||
-      (r.status === "Pending" && can("approve"))
-    );
-
-  const canEdit =
-    (r.status === "Pending" || r.status === "Draft") &&
-    can("edit");
-
     return `
     <tr data-id="${r.id}" class="management-card-row">
       <td data-label="Intake ID" class="intake-code management-card-primary">${r.id}</td>
@@ -258,17 +243,10 @@ function renderTable() {
       <td data-label="Encoded by" class="encoded-by">${r.encodedBy}</td>
       <td data-label="Date" class="intake-date">${formatDate(r.intakeDate)}</td>
       <td data-label="Status">${statusBadge(r.status)}</td>
-      <td data-label="Actions" class="table-actions management-card-actions">
-        <div class="intake-action-group">
-          <button type="button" class="tbl-action-btn management-card-open management-view-action management-view-action--compact" title="View record" aria-label="View ${r.id}" data-action="view" data-id="${r.id}">
-            <i class="bi bi-eye" aria-hidden="true"></i><span class="management-action-text">View record</span>
-          </button>
-          <div class="intake-secondary-actions">
-            ${canEdit    ? `<button class="tbl-action-btn" title="Edit" aria-label="Edit ${r.id}" data-action="edit" data-id="${r.id}"><i class="bi bi-pencil"></i><span class="intake-action-label">Edit</span></button>` : ""}
-            ${canReject  ? `<button class="tbl-action-btn reject" title="Reject" aria-label="Reject ${r.id}" data-action="reject" data-id="${r.id}"><i class="bi bi-x-lg"></i><span class="intake-action-label">Reject</span></button>` : ""}
-            ${canConvert ? `<button class="tbl-action-btn convert" title="${r.status === "Pending" ? "Approve and start profiling" : "Start profiling"}" aria-label="${r.status === "Pending" ? "Approve and start profiling for" : "Start profiling for"} ${r.id}" data-action="convert" data-id="${r.id}"><i class="bi bi-arrow-right-circle"></i><span class="intake-action-label">${r.status === "Pending" ? "Approve" : "Profile"}</span></button>` : ""}
-          </div>
-        </div>
+      <td data-label="Actions" class="management-card-actions">
+        <button type="button" class="tbl-action-btn management-card-open management-view-action management-view-action--compact" title="View record" aria-label="View ${r.id}" data-action="view" data-id="${r.id}">
+          <i class="bi bi-eye" aria-hidden="true"></i><span class="management-action-text">View record</span>
+        </button>
       </td>
     </tr>`;
   }).join("");
@@ -284,11 +262,7 @@ function renderTable() {
   tbody.querySelectorAll("[data-action]").forEach(btn => {
     btn.addEventListener("click", e => {
       e.stopPropagation();
-      const { action, id } = btn.dataset;
-      if (action === "view")    openViewModal(id);
-      if (action === "edit")    openEditModal(id);
-      if (action === "reject")  openConfirmModal("reject",  id);
-      if (action === "convert") openConfirmModal("convert", id);
+      openViewModal(btn.dataset.id);
     });
   });
 }

@@ -4707,223 +4707,30 @@ html body.management-consistent-ui .page-body .archive-records-table.management-
   }
 }
 
-/* Intake card actions: below 720px the module's own CSS always renders cards.
-   Wider layouts receive this treatment only when the responsive table helper
-   has explicitly activated card mode, preserving compact table eye buttons. */
-@media (max-width: 720px) {
-  html body.intake-management-page .page-body
-    #intakeTableBody > tr > td.management-card-actions {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: none !important;
+/* Intake rows expose only the centralized View control. Edit, rejection and
+   approval remain in the record-details modal so the workflow is unchanged. */
+html body.intake-management-page .page-body
+  #intakeTableBody > tr > td.management-card-actions {
+  text-align: center !important;
+}
+
+/* Restore the original desktop Intake Source composition. The form keeps the
+   shared modal shell, but its three mutually exclusive source types belong on
+   one row whenever the modal has tablet/desktop space. */
+@media (min-width: 721px) {
+  html body.management-consistent-ui.intake-management-page
+    #intakeModalBackdrop.management-modal-layer
+    > .intake-modal.management-side-modal .source-selector {
     display: grid !important;
-    grid-template-columns: minmax(0, 1fr) !important;
-    grid-auto-flow: row !important;
-    justify-items: stretch !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     align-items: stretch !important;
-    box-sizing: border-box !important;
+    gap: 10px !important;
   }
 
-  html body.intake-management-page .page-body
-    #intakeTableBody > tr > td.management-card-actions::before {
-    width: 100% !important;
-    grid-column: 1 / -1 !important;
-    text-align: center !important;
-  }
-
-  html body.intake-management-page .page-body
-    #intakeTableBody .intake-action-group {
-    width: 100% !important;
+  html body.management-consistent-ui.intake-management-page
+    #intakeModalBackdrop.management-modal-layer
+    > .intake-modal.management-side-modal .source-opt {
     min-width: 0 !important;
-    max-width: none !important;
-    display: grid !important;
-    grid-column: 1 / -1 !important;
-    grid-template-columns: minmax(0, 1fr) !important;
-    gap: 8px !important;
-    justify-self: stretch !important;
-    box-sizing: border-box !important;
-  }
-
-  html body.intake-management-page .page-body
-    #intakeTableBody .intake-secondary-actions {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: none !important;
-    display: grid !important;
-    grid-template-columns: repeat(auto-fit, minmax(82px, 1fr)) !important;
-    gap: 8px !important;
-    grid-column: 1 / -1 !important;
-    justify-self: stretch !important;
-  }
-
-  html body.intake-management-page .page-body
-    #intakeTableBody .intake-secondary-actions:empty {
-    display: none !important;
-  }
-
-  html body.intake-management-page .page-body
-    #intakeTableBody .intake-action-group > .tbl-action-btn,
-  html body.intake-management-page .page-body
-    #intakeTableBody .intake-secondary-actions > .tbl-action-btn {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: none !important;
-    flex: 1 1 auto !important;
-  }
-
-  html body.intake-management-page .page-body
-    #intakeTableBody .intake-action-group > .management-card-open {
-    width: 100% !important;
-    max-width: none !important;
-    min-width: 0 !important;
-    grid-column: 1 / -1 !important;
-    justify-self: stretch !important;
-  }
-
-  html body.intake-management-page .page-body
-    #intakeTableBody .management-card-actions
-    .management-view-action > .management-action-text {
-    display: inline !important;
-    color: inherit !important;
-    font: inherit !important;
-    white-space: nowrap !important;
-  }
-}
-
-@media (min-width: 721px) and (max-width: 1365px) {
-  html body.intake-management-page .page-body
-    .management-data-table.management-card-table.management-card-active
-    #intakeTableBody > tr > td.management-card-actions {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: none !important;
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) !important;
-    grid-auto-flow: row !important;
-    justify-items: stretch !important;
-    align-items: stretch !important;
-    box-sizing: border-box !important;
-  }
-
-  html body.intake-management-page .page-body
-    .management-data-table.management-card-table.management-card-active
-    #intakeTableBody > tr > td.management-card-actions::before {
-    width: 100% !important;
-    grid-column: 1 / -1 !important;
-    text-align: center !important;
-  }
-
-  html body.intake-management-page .page-body
-    .management-data-table.management-card-table.management-card-active
-    #intakeTableBody .intake-action-group {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: none !important;
-    display: grid !important;
-    grid-column: 1 / -1 !important;
-    grid-template-columns: minmax(0, 1fr) !important;
-    gap: 8px !important;
-    justify-self: stretch !important;
-    box-sizing: border-box !important;
-  }
-
-  html body.intake-management-page .page-body
-    .management-data-table.management-card-table.management-card-active
-    #intakeTableBody .intake-secondary-actions {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: none !important;
-    display: grid !important;
-    grid-template-columns: repeat(auto-fit, minmax(82px, 1fr)) !important;
-    gap: 8px !important;
-    grid-column: 1 / -1 !important;
-    justify-self: stretch !important;
-  }
-
-  html body.intake-management-page .page-body
-    .management-data-table.management-card-table.management-card-active
-    #intakeTableBody .intake-secondary-actions:empty {
-    display: none !important;
-  }
-
-  html body.intake-management-page .page-body
-    .management-data-table.management-card-table.management-card-active
-    #intakeTableBody .intake-action-group > .tbl-action-btn,
-  html body.intake-management-page .page-body
-    .management-data-table.management-card-table.management-card-active
-    #intakeTableBody .intake-secondary-actions > .tbl-action-btn {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: none !important;
-    flex: 1 1 auto !important;
-  }
-
-  html body.intake-management-page .page-body
-    .management-data-table.management-card-table.management-card-active
-    #intakeTableBody .intake-action-group > .management-card-open {
-    width: 100% !important;
-    max-width: none !important;
-    min-width: 0 !important;
-    grid-column: 1 / -1 !important;
-    justify-self: stretch !important;
-  }
-}
-
-/* The non-card intake table can expose four row actions. Keep them in a
-   contained two-by-two grid so the last control never crosses the panel edge
-   and the operational columns do not need horizontal scrolling. */
-@media (min-width: 1366px) {
-  html body.intake-management-page .page-body
-    .management-data-table:not(.management-card-active)
-    #intakeTableBody > tr > td.management-card-actions {
-    width: 118px !important;
-    min-width: 118px !important;
-    max-width: 118px !important;
-    padding-inline: 8px !important;
-    overflow: visible !important;
-    box-sizing: border-box !important;
-  }
-
-  html body.intake-management-page .page-body
-    .management-data-table:not(.management-card-active)
-    #intakeTableBody .intake-action-group {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: none !important;
-    display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    align-items: center !important;
-    justify-items: center !important;
-    gap: 6px !important;
-  }
-
-  html body.intake-management-page .page-body
-    .management-data-table:not(.management-card-active)
-    #intakeTableBody .intake-secondary-actions {
-    display: contents !important;
-  }
-
-  html body.intake-management-page .page-body
-    .management-data-table:not(.management-card-active)
-    #intakeTableBody .intake-secondary-actions:empty {
-    display: none !important;
-  }
-}
-
-@media (max-width: 339px) {
-  html body.intake-management-page .page-body
-    #intakeTableBody .intake-action-group {
-    grid-template-columns: minmax(0, 1fr) !important;
-  }
-
-  html body.intake-management-page .page-body
-    #intakeTableBody .intake-action-group > .tbl-action-btn {
-    grid-column: 1 !important;
-  }
-
-  html body.intake-management-page .page-body
-    #intakeTableBody .intake-secondary-actions {
-    grid-template-columns: minmax(0, 1fr) !important;
   }
 }
 

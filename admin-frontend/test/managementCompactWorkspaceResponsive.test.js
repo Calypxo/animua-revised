@@ -139,68 +139,33 @@ test("Intake remains one continuous Inventory-style panel on phones", () => {
   );
 });
 
-test("Intake actions fill the card and keep decision controls aligned", () => {
+test("Intake rows use only the centralized View action while the modal owns workflow actions", () => {
+  const intakeRow = intakeScript.slice(
+    intakeScript.indexOf('tbody.innerHTML = page.map'),
+    intakeScript.indexOf('// Row click'),
+  );
   const intakeActions = responsiveStyles.slice(
-    responsiveStyles.lastIndexOf("/* Intake card actions:"),
+    responsiveStyles.lastIndexOf("/* Intake rows expose only the centralized View control."),
+    responsiveStyles.lastIndexOf("/* Intake record details is a centered review dialog"),
   );
 
   assert.match(
-    intakeScript,
-    /intake-action-group[\s\S]*?tbl-action-btn management-card-open management-view-action management-view-action--compact[\s\S]*?management-action-text">View record/,
+    intakeRow,
+    /management-card-actions[\s\S]*?tbl-action-btn management-card-open management-view-action management-view-action--compact[\s\S]*?management-action-text">View record/,
   );
-  assert.match(
-    intakeScript,
-    /intake-secondary-actions[\s\S]*?data-action="edit"[\s\S]*?data-action="reject"[\s\S]*?data-action="convert"/,
-  );
+  assert.doesNotMatch(intakeRow, /intake-secondary-actions/);
+  assert.doesNotMatch(intakeRow, /data-action="(?:edit|reject|convert)"/);
+  assert.match(intakeScript, /intake-view-footer-actions[\s\S]*?vBtnEdit[\s\S]*?vBtnReject[\s\S]*?vBtnConvert/);
+  assert.match(intakeScript, /vBtnEdit[\s\S]*?openEditModal\(id\)/);
+  assert.match(intakeScript, /vBtnReject[\s\S]*?openConfirmModal\("reject",\s+id\)/);
+  assert.match(intakeScript, /vBtnConvert[\s\S]*?openConfirmModal\("convert", id\)/);
   assert.match(
     surrenderScript,
     /tbl-action-btn management-card-open management-view-action management-view-action--compact[\s\S]*?management-action-text">View request/,
   );
-  assert.match(intakeActions, /@media \(max-width: 720px\)/);
-  assert.doesNotMatch(
-    intakeActions.slice(0, intakeActions.indexOf("@media (min-width: 721px)")),
-    /management-card-active/,
-  );
-  assert.match(
-    intakeActions,
-    /@media \(min-width: 721px\) and \(max-width: 1365px\)[\s\S]*?management-card-active[\s\S]*?#intakeTableBody \.intake-action-group/,
-  );
-  assert.match(
-    intakeActions,
-    /#intakeTableBody > tr > td\.management-card-actions\s*\{[\s\S]*?width:\s*100% !important;[\s\S]*?grid-template-columns:\s*minmax\(0, 1fr\) !important;[\s\S]*?justify-items:\s*stretch !important;/,
-  );
-  assert.match(
-    intakeActions,
-    /#intakeTableBody \.intake-action-group\s*\{[\s\S]*?width:\s*100% !important;[\s\S]*?max-width:\s*none !important;[\s\S]*?display:\s*grid !important;[\s\S]*?grid-column:\s*1 \/ -1 !important;[\s\S]*?grid-template-columns:\s*minmax\(0, 1fr\) !important;[\s\S]*?justify-self:\s*stretch !important;/,
-  );
-  assert.match(
-    intakeActions,
-    /#intakeTableBody \.intake-secondary-actions\s*\{[\s\S]*?width:\s*100% !important;[\s\S]*?grid-template-columns:\s*repeat\(auto-fit, minmax\(82px, 1fr\)\) !important;[\s\S]*?justify-self:\s*stretch !important;/,
-  );
-  assert.match(
-    intakeActions,
-    /#intakeTableBody \.intake-action-group > \.management-card-open\s*\{[\s\S]*?width:\s*100% !important;[\s\S]*?max-width:\s*none !important;[\s\S]*?grid-column:\s*1 \/ -1 !important;[\s\S]*?justify-self:\s*stretch !important;/,
-  );
-  assert.match(
-    intakeActions,
-    /\.management-view-action > \.management-action-text\s*\{[\s\S]*?display:\s*inline !important;/,
-  );
-  assert.match(
-    intakeActions,
-    /@media \(max-width: 339px\)[\s\S]*?#intakeTableBody \.intake-action-group\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0, 1fr\) !important;/,
-  );
-  assert.match(
-    intakeActions,
-    /@media \(min-width: 1366px\)[\s\S]*?management-data-table:not\(\.management-card-active\)[\s\S]*?#intakeTableBody > tr > td\.management-card-actions\s*\{[\s\S]*?width:\s*118px !important;[\s\S]*?min-width:\s*118px !important;/,
-  );
-  assert.match(
-    intakeActions,
-    /@media \(min-width: 1366px\)[\s\S]*?#intakeTableBody \.intake-action-group\s*\{[\s\S]*?display:\s*grid !important;[\s\S]*?grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\) !important;[\s\S]*?justify-items:\s*center !important;/,
-  );
-  assert.match(
-    intakeActions,
-    /@media \(min-width: 1366px\)[\s\S]*?#intakeTableBody \.intake-secondary-actions\s*\{[\s\S]*?display:\s*contents !important;/,
-  );
+  assert.match(intakeActions, /#intakeTableBody > tr > td\.management-card-actions\s*\{[\s\S]*?text-align:\s*center !important;/);
+  assert.match(intakeActions, /@media \(min-width: 721px\)/);
+  assert.match(intakeActions, /#intakeModalBackdrop\.management-modal-layer[\s\S]*?> \.intake-modal\.management-side-modal \.source-selector\s*\{[\s\S]*?grid-template-columns:\s*repeat\(3, minmax\(0, 1fr\)\) !important;/);
 });
 
 test("Intake modals stay inside the mobile viewport with usable actions", () => {
