@@ -5,9 +5,10 @@ import { readFile } from "node:fs/promises";
 const readPage = (name) => readFile(new URL(`../pages/${name}`, import.meta.url), "utf8");
 const readStyle = (name) => readFile(new URL(`../src/css/${name}`, import.meta.url), "utf8");
 
-const [compatibilityPage, inventoryPage, adoptionScript, intakeScript, compatibilityStyles, inventoryStyles, responsiveStyles, tabStyles] = await Promise.all([
+const [compatibilityPage, inventoryPage, intakePage, adoptionScript, intakeScript, compatibilityStyles, inventoryStyles, responsiveStyles, tabStyles] = await Promise.all([
   readPage("compatibilityQuiz.html"),
   readPage("inventory.html"),
+  readPage("intakeList.html"),
   readFile(new URL("../src/management/adoptionApps.js", import.meta.url), "utf8"),
   readFile(new URL("../src/management/intake.js", import.meta.url), "utf8"),
   readStyle("compatibilityQuiz.css"),
@@ -149,15 +150,46 @@ test("Intake View record fills the mobile action row", () => {
   assert.match(intakeActions, /@media \(max-width: 599px\)/);
   assert.match(
     intakeActions,
-    /\.intake-action-group\s*\{[\s\S]*?width:\s*100% !important;[\s\S]*?grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\) !important;/,
+    /#intakeTableBody \.intake-action-group\s*\{[\s\S]*?width:\s*100% !important;[\s\S]*?display:\s*grid !important;[\s\S]*?grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\) !important;/,
   );
   assert.match(
     intakeActions,
-    /\.intake-action-group > \.management-card-open\s*\{[\s\S]*?width:\s*100% !important;[\s\S]*?max-width:\s*none !important;[\s\S]*?grid-column:\s*1 \/ -1 !important;[\s\S]*?justify-self:\s*stretch !important;/,
+    /#intakeTableBody \.intake-action-group > \.management-card-open\s*\{[\s\S]*?width:\s*100% !important;[\s\S]*?max-width:\s*none !important;[\s\S]*?grid-column:\s*1 \/ -1 !important;[\s\S]*?justify-self:\s*stretch !important;/,
   );
   assert.match(
     intakeActions,
-    /@media \(max-width: 339px\)[\s\S]*?\.intake-action-group\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0, 1fr\) !important;/,
+    /@media \(max-width: 339px\)[\s\S]*?#intakeTableBody \.intake-action-group\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0, 1fr\) !important;/,
+  );
+});
+
+test("Intake modals stay inside the mobile viewport with usable actions", () => {
+  const intakeModals = responsiveStyles.slice(
+    responsiveStyles.lastIndexOf("/* Intake mobile modal contract:"),
+  );
+
+  for (const modalId of ["intakeModalBackdrop", "viewModalBackdrop", "confirmModalBackdrop"]) {
+    assert.match(intakePage, new RegExp(`id="${modalId}"`));
+  }
+  assert.match(intakeModals, /@media \(max-width: 599px\)/);
+  assert.match(
+    intakeModals,
+    /#intakeModalBackdrop,[\s\S]*?#viewModalBackdrop[\s\S]*?\.management-modal-layer\s*\{[\s\S]*?padding:\s*0 !important;[\s\S]*?overflow:\s*hidden !important;/,
+  );
+  assert.match(
+    intakeModals,
+    /\.intake-modal\.management-side-modal\s*\{[\s\S]*?width:\s*100dvw !important;[\s\S]*?height:\s*100dvh !important;[\s\S]*?max-height:\s*100dvh !important;/,
+  );
+  assert.match(
+    intakeModals,
+    /\.intake-modal > \.um-modal-body\s*\{[\s\S]*?min-height:\s*0 !important;[\s\S]*?overflow-y:\s*auto !important;[\s\S]*?touch-action:\s*pan-y !important;/,
+  );
+  assert.match(
+    intakeModals,
+    /#viewModalBackdrop[\s\S]*?\.intake-view-footer-actions\s*\{[\s\S]*?width:\s*100% !important;[\s\S]*?grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\) !important;/,
+  );
+  assert.match(
+    intakeModals,
+    /@media \(max-width: 420px\)[\s\S]*?#confirmModalBackdrop[\s\S]*?grid-template-columns:\s*minmax\(0, 1fr\) !important;/,
   );
 });
 

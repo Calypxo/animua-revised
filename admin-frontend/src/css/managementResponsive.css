@@ -4719,7 +4719,7 @@ html body.management-consistent-ui .page-body .archive-records-table.management-
 
   html body.management-consistent-ui.intake-management-page .page-body
     .management-data-table.management-card-table.management-card-active
-    .intake-action-group {
+    #intakeTableBody .intake-action-group {
     width: 100% !important;
     min-width: 0 !important;
     display: grid !important;
@@ -4729,14 +4729,16 @@ html body.management-consistent-ui .page-body .archive-records-table.management-
 
   html body.management-consistent-ui.intake-management-page .page-body
     .management-data-table.management-card-table.management-card-active
-    .intake-action-group > .tbl-action-btn {
+    #intakeTableBody .intake-action-group > .tbl-action-btn {
     width: 100% !important;
     min-width: 0 !important;
+    max-width: none !important;
+    flex: 1 1 auto !important;
   }
 
   html body.management-consistent-ui.intake-management-page .page-body
     .management-data-table.management-card-table.management-card-active
-    .intake-action-group > .management-card-open {
+    #intakeTableBody .intake-action-group > .management-card-open {
     width: 100% !important;
     max-width: none !important;
     min-width: 0 !important;
@@ -4748,13 +4750,182 @@ html body.management-consistent-ui .page-body .archive-records-table.management-
 @media (max-width: 339px) {
   html body.management-consistent-ui.intake-management-page .page-body
     .management-data-table.management-card-table.management-card-active
-    .intake-action-group {
+    #intakeTableBody .intake-action-group {
     grid-template-columns: minmax(0, 1fr) !important;
   }
 
   html body.management-consistent-ui.intake-management-page .page-body
     .management-data-table.management-card-table.management-card-active
-    .intake-action-group > .tbl-action-btn {
+    #intakeTableBody .intake-action-group > .tbl-action-btn {
     grid-column: 1 !important;
+  }
+}
+
+/* Intake mobile modal contract: the backdrop and full-screen workflow panel
+   share the same viewport box, while only the modal body scrolls. This avoids
+   the 100vw-plus-backdrop-padding overflow left by the generic dialog rules. */
+@media (max-width: 599px) {
+  html body.management-consistent-ui.intake-management-page :is(
+    #intakeModalBackdrop,
+    #viewModalBackdrop
+  ).management-modal-layer {
+    align-items: stretch !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page :is(
+    #intakeModalBackdrop,
+    #viewModalBackdrop
+  ).management-modal-layer > .intake-modal.management-side-modal {
+    width: 100dvw !important;
+    min-width: 0 !important;
+    max-width: 100dvw !important;
+    height: 100dvh !important;
+    min-height: 0 !important;
+    max-height: 100dvh !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page :is(
+    #intakeModalBackdrop,
+    #viewModalBackdrop
+  ) .intake-modal > .um-modal-header {
+    min-height: 0 !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+    padding: max(14px, env(safe-area-inset-top)) 14px 12px !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page :is(
+    #intakeModalBackdrop,
+    #viewModalBackdrop
+  ) .intake-modal > .um-modal-header > div {
+    min-width: 0 !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page :is(
+    #intakeModalBackdrop,
+    #viewModalBackdrop
+  ) .intake-modal > .um-modal-header :is(h2, .modal-subtitle) {
+    max-width: 100% !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page :is(
+    #intakeModalBackdrop,
+    #viewModalBackdrop
+  ) .intake-modal > .um-modal-body {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    padding: 14px 12px 20px !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page #intakeModalBackdrop
+    .intake-modal :is(.form-grid, .form-grid-3, .source-selector) {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page #intakeModalBackdrop
+    .intake-modal :is(input, select, textarea):not([type="radio"]):not([type="checkbox"]) {
+    max-width: 100% !important;
+    font-size: 16px !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page :is(
+    #intakeModalBackdrop,
+    #viewModalBackdrop
+  ) .intake-modal > .um-modal-footer {
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 10px 12px max(10px, env(safe-area-inset-bottom)) !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page #intakeModalBackdrop
+    .intake-modal > .um-modal-footer {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page #intakeModalBackdrop
+    .intake-modal > .um-modal-footer > button {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page #intakeModalBackdrop
+    .intake-modal > .um-modal-footer > .management-primary-action {
+    grid-column: 1 / -1 !important;
+    order: -1 !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page #viewModalBackdrop
+    .intake-view-modal > #viewModalFooter {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page #viewModalBackdrop
+    .intake-view-footer-actions {
+    width: 100% !important;
+    min-width: 0 !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page #viewModalBackdrop
+    .intake-view-footer-actions > button {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    white-space: normal !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page #viewModalBackdrop
+    .intake-view-footer-actions > .btn-convert {
+    grid-column: 1 / -1 !important;
+    order: -1 !important;
+  }
+}
+
+@media (max-width: 420px) {
+  html body.management-consistent-ui.intake-management-page #intakeModalBackdrop
+    .intake-modal > .um-modal-footer,
+  html body.management-consistent-ui.intake-management-page #viewModalBackdrop
+    .intake-view-footer-actions,
+  html body.management-consistent-ui.intake-management-page #confirmModalBackdrop
+    .intake-decision-modal > .um-modal-footer {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page #intakeModalBackdrop
+    .intake-modal > .um-modal-footer > button,
+  html body.management-consistent-ui.intake-management-page #viewModalBackdrop
+    .intake-view-footer-actions > button,
+  html body.management-consistent-ui.intake-management-page #confirmModalBackdrop
+    .intake-decision-modal > .um-modal-footer > button {
+    grid-column: 1 !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page #confirmModalBackdrop.management-confirm-layer {
+    padding: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom)) !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page #confirmModalBackdrop
+    .intake-decision-modal {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: calc(100dvh - 16px) !important;
   }
 }
