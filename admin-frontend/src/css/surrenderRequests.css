@@ -1690,16 +1690,33 @@
 
   .surrender-requests-page .triage-disclaimer {
     grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: 9px 10px;
   }
 
   .surrender-requests-page .triage-disclaimer small {
-    grid-column: 2;
+    grid-column: auto;
+    min-width: 0;
     text-align: left;
+    overflow-wrap: anywhere;
   }
 
   .surrender-requests-page .triage-analysis-source {
-    grid-column: 2;
-    justify-items: start;
+    grid-column: 1 / -1;
+    width: 100%;
+    min-width: 0;
+    justify-items: stretch;
+    gap: 9px;
+    padding-top: 2px;
+  }
+
+  .surrender-requests-page .triage-reanalyze-btn {
+    width: 100%;
+    min-height: 44px;
+    padding: 8px 14px;
+    font-size: 11px;
+    line-height: 1.25;
+    white-space: normal;
   }
 }
 
