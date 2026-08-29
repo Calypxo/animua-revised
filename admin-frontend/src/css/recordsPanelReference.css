@@ -84,9 +84,18 @@
 }
 
 :is(.ap-list-page .ap-tabs-wrap, .surrender-requests-page .surrender-toolbar .toolbar-tabs) {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   margin: 0 !important;
   padding: 0 24px 18px !important;
   overflow-x: auto !important;
+  overflow-y: hidden !important;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  touch-action: pan-x pan-y;
+  -webkit-overflow-scrolling: touch;
   border: 0 !important;
   border-bottom: 1px solid #EEE3D9 !important;
   background: linear-gradient(135deg, #FFF8EE, #FFFFFF 70%) !important;
@@ -103,8 +112,10 @@
 }
 
 :is(.ap-list-page .ap-tabs, .surrender-requests-page .sr-tabs) {
+  box-sizing: border-box;
   width: max-content !important;
-  max-width: 100% !important;
+  max-width: none !important;
+  min-width: max-content !important;
   min-height: 48px;
   display: flex !important;
   align-items: center !important;
@@ -114,6 +125,10 @@
   border-radius: 14px !important;
   background: #EFE5D2 !important;
   box-shadow: none !important;
+}
+
+.ap-list-page .ap-tabs-wrap .ap-tab {
+  scroll-snap-align: start;
 }
 
 :is(.ap-list-page .ap-tab, .surrender-requests-page .sr-tab) {

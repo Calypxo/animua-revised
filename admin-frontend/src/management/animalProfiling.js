@@ -204,6 +204,7 @@ function clearAnimalFilters() {
     tab.classList.toggle("active", selected);
     tab.setAttribute("aria-selected", String(selected));
   });
+  document.querySelector('.ap-tab[data-tab="all"]')?.scrollIntoView({ block: "nearest", inline: "nearest" });
   applyFilters();
 }
 
@@ -359,6 +360,7 @@ async function init() {
         btn.setAttribute("aria-selected", "true");
         activeTab = btn.dataset.tab;
         applyFilters();
+        btn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
       });
     });
 
