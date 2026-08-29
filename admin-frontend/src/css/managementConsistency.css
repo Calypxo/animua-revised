@@ -661,8 +661,12 @@ html body.management-consistent-ui.contact-messages-page .cm-records-panel > .ap
     linear-gradient(120deg, var(--animua-red-deep), var(--animua-red) 62%, #94132a) !important;
 }
 
-html body.management-consistent-ui.contact-messages-page .cm-records-panel > .ap-records-heading :is(h2, p, .ap-records-legend) {
+html body.management-consistent-ui.contact-messages-page .cm-records-panel > .ap-records-heading :is(h2, p) {
   color: #FFFFFF !important;
+}
+
+html body.management-consistent-ui.contact-messages-page .cm-records-panel > .ap-records-heading .ap-records-legend {
+  color: var(--animua-red) !important;
 }
 
 html body.management-consistent-ui.contact-messages-page .cm-records-panel > .ap-records-heading .ap-section-kicker,

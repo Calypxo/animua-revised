@@ -1134,6 +1134,26 @@ button.cm-chat-bubble.active {
   }
 }
 
+/* The composer is one control. Management-wide field focus styles must not
+   draw a second ring inside it or override the reply text color. */
+html body.management-consistent-ui.contact-messages-page .cm-chat-composer #replyMessage,
+html body.management-consistent-ui.contact-messages-page .cm-chat-composer #replyMessage:is(:focus, :focus-visible) {
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  color: #2d2322 !important;
+  -webkit-text-fill-color: #2d2322 !important;
+  caret-color: var(--cm-red) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html body.management-consistent-ui.contact-messages-page .cm-chat-composer #replyMessage::placeholder {
+  color: #746f6b !important;
+  -webkit-text-fill-color: #746f6b !important;
+  opacity: 1;
+}
+
 @media (max-width: 480px) {
   .contact-messages-page .cm-message-sender {
     align-items: flex-start;
