@@ -11133,6 +11133,59 @@ body.home-page.furbabies-page .adoption-select-options button:is(.is-active, :ho
   }
 }
 
+/* Ready pets can use a full identifying description as their public label.
+   Keep those longer labels from making a newly published card taller than
+   the rest of the adoption grid. */
+body.furbabies-page .pets-grid {
+  grid-auto-rows: 420px !important;
+  align-items: stretch !important;
+}
+
+body.furbabies-page .pets-grid > .pet-card {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  height: 420px !important;
+  min-height: 420px !important;
+  max-height: 420px !important;
+  align-self: stretch !important;
+  overflow: hidden !important;
+}
+
+body.furbabies-page .pets-grid > .pet-card .pet-card-body {
+  box-sizing: border-box !important;
+  height: 226px !important;
+  min-height: 226px !important;
+  max-height: 226px !important;
+}
+
+body.furbabies-page .pets-grid > .pet-card .pet-card-top h3 {
+  display: -webkit-box !important;
+  max-height: 2.2em !important;
+  overflow: hidden !important;
+  overflow-wrap: anywhere !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
+}
+
+@media (max-width: 640px) {
+  body.furbabies-page .pets-grid {
+    grid-auto-rows: 432px !important;
+  }
+
+  body.furbabies-page .pets-grid > .pet-card {
+    height: 432px !important;
+    min-height: 432px !important;
+    max-height: 432px !important;
+  }
+
+  body.furbabies-page .pets-grid > .pet-card .pet-card-body {
+    height: 227px !important;
+    min-height: 227px !important;
+    max-height: 227px !important;
+  }
+}
+
 /* Final adoption progress hierarchy:
    desktop uses the complete sidebar, while phones show only one compact counter. */
 @media (min-width: 901px) {
