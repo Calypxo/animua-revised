@@ -119,6 +119,38 @@ test("the two-person vaccination event uses a centered story crop", async () => 
   );
 });
 
+test("story navigation hides the outgoing photo until the next image is ready", async () => {
+  const [css, publicUi] = await Promise.all([
+    readFile(homeStylesUrl, "utf8"),
+    readFile(new URL("../src/public/js/public-ui.js", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(
+    publicUi,
+    /const updateStoryImage[\s\S]*?classList\.add\("is-story-image-loading"\)[\s\S]*?classList\.remove\("is-story-image-loading"\)[\s\S]*?storyModalImage\.onload\s*=\s*revealLoadedImage/,
+  );
+  assert.match(
+    css,
+    /Hide the outgoing photo before applying the next story's crop[\s\S]*?img\.is-story-image-loading\s*\{[\s\S]*?opacity:\s*0\s*!important;[\s\S]*?transition:\s*none\s*!important;/,
+  );
+});
+
+test("the CIAC wellness-day story shifts its crop toward the person and pet", async () => {
+  const [css, publicUi] = await Promise.all([
+    readFile(homeStylesUrl, "utf8"),
+    readFile(new URL("../src/public/js/public-ui.js", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(
+    publicUi,
+    /ciac\.\*paws[\s\S]*?claws\.\*pet\\s\+day[\s\S]*?\?\s*"person-right"/,
+  );
+  assert.match(
+    css,
+    /CIAC wellness-day photo[\s\S]*?data-story-key="news-alerts"\]\[data-story-image-focus="person-right"\][\s\S]*?object-position:\s*78% top\s*!important;/,
+  );
+});
+
 test("story text stays readable over light and busy photos", async () => {
   const css = await readFile(homeStylesUrl, "utf8");
 

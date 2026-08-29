@@ -1,3 +1,4 @@
+const crypto = require("crypto");
 const { db, admin } = require("../config/firebase");
 const {
   buildShelterLabel,
@@ -17,6 +18,37 @@ const { createUserNotification, createManagementNotification } = require("../ser
 const {
   getAdoptionFinalizationError,
 } = require("../services/adoptionWorkflowService");
+
+function normalizeApplicantIdentifier(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function adoptionBelongsToApplicant(adoption = {}, user = {}) {
+  const applicantIdentifiers = new Set([
+    normalizeApplicantIdentifier(user.id),
+    normalizeApplicantIdentifier(user.email),
+  ].filter(Boolean));
+  const recordedIdentifiers = [
+    adoption.applicant?.email,
+    adoption.account?.email,
+    adoption.submission_metadata?.applicant_account_id,
+  ].map(normalizeApplicantIdentifier).filter(Boolean);
+  return recordedIdentifiers.some((identifier) => applicantIdentifiers.has(identifier));
+}
+
+function adoptionSubmissionDocumentId(user = {}, petId = "") {
+  const applicantIdentifier = normalizeApplicantIdentifier(user.id || user.email);
+  return `user_pet_${crypto
+    .createHash("sha256")
+    .update(`${applicantIdentifier}:${String(petId).trim()}`)
+    .digest("hex")}`;
+}
+
+function isAlreadyExistingDocumentError(error) {
+  return error?.code === 6 ||
+    error?.code === "already-exists" ||
+    error?.code === "ALREADY_EXISTS";
+}
 
 function getPickupRescheduleCount(schedule = {}) {
   const explicitCount = Number(schedule.rescheduleCount || 0);
@@ -171,6 +203,20 @@ exports.createAdoption = async (req, res) => {
     }
     const petLabel = buildShelterLabel(animalData, pet_id);
 
+    const existingForPet = await db.collection(ADOPTION_COL)
+      .where("pet_id", "==", pet_id)
+      .get();
+    const existingApplication = (existingForPet.docs || []).find((doc) =>
+      adoptionBelongsToApplicant(doc.data() || {}, req.user)
+    );
+    if (existingApplication) {
+      return res.status(409).json({
+        code: "DUPLICATE_ADOPTION_APPLICATION",
+        message: "You already submitted an adoption application for this pet.",
+        applicationId: existingApplication.data()?.applicationId || "",
+      });
+    }
+
     const year = new Date().getFullYear();
 
     const countSnap = await db.collection("adoptions")
@@ -293,7 +339,20 @@ exports.createAdoption = async (req, res) => {
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     };
 
-    const docRef = await db.collection("adoptions").add(adoptionData);
+    const docRef = db.collection(ADOPTION_COL).doc(
+      adoptionSubmissionDocumentId(req.user, pet_id)
+    );
+    try {
+      await docRef.create(adoptionData);
+    } catch (error) {
+      if (isAlreadyExistingDocumentError(error)) {
+        return res.status(409).json({
+          code: "DUPLICATE_ADOPTION_APPLICATION",
+          message: "You already submitted an adoption application for this pet.",
+        });
+      }
+      throw error;
+    }
     await createManagementNotification({
       type: "adoption_application_created",
       resourceType: "adoption_application",
@@ -591,6 +650,12 @@ exports.scheduleMyAdoptionPickup = async (req, res) => {
       });
     }
 
+    if (data.arrivalConfirmedAt) {
+      return res.status(400).json({
+        message: "Pickup attendance has already been confirmed and can no longer be rescheduled.",
+      });
+    }
+
     data = await applyLegacyPendingPickupReschedule(adoptionRef, data);
 
     if (!validateScheduleDate(data, date)) {
@@ -617,6 +682,12 @@ exports.scheduleMyAdoptionPickup = async (req, res) => {
       }
       if (String(currentData.status || "").toLowerCase() !== "approved") {
         throw pickupScheduleError(400, "Only approved applications can schedule a pickup.");
+      }
+      if (currentData.arrivalConfirmedAt) {
+        throw pickupScheduleError(
+          400,
+          "Pickup attendance has already been confirmed and can no longer be rescheduled."
+        );
       }
       if (!validateScheduleDate(currentData, date)) {
         throw pickupScheduleError(

@@ -1148,6 +1148,10 @@
   padding-right: 0;
 }
 
+.application-summary-grid article > div {
+  min-width: 0;
+}
+
 .application-summary-grid article > span {
   width: 39px;
   height: 39px;
@@ -1179,12 +1183,21 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  max-width: 100%;
   min-height: 22px;
   padding: 4px 8px;
   border-radius: 6px;
   background: #dcf3df;
   color: #3f7549 !important;
+  font-size: 0.68rem !important;
   font-weight: 850 !important;
+  line-height: 1.15 !important;
+  white-space: nowrap;
+}
+
+.application-match.is-unassessed {
+  background: #f1eee9;
+  color: #68635c !important;
 }
 
 .surrender-summary-list {
@@ -3514,6 +3527,11 @@ body.submissions-page .compatibility-matches li{grid-template-columns:24px 34px 
     background: rgba(255, 253, 249, 0.97) !important;
     box-shadow: 0 6px 18px rgba(44, 35, 30, 0.06) !important;
     backdrop-filter: blur(12px);
+  }
+
+  body.submissions-page .adoption-detail-modal .application-detail-header + .application-detail-hero,
+  body.submissions-page .surrender-detail-modal .application-detail-header + .application-detail-hero {
+    margin-top: 14px !important;
   }
 
   body.submissions-page .adoption-detail-modal .application-detail-x,

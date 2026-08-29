@@ -25,6 +25,11 @@ const MAX_SURRENDER_PHOTO_DATA_URL_LENGTH = 900000;
 const MAX_ID_PHOTO_DATA_URL_LENGTH = 560000;
 const SURRENDER_LIST_THUMB_WIDTH = 380;
 
+function canScheduleSurrenderStatus(status) {
+  const normalized = String(status || "").trim().toLowerCase();
+  return normalized === "approved" || normalized === "accepted";
+}
+
 const ANGELES_BARANGAYS = [
   "Agapito del Rosario", "Amsic", "Anunas", "Balibago", "Capaya", "Claro M. Recto",
   "Cuayan", "Cutcut", "Cutud", "Lourdes Norte", "Lourdes Sur", "Lourdes Sur Este",
@@ -582,9 +587,15 @@ async function scheduleMySurrenderAppointment(req, res) {
       });
     }
 
-    if (String(data.status || "").toLowerCase() !== "approved") {
+    if (!canScheduleSurrenderStatus(data.status)) {
       return res.status(400).json({
         message: "Only accepted surrender requests can schedule an appointment.",
+      });
+    }
+
+    if (data.arrivalConfirmedAt) {
+      return res.status(400).json({
+        message: "Drop-off attendance has already been confirmed and can no longer be rescheduled.",
       });
     }
 

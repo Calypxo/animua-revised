@@ -17,13 +17,14 @@
       <div class="modal-panel adopt-form-panel adoption-wizard-modal">
         <button class="modal-close adoption-wizard-close" type="button" aria-label="Close adoption application">x</button>
         <div class="adoption-form-header">
-          <span class="adoption-form-logo"><i aria-hidden="true">p</i></span>
+          <img class="adoption-form-logo" src="/images/animua_logo1.svg" alt="" aria-hidden="true" width="240" height="216">
           <div class="adoption-form-title">
             <h2>Animal Adoption Application</h2>
             <p>Please fill out the form honestly. All information will be kept confidential.</p>
           </div>
         </div>
         <div class="adoption-stepper" aria-label="Adoption application steps">
+          <span class="adoption-step-counter" aria-live="polite">Step 1 of 4</span>
           <button type="button" class="adoption-stepper-item active"><span>1</span><strong>Applicant Information</strong><small>Tell us about yourself.</small></button>
           <button type="button" class="adoption-stepper-item"><span>2</span><strong>Household Information</strong><small>Your family and pets.</small></button>
           <button type="button" class="adoption-stepper-item"><span>3</span><strong>Adoption Readiness</strong><small>A few questions about your readiness.</small></button>
@@ -127,8 +128,8 @@
         adoptionBottomCols: gridCols(".adoption-bottom-grid"),
         stepperText: getComputedStyle(document.querySelector(".adoption-stepper-item.active"), "::before").content,
         selectedPet: rect(".selected-pet-box"),
-        adoptionCirclesRound: circleOk(".adoption-wizard-close, .adoption-form-logo, .adoption-stepper-item:not(.active)"),
-        adoptionCircleDetails: circleDetails(".adoption-wizard-close, .adoption-form-logo, .adoption-stepper-item:not(.active)"),
+        adoptionCirclesRound: circleOk(".adoption-wizard-close, .adoption-stepper-item:not(.active)"),
+        adoptionCircleDetails: circleDetails(".adoption-wizard-close, .adoption-stepper-item:not(.active)"),
         statusPopup: rect(".application-detail-popup"),
         statusHeroCols: gridCols(".application-detail-hero"),
         referenceLine: rect(".application-reference strong"),

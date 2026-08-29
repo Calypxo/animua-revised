@@ -9253,10 +9253,15 @@ body.furbabies-page .furbabies-hero {
   body.furbabies-page .selected-pet-box h3 {
     position: static !important;
     display: block !important;
+    width: auto !important;
     margin: 0 0 8px !important;
     padding: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
     font-size: 0.8rem !important;
     line-height: 1.1 !important;
+    white-space: normal !important;
   }
 
   body.furbabies-page .selected-pet-preview {
@@ -10381,39 +10386,24 @@ body .adoption-submission-success-popup .swal2-cancel {
   display: none !important;
 }
 
-body .adoption-submission-success-popup .adoption-success-reference {
-  width: 100% !important;
-  margin-top: 15px !important;
-  padding: 10px 14px !important;
-  border: 1px solid rgba(111, 42, 31, 0.12) !important;
-  border-radius: 10px !important;
-  background: #fff8ee !important;
-  display: grid !important;
-  gap: 2px !important;
+/* The account email is a desktop summary field; smaller layouts keep their
+   existing field set and source order. */
+body.furbabies-page .adoption-desktop-email-field {
+  display: none !important;
 }
 
-body .adoption-submission-success-popup .adoption-success-reference span {
-  color: #81746d !important;
-  font-size: 0.68rem !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.08em !important;
-  text-transform: uppercase !important;
-}
-
-body .adoption-submission-success-popup .adoption-success-reference strong {
-  color: #780116 !important;
-  font-size: 0.94rem !important;
-  overflow-wrap: anywhere !important;
+body.furbabies-page .adoption-step-counter {
+  display: none;
 }
 
 /* Desktop adoption workspace: fixed shell with one focused scrolling panel. */
 @media (min-width: 901px) {
   body.furbabies-page .adoption-wizard-modal {
-    width: min(1020px, calc(100vw - 48px)) !important;
-    height: min(760px, 86dvh) !important;
+    width: min(980px, calc(100vw - 48px)) !important;
+    height: min(740px, 88dvh) !important;
     max-height: calc(100dvh - 40px) !important;
     display: grid !important;
-    grid-template-columns: 188px minmax(0, 1fr) !important;
+    grid-template-columns: 190px minmax(0, 1fr) !important;
     grid-template-rows: auto auto minmax(0, 1fr) auto auto !important;
     overflow: hidden !important;
     border-radius: 18px !important;
@@ -10423,16 +10413,21 @@ body .adoption-submission-success-popup .adoption-success-reference strong {
     grid-column: 1 / -1 !important;
     grid-row: 1 !important;
     gap: 11px !important;
-    min-height: 68px !important;
-    padding: 13px 68px 12px 20px !important;
+    min-height: 70px !important;
+    padding: 14px 68px 13px 22px !important;
     border-bottom: 1px solid rgba(111, 42, 31, 0.08) !important;
   }
 
   body.furbabies-page .adoption-form-logo {
-    width: 40px !important;
-    height: 40px !important;
-    flex-basis: 40px !important;
-    font-size: 0.92rem !important;
+    display: block !important;
+    width: 42px !important;
+    height: 42px !important;
+    flex: 0 0 42px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    object-fit: contain !important;
+    background: transparent !important;
   }
 
   body.furbabies-page .adoption-form-title h2 {
@@ -10464,40 +10459,40 @@ body .adoption-submission-success-popup .adoption-success-reference strong {
     min-height: 0 !important;
     align-content: start !important;
     gap: 4px !important;
-    padding: 16px 12px !important;
-    overflow-y: auto !important;
+    padding: 14px 10px !important;
+    overflow: hidden !important;
     border-right: 1px solid rgba(111, 42, 31, 0.08) !important;
     background: rgba(255, 249, 242, 0.52) !important;
   }
 
   body.furbabies-page .adoption-stepper-item {
-    grid-template-columns: 28px minmax(0, 1fr) !important;
-    gap: 1px 9px !important;
-    min-height: 64px !important;
-    padding: 9px 10px !important;
+    grid-template-columns: 26px minmax(0, 1fr) !important;
+    gap: 1px 8px !important;
+    min-height: 60px !important;
+    padding: 8px !important;
     border: 0 !important;
     border-left: 3px solid transparent !important;
     border-radius: 8px !important;
   }
 
   body.furbabies-page .adoption-stepper-item span {
-    width: 26px !important;
-    height: 26px !important;
-    font-size: 0.7rem !important;
+    width: 24px !important;
+    height: 24px !important;
+    font-size: 0.66rem !important;
   }
 
   body.furbabies-page .adoption-stepper-item strong {
-    font-size: 0.76rem !important;
+    font-size: 0.73rem !important;
     line-height: 1.12 !important;
   }
 
   body.furbabies-page .adoption-stepper-item small {
-    font-size: 0.62rem !important;
+    font-size: 0.59rem !important;
     line-height: 1.3 !important;
   }
 
   body.furbabies-page .adoption-stepper-item.active {
-    border-left-color: var(--adopt-burgundy, #780116) !important;
+    border-left-color: transparent !important;
     background: rgba(120, 1, 22, 0.055) !important;
     box-shadow: none !important;
   }
@@ -10507,7 +10502,7 @@ body .adoption-submission-success-popup .adoption-success-reference strong {
     grid-row: 3 !important;
     min-height: 0 !important;
     margin: 0 !important;
-    padding: 8px 22px 0 !important;
+    padding: 8px 26px 0 !important;
     overflow-x: hidden !important;
     overflow-y: auto !important;
     overscroll-behavior: contain !important;
@@ -10517,13 +10512,13 @@ body .adoption-submission-success-popup .adoption-success-reference strong {
   body.furbabies-page .selected-pet-box {
     grid-column: 2 !important;
     grid-row: 2 !important;
-    grid-template-columns: 58px minmax(0, 1fr) auto !important;
+    grid-template-columns: 64px minmax(0, 1fr) auto !important;
     grid-template-rows: auto auto auto !important;
     align-items: center !important;
     gap: 1px 12px !important;
     min-height: 70px !important;
-    margin: 12px 22px 6px !important;
-    padding: 8px 12px !important;
+    margin: 10px 26px 4px !important;
+    padding: 6px 10px !important;
     border-color: rgba(120, 1, 22, 0.11) !important;
     border-radius: 10px !important;
     background: rgba(255, 249, 240, 0.62) !important;
@@ -10538,8 +10533,8 @@ body .adoption-submission-success-popup .adoption-success-reference strong {
   body.furbabies-page .selected-pet-image {
     grid-column: 1 !important;
     grid-row: 1 / 4 !important;
-    width: 58px !important;
-    height: 52px !important;
+    width: 64px !important;
+    height: 58px !important;
     border-radius: 8px !important;
     object-fit: cover !important;
   }
@@ -10564,6 +10559,11 @@ body .adoption-submission-success-popup .adoption-success-reference strong {
     grid-row: 2 !important;
     font-size: 0.94rem !important;
     line-height: 1.05 !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
   }
 
   body.furbabies-page .selected-pet-box span {
@@ -10585,12 +10585,86 @@ body .adoption-submission-success-popup .adoption-success-reference strong {
   }
 
   body.furbabies-page .adoption-section-title {
-    margin-bottom: 14px !important;
-    padding-top: 10px !important;
+    gap: 9px !important;
+    margin-bottom: 12px !important;
+    padding: 9px 0 8px !important;
+    border-top: 0 !important;
+    border-bottom: 1px solid rgba(111, 42, 31, 0.1) !important;
+  }
+
+  body.furbabies-page .adoption-section-title > span {
+    width: 26px !important;
+    height: 26px !important;
+    display: inline-grid !important;
+    flex: 0 0 26px !important;
+    place-items: center !important;
+    border: 1px solid rgba(120, 1, 22, 0.28) !important;
+    border-radius: 50% !important;
+    background: #fffdf8 !important;
+    font-size: 0.68rem !important;
+  }
+
+  body.furbabies-page .adoption-section-title .fa-shield-heart::before {
+    content: "\f007" !important;
+  }
+
+  body.furbabies-page .adoption-section-title h3 {
+    font-size: 1rem !important;
   }
 
   body.furbabies-page .adoption-grid {
-    gap: 12px 18px !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px 20px !important;
+  }
+
+  body.furbabies-page .adoption-grid .adoption-field-full-name {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+  }
+
+  body.furbabies-page .adoption-grid .adoption-field-birthdate {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+  }
+
+  body.furbabies-page .adoption-grid .adoption-field-gender {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+  }
+
+  body.furbabies-page .adoption-grid .adoption-field-civil-status {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+  }
+
+  body.furbabies-page .adoption-grid .adoption-field-citizenship {
+    grid-column: 1 !important;
+    grid-row: 3 !important;
+  }
+
+  body.furbabies-page .adoption-grid .adoption-field-occupation {
+    grid-column: 2 !important;
+    grid-row: 3 !important;
+  }
+
+  body.furbabies-page .adoption-grid .adoption-field-contact-number {
+    grid-column: 1 !important;
+    grid-row: 4 !important;
+  }
+
+  body.furbabies-page .adoption-grid .adoption-desktop-email-field:not(.adoption-step-hidden) {
+    grid-column: 2 !important;
+    grid-row: 4 !important;
+    display: block !important;
+  }
+
+  body.furbabies-page .adoption-grid .adoption-field-address {
+    grid-column: 1 / -1 !important;
+    grid-row: 5 !important;
+  }
+
+  body.furbabies-page .adoption-grid .adoption-field-age {
+    display: none !important;
   }
 
   body.furbabies-page .adoption-wizard-modal .form-group {
@@ -10603,34 +10677,38 @@ body .adoption-submission-success-popup .adoption-success-reference strong {
     .adoption-select-trigger,
     .date-picker-field
   ) {
-    min-height: 42px !important;
+    min-height: 40px !important;
   }
 
-  body.furbabies-page .adoption-wizard-actions {
+  body.furbabies-page .adoption-wizard-modal .form-group label {
+    margin-bottom: 5px !important;
+    font-size: 0.74rem !important;
+  }
+
+  body.furbabies-page .adopt-form-panel .adoption-form > .adoption-wizard-actions {
     position: static !important;
     z-index: 12 !important;
-    grid-column: 2 !important;
-    grid-row: 4 !important;
     width: 100% !important;
     display: flex !important;
     align-items: center !important;
-    justify-content: flex-start !important;
+    justify-content: flex-end !important;
     gap: 10px !important;
-    margin: 0 !important;
-    padding: 10px 22px !important;
+    margin: 14px 0 0 !important;
+    padding: 12px 0 16px !important;
     border-top: 1px solid rgba(111, 42, 31, 0.1) !important;
-    background: #fffdf8 !important;
-    box-shadow: 0 -10px 22px rgba(65, 35, 29, 0.045) !important;
+    background: transparent !important;
+    box-shadow: none !important;
   }
 
-  body.furbabies-page .adoption-wizard-actions .btn {
+  body.furbabies-page .adopt-form-panel .adoption-form > .adoption-wizard-actions .btn {
+    flex: 0 0 auto !important;
     width: auto !important;
-    min-width: 150px !important;
-    min-height: 42px !important;
-    padding-inline: 22px !important;
+    min-width: 132px !important;
+    min-height: 40px !important;
+    padding-inline: 20px !important;
   }
 
-  body.furbabies-page :is(#adoptionNextBtn, #adoptionSubmitBtn) {
+  body.furbabies-page .adoption-form > .adoption-wizard-actions :is(#adoptionNextBtn, #adoptionSubmitBtn) {
     margin-left: auto !important;
   }
 
@@ -10643,17 +10721,274 @@ body .adoption-submission-success-popup .adoption-success-reference strong {
   }
 }
 
-/* Custom adoption selects use the same yellow accessibility state as inputs. */
-body.home-page.furbabies-page .adoption-select-menu:is(.is-open, :focus-within) .adoption-select-trigger {
-  border-color: rgba(241, 192, 69, 0.92) !important;
+/* Tablet and phone headers keep the same standalone Animua mark and person
+   section icon as the desktop adoption modal. */
+@media (max-width: 900px) {
+  body.furbabies-page .adoption-form-logo {
+    display: block !important;
+    width: 38px !important;
+    height: 38px !important;
+    flex: 0 0 38px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    object-fit: contain !important;
+    background: transparent !important;
+  }
+
+  body.furbabies-page .adoption-section-title > span {
+    width: 26px !important;
+    height: 26px !important;
+    display: inline-grid !important;
+    flex: 0 0 26px !important;
+    place-items: center !important;
+    border: 1px solid rgba(120, 1, 22, 0.28) !important;
+    border-radius: 50% !important;
+    background: #fffdf8 !important;
+    font-size: 0.68rem !important;
+  }
+
+  body.furbabies-page .adoption-section-title .fa-shield-heart::before {
+    content: "\f007" !important;
+  }
+}
+
+@media (max-width: 760px) {
+  body.furbabies-page .adoption-form-header {
+    grid-template-columns: 38px minmax(0, 1fr) !important;
+    gap: 10px !important;
+  }
+}
+
+/* Browser zoom can move a desktop window into this effective tablet width.
+   Fully reset the former sidebar geometry so the horizontal stepper and form
+   cannot inherit conflicting desktop offsets. */
+@media (min-width: 761px) and (max-width: 900px) {
+  body.furbabies-page #adoptModal {
+    padding: 16px !important;
+  }
+
+  body.furbabies-page .adoption-wizard-modal {
+    width: min(820px, calc(100vw - 32px)) !important;
+    height: auto !important;
+    max-height: calc(100dvh - 32px) !important;
+    display: block !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+
+  body.furbabies-page .adoption-wizard-modal > .adoption-stepper {
+    position: static !important;
+    inset: auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+    margin: 0 20px 12px !important;
+    padding: 8px !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(111, 42, 31, 0.1) !important;
+    border-radius: 12px !important;
+    background: rgba(255, 249, 242, 0.52) !important;
+  }
+
+  body.furbabies-page .adoption-stepper-item {
+    width: auto !important;
+    min-width: 0 !important;
+    min-height: 54px !important;
+    display: grid !important;
+    grid-template-columns: 26px minmax(0, 1fr) !important;
+    grid-template-rows: auto !important;
+    align-items: center !important;
+    gap: 7px !important;
+    padding: 8px !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    background: transparent !important;
+  }
+
+  body.furbabies-page .adoption-stepper-item::before,
+  body.furbabies-page .adoption-stepper-item small {
+    display: none !important;
+    content: none !important;
+  }
+
+  body.furbabies-page .adoption-stepper-item span {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    width: 26px !important;
+    height: 26px !important;
+    font-size: 0.7rem !important;
+  }
+
+  body.furbabies-page .adoption-stepper-item strong {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    min-width: 0 !important;
+    display: block !important;
+    font-size: 0.7rem !important;
+    line-height: 1.15 !important;
+    white-space: normal !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+  }
+
+  body.furbabies-page .adoption-stepper-item.active {
+    border-left: 0 !important;
+    background: rgba(120, 1, 22, 0.055) !important;
+  }
+
+  body.furbabies-page .selected-pet-box {
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 20px 12px !important;
+  }
+
+  body.furbabies-page .adopt-form-panel .adoption-form {
+    width: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 20px 20px !important;
+    overflow: visible !important;
+  }
+
+  body.furbabies-page .adoption-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px 14px !important;
+  }
+
+  body.furbabies-page .adoption-grid .full,
+  body.furbabies-page .adoption-grid .span-2 {
+    grid-column: 1 / -1 !important;
+  }
+
+  body.furbabies-page .adoption-wizard-actions {
+    width: 100% !important;
+    margin: 16px 0 0 !important;
+    padding: 12px 0 0 !important;
+  }
+
+  body.furbabies-page.modal-open .animua-chatbot {
+    display: none !important;
+  }
+}
+
+/* Compact wizard progress: the frame stays fixed while the active dot moves. */
+@media (max-width: 900px) {
+  body.furbabies-page .adoption-wizard-modal > .adoption-stepper {
+    position: static !important;
+    inset: auto !important;
+    width: auto !important;
+    height: auto !important;
+    min-width: 0 !important;
+    min-height: 38px !important;
+    max-height: none !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin: 0 16px 12px !important;
+    padding: 7px 10px !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(120, 1, 22, 0.12) !important;
+    border-radius: 10px !important;
+    background: #fffdf8 !important;
+  }
+
+  body.furbabies-page .adoption-step-counter {
+    min-width: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    margin-right: auto !important;
+    padding: 3px 8px !important;
+    border-radius: 999px !important;
+    background: rgba(120, 1, 22, 0.055) !important;
+    color: #5f0012 !important;
+    font-size: 0.68rem !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+  }
+
+  body.furbabies-page .adoption-wizard-modal > .adoption-stepper .adoption-stepper-item,
+  body.furbabies-page .adoption-wizard-modal > .adoption-stepper .adoption-stepper-item.active {
+    flex: 0 0 8px !important;
+    width: 8px !important;
+    height: 8px !important;
+    min-width: 8px !important;
+    min-height: 8px !important;
+    max-width: 8px !important;
+    max-height: 8px !important;
+    display: block !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 50% !important;
+    background: #ded2ce !important;
+    box-shadow: none !important;
+    overflow: hidden !important;
+  }
+
+  body.furbabies-page .adoption-wizard-modal > .adoption-stepper .adoption-stepper-item.active {
+    background: var(--adopt-burgundy, #780116) !important;
+  }
+
+  body.furbabies-page .adoption-wizard-modal > .adoption-stepper .adoption-stepper-item :is(span, strong, small),
+  body.furbabies-page .adoption-wizard-modal > .adoption-stepper .adoption-stepper-item::before,
+  body.furbabies-page .adoption-wizard-modal > .adoption-stepper .adoption-stepper-item::after {
+    display: none !important;
+    content: none !important;
+  }
+}
+
+/* Readiness labels only need room for two compact lines. The older 58px row
+   created a large visual gap above short answers. */
+@media (min-width: 761px) {
+  body.furbabies-page .adoption-form.adoption-step-3-active .adoption-grid .form-group[data-adoption-field-step="3"]:not(.full):not(.adoption-step-hidden) {
+    grid-template-rows: 34px auto !important;
+    row-gap: 5px !important;
+  }
+
+  body.furbabies-page .adoption-form.adoption-step-3-active .adoption-grid .form-group[data-adoption-field-step="3"]:not(.full):not(.adoption-step-hidden) label {
+    min-height: 34px !important;
+  }
+}
+
+/* Keep custom select feedback visible without the former double focus ring. */
+body.home-page.furbabies-page .adoption-select-menu:not(.is-disabled, .is-open) .adoption-select-trigger:hover {
+  border-color: rgba(215, 164, 47, 0.68) !important;
   background: #fffdf8 !important;
-  outline: 3px solid rgba(241, 192, 69, 0.92) !important;
-  outline-offset: 3px !important;
-  box-shadow: 0 0 0 5px rgba(114, 27, 20, 0.18) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(241, 192, 69, 0.12) !important;
+}
+
+body.home-page.furbabies-page .adoption-select-menu:is(.is-open, :focus-within) .adoption-select-trigger {
+  border-color: rgba(207, 151, 25, 0.82) !important;
+  background: #fffdf8 !important;
+  outline: 2px solid rgba(241, 192, 69, 0.34) !important;
+  outline-offset: 1px !important;
+  box-shadow: 0 4px 12px rgba(75, 43, 33, 0.08) !important;
 }
 
 body.home-page.furbabies-page .adoption-select-menu.is-open .adoption-select-options {
-  border-color: rgba(241, 192, 69, 0.82) !important;
+  border-color: rgba(215, 164, 47, 0.42) !important;
+}
+
+body.home-page.furbabies-page .adoption-select-options button:is(.is-active, :hover, :focus-visible) {
+  background: #fff5dc !important;
+  color: #780116 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Desktop adoption dropdowns share the same focus color and ring as the
+   modal's text inputs. */
+@media (min-width: 901px) {
+  body.home-page.furbabies-page .adoption-select-menu:is(.is-open, :focus-within) .adoption-select-trigger {
+    border-color: var(--animua-red) !important;
+    outline: 3px solid rgba(241, 192, 69, 0.92) !important;
+    outline-offset: 3px !important;
+    box-shadow: 0 0 0 4px rgba(142, 42, 32, 0.12) !important;
+  }
 }
 
 /* Compact tablets have enough width for the profile's desktop composition.
@@ -10795,6 +11130,113 @@ body.home-page.furbabies-page .adoption-select-menu.is-open .adoption-select-opt
 
   body.furbabies-page .pet-actions {
     margin-top: auto !important;
+  }
+}
+
+/* Final adoption progress hierarchy:
+   desktop uses the complete sidebar, while phones show only one compact counter. */
+@media (min-width: 901px) {
+  body.furbabies-page .adoption-wizard-modal > .adoption-stepper > .adoption-step-counter {
+    display: none !important;
+  }
+}
+
+@media (max-width: 760px) {
+  body.furbabies-page .adoption-wizard-modal > .adoption-stepper {
+    min-height: 48px !important;
+    max-height: none !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) repeat(4, 8px) !important;
+    grid-template-rows: 30px !important;
+    align-items: center !important;
+    column-gap: 6px !important;
+    margin: 0 16px 14px !important;
+    padding: 8px 10px !important;
+    border: 1px solid rgba(120, 1, 22, 0.16) !important;
+    border-radius: 14px !important;
+    background: linear-gradient(135deg, #fffdf8, #faf3ed) !important;
+    box-shadow: 0 8px 20px rgba(73, 35, 27, 0.07) !important;
+  }
+
+  body.furbabies-page .adoption-wizard-modal > .adoption-stepper > .adoption-step-counter {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    width: max-content !important;
+    min-height: 28px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 !important;
+    padding: 6px 10px !important;
+    border: 1px solid rgba(120, 1, 22, 0.13) !important;
+    border-radius: 999px !important;
+    background: rgba(120, 1, 22, 0.065) !important;
+    color: #780116 !important;
+    font-size: 0.72rem !important;
+    font-weight: 850 !important;
+    letter-spacing: 0.02em !important;
+    line-height: 1 !important;
+    text-align: center !important;
+  }
+
+  body.furbabies-page .adoption-wizard-modal > .adoption-stepper > .adoption-stepper-item,
+  body.furbabies-page .adoption-wizard-modal > .adoption-stepper > .adoption-stepper-item.active,
+  body.furbabies-page .adoption-wizard-modal > .adoption-stepper > .adoption-stepper-item.complete {
+    position: relative !important;
+    grid-row: 1 !important;
+    width: 8px !important;
+    height: 8px !important;
+    min-width: 8px !important;
+    min-height: 8px !important;
+    max-width: 8px !important;
+    max-height: 8px !important;
+    display: block !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 50% !important;
+    background: #ded2ce !important;
+    color: transparent !important;
+    box-shadow: none !important;
+    overflow: hidden !important;
+    font: inherit !important;
+  }
+
+  body.furbabies-page .adoption-wizard-modal > .adoption-stepper > .adoption-stepper-item > span {
+    display: none !important;
+  }
+
+  body.furbabies-page .adoption-wizard-modal > .adoption-stepper > .adoption-stepper-item > :is(strong, small) {
+    display: none !important;
+  }
+
+  body.furbabies-page .adoption-wizard-modal > .adoption-stepper > .adoption-stepper-item:not(:last-child)::after {
+    content: none !important;
+    display: none !important;
+  }
+
+  body.furbabies-page .adoption-wizard-modal > .adoption-stepper > .adoption-stepper-item.complete {
+    background: #780116 !important;
+  }
+
+  body.furbabies-page .adoption-wizard-modal > .adoption-stepper > .adoption-stepper-item.active {
+    background: #780116 !important;
+    box-shadow: none !important;
+  }
+
+  body.furbabies-page .adoption-wizard-modal > .adoption-stepper > [data-adoption-step-target="1"] {
+    grid-column: 2 !important;
+  }
+
+  body.furbabies-page .adoption-wizard-modal > .adoption-stepper > [data-adoption-step-target="2"] {
+    grid-column: 3 !important;
+  }
+
+  body.furbabies-page .adoption-wizard-modal > .adoption-stepper > [data-adoption-step-target="3"] {
+    grid-column: 4 !important;
+  }
+
+  body.furbabies-page .adoption-wizard-modal > .adoption-stepper > [data-adoption-step-target="4"] {
+    grid-column: 5 !important;
   }
 }
 

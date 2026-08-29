@@ -26,6 +26,7 @@ test("phone application details remain a floating dialog and scroll internally",
   assert.match(css, /min-height:\s*0\s*!important/);
   assert.match(css, /position:\s*sticky\s*!important;[\s\S]*?top:\s*0\s*!important/);
   assert.match(css, /padding-bottom:\s*max\(20px,\s*env\(safe-area-inset-bottom\)\)\s*!important/);
+  assert.match(css, /\.application-detail-header \+ \.application-detail-hero,[\s\S]*?margin-top:\s*14px\s*!important/);
 });
 
 test("approved cards have one consistent mobile inset instead of stacked margins", async () => {
@@ -37,9 +38,29 @@ test("approved cards have one consistent mobile inset instead of stacked margins
   assert.match(css, /\.adoption-detail-modal \.approved-next-steps,[\s\S]*?margin:\s*0\s*!important/);
   assert.match(css, /\.approved-next-steps > :is\([\s\S]*?\.schedule-card-action-row,[\s\S]*?margin-inline:\s*12px\s*!important/);
   assert.match(script, /class="schedule-card-primary-btn" data-schedule-kind="adoption"/);
-  assert.match(script, /class="schedule-card-primary-btn" data-schedule-kind="surrender"/);
+  assert.match(script, /class="\$\{!hasSchedule \? "schedule-card-primary-btn" : ""\}"[\s\S]*?data-schedule-kind="surrender"/);
   assert.match(css, /\.schedule-card-action-row > \.schedule-card-primary-btn,[\s\S]*?width:\s*100%\s*!important;[\s\S]*?max-width:\s*100%\s*!important;[\s\S]*?min-height:\s*44px\s*!important/);
   assert.match(css, /white-space:\s*normal\s*!important;[\s\S]*?overflow:\s*visible\s*!important/);
+});
+
+test("accepted surrender scheduling remains visible until a real appointment is completed", async () => {
+  const script = await readFile(scriptUrl, "utf8");
+
+  assert.match(script, /function hasConfirmedAttendance\(details = \{\}, kind = "adoption"\)/);
+  assert.match(script, /kind === "surrender"[\s\S]*?hasScheduleValue\(details\.surrenderAppointment\)/);
+  assert.match(script, /!arrivalConfirmed && \(!hasSchedule \|\| canReschedule\)/);
+  assert.match(script, />\$\{hasSchedule \? "Request Re-sched" : "Schedule Appointment"\}<\/button>/);
+});
+
+test("confirmed adoption and surrender attendance remove every reschedule action", async () => {
+  const script = await readFile(scriptUrl, "utf8");
+
+  assert.match(script, /const arrivalConfirmed = hasConfirmedAttendance\(details, "adoption"\)/);
+  assert.match(script, /\$\{hasSchedule && !arrivalConfirmed \? `/);
+  assert.match(script, /!hasSchedule && !arrivalConfirmed \? '<div class="schedule-card-action-row"/);
+  assert.match(script, /hasSchedule && !arrivalConfirmed \? renderPickupRescheduleWarning\(rescheduleCount\)/);
+  assert.match(script, /Your pet pickup has been confirmed\./);
+  assert.match(script, /Your surrender drop-off has been confirmed\./);
 });
 
 test("very narrow and short screens retain dedicated compact layouts", async () => {
