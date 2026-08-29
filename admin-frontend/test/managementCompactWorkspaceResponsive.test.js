@@ -5,9 +5,10 @@ import { readFile } from "node:fs/promises";
 const readPage = (name) => readFile(new URL(`../pages/${name}`, import.meta.url), "utf8");
 const readStyle = (name) => readFile(new URL(`../src/css/${name}`, import.meta.url), "utf8");
 
-const [compatibilityPage, inventoryPage, compatibilityStyles, inventoryStyles, responsiveStyles, tabStyles] = await Promise.all([
+const [compatibilityPage, inventoryPage, adoptionScript, compatibilityStyles, inventoryStyles, responsiveStyles, tabStyles] = await Promise.all([
   readPage("compatibilityQuiz.html"),
   readPage("inventory.html"),
+  readFile(new URL("../src/management/adoptionApps.js", import.meta.url), "utf8"),
   readStyle("compatibilityQuiz.css"),
   readStyle("inventory.css"),
   readStyle("managementResponsive.css"),
@@ -137,13 +138,37 @@ test("Intake remains one continuous Inventory-style panel on phones", () => {
 
 test("Surrender record cards clear the mobile section header divider", () => {
   const surrenderSpacing = responsiveStyles.slice(
-    responsiveStyles.lastIndexOf("/* Keep the first Surrender record clear"),
+    responsiveStyles.lastIndexOf("/* Keep the first review-queue record clear"),
   );
 
   assert.match(surrenderSpacing, /@media \(max-width: 760px\)/);
   assert.match(
     surrenderSpacing,
-    /surrender-requests-page \.sr-table-panel[\s\S]*?management-review-table\.management-card-active tbody\s*\{[\s\S]*?padding:\s*10px 2px 2px !important;/,
+    /adoption-applications-page,[\s\S]*?surrender-requests-page[\s\S]*?management-review-table\.management-card-active tbody\s*\{[\s\S]*?padding:\s*10px 2px 2px !important;/,
+  );
+});
+
+test("Adoption compact fields use unique grid areas instead of overlapping", () => {
+  const adoptionCompact = responsiveStyles.slice(
+    responsiveStyles.lastIndexOf("/* Adoption compact cards keep four unique rows."),
+  );
+
+  for (const field of ["applicant", "animal", "application", "type", "match", "status", "actions"]) {
+    assert.match(adoptionScript, new RegExp(`management-review-${field}-field`));
+    assert.match(adoptionCompact, new RegExp(`management-review-${field}-field \\{ grid-area: ${field} !important; \\}`));
+  }
+
+  assert.match(
+    adoptionCompact,
+    /@media \(max-width: 380px\)[\s\S]*?"application type"[\s\S]*?"match status"/,
+  );
+  assert.match(
+    adoptionCompact,
+    /tbody > tr\.management-card-row > td\s*\{[\s\S]*?grid-column:\s*auto !important;/,
+  );
+  assert.match(
+    adoptionCompact,
+    /@media \(max-width: 339px\)[\s\S]*?"application"[\s\S]*?"type"[\s\S]*?"match"[\s\S]*?"status"/,
   );
 });
 
