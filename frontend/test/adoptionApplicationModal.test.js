@@ -19,13 +19,19 @@ test("the adoption modal hides the animal ID but keeps it for submission", async
 });
 
 test("the desktop adoption modal uses a compact workspace hierarchy", async () => {
-  const styles = await readFile(stylesUrl, "utf8");
+  const [page, styles] = await Promise.all([
+    readFile(pageUrl, "utf8"),
+    readFile(stylesUrl, "utf8"),
+  ]);
 
-  assert.match(styles, /Desktop adoption workspace: clearer hierarchy with less visual bulk/);
-  assert.match(styles, /@media\s*\(min-width:\s*901px\)/);
-  assert.match(styles, /\.selected-pet-box\s*\{[\s\S]*?grid-template-columns:\s*72px\s+minmax\(0,\s*1fr\)\s+auto\s*!important/);
-  assert.match(styles, /\.adoption-stepper-item\s*\{[\s\S]*?min-height:\s*72px\s*!important/);
-  assert.match(styles, /\.adoption-wizard-actions\s*\{[\s\S]*?justify-content:\s*flex-end\s*!important/);
+  assert.match(styles, /Desktop adoption workspace: fixed shell with one focused scrolling panel/);
+  assert.match(styles, /@media\s*\(min-width:\s*901px\)[\s\S]*?\.adoption-wizard-modal\s*\{[\s\S]*?width:\s*min\(1020px,[\s\S]*?height:\s*min\(760px,\s*86dvh\)[\s\S]*?grid-template-columns:\s*188px minmax\(0,\s*1fr\)/);
+  assert.match(styles, /Desktop adoption workspace:[\s\S]*?\.adoption-wizard-modal > \.adoption-stepper\s*\{[\s\S]*?position:\s*static\s*!important;[\s\S]*?grid-row:\s*2 \/ 5\s*!important/);
+  assert.match(styles, /Desktop adoption workspace:[\s\S]*?\.adopt-form-panel \.adoption-form\s*\{[\s\S]*?grid-row:\s*3\s*!important;[\s\S]*?overflow-y:\s*auto\s*!important/);
+  assert.match(styles, /Desktop adoption workspace:[\s\S]*?\.selected-pet-box\s*\{[\s\S]*?grid-template-columns:\s*58px\s+minmax\(0,\s*1fr\)\s+auto\s*!important/);
+  assert.match(styles, /Desktop adoption workspace:[\s\S]*?\.adoption-wizard-actions\s*\{[\s\S]*?grid-row:\s*4\s*!important;[\s\S]*?width:\s*100%\s*!important/);
+  assert.match(page, /<\/form>\s*<div class="form-actions adoption-wizard-actions">[\s\S]*?id="adoptionSubmitBtn" form="adoptionForm"/);
+  assert.match(styles, /@media\s*\(max-width:\s*900px\)[\s\S]*?\.adoption-wizard-modal > \.adoption-stepper/);
 });
 
 test("the birthdate calendar uses a compact scrollable year menu", async () => {

@@ -2336,6 +2336,21 @@ body.announcements-page .announcement-detail-close {
   box-shadow: none !important;
 }
 
+/* Query-linked stories use the same detail dialog as feed cards. Keep the
+   dialog itself as the initial focus target so the close button does not show
+   the homepage's large focus halo on page load. */
+body.announcements-page .announcement-detail-popup:focus,
+body.announcements-page .announcement-detail-popup:focus-visible {
+  outline: none !important;
+  box-shadow: 0 24px 70px rgba(43, 23, 25, 0.24) !important;
+}
+
+body.announcements-page .announcement-detail-close:focus-visible {
+  outline: 2px solid #f1c045 !important;
+  outline-offset: -3px !important;
+  box-shadow: none !important;
+}
+
 body.announcements-page .announcement-detail-kicker {
   margin-top: 4px !important;
   padding-right: 46px !important;
@@ -2354,6 +2369,12 @@ body.announcements-page .announcement-detail-photo-button,
 body.announcements-page .announcement-detail-photo-button img {
   min-height: 0 !important;
   height: clamp(175px, 28vh, 235px) !important;
+}
+
+/* Keep the existing wide detail frame, but anchor portrait photos at the top
+   so people's faces remain visible instead of cropping around their bodies. */
+body.announcements-page .announcement-detail-photo-button img {
+  object-position: center top !important;
 }
 
 @media (max-width: 640px) {

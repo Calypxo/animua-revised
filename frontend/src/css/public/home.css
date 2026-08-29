@@ -8147,7 +8147,7 @@ body.home-page .home-highlight-story:focus-visible {
   right: 0;
   bottom: 0;
   z-index: 4;
-  max-height: 56%;
+  max-height: 48%;
   display: block;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -8323,7 +8323,7 @@ body.home-page .home-highlight-story:focus-visible {
 }
 
 .story-modal-card[data-story-key="news-alerts"] .story-modal-copy {
-  max-height: 58%;
+  max-height: 50%;
   padding-bottom: calc(34px + env(safe-area-inset-bottom));
 }
 
@@ -8351,12 +8351,12 @@ body.home-page .home-highlight-story:focus-visible {
   }
 
   .story-modal-copy {
-    max-height: 56%;
+    max-height: 48%;
     padding: 0 18px calc(32px + env(safe-area-inset-bottom));
   }
 
   .story-modal-card[data-story-key="news-alerts"] .story-modal-copy {
-    max-height: 58%;
+    max-height: 50%;
   }
 
   .story-modal-close {
@@ -17281,5 +17281,48 @@ body.home-page .home-highlights-track::-webkit-scrollbar {
     padding: 0 12px !important;
     font-size: 0.62rem !important;
   }
+}
+
+/* Event posters are usually landscape photos with people near the sides.
+   Preserve the full story canvas size and shift only the crop toward the
+   upper-right subject so at least one person's face stays visible. */
+.story-modal-card[data-story-key="events"] .story-modal-image img {
+  object-position: 82% top !important;
+}
+
+/* This vaccination photo has two people grouped in the middle. Keep that
+   event centered without changing the story canvas or image scale. */
+.story-modal-card[data-story-key="events"][data-story-image-focus="center"] .story-modal-image img {
+  object-position: center top !important;
+}
+
+/* Keep story copy readable over light or visually busy photos without hiding
+   the upper part of the image. This layer sits above the photo and below all
+   interactive story content. */
+.story-modal-card::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  height: 68%;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.48) 24%,
+    rgba(0, 0, 0, 0.82) 58%,
+    rgba(0, 0, 0, 0.95) 100%
+  );
+  pointer-events: none;
+}
+
+.story-modal-copy h2 {
+  text-shadow: 0 3px 12px rgba(0, 0, 0, 0.95), 0 1px 2px #000000 !important;
+}
+
+.story-modal-copy p,
+.story-modal-content {
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.96), 0 1px 2px #000000;
 }
 

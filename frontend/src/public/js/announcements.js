@@ -515,6 +515,11 @@ async function showAnnouncementDetail(item) {
     showConfirmButton: false,
     showCloseButton: false,
     didOpen: (popup) => {
+      // SweetAlert otherwise focuses the first button when this dialog is
+      // opened from a ?story= link. Keep initial focus on the real dialog so
+      // the close control looks the same as when a feed card opens it.
+      popup.focus({ preventScroll: true });
+
       popup.querySelectorAll("[data-announcement-detail-close]").forEach((button) => {
         button.addEventListener("click", () => Swal.close());
       });

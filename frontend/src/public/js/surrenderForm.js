@@ -1,5 +1,9 @@
 import { API_BASE_URL } from "../../utils/api.js";
-import { ensureUserSession, getUserSession } from "../../utils/storage.js";
+import {
+  ensureUserSession,
+  getUserSession,
+  setPostAuthRedirect,
+} from "../../utils/storage.js";
 import {
   deleteQueuedPublicRequest,
   getQueuedPublicRequests,
@@ -110,15 +114,33 @@ function fillOwnerInfoFromAccount() {
   identityCard?.classList.remove("is-signed-out");
 }
 
-function openLoginModal() {
+function openLoginModal(event) {
+  event?.preventDefault();
+  setPostAuthRedirect("/pages/public/surrender.html");
   const authModal = document.getElementById("authModal");
   if (authModal) {
     authModal.classList.remove("hidden");
-    document.body.classList.add("modal-open");
+    document.body.classList.add("modal-open", "auth-open");
     return;
   }
   sessionStorage.setItem("animua_open_auth_modal", "true");
   window.location.href = "/pages/public/home.html";
+}
+
+function applySurrenderAuthState(user = getLoggedInUser()) {
+  const locked = !user;
+  const workspace = document.querySelector(".surrender-workspace");
+  const panel = document.getElementById("surrenderAuthPanel");
+  const form = document.getElementById("surrenderForm");
+
+  workspace?.classList.toggle("is-auth-required", locked);
+  if (panel) panel.hidden = !locked;
+  if (form) {
+    form.inert = locked;
+    form.setAttribute("aria-disabled", String(locked));
+  }
+
+  return !locked;
 }
 
 function requireLoggedInUser() {
@@ -954,8 +976,14 @@ function bindWaiverLanguageToggle() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  await ensureUserSession();
+  let session = null;
+  try {
+    session = await ensureUserSession();
+  } catch (error) {
+    console.warn("Unable to verify the surrender account session:", error.message);
+  }
   const form = document.getElementById("surrenderForm");
+  const canUseSurrenderForm = applySurrenderAuthState(session);
   fillOwnerInfoFromAccount();
   bindStepNavigation();
   bindWaiverLanguageToggle();
@@ -965,7 +993,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   showStep(1, { scroll: false, focus: false });
   const scheduleNonCriticalRequest = window.requestIdleCallback || ((callback) => window.setTimeout(callback, 1200));
   scheduleNonCriticalRequest(() => {
-    syncQueuedSurrenderRequests();
+    if (canUseSurrenderForm) syncQueuedSurrenderRequests();
     loadSurrenderAvailability();
     loadMySurrenderRequests();
   }, { timeout: 2500 });
@@ -987,5 +1015,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("checkSurrenderAvailability")?.addEventListener("click", () => {
     loadSurrenderAvailability({ showError: true });
   });
-  window.addEventListener("online", syncQueuedSurrenderRequests);
+  document.getElementById("surrenderAuthLoginButton")?.addEventListener("click", openLoginModal);
+  document.querySelector('.surrender-hero-actions a[href="#surrenderRequestWorkspace"]')?.addEventListener("click", (event) => {
+    if (!canUseSurrenderForm) openLoginModal(event);
+  });
+  window.addEventListener("online", () => {
+    if (getLoggedInUser()) syncQueuedSurrenderRequests();
+  });
 });

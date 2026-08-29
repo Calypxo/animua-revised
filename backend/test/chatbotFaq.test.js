@@ -196,19 +196,26 @@ test("answers Tagalog free vaccine questions directly from matching events", () 
   assert.doesNotMatch(reply, /Wala pang published upcoming events/i);
 });
 
-test("answers adopted animal pickup timing questions", () => {
-  const message = "kailan ko pwede kunin ang inadopt ko?";
+test("answers Taglish adopted-dog pickup questions with the approval and scheduling workflow", () => {
+  const messages = [
+    "paano ko pipick up yung aso ko?",
+    "pano ko pipick up yung aso kong inadopt?",
+    "kailan ko pwede kunin ang inadopt ko?"
+  ];
 
-  assert.equal(_test.resolveReplyLanguage("", message), "tagalog");
-  assert.equal(_test.shouldUseLocalReply(message), true);
-  assert.equal(_test.needsPublicContext(message), false);
-  assert.equal(_test.hasAdoptionPickupIntent(message), true);
+  for (const message of messages) {
+    assert.equal(_test.shouldUseLocalReply(message), true, message);
+    assert.equal(_test.needsPublicContext(message), false, message);
+    assert.equal(_test.hasAdoptionPickupIntent(message), true, message);
 
-  const reply = _test.getLocalReply(message, { pets: [], events: [] }, "tagalog");
+    const reply = _test.getLocalReply(message, { pets: [], events: [] }, "tagalog");
 
-  assert.match(reply, /approved na/i);
-  assert.match(reply, /pickup instructions/i);
-  assert.match(reply, /application updates/i);
+    assert.match(reply, /My Applications/i, message);
+    assert.match(reply, /Approved ang adoption application/i, message);
+    assert.match(reply, /Schedule Pickup/i, message);
+    assert.match(reply, /pickup date at time/i, message);
+    assert.doesNotMatch(reply, /pang-ANIMUA/i, message);
+  }
 });
 
 test("answers adoption step questions instead of listing ready animals", () => {
@@ -273,6 +280,7 @@ test("provider prompt includes official FAQ source-of-truth rules", () => {
   assert.match(prompt, /only qualified Angeles City residents may submit surrender requests/i);
   assert.match(prompt, /ANIMUA has no stray\/lost reporting feature/i);
   assert.match(prompt, /answer in English even if the user writes Taglish/i);
+  assert.match(prompt, /simple, everyday words and short sentences/i);
 });
 
 test("official FAQ layer answers system questions before AI is needed", async () => {
@@ -376,6 +384,115 @@ test("answers Match Quiz questions concisely", () => {
   assert.match(reply, /guide only/i);
   assert.match(reply, /final decision/i);
   assert.ok(reply.length < 260);
+});
+
+test("explains the complete Match Quiz process and configured retake rule in English", () => {
+  const message = "How does the Match Quiz work?";
+  const reply = _test.getLocalReply(
+    message,
+    {
+      pets: [],
+      events: [],
+      quiz: {
+        ..._test.getEmptyQuizContext(),
+        loaded: true,
+        retakeCooldownDays: 31
+      }
+    },
+    "english"
+  );
+
+  assert.equal(_test.hasQuizProcessIntent(message), true);
+  assert.match(reply, /Sign in and open Match Quiz/i);
+  assert.match(reply, /choose English or Tagalog/i);
+  assert.match(reply, /all five sections/i);
+  assert.match(reply, /31 days/i);
+  assert.match(reply, /Next allowed retake/i);
+});
+
+test("answers a logged-in user's exact quiz retake date in English", () => {
+  const message = "When can I retake the quiz?";
+  const reply = _test.getLocalReply(
+    message,
+    {
+      pets: [],
+      events: [],
+      quiz: {
+        loaded: true,
+        authenticated: true,
+        quizEnabled: true,
+        retakeCooldownDays: 30,
+        hasPreviousResult: true,
+        canTakeQuiz: false,
+        reason: "RETAKE_COOLDOWN",
+        nextRetakeAt: "2026-09-30T00:00:00.000Z",
+        remainingDays: 12
+      }
+    },
+    "english"
+  );
+
+  assert.equal(_test.hasQuizRetakeIntent(message), true);
+  assert.match(reply, /September 30, 2026/i);
+  assert.match(reply, /12 days/i);
+  assert.match(reply, /My Submissions/i);
+});
+
+test("answers quiz retake availability in Tagalog", () => {
+  const message = "Kailan ako puwedeng mag-quiz ulit?";
+  const reply = _test.getLocalReply(
+    message,
+    {
+      pets: [],
+      events: [],
+      quiz: {
+        loaded: true,
+        authenticated: true,
+        quizEnabled: true,
+        retakeCooldownDays: 30,
+        hasPreviousResult: true,
+        canTakeQuiz: true,
+        reason: "RETAKE_AVAILABLE",
+        nextRetakeAt: "2026-08-20T00:00:00.000Z",
+        remainingDays: 0
+      }
+    },
+    "tagalog"
+  );
+
+  assert.equal(_test.hasQuizRetakeIntent(message), true);
+  assert.match(reply, /Maaari mo nang ulitin ang quiz ngayon/i);
+  assert.match(reply, /account history/i);
+  assert.match(reply, /current matches/i);
+});
+
+test("answers a logged-in user's exact quiz retake date in Tagalog", () => {
+  const message = "Kailan ko maaaring ulitin ang Match Quiz?";
+  const reply = _test.getLocalReply(
+    message,
+    {
+      pets: [],
+      events: [],
+      quiz: {
+        loaded: true,
+        authenticated: true,
+        quizEnabled: true,
+        retakeCooldownDays: 30,
+        hasPreviousResult: true,
+        canTakeQuiz: false,
+        reason: "RETAKE_COOLDOWN",
+        nextRetakeAt: "2026-09-30T00:00:00.000Z",
+        remainingDays: 12
+      }
+    },
+    "tagalog"
+  );
+
+  assert.equal(_test.hasQuizRetakeIntent(message), true);
+  assert.match(reply, /Setyembre 30, 2026/i);
+  assert.match(reply, /12 araw/i);
+  assert.match(reply, /sagutan muli ang lahat ng limang sections/i);
+  assert.match(reply, /My Submissions/i);
 });
 
 test("routes application status questions to My Applications instead of animal visits", () => {
@@ -597,10 +714,9 @@ test("answers adoption pickup reschedule questions", () => {
   const reply = _test.getLocalReply(message, { pets: [], events: [] }, "english");
 
   assert.match(reply, /Reschedule/i);
-  assert.match(reply, /up to two times/i);
-  assert.match(reply, /saved immediately/i);
-  assert.match(reply, /without admin approval/i);
-  assert.match(reply, /account may be suspended/i);
+  assert.match(reply, /change an approved adoption pickup twice/i);
+  assert.match(reply, /14-day deadline/i);
+  assert.match(reply, /second change is final/i);
 });
 
 test("answers Tagalog adoption pickup reschedule questions", () => {
@@ -613,9 +729,122 @@ test("answers Tagalog adoption pickup reschedule questions", () => {
 
   assert.match(reply, /Reschedule/i);
   assert.match(reply, /dalawang beses/i);
-  assert.match(reply, /Agad mase-save/i);
-  assert.match(reply, /walang admin approval/i);
-  assert.match(reply, /maaaring ma-suspend/i);
+  assert.match(reply, /14-day deadline/i);
+  assert.match(reply, /Final ang pangalawang pagbabago/i);
+});
+
+test("answers how many adoption pickup reschedules remain from account context", () => {
+  const message = "How many pickup reschedules do I have left?";
+  const reply = _test.getLocalReply(
+    message,
+    {
+      pets: [],
+      events: [],
+      userAdoptions: [{
+        applicationId: "APP-2026-RESCHEDULE",
+        petName: "Bingo",
+        status: "Approved",
+        pickupSchedule: {
+          date: "2026-09-02",
+          time: "10:00",
+          rescheduleCount: 1
+        }
+      }]
+    },
+    "english"
+  );
+
+  assert.match(reply, /one final pickup reschedule/i);
+  assert.match(reply, /Bingo/i);
+  assert.match(reply, /APP-2026-RESCHEDULE/i);
+  assert.match(reply, /next change will be final/i);
+});
+
+test("explains when an adoption pickup has reached its reschedule limit", () => {
+  const message = "Pwede ko pa bang ilipat ang pickup schedule ko?";
+  const reply = _test.getLocalReply(
+    message,
+    {
+      pets: [],
+      events: [],
+      userAdoptions: [{
+        applicationId: "APP-2026-FINAL",
+        petName: "Ming",
+        status: "Approved",
+        pickupSchedule: {
+          date: "2026-09-03",
+          time: "13:00",
+          rescheduleCount: 2
+        }
+      }]
+    },
+    "tagalog"
+  );
+
+  assert.match(reply, /Nagamit mo na ang parehong pickup reschedules/i);
+  assert.match(reply, /Final na ang current pickup schedule/i);
+  assert.match(reply, /disabled na ang Reschedule option/i);
+});
+
+test("explains surrender appointment rescheduling in simple English", () => {
+  const message = "Can I reschedule my surrender drop-off appointment?";
+
+  assert.equal(_test.shouldUseLocalReply(message), true);
+  assert.equal(_test.hasSurrenderAppointmentRescheduleIntent(message), true);
+  assert.equal(_test.hasAdoptionPickupRescheduleIntent(message), false);
+
+  const reply = _test.getLocalReply(message, { pets: [], events: [] }, "english");
+
+  assert.match(reply, /My Submissions/i);
+  assert.match(reply, /appointment once/i);
+  assert.match(reply, /14-day deadline/i);
+  assert.match(reply, /Follow the old schedule/i);
+});
+
+test("explains surrender appointment rescheduling in Tagalog", () => {
+  const message = "Pwede ko bang ilipat ang surrender appointment ko?";
+
+  assert.equal(_test.resolveReplyLanguage("tagalog", message), "tagalog");
+  assert.equal(_test.hasSurrenderAppointmentRescheduleIntent(message), true);
+
+  const reply = _test.getLocalReply(message, { pets: [], events: [] }, "tagalog");
+
+  assert.match(reply, /My Submissions/i);
+  assert.match(reply, /Isang beses/i);
+  assert.match(reply, /14-day deadline/i);
+  assert.match(reply, /Sundin muna ang dating schedule/i);
+});
+
+test("distinguishes both rescheduling workflows when the request is ambiguous", () => {
+  const message = "Can I reschedule?";
+
+  assert.equal(_test.hasGeneralRescheduleIntent(message), true);
+  assert.equal(_test.shouldUseLocalReply(message), true);
+
+  const reply = _test.getLocalReply(message, { pets: [], events: [] }, "english");
+
+  assert.match(reply, /adoption pickup/i);
+  assert.match(reply, /change an adoption pickup twice/i);
+  assert.match(reply, /surrender appointment/i);
+  assert.match(reply, /appointment once/i);
+});
+
+test("answers a blocked reschedule question with a short explanation", () => {
+  const message = "bakit hindi na ako makapag resched?";
+
+  assert.equal(_test.hasBlockedRescheduleQuestion(message), true);
+
+  const englishReply = _test.getLocalReply(message, { pets: [], events: [] }, "english");
+  const tagalogReply = _test.getLocalReply(message, { pets: [], events: [] }, "tagalog");
+
+  assert.match(englishReply, /reached the reschedule limit/i);
+  assert.match(englishReply, /up to 2 changes/i);
+  assert.match(englishReply, /1 change/i);
+  assert.ok(englishReply.length < 260);
+  assert.match(tagalogReply, /Baka naabot mo na/i);
+  assert.match(tagalogReply, /hanggang 2 changes/i);
+  assert.match(tagalogReply, /1 change lang/i);
+  assert.ok(tagalogReply.length < 280);
 });
 
 test("answers home preparation questions before adoption", () => {

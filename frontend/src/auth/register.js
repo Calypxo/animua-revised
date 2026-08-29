@@ -8,7 +8,11 @@ import {
   updateProfile,
   deleteUser
 } from "firebase/auth";
-import { clearUserSession, setUserSession } from "../utils/storage.js";
+import {
+  clearUserSession,
+  consumePostAuthRedirect,
+  setUserSession,
+} from "../utils/storage.js";
 
 const RECAPTCHA_SITE_KEY =
   import.meta.env?.VITE_RECAPTCHA_SITE_KEY ||
@@ -605,12 +609,13 @@ async function handleEmailVerifiedClick() {
     const pendingPetId = sessionStorage.getItem("animua_selected_pet_id");
     const pendingAction = sessionStorage.getItem("animua_selected_pet_action");
 
+    const postAuthRedirect = consumePostAuthRedirect();
     if (userRole === "Admin" || userRole === "Staff") {
       window.location.replace("/pages/dashboard.html");
     } else if (pendingPetId && pendingAction === "adopt") {
       window.location.replace("/pages/public/find-furbabies.html");
     } else {
-      window.location.replace("/pages/public/home.html");
+      window.location.replace(postAuthRedirect || "/pages/public/home.html");
     }
   } catch (error) {
     if (message) message.textContent = error.message || "Incorrect email OTP. Please try again.";

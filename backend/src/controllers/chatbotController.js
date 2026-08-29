@@ -222,6 +222,99 @@ function getEmptyPublicContext() {
   return { pets: [], events: [] };
 }
 
+function getEmptyQuizContext() {
+  return {
+    loaded: false,
+    authenticated: false,
+    quizEnabled: true,
+    retakeCooldownDays: 30,
+    hasPreviousResult: false,
+    canTakeQuiz: true,
+    reason: "FIRST_ATTEMPT",
+    lastCompletedAt: null,
+    nextRetakeAt: null,
+    remainingDays: 0
+  };
+}
+
+async function getQuizContext(req = {}) {
+  const settingsSnapshot = await db.collection("quizSettings").doc("compatibilityQuiz").get();
+  const settingsData = settingsSnapshot.exists ? settingsSnapshot.data() || {} : {};
+  const quizEnabled = typeof settingsData.quizEnabled === "boolean" ? settingsData.quizEnabled : true;
+  const retakeCooldownDays = Number.isInteger(settingsData.retakeCooldownDays)
+    ? settingsData.retakeCooldownDays
+    : 30;
+  const userId = String(req.user?.id || req.user?.email || "").trim();
+
+  if (!userId) {
+    return {
+      ...getEmptyQuizContext(),
+      loaded: true,
+      quizEnabled,
+      retakeCooldownDays,
+      canTakeQuiz: quizEnabled,
+      reason: quizEnabled ? "SIGN_IN_REQUIRED" : "QUIZ_DISABLED"
+    };
+  }
+
+  const [userSnapshot, resultsSnapshot] = await Promise.all([
+    db.collection("users").doc(userId).get(),
+    db.collection("compatibilityResults").where("userId", "==", userId).get()
+  ]);
+  const user = userSnapshot.exists ? userSnapshot.data() || {} : {};
+  const results = resultsSnapshot.docs
+    .map((doc) => ({ id: doc.id, ...(doc.data() || {}) }))
+    .sort((a, b) => (parseAnyDate(b.completedAt)?.getTime() || 0) - (parseAnyDate(a.completedAt)?.getTime() || 0));
+  const latest = results.find((item) => item.isLatest) || results[0] || null;
+  const completedAt = parseAnyDate(latest?.completedAt);
+  const fallbackRetakeAt = completedAt
+    ? new Date(completedAt.getTime() + retakeCooldownDays * 86400000)
+    : null;
+  const nextRetakeAt = parseAnyDate(user.quizRetakeOverrideAt) ||
+    parseAnyDate(latest?.nextRetakeAt) ||
+    fallbackRetakeAt;
+  const now = new Date();
+  const hasPreviousResult = Boolean(latest);
+  const cooldownActive = hasPreviousResult && nextRetakeAt && now < nextRetakeAt;
+  const canTakeQuiz = quizEnabled && !cooldownActive;
+
+  return {
+    loaded: true,
+    authenticated: true,
+    quizEnabled,
+    retakeCooldownDays,
+    hasPreviousResult,
+    canTakeQuiz,
+    reason: !quizEnabled
+      ? "QUIZ_DISABLED"
+      : cooldownActive
+        ? "RETAKE_COOLDOWN"
+        : hasPreviousResult
+          ? "RETAKE_AVAILABLE"
+          : "FIRST_ATTEMPT",
+    lastCompletedAt: completedAt?.toISOString() || null,
+    nextRetakeAt: nextRetakeAt?.toISOString() || null,
+    remainingDays: canTakeQuiz || !nextRetakeAt
+      ? 0
+      : Math.max(1, Math.ceil((nextRetakeAt.getTime() - now.getTime()) / 86400000))
+  };
+}
+
+async function getQuizContextSafely(req = {}) {
+  const fallback = getEmptyQuizContext();
+  const guardedContext = getQuizContext(req).catch((error) => {
+    console.warn("[Chatbot Quiz Context Warning]", error.message);
+    return fallback;
+  });
+
+  return withTimeout(
+    guardedContext,
+    PUBLIC_CONTEXT_TIMEOUT_MS,
+    fallback,
+    () => console.warn(`[Chatbot Quiz Context Warning] timed out after ${PUBLIC_CONTEXT_TIMEOUT_MS}ms.`)
+  );
+}
+
 function withTimeout(promise, timeoutMs, fallbackValue, onTimeout) {
   let timeoutId;
 
@@ -939,6 +1032,18 @@ function parseAnyDate(value) {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
+function formatQuizDate(value, language = "english") {
+  const date = parseAnyDate(value);
+  if (!date) return "";
+
+  return new Intl.DateTimeFormat(language === "tagalog" ? "fil-PH" : "en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "Asia/Manila"
+  }).format(date);
+}
+
 async function getMyAdoptionContextSafely(req) {
   if (!req.user?.email) return { adoptions: [] };
 
@@ -1005,8 +1110,8 @@ function getScheduledPickupReply(adoption, language = "english") {
   if (isPendingStatus(adoption.status)) {
     return localizedReply(
       language,
-      `Your application for ${petName}${reference} is still ${adoption.status}. A pickup schedule will only appear after the Angeles City Veterinary Office approves the application.`,
-      `Ang application mo para kay ${petName}${reference} ay ${adoption.status} pa. Lalabas lang ang pickup schedule kapag approved na ng Angeles City Veterinary Office ang application.`
+      `Your application for ${petName}${reference} is still ${adoption.status}. Check My Applications for updates. Schedule Pickup will only appear after the Angeles City Veterinary Office approves the application.`,
+      `Ang application mo para kay ${petName}${reference} ay ${adoption.status} pa. Tingnan ang My Applications para sa updates. Lalabas lang ang Schedule Pickup kapag approved na ng Angeles City Veterinary Office ang application.`
     );
   }
 
@@ -1631,6 +1736,90 @@ function hasQuizIntent(text = "") {
   ]);
 }
 
+function hasQuizRetakeIntent(text = "") {
+  if (!hasQuizIntent(text)) return false;
+
+  return includesAnyWord(text, ["retake", "retakes", "retaking", "again", "ulit", "ulitin", "muli"]) ||
+    includesAnyPhrase(text, [
+      "take the quiz again",
+      "take quiz again",
+      "when can i retake",
+      "when can i take the quiz",
+      "next retake",
+      "quiz again",
+      "quiz ulit",
+      "ulitin ang quiz",
+      "kailan pwede mag quiz",
+      "kailan pwedeng mag quiz",
+      "kailan puwede mag quiz",
+      "kailan maaaring mag quiz"
+    ]);
+}
+
+function hasQuizAccuracyIntent(text = "") {
+  return hasQuizIntent(text) && (
+    includesAnyWord(text, ["accurate", "accuracy", "reliable", "guarantee", "guaranteed"]) ||
+    includesAnyPhrase(text, ["how accurate", "is the quiz accurate", "matching accurate"])
+  );
+}
+
+function getAdoptionRescheduleAccountReply(adoption, language = "english") {
+  if (!adoption) return "";
+
+  const petName = adoption.petName || "your selected animal";
+  const reference = adoption.applicationId ? ` (${adoption.applicationId})` : "";
+  const status = String(adoption.status || "").trim();
+  const schedule = adoption.pickupSchedule || {};
+
+  if (status.toLowerCase() !== "approved") {
+    return localizedReply(
+      language,
+      `Your application for ${petName}${reference} is ${status || "not approved yet"}. Only an approved application with an existing pickup schedule can use Reschedule. Check My Applications for the official status and next step.`,
+      `Ang application mo para kay ${petName}${reference} ay ${status || "hindi pa approved"}. Approved application na may existing pickup schedule lang ang maaaring gumamit ng Reschedule. Tingnan ang My Applications para sa official status at next step.`
+    );
+  }
+
+  if (!hasScheduleValue(schedule)) {
+    return localizedReply(
+      language,
+      `Your application for ${petName}${reference} is approved, but it does not have a pickup schedule yet. Open My Applications and use Schedule Pickup first; Reschedule becomes available only after an initial schedule is saved.`,
+      `Approved ang application mo para kay ${petName}${reference}, pero wala pa itong pickup schedule. Buksan ang My Applications at gamitin muna ang Schedule Pickup; magiging available lang ang Reschedule kapag may initial schedule nang naka-save.`
+    );
+  }
+
+  const explicitCount = Number(schedule.rescheduleCount || 0);
+  const usedCount = Math.max(0, explicitCount || (schedule.rescheduledAt ? 1 : 0));
+  const remaining = Math.max(0, 2 - usedCount);
+
+  if (!remaining) {
+    return localizedReply(
+      language,
+      `You have already used both pickup reschedules for ${petName}${reference}. The current pickup schedule is final and the Reschedule option is disabled. If you cannot attend, contact the Angeles City Veterinary Office immediately because your account may be suspended.`,
+      `Nagamit mo na ang parehong pickup reschedules para kay ${petName}${reference}. Final na ang current pickup schedule at disabled na ang Reschedule option. Kung hindi ka makakadalo, kontakin agad ang Angeles City Veterinary Office dahil maaaring ma-suspend ang account mo.`
+    );
+  }
+
+  return localizedReply(
+    language,
+    `You have ${remaining === 1 ? "one final pickup reschedule" : "two pickup reschedules"} remaining for ${petName}${reference}. Open My Applications and use Reschedule. Choose today or a later date within the active 14-day attendance deadline; the valid change is saved immediately without a separate review.${remaining === 1 ? " Your next change will be final." : ""}`,
+    `May ${remaining === 1 ? "isang final pickup reschedule" : "dalawang pickup reschedules"} ka pang natitira para kay ${petName}${reference}. Buksan ang My Applications at gamitin ang Reschedule. Pumili ng date ngayong araw o mas huli na pasok sa active 14-day attendance deadline; agad mase-save ang valid change nang walang hiwalay na review.${remaining === 1 ? " Final na ang susunod mong pagbabago." : ""}`
+  );
+}
+
+function hasQuizProcessIntent(text = "") {
+  if (!hasQuizIntent(text)) return false;
+
+  return includesAnyWord(text, ["how", "paano", "process", "steps", "start", "begin", "answer", "answers", "language"]) ||
+    includesAnyPhrase(text, [
+      "how does the quiz work",
+      "how to take the quiz",
+      "how do i take",
+      "quiz process",
+      "quiz steps",
+      "take the quiz"
+    ]);
+}
+
 function hasLiveCommunicationIntent(text = "") {
   return includesAnyWord(text, ["staff", "employee", "chat", "video", "consultation", "transfer"]) ||
     includesAnyPhrase(text, ["live chat", "video consult", "talk to staff", "transfer me"]);
@@ -1725,9 +1914,25 @@ function hasAdoptionPickupIntent(text = "") {
     hasAnimalMentionIntent(text);
 
   return mentionsAdoption && (
-    includesAnyWord(text, ["pickup", "pick-up", "claim", "release", "kunin", "kuha", "makukuha"]) ||
+    includesAnyWord(text, [
+      "pickup",
+      "pipick",
+      "pipickup",
+      "ipick",
+      "ipickup",
+      "magpickup",
+      "claim",
+      "release",
+      "kunin",
+      "kuha",
+      "makukuha"
+    ]) ||
     includesAnyPhrase(text, [
       "pick up",
+      "pipick up",
+      "pi pick up",
+      "ipick up",
+      "mag pick up",
       "get the pet",
       "get my pet",
       "get the animal",
@@ -1771,7 +1976,7 @@ function hasAdoptionPickupRescheduleIntent(text = "") {
     includesAnyWord(text, ["pickup", "release", "kunin"]);
 
   return mentionsPickup && (
-    includesAnyWord(text, ["reschedule", "resched", "change", "move", "cancel", "reschedule", "palit", "lipat", "ilipat", "ililipat", "iba"]) ||
+    includesAnyWord(text, ["reschedule", "reschedules", "rescheduled", "rescheduling", "resched", "change", "move", "cancel", "palit", "lipat", "ilipat", "ililipat", "iba"]) ||
     includesAnyPhrase(text, [
       "change pickup",
       "change my pickup",
@@ -1783,6 +1988,67 @@ function hasAdoptionPickupRescheduleIntent(text = "") {
       "lipat schedule",
       "ilipat schedule",
       "ibang schedule"
+    ])
+  );
+}
+
+function hasScheduleChangeIntent(text = "") {
+  return includesAnyWord(text, ["reschedule", "reschedules", "rescheduled", "rescheduling", "resched", "change", "move", "palit", "lipat", "ilipat", "ililipat"]) ||
+    includesAnyPhrase(text, [
+      "request resched",
+      "request re sched",
+      "request re-sched",
+      "change schedule",
+      "move schedule",
+      "palit schedule",
+      "lipat schedule",
+      "ilipat schedule",
+      "ibang schedule"
+    ]);
+}
+
+function hasSurrenderAppointmentRescheduleIntent(text = "") {
+  const mentionsSurrenderAppointment = hasSurrenderIntent(text) ||
+    includesAnyWord(text, ["dropoff"]) ||
+    includesAnyPhrase(text, ["drop off", "drop-off"]);
+
+  return mentionsSurrenderAppointment && hasScheduleChangeIntent(text) &&
+    !hasAdoptionPickupRescheduleIntent(text);
+}
+
+function hasGeneralRescheduleIntent(text = "") {
+  const explicitlyAsksToReschedule = includesAnyWord(text, ["reschedule", "reschedules", "rescheduled", "rescheduling", "resched"]) ||
+    includesAnyPhrase(text, [
+      "request resched",
+      "request re sched",
+      "request re-sched",
+      "palit schedule",
+      "lipat schedule",
+      "ilipat schedule",
+      "ibang schedule"
+    ]);
+
+  return explicitlyAsksToReschedule &&
+    !hasAdoptionPickupRescheduleIntent(text) &&
+    !hasSurrenderAppointmentRescheduleIntent(text);
+}
+
+function hasBlockedRescheduleQuestion(text = "") {
+  return (
+    hasAdoptionPickupRescheduleIntent(text) ||
+    hasSurrenderAppointmentRescheduleIntent(text) ||
+    hasGeneralRescheduleIntent(text)
+  ) && (
+    includesAnyWord(text, ["why", "bakit", "cannot", "cant", "unable", "limit", "reached", "hindi", "ayaw", "wala"]) ||
+    includesAnyPhrase(text, [
+      "can't reschedule",
+      "cannot reschedule",
+      "can not reschedule",
+      "no longer reschedule",
+      "hindi na makapag resched",
+      "di na makapag resched",
+      "hindi makapag reschedule",
+      "di makapag reschedule"
     ])
   );
 }
@@ -1980,6 +2246,8 @@ function isOnTopic(message = "") {
     hasGoodbyeIntent(normalizedMessage) ||
     hasStrayIntent(normalizedMessage) ||
     hasSurrenderIntent(normalizedMessage) ||
+    hasSurrenderAppointmentRescheduleIntent(normalizedMessage) ||
+    hasGeneralRescheduleIntent(normalizedMessage) ||
     hasDonationIntent(normalizedMessage) ||
     hasPublicAccountLimitIntent(normalizedMessage) ||
     hasApplicationEditIntent(normalizedMessage) ||
@@ -2047,6 +2315,8 @@ function shouldUseLocalReply(message = "") {
     hasAdoptionPickupIntent(lower) ||
     hasAdoptionPickupDocumentIntent(lower) ||
     hasAdoptionPickupRescheduleIntent(lower) ||
+    hasSurrenderAppointmentRescheduleIntent(lower) ||
+    hasGeneralRescheduleIntent(lower) ||
     hasPickupMissedIntent(lower) ||
     hasAdoptionApprovalTimingIntent(lower) ||
     hasAdoptionHomePreparationIntent(lower) ||
@@ -2151,7 +2421,7 @@ function buildSystemPrompt(context = {}, language = "english") {
       : "Answer in English.",
     "Help users with adoption browsing, compatibility matching, surrender requests, account registration, email OTP verification, login, and general shelter service navigation.",
     "ANIMUA means Animal Unified Approach. It is one system for shelter operations and public services managed through the Angeles City Veterinary Office. Never invent a different expansion of ANIMUA.",
-    "Be concise, warm, and practical. Sound like a helpful shelter front desk, not a formal policy notice. Do not use markdown formatting, bullets, or bold markers. Do not add a generic follow-up question unless the user needs to choose a next step.",
+    "Use simple, everyday words and short sentences. Answer the user's question in the first sentence, then give only the details needed for the next step. Keep most replies to two to four short sentences. Avoid policy-style wording, jargon, long lists, and unnecessary explanations. Sound like a helpful shelter front desk. Do not use markdown formatting, bullets, or bold markers. Do not add a generic follow-up question unless the user needs to choose a next step.",
     "ANIMUA no longer has a stray animal reporting feature or stray reporting page. Never tell users to submit stray reports through ANIMUA. For stray or abandoned animals, direct users to the Angeles City Dog Pound or Angeles City Veterinary Office.",
     "Adoption through ANIMUA has no adoption fee. Do not invent other fees or payment requirements.",
     "ANIMUA does not process online donation payments, GCash, bank, card, or payment gateway transactions. For donations, direct users to the Angeles City Veterinary Office for official procedures and current needs.",
@@ -2169,6 +2439,8 @@ function buildSystemPrompt(context = {}, language = "english") {
     "If the user asks about adoption fees, say adoption through ANIMUA has no adoption fee, but application review is still required.",
     "If the user asks about adoption status, approval timing, pickup schedule, pickup requirements, or rescheduling, tell them to sign in and check My Applications. Never invent a date, time, approval result, or private status.",
     "If the user is logged in and adoption context is provided, use that context for pickup schedule or latest application status. If no private context is provided, do not pretend to know their record.",
+    "For an approved adoption pickup, a user may reschedule in My Applications up to two times. Each valid change saves immediately without staff approval, must be today or later and within the active 14-day attendance deadline, and the second reschedule is final.",
+    "For an approved surrender drop-off appointment, a user may submit only one reschedule request in My Submissions. It must be today or later and within the active 14-day attendance deadline, requires staff approval, and does not replace the official appointment unless approved.",
     "If the user asks what to bring for pickup, say the official list is shown in the adoption application details in My Applications and may include valid ID, adoption agreement, and office instructions.",
     "If the user asks about multiple applications, say they may submit more than one application for different animals, but each is reviewed separately and approval is not guaranteed.",
     "If the user asks about surrender eligibility, say only qualified Angeles City residents may submit surrender requests through ANIMUA. Users from other cities or municipalities should contact their local city or municipal veterinary office, animal welfare office, or nearest shelter.",
@@ -2177,8 +2449,11 @@ function buildSystemPrompt(context = {}, language = "english") {
     "If the user asks about animal vaccination records, medical history, age, sex, breed, photos, or behavior, direct them to the animal profile in Find Furbabies and to contact the office if details are missing or unclear.",
     "If the user asks when vaccination, anti-rabies, spay/neuter, or other public service events happen, direct them to the Home page event section and Contact Us for official confirmation. Do not treat event schedules as an individual animal vaccination record.",
     "If the user asks about lost, stray, found, or abandoned animals, say ANIMUA has no stray/lost reporting feature and direct them to Angeles City Dog Pound or the Angeles City Veterinary Office.",
-    "If the user asks what can be done without an account, say public pages can be browsed without signing in, but applications, surrender requests, private statuses, and schedules require an account.",
+    "If the user asks what can be done without an account, say Home, Find Furbabies, Surrender information, and Contact Us can be browsed without signing in, but taking the Match Quiz, applications, surrender requests, private statuses, and schedules require a Public account.",
     "If the user asks about reservations, say ANIMUA does not guarantee pet reservations through chat; they should submit an adoption application from the animal profile if available.",
+    "For the Match Quiz process, tell users to sign in to a Public account, open Match Quiz, choose English or Tagalog, set their pet filters, answer all five sections honestly, submit, and view the ranked compatibility results saved to their account.",
+    "A completed Match Quiz starts the configured retake cooldown (30 days by default, although the current system setting may differ). The old result remains in account history, and the next completed attempt becomes the current result.",
+    "Never invent a user's retake date. If verified quiz eligibility context is unavailable, explain the configured cooldown and tell the user to sign in and check Match Quiz or My Submissions for the exact Next allowed retake date. The quiz may also be paused or have an account-specific retake date.",
     "If the user asks in Tagalog or Taglish, answer in natural Tagalog or Taglish. If the selected language is English, answer in English even if the user writes Taglish.",
     `Ready animals shown publicly right now: ${context.pets?.length ? context.pets.map(formatPet).join("; ") : "No live animal list available in context."}`,
     `Published or recent events in context: ${context.events?.length ? context.events.map(formatEvent).join("; ") : "No event list available in context."}`
@@ -2190,6 +2465,7 @@ function getLocalReply(message, context = {}, language = "english") {
   const pets = Array.isArray(context.pets) ? context.pets : [];
   const events = Array.isArray(context.events) ? context.events : [];
   const userAdoptions = Array.isArray(context.userAdoptions) ? context.userAdoptions : [];
+  const quizContext = context.quiz || getEmptyQuizContext();
 
   if (hasGreetingIntent(lower)) {
     return localizedReply(
@@ -2274,8 +2550,32 @@ function getLocalReply(message, context = {}, language = "english") {
   if (hasPublicAccountLimitIntent(lower)) {
     return localizedReply(
       language,
-      "You can browse public ANIMUA pages without signing in, such as Home, Find Furbabies, Match Quiz, Surrender information, and Contact Us. To submit an adoption application, submit a surrender request, view My Applications, see private status updates, or manage pickup schedules, you need to sign in or create an account.",
-      "Maaari mong tingnan ang public ANIMUA pages kahit hindi naka-sign in, tulad ng Home, Find Furbabies, Match Quiz, Surrender information, at Contact Us. Para mag-submit ng adoption application, mag-submit ng surrender request, makita ang My Applications, makita ang private status updates, o i-manage ang pickup schedules, kailangan mong mag-sign in o gumawa ng account."
+      "You can browse public ANIMUA pages without signing in, such as Home, Find Furbabies, Surrender information, and Contact Us. To take the Match Quiz, submit an adoption application or surrender request, view My Applications, see private status updates, or manage pickup schedules, you need to sign in or create an account. These actions require a Public account.",
+      "Maaari mong tingnan ang public ANIMUA pages kahit hindi naka-sign in, tulad ng Home, Find Furbabies, Surrender information, at Contact Us. Para sagutan ang Match Quiz, mag-submit ng adoption application o surrender request, makita ang My Applications at private status updates, o i-manage ang pickup schedules, kailangan mong mag-sign in o gumawa ng Public account."
+    );
+  }
+
+  if (hasSurrenderAppointmentRescheduleIntent(lower)) {
+    return localizedReply(
+      language,
+      hasBlockedRescheduleQuestion(lower)
+        ? "You may have used your one surrender reschedule. Reschedule also requires an approved request and an existing appointment. Check My Submissions to see the reason."
+        : "You can change an approved surrender appointment once. Go to My Submissions and select Reschedule. Choose a date within your 14-day deadline. Follow the old schedule until the change is accepted.",
+      hasBlockedRescheduleQuestion(lower)
+        ? "Baka nagamit mo na ang isang surrender reschedule. Kailangan ding approved ang request at may existing appointment. Tingnan ang My Submissions para makita ang dahilan."
+        : "Isang beses puwedeng baguhin ang approved surrender appointment. Pumunta sa My Submissions at piliin ang Reschedule. Pumili ng date na pasok sa 14-day deadline. Sundin muna ang dating schedule hangga't hindi accepted ang pagbabago."
+    );
+  }
+
+  if (hasGeneralRescheduleIntent(lower)) {
+    return localizedReply(
+      language,
+      hasBlockedRescheduleQuestion(lower)
+        ? "You may have reached the reschedule limit. Adoption pickup: up to 2 changes. Surrender appointment: 1 change. Check My Applications or My Submissions for your current schedule."
+        : "Yes. You can change an adoption pickup twice or a surrender appointment once. Use My Applications or My Submissions to reschedule.",
+      hasBlockedRescheduleQuestion(lower)
+        ? "Baka naabot mo na ang reschedule limit. Adoption pickup: hanggang 2 changes. Surrender appointment: 1 change lang. Tingnan ang My Applications o My Submissions para sa current schedule mo."
+        : "Oo. Dalawang beses puwedeng baguhin ang adoption pickup, at isang beses ang surrender appointment. Gamitin ang My Applications o My Submissions para mag-reschedule."
     );
   }
 
@@ -2394,10 +2694,71 @@ function getLocalReply(message, context = {}, language = "english") {
   }
 
   if (hasQuizIntent(lower)) {
+    if (hasQuizAccuracyIntent(lower) && !hasQuizRetakeIntent(lower)) {
+      return localizedReply(
+        language,
+        "The Match Quiz gives compatibility suggestions based on your answers and available animal data. Use it as a guide only; it does not guarantee approval or availability. The Angeles City Veterinary Office still makes the final decision.",
+        "Ang Match Quiz ay nagbibigay ng compatibility suggestions batay sa sagot mo at available animal data. Guide lang ito; hindi nito ginagarantiya ang approval o availability. Angeles City Veterinary Office pa rin ang final decision."
+      );
+    }
+
+    const cooldownDays = Number.isInteger(quizContext.retakeCooldownDays)
+      ? quizContext.retakeCooldownDays
+      : 30;
+    const nextRetakeDate = formatQuizDate(quizContext.nextRetakeAt, language);
+    let retakeGuidance;
+
+    if (quizContext.quizEnabled === false) {
+      retakeGuidance = localizedReply(
+        language,
+        quizContext.hasPreviousResult
+          ? "The Match Quiz is temporarily paused by the shelter. Your saved result remains in your account; check Match Quiz again later for availability."
+          : "The Match Quiz is temporarily paused by the shelter. Check Match Quiz again later for availability.",
+        quizContext.hasPreviousResult
+          ? "Pansamantalang naka-pause ng shelter ang Match Quiz. Nasa account mo pa rin ang saved result; tingnan muli ang Match Quiz later kung available na."
+          : "Pansamantalang naka-pause ng shelter ang Match Quiz. Tingnan muli ang Match Quiz later kung available na."
+      );
+    } else if (quizContext.authenticated && !quizContext.hasPreviousResult) {
+      retakeGuidance = localizedReply(
+        language,
+        "You have no previous result, so you can take your first quiz now. Open Match Quiz and complete all five sections.",
+        "Wala ka pang previous result, kaya maaari mong sagutan ang first quiz mo ngayon. Buksan ang Match Quiz at kumpletuhin ang lahat ng limang sections."
+      );
+    } else if (quizContext.authenticated && quizContext.hasPreviousResult && quizContext.canTakeQuiz) {
+      retakeGuidance = localizedReply(
+        language,
+        "You can retake the quiz now. Open Match Quiz and answer all five sections again. Your previous result will stay in your account history, while the new result will update your current matches.",
+        "Maaari mo nang ulitin ang quiz ngayon. Buksan ang Match Quiz at sagutan muli ang lahat ng limang sections. Mananatili sa account history ang previous result mo, at ia-update ng bagong result ang current matches mo."
+      );
+    } else if (quizContext.authenticated && quizContext.hasPreviousResult && nextRetakeDate) {
+      const daysText = quizContext.remainingDays > 0
+        ? localizedReply(
+            language,
+            ` That is about ${quizContext.remainingDays} day${quizContext.remainingDays === 1 ? "" : "s"} from now.`,
+            ` Humigit-kumulang ${quizContext.remainingDays} araw pa iyon mula ngayon.`
+          )
+        : "";
+      retakeGuidance = localizedReply(
+        language,
+        `You can retake the Match Quiz beginning ${nextRetakeDate}.${daysText} On or after that date, open Match Quiz and answer all five sections again. You can also see the date under Next allowed retake in Match Quiz or My Submissions.`,
+        `Maaari mong ulitin ang Match Quiz simula ${nextRetakeDate}.${daysText} Sa araw na iyon o pagkatapos nito, buksan ang Match Quiz at sagutan muli ang lahat ng limang sections. Makikita rin ang date sa Next allowed retake sa Match Quiz o My Submissions.`
+      );
+    } else {
+      retakeGuidance = localizedReply(
+        language,
+        `After you complete the quiz, the normal retake wait is ${cooldownDays} day${cooldownDays === 1 ? "" : "s"}. Sign in and open Match Quiz or My Submissions to see your exact Next allowed retake date.`,
+        `Pagkatapos mong makumpleto ang quiz, ang normal na hintayan bago mag-retake ay ${cooldownDays} araw. Mag-sign in at buksan ang Match Quiz o My Submissions para makita ang eksaktong Next allowed retake date mo.`
+      );
+    }
+
+    if (hasQuizRetakeIntent(lower)) {
+      return retakeGuidance;
+    }
+
     return localizedReply(
       language,
-      "The Match Quiz gives compatibility suggestions based on your answers and available animal data. Use it as a guide only; it does not guarantee approval or availability. The Angeles City Veterinary Office still makes the final decision.",
-      "Ang Match Quiz ay nagbibigay ng compatibility suggestions batay sa sagot mo at available animal data. Guide lang ito; hindi nito ginagarantiya ang approval o availability. Angeles City Veterinary Office pa rin ang final decision."
+      `Sign in and open Match Quiz. Choose English or Tagalog, set your pet preferences, and answer all five sections. Submit the quiz to see your saved matches. ${retakeGuidance}`,
+      `Mag-sign in at buksan ang Match Quiz. Pumili ng English o Tagalog, itakda ang pet preferences, at sagutan ang limang sections. I-submit ang quiz para makita ang saved matches mo. ${retakeGuidance}`
     );
   }
 
@@ -2474,10 +2835,20 @@ function getLocalReply(message, context = {}, language = "english") {
   }
 
   if (hasAdoptionPickupRescheduleIntent(lower)) {
+    const accountReply = getAdoptionRescheduleAccountReply(
+      selectRelevantAdoption(userAdoptions),
+      language
+    );
+    if (accountReply) return accountReply;
+
     return localizedReply(
       language,
-      "If you already have a pickup schedule, open My Applications and use Reschedule if the option is available. Pickup can be rescheduled up to two times, and each change is saved immediately without admin approval. The second reschedule is final; if you cannot attend, your account may be suspended.",
-      "Kung may pickup schedule ka na, buksan ang My Applications at gamitin ang Reschedule kung available ang option. Agad mase-save ang bawat pagbabago nang walang admin approval at hanggang dalawang beses puwedeng mag-reschedule. Final na ang pangalawang reschedule; kung hindi ka makakadalo, maaaring ma-suspend ang account mo."
+      hasBlockedRescheduleQuestion(lower)
+        ? "The Reschedule button may be unavailable because the adoption is not approved, there is no pickup schedule, or you already used both changes. Check My Applications to see the reason."
+        : "You can change an approved adoption pickup twice. Go to My Applications and select Reschedule. Choose a date within your 14-day deadline. The second change is final.",
+      hasBlockedRescheduleQuestion(lower)
+        ? "Maaaring walang Reschedule button dahil hindi approved ang adoption, wala pang pickup schedule, o nagamit mo na ang dalawang changes. Tingnan ang My Applications para makita ang dahilan."
+        : "Dalawang beses puwedeng baguhin ang approved adoption pickup. Pumunta sa My Applications at piliin ang Reschedule. Pumili ng date na pasok sa 14-day deadline. Final ang pangalawang pagbabago."
     );
   }
 
@@ -2488,8 +2859,8 @@ function getLocalReply(message, context = {}, language = "english") {
 
     return localizedReply(
       language,
-      "You can pick up or receive an adopted animal only after the Angeles City Veterinary Office approves the adoption and gives official release or pickup instructions. Please sign in to ANIMUA and check your application updates, or contact the office if no pickup schedule or next step is shown.",
-      "Makukuha o mapipick up mo lang ang adopted animal kapag approved na ng Angeles City Veterinary Office ang adoption at may official release o pickup instructions na. Mag-sign in sa ANIMUA at tingnan ang application updates, o kontakin ang office kung walang pickup schedule o next step na nakalagay."
+      "Sign in and open My Applications. Check whether your adoption application is Approved. If it is approved, open it and select Schedule Pickup to choose your pickup date and time. If it is not approved yet, wait for the official update because pickup scheduling is not available yet.",
+      "Mag-sign in at buksan ang My Applications. Tingnan kung Approved ang adoption application mo. Kapag Approved, buksan ito at piliin ang Schedule Pickup para pumili ng pickup date at time. Kung hindi pa Approved, hintayin muna ang official update dahil hindi pa available ang pickup scheduling."
     );
   }
 
@@ -2857,14 +3228,23 @@ async function getOfficialFaqReply(req, message, language = "english") {
     return "";
   }
 
-  const context = needsPublicContext(message)
-    ? await getPublicContextSafely("Context")
-    : getEmptyPublicContext();
-  const userContext = needsUserAdoptionContext(message)
-    ? await getMyAdoptionContextSafely(req)
-    : { adoptions: [] };
+  const [context, userContext, quizContext] = await Promise.all([
+    needsPublicContext(message)
+      ? getPublicContextSafely("Context")
+      : getEmptyPublicContext(),
+    needsUserAdoptionContext(message)
+      ? getMyAdoptionContextSafely(req)
+      : { adoptions: [] },
+    hasQuizIntent(normalizeIntentText(message))
+      ? getQuizContextSafely(req)
+      : getEmptyQuizContext()
+  ]);
 
-  return getLocalReply(message, { ...context, userAdoptions: userContext.adoptions }, language);
+  return getLocalReply(message, {
+    ...context,
+    userAdoptions: userContext.adoptions,
+    quiz: quizContext
+  }, language);
 }
 
 async function requestProviderReply({ message, history, context, language }) {
@@ -3063,6 +3443,8 @@ exports._test = {
   buildSystemPrompt,
   getOfficialFaqReply,
   getLocalReply,
+  getEmptyQuizContext,
+  getQuizContext,
   hasAdoptionProcessIntent,
   hasAnimalAvailabilityIntent,
   hasCheckupRequestIntent,
@@ -3072,8 +3454,14 @@ exports._test = {
   hasAdoptionPickupIntent,
   hasAdoptionPickupDocumentIntent,
   hasAdoptionPickupRescheduleIntent,
+  hasBlockedRescheduleQuestion,
+  hasGeneralRescheduleIntent,
+  hasSurrenderAppointmentRescheduleIntent,
   hasOutsideAngelesIntent,
   hasPetCareIntent,
+  hasQuizIntent,
+  hasQuizProcessIntent,
+  hasQuizRetakeIntent,
   hasSurrenderAppointmentIntent,
   hasSurrenderAvailabilityIntent,
   hasSurrenderDocumentIntent,

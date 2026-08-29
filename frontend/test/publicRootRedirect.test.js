@@ -28,6 +28,6 @@ test("the public cache rotates and protected redirects bypass index.html", async
     readFile(new URL("../src/public/js/compatibilityResults.js", import.meta.url), "utf8"),
   ]);
 
-  assert.match(serviceWorker, /CACHE_VERSION = "animua-public-v26"/);
+  assert.match(serviceWorker, /CACHE_VERSION = "animua-public-v30"/);
   assert.doesNotMatch(compatibilityResults, /window\.location\.href = "\/index\.html"/);
 });

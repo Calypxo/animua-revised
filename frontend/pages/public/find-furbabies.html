@@ -20,7 +20,7 @@
   <link rel="stylesheet" href="../../src/css/public/home.css">
   <link rel="preload" as="style" href="../../src/css/global.css?v=profile-stack-restored-20260824" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="../../src/css/global.css?v=profile-stack-restored-20260824"></noscript>
-  <link rel="stylesheet" href="../../src/css/public/furbabies.css?v=matching-calendar-menus-20260824">
+  <link rel="stylesheet" href="../../src/css/public/furbabies.css?v=yellow-field-focus-20260829">
   <link rel="stylesheet" href="../../src/css/public/zoom-responsive.css?v=public-zoom-20260825-4">
 </head>
 <body class="home-page furbabies-page">
@@ -655,14 +655,13 @@
           <label><input type="checkbox" id="understandNoGuarantee" name="understand_no_guarantee" required><span class="adoption-checkmark" aria-hidden="true"></span><span>I understand that submitting this application does not guarantee approval.</span></label>
         </div>
 
-        <div class="form-actions adoption-wizard-actions">
-          <button type="button" class="btn secondary-btn" id="adoptionBackBtn" hidden>Back</button>
-          <button type="button" class="btn primary-btn" id="adoptionNextBtn">Continue <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
-          <button type="submit" class="btn primary-btn" id="adoptionSubmitBtn" hidden>Submit Adoption Application</button>
-        </div>
-
         <p class="form-message" id="formMessage"></p>
       </form>
+      <div class="form-actions adoption-wizard-actions">
+        <button type="button" class="btn secondary-btn" id="adoptionBackBtn" hidden>Back</button>
+        <button type="button" class="btn primary-btn" id="adoptionNextBtn">Continue <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
+        <button type="submit" class="btn primary-btn" id="adoptionSubmitBtn" form="adoptionForm" hidden>Submit Adoption Application</button>
+      </div>
       <footer class="adoption-security-note"><i class="fa-solid fa-shield-heart" aria-hidden="true"></i><span>Your information is secure and will only be used for adoption purposes.</span></footer>
     </div>
   </div>

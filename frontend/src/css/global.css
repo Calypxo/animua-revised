@@ -21051,6 +21051,34 @@ body.home-page :where(a, button, input, select, textarea, [tabindex]):focus-visi
   box-shadow: 0 0 0 5px rgba(114, 27, 20, 0.18) !important;
 }
 
+/* Composite text controls include icons or actions, so their focus ring belongs
+   on the complete visible field rather than on the text-entry area alone. */
+body.home-page :where(
+  .auth-field,
+  .chatbot-search-field,
+  .contact-thread-reply-field,
+  .search-box,
+  .profile-info-row
+):focus-within {
+  outline: 3px solid rgba(241, 192, 69, 0.92) !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 0 5px rgba(114, 27, 20, 0.18) !important;
+}
+
+body.home-page .auth-field > input:focus,
+body.home-page .auth-field > input:focus-visible,
+body.home-page .chatbot-search-field > input:focus,
+body.home-page .chatbot-search-field > input:focus-visible,
+body.home-page .contact-thread-reply-field > textarea:focus,
+body.home-page .contact-thread-reply-field > textarea:focus-visible,
+body.home-page .search-box > input:focus,
+body.home-page .search-box > input:focus-visible,
+body.home-page .profile-info-row :is(input, textarea):focus,
+body.home-page .profile-info-row :is(input, textarea):focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 body.home-page :where(.navbar a, .footer-links a, .auth-muted-link, .featured-furbabies-all):focus-visible {
   border-radius: 6px !important;
 }
@@ -23137,7 +23165,7 @@ body.home-page #register-section .auth-submit-btn,
   }
 
   body.home-page .header {
-    border-bottom: 1px solid rgba(120, 1, 22, 0.32) !important;
+    border-bottom: 0 !important;
   }
 
   body.home-page :is(

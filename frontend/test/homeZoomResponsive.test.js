@@ -65,7 +65,7 @@ test("adoption process matches the compact-header breakpoint and keeps a solid d
   );
   assert.match(
     home,
-    /global\.css\?v=mobile-notification-icon-20260824-process-layout-20260827-2/,
+    /global\.css\?v=public-ui-20260829/,
   );
 });
 
@@ -84,4 +84,64 @@ test("success-story photos cover the complete story canvas", async () => {
     /\.story-modal-card\[data-story-key="success-stories"\] \.story-modal-image img\s*\{[\s\S]*?object-fit:\s*contain\s*!important;/,
   );
   assert.match(home, /home\.css\?v=story-photo-cover-20260825/);
+});
+
+test("event stories keep their canvas size while shifting the crop toward a person", async () => {
+  const css = await readFile(homeStylesUrl, "utf8");
+
+  assert.match(
+    css,
+    /\.story-modal-card\[data-story-key="events"\] \.story-modal-image img\s*\{[\s\S]*?object-position:\s*82% top\s*!important;/,
+  );
+  assert.match(
+    css,
+    /\.story-modal-card \.story-modal-image img\s*\{[\s\S]*?width:\s*100%\s*!important;[\s\S]*?height:\s*100%\s*!important;[\s\S]*?object-fit:\s*cover\s*!important;/,
+  );
+});
+
+test("the two-person vaccination event uses a centered story crop", async () => {
+  const [css, publicUi] = await Promise.all([
+    readFile(homeStylesUrl, "utf8"),
+    readFile(new URL("../src/public/js/public-ui.js", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(
+    publicUi,
+    /libreng\\s\+anti\[\\s-\]\*rabies\\s\+vaccination[\s\S]*?\?\s*"center"\s*:\s*"person-right"/,
+  );
+  assert.match(
+    publicUi,
+    /storyModalCard\.dataset\.storyImageFocus\s*=\s*config\.imageFocus/,
+  );
+  assert.match(
+    css,
+    /\[data-story-key="events"\]\[data-story-image-focus="center"\][\s\S]*?object-position:\s*center top\s*!important;/,
+  );
+});
+
+test("story text stays readable over light and busy photos", async () => {
+  const css = await readFile(homeStylesUrl, "utf8");
+
+  assert.match(
+    css,
+    /\.story-modal-card::after\s*\{[\s\S]*?height:\s*68%;[\s\S]*?rgba\(0, 0, 0, 0\.95\) 100%\s*\);[\s\S]*?pointer-events:\s*none;/,
+  );
+  assert.match(
+    css,
+    /\.story-modal-copy p,\s*\.story-modal-content\s*\{[\s\S]*?text-shadow:/,
+  );
+});
+
+test("story copy starts lower while long updates remain scrollable", async () => {
+  const css = await readFile(homeStylesUrl, "utf8");
+
+  assert.match(
+    css,
+    /\.story-modal-copy\s*\{[\s\S]*?bottom:\s*0;[\s\S]*?max-height:\s*48%;[\s\S]*?overflow-y:\s*auto;/,
+  );
+  assert.match(
+    css,
+    /\[data-story-key="news-alerts"\] \.story-modal-copy\s*\{[\s\S]*?max-height:\s*50%;/,
+  );
+  assert.doesNotMatch(css, /\.story-modal-copy\s*\{[\s\S]*?max-height:\s*56%;/);
 });

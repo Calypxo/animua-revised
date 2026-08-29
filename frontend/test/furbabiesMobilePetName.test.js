@@ -37,3 +37,18 @@ test("laptop pet cards reserve two title lines without changing the phone breakp
   );
   assert.match(furbabiesStyles, /Mobile pet names:[\s\S]*?@media \(max-width: 640px\)/);
 });
+
+test("tablet pet cards reserve two title lines at the 768px layout", () => {
+  assert.match(
+    furbabiesStyles,
+    /Tablet pet names:[\s\S]*?@media \(min-width: 641px\) and \(max-width: 900px\)[\s\S]*?\.pet-card\s*\{[\s\S]*?height:\s*420px\s*!important;[\s\S]*?\.pet-card-body\s*\{[\s\S]*?height:\s*226px\s*!important;/,
+  );
+  assert.match(
+    furbabiesStyles,
+    /Tablet pet names:[\s\S]*?\.pet-card-top\s*\{[\s\S]*?height:\s*auto\s*!important;[\s\S]*?flex:\s*0 0 auto\s*!important;[\s\S]*?\.pet-card-top h3\s*\{[\s\S]*?height:\s*auto\s*!important;[\s\S]*?max-height:\s*2\.2em\s*!important;[\s\S]*?-webkit-line-clamp:\s*2\s*!important;/,
+  );
+  assert.match(
+    furbabiesStyles,
+    /Tablet pet names:[\s\S]*?\.pet-actions\s*\{[\s\S]*?margin-top:\s*auto\s*!important;/,
+  );
+});

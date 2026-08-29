@@ -4,6 +4,7 @@ let currentUser = null;
 let sessionRequest = null;
 const PUBLIC_SESSION_CACHE_KEY = "animua_public_session_cache";
 const PUBLIC_SESSION_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const PUBLIC_POST_AUTH_REDIRECT_KEY = "animua_post_auth_redirect";
 
 const LEGACY_SESSION_KEYS = [
   "animua_token",
@@ -97,6 +98,30 @@ export function getUserEmail() {
 
 export function hasUserSession() {
   return Boolean(currentUser);
+}
+
+function isSafePublicRedirect(path = "") {
+  return /^\/pages\/public\/[a-z0-9-]+\.html(?:[?#].*)?$/i.test(String(path));
+}
+
+export function setPostAuthRedirect(path = "") {
+  if (!isSafePublicRedirect(path)) return false;
+  try {
+    globalThis.sessionStorage?.setItem(PUBLIC_POST_AUTH_REDIRECT_KEY, String(path));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function consumePostAuthRedirect() {
+  try {
+    const path = globalThis.sessionStorage?.getItem(PUBLIC_POST_AUTH_REDIRECT_KEY) || "";
+    globalThis.sessionStorage?.removeItem(PUBLIC_POST_AUTH_REDIRECT_KEY);
+    return isSafePublicRedirect(path) ? path : "";
+  } catch {
+    return "";
+  }
 }
 
 export function clearUserSession(storage = globalThis.localStorage) {

@@ -19,7 +19,7 @@
   <noscript><link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
   <link rel="stylesheet" href="../../src/css/public/home.css">
   <link rel="stylesheet" href="../../src/css/global.css?v=profile-stack-restored-20260824">
-  <link rel="stylesheet" href="../../src/css/public/surrender.css?v=id-preview-20260824">
+  <link rel="stylesheet" href="../../src/css/public/surrender.css?v=yellow-field-focus-20260829">
   <link rel="stylesheet" href="../../src/css/public/zoom-responsive.css?v=public-zoom-20260825-4">
 </head>
 <body class="home-page surrender-page">
@@ -227,6 +227,12 @@
         </aside>
 
         <div class="surrender-form-wrap">
+          <section class="surrender-auth-panel" id="surrenderAuthPanel" role="status" aria-live="polite" hidden>
+            <span class="auth-panel-icon"><i class="fa-solid fa-user-lock" aria-hidden="true"></i></span>
+            <h2>Sign in to start a surrender request.</h2>
+            <p>Your Animua account securely provides the requester name and email attached to this submission.</p>
+            <button type="button" class="btn primary-btn" id="surrenderAuthLoginButton">Sign in to continue</button>
+          </section>
           <section class="surrender-availability-panel" id="surrenderAvailabilityPanel" role="status" aria-live="polite" tabindex="-1" hidden>
             <span class="availability-panel-icon"><i class="fa-solid fa-house-circle-xmark" aria-hidden="true"></i></span>
             <span class="section-label">Requests temporarily paused</span>
@@ -244,7 +250,7 @@
           <div class="mobile-form-progress" aria-live="polite"><div><strong>Step <span id="currentStepText">1</span> of 4</strong><span id="currentStepLabel">Requester information</span></div><div class="form-progress-track"><span id="formProgressBar"></span></div></div>
           <div class="form-feedback hidden" id="formFeedback" role="alert" tabindex="-1"></div>
 
-          <form class="surrender-form" id="surrenderForm" novalidate>
+          <form class="surrender-form" id="surrenderForm" novalidate inert aria-disabled="true">
 
           <!-- Pet Owner Information -->
           <section class="document-form-section surrender-step-panel is-active" data-step="1" aria-labelledby="requesterStepTitle">

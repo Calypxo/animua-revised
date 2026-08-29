@@ -3,7 +3,11 @@ import { auth } from "../utils/firebase.js";
 import { API_BASE_URL } from "../utils/api.js";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { showEmailVerificationScreen } from "./register.js";
-import { clearUserSession, setUserSession } from "../utils/storage.js";
+import {
+  clearUserSession,
+  consumePostAuthRedirect,
+  setUserSession,
+} from "../utils/storage.js";
 
 const RECAPTCHA_SITE_KEY =
   import.meta.env?.VITE_RECAPTCHA_SITE_KEY ||
@@ -222,6 +226,7 @@ export async function handleLogin(event) {
 
     closeModal(authModal);
 
+    const postAuthRedirect = consumePostAuthRedirect();
     if (userRole === "Admin" || userRole === "Staff") {
       window.location.replace("/pages/dashboard.html");
     } else {
@@ -231,7 +236,7 @@ export async function handleLogin(event) {
       if (pendingPetId && pendingAction === "adopt") {
         window.location.replace("/pages/public/find-furbabies.html");
       } else {
-        window.location.replace("/pages/public/home.html");
+        window.location.replace(postAuthRedirect || "/pages/public/home.html");
       }
     }
   } catch (error) {

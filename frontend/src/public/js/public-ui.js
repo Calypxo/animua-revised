@@ -1144,6 +1144,11 @@ function setupHomeStories() {
 
   const applyStoryConfig = (key, config, progressCount = 1, progressIndex = 0) => {
     storyModalCard.dataset.storyKey = key;
+    if (config.imageFocus) {
+      storyModalCard.dataset.storyImageFocus = config.imageFocus;
+    } else {
+      delete storyModalCard.dataset.storyImageFocus;
+    }
     renderStoryProgress(progressCount, progressIndex);
     updateStoryNavigation(progressCount);
 
@@ -1444,6 +1449,9 @@ function setupHomeStories() {
     const description = getEventDescription(event);
     const detailHref = announcementStoryHref(event.id || "demo-upcoming-event", "Upcoming Events");
     const contentRows = [date, time, location].filter(Boolean).join(" / ");
+    const imageFocus = /libreng\s+anti[\s-]*rabies\s+vaccination/i.test(title)
+      ? "center"
+      : "person-right";
 
     return {
       tag: isUpcomingEvent(event) ? "Upcoming Events" : "Event Highlight",
@@ -1452,6 +1460,7 @@ function setupHomeStories() {
       date: date || "Event",
       image: getEventImage(event),
       imageAlt: title,
+      imageFocus,
       intro: description || "Stay informed about Angeles City Veterinary Office events and community activities.",
       primary: { label: "View full update", href: detailHref },
       contentHtml: `

@@ -6,6 +6,7 @@ const announcementsUrl = new URL("../pages/public/announcements.html", import.me
 const homeUrl = new URL("../pages/public/home.html", import.meta.url);
 const stylesUrl = new URL("../src/css/public/announcements.css", import.meta.url);
 const publicUiUrl = new URL("../src/public/js/public-ui.js", import.meta.url);
+const announcementsScriptUrl = new URL("../src/public/js/announcements.js", import.meta.url);
 
 test("highlight stories stay on the homepage and are absent from the announcements hero", async () => {
   const [announcements, home, styles] = await Promise.all([
@@ -42,4 +43,39 @@ test("newest-furbabies stories use the same available pets returned to Find Furb
   );
   assert.match(script, /date:\s*formatStoryDate\([\s\S]*?pet\.readyForAdoptionAt/);
   assert.match(home, /public-ui\.js\?v=newest-furbabies-date-20260825/);
+});
+
+test("homepage full-update links open the real announcement detail without focusing its close button", async () => {
+  const [homeScript, announcementsScript, styles] = await Promise.all([
+    readFile(publicUiUrl, "utf8"),
+    readFile(announcementsScriptUrl, "utf8"),
+    readFile(stylesUrl, "utf8"),
+  ]);
+
+  assert.match(homeScript, /return `announcements\.html\?\$\{params\.toString\(\)\}`/);
+  assert.match(
+    announcementsScript,
+    /focusRequestedAnnouncement[\s\S]*?showAnnouncementDetail\(item\)/,
+  );
+  assert.match(
+    announcementsScript,
+    /didOpen:\s*\(popup\)\s*=>\s*\{[\s\S]*?popup\.focus\(\{ preventScroll: true \}\)/,
+  );
+  assert.match(
+    styles,
+    /body\.announcements-page \.announcement-detail-popup:focus-visible[\s\S]*?outline:\s*none\s*!important/,
+  );
+});
+
+test("announcement detail photos keep their frame while prioritizing faces", async () => {
+  const styles = await readFile(stylesUrl, "utf8");
+
+  assert.match(
+    styles,
+    /body\.announcements-page \.announcement-detail-photo-button,[\s\S]*?height:\s*clamp\(175px,\s*28vh,\s*235px\)\s*!important/,
+  );
+  assert.match(
+    styles,
+    /body\.announcements-page \.announcement-detail-photo-button img\s*\{[\s\S]*?object-position:\s*center top\s*!important/,
+  );
 });
