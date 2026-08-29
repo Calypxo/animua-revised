@@ -4869,16 +4869,17 @@ html body.management-consistent-ui .page-body .archive-records-table.management-
   }
 }
 
-/* The non-card intake table can expose four row actions. Reserve the actual
-   button footprint so the final action never overflows behind the panel edge. */
+/* The non-card intake table can expose four row actions. Keep them in a
+   contained two-by-two grid so the last control never crosses the panel edge
+   and the operational columns do not need horizontal scrolling. */
 @media (min-width: 1366px) {
   html body.intake-management-page .page-body
     .management-data-table:not(.management-card-active)
     #intakeTableBody > tr > td.management-card-actions {
-    width: 196px !important;
-    min-width: 196px !important;
-    max-width: 196px !important;
-    padding-inline: 10px !important;
+    width: 118px !important;
+    min-width: 118px !important;
+    max-width: 118px !important;
+    padding-inline: 8px !important;
     overflow: visible !important;
     box-sizing: border-box !important;
   }
@@ -4889,19 +4890,17 @@ html body.management-consistent-ui .page-body .archive-records-table.management-
     width: 100% !important;
     min-width: 0 !important;
     max-width: none !important;
-    display: flex !important;
-    justify-content: center !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    align-items: center !important;
+    justify-items: center !important;
     gap: 6px !important;
   }
 
   html body.intake-management-page .page-body
     .management-data-table:not(.management-card-active)
     #intakeTableBody .intake-secondary-actions {
-    min-width: 0 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 6px !important;
+    display: contents !important;
   }
 
   html body.intake-management-page .page-body

@@ -191,7 +191,15 @@ test("Intake actions fill the card and keep decision controls aligned", () => {
   );
   assert.match(
     intakeActions,
-    /@media \(min-width: 1366px\)[\s\S]*?management-data-table:not\(\.management-card-active\)[\s\S]*?#intakeTableBody > tr > td\.management-card-actions\s*\{[\s\S]*?width:\s*196px !important;[\s\S]*?min-width:\s*196px !important;/,
+    /@media \(min-width: 1366px\)[\s\S]*?management-data-table:not\(\.management-card-active\)[\s\S]*?#intakeTableBody > tr > td\.management-card-actions\s*\{[\s\S]*?width:\s*118px !important;[\s\S]*?min-width:\s*118px !important;/,
+  );
+  assert.match(
+    intakeActions,
+    /@media \(min-width: 1366px\)[\s\S]*?#intakeTableBody \.intake-action-group\s*\{[\s\S]*?display:\s*grid !important;[\s\S]*?grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\) !important;[\s\S]*?justify-items:\s*center !important;/,
+  );
+  assert.match(
+    intakeActions,
+    /@media \(min-width: 1366px\)[\s\S]*?#intakeTableBody \.intake-secondary-actions\s*\{[\s\S]*?display:\s*contents !important;/,
   );
 });
 
