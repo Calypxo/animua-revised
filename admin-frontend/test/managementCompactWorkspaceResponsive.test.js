@@ -214,6 +214,31 @@ test("Intake modals stay inside the mobile viewport with usable actions", () => 
   );
 });
 
+test("Intake record details remains a centered desktop review dialog", () => {
+  const intakeDetails = responsiveStyles.slice(
+    responsiveStyles.lastIndexOf("/* Intake record details is a centered review dialog"),
+    responsiveStyles.lastIndexOf("/* Intake mobile modal contract:"),
+  );
+
+  assert.match(intakeDetails, /@media \(min-width: 721px\)/);
+  assert.match(
+    intakeDetails,
+    /#viewModalBackdrop\.management-modal-layer\s*\{[\s\S]*?align-items:\s*center !important;[\s\S]*?justify-content:\s*center !important;/,
+  );
+  assert.match(
+    intakeDetails,
+    /> \.intake-view-modal\.management-side-modal\s*\{[\s\S]*?width:\s*min\(820px, calc\(100dvw - 48px\)\) !important;[\s\S]*?height:\s*auto !important;[\s\S]*?max-height:\s*min\(900px, calc\(100dvh - 48px\)\) !important;[\s\S]*?border-radius:\s*24px !important;/,
+  );
+  assert.match(
+    intakeDetails,
+    /\.intake-view-modal > \.um-modal-body\s*\{[\s\S]*?min-height:\s*0 !important;[\s\S]*?overflow-y:\s*auto !important;/,
+  );
+  assert.match(
+    intakeDetails,
+    /\.intake-view-modal \.view-grid\s*\{[\s\S]*?grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\) !important;/,
+  );
+});
+
 test("Surrender record cards clear the mobile section header divider", () => {
   const surrenderSpacing = responsiveStyles.slice(
     responsiveStyles.lastIndexOf("/* Keep the first review-queue record clear"),
