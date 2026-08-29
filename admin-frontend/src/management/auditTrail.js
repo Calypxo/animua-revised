@@ -1,7 +1,7 @@
 import "../css/recordsWorkspace.css";
 import "../css/managementTables.css";
-import "../css/recordsPanelReference.css";
 import "../css/auditTrail.css";
+import "../css/recordsPanelReference.css";
 
 import { protectPageByModule } from "../auth/authGuard.js";
 import { renderTopbarUser } from "../components/management/topbarUser.js";
@@ -187,6 +187,12 @@ function applyFilters() {
   renderAlert();
   renderTable();
   renderPagination();
+}
+
+function keepSelectedAuditViewVisible(smooth = false) {
+  [...document.querySelectorAll("[data-audit-view]")]
+    .find((button) => button.dataset.auditView === state.view)
+    ?.scrollIntoView?.({ behavior: smooth ? "smooth" : "auto", block: "nearest", inline: "nearest" });
 }
 
 function renderAlert() {
@@ -483,6 +489,7 @@ function resetFilters() {
   getEl("filterStatus").value = "";
 
   applyFilters();
+  keepSelectedAuditViewVisible();
   showToast("Filters reset.", "info");
 }
 
@@ -584,6 +591,7 @@ function bindFilters() {
     state.view = "all";
     state.currentPage = 1;
     applyFilters();
+    keepSelectedAuditViewVisible();
   });
 
   document.querySelectorAll("[data-audit-view]").forEach((button) => {
@@ -593,6 +601,7 @@ function bindFilters() {
       getEl("filterStatus").value = "";
       state.currentPage = 1;
       applyFilters();
+      keepSelectedAuditViewVisible(true);
     });
   });
 }

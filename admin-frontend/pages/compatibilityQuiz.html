@@ -15,7 +15,7 @@
 </head><body class="loading ap-list-page compatibility-management-page"><div class="shell"><div id="sidebar-container"></div><div class="stage">
 <header class="topbar"><div class="topbar-left"><button id="sidebarToggle" class="icon-btn" type="button" aria-label="Toggle navigation"><i class="bi bi-list" aria-hidden="true"></i></button><nav class="d-flex align-items-center" aria-label="Breadcrumb"><span class="breadcrumb-link">Adoption Management</span><i class="bi bi-chevron-right breadcrumb-sep" aria-hidden="true"></i><span class="breadcrumb-current" aria-current="page">Compatibility Quiz</span></nav></div><div class="topbar-right"><button class="icon-btn notif-btn" type="button" aria-label="Notifications"><i class="bi bi-bell-fill" aria-hidden="true"></i><span class="notif-dot" aria-hidden="true"></span></button><div class="user-chip"><div class="user-avatar" id="topbar-initials">AU</div><div class="user-meta"><span id="display-name">Management User</span><small id="display-role">Role</small></div><i class="bi bi-chevron-down caret" aria-hidden="true"></i></div></div></header>
 <main class="page-body"><div id="pageHeaderMount"></div>
-<div class="cq-workspace-nav">
+<div class="cq-workspace-nav management-record-tabs-scroll">
   <nav class="archive-tabs" aria-label="Compatibility quiz sections" role="tablist">
     <button type="button" class="archive-tab active" data-cq-tab="records" role="tab" aria-selected="true"><i class="bi bi-people"></i>User records</button>
     <button type="button" class="archive-tab" data-cq-tab="questions" role="tab" aria-selected="false"><i class="bi bi-ui-checks-grid"></i>Quiz questions</button>
@@ -46,9 +46,9 @@
 </section>
 <section class="cq-workspace-panel" data-cq-panel="records">
 <section class="cq-card cq-records">
-  <div class="cq-record-head">
-    <div class="cq-card-head"><span class="cq-card-icon"><i class="bi bi-people"></i></span><div><small>Saved recommendations</small><h2>User quiz results</h2><p>Search and review saved compatibility attempts.</p></div></div>
-    <span class="cq-legend"><i class="bi bi-info-circle"></i>Historical animal names remain available</span>
+  <div class="cq-record-head reference-records-heading-row">
+    <div class="cq-card-head reference-records-heading"><span class="cq-card-icon reference-records-icon"><i class="bi bi-people"></i></span><div><small class="reference-records-kicker">Saved recommendations</small><h2>User quiz results</h2><p>Search and review saved compatibility attempts.</p></div></div>
+    <span class="cq-legend reference-records-tip"><i class="bi bi-info-circle"></i>Historical animal names remain available</span>
   </div>
   <div class="cq-toolbar">
     <label class="cq-filter-field cq-filter-search"><span>Search results</span><div class="cq-search"><i class="bi bi-search"></i><input id="resultSearch" type="search" placeholder="User, email, or result ID"></div></label>

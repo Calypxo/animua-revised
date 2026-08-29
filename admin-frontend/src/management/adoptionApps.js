@@ -1,8 +1,8 @@
 // admin-frontend/src/management/adoptionApps.js
 import "../css/adoptionApps.css";
 import "../css/managementTables.css";
-import "../css/recordsPanelReference.css";
 import "../css/reviewQueueRecords.css";
+import "../css/recordsPanelReference.css";
 import { renderPageHeader } from "../components/management/pageHeader.js";
 import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.js";
 

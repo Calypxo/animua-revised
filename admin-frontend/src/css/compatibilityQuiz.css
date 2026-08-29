@@ -969,12 +969,13 @@ body.management-consistent-ui.compatibility-management-page .compatibility-resul
   }
 }
 
-/* User Records follows the same white-card hierarchy as Questions and Settings. */
+/* User Records uses the shared Inventory record-header hierarchy. */
 body.management-consistent-ui.compatibility-management-page .cq-records > .cq-record-head {
-  min-height: 0;
-  padding: 22px 24px;
-  border-bottom: 1px solid #eee4db;
+  min-height: 82px;
+  padding: 22px 24px 16px;
+  border-bottom: 1px solid #eee3d9;
   background: #fff;
+  background-image: none;
 }
 
 body.management-consistent-ui.compatibility-management-page .cq-records .cq-legend {
@@ -988,11 +989,12 @@ body.management-consistent-ui.compatibility-management-page .cq-records .cq-lege
 }
 
 body.management-consistent-ui.compatibility-management-page .cq-records > :is(.cq-toolbar, .mrf-workspace) {
-  margin: 16px 24px 0;
-  padding: 14px;
-  border: 1px solid #eee3db;
-  border-radius: 14px;
-  background: #faf7f3;
+  margin: 0;
+  padding: 18px 24px;
+  border: 0;
+  border-bottom: 1px solid #f0e6dd;
+  border-radius: 0;
+  background: #fff8ee;
 }
 
 body.management-consistent-ui.compatibility-management-page .cq-records .mrf-workspace .cq-toolbar {
@@ -1002,13 +1004,14 @@ body.management-consistent-ui.compatibility-management-page .cq-records .mrf-wor
 }
 
 body.management-consistent-ui.compatibility-management-page .cq-records > .reference-table-section-head {
-  min-height: 0;
-  margin: 18px 24px 0;
-  padding: 14px 16px;
-  border: 1px solid #eee3db;
-  border-radius: 14px;
+  min-height: 72px;
+  margin: 0;
+  padding: 19px 24px 14px;
+  border: 0;
+  border-bottom: 1px solid #eadfd4;
+  border-radius: 0;
   color: #504743;
-  background: #fffaf4 !important;
+  background: #fff !important;
   box-shadow: none;
 }
 
@@ -1023,13 +1026,14 @@ body.management-consistent-ui.compatibility-management-page .cq-records > .refer
 }
 
 body.management-consistent-ui.compatibility-management-page .cq-records > .reference-table-section-head > strong {
-  min-height: 0;
-  padding: 0;
+  min-height: 30px;
+  padding: 6px 11px;
   border: 0;
+  border-radius: 999px;
   color: #780116;
-  background: transparent;
+  background: #efe5d2;
   box-shadow: none;
-  font-size: 1.1rem;
+  font-size: .66rem;
 }
 
 @media (max-width: 700px) {
@@ -1038,13 +1042,14 @@ body.management-consistent-ui.compatibility-management-page .cq-records > .refer
   }
 
   body.management-consistent-ui.compatibility-management-page .cq-records > :is(.cq-toolbar, .mrf-workspace) {
-    margin: 14px 16px 0;
+    margin: 0;
+    padding: 15px 16px;
   }
 
   body.management-consistent-ui.compatibility-management-page .cq-records > .reference-table-section-head {
     min-height: 0;
-    margin: 16px 16px 0;
-    padding: 12px;
+    margin: 0;
+    padding: 15px 16px 12px;
   }
 
   body.management-consistent-ui.compatibility-management-page .cq-records > .reference-table-section-head h3 {
@@ -1054,9 +1059,11 @@ body.management-consistent-ui.compatibility-management-page .cq-records > .refer
 
 @media (max-width: 599px) {
   body.management-consistent-ui.compatibility-management-page .cq-records > .mrf-workspace {
-    padding: 0;
+    margin: 0;
+    padding: 14px 16px;
     border: 0;
-    background: transparent;
+    border-bottom: 1px solid #f0e6dd;
+    background: #fff8ee;
   }
 }
 
@@ -1068,11 +1075,12 @@ body.management-consistent-ui.compatibility-management-page .cq-records > .refer
     display: grid !important;
     align-items: end !important;
     gap: 12px !important;
-    margin: 16px 24px 0 !important;
-    padding: 16px 18px !important;
-    border: 1px solid #eadfd4 !important;
-    border-radius: 16px !important;
-    background: #fffaf7 !important;
+    margin: 0 !important;
+    padding: 18px 24px !important;
+    border: 0 !important;
+    border-bottom: 1px solid #f0e6dd !important;
+    border-radius: 0 !important;
+    background: #fff8ee !important;
     box-shadow: none !important;
     box-sizing: border-box !important;
   }
@@ -1198,8 +1206,8 @@ body.management-consistent-ui.compatibility-management-page .cq-records > .refer
 
 @media (min-width: 600px) and (max-width: 700px) {
   html body.management-consistent-ui.compatibility-management-page .cq-records > .mrf-workspace-compatibility {
-    margin-inline: 16px !important;
-    padding: 14px !important;
+    margin-inline: 0 !important;
+    padding: 15px 16px !important;
   }
 }
 
@@ -1208,10 +1216,9 @@ body.management-consistent-ui.compatibility-management-page .cq-records > .refer
    table, and independent cards as soon as the columns no longer fit well. */
 html body.management-consistent-ui.compatibility-management-page .cq-records > .reference-table-section-head {
   min-height: 72px;
-  margin: 18px 0 0;
+  margin: 0;
   padding: 19px 24px 14px;
   border: 0;
-  border-top: 1px solid #eadfd4;
   border-bottom: 1px solid #eadfd4;
   border-radius: 0;
   color: #2d2322;
@@ -1436,7 +1443,7 @@ html body.management-consistent-ui.compatibility-management-page .compatibility-
 @media (max-width: 700px) {
   html body.management-consistent-ui.compatibility-management-page .cq-records > .reference-table-section-head {
     min-height: 0;
-    margin-top: 14px;
+    margin-top: 0;
     padding: 15px 16px 12px;
   }
 

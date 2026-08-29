@@ -23,7 +23,8 @@
   gap: 18px !important;
   padding: 22px 24px 16px !important;
   border: 0 !important;
-  background: linear-gradient(135deg, #FFF8EE, #FFFFFF 70%) !important;
+  background: #FFFFFF !important;
+  background-image: none !important;
 }
 
 html body.management-consistent-ui.ap-list-page .page-body .ap-records-panel > .ap-records-heading {
@@ -40,6 +41,20 @@ html body.management-consistent-ui.ap-list-page .page-body .ap-records-panel > .
 
 .reference-records-heading > div {
   min-width: 0;
+}
+
+.reference-records-heading-row {
+  min-height: 82px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin: 0;
+  padding: 22px 24px 16px;
+  border: 0;
+  border-bottom: 1px solid #EEE3D9;
+  background: #FFFFFF;
+  background-image: none;
 }
 
 .reference-records-icon {
@@ -94,7 +109,7 @@ html body.management-consistent-ui.ap-list-page .page-body .ap-records-panel > .
   max-width: 100%;
   min-width: 0;
   margin: 0 !important;
-  padding: 0 24px 18px !important;
+  padding: 16px 24px 18px !important;
   overflow-x: auto !important;
   overflow-y: hidden !important;
   overscroll-behavior-x: contain;
@@ -103,8 +118,36 @@ html body.management-consistent-ui.ap-list-page .page-body .ap-records-panel > .
   -webkit-overflow-scrolling: touch;
   border: 0 !important;
   border-bottom: 1px solid #EEE3D9 !important;
-  background: linear-gradient(135deg, #FFF8EE, #FFFFFF 70%) !important;
+  background: #FFFFFF !important;
+  background-image: none !important;
   scrollbar-width: none;
+}
+
+.reference-records-kicker {
+  display: block;
+  color: #780116;
+  font: 800 .625rem/1 "Poppins", sans-serif;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+}
+
+.reference-records-heading h2 {
+  margin: 4px 0 2px;
+  color: #2D2322;
+  font: 800 1rem/1.2 "Poppins", sans-serif;
+  letter-spacing: 0;
+}
+
+.reference-records-heading p,
+.reference-records-tip {
+  margin: 0;
+  color: #81746D;
+  font: 500 .72rem/1.45 "Poppins", sans-serif;
+}
+
+.reference-records-tip {
+  font-size: .67rem;
+  font-weight: 600;
 }
 
 html body.management-consistent-ui.ap-list-page .page-body .ap-records-panel .ap-tabs-wrap {
@@ -479,7 +522,8 @@ html body.management-consistent-ui.ap-list-page .page-body .ap-records-panel .ap
   padding: 22px 24px 16px !important;
   border: 0 !important;
   border-bottom: 1px solid #EEE3D9 !important;
-  background: linear-gradient(135deg, #FFF8EE, #FFFFFF 70%) !important;
+  background: #FFFFFF !important;
+  background-image: none !important;
 }
 
 .adoption-applications-page .aa-panel-heading {
@@ -548,7 +592,8 @@ html body.management-consistent-ui.ap-list-page .page-body .ap-records-panel .ap
   padding: 16px 24px !important;
   border: 0 !important;
   border-bottom: 1px solid #EEE3D9 !important;
-  background: linear-gradient(135deg, #FFF8EE, #FFFFFF 70%) !important;
+  background: #FFFFFF !important;
+  background-image: none !important;
 }
 
 :is(.records-panel .intake-tabs, .adoption-applications-page .aa-tabs, .inventory-page .inv-tabs) {
@@ -828,7 +873,8 @@ body.management-consistent-ui.surrender-requests-page .sr-table-panel {
 .surrender-requests-page .surrender-records-toolbar {
   align-items: stretch !important;
   padding: 22px 24px 18px !important;
-  background: linear-gradient(135deg, #FFF8EE, #FFFFFF 70%) !important;
+  background: #FFFFFF !important;
+  background-image: none !important;
 }
 
 .surrender-requests-page .surrender-records-toolbar .records-heading {
@@ -1112,6 +1158,366 @@ body.management-consistent-ui .audit-panel .audit-filter-grid :is(.search-pill-s
 
   .audit-panel .filter-field-search {
     grid-column: auto !important;
+  }
+}
+
+/* Inventory White workspace contract
+   ----------------------------------
+   Every management register uses the Inventory panel hierarchy: White record
+   header, White controls, White section chrome, and one bordered tablist that
+   owns its own horizontal scrolling. Page backgrounds may remain warm, but a
+   record panel never introduces another Cream band or scrolling shell. */
+html body.management-consistent-ui:is(
+  .intake-management-page,
+  .ap-list-page,
+  .surrender-requests-page,
+  .adoption-applications-page,
+  .reports-page,
+  .audit-trail-page,
+  .archived-records-page,
+  .inventory-page
+) .page-body :is(
+  .records-panel,
+  .ap-records-panel,
+  .management-review-panel,
+  .sr-table-panel,
+  .aa-table-panel,
+  .inv-table-panel,
+  .cq-records,
+  .um-directory-panel,
+  .audit-panel,
+  .archive-panel,
+  .report-command-card,
+  .report-catalog-section,
+  .report-data-card
+) {
+  background: #ffffff !important;
+  background-image: none !important;
+}
+
+html body.management-consistent-ui:is(
+  .intake-management-page,
+  .ap-list-page,
+  .surrender-requests-page,
+  .adoption-applications-page,
+  .reports-page,
+  .audit-trail-page,
+  .archived-records-page,
+  .inventory-page
+) .page-body :is(
+  .panel-head,
+  .records-toolbar,
+  .records-heading,
+  .ap-records-heading,
+  .management-review-toolbar,
+  .management-review-intro,
+  .inventory-records-heading,
+  .cq-record-head,
+  .command-card-heading,
+  .rpt-card-head,
+  .ap-toolbar,
+  .toolbar-tabs,
+  .ap-tabs-wrap,
+  .um-tabs-wrap,
+  .management-review-tabs-scroll,
+  .management-record-tabs-scroll,
+  .mrf-workspace,
+  .filter-toolbar,
+  .ap-filter-toolbar,
+  .aa-filter-toolbar,
+  .management-review-filters,
+  .surrender-filter-grid,
+  .inventory-filter-toolbar,
+  .inventory-filter-controls,
+  .inventory-filter-summary,
+  .cm-filter-toolbar,
+  .cq-toolbar,
+  .um-filter-bar,
+  .report-preset-row,
+  .report-filter-grid,
+  .audit-filter-grid,
+  .archive-filter-grid,
+  .reference-table-section-head,
+  .management-review-section-head,
+  .table-section-head,
+  .table-responsive,
+  .records-table-wrap,
+  .management-review-table-wrap,
+  .inventory-table-wrap,
+  .cq-table-wrap,
+  .um-table-shell,
+  .report-table-wrap,
+  .um-pagination,
+  .report-table-footer
+) {
+  background: #ffffff !important;
+  background-image: none !important;
+}
+
+/* The outer row supplies spacing only; it must never clip the rounded tablist. */
+html body.management-consistent-ui :is(
+  .ap-tabs-wrap,
+  .um-tabs-wrap,
+  .toolbar-tabs,
+  .management-review-tabs-scroll,
+  .management-record-tabs-scroll,
+  .cq-workspace-nav
+) {
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow: visible !important;
+  scrollbar-width: none !important;
+}
+
+/* The actual bordered list is the sole horizontal scroll owner. */
+html body.management-consistent-ui :is(
+  .intake-tabs,
+  .aa-tabs,
+  .sr-tabs,
+  .archive-tabs,
+  .ap-tabs,
+  .um-tabs,
+  .inv-tabs,
+  .audit-view-switch,
+  .profile-tabs-bar,
+  .report-tabs
+) {
+  box-sizing: border-box !important;
+  width: max-content !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  border: 1px solid #d8c8ad !important;
+  border-radius: 16px !important;
+  background: #efe5d2 !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  overscroll-behavior-inline: contain;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: 5px;
+  scrollbar-width: none !important;
+  touch-action: pan-x pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+html body.management-consistent-ui :is(
+  .intake-tabs,
+  .aa-tabs,
+  .sr-tabs,
+  .archive-tabs,
+  .ap-tabs,
+  .um-tabs,
+  .inv-tabs,
+  .audit-view-switch,
+  .profile-tabs-bar,
+  .report-tabs
+)::-webkit-scrollbar {
+  display: none !important;
+}
+
+html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-tabs-scroll {
+  overflow: visible !important;
+}
+
+html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-tabs {
+  width: max-content !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  border-radius: 16px !important;
+  background: #efe5d2 !important;
+  overscroll-behavior-inline: contain;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none !important;
+  touch-action: pan-x pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Vite may extract the queue stylesheet after this shared file. These panel-
+   scoped guards keep its former Cream table/card wells from winning by order. */
+html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-panel :is(
+  .management-review-table-wrap,
+  .management-review-table.management-card-active tbody
+),
+html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-panel > .um-pagination {
+  background: #ffffff !important;
+  background-image: none !important;
+}
+
+html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-panel .management-review-table:not(.management-card-active) thead,
+html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-panel .management-review-table:not(.management-card-active) thead th {
+  background: #ffffff !important;
+  background-image: none !important;
+}
+
+html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-panel .management-review-table:not(.management-card-active) tbody tr:is(:hover, .row-active) td {
+  background: rgba(120, 1, 22, .035) !important;
+}
+
+/* Table headings and responsive card wells stay White too. Borders retain the
+   column rhythm without bringing the old Cream band back. */
+html body.management-consistent-ui:is(
+  .intake-management-page,
+  .ap-list-page,
+  .surrender-requests-page,
+  .adoption-applications-page,
+  .reports-page,
+  .audit-trail-page,
+  .archived-records-page,
+  .inventory-page
+) .page-body :is(
+  .management-data-table,
+  .management-review-table,
+  .inventory-smart-table,
+  .cq-table,
+  .rpt-table,
+  .um-user-table
+) thead,
+html body.management-consistent-ui:is(
+  .intake-management-page,
+  .ap-list-page,
+  .surrender-requests-page,
+  .adoption-applications-page,
+  .reports-page,
+  .audit-trail-page,
+  .archived-records-page,
+  .inventory-page
+) .page-body :is(
+  .management-data-table,
+  .management-review-table,
+  .inventory-smart-table,
+  .cq-table,
+  .rpt-table,
+  .um-user-table
+) thead th {
+  background: #ffffff !important;
+  background-image: none !important;
+}
+
+html body.management-consistent-ui:is(
+  .intake-management-page,
+  .ap-list-page,
+  .surrender-requests-page,
+  .adoption-applications-page,
+  .reports-page,
+  .audit-trail-page,
+  .archived-records-page,
+  .inventory-page
+) .page-body :is(
+  .management-card-table.management-card-active,
+  .management-review-table.management-card-active,
+  .inventory-smart-table.management-card-active,
+  .report-reference-table.management-card-active
+) tbody {
+  background: #ffffff !important;
+}
+
+@media (max-width: 760px) {
+  html body.management-consistent-ui:is(
+    .intake-management-page,
+    .ap-list-page,
+    .surrender-requests-page,
+    .adoption-applications-page,
+    .reports-page,
+    .audit-trail-page,
+    .archived-records-page,
+    .inventory-page
+  ) .page-body :is(
+    .records-panel,
+    .ap-records-panel,
+    .management-review-panel,
+    .sr-table-panel,
+    .aa-table-panel,
+    .inv-table-panel,
+    .cq-records,
+    .um-directory-panel,
+    .audit-panel,
+    .archive-panel,
+    .report-command-card,
+    .report-catalog-section,
+    .report-data-card
+  ) {
+    border-radius: 19px !important;
+  }
+
+  html body.management-consistent-ui :is(
+    .ap-tabs-wrap,
+    .um-tabs-wrap,
+    .toolbar-tabs,
+    .management-review-tabs-scroll,
+    .management-record-tabs-scroll
+  ) {
+    padding: 14px 16px 16px !important;
+  }
+
+  html body.management-consistent-ui :is(
+    .intake-tabs,
+    .aa-tabs,
+    .sr-tabs,
+    .archive-tabs,
+    .ap-tabs,
+    .um-tabs,
+    .inv-tabs,
+    .audit-view-switch,
+    .profile-tabs-bar,
+    .report-tabs
+  ) {
+    width: 100% !important;
+    border-radius: 14px !important;
+  }
+
+  html body.management-consistent-ui:is(
+    .intake-management-page,
+    .ap-list-page,
+    .surrender-requests-page,
+    .adoption-applications-page,
+    .reports-page,
+    .audit-trail-page,
+    .archived-records-page,
+    .inventory-page
+  ) .page-body :is(
+    .reference-records-heading-row,
+    .ap-records-heading,
+    .management-review-intro,
+    .records-heading,
+    .inventory-records-heading,
+    .cq-record-head,
+    .command-card-heading
+  ) {
+    min-height: 0 !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+    padding: 18px 16px 14px !important;
+  }
+
+  html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-intro .records-heading {
+    min-height: 0 !important;
+    padding: 0 !important;
+  }
+
+  html body.management-consistent-ui:is(
+    .intake-management-page,
+    .ap-list-page,
+    .surrender-requests-page,
+    .adoption-applications-page,
+    .reports-page,
+    .audit-trail-page,
+    .archived-records-page,
+    .inventory-page
+  ) .page-body :is(
+    .records-legend,
+    .ap-records-legend,
+    .aa-panel-tip,
+    .inventory-records-tip,
+    .cq-legend,
+    .reference-records-tip
+  ) {
+    display: none !important;
   }
 }
 

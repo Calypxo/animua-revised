@@ -946,21 +946,12 @@ select.form-inp { cursor: pointer; }
 .toolbar-tabs {
   display: flex;
   align-items: center;
-  gap: 22px;
+  gap: 0;
   margin-bottom: 15px;
   padding: 0;
   overflow-x: auto;
   border-bottom: 1px solid #eadbd4;
   scrollbar-width: thin;
-}
-.toolbar-tabs::before {
-  content: "Status";
-  flex: 0 0 auto;
-  padding-bottom: 12px;
-  color: #7a6e68;
-  font: 800 10px/1 'Poppins', sans-serif;
-  letter-spacing: .07em;
-  text-transform: uppercase;
 }
 .intake-tabs {
   width: max-content;

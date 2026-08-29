@@ -66,13 +66,15 @@
                 <p>Find retained records and review their archive history before restoring eligible profiles.</p>
               </div>
             </div>
-            <div class="archive-tabs" id="archiveTabs" role="tablist" aria-label="Archived record modules">
-              <button class="archive-tab active" type="button" role="tab" aria-selected="true" data-tab="all"><i class="bi bi-collection"></i> All</button>
-              <button class="archive-tab" type="button" role="tab" aria-selected="false" data-tab="Animal Management"><i class="bi bi-heart-pulse"></i> Animals</button>
-              <button class="archive-tab" type="button" role="tab" aria-selected="false" data-tab="Adoption Management"><i class="bi bi-house-heart"></i> Adoptions</button>
-              <button class="archive-tab" type="button" role="tab" aria-selected="false" data-tab="Post Adoption"><i class="bi bi-clipboard2-heart"></i> Post Adoption</button>
-              <button class="archive-tab" type="button" role="tab" aria-selected="false" data-tab="Inventory"><i class="bi bi-box-seam"></i> Inventory</button>
-              <button class="archive-tab" type="button" role="tab" aria-selected="false" data-tab="User Management"><i class="bi bi-people"></i> Users</button>
+            <div class="management-record-tabs-scroll" aria-label="Scrollable archived record modules">
+              <div class="archive-tabs" id="archiveTabs" role="tablist" aria-label="Archived record modules">
+                <button class="archive-tab active" type="button" role="tab" aria-selected="true" data-tab="all"><i class="bi bi-collection"></i> All</button>
+                <button class="archive-tab" type="button" role="tab" aria-selected="false" data-tab="Animal Management"><i class="bi bi-heart-pulse"></i> Animals</button>
+                <button class="archive-tab" type="button" role="tab" aria-selected="false" data-tab="Adoption Management"><i class="bi bi-house-heart"></i> Adoptions</button>
+                <button class="archive-tab" type="button" role="tab" aria-selected="false" data-tab="Post Adoption"><i class="bi bi-clipboard2-heart"></i> Post Adoption</button>
+                <button class="archive-tab" type="button" role="tab" aria-selected="false" data-tab="Inventory"><i class="bi bi-box-seam"></i> Inventory</button>
+                <button class="archive-tab" type="button" role="tab" aria-selected="false" data-tab="User Management"><i class="bi bi-people"></i> Users</button>
+              </div>
             </div>
           </div>
 
@@ -115,12 +117,12 @@
               </label>
           </div>
 
-          <div class="table-section-head">
+          <div class="table-section-head reference-table-section-head">
             <div>
               <span class="section-kicker">Retained history</span>
               <h3>Archived management records</h3>
             </div>
-            <span class="result-count" id="archiveResultLabel">0 records</span>
+            <strong class="result-count" id="archiveResultLabel">0 records</strong>
           </div>
 
           <div class="table-responsive records-table-wrap">

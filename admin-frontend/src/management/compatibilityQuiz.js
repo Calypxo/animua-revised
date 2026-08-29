@@ -81,7 +81,33 @@ function addQuestion(){const id=`question-${Date.now()}`;state.questions.push({i
 function setEditorError(message=""){$("questionEditorError").hidden=!message;$("questionEditorError").textContent=message}
 function hasQuestionChanges(){return JSON.stringify(state.questions)!==JSON.stringify(state.savedQuestions)}
 function refreshDraftState(){$("questionDraftBar").hidden=!admin()||!hasQuestionChanges()}
-function showWorkspaceTab(name){document.querySelectorAll("[data-cq-tab]").forEach(button=>{const active=button.dataset.cqTab===name;button.classList.toggle("active",active);button.setAttribute("aria-selected",String(active));button.tabIndex=active?0:-1});document.querySelectorAll("[data-cq-panel]").forEach(panel=>{panel.hidden=panel.dataset.cqPanel!==name})}
+function showWorkspaceTab(name,{focus=false,smooth=false}={}){
+  let selectedButton=null;
+  document.querySelectorAll("[data-cq-tab]").forEach(button=>{
+    const active=button.dataset.cqTab===name;
+    button.classList.toggle("active",active);
+    button.setAttribute("aria-selected",String(active));
+    button.tabIndex=active?0:-1;
+    if(active)selectedButton=button;
+  });
+  document.querySelectorAll("[data-cq-panel]").forEach(panel=>{panel.hidden=panel.dataset.cqPanel!==name});
+  if(!selectedButton)return;
+  if(focus)selectedButton.focus({preventScroll:true});
+  selectedButton.scrollIntoView?.({behavior:smooth?"smooth":"auto",block:"nearest",inline:"nearest"});
+}
+function handleWorkspaceTabKeydown(event){
+  const tabs=[...document.querySelectorAll("[data-cq-tab]")];
+  const currentIndex=tabs.indexOf(event.currentTarget);
+  if(currentIndex<0)return;
+  let nextIndex;
+  if(event.key==="Home")nextIndex=0;
+  else if(event.key==="End")nextIndex=tabs.length-1;
+  else if(event.key==="ArrowRight"||event.key==="ArrowDown")nextIndex=(currentIndex+1)%tabs.length;
+  else if(event.key==="ArrowLeft"||event.key==="ArrowUp")nextIndex=(currentIndex-1+tabs.length)%tabs.length;
+  else return;
+  event.preventDefault();
+  showWorkspaceTab(tabs[nextIndex].dataset.cqTab,{focus:true,smooth:true});
+}
 function questionPosition(index,direction){const phase=state.questions[index]?.phaseKey;const candidates=state.questions.map((question,position)=>question.phaseKey===phase?position:-1).filter(position=>position>=0);const current=candidates.indexOf(index);return candidates[current+direction]??-1}
 function renderQuestionOverview() {
   const canManage = admin();
@@ -117,7 +143,10 @@ $("resultSearch").addEventListener("input",render);
 $("attemptFilter").addEventListener("change",render);
 $("matchFilter").addEventListener("change",render);
 $("clearFilters").addEventListener("click",()=>{$("resultSearch").value="";$("attemptFilter").value="";$("matchFilter").value="";render()});
-document.querySelectorAll("[data-cq-tab]").forEach(button=>button.addEventListener("click",()=>showWorkspaceTab(button.dataset.cqTab)));
+document.querySelectorAll("[data-cq-tab]").forEach(button=>{
+  button.addEventListener("click",()=>showWorkspaceTab(button.dataset.cqTab,{smooth:true}));
+  button.addEventListener("keydown",handleWorkspaceTabKeydown);
+});
 $("questionList").addEventListener("click",handleQuestionOverview);
 $("addQuestionBtn").addEventListener("click",()=>openQuestionEditor());
 $("saveQuestionsBtn").addEventListener("click",publishQuestionDraft);

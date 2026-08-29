@@ -1,6 +1,7 @@
 import "../css/archivedRecords.css";
 import "../css/recordsWorkspace.css";
 import "../css/managementTables.css";
+import "../css/recordsPanelReference.css";
 import Swal from "sweetalert2";
 import { protectPageByModule } from "../auth/authGuard.js";
 import { hasPermission } from "../auth/permissions.js";
@@ -589,6 +590,7 @@ if (reasonFilter) {
     btn.classList.toggle("active", isSelected);
     btn.setAttribute("aria-selected", String(isSelected));
   });
+  document.querySelector('.archive-tab[data-tab="all"]')?.scrollIntoView?.({ block: "nearest", inline: "nearest" });
 
   applyFilters();
   showToast("Filters reset.", "info");
@@ -605,6 +607,7 @@ function bindTabs() {
         tab.classList.toggle("active", isSelected);
         tab.setAttribute("aria-selected", String(isSelected));
       });
+      btn.scrollIntoView?.({ behavior: "smooth", block: "nearest", inline: "nearest" });
 
       applyFilters();
     });
@@ -750,6 +753,10 @@ function syncArchiveTabs() {
       button.classList.toggle("active", isSelected);
       button.setAttribute("aria-selected", String(isSelected));
     });
+
+  [...document.querySelectorAll(".archive-tab")]
+    .find((button) => button.dataset.tab === state.activeTab)
+    ?.scrollIntoView?.({ block: "nearest", inline: "nearest" });
 }
 
 async function loadArchivedRecords() {

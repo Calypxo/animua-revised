@@ -1,7 +1,7 @@
 import "../css/animalProfiling.css";
 import "../css/managementTables.css";
-import "../css/recordsPanelReference.css";
 import "../css/contactMessages.css";
+import "../css/recordsPanelReference.css";
 
 import Swal from "sweetalert2";
 
@@ -220,6 +220,7 @@ function clearMessageFilters() {
     tab.classList.toggle("active", selected);
     tab.setAttribute("aria-selected", String(selected));
   });
+  document.querySelector('.ap-tab[data-status=""]')?.scrollIntoView?.({ block: "nearest", inline: "nearest" });
 
   applyFilters();
 }
@@ -608,6 +609,7 @@ function bindEvents() {
       tab.classList.add("active");
       tab.setAttribute("aria-selected", "true");
       state.status = tab.dataset.status || "";
+      tab.scrollIntoView?.({ behavior: "smooth", block: "nearest", inline: "nearest" });
       applyFilters();
     });
   });

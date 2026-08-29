@@ -12,7 +12,7 @@
   --mt-muted: var(--mt-brown);
   --mt-line: rgba(54, 40, 34, .18);
   --mt-line-soft: rgba(54, 40, 34, .10);
-  --mt-head: var(--mt-champagne);
+  --mt-head: var(--mt-white);
   --mt-hover: rgba(120, 1, 22, .035);
   --mt-active: rgba(120, 1, 22, .10);
 }
@@ -239,6 +239,7 @@
     border-bottom: 1px solid var(--mt-line) !important;
     color: var(--mt-red) !important;
     background: var(--mt-head) !important;
+    background-image: none !important;
     font: 800 .625rem/1.35 "Poppins", sans-serif !important;
     letter-spacing: .075em !important;
     text-align: left;
@@ -578,6 +579,7 @@ html body.management-consistent-ui .page-body :is(.table-responsive, .cq-table-w
     border-bottom: 1px solid var(--mt-line) !important;
     color: var(--mt-red) !important;
     background: var(--mt-head) !important;
+    background-image: none !important;
     font: 800 .625rem/1.35 "Poppins", sans-serif !important;
     letter-spacing: .075em !important;
     text-align: left !important;

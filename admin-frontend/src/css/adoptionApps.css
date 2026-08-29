@@ -394,7 +394,8 @@
 .aa-table-panel .panel-head {
   padding: 22px 24px 18px;
   border-bottom: 1px solid #eee3d9;
-  background: linear-gradient(135deg, #FFF8EE 0%, #FFFFFF 70%);
+  background: #FFFFFF;
+  background-image: none;
 }
 
 .aa-panel-intro {

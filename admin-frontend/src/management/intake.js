@@ -205,6 +205,7 @@ function clearFilters() {
     tab.classList.toggle("active", isAll);
     tab.setAttribute("aria-selected", String(isAll));
   });
+  document.querySelector('.intake-tab[data-tab="all"]')?.scrollIntoView?.({ block: "nearest", inline: "nearest" });
   applyFilters();
 }
 
@@ -1236,6 +1237,7 @@ if (params.get("source") === "surrender") {
         btn.classList.add("active");
         btn.setAttribute("aria-selected", "true");
         activeTab = btn.dataset.tab;
+        btn.scrollIntoView?.({ behavior: "smooth", block: "nearest", inline: "nearest" });
         applyFilters();
       });
     });

@@ -19,10 +19,11 @@ const behavior = await readFile(
   "utf8",
 );
 
-test("animal lifecycle tabs stay inside a keyboard-accessible scroll surface", () => {
-  assert.match(page, /class="ap-tabs-wrap" role="region" tabindex="0"/);
-  assert.match(panelStyles, /\.ap-tabs-wrap[\s\S]*?width:\s*100%;[\s\S]*?overflow-x:\s*auto !important/);
-  assert.match(panelStyles, /\.ap-list-page \.ap-tabs[\s\S]*?max-width:\s*none !important[\s\S]*?min-width:\s*max-content !important/);
+test("animal lifecycle tablist directly owns its keyboard-aware scrolling", () => {
+  assert.match(page, /class="ap-tabs-wrap"[^>]*>[\s\S]*?class="ap-tabs" role="tablist"/);
+  assert.doesNotMatch(page, /class="ap-tabs-wrap"[^>]*tabindex=/);
+  assert.match(panelStyles, /The outer row supplies spacing only[\s\S]*?\.ap-tabs-wrap[\s\S]*?overflow:\s*visible !important/);
+  assert.match(panelStyles, /The actual bordered list is the sole horizontal scroll owner[\s\S]*?\.ap-tabs,[\s\S]*?max-width:\s*100% !important;[\s\S]*?overflow-x:\s*auto !important/);
   assert.match(behavior, /btn\.scrollIntoView\(\{ behavior: "smooth", block: "nearest", inline: "nearest" \}\)/);
 });
 

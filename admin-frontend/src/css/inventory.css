@@ -2648,24 +2648,25 @@
 
 @media (max-width: 700px) {
   html body.management-consistent-ui.inventory-page .inv-table-panel {
-    overflow: visible !important;
-    border: 0 !important;
-    border-radius: 0 !important;
-    background: transparent !important;
-    box-shadow: none !important;
+    overflow: hidden !important;
+    border: 1px solid #eadfd4 !important;
+    border-radius: 18px !important;
+    background: #ffffff !important;
+    box-shadow: 0 12px 30px rgba(72, 36, 29, .065) !important;
   }
 
   html body.management-consistent-ui.inventory-page .inv-table-panel > .panel-head {
-    margin-bottom: 11px;
-    border: 1px solid #eadfd4;
-    border-radius: 16px;
-    background: #fff;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
   }
 
   html body.management-consistent-ui.inventory-page .inventory-smart-table.management-card-active tbody {
-    gap: 11px !important;
-    padding: 0 !important;
-    background: transparent !important;
+    gap: 9px !important;
+    padding: 10px !important;
+    background: #fff8ee !important;
   }
 
   html body.management-consistent-ui.inventory-page .inventory-smart-table.management-card-active tbody > tr.management-card-row {

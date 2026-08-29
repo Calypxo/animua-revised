@@ -74,10 +74,12 @@
                 <p>Search and review staff actions, affected records, and system outcomes.</p>
               </div>
             </div>
-            <div class="audit-view-switch" role="tablist" aria-label="Audit log views">
-              <button class="audit-view-btn active" type="button" role="tab" aria-selected="true" data-audit-view="all"><i class="bi bi-list-ul"></i> All activity</button>
-              <button class="audit-view-btn" type="button" role="tab" aria-selected="false" data-audit-view="attention"><i class="bi bi-exclamation-circle"></i> Needs attention</button>
-              <button class="audit-view-btn" type="button" role="tab" aria-selected="false" data-audit-view="success"><i class="bi bi-check2-circle"></i> Successful</button>
+            <div class="management-record-tabs-scroll" aria-label="Scrollable audit log views">
+              <div class="audit-view-switch" role="tablist" aria-label="Audit log views">
+                <button class="audit-view-btn active" type="button" role="tab" aria-selected="true" data-audit-view="all"><i class="bi bi-list-ul"></i> All activity</button>
+                <button class="audit-view-btn" type="button" role="tab" aria-selected="false" data-audit-view="attention"><i class="bi bi-exclamation-circle"></i> Needs attention</button>
+                <button class="audit-view-btn" type="button" role="tab" aria-selected="false" data-audit-view="success"><i class="bi bi-check2-circle"></i> Successful</button>
+              </div>
             </div>
           </div>
 
@@ -133,12 +135,12 @@
               <button class="reference-clear-filters" id="clearAuditFilters" type="button"><i class="bi bi-arrow-counterclockwise"></i> Clear</button>
           </div>
 
-          <div class="table-section-head">
+          <div class="table-section-head reference-table-section-head">
             <div>
               <span class="section-kicker">Chronological record</span>
               <h3>Recent management activity</h3>
             </div>
-            <span class="result-count" id="auditResultLabel">0 events</span>
+            <strong class="result-count" id="auditResultLabel">0 events</strong>
           </div>
 
           <div class="table-responsive records-table-wrap">

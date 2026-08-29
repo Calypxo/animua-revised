@@ -144,14 +144,23 @@ async function load() {
   }
 }
 
-function tabs() {
+function tabs({ focusActive = false, smooth = false } = {}) {
   const target = document.getElementById("liveReportTabs");
   target.innerHTML = payload.available.map((key) => {
     const config = CONFIG[key];
     const count = payload.reports[key]?.length || 0;
     return `<button class="report-tab tone-${config.tone} ${key === active ? "active" : ""}" id="report-tab-${key}" type="button" data-report="${key}" role="tab" aria-selected="${key === active}" aria-controls="reportDataPanel"><span class="report-tab-icon" aria-hidden="true"><i class="bi ${config.icon}"></i></span><span class="report-tab-copy"><strong>${esc(config.label)}</strong><small>${esc(config.description)}</small></span><span class="report-tab-count" aria-label="${count} records">${count}</span></button>`;
   }).join("");
-  target.querySelectorAll("[data-report]").forEach((button) => button.addEventListener("click", () => { active = button.dataset.report; activePage = 1; tabs(); render(); }));
+  target.querySelectorAll("[data-report]").forEach((button) => button.addEventListener("click", () => {
+    active = button.dataset.report;
+    activePage = 1;
+    tabs({ focusActive: true, smooth: true });
+    render();
+  }));
+  const activeButton = [...target.querySelectorAll("[data-report]")]
+    .find((button) => button.dataset.report === active);
+  if (focusActive) activeButton?.focus({ preventScroll: true });
+  activeButton?.scrollIntoView?.({ behavior: smooth ? "smooth" : "auto", block: "nearest", inline: "nearest" });
 }
 
 function rows() {

@@ -295,6 +295,7 @@ function bindTabs() {
       btn.classList.add("active");
       btn.setAttribute("aria-selected", "true");
       activeTab = btn.dataset.tab;
+      btn.scrollIntoView?.({ behavior: "smooth", block: "nearest", inline: "nearest" });
       // sync role filter dropdown
       const rf = document.getElementById("filterRole");
       if (rf) {
@@ -392,6 +393,7 @@ function clearUserFilters() {
     tab.classList.toggle("active", isActive);
     tab.setAttribute("aria-selected", String(isActive));
   });
+  document.querySelector('.um-tab[data-tab="all"]')?.scrollIntoView?.({ block: "nearest", inline: "nearest" });
   applyFilters();
 }
 
@@ -1061,6 +1063,7 @@ if (addUserButton) {
           tab.classList.toggle("active", isActive);
           tab.setAttribute("aria-selected", String(isActive));
         });
+        document.querySelector('.um-tab[data-tab="all"]')?.scrollIntoView?.({ block: "nearest", inline: "nearest" });
       }
       applyFilters();
     });

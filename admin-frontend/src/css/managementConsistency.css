@@ -389,7 +389,7 @@ html body.management-consistent-ui .action-tile:focus-visible {
   box-shadow: 0 10px 24px rgba(120, 1, 22, .09) !important;
 }
 
-/* Every operational register shares the same warm frame and branded heading. */
+/* Every operational register follows the Inventory directory's plain header. */
 html body.management-consistent-ui :is(
   .ap-records-panel,
   .records-panel,
@@ -407,6 +407,7 @@ html body.management-consistent-ui :is(
 }
 
 html body.management-consistent-ui :is(
+  .records-panel > .records-toolbar,
   .records-panel .records-heading,
   .aa-table-panel .aa-panel-intro,
   .sr-table-panel .records-toolbar,
@@ -415,8 +416,9 @@ html body.management-consistent-ui :is(
   .cq-records .cq-record-head,
   .report-data-card > .rpt-card-head
 ) {
-  border-bottom-color: rgba(247, 181, 56, .38) !important;
-  background: linear-gradient(125deg, var(--animua-gold-soft) 0%, #FFF8EE 30%, #FFFFFF 76%) !important;
+  border-bottom: 1px solid #EEE3D9 !important;
+  background: #FFFFFF !important;
+  background-image: none !important;
 }
 
 html body.management-consistent-ui :is(
@@ -511,7 +513,8 @@ html body.management-consistent-ui :is(
   .feed-filters
 ) {
   border-bottom-color: rgba(247, 181, 56, .32) !important;
-  background: linear-gradient(180deg, #FFFFFF, #FFFCF7) !important;
+  background: #FFF8EE !important;
+  background-image: none !important;
 }
 
 html body.management-consistent-ui :is(
@@ -525,11 +528,12 @@ html body.management-consistent-ui select:focus {
   box-shadow: 0 0 0 4px rgba(247, 181, 56, .24) !important;
 }
 
-/* Gold-tinted headings make dense tables scan as branded workspaces. */
+/* All operational tables use Inventory's quiet, plain header surface. */
 html body.management-consistent-ui :is(.shelter-table, .rpt-table, .management-data-table) thead th {
-  border-color: #ead4a0 !important;
+  border-color: #EADFD4 !important;
   color: var(--animua-red) !important;
-  background: var(--animua-gold-soft) !important;
+  background: #FFF8EE !important;
+  background-image: none !important;
 }
 
 html body.management-consistent-ui :is(.shelter-table, .rpt-table, .management-data-table) tbody tr:hover > * {
@@ -653,16 +657,19 @@ html body.management-consistent-ui :is(
   box-shadow: 0 7px 16px rgba(120, 1, 22, .16) !important;
 }
 
-/* Conversations intentionally use the stronger burgundy workspace header. */
+/* Contact Messages uses the same plain record header and explicit readable copy. */
 html body.management-consistent-ui.contact-messages-page .cm-records-panel > .ap-records-heading {
-  border-bottom-color: rgba(247, 181, 56, .42) !important;
-  background:
-    radial-gradient(circle at 86% 18%, rgba(247, 181, 56, .2), transparent 24%),
-    linear-gradient(120deg, var(--animua-red-deep), var(--animua-red) 62%, #94132a) !important;
+  border-bottom: 1px solid #EEE3D9 !important;
+  background: #FFFFFF !important;
+  background-image: none !important;
 }
 
-html body.management-consistent-ui.contact-messages-page .cm-records-panel > .ap-records-heading :is(h2, p) {
-  color: #FFFFFF !important;
+html body.management-consistent-ui.contact-messages-page .cm-records-panel > .ap-records-heading h2 {
+  color: #2D2322 !important;
+}
+
+html body.management-consistent-ui.contact-messages-page .cm-records-panel > .ap-records-heading p {
+  color: #81746D !important;
 }
 
 html body.management-consistent-ui.contact-messages-page .cm-records-panel > .ap-records-heading .ap-records-legend {
@@ -671,7 +678,7 @@ html body.management-consistent-ui.contact-messages-page .cm-records-panel > .ap
 
 html body.management-consistent-ui.contact-messages-page .cm-records-panel > .ap-records-heading .ap-section-kicker,
 html body.management-consistent-ui.contact-messages-page .cm-records-panel > .ap-records-heading .ap-records-legend i {
-  color: var(--animua-gold) !important;
+  color: var(--animua-red) !important;
 }
 
 @media (max-width: 680px) {
