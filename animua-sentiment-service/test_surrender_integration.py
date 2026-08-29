@@ -89,6 +89,26 @@ class SurrenderIntegrationTests(unittest.TestCase):
         self.assertEqual(urgency, "Critical")
         self.assertEqual(score, 95)
 
+    def test_short_tagalog_appetite_symptom_is_corrected_after_prediction(self):
+        with patch.object(
+            app,
+            "predict_sentiment_and_category",
+            return_value={
+                "sentiment": ("Negative", 0.88),
+                "category": ("Overcrowding", 0.58),
+                "source": app.MODEL_SOURCE_LABEL,
+            },
+        ):
+            result = app.analyze_reason("Ang aso ko ay hindi kumakain.")
+
+        self.assertEqual(result["category"], "Medical")
+        self.assertEqual(result["urgencyLabel"], "High")
+        self.assertEqual(result["urgencyScore"], 75)
+
+    def test_health_exposes_rules_version_for_deployment_verification(self):
+        status = app.health()
+        self.assertEqual(status["rulesVersion"], app.RULES_VERSION)
+
 
 if __name__ == "__main__":
     unittest.main()

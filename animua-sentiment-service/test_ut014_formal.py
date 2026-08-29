@@ -45,6 +45,44 @@ class UT014PythonSurrenderAnalysisRules(unittest.TestCase):
         self.assertEqual(result["category"], "Medical")
         self.assertEqual(result["source"], app.MODEL_SOURCE_LABEL)
 
+    def test_short_not_eating_message_overrides_wrong_category_to_medical(self):
+        self.assertEqual(
+            app.apply_category_override(
+                "Ang aso ko ay hindi kumakain.",
+                "Overcrowding",
+            ),
+            "Medical",
+        )
+
+    def test_not_eating_alone_is_high_not_critical(self):
+        self.assertEqual(
+            app.map_urgency(
+                "Negative",
+                "Medical",
+                "Ang aso ko ay hindi kumakain.",
+            ),
+            ("High", 75),
+        )
+
+    def test_breathing_difficulty_remains_critical(self):
+        self.assertEqual(
+            app.map_urgency(
+                "Negative",
+                "Medical",
+                "Nahihirapang huminga at nanghihina ang aso.",
+            ),
+            ("Critical", 95),
+        )
+
+    def test_lumipat_overrides_non_medical_prediction_to_relocation(self):
+        self.assertEqual(
+            app.apply_category_override(
+                "Kumakain naman siya pero kailangan naming lumipat.",
+                "Other",
+            ),
+            "Relocation",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

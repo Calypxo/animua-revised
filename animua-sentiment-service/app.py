@@ -31,6 +31,8 @@ app = FastAPI(
     openapi_url=None,
 )
 
+RULES_VERSION = "2026-08-29-medical-triage-v2"
+
 sentiment_model = joblib.load(SERVICE_DIR / "sentiment_model.pkl")
 category_model = joblib.load(SERVICE_DIR / "category_model.pkl")
 transformer_models = {}
@@ -205,8 +207,32 @@ def predict_sentiment_and_category(reason):
     }
 
 
+def contains_phrase(text, phrases):
+    return any(phrase in text for phrase in phrases)
+
+
+def has_medical_signal(reason):
+    text = reason.lower()
+    medical_phrases = [
+        "sick", "injured", "bleeding", "dying", "cancer",
+        "not eating", "won't eat", "will not eat", "no appetite",
+        "vomiting", "weak", "needs a vet", "need a vet",
+        "may sakit", "sugatan", "dumudugo", "namamatay", "gamot",
+        "hindi kumakain", "hindi na kumakain", "ayaw kumain",
+        "walang gana", "nanghihina", "nagsusuka", "kailangan ng vet",
+        "kailangan niya ng vet", "nahihirapang huminga", "walang malay",
+        "hindi makatayo", "nabangga", "malubha",
+    ]
+    return contains_phrase(text, medical_phrases)
+
+
 def apply_category_override(reason, predicted_category):
     text = reason.lower()
+
+    # Explicit symptoms are safer and more precise than a low-confidence
+    # category prediction from short or informal owner messages.
+    if has_medical_signal(reason):
+        return "Medical"
 
     relocation_words = [
         "moving", "relocate", "relocating", "migration", "migrate",
@@ -215,7 +241,7 @@ def apply_category_override(reason, predicted_category):
         "pilipinas", "france", "paris", "documents", "madadala",
         "dalhin", "isama", "maisama", "hindi kayang dalhin",
         "hindi namin kayang dalhin", "hindi madala", "hindi maisama",
-        "papuntang", "ibang lugar"
+        "papuntang", "ibang lugar", "lumipat", "paglipat"
     ]
 
     if any(word in text for word in relocation_words):
@@ -236,7 +262,8 @@ def extract_keywords(reason):
 
         "may sakit", "sugatan", "nabangga", "namamatay", "gamot",
         "dumudugo", "malubha", "agarang", "nahihirapang huminga",
-        "walang malay", "hindi kumakain",
+        "walang malay", "hindi kumakain", "hindi na kumakain",
+        "ayaw kumain", "walang gana", "nanghihina", "nagsusuka",
         "walang budget", "hindi afford", "nawalan", "trabaho",
         "lilipat", "bawal", "mag-aabroad", "condo",
         "nangangagat", "inatake", "delikado",
@@ -260,18 +287,14 @@ def extract_keywords(reason):
 def map_urgency(sentiment, category, reason):
     text = reason.lower()
 
-    emergency_words = [
+    critical_phrases = [
         "emergency", "immediately", "bleeding", "dying", "critical",
-        "cannot stand", "not eating", "hit by", "attacked", "bit",
-        "agad", "sugatan", "nabangga", "namamatay", "hindi makatayo",
-        "inatake", "nangangagat", "delikado", "kalsada", "dumudugo",
-        "agarang", "malubha", "nahihirapang huminga", "walang malay",
-        "hindi kumakain"
+        "cannot stand", "hit by", "attacked",
+        "nabangga", "namamatay", "hindi makatayo", "inatake",
+        "dumudugo", "nahihirapang huminga", "walang malay",
     ]
 
-    has_emergency_word = any(word in text for word in emergency_words)
-
-    if has_emergency_word:
+    if contains_phrase(text, critical_phrases):
         return "Critical", 95
 
     # Relocation should usually not become High Priority
@@ -355,6 +378,7 @@ def home():
     return {
         "message": "ANIMUA surrender sentiment service is running.",
         "configuredModel": MODEL_NAME,
+        "rulesVersion": RULES_VERSION,
         "transformerReady": ready,
         "loadedTasks": {
             task_name: task["modelLoaded"]
@@ -377,6 +401,7 @@ def health():
         "transformerReady": ready,
         "tasks": tasks,
         "activeSource": MODEL_SOURCE_LABEL if ready else FALLBACK_SOURCE_LABEL,
+        "rulesVersion": RULES_VERSION,
     }
     if not ready:
         return JSONResponse(status_code=503, content=payload)
