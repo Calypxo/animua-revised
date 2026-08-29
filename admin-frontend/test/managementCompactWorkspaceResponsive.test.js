@@ -139,7 +139,7 @@ test("Intake remains one continuous Inventory-style panel on phones", () => {
   );
 });
 
-test("Intake View record fills the mobile action row", () => {
+test("Intake actions fill the card and keep decision controls aligned", () => {
   const intakeActions = responsiveStyles.slice(
     responsiveStyles.lastIndexOf("/* Intake card actions:"),
   );
@@ -147,6 +147,10 @@ test("Intake View record fills the mobile action row", () => {
   assert.match(
     intakeScript,
     /intake-action-group[\s\S]*?tbl-action-btn management-card-open management-view-action management-view-action--compact[\s\S]*?management-action-text">View record/,
+  );
+  assert.match(
+    intakeScript,
+    /intake-secondary-actions[\s\S]*?data-action="edit"[\s\S]*?data-action="reject"[\s\S]*?data-action="convert"/,
   );
   assert.match(
     surrenderScript,
@@ -163,11 +167,15 @@ test("Intake View record fills the mobile action row", () => {
   );
   assert.match(
     intakeActions,
-    /#intakeTableBody > tr > td\.management-card-actions\s*\{[\s\S]*?width:\s*100% !important;/,
+    /#intakeTableBody > tr > td\.management-card-actions\s*\{[\s\S]*?width:\s*100% !important;[\s\S]*?grid-template-columns:\s*minmax\(0, 1fr\) !important;[\s\S]*?justify-items:\s*stretch !important;/,
   );
   assert.match(
     intakeActions,
-    /#intakeTableBody \.intake-action-group\s*\{[\s\S]*?width:\s*100% !important;[\s\S]*?display:\s*grid !important;[\s\S]*?grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\) !important;/,
+    /#intakeTableBody \.intake-action-group\s*\{[\s\S]*?width:\s*100% !important;[\s\S]*?max-width:\s*none !important;[\s\S]*?display:\s*grid !important;[\s\S]*?grid-column:\s*1 \/ -1 !important;[\s\S]*?grid-template-columns:\s*minmax\(0, 1fr\) !important;[\s\S]*?justify-self:\s*stretch !important;/,
+  );
+  assert.match(
+    intakeActions,
+    /#intakeTableBody \.intake-secondary-actions\s*\{[\s\S]*?width:\s*100% !important;[\s\S]*?grid-template-columns:\s*repeat\(auto-fit, minmax\(82px, 1fr\)\) !important;[\s\S]*?justify-self:\s*stretch !important;/,
   );
   assert.match(
     intakeActions,
@@ -180,6 +188,10 @@ test("Intake View record fills the mobile action row", () => {
   assert.match(
     intakeActions,
     /@media \(max-width: 339px\)[\s\S]*?#intakeTableBody \.intake-action-group\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0, 1fr\) !important;/,
+  );
+  assert.match(
+    intakeActions,
+    /@media \(min-width: 1366px\)[\s\S]*?management-data-table:not\(\.management-card-active\)[\s\S]*?#intakeTableBody > tr > td\.management-card-actions\s*\{[\s\S]*?width:\s*196px !important;[\s\S]*?min-width:\s*196px !important;/,
   );
 });
 

@@ -4715,19 +4715,56 @@ html body.management-consistent-ui .page-body .archive-records-table.management-
     #intakeTableBody > tr > td.management-card-actions {
     width: 100% !important;
     min-width: 0 !important;
+    max-width: none !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-auto-flow: row !important;
+    justify-items: stretch !important;
+    align-items: stretch !important;
+    box-sizing: border-box !important;
+  }
+
+  html body.intake-management-page .page-body
+    #intakeTableBody > tr > td.management-card-actions::before {
+    width: 100% !important;
+    grid-column: 1 / -1 !important;
+    text-align: center !important;
   }
 
   html body.intake-management-page .page-body
     #intakeTableBody .intake-action-group {
     width: 100% !important;
     min-width: 0 !important;
+    max-width: none !important;
     display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-column: 1 / -1 !important;
+    grid-template-columns: minmax(0, 1fr) !important;
     gap: 8px !important;
+    justify-self: stretch !important;
+    box-sizing: border-box !important;
   }
 
   html body.intake-management-page .page-body
-    #intakeTableBody .intake-action-group > .tbl-action-btn {
+    #intakeTableBody .intake-secondary-actions {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(82px, 1fr)) !important;
+    gap: 8px !important;
+    grid-column: 1 / -1 !important;
+    justify-self: stretch !important;
+  }
+
+  html body.intake-management-page .page-body
+    #intakeTableBody .intake-secondary-actions:empty {
+    display: none !important;
+  }
+
+  html body.intake-management-page .page-body
+    #intakeTableBody .intake-action-group > .tbl-action-btn,
+  html body.intake-management-page .page-body
+    #intakeTableBody .intake-secondary-actions > .tbl-action-btn {
     width: 100% !important;
     min-width: 0 !important;
     max-width: none !important;
@@ -4759,6 +4796,21 @@ html body.management-consistent-ui .page-body .archive-records-table.management-
     #intakeTableBody > tr > td.management-card-actions {
     width: 100% !important;
     min-width: 0 !important;
+    max-width: none !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-auto-flow: row !important;
+    justify-items: stretch !important;
+    align-items: stretch !important;
+    box-sizing: border-box !important;
+  }
+
+  html body.intake-management-page .page-body
+    .management-data-table.management-card-table.management-card-active
+    #intakeTableBody > tr > td.management-card-actions::before {
+    width: 100% !important;
+    grid-column: 1 / -1 !important;
+    text-align: center !important;
   }
 
   html body.intake-management-page .page-body
@@ -4766,14 +4818,40 @@ html body.management-consistent-ui .page-body .archive-records-table.management-
     #intakeTableBody .intake-action-group {
     width: 100% !important;
     min-width: 0 !important;
+    max-width: none !important;
     display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-column: 1 / -1 !important;
+    grid-template-columns: minmax(0, 1fr) !important;
     gap: 8px !important;
+    justify-self: stretch !important;
+    box-sizing: border-box !important;
   }
 
   html body.intake-management-page .page-body
     .management-data-table.management-card-table.management-card-active
-    #intakeTableBody .intake-action-group > .tbl-action-btn {
+    #intakeTableBody .intake-secondary-actions {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(82px, 1fr)) !important;
+    gap: 8px !important;
+    grid-column: 1 / -1 !important;
+    justify-self: stretch !important;
+  }
+
+  html body.intake-management-page .page-body
+    .management-data-table.management-card-table.management-card-active
+    #intakeTableBody .intake-secondary-actions:empty {
+    display: none !important;
+  }
+
+  html body.intake-management-page .page-body
+    .management-data-table.management-card-table.management-card-active
+    #intakeTableBody .intake-action-group > .tbl-action-btn,
+  html body.intake-management-page .page-body
+    .management-data-table.management-card-table.management-card-active
+    #intakeTableBody .intake-secondary-actions > .tbl-action-btn {
     width: 100% !important;
     min-width: 0 !important;
     max-width: none !important;
@@ -4791,6 +4869,48 @@ html body.management-consistent-ui .page-body .archive-records-table.management-
   }
 }
 
+/* The non-card intake table can expose four row actions. Reserve the actual
+   button footprint so the final action never overflows behind the panel edge. */
+@media (min-width: 1366px) {
+  html body.intake-management-page .page-body
+    .management-data-table:not(.management-card-active)
+    #intakeTableBody > tr > td.management-card-actions {
+    width: 196px !important;
+    min-width: 196px !important;
+    max-width: 196px !important;
+    padding-inline: 10px !important;
+    overflow: visible !important;
+    box-sizing: border-box !important;
+  }
+
+  html body.intake-management-page .page-body
+    .management-data-table:not(.management-card-active)
+    #intakeTableBody .intake-action-group {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    display: flex !important;
+    justify-content: center !important;
+    gap: 6px !important;
+  }
+
+  html body.intake-management-page .page-body
+    .management-data-table:not(.management-card-active)
+    #intakeTableBody .intake-secondary-actions {
+    min-width: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+  }
+
+  html body.intake-management-page .page-body
+    .management-data-table:not(.management-card-active)
+    #intakeTableBody .intake-secondary-actions:empty {
+    display: none !important;
+  }
+}
+
 @media (max-width: 339px) {
   html body.intake-management-page .page-body
     #intakeTableBody .intake-action-group {
@@ -4800,6 +4920,11 @@ html body.management-consistent-ui .page-body .archive-records-table.management-
   html body.intake-management-page .page-body
     #intakeTableBody .intake-action-group > .tbl-action-btn {
     grid-column: 1 !important;
+  }
+
+  html body.intake-management-page .page-body
+    #intakeTableBody .intake-secondary-actions {
+    grid-template-columns: minmax(0, 1fr) !important;
   }
 }
 

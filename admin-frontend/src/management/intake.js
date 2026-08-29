@@ -263,9 +263,11 @@ function renderTable() {
           <button type="button" class="tbl-action-btn management-card-open management-view-action management-view-action--compact" title="View record" aria-label="View ${r.id}" data-action="view" data-id="${r.id}">
             <i class="bi bi-eye" aria-hidden="true"></i><span class="management-action-text">View record</span>
           </button>
-          ${canEdit    ? `<button class="tbl-action-btn" title="Edit" aria-label="Edit ${r.id}" data-action="edit" data-id="${r.id}"><i class="bi bi-pencil"></i><span class="intake-action-label">Edit</span></button>` : ""}
-          ${canReject  ? `<button class="tbl-action-btn reject" title="Reject" aria-label="Reject ${r.id}" data-action="reject" data-id="${r.id}"><i class="bi bi-x-lg"></i><span class="intake-action-label">Reject</span></button>` : ""}
-          ${canConvert ? `<button class="tbl-action-btn convert" title="${r.status === "Pending" ? "Approve and start profiling" : "Start profiling"}" aria-label="${r.status === "Pending" ? "Approve and start profiling for" : "Start profiling for"} ${r.id}" data-action="convert" data-id="${r.id}"><i class="bi bi-arrow-right-circle"></i><span class="intake-action-label">${r.status === "Pending" ? "Approve" : "Profile"}</span></button>` : ""}
+          <div class="intake-secondary-actions">
+            ${canEdit    ? `<button class="tbl-action-btn" title="Edit" aria-label="Edit ${r.id}" data-action="edit" data-id="${r.id}"><i class="bi bi-pencil"></i><span class="intake-action-label">Edit</span></button>` : ""}
+            ${canReject  ? `<button class="tbl-action-btn reject" title="Reject" aria-label="Reject ${r.id}" data-action="reject" data-id="${r.id}"><i class="bi bi-x-lg"></i><span class="intake-action-label">Reject</span></button>` : ""}
+            ${canConvert ? `<button class="tbl-action-btn convert" title="${r.status === "Pending" ? "Approve and start profiling" : "Start profiling"}" aria-label="${r.status === "Pending" ? "Approve and start profiling for" : "Start profiling for"} ${r.id}" data-action="convert" data-id="${r.id}"><i class="bi bi-arrow-right-circle"></i><span class="intake-action-label">${r.status === "Pending" ? "Approve" : "Profile"}</span></button>` : ""}
+          </div>
         </div>
       </td>
     </tr>`;
