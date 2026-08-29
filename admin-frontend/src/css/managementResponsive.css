@@ -4617,3 +4617,13 @@ html body.management-consistent-ui .page-body .archive-records-table.management-
     background: #ffffff !important;
   }
 }
+
+/* Keep the first Surrender record clear of the section-heading divider. The
+   canonical card layer uses a 2px well by default, which makes the rounded
+   card border appear to sit on top of the header at phone widths. */
+@media (max-width: 760px) {
+  html body.management-consistent-ui.surrender-requests-page .sr-table-panel
+    .management-review-table.management-card-active tbody {
+    padding: 10px 2px 2px !important;
+  }
+}

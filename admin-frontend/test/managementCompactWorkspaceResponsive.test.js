@@ -135,6 +135,18 @@ test("Intake remains one continuous Inventory-style panel on phones", () => {
   );
 });
 
+test("Surrender record cards clear the mobile section header divider", () => {
+  const surrenderSpacing = responsiveStyles.slice(
+    responsiveStyles.lastIndexOf("/* Keep the first Surrender record clear"),
+  );
+
+  assert.match(surrenderSpacing, /@media \(max-width: 760px\)/);
+  assert.match(
+    surrenderSpacing,
+    /surrender-requests-page \.sr-table-panel[\s\S]*?management-review-table\.management-card-active tbody\s*\{[\s\S]*?padding:\s*10px 2px 2px !important;/,
+  );
+});
+
 test("shared tabs use the same horizontal scroll mechanics as Reports", () => {
   assert.match(tabStyles, /The bordered tablist is the one and[\s\S]*?only horizontal scroll owner/);
   assert.match(tabStyles, /\.cq-workspace-nav[\s\S]*?overflow:\s*visible !important;/);
