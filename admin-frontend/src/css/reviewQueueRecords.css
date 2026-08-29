@@ -64,8 +64,38 @@ html body.management-consistent-ui:is(.adoption-applications-page, .surrender-re
 }
 
 html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .management-review-tabs {
-  max-width: 100% !important;
+  width: max-content !important;
+  max-width: none !important;
+  min-width: max-content !important;
   margin-inline: 0 !important;
+  overflow: visible !important;
+}
+
+html body.management-consistent-ui.adoption-applications-page .management-review-tabs-scroll {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 4px;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(120, 1, 22, .38) transparent;
+  touch-action: pan-x pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+html body.management-consistent-ui.adoption-applications-page .management-review-tabs-scroll::-webkit-scrollbar {
+  height: 4px;
+}
+
+html body.management-consistent-ui.adoption-applications-page .management-review-tabs-scroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(120, 1, 22, .38);
+}
+
+html body.management-consistent-ui.adoption-applications-page .management-review-tabs-scroll .aa-tab {
+  scroll-snap-align: start;
 }
 
 html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .management-review-filters {

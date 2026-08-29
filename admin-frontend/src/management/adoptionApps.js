@@ -940,8 +940,13 @@ async function init() {
     // Tabs
     document.querySelectorAll(".aa-tab").forEach(btn => {
       btn.addEventListener("click",()=>{
-        document.querySelectorAll(".aa-tab").forEach(t=>t.classList.remove("active"));
+        document.querySelectorAll(".aa-tab").forEach(t=>{
+          t.classList.remove("active");
+          t.setAttribute("aria-selected", "false");
+        });
+        btn.setAttribute("aria-selected", "true");
         btn.classList.add("active"); activeTab=btn.dataset.tab; applyFilters();
+        btn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
       });
     });
 
@@ -953,7 +958,12 @@ async function init() {
       const type = document.getElementById("filterType");
       if (search) search.value = "";
       if (type) type.value = "";
-      document.querySelectorAll(".aa-tab").forEach((tab) => tab.classList.toggle("active", tab.dataset.tab === "all"));
+      document.querySelectorAll(".aa-tab").forEach((tab) => {
+        const isAllTab = tab.dataset.tab === "all";
+        tab.classList.toggle("active", isAllTab);
+        tab.setAttribute("aria-selected", String(isAllTab));
+      });
+      document.querySelector('.aa-tab[data-tab="all"]')?.scrollIntoView({ block: "nearest", inline: "nearest" });
       applyFilters();
     });
     document.getElementById("aaDrawerBackdrop")?.addEventListener("click", closeDrawer);

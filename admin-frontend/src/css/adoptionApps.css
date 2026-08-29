@@ -638,6 +638,12 @@
   min-width: 0;
 }
 
+.journey-person > span:last-child,
+.journey-animal > span:last-child {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
 .journey-avatar {
   width: 44px;
   height: 44px;
@@ -675,6 +681,17 @@
   font-size: .9rem;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.journey-person > span:last-child > strong,
+.journey-animal > span:last-child > strong {
+  width: 100%;
+  display: -webkit-box;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .journey-link {
