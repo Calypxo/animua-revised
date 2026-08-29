@@ -4711,14 +4711,12 @@ html body.management-consistent-ui .page-body .archive-records-table.management-
    letting permission-dependent secondary actions squeeze or overflow it. */
 @media (max-width: 599px) {
   html body.management-consistent-ui.intake-management-page .page-body
-    .management-data-table.management-card-table.management-card-active
-    td.management-card-actions {
+    #intakeTableBody > tr > td.management-card-actions {
     width: 100% !important;
     min-width: 0 !important;
   }
 
   html body.management-consistent-ui.intake-management-page .page-body
-    .management-data-table.management-card-table.management-card-active
     #intakeTableBody .intake-action-group {
     width: 100% !important;
     min-width: 0 !important;
@@ -4728,7 +4726,6 @@ html body.management-consistent-ui .page-body .archive-records-table.management-
   }
 
   html body.management-consistent-ui.intake-management-page .page-body
-    .management-data-table.management-card-table.management-card-active
     #intakeTableBody .intake-action-group > .tbl-action-btn {
     width: 100% !important;
     min-width: 0 !important;
@@ -4737,7 +4734,6 @@ html body.management-consistent-ui .page-body .archive-records-table.management-
   }
 
   html body.management-consistent-ui.intake-management-page .page-body
-    .management-data-table.management-card-table.management-card-active
     #intakeTableBody .intake-action-group > .management-card-open {
     width: 100% !important;
     max-width: none !important;
@@ -4749,13 +4745,11 @@ html body.management-consistent-ui .page-body .archive-records-table.management-
 
 @media (max-width: 339px) {
   html body.management-consistent-ui.intake-management-page .page-body
-    .management-data-table.management-card-table.management-card-active
     #intakeTableBody .intake-action-group {
     grid-template-columns: minmax(0, 1fr) !important;
   }
 
   html body.management-consistent-ui.intake-management-page .page-body
-    .management-data-table.management-card-table.management-card-active
     #intakeTableBody .intake-action-group > .tbl-action-btn {
     grid-column: 1 !important;
   }

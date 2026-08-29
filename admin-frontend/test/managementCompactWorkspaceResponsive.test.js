@@ -148,6 +148,14 @@ test("Intake View record fills the mobile action row", () => {
     /intake-action-group[\s\S]*?management-card-open management-view-action[\s\S]*?View record/,
   );
   assert.match(intakeActions, /@media \(max-width: 599px\)/);
+  assert.doesNotMatch(
+    intakeActions.slice(0, intakeActions.indexOf("/* Intake mobile modal contract:")),
+    /management-card-active/,
+  );
+  assert.match(
+    intakeActions,
+    /#intakeTableBody > tr > td\.management-card-actions\s*\{[\s\S]*?width:\s*100% !important;/,
+  );
   assert.match(
     intakeActions,
     /#intakeTableBody \.intake-action-group\s*\{[\s\S]*?width:\s*100% !important;[\s\S]*?display:\s*grid !important;[\s\S]*?grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\) !important;/,
