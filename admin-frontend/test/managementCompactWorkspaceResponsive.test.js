@@ -5,7 +5,7 @@ import { readFile } from "node:fs/promises";
 const readPage = (name) => readFile(new URL(`../pages/${name}`, import.meta.url), "utf8");
 const readStyle = (name) => readFile(new URL(`../src/css/${name}`, import.meta.url), "utf8");
 
-const [compatibilityPage, inventoryPage, intakePage, adoptionScript, intakeScript, surrenderScript, compatibilityStyles, inventoryStyles, responsiveStyles, tabStyles] = await Promise.all([
+const [compatibilityPage, inventoryPage, intakePage, adoptionScript, intakeScript, surrenderScript, compatibilityStyles, inventoryStyles, responsiveStyles, tabStyles, managementModalStyles] = await Promise.all([
   readPage("compatibilityQuiz.html"),
   readPage("inventory.html"),
   readPage("intakeList.html"),
@@ -16,6 +16,7 @@ const [compatibilityPage, inventoryPage, intakePage, adoptionScript, intakeScrip
   readStyle("inventory.css"),
   readStyle("managementResponsive.css"),
   readStyle("managementTabs.css"),
+  readStyle("managementModal.css"),
 ]);
 
 test("Compatibility Quiz uses the shared record header and scrollable workspace navigation", () => {
@@ -146,7 +147,7 @@ test("Intake rows use only the centralized View action while the modal owns work
   );
   const intakeActions = responsiveStyles.slice(
     responsiveStyles.lastIndexOf("/* Intake rows expose only the centralized View control."),
-    responsiveStyles.lastIndexOf("/* Intake record details is a centered review dialog"),
+    responsiveStyles.lastIndexOf("/* Intake mobile modal contract:"),
   );
 
   assert.match(
@@ -165,7 +166,8 @@ test("Intake rows use only the centralized View action while the modal owns work
   );
   assert.match(intakeActions, /#intakeTableBody > tr > td\.management-card-actions\s*\{[\s\S]*?text-align:\s*center !important;/);
   assert.match(intakeActions, /@media \(min-width: 721px\)/);
-  assert.match(intakeActions, /#intakeModalBackdrop\.management-modal-layer[\s\S]*?> \.intake-modal\.management-side-modal \.source-selector\s*\{[\s\S]*?grid-template-columns:\s*repeat\(3, minmax\(0, 1fr\)\) !important;/);
+  assert.match(intakeActions, /#intakeModalBackdrop #sourceSelector\.source-selector\s*\{[\s\S]*?grid-template-columns:\s*repeat\(3, minmax\(0, 1fr\)\) !important;/);
+  assert.match(intakeActions, /#sourceSelector\.source-selector > \.source-opt\s*\{[\s\S]*?grid-column:\s*auto !important;/);
 });
 
 test("Intake modals stay inside the mobile viewport with usable actions", () => {
@@ -199,29 +201,23 @@ test("Intake modals stay inside the mobile viewport with usable actions", () => 
   );
 });
 
-test("Intake record details remains a centered desktop review dialog", () => {
-  const intakeDetails = responsiveStyles.slice(
-    responsiveStyles.lastIndexOf("/* Intake record details is a centered review dialog"),
+test("Intake record details inherits the centralized desktop side-modal contract", () => {
+  const intakeDesktopOverrides = responsiveStyles.slice(
+    responsiveStyles.lastIndexOf("/* Restore the original desktop Intake Source composition."),
     responsiveStyles.lastIndexOf("/* Intake mobile modal contract:"),
   );
 
-  assert.match(intakeDetails, /@media \(min-width: 721px\)/);
+  assert.match(intakePage, /id="viewModalBackdrop"[\s\S]*?class="um-modal intake-modal intake-view-modal"/);
   assert.match(
-    intakeDetails,
-    /#viewModalBackdrop\.management-modal-layer\s*\{[\s\S]*?align-items:\s*center !important;[\s\S]*?justify-content:\s*center !important;/,
+    managementModalStyles,
+    /\.management-modal-layer\s*\{[\s\S]*?align-items:\s*stretch !important;[\s\S]*?justify-content:\s*flex-end !important;/,
   );
   assert.match(
-    intakeDetails,
-    /> \.intake-view-modal\.management-side-modal\s*\{[\s\S]*?width:\s*min\(820px, calc\(100dvw - 48px\)\) !important;[\s\S]*?height:\s*auto !important;[\s\S]*?max-height:\s*min\(900px, calc\(100dvh - 48px\)\) !important;[\s\S]*?border-radius:\s*24px !important;/,
+    managementModalStyles,
+    /\.management-modal-layer > \.management-side-modal\s*\{[\s\S]*?height:\s*100dvh !important;[\s\S]*?border-radius:\s*var\(--management-modal-radius\) 0 0 var\(--management-modal-radius\) !important;[\s\S]*?transform:\s*translate3d\(104%, 0, 0\) !important;/,
   );
-  assert.match(
-    intakeDetails,
-    /\.intake-view-modal > \.um-modal-body\s*\{[\s\S]*?min-height:\s*0 !important;[\s\S]*?overflow-y:\s*auto !important;/,
-  );
-  assert.match(
-    intakeDetails,
-    /\.intake-view-modal \.view-grid\s*\{[\s\S]*?grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\) !important;/,
-  );
+  assert.doesNotMatch(intakeDesktopOverrides, /#viewModalBackdrop\.management-modal-layer\s*\{/);
+  assert.doesNotMatch(intakeDesktopOverrides, /\.intake-view-modal\.management-side-modal\s*\{/);
 });
 
 test("Surrender record cards clear the mobile section header divider", () => {
