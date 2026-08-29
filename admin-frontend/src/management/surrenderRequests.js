@@ -496,6 +496,9 @@ function renderDrawer(r) {
   }[r.nlp.urgencyLabel] || "Review the owner's message before making a decision.";
   const keywords = Array.isArray(r.nlp.keywords) ? r.nlp.keywords : [];
   const usesNodeFallback = /node fallback/i.test(String(r.nlp.source || ""));
+  const reanalyzeLabel = usesNodeFallback
+    ? "Run Tagalog RoBERTa"
+    : "Re-run Tagalog RoBERTa";
 
   // ── Plain-language automated triage section ──────────
   const nlpSection = `
@@ -561,11 +564,10 @@ function renderDrawer(r) {
           <span><strong>Decision support only.</strong> Confirm the result against the owner's message before acting.</span>
           <div class="triage-analysis-source">
             <small>Analyzed by ${escapeHtml(r.nlp.source || "automated text analysis")}</small>
-            ${usesNodeFallback ? `
-              <button class="triage-reanalyze-btn" id="reanalyzeSurrenderBtn" type="button">
+            <button class="triage-reanalyze-btn" id="reanalyzeSurrenderBtn" type="button" data-default-label="${reanalyzeLabel}">
                 <i class="bi bi-stars" aria-hidden="true"></i>
-                Run Tagalog RoBERTa
-              </button>` : ""}
+                ${reanalyzeLabel}
+            </button>
           </div>
         </div>
       </div>
@@ -926,7 +928,7 @@ async function reanalyzeSurrenderRequest(id) {
     showToast("error", error.message || "Unable to run Tagalog RoBERTa analysis.");
     if (button?.isConnected) {
       button.disabled = false;
-      button.innerHTML = '<i class="bi bi-stars" aria-hidden="true"></i> Run Tagalog RoBERTa';
+      button.innerHTML = `<i class="bi bi-stars" aria-hidden="true"></i> ${button.dataset.defaultLabel || "Run Tagalog RoBERTa"}`;
     }
   }
 }
