@@ -5,10 +5,11 @@ import { readFile } from "node:fs/promises";
 const readPage = (name) => readFile(new URL(`../pages/${name}`, import.meta.url), "utf8");
 const readStyle = (name) => readFile(new URL(`../src/css/${name}`, import.meta.url), "utf8");
 
-const [compatibilityPage, inventoryPage, adoptionScript, compatibilityStyles, inventoryStyles, responsiveStyles, tabStyles] = await Promise.all([
+const [compatibilityPage, inventoryPage, adoptionScript, intakeScript, compatibilityStyles, inventoryStyles, responsiveStyles, tabStyles] = await Promise.all([
   readPage("compatibilityQuiz.html"),
   readPage("inventory.html"),
   readFile(new URL("../src/management/adoptionApps.js", import.meta.url), "utf8"),
+  readFile(new URL("../src/management/intake.js", import.meta.url), "utf8"),
   readStyle("compatibilityQuiz.css"),
   readStyle("inventory.css"),
   readStyle("managementResponsive.css"),
@@ -133,6 +134,30 @@ test("Intake remains one continuous Inventory-style panel on phones", () => {
   assert.match(
     intakePhone,
     /management-card-table\.management-card-active tbody\s*\{[\s\S]*?padding:\s*10px !important;[\s\S]*?background:\s*#ffffff !important;/,
+  );
+});
+
+test("Intake View record fills the mobile action row", () => {
+  const intakeActions = responsiveStyles.slice(
+    responsiveStyles.lastIndexOf("/* Intake phone actions:"),
+  );
+
+  assert.match(
+    intakeScript,
+    /intake-action-group[\s\S]*?management-card-open management-view-action[\s\S]*?View record/,
+  );
+  assert.match(intakeActions, /@media \(max-width: 599px\)/);
+  assert.match(
+    intakeActions,
+    /\.intake-action-group\s*\{[\s\S]*?width:\s*100% !important;[\s\S]*?grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\) !important;/,
+  );
+  assert.match(
+    intakeActions,
+    /\.intake-action-group > \.management-card-open\s*\{[\s\S]*?width:\s*100% !important;[\s\S]*?max-width:\s*none !important;[\s\S]*?grid-column:\s*1 \/ -1 !important;[\s\S]*?justify-self:\s*stretch !important;/,
+  );
+  assert.match(
+    intakeActions,
+    /@media \(max-width: 339px\)[\s\S]*?\.intake-action-group\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0, 1fr\) !important;/,
   );
 });
 

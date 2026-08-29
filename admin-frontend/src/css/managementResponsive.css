@@ -4706,3 +4706,55 @@ html body.management-consistent-ui .page-body .archive-records-table.management-
       "actions" !important;
   }
 }
+
+/* Intake phone actions: keep the primary record action easy to reach without
+   letting permission-dependent secondary actions squeeze or overflow it. */
+@media (max-width: 599px) {
+  html body.management-consistent-ui.intake-management-page .page-body
+    .management-data-table.management-card-table.management-card-active
+    td.management-card-actions {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page .page-body
+    .management-data-table.management-card-table.management-card-active
+    .intake-action-group {
+    width: 100% !important;
+    min-width: 0 !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page .page-body
+    .management-data-table.management-card-table.management-card-active
+    .intake-action-group > .tbl-action-btn {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page .page-body
+    .management-data-table.management-card-table.management-card-active
+    .intake-action-group > .management-card-open {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    grid-column: 1 / -1 !important;
+    justify-self: stretch !important;
+  }
+}
+
+@media (max-width: 339px) {
+  html body.management-consistent-ui.intake-management-page .page-body
+    .management-data-table.management-card-table.management-card-active
+    .intake-action-group {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page .page-body
+    .management-data-table.management-card-table.management-card-active
+    .intake-action-group > .tbl-action-btn {
+    grid-column: 1 !important;
+  }
+}
