@@ -13,6 +13,10 @@ const { createUserNotification, createManagementNotification } = require("../ser
 const {
   isDirectSurrenderStatusAllowed,
 } = require("../services/surrenderWorkflowService");
+const {
+  MIN_SURRENDER_REASON_LENGTH,
+  isDetailedSurrenderReason,
+} = require("../utils/surrenderReason");
 
 const COLLECTION_NAME = "surrenderRequests";
 const SETTINGS_COLLECTION_NAME = "surrenderSettings";
@@ -231,6 +235,12 @@ async function createSurrenderRequest(req, res) {
     if (!surrenderReason) {
       return res.status(400).json({
         message: "Surrender reason is required.",
+      });
+    }
+
+    if (!isDetailedSurrenderReason(surrenderReason)) {
+      return res.status(400).json({
+        message: `Please provide a meaningful surrender reason using at least ${MIN_SURRENDER_REASON_LENGTH} characters.`,
       });
     }
 

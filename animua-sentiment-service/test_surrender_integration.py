@@ -11,8 +11,14 @@ REQUIRED_NLP_FIELDS = {
     "urgencyLabel",
     "urgencyScore",
     "confidence",
+    "sentimentConfidence",
+    "categoryConfidence",
+    "modelCategory",
+    "categoryAdjusted",
+    "categoryAdjustmentReason",
     "keywords",
     "suggestedPriority",
+    "rulesVersion",
     "source",
 }
 
@@ -104,6 +110,40 @@ class SurrenderIntegrationTests(unittest.TestCase):
         self.assertEqual(result["category"], "Medical")
         self.assertEqual(result["urgencyLabel"], "High")
         self.assertEqual(result["urgencyScore"], 75)
+        self.assertEqual(result["modelCategory"], "Overcrowding")
+        self.assertTrue(result["categoryAdjusted"])
+        self.assertEqual(result["confidence"], 0.58)
+
+    def test_meaningless_reason_does_not_receive_a_model_guess(self):
+        with patch.object(
+            app,
+            "predict_sentiment_and_category",
+        ) as predictor:
+            result = app.analyze_reason("xsx")
+
+        predictor.assert_not_called()
+        self.assertEqual(result["sentiment"], "Neutral")
+        self.assertEqual(result["category"], "Other")
+        self.assertEqual(result["urgencyLabel"], "Low")
+        self.assertEqual(result["urgencyScore"], 10)
+        self.assertEqual(result["confidence"], 0.0)
+        self.assertEqual(
+            result["categoryAdjustmentReason"],
+            "Insufficient meaningful text",
+        )
+
+    def test_financial_and_abandonment_conflicts_keep_the_intended_category(self):
+        financial = app.resolve_category(
+            "Wala na akong pera para sa pagkain at gamot niya.",
+            "Financial",
+        )
+        abandonment = app.resolve_category(
+            "Wala nang mag-aalaga sa kanya kapag umalis ako.",
+            "Abandonment Risk",
+        )
+
+        self.assertEqual(financial[0], "Financial")
+        self.assertEqual(abandonment[0], "Abandonment Risk")
 
     def test_health_exposes_rules_version_for_deployment_verification(self):
         status = app.health()

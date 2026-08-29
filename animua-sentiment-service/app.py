@@ -1,4 +1,5 @@
 import json
+import re
 
 import joblib
 
@@ -31,7 +32,8 @@ app = FastAPI(
     openapi_url=None,
 )
 
-RULES_VERSION = "2026-08-29-medical-triage-v2"
+RULES_VERSION = "2026-08-29-context-rules-v3"
+INSUFFICIENT_SOURCE_LABEL = "Input validation (insufficient text)"
 
 sentiment_model = joblib.load(SERVICE_DIR / "sentiment_model.pkl")
 category_model = joblib.load(SERVICE_DIR / "category_model.pkl")
@@ -208,46 +210,134 @@ def predict_sentiment_and_category(reason):
 
 
 def contains_phrase(text, phrases):
-    return any(phrase in text for phrase in phrases)
+    normalized = str(text or "").casefold()
+    for phrase in phrases:
+        words = [re.escape(word) for word in str(phrase).casefold().split()]
+        if not words:
+            continue
+        pattern = r"(?<!\w)" + r"\s+".join(words) + r"(?!\w)"
+        if re.search(pattern, normalized):
+            return True
+    return False
+
+
+CRITICAL_MEDICAL_PHRASES = [
+    "bleeding", "dying", "cannot stand", "hit by",
+    "dumudugo", "namamatay", "hindi makatayo", "nabangga",
+    "nahihirapang huminga", "walang malay",
+]
+
+FINANCIAL_PHRASES = [
+    "cannot afford", "can't afford", "no money", "no budget",
+    "lost my job", "financial problem", "financial difficulty",
+    "walang pera", "wala akong pera", "wala kaming pera",
+    "walang budget", "hindi afford", "di afford",
+    "nawalan ng trabaho", "nawalan ako ng trabaho",
+    "wala akong trabaho", "wala kaming trabaho", "walang trabaho",
+    "hindi kaya ang gastos", "hindi kayang bumili",
+]
+
+URGENT_ABANDONMENT_PHRASES = [
+    "abandon", "leave on the street", "nowhere to stay",
+    "iiwan sa kalsada", "iwan sa kalsada", "ayoko na",
+    "ipapamigay na lang", "walang matutuluyan",
+]
+
+CAREGIVER_ABSENCE_PHRASES = [
+    "wala nang mag-aalaga", "walang mag-aalaga",
+]
+
+ABANDONMENT_PHRASES = [
+    *URGENT_ABANDONMENT_PHRASES,
+    *CAREGIVER_ABSENCE_PHRASES,
+]
+
+RELOCATION_PHRASES = [
+    "moving", "relocate", "relocating", "migration", "migrate",
+    "moving abroad", "leaving the country", "leaving philippines",
+    "aalis kami", "aalis na kami", "lilipat", "lumipat", "paglipat",
+    "kami ay aalis", "ako ay aalis", "pamilya namin ay aalis",
+    "may-ari ay aalis", "aalis ng angeles city",
+    "mag-aabroad", "ibang bansa", "ibang lugar", "hindi madadala",
+    "hindi maisama", "hindi kayang dalhin", "hindi namin kayang dalhin",
+    "papuntang ibang bansa", "bawal sa bagong tirahan",
+]
+
+MEDICAL_PHRASES = [
+    "sick", "injured", "bleeding", "dying", "cancer",
+    "not eating", "won't eat", "will not eat", "no appetite",
+    "vomiting", "needs a vet", "need a vet", "needs medicine",
+    "may sakit", "sugatan", "dumudugo", "namamatay",
+    "kailangan ng gamot", "kailangan niya ng gamot",
+    "hindi kumakain", "hindi na kumakain", "ayaw kumain",
+    "walang gana", "nanghihina", "nagsusuka", "kailangan ng vet",
+    "kailangan niya ng vet", "nahihirapang huminga", "walang malay",
+    "hindi makatayo", "nabangga", "malubha",
+]
+
+MEANINGFUL_SHORT_PHRASES = [
+    *CRITICAL_MEDICAL_PHRASES,
+    *FINANCIAL_PHRASES,
+    *ABANDONMENT_PHRASES,
+    *RELOCATION_PHRASES,
+    *MEDICAL_PHRASES,
+    "nangangagat", "aggressive", "sobrang dami", "walang space",
+    "naospital", "bedridden", "disabled",
+]
+
+
+def is_insufficient_reason(reason):
+    text = re.sub(r"\s+", " ", str(reason or "").strip())
+    if not text:
+        return True
+
+    lowered = text.casefold()
+    known_placeholders = {
+        "n/a", "na", "none", "test", "testing", "sample",
+        "asdf", "qwerty", "xxx", "xsx",
+    }
+    if lowered in known_placeholders:
+        return True
+
+    letters = re.findall(r"[^\W\d_]", lowered, flags=re.UNICODE)
+    words = re.findall(r"[^\W\d_]+", lowered, flags=re.UNICODE)
+    if len(letters) < 4:
+        return True
+    if len(words) < 2 and not contains_phrase(lowered, MEANINGFUL_SHORT_PHRASES):
+        return True
+
+    return False
 
 
 def has_medical_signal(reason):
-    text = reason.lower()
-    medical_phrases = [
-        "sick", "injured", "bleeding", "dying", "cancer",
-        "not eating", "won't eat", "will not eat", "no appetite",
-        "vomiting", "weak", "needs a vet", "need a vet",
-        "may sakit", "sugatan", "dumudugo", "namamatay", "gamot",
-        "hindi kumakain", "hindi na kumakain", "ayaw kumain",
-        "walang gana", "nanghihina", "nagsusuka", "kailangan ng vet",
-        "kailangan niya ng vet", "nahihirapang huminga", "walang malay",
-        "hindi makatayo", "nabangga", "malubha",
-    ]
-    return contains_phrase(text, medical_phrases)
+    return contains_phrase(reason, MEDICAL_PHRASES)
+
+
+def resolve_category(reason, predicted_category):
+    if contains_phrase(reason, CRITICAL_MEDICAL_PHRASES):
+        return "Medical", "Explicit critical medical symptom"
+    if contains_phrase(reason, FINANCIAL_PHRASES):
+        return "Financial", "Explicit financial constraint"
+    has_relocation = contains_phrase(reason, RELOCATION_PHRASES)
+    has_abandonment = contains_phrase(reason, ABANDONMENT_PHRASES)
+    if (
+        has_relocation and
+        contains_phrase(reason, CAREGIVER_ABSENCE_PHRASES) and
+        not contains_phrase(reason, URGENT_ABANDONMENT_PHRASES)
+    ):
+        return "Relocation", "Explicit relocation constraint"
+    if has_abandonment:
+        return "Abandonment Risk", "Explicit abandonment risk"
+    if has_relocation:
+        return "Relocation", "Explicit relocation constraint"
+    if has_medical_signal(reason):
+        return "Medical", "Explicit medical symptom"
+    return predicted_category, ""
 
 
 def apply_category_override(reason, predicted_category):
-    text = reason.lower()
-
-    # Explicit symptoms are safer and more precise than a low-confidence
-    # category prediction from short or informal owner messages.
-    if has_medical_signal(reason):
-        return "Medical"
-
-    relocation_words = [
-        "moving", "relocate", "relocating", "migration", "migrate",
-        "abroad", "leaving the country", "leaving philippines",
-        "alis", "aalis", "lilipat", "mag-aabroad", "ibang bansa",
-        "pilipinas", "france", "paris", "documents", "madadala",
-        "dalhin", "isama", "maisama", "hindi kayang dalhin",
-        "hindi namin kayang dalhin", "hindi madala", "hindi maisama",
-        "papuntang", "ibang lugar", "lumipat", "paglipat"
-    ]
-
-    if any(word in text for word in relocation_words):
-        return "Relocation"
-
-    return predicted_category
+    category, _ = resolve_category(reason, predicted_category)
+    return category
 
 
 def extract_keywords(reason):
@@ -278,7 +368,7 @@ def extract_keywords(reason):
     detected = []
 
     for word in important_words:
-        if word in text:
+        if contains_phrase(text, [word]):
             detected.append(word)
 
     return detected[:5]
@@ -288,10 +378,8 @@ def map_urgency(sentiment, category, reason):
     text = reason.lower()
 
     critical_phrases = [
-        "emergency", "immediately", "bleeding", "dying", "critical",
-        "cannot stand", "hit by", "attacked",
-        "nabangga", "namamatay", "hindi makatayo", "inatake",
-        "dumudugo", "nahihirapang huminga", "walang malay",
+        *CRITICAL_MEDICAL_PHRASES,
+        "emergency", "attacked", "inatake",
     ]
 
     if contains_phrase(text, critical_phrases):
@@ -330,27 +418,32 @@ def suggested_priority_from_urgency(urgency_label):
 def analyze_reason(reason):
     reason = reason.strip()
 
-    if not reason:
+    if is_insufficient_reason(reason):
         return {
             "sentiment": "Neutral",
             "category": "Other",
             "urgencyLabel": "Low",
             "urgencyScore": 10,
             "confidence": 0.0,
+            "sentimentConfidence": 0.0,
+            "categoryConfidence": 0.0,
+            "modelCategory": "Other",
+            "categoryAdjusted": False,
+            "categoryAdjustmentReason": "Insufficient meaningful text",
             "keywords": [],
             "suggestedPriority": "Normal Priority",
-            "source": (
-                MODEL_SOURCE_LABEL
-                if all(transformer_models.values())
-                else FALLBACK_SOURCE_LABEL
-            ),
+            "rulesVersion": RULES_VERSION,
+            "source": INSUFFICIENT_SOURCE_LABEL,
         }
 
     predictions = predict_sentiment_and_category(reason)
     sentiment, sentiment_confidence = predictions["sentiment"]
-    category, category_confidence = predictions["category"]
+    model_category, category_confidence = predictions["category"]
 
-    category = apply_category_override(reason, category)
+    category, adjustment_reason = resolve_category(reason, model_category)
+    category_adjusted = category != model_category
+    if not category_adjusted:
+        adjustment_reason = ""
 
     urgency_label, urgency_score = map_urgency(
         sentiment,
@@ -358,17 +451,21 @@ def analyze_reason(reason):
         reason
     )
 
-    confidence = round((sentiment_confidence + category_confidence) / 2, 2)
-
     return {
         "sentiment": sentiment,
         "category": category,
         "urgencyLabel": urgency_label,
         "urgencyScore": urgency_score,
-        "confidence": confidence,
+        "confidence": category_confidence,
+        "sentimentConfidence": sentiment_confidence,
+        "categoryConfidence": category_confidence,
+        "modelCategory": model_category,
+        "categoryAdjusted": category_adjusted,
+        "categoryAdjustmentReason": adjustment_reason,
         "keywords": extract_keywords(reason),
         "suggestedPriority": suggested_priority_from_urgency(urgency_label),
-        "source": predictions["source"]
+        "rulesVersion": RULES_VERSION,
+        "source": predictions["source"],
     }
 
 

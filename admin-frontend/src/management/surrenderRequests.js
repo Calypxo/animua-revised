@@ -101,7 +101,13 @@ async function getPublicSubmittedRequests() {
           category: request.nlp?.category || "Other",
           urgencyLabel: request.nlp?.urgencyLabel || "Low",
           urgencyScore: request.nlp?.urgencyScore ?? 20,
-          confidence: request.nlp?.confidence ?? 0.5,
+          confidence: request.nlp?.categoryConfidence ?? request.nlp?.confidence ?? 0.5,
+          sentimentConfidence: request.nlp?.sentimentConfidence ?? null,
+          categoryConfidence: request.nlp?.categoryConfidence ?? request.nlp?.confidence ?? 0.5,
+          modelCategory: request.nlp?.modelCategory || request.nlp?.category || "Other",
+          categoryAdjusted: request.nlp?.categoryAdjusted === true,
+          categoryAdjustmentReason: request.nlp?.categoryAdjustmentReason || "",
+          rulesVersion: request.nlp?.rulesVersion || "",
           keywords: Array.isArray(request.nlp?.keywords) ? request.nlp.keywords : [],
           suggestedPriority: request.nlp?.suggestedPriority || "Normal Priority",
           source: request.nlp?.source || "TF-IDF + Logistic Regression",
@@ -481,12 +487,22 @@ function renderDrawer(r) {
 
   const urgencyScore = Math.max(0, Math.min(100, Number(r.nlp.urgencyScore) || 0));
   const fill = URGENCY_FILL[r.nlp.urgencyLabel] || "fill-low";
-  const confPct = Math.max(0, Math.min(100, Math.round((Number(r.nlp.confidence) || 0) * 100)));
-  const confidenceNote = confPct >= 75
-    ? "Strong match"
-    : confPct >= 50
-      ? "Moderate match — verify with the message"
-      : "Low match — staff review needed";
+  const confPct = Math.max(0, Math.min(100, Math.round((Number(r.nlp.categoryConfidence ?? r.nlp.confidence) || 0) * 100)));
+  const insufficientText = /insufficient meaningful text/i.test(String(r.nlp.categoryAdjustmentReason || ""));
+  const confidenceNote = insufficientText
+    ? "Insufficient explanation — staff review needed"
+    : r.nlp.categoryAdjusted
+      ? "Rule-adjusted — verify with the message"
+      : confPct >= 75
+        ? "Strong category match"
+        : confPct >= 50
+          ? "Moderate category match — verify"
+          : "Low category match — staff review needed";
+  const confidenceDetail = insufficientText
+    ? "The submitted reason did not contain enough meaningful text for RoBERTa classification."
+    : r.nlp.categoryAdjusted
+      ? `RoBERTa suggested ${escapeHtml(r.nlp.modelCategory || "Other")}; ${escapeHtml(r.nlp.categoryAdjustmentReason || "a high-precision rule")} adjusted the displayed category.`
+      : "RoBERTa confidence in the displayed reason category.";
   const priority = r.nlp.suggestedPriority || "Normal Priority";
   const urgencyNote = {
     Critical: "Review immediately and check for an urgent welfare risk.",
@@ -533,7 +549,7 @@ function renderDrawer(r) {
             <span class="triage-signal-label">Analysis confidence</span>
             <strong>${confPct}%</strong>
             <small class="triage-signal-status">${confidenceNote}</small>
-            <p>How sure the automated analysis is about the category and tone.</p>
+            <p>${confidenceDetail}</p>
           </div>
         </div>
 

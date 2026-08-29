@@ -474,6 +474,9 @@ function validationMessage(field) {
   }
   if (field.id === "agreeAllTerms" && !field.checked) return "Confirm that you have read and agree to the surrender terms.";
   if (field.validity.valueMissing) return "This field is required before you continue.";
+  if (field.id === "reasons" && (field.validity.tooShort || field.value.trim().length < 15)) {
+    return "Please provide a meaningful explanation using at least 15 characters.";
+  }
   if (field.validity.typeMismatch) return "Enter a valid value in the requested format.";
   return "";
 }
