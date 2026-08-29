@@ -1,7 +1,11 @@
 const PYTHON_SENTIMENT_API_URL =
   process.env.PYTHON_SENTIMENT_API_URL ||
   "https://animua-sentiment-3wy62l2fta-as.a.run.app/analyze-surrender-sentiment";
-const SENTIMENT_TIMEOUT_MS = Number(process.env.PYTHON_SENTIMENT_TIMEOUT_MS || 15000);
+const DEFAULT_SENTIMENT_TIMEOUT_MS = 90000;
+const configuredTimeoutMs = Number(process.env.PYTHON_SENTIMENT_TIMEOUT_MS);
+const SENTIMENT_TIMEOUT_MS = Number.isFinite(configuredTimeoutMs) && configuredTimeoutMs > 0
+  ? configuredTimeoutMs
+  : DEFAULT_SENTIMENT_TIMEOUT_MS;
 
 const CATEGORY_RULES = [
   ["Medical", ["may sakit", "sugatan", "dumudugo", "gamot", "ospital", "nabangga", "cancer", "sick", "injured", "bleeding"]],
@@ -102,6 +106,7 @@ async function analyzeSurrenderReason(reason, fetchImpl = globalThis.fetch) {
 
 module.exports = {
   PYTHON_SENTIMENT_API_URL,
+  SENTIMENT_TIMEOUT_MS,
   analyzeSurrenderReason,
   buildFallbackAnalysis,
   isValidAnalysis,

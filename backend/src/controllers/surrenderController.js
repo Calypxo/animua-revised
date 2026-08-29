@@ -409,6 +409,59 @@ async function getAllSurrenderRequests(req, res) {
   }
 }
 
+async function reanalyzeSurrenderRequest(req, res) {
+  try {
+    if (!isAdminOrStaff(req.user)) {
+      return res.status(403).json({
+        message: "Only Admin or Staff can rerun surrender analysis.",
+      });
+    }
+
+    const { id } = req.params;
+    const requestRef = db.collection(COLLECTION_NAME).doc(id);
+    const requestDoc = await requestRef.get();
+
+    if (!requestDoc.exists) {
+      return res.status(404).json({
+        message: "Surrender request not found.",
+      });
+    }
+
+    const surrenderReason = String(requestDoc.data()?.surrenderReason || "").trim();
+    if (!surrenderReason) {
+      return res.status(400).json({
+        message: "This request has no surrender reason to analyze.",
+      });
+    }
+
+    const analysis = await analyzeSurrenderReason(surrenderReason);
+    if (/node fallback/i.test(String(analysis?.source || ""))) {
+      return res.status(503).json({
+        message: "Tagalog RoBERTa is still starting or unavailable. The existing analysis was kept; please retry shortly.",
+      });
+    }
+
+    const nlpAnalyzedAt = new Date().toISOString();
+    await requestRef.update({
+      nlp: analysis,
+      nlpAnalyzedAt,
+    });
+
+    return res.json({
+      message: "Tagalog RoBERTa analysis completed.",
+      nlp: analysis,
+      nlpAnalyzedAt,
+    });
+  } catch (error) {
+    console.error("Reanalyze surrender request error:", error);
+
+    return res.status(500).json({
+      message: "Failed to rerun Tagalog RoBERTa analysis.",
+      error: error.message,
+    });
+  }
+}
+
 async function getMySurrenderRequests(req, res) {
   try {
     await reconcileRequestDeadlines("surrender");
@@ -773,6 +826,7 @@ module.exports = {
   updateSurrenderAvailability,
   createSurrenderRequest,
   getAllSurrenderRequests,
+  reanalyzeSurrenderRequest,
   getMySurrenderRequests,
   scheduleMySurrenderAppointment,
   approveSurrenderReschedule,

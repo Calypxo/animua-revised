@@ -3,6 +3,7 @@ const assert = require("node:assert/strict");
 
 const {
   PYTHON_SENTIMENT_API_URL,
+  SENTIMENT_TIMEOUT_MS,
   analyzeSurrenderReason,
   buildFallbackAnalysis,
 } = require("../src/services/surrenderNlpService");
@@ -12,6 +13,10 @@ test("uses the deployed Cloud Run surrender sentiment service by default", () =>
     PYTHON_SENTIMENT_API_URL,
     "https://animua-sentiment-3wy62l2fta-as.a.run.app/analyze-surrender-sentiment"
   );
+});
+
+test("allows enough time for a scaled-to-zero RoBERTa cold start", () => {
+  assert.equal(SENTIMENT_TIMEOUT_MS, 90000);
 });
 
 test("returns a valid Tagalog service response unchanged", async () => {

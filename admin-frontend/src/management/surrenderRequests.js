@@ -495,6 +495,7 @@ function renderDrawer(r) {
     Low: "No urgent risk was detected, but staff should still verify the request.",
   }[r.nlp.urgencyLabel] || "Review the owner's message before making a decision.";
   const keywords = Array.isArray(r.nlp.keywords) ? r.nlp.keywords : [];
+  const usesNodeFallback = /node fallback/i.test(String(r.nlp.source || ""));
 
   // ── Plain-language automated triage section ──────────
   const nlpSection = `
@@ -558,7 +559,14 @@ function renderDrawer(r) {
         <div class="triage-disclaimer">
           <i class="bi bi-info-circle" aria-hidden="true"></i>
           <span><strong>Decision support only.</strong> Confirm the result against the owner's message before acting.</span>
-          <small>Analyzed by ${escapeHtml(r.nlp.source || "automated text analysis")}</small>
+          <div class="triage-analysis-source">
+            <small>Analyzed by ${escapeHtml(r.nlp.source || "automated text analysis")}</small>
+            ${usesNodeFallback ? `
+              <button class="triage-reanalyze-btn" id="reanalyzeSurrenderBtn" type="button">
+                <i class="bi bi-stars" aria-hidden="true"></i>
+                Run Tagalog RoBERTa
+              </button>` : ""}
+          </div>
         </div>
       </div>
 
@@ -881,6 +889,46 @@ function renderDrawer(r) {
   document.getElementById("drawerApproveRescheduleBtn")?.addEventListener("click", () => openAttendanceWorkflow(r.id, "reschedule/approve"));
   document.getElementById("drawerRejectRescheduleBtn")?.addEventListener("click", () => openAttendanceWorkflow(r.id, "reschedule/reject"));
   document.getElementById("drawerConvertBtn")?.addEventListener("click", () => beginSurrenderIntake(r.id));
+  document.getElementById("reanalyzeSurrenderBtn")?.addEventListener("click", () => reanalyzeSurrenderRequest(r.id));
+}
+
+async function reanalyzeSurrenderRequest(id) {
+  const button = document.getElementById("reanalyzeSurrenderBtn");
+  if (button?.disabled) return;
+
+  if (button) {
+    button.disabled = true;
+    button.innerHTML = '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> Starting RoBERTa...';
+  }
+
+  try {
+    const response = await fetch(`${SURRENDER_REQUESTS_API_URL}/${encodeURIComponent(id)}/reanalyze`, {
+      method: "POST",
+      credentials: "include",
+    });
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Unable to run Tagalog RoBERTa analysis.");
+    }
+
+    const request = allRequests.find(item => item.id === id);
+    if (request) {
+      request.nlp = { ...request.nlp, ...data.nlp };
+      request.nlpAnalyzedAt = data.nlpAnalyzedAt || null;
+      renderStats();
+      applyFilters();
+      renderDrawer(request);
+    }
+
+    showToast("success", data.message || "Tagalog RoBERTa analysis completed.");
+  } catch (error) {
+    showToast("error", error.message || "Unable to run Tagalog RoBERTa analysis.");
+    if (button?.isConnected) {
+      button.disabled = false;
+      button.innerHTML = '<i class="bi bi-stars" aria-hidden="true"></i> Run Tagalog RoBERTa';
+    }
+  }
 }
 
 async function updateSurrenderStatusInBackend(id, payload) {

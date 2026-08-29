@@ -1638,6 +1638,38 @@
   text-align: right;
 }
 
+.surrender-requests-page .triage-analysis-source {
+  display: grid;
+  justify-items: end;
+  gap: 7px;
+}
+
+.surrender-requests-page .triage-reanalyze-btn {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 11px;
+  border: 1px solid #780116;
+  border-radius: 9px;
+  color: #FFFFFF;
+  background: #780116;
+  font-size: 10px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.surrender-requests-page .triage-reanalyze-btn:hover:not(:disabled),
+.surrender-requests-page .triage-reanalyze-btn:focus-visible {
+  background: #650112;
+}
+
+.surrender-requests-page .triage-reanalyze-btn:disabled {
+  opacity: .68;
+  cursor: wait;
+}
+
 @media (max-width: 720px) {
   .surrender-requests-page .triage-callout {
     grid-template-columns: auto minmax(0, 1fr);
@@ -1663,6 +1695,11 @@
   .surrender-requests-page .triage-disclaimer small {
     grid-column: 2;
     text-align: left;
+  }
+
+  .surrender-requests-page .triage-analysis-source {
+    grid-column: 2;
+    justify-items: start;
   }
 }
 

@@ -10,6 +10,7 @@ const {
   updateSurrenderAvailability,
   createSurrenderRequest,
   getAllSurrenderRequests,
+  reanalyzeSurrenderRequest,
   getMySurrenderRequests,
   scheduleMySurrenderAppointment,
   approveSurrenderReschedule,
@@ -53,6 +54,13 @@ router.get(
   authenticateToken,
   authorizeRole("Admin", "Staff"),
   getAllSurrenderRequests
+);
+
+router.post(
+  "/:id/reanalyze",
+  authenticateToken,
+  authorizeRole("Admin", "Staff"),
+  reanalyzeSurrenderRequest
 );
 
 // Admin/Staff updates request status
