@@ -2,7 +2,9 @@ import { API_BASE_URL } from "../../utils/api.js";
 import { optimizedPublicImageUrl } from "../../utils/image.js";
 import { ensureUserSession, hasUserSession } from "../../utils/storage.js";
 import {
+  applicationCompatibilityPresentation,
   mergeSubmissionResults,
+  submissionDisplayStatus,
   submissionLoadErrorMessage,
 } from "./mySubmissionsState.js";
 
@@ -167,7 +169,7 @@ function statusClass(status) {
   const normalized = String(status || "").toLowerCase();
 
   if (normalized.includes("review") || normalized.includes("assessment")) return "review";
-  if (normalized.includes("approved") || normalized.includes("accepted")) return "approved";
+  if (normalized.includes("approved") || normalized.includes("accepted") || normalized.includes("confirmed")) return "approved";
   if (normalized.includes("converted")) return "converted";
   if (normalized.includes("finalized")) return "finalized";
   if (normalized.includes("received")) return "received";
@@ -179,7 +181,7 @@ function statusClass(status) {
 function iconForStatus(status) {
   const normalized = String(status || "").toLowerCase();
 
-  if (normalized.includes("approved") || normalized.includes("accepted") || normalized.includes("converted") || normalized.includes("finalized")) {
+  if (normalized.includes("approved") || normalized.includes("accepted") || normalized.includes("confirmed") || normalized.includes("converted") || normalized.includes("finalized")) {
     return "fa-solid fa-check";
   }
 
@@ -404,6 +406,7 @@ function renderSubmissionCard(item, index = 0) {
   const typeLabel = item.type === "adoption" ? "Adoption" : "Surrender";
   const typeIcon = item.type === "adoption" ? "fa-regular fa-heart" : "fa-regular fa-hand";
   const status = cleanStatus(item.status, item.type);
+  const displayStatus = submissionDisplayStatus(item, status);
   const metaParts = [item.sex, item.species, item.age].filter(Boolean);
   const safeName = escapeHtml(item.name);
   const safeReference = escapeHtml(item.reference);
@@ -431,9 +434,9 @@ function renderSubmissionCard(item, index = 0) {
       </div>
       <div class="submission-badges">
         <span class="submission-type ${item.type}"><i class="${typeIcon}" aria-hidden="true"></i>${typeLabel}</span>
-        <span class="submission-status ${statusClass(status)}">
-          <i class="${iconForStatus(status)}" aria-hidden="true"></i>
-          ${escapeHtml(status)}
+        <span class="submission-status ${statusClass(displayStatus)}">
+          <i class="${iconForStatus(displayStatus)}" aria-hidden="true"></i>
+          ${escapeHtml(displayStatus)}
         </span>
       </div>
       <button type="button" class="submission-details-btn" data-submission-id="${safeId}">
@@ -458,13 +461,6 @@ submissionsList?.addEventListener("error", (event) => {
 function valueOrFallback(value, fallback = "Not provided") {
   const text = String(value ?? "").trim();
   return text || fallback;
-}
-
-function getCompatibilityLabel(item) {
-  const percent = item.details?.compatibility?.matchPercent;
-  if (typeof percent === "number") return `${percent}% Match`;
-  if (String(item.status || "").toLowerCase().includes("reject")) return "Needs Review";
-  return "Good Match";
 }
 
 function getApplicationMessage(status) {
@@ -522,6 +518,19 @@ function getScheduleDate(schedule, fallbackValue) {
 
 function hasScheduleValue(schedule, fallbackValue) {
   return Boolean(schedule?.date || fallbackValue || schedule?.time);
+}
+
+function hasConfirmedAttendance(details = {}, kind = "adoption") {
+  if (!details.arrivalConfirmedAt) return false;
+
+  // Older surrender records can contain an arrival flag without ever having
+  // an appointment. Keep scheduling available for those inconsistent records
+  // instead of presenting an unscheduled request as already completed.
+  if (kind === "surrender") {
+    return hasScheduleValue(details.surrenderAppointment);
+  }
+
+  return true;
 }
 
 function hasUsedReschedule(schedule) {
@@ -736,9 +745,12 @@ function renderAttendanceDeadline(item, kind) {
     || addDays(getDecisionDate(kind, item), 14);
   const status = String(details.status || item?.status || "").toLowerCase();
   const isExpired = status.includes("expired");
-  const isComplete = Boolean(details.arrivalConfirmedAt)
+  const isComplete = hasConfirmedAttendance(details, kind)
     || status.includes("finalized")
     || status.includes("converted");
+  const hasUnscheduledArrivalFlag = kind === "surrender"
+    && Boolean(details.arrivalConfirmedAt)
+    && !hasScheduleValue(details.surrenderAppointment);
   const now = new Date();
   now.setHours(0, 0, 0, 0);
   deadline.setHours(23, 59, 59, 999);
@@ -749,7 +761,9 @@ function renderAttendanceDeadline(item, kind) {
     ? "Arrival confirmed"
     : isExpired
       ? "Expired \u2014 No Show"
-      : details.deadlineStatus || (daysLeft === 1 ? "1 day remaining" : `${daysLeft} days remaining`);
+      : hasUnscheduledArrivalFlag
+        ? "Awaiting appointment"
+        : details.deadlineStatus || (daysLeft === 1 ? "1 day remaining" : `${daysLeft} days remaining`);
   const message = isComplete
     ? `Your shelter ${appointmentName} attendance has been confirmed.`
     : isExpired
@@ -774,10 +788,11 @@ function renderAttendanceDeadline(item, kind) {
 function renderApprovedAdoptionNextSteps(item) {
   const details = item.details || {};
   const schedule = details.pickupSchedule || {};
+  const arrivalConfirmed = hasConfirmedAttendance(details, "adoption");
   const scheduleDate = getScheduleDate(schedule, details.adoptionDate);
   const hasSchedule = hasScheduleValue(schedule);
   const rescheduleCount = getScheduleRescheduleCount(schedule);
-  const canReschedule = hasSchedule && rescheduleCount < 2;
+  const canReschedule = hasSchedule && rescheduleCount < 2 && !arrivalConfirmed;
   const scheduleLabel = scheduleDate
     ? `${formatScheduleValue(scheduleDate, "Not scheduled")} ${scheduleTimeOrFallback(schedule)}`
     : "Not scheduled yet";
@@ -786,7 +801,7 @@ function renderApprovedAdoptionNextSteps(item) {
     <div class="approved-next-steps adoption-next-steps">
       <div class="approved-message">
         <i class="fa-solid fa-check"></i>
-        <p><strong>Congratulations, your application has been approved.</strong>You may now schedule a pickup date and time to bring your new companion home.</p>
+        <p><strong>${arrivalConfirmed ? "Your pet pickup has been confirmed." : "Congratulations, your application has been approved."}</strong>${arrivalConfirmed ? "Shelter staff have recorded your pickup attendance." : "You may now schedule a pickup date and time to bring your new companion home."}</p>
       </div>
       ${renderAttendanceDeadline(item, "adoption")}
       ${renderScheduleFeedback(item)}
@@ -795,10 +810,10 @@ function renderApprovedAdoptionNextSteps(item) {
         <header>
           <span><i class="fa-regular fa-calendar-days"></i></span>
           <div>
-            <h3>Schedule Pet Pickup</h3>
-            <p>Choose a convenient date and time to pick up ${escapeHtml(item.name)} from the shelter.</p>
+            <h3>${arrivalConfirmed ? "Pet Pickup Details" : "Schedule Pet Pickup"}</h3>
+            <p>${arrivalConfirmed ? `Your confirmed pickup details for ${escapeHtml(item.name)}.` : `Choose a convenient date and time to pick up ${escapeHtml(item.name)} from the shelter.`}</p>
           </div>
-          ${hasSchedule ? `
+          ${hasSchedule && !arrivalConfirmed ? `
             <button
               type="button"
               data-schedule-kind="adoption"
@@ -827,8 +842,14 @@ function renderApprovedAdoptionNextSteps(item) {
           </article>
         </div>
       </section>
-      ${!hasSchedule ? '<div class="schedule-card-action-row"><button type="button" class="schedule-card-primary-btn" data-schedule-kind="adoption">Schedule Pickup</button></div>' : ""}
-      ${hasSchedule ? renderPickupRescheduleWarning(rescheduleCount) : ""}
+      ${!hasSchedule && !arrivalConfirmed ? '<div class="schedule-card-action-row"><button type="button" class="schedule-card-primary-btn" data-schedule-kind="adoption">Schedule Pickup</button></div>' : ""}
+      ${hasSchedule && !arrivalConfirmed ? renderPickupRescheduleWarning(rescheduleCount) : ""}
+      ${arrivalConfirmed ? `
+        <div class="schedule-feedback saved">
+          <i class="fa-solid fa-check"></i>
+          <p><strong>Pet pickup confirmed</strong>Shelter staff can now finalize the adoption record.</p>
+        </div>
+      ` : ""}
     </div>
   `;
 }
@@ -836,11 +857,11 @@ function renderApprovedAdoptionNextSteps(item) {
 function renderAcceptedSurrenderNextSteps(item) {
   const details = item.details || {};
   const appointment = details.surrenderAppointment || {};
-  const arrivalConfirmed = Boolean(details.arrivalConfirmedAt);
+  const arrivalConfirmed = hasConfirmedAttendance(details, "surrender");
   const scheduleDate = getScheduleDate(appointment, details.dropoffDate);
   const hasSchedule = hasScheduleValue(appointment);
-  const canReschedule = hasSchedule && !hasUsedReschedule(appointment);
   const pendingReschedule = getPendingReschedule(details, "surrenderRescheduleRequest");
+  const canReschedule = hasSchedule && !hasUsedReschedule(appointment) && !pendingReschedule;
   const scheduleLabel = scheduleDate
     ? `${formatScheduleValue(scheduleDate, "Not scheduled")} ${scheduleTimeOrFallback(appointment)}`
     : "Not scheduled yet";
@@ -849,7 +870,7 @@ function renderAcceptedSurrenderNextSteps(item) {
     <div class="approved-next-steps surrender-next-steps">
       <div class="approved-message">
         <i class="fa-solid fa-check"></i>
-        <p><strong>Congratulations, your surrender request has been accepted.</strong>You may now schedule an appointment to bring ${escapeHtml(item.name)} to the shelter.</p>
+        <p><strong>${arrivalConfirmed ? "Your surrender drop-off has been confirmed." : "Congratulations, your surrender request has been accepted."}</strong>${arrivalConfirmed ? "Shelter staff have recorded your drop-off attendance." : `You may now schedule an appointment to bring ${escapeHtml(item.name)} to the shelter.`}</p>
       </div>
       ${renderAttendanceDeadline(item, "surrender")}
 
@@ -857,10 +878,16 @@ function renderAcceptedSurrenderNextSteps(item) {
         <header>
           <span><i class="fa-regular fa-calendar-days"></i></span>
           <div>
-            <h3>Schedule Surrender Appointment</h3>
-            <p>Choose a date and time to bring ${escapeHtml(item.name)} to the shelter for turnover.</p>
+            <h3>${arrivalConfirmed ? "Surrender Drop-off Details" : "Schedule Surrender Appointment"}</h3>
+            <p>${arrivalConfirmed ? `Your confirmed drop-off details for ${escapeHtml(item.name)}.` : `Choose a date and time to bring ${escapeHtml(item.name)} to the shelter for turnover.`}</p>
           </div>
-          ${hasSchedule && canReschedule && !arrivalConfirmed ? `<button type="button" data-schedule-kind="surrender">Request Re-sched</button>` : ""}
+          ${!arrivalConfirmed && (!hasSchedule || canReschedule) ? `
+            <button
+              type="button"
+              class="${!hasSchedule ? "schedule-card-primary-btn" : ""}"
+              data-schedule-kind="surrender"
+            >${hasSchedule ? "Request Re-sched" : "Schedule Appointment"}</button>
+          ` : ""}
         </header>
         <div class="schedule-info-grid">
           <article>
@@ -884,7 +911,6 @@ function renderAcceptedSurrenderNextSteps(item) {
           </article>
         </div>
       </section>
-      ${!hasSchedule && !arrivalConfirmed ? '<div class="schedule-card-action-row"><button type="button" class="schedule-card-primary-btn" data-schedule-kind="surrender">Schedule Appointment</button></div>' : ""}
       ${!arrivalConfirmed ? renderPendingReschedule(pendingReschedule, "Appointment reschedule request") : ""}
       ${arrivalConfirmed ? `
         <div class="schedule-feedback saved">
@@ -1398,6 +1424,7 @@ async function showSubmissionDetails(item) {
   const Swal = await getSwal();
   if (item.type !== "adoption") {
     const status = cleanStatus(item.status, item.type);
+    const displayStatus = submissionDisplayStatus(item, status);
     const isAccepted = isApprovedDecision(status, "surrender");
     const submittedDate = formatDate(item.submittedAt);
     const metaParts = [item.sex, item.species, item.age].filter(Boolean);
@@ -1441,9 +1468,9 @@ async function showSubmissionDetails(item) {
               </div>
               <div class="application-reference">Reference: <strong>${escapeHtml(item.reference)}</strong></div>
             </div>
-            <span class="application-modal-status submission-status ${statusClass(status)}">
-              <i class="${iconForStatus(status)}"></i>
-              ${escapeHtml(status)}
+            <span class="application-modal-status submission-status ${statusClass(displayStatus)}">
+              <i class="${iconForStatus(displayStatus)}"></i>
+              ${escapeHtml(displayStatus)}
             </span>
           </div>
 
@@ -1536,12 +1563,14 @@ async function showSubmissionDetails(item) {
   }
 
   const status = cleanStatus(item.status, item.type);
+  const displayStatus = submissionDisplayStatus(item, status);
   const submittedDate = formatDate(item.submittedAt);
   const metaParts = [item.sex, item.species, item.age].filter(Boolean);
   const details = item.details || {};
   const applicant = details.applicant || {};
   const homeType = valueOrFallback(applicant.address);
   const petExperience = valueOrFallback(details.other_information?.existing_pets, "Not provided");
+  const compatibilityPresentation = applicationCompatibilityPresentation(details);
   const isApproved = isApprovedDecision(status, "adoption");
   const decisionDate = formatDate(details.approvedDate || details.approvedAt || details.acceptedDate || details.acceptedAt || details.updatedAt || item.submittedAt);
 
@@ -1576,9 +1605,9 @@ async function showSubmissionDetails(item) {
             </div>
             <div class="application-reference">Reference: <strong>${escapeHtml(item.reference)}</strong></div>
           </div>
-          <span class="application-modal-status submission-status ${statusClass(status)}">
-            <i class="${iconForStatus(status)}"></i>
-            ${escapeHtml(status)}
+          <span class="application-modal-status submission-status ${statusClass(displayStatus)}">
+            <i class="${iconForStatus(displayStatus)}"></i>
+            ${escapeHtml(displayStatus)}
           </span>
         </div>
 
@@ -1614,7 +1643,7 @@ async function showSubmissionDetails(item) {
               <span><i class="fa-solid fa-heart"></i></span>
               <div>
                 <strong>Compatibility</strong>
-                <p class="application-match"><i class="fa-solid fa-check"></i>${escapeHtml(getCompatibilityLabel(item))}</p>
+                <p class="application-match ${compatibilityPresentation.stateClass}" aria-label="${escapeHtml(compatibilityPresentation.accessibleLabel || compatibilityPresentation.label)}"><i class="${compatibilityPresentation.iconClass}" aria-hidden="true"></i>${escapeHtml(compatibilityPresentation.label)}</p>
               </div>
             </article>
           </div>

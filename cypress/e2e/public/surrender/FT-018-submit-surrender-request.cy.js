@@ -40,7 +40,7 @@ describe("FT-018 — Submit Surrender Request", () => {
     });
 
     cy.get("#surrenderSuccessPanel").should("be.visible");
-    cy.then(() => cy.get("#submittedRequestId").should("have.text", requestId));
+    cy.get("#submittedRequestId").should("not.exist");
 
     cy.intercept("GET", "**/api/adoptions/my-applications").as("myAdoptions");
     cy.intercept("GET", "**/api/surrenders/my-requests").as("mySurrenders");

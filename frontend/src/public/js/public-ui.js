@@ -5,6 +5,7 @@ import { API_BASE_URL } from "../../utils/api.js";
 import { optimizedPublicImageUrl } from "../../utils/image.js";
 import { auth } from "../../utils/firebase.js";
 import { signOut } from "firebase/auth";
+import { deduplicateEventStories } from "./event-story-utils.js";
 import {
   clearUserSession,
   endUserSession,
@@ -718,6 +719,7 @@ function setupHomeStories() {
   let activeStoryIndex = 0;
   let activeStoryDeck = [];
   let storyAdvanceTimer = null;
+  let storyImageLoadVersion = 0;
   const STORY_AUTO_ADVANCE_MS = 7000;
   const STORY_FRESH_DAYS = 14;
   const STORY_FRESH_MS = STORY_FRESH_DAYS * 24 * 60 * 60 * 1000;
@@ -999,6 +1001,9 @@ function setupHomeStories() {
     const paragraphs = getAnnouncementParagraphs(item);
     const intro = paragraphs[0] || item.caption || item.description || "Official ANIMUA community update.";
     const image = getAnnouncementImage(item, type);
+    const imageFocus = /ciac.*paws\s*(?:&|and)\s*claws.*pet\s+day/i.test(title)
+      ? "person-right"
+      : "";
 
     return {
       id: item.id || item.slug || title,
@@ -1008,6 +1013,7 @@ function setupHomeStories() {
       date: formatStoryDate(getAnnouncementStoryDate(item)),
       image,
       imageAlt: `${title} cover`,
+      imageFocus,
       intro,
       source: item.source || "ANIMUA City Government",
       photoCredit: image ? "Official ANIMUA update" : "",
@@ -1142,7 +1148,31 @@ function setupHomeStories() {
     storyModalCard.classList.add("is-story-playing");
   };
 
+  const updateStoryImage = (config = {}) => {
+    if (!storyModalImage) return;
+
+    const source = config.image || "";
+    const loadVersion = ++storyImageLoadVersion;
+    storyModalImage.classList.add("is-story-image-loading");
+    storyModalImage.alt = config.imageAlt || config.title || "";
+
+    const revealLoadedImage = () => {
+      if (loadVersion !== storyImageLoadVersion) return;
+      storyModalImage.classList.remove("is-story-image-loading");
+    };
+
+    storyModalImage.onload = revealLoadedImage;
+    setOptimizedImageSource(storyModalImage, source, 900);
+
+    if (!source) {
+      revealLoadedImage();
+    } else if (storyModalImage.complete && storyModalImage.naturalWidth) {
+      window.requestAnimationFrame(revealLoadedImage);
+    }
+  };
+
   const applyStoryConfig = (key, config, progressCount = 1, progressIndex = 0) => {
+    updateStoryImage(config);
     storyModalCard.dataset.storyKey = key;
     if (config.imageFocus) {
       storyModalCard.dataset.storyImageFocus = config.imageFocus;
@@ -1152,10 +1182,6 @@ function setupHomeStories() {
     renderStoryProgress(progressCount, progressIndex);
     updateStoryNavigation(progressCount);
 
-    if (storyModalImage) {
-      setOptimizedImageSource(storyModalImage, config.image || "", 900);
-      storyModalImage.alt = config.imageAlt || config.title || "";
-    }
     if (storyModalAvatar) {
       const avatarImage = config.avatarImage || config.image || "";
       setOptimizedImageSource(storyModalAvatar, avatarImage, 180);
@@ -1318,10 +1344,12 @@ function setupHomeStories() {
           throw new Error(`Events request failed with status ${response.status}.`);
         }
 
-        upcomingEvents = [
+        upcomingEvents = deduplicateEventStories([
           ...announcementEvents,
           ...normalizeEvents(await response.json())
-        ].slice(0, 4);
+        ])
+          .sort((a, b) => getEventDateValue(a) - getEventDateValue(b))
+          .slice(0, 4);
         if (upcomingEvents.length) {
           return upcomingEvents;
         }

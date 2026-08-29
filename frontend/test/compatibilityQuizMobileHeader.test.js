@@ -115,7 +115,7 @@ test("the 1024px iPad uses the desktop visual treatment only at that exact width
   );
   assert.match(
     quizStyles,
-    /iPad Pro portrait only:[\s\S]*?\.phase-step.active span\s*\{[\s\S]*?border:\s*1px solid rgba\(241, 192, 69, 0\.46\)\s*!important;[\s\S]*?background:\s*#fff8df\s*!important;/,
+    /Active quiz step: the filled number circle is the complete indicator\.[\s\S]*?\.phase-step\.active\s*\{[\s\S]*?background:\s*transparent\s*!important;[\s\S]*?box-shadow:\s*none\s*!important;[\s\S]*?\.phase-step\.active span\s*\{[\s\S]*?border-color:\s*transparent\s*!important;[\s\S]*?background:\s*transparent\s*!important;/,
   );
   assert.doesNotMatch(
     quizStyles,

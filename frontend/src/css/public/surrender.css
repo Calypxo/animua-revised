@@ -224,7 +224,6 @@
 .surrender-page .surrender-form-heading h2 { margin: 0; color: var(--sr-ink); font-size: clamp(1.7rem, 3vw, 2.55rem) !important; line-height: 1.05; }
 .surrender-form-heading p { margin: 10px 0 0; color: var(--sr-muted); font-size: .82rem; line-height: 1.55; }
 .form-save-note { display: inline-flex; align-items: center; gap: 8px; flex: 0 0 auto; padding: 8px 11px; border: 1px solid #cfe2d6; border-radius: 999px; color: var(--sr-green); background: var(--sr-green-soft); font-size: .66rem; font-weight: 850; }
-.mobile-form-progress { display: none; }
 .form-feedback { display: flex; align-items: flex-start; gap: 10px; margin: 22px 28px 0; padding: 13px 15px; border: 1px solid #e6c9bd; border-radius: 10px; color: #7c2b22; background: #fff2ed; font-size: .78rem; line-height: 1.5; }
 .form-feedback.is-info { color: #31586b; border-color: #cbdde4; background: #eef5f7; }
 .surrender-page .surrender-form { padding: clamp(22px, 3vw, 34px); }
@@ -420,6 +419,11 @@
 .review-summary article > span { color: #8b7b73; font-size: .62rem; font-weight: 850; letter-spacing: .07em; text-transform: uppercase; }
 .review-summary strong { display: block; margin-top: 7px; overflow: hidden; color: var(--sr-ink); font-size: .82rem; text-overflow: ellipsis; white-space: nowrap; }
 .review-summary p { margin: 5px 0 0; color: var(--sr-muted); font-size: .72rem; line-height: 1.45; }
+.review-summary #reviewOwnerContact {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
 .review-summary .review-reason { grid-column: 1 / -1; }
 .review-summary .review-reason p { max-height: 100px; overflow: auto; white-space: pre-wrap; }
 .waiver-card { margin-top: 22px; overflow: hidden; border: 1px solid var(--sr-line); border-radius: 12px; background: #fff; }
@@ -445,9 +449,6 @@
 .surrender-success-panel .section-label { justify-content: center; }
 .surrender-success-panel h2 { max-width: 660px; margin: 4px auto 0; color: var(--sr-ink); font-size: clamp(1.8rem, 3.4vw, 2.8rem); line-height: 1.08; }
 .surrender-success-panel > p { max-width: 650px; margin: 14px auto 0; color: var(--sr-muted); line-height: 1.6; }
-.success-request-id { width: min(100%, 430px); display: flex; align-items: center; justify-content: space-between; gap: 20px; margin: 24px auto 0; padding: 15px 18px; border: 1px solid var(--sr-line); border-radius: 10px; background: var(--sr-paper); text-align: left; }
-.success-request-id span { color: #86776f; font-size: .67rem; font-weight: 850; text-transform: uppercase; }
-.success-request-id strong { color: var(--sr-red); font-family: "DM Mono", monospace; font-size: .86rem; }
 .success-next-steps { width: min(100%, 580px); margin: 18px auto 0; padding: 18px 22px; border-left: 4px solid var(--sr-gold); background: #fff8df; text-align: left; }
 .success-next-steps p { margin: 0; color: #55451f; }
 .success-next-steps ol { margin: 9px 0 0; padding-left: 19px; color: #6c5c37; font-size: .76rem; line-height: 1.7; }
@@ -473,11 +474,6 @@
   .surrender-step-nav { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; }
   .surrender-step-link { grid-template-columns: 28px 1fr; }
   .surrender-step-link small { display: none; }
-  .mobile-form-progress { display: block; padding: 16px 22px; border-bottom: 1px solid var(--sr-line); background: #fff9f4; }
-  .mobile-form-progress > div:first-child { display: flex; justify-content: space-between; gap: 14px; color: var(--sr-muted); font-size: .72rem; }
-  .mobile-form-progress strong { color: var(--sr-red-dark); }
-  .form-progress-track { height: 5px; margin-top: 10px; overflow: hidden; border-radius: 999px; background: #e9ddd4; }
-  .form-progress-track span { display: block; width: 25%; height: 100%; border-radius: inherit; background: var(--sr-red); transition: width .2s ease; }
 }
 
 @media (max-width: 700px) {
@@ -521,7 +517,6 @@
   .waiver-card > header > span { width: 34px; height: 34px; }
   .surrender-page .waiver-box { padding: 17px; }
   .surrender-page .agreement-option { margin-inline: 14px; }
-  .success-request-id { align-items: flex-start; flex-direction: column; gap: 5px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -578,7 +573,6 @@ body.surrender-page .surrender-workspace.is-auth-required {
 
 body.surrender-page .surrender-workspace.is-auth-required .surrender-progress-rail,
 body.surrender-page .surrender-workspace.is-auth-required .surrender-form-heading,
-body.surrender-page .surrender-workspace.is-auth-required .mobile-form-progress,
 body.surrender-page .surrender-workspace.is-auth-required .form-feedback,
 body.surrender-page .surrender-workspace.is-auth-required .surrender-form,
 body.surrender-page .surrender-workspace.is-auth-required .surrender-success-panel,
@@ -647,7 +641,6 @@ body.surrender-page .surrender-auth-panel .btn {
 
 body.surrender-page .surrender-workspace.is-not-accepting .surrender-progress-rail,
 body.surrender-page .surrender-workspace.is-not-accepting .surrender-form-heading,
-body.surrender-page .surrender-workspace.is-not-accepting .mobile-form-progress,
 body.surrender-page .surrender-workspace.is-not-accepting .form-feedback,
 body.surrender-page .surrender-workspace.is-not-accepting .surrender-form,
 body.surrender-page .surrender-workspace.is-not-accepting .surrender-success-panel {
@@ -3282,8 +3275,7 @@ body.surrender-page .check-option,
 body.surrender-page .waiver-card,
 body.surrender-page .waiver-box,
 body.surrender-page .agreement-option,
-body.surrender-page .review-summary article,
-body.surrender-page .success-request-id {
+body.surrender-page .review-summary article {
   border-color: var(--sr-line) !important;
   background: rgba(255, 253, 249, 0.92) !important;
 }
@@ -4908,15 +4900,104 @@ body.home-page.surrender-page .surrender-workspace.is-auth-required .surrender-a
   }
 }
 
-/* Custom surrender selects use the same yellow accessibility state as inputs. */
-body.home-page.surrender-page .surrender-select-menu:is(.is-open, :focus-within) .surrender-select-trigger {
-  border-color: rgba(241, 192, 69, 0.92) !important;
+/* Keep custom select feedback visible without the former double focus ring. */
+body.surrender-page .surrender-form.is-submitting {
+  pointer-events: none !important;
+}
+
+body.home-page.surrender-page .surrender-select-menu:not(.is-disabled, .is-open) .surrender-select-trigger:hover {
+  border-color: rgba(215, 164, 47, 0.68) !important;
   background: #fffdf8 !important;
-  outline: 3px solid rgba(241, 192, 69, 0.92) !important;
-  outline-offset: 3px !important;
-  box-shadow: 0 0 0 5px rgba(114, 27, 20, 0.18) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(241, 192, 69, 0.12) !important;
+}
+
+body.home-page.surrender-page .surrender-select-menu:is(.is-open, :focus-within) .surrender-select-trigger {
+  border-color: rgba(207, 151, 25, 0.82) !important;
+  background: #fffdf8 !important;
+  outline: 2px solid rgba(241, 192, 69, 0.34) !important;
+  outline-offset: 1px !important;
+  box-shadow: 0 4px 12px rgba(75, 43, 33, 0.08) !important;
 }
 
 body.home-page.surrender-page .surrender-select-menu.is-open .surrender-select-options {
-  border-color: rgba(241, 192, 69, 0.82) !important;
+  border-color: rgba(215, 164, 47, 0.42) !important;
+}
+
+body.home-page.surrender-page .surrender-select-options button:is(.is-active, :hover, :focus-visible) {
+  background: #fff5dc !important;
+  color: #780116 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Desktop surrender dropdowns use the same dark-gold focus treatment as the
+   adoption application. */
+@media (min-width: 901px) {
+  body.home-page.surrender-page .surrender-select-menu:is(.is-open, :focus-within) .surrender-select-trigger {
+    border-color: var(--animua-red) !important;
+    outline: 3px solid rgba(241, 192, 69, 0.92) !important;
+    outline-offset: 3px !important;
+    box-shadow: 0 0 0 4px rgba(142, 42, 32, 0.12) !important;
+  }
+}
+
+/* On phones, join the progress line to the numbered step circles instead of
+   leaving it as a separate divider beneath the labels. */
+@media (max-width: 700px) {
+  body.home-page.surrender-page .surrender-progress-rail,
+  body.surrender-page .surrender-progress-rail {
+    border-bottom: 0 !important;
+  }
+
+  body.home-page.surrender-page .surrender-step-nav,
+  body.surrender-page .surrender-step-nav {
+    position: relative !important;
+    isolation: isolate;
+  }
+
+  body.home-page.surrender-page .surrender-step-nav::before,
+  body.surrender-page .surrender-step-nav::before,
+  body.home-page.surrender-page .surrender-step-nav::after,
+  body.surrender-page .surrender-step-nav::after {
+    content: "" !important;
+    position: absolute !important;
+    top: 22px !important;
+    bottom: auto !important;
+    left: 12.5% !important;
+    height: 2px !important;
+    border-radius: 999px;
+  }
+
+  body.home-page.surrender-page .surrender-step-nav::before,
+  body.surrender-page .surrender-step-nav::before {
+    right: 12.5% !important;
+    width: auto !important;
+    background: #d8d0cb !important;
+  }
+
+  body.home-page.surrender-page .surrender-step-nav::after,
+  body.surrender-page .surrender-step-nav::after {
+    z-index: 0;
+    width: 0;
+    background: var(--sr-red);
+    transition: width 0.2s ease;
+  }
+
+  body.surrender-page .surrender-step-nav:has([data-step-link="2"].is-active)::after { width: 25%; }
+  body.surrender-page .surrender-step-nav:has([data-step-link="3"].is-active)::after { width: 50%; }
+  body.surrender-page .surrender-step-nav:has([data-step-link="4"].is-active)::after { width: 75%; }
+
+  body.home-page.surrender-page .surrender-progress-rail .surrender-step-link,
+  body.surrender-page .surrender-progress-rail .surrender-step-link {
+    position: relative !important;
+    z-index: 1 !important;
+  }
+
+  body.home-page.surrender-page .surrender-progress-rail .surrender-step-link > span,
+  body.surrender-page .surrender-progress-rail .surrender-step-link > span {
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 0 0 5px #fffdf9 !important;
+  }
 }

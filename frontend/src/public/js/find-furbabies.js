@@ -57,6 +57,7 @@ const petNameField = document.getElementById("petNameField");
 const adoptionForm = document.getElementById("adoptionForm");
 const formMessage = document.getElementById("formMessage");
 const adoptionStepButtons = document.querySelectorAll("[data-adoption-step-target]");
+const adoptionStepCounter = document.getElementById("adoptionStepCounter");
 const adoptionNextBtn = document.getElementById("adoptionNextBtn");
 const adoptionBackBtn = document.getElementById("adoptionBackBtn");
 const adoptionSubmitBtn = document.getElementById("adoptionSubmitBtn");
@@ -82,6 +83,7 @@ let currentFilter = "all";
 let currentSort = "newest";
 let currentPetForAdoption = null;
 let currentAdoptionStep = 1;
+let isSubmittingAdoption = false;
 let idFrontFileData = null;
 let idBackFileData = null;
 let adoptionSelectMenus = [];
@@ -667,14 +669,19 @@ function generateLocalApplicationReference() {
 function prefillApplicantFromAccount() {
   const session = getUserSession() || {};
   const fullName = session.fullName || "";
+  const email = session.email || "";
   const fullNameField = getField("fullName");
   if (fullNameField) {
     fullNameField.value = fullName;
     fullNameField.readOnly = true;
     fullNameField.classList.add("readonly-account-field");
   }
+  const emailField = getField("emailAddress");
+  if (emailField) {
+    emailField.value = email;
+  }
   if (!getValue("applicantAccountId")) {
-    getField("applicantAccountId").value = session.email || "";
+    getField("applicantAccountId").value = email;
   }
 }
 
@@ -782,6 +789,7 @@ function uploadPayload(fileData) {
 
 function setAdoptionStep(step) {
   currentAdoptionStep = Math.max(1, Math.min(4, Number(step) || 1));
+  if (adoptionStepCounter) adoptionStepCounter.textContent = `Step ${currentAdoptionStep} of 4`;
   adoptionForm?.classList.toggle("adoption-step-3-active", currentAdoptionStep === 3);
   document.querySelectorAll("[data-adoption-field-step]").forEach((group) => {
     const isActive = Number(group.dataset.adoptionFieldStep) === currentAdoptionStep;
@@ -799,6 +807,8 @@ function setAdoptionStep(step) {
     const itemStep = Number(button.dataset.adoptionStepTarget);
     button.classList.toggle("active", itemStep === currentAdoptionStep);
     button.classList.toggle("complete", itemStep < currentAdoptionStep);
+    if (itemStep === currentAdoptionStep) button.setAttribute("aria-current", "step");
+    else button.removeAttribute("aria-current");
   });
 
   if (adoptionBackBtn) adoptionBackBtn.hidden = currentAdoptionStep === 1 || currentAdoptionStep === 4;
@@ -824,19 +834,13 @@ function closeAdoptionModalWithoutPrompt() {
   }
 }
 
-function showAdoptionSubmissionSuccess(referenceNumber) {
+function showAdoptionSubmissionSuccess() {
   closeAdoptionModalWithoutPrompt();
 
   return Swal.fire({
     icon: "success",
     title: "Application Submitted",
-    html: `
-      <p>Your adoption application has been received for shelter review.</p>
-      <div class="adoption-success-reference">
-        <span>Reference number</span>
-        <strong>${escapeHtml(referenceNumber || "Not available")}</strong>
-      </div>
-    `,
+    html: "<p>Your adoption application has been received for shelter review.</p>",
     confirmButtonText: "Done",
     showConfirmButton: true,
     showCancelButton: false,
@@ -891,7 +895,18 @@ function areAdoptionDeclarationsChecked() {
 
 function syncAdoptionSubmitState() {
   if (!adoptionSubmitBtn) return;
-  adoptionSubmitBtn.disabled = currentAdoptionStep === 4 && !areAdoptionDeclarationsChecked();
+  adoptionSubmitBtn.disabled = isSubmittingAdoption ||
+    (currentAdoptionStep === 4 && !areAdoptionDeclarationsChecked());
+}
+
+function setAdoptionSubmitting(isSubmitting) {
+  isSubmittingAdoption = Boolean(isSubmitting);
+  if (!adoptionSubmitBtn) return;
+  adoptionSubmitBtn.textContent = isSubmittingAdoption
+    ? "Submitting..."
+    : "Submit Adoption Application";
+  adoptionSubmitBtn.toggleAttribute("aria-busy", isSubmittingAdoption);
+  syncAdoptionSubmitState();
 }
 
 function renderAdoptionReview() {
@@ -1781,6 +1796,8 @@ if (adoptionForm) {
   adoptionForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
+    if (isSubmittingAdoption) return;
+
     const selectedPet = getSelectedPetForAdoption();
 
     const selectedPetRecordId = selectedPet?.id || selectedPet?.petId || "";
@@ -1800,6 +1817,7 @@ if (adoptionForm) {
       return;
     }
 
+    setAdoptionSubmitting(true);
     let formData = null;
 
     try {
@@ -1873,9 +1891,7 @@ if (adoptionForm) {
         signature_name: getValue("fullName"),
       };
 
-      const result = await submitAdoptionApplication(formData);
-
-      const referenceNumber = result.applicationId || formData.application_reference;
+      await submitAdoptionApplication(formData);
 
       adoptionForm.reset();
       currentPetForAdoption = null;
@@ -1889,7 +1905,7 @@ if (adoptionForm) {
       renderUploadPreview(idFrontPreview, null, idFrontUpload);
       renderUploadPreview(idBackPreview, null, idBackUpload);
       setAdoptionStep(1);
-      await showAdoptionSubmissionSuccess(referenceNumber);
+      await showAdoptionSubmissionSuccess();
     } catch (error) {
       console.error("Adoption submit error:", error);
       if (formData && isNetworkError(error)) {
@@ -1918,6 +1934,8 @@ if (adoptionForm) {
       }
       formMessage.textContent = error.message || "Failed to submit. Please try again.";
       formMessage.style.color = "red";
+    } finally {
+      setAdoptionSubmitting(false);
     }
   });
 }

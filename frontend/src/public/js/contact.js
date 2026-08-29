@@ -244,11 +244,20 @@ function renderConversationThread(item = {}) {
 function renderInlineConversation(item = {}) {
   if (!contactMessageList) return;
 
-  if (contactRepliesPanel && !contactRepliesPanel.classList.contains("is-thread-open")) {
+  const shouldLockThreadHeight = typeof window.matchMedia !== "function"
+    || !window.matchMedia("(max-width: 1040px)").matches;
+
+  if (
+    shouldLockThreadHeight
+    && contactRepliesPanel
+    && !contactRepliesPanel.classList.contains("is-thread-open")
+  ) {
     const currentHeight = contactRepliesPanel.getBoundingClientRect().height;
     if (currentHeight > 0) {
       contactRepliesPanel.style.setProperty("--contact-thread-height", `${Math.round(currentHeight)}px`);
     }
+  } else {
+    contactRepliesPanel?.style.removeProperty("--contact-thread-height");
   }
 
   contactRepliesPanel?.classList.add("is-thread-open");
@@ -311,7 +320,7 @@ function renderInlineConversation(item = {}) {
       <form class="contact-thread-reply-form" data-contact-reply-form>
         <label class="contact-thread-reply-field">
           <i class="fa-regular fa-comment" aria-hidden="true"></i>
-          <textarea name="message" rows="4" placeholder="Type your reply here..."></textarea>
+          <textarea name="message" rows="2" placeholder="Type your reply here..."></textarea>
           <button type="submit" class="contact-thread-send">
             <i class="fa-solid fa-paper-plane" aria-hidden="true"></i>
             <span class="sr-only">Send Reply</span>

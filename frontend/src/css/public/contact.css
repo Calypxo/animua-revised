@@ -1638,12 +1638,52 @@ body.contact-page .contact-method-primary strong {
     white-space: normal;
   }
 
+  .contact-replies-panel.is-thread-open {
+    align-self: auto;
+    height: auto;
+    max-height: none;
+    overflow: visible;
+    padding-bottom: 18px;
+  }
+
+  .contact-replies-panel.is-thread-open .contact-reply-list {
+    flex: 0 1 auto;
+    height: auto;
+    overflow: visible;
+  }
+
+  .contact-thread-view {
+    grid-template-rows: auto auto auto auto;
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
   .contact-thread-messages {
+    height: auto;
     min-height: 0;
+    max-height: min(42dvh, 320px);
+    padding-right: 3px;
   }
 
   .contact-thread-reply-form {
     margin-top: 8px;
+  }
+
+  .contact-thread-reply-field {
+    min-height: 56px;
+    align-items: center;
+    padding: 9px 54px 9px 13px;
+  }
+
+  .contact-thread-reply-field i {
+    margin-top: 0;
+  }
+
+  .contact-thread-reply-field textarea {
+    min-height: 32px;
+    max-height: 72px;
+    align-self: center;
   }
 
   .contact-thread-message {
@@ -1665,7 +1705,12 @@ body.contact-page .contact-method-primary strong {
   }
 
   .contact-thread-send {
-    width: 100%;
+    right: 10px;
+    bottom: 50%;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    transform: translateY(50%);
   }
 
   .contact-emergency-strip {

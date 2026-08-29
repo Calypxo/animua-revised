@@ -45,7 +45,7 @@ test("surrender login returns the visitor to the surrender page", () => {
 test("the guest sign-in state spans and centers within the surrender workspace", () => {
   assert.match(
     markup,
-    /surrender\.css\?v=yellow-field-focus-20260829/,
+    /surrender\.css\?v=success-without-request-id-20260829/,
   );
   assert.match(
     surrenderStyles,
@@ -62,5 +62,55 @@ test("the guest sign-in state spans and centers within the surrender workspace",
   assert.match(
     surrenderStyles,
     /@media \(min-width: 901px\)[\s\S]*?\.surrender-workspace\.is-auth-required \.surrender-auth-panel\s*\{[\s\S]*?grid-template-columns:\s*56px minmax\(0,\s*1fr\) auto\s*!important/,
+  );
+});
+
+test("long requester emails wrap inside the surrender review column", () => {
+  assert.match(
+    surrenderStyles,
+    /\.review-summary #reviewOwnerContact\s*\{[^}]*max-width:\s*100%[^}]*overflow-wrap:\s*anywhere[^}]*word-break:\s*break-word/,
+  );
+});
+
+test("phone progress line connects the numbered surrender steps", () => {
+  assert.match(
+    surrenderStyles,
+    /join the progress line to the numbered step circles[\s\S]*?@media \(max-width: 700px\)[\s\S]*?\.surrender-progress-rail[\s\S]*?border-bottom:\s*0\s*!important/,
+  );
+  assert.match(
+    surrenderStyles,
+    /\.surrender-step-nav::before[\s\S]*?top:\s*22px\s*!important;[\s\S]*?left:\s*12\.5%\s*!important;[\s\S]*?right:\s*12\.5%\s*!important/,
+  );
+  assert.match(
+    surrenderStyles,
+    /data-step-link="4"[^}]*\.is-active\)::after\s*\{\s*width:\s*75%/,
+  );
+});
+
+test("the redundant mobile Step 1 of 4 progress strip is removed", () => {
+  assert.doesNotMatch(markup, /mobile-form-progress|currentStepText|currentStepLabel|formProgressBar/);
+  assert.doesNotMatch(surrenderScript, /STEP_LABELS|mobile-form-progress|currentStepText|currentStepLabel|formProgressBar/);
+  assert.doesNotMatch(surrenderStyles, /mobile-form-progress|form-progress-track/);
+});
+
+test("the success screen does not expose a request ID card", () => {
+  assert.doesNotMatch(markup, /success-request-id|submittedRequestId|>Request ID</);
+  assert.doesNotMatch(surrenderScript, /submittedRequestId/);
+  assert.doesNotMatch(surrenderStyles, /success-request-id/);
+});
+
+test("rapid clicks cannot create parallel surrender requests", () => {
+  assert.match(surrenderScript, /let isSubmitting = false;/);
+  assert.match(
+    surrenderScript,
+    /function setSubmitting\(submitting\)[\s\S]*?isSubmitting = submitting;[\s\S]*?classList\.toggle\("is-submitting", submitting\)[\s\S]*?setAttribute\("aria-busy", String\(submitting\)\)[\s\S]*?button\.disabled = submitting \|\| !surrenderAcceptingRequests/,
+  );
+  assert.match(
+    surrenderScript,
+    /async function handleSurrenderSubmit\(event\)[\s\S]*?event\.preventDefault\(\);\s*if \(isSubmitting\) return;[\s\S]*?setSubmitting\(true\);[\s\S]*?await submitSurrenderRequest\(requestData\)[\s\S]*?finally \{\s*setSubmitting\(false\);\s*\}/,
+  );
+  assert.match(
+    surrenderStyles,
+    /\.surrender-form\.is-submitting\s*\{\s*pointer-events:\s*none\s*!important;/,
   );
 });

@@ -17296,6 +17296,24 @@ body.home-page .home-highlights-track::-webkit-scrollbar {
   object-position: center top !important;
 }
 
+/* Keep the person and pet visible in the landscape CIAC wellness-day photo. */
+.story-modal-card[data-story-key="news-alerts"][data-story-image-focus="person-right"] .story-modal-image img {
+  object-position: 78% top !important;
+}
+
+/* Hide the outgoing photo before applying the next story's crop. This avoids
+   briefly showing the previous event from a different image position while
+   the incoming photo is still loading. */
+.story-modal-card .story-modal-image img {
+  opacity: 1;
+  transition: opacity 160ms ease;
+}
+
+.story-modal-card .story-modal-image img.is-story-image-loading {
+  opacity: 0 !important;
+  transition: none !important;
+}
+
 /* Keep story copy readable over light or visually busy photos without hiding
    the upper part of the image. This layer sits above the photo and below all
    interactive story content. */
