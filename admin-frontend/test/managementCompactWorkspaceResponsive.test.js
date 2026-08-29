@@ -87,7 +87,7 @@ test("compact Inventory spacing stays aligned without squeezing its search field
   );
 });
 
-test("the final compact-phone guard prevents overlap in every shared record card", () => {
+test("the final compact-phone guard keeps shared cells shrink-safe and removes Surrender collisions", () => {
   const compactGuard = responsiveStyles.slice(
     responsiveStyles.lastIndexOf("/* Compact-phone collision guard."),
   );
@@ -95,15 +95,43 @@ test("the final compact-phone guard prevents overlap in every shared record card
   assert.match(compactGuard, /@media \(max-width: 380px\)/);
   assert.match(
     compactGuard,
-    /management-data-table\.management-card-table\.management-card-active[\s\S]*?grid-template-columns:\s*minmax\(0, 1fr\) !important;[\s\S]*?grid-template-areas:\s*none !important;/,
+    /management-card-row > td\s*\{[\s\S]*?min-width:\s*0 !important;[\s\S]*?max-width:\s*100% !important;[\s\S]*?overflow-wrap:\s*anywhere !important;/,
   );
   assert.match(
     compactGuard,
-    /tbody > tr\.management-card-row > td\s*\{[\s\S]*?grid-column:\s*1 !important;[\s\S]*?grid-area:\s*auto !important;/,
+    /surrender-requests-page[\s\S]*?grid-template-columns:\s*minmax\(0, 1fr\) !important;[\s\S]*?grid-template-areas:\s*none !important;/,
   );
   assert.match(
     compactGuard,
     /surrender-requests-page[\s\S]*?overflow-wrap:\s*anywhere !important;/,
+  );
+});
+
+test("Intake remains one continuous Inventory-style panel on phones", () => {
+  const intakePhone = responsiveStyles.slice(
+    responsiveStyles.lastIndexOf("/* Intake phone composition:"),
+  );
+
+  assert.match(intakePhone, /@media \(max-width: 599px\)/);
+  assert.match(
+    intakePhone,
+    /intake-management-page \.page-body > \.records-panel\s*\{[\s\S]*?overflow:\s*hidden !important;[\s\S]*?border:\s*1px solid #eadfd4 !important;[\s\S]*?background:\s*#ffffff !important;/,
+  );
+  assert.match(
+    intakePhone,
+    /records-panel > \.intake-toolbar\s*\{[\s\S]*?padding:\s*0 !important;[\s\S]*?border-radius:\s*0 !important;[\s\S]*?box-shadow:\s*none !important;/,
+  );
+  assert.match(
+    intakePhone,
+    /mrf-workspace-intake\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0, 1fr\) auto !important;[\s\S]*?padding:\s*13px 14px !important;/,
+  );
+  assert.match(
+    intakePhone,
+    /records-panel > \.reference-table-section-head\s*\{[\s\S]*?padding:\s*14px !important;[\s\S]*?background:\s*#ffffff !important;/,
+  );
+  assert.match(
+    intakePhone,
+    /management-card-table\.management-card-active tbody\s*\{[\s\S]*?padding:\s*10px !important;[\s\S]*?background:\s*#ffffff !important;/,
   );
 });
 

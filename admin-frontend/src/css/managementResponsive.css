@@ -4357,24 +4357,30 @@ html body.management-consistent-ui .page-body .archive-records-table.management-
   }
 }
 
-/* Compact-phone collision guard. Page-specific card maps above intentionally
-   pair short facts on ordinary phones. At the narrowest supported width every
-   management record returns to one source-ordered column so long labels,
-   badges, dates, and translated copy cannot overlap an adjacent field. Keep
-   this final in the cascade so module refinements cannot reintroduce a second
-   column after the shared fallback. */
+/* Compact-phone collision guard. Shared cards keep their balanced field pairs
+   when the content fits, but every cell must remain shrink-safe. Surrender has
+   the longest category/status combinations, so only that queue returns to one
+   source-ordered column at this breakpoint. Keep this final in the cascade so
+   its page-specific two-column map cannot reintroduce the collision. */
 @media (max-width: 380px) {
   html body.management-consistent-ui .page-body
+    .management-data-table.management-card-table.management-card-active
+    tbody > tr.management-card-row > td {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  html body.management-consistent-ui.surrender-requests-page .page-body
     .management-data-table.management-card-table.management-card-active
     tbody > tr.management-card-row {
     grid-template-columns: minmax(0, 1fr) !important;
     grid-template-areas: none !important;
   }
 
-  html body.management-consistent-ui .page-body
+  html body.management-consistent-ui.surrender-requests-page .page-body
     .management-data-table.management-card-table.management-card-active
     tbody > tr.management-card-row > td {
-    min-width: 0 !important;
     grid-column: 1 !important;
     grid-area: auto !important;
   }
@@ -4451,5 +4457,163 @@ html body.management-consistent-ui .page-body .archive-records-table.management-
   html body.management-consistent-ui.surrender-requests-page .sr-table-panel > .reference-table-section-head h3 {
     min-width: 0 !important;
     overflow-wrap: anywhere !important;
+  }
+}
+
+/* Intake phone composition: retain the Inventory-style continuous register.
+   The record header, scrollable tablist, compact filter row, section title,
+   cards, and pagination are one bordered White surface instead of detached
+   cards with competing outer margins. */
+@media (max-width: 599px) {
+  html body.management-consistent-ui.intake-management-page .page-body {
+    padding-right: max(12px, env(safe-area-inset-right)) !important;
+    padding-left: max(12px, env(safe-area-inset-left)) !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page .page-body > .records-panel {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin-inline: 0 !important;
+    overflow: hidden !important;
+    border: 1px solid #eadfd4 !important;
+    border-radius: 18px !important;
+    background: #ffffff !important;
+    box-shadow: 0 12px 30px rgba(72, 36, 29, .065) !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page .records-panel > .records-heading {
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 16px 14px 13px !important;
+    border: 0 !important;
+    border-bottom: 1px solid #eee3d9 !important;
+    background: #ffffff !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page .records-panel > .intake-toolbar {
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page .intake-toolbar > .toolbar-tabs {
+    margin: 0 !important;
+    padding: 14px 14px 15px !important;
+    border: 0 !important;
+    border-bottom: 1px solid #eee3d9 !important;
+    background: #ffffff !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page .mrf-workspace-intake {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    padding: 13px 14px !important;
+    border: 0 !important;
+    border-bottom: 1px solid #f0e6dd !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page .mrf-workspace-intake :is(
+    .mrf-search-slot,
+    .mrf-actions,
+    .search-pill-sm
+  ) {
+    min-width: 0 !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page .mrf-workspace-intake .mrf-trigger {
+    min-width: 92px !important;
+    min-height: 42px !important;
+    padding-inline: 10px !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page .records-panel > .reference-table-section-head {
+    min-height: 0 !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    padding: 14px !important;
+    border: 0 !important;
+    border-bottom: 1px solid #eadfd4 !important;
+    background: #ffffff !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page .records-panel > .reference-table-section-head > div {
+    min-width: 0 !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page .records-panel > .reference-table-section-head h3 {
+    min-width: 0 !important;
+    margin-top: 4px !important;
+    font-size: .9rem !important;
+    line-height: 1.28 !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page .records-panel > .reference-table-section-head > strong {
+    justify-self: end !important;
+    padding: 6px 9px !important;
+    font-size: .62rem !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page .records-panel > .table-responsive {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page
+    .management-card-table.management-card-active tbody {
+    gap: 9px !important;
+    padding: 10px !important;
+    background: #ffffff !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page
+    .management-card-table.management-card-active tbody > tr.management-card-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px 12px !important;
+    padding: 12px !important;
+    border-radius: 14px !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page
+    .management-card-table.management-card-active tbody > tr.management-card-row > td {
+    min-width: 0 !important;
+    grid-column: auto !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page
+    .management-card-table.management-card-active tbody > tr.management-card-row > :is(
+      td:first-child,
+      td.management-card-primary,
+      td[data-label="Animal"],
+      td.encoded-by,
+      td.management-card-actions
+    ) {
+    grid-column: 1 / -1 !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page .records-panel > .um-pagination {
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 12px 14px !important;
+    border-top: 1px solid #eadfd4 !important;
+    background: #ffffff !important;
   }
 }
