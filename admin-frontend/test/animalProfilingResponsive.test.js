@@ -31,3 +31,14 @@ test("animal search uses the shared shrink-safe mobile search rule", () => {
   assert.match(responsiveStyles, /\.mrf-search-slot :is\(\.search-pill-sm, \.ap-control[\s\S]*?box-sizing:\s*border-box !important/);
   assert.match(responsiveStyles, /> :is\(input\[type="search"\][\s\S]*?flex:\s*1 1 auto !important/);
 });
+
+test("animal directory heading and tab surround use plain white surfaces", () => {
+  assert.match(
+    panelStyles,
+    /\.ap-records-panel > \.ap-records-heading\s*\{[\s\S]*?background:\s*#FFFFFF !important;[\s\S]*?background-image:\s*none !important;/,
+  );
+  assert.match(
+    panelStyles,
+    /\.ap-records-panel \.ap-tabs-wrap\s*\{[\s\S]*?background:\s*#FFFFFF !important;[\s\S]*?background-image:\s*none !important;/,
+  );
+});

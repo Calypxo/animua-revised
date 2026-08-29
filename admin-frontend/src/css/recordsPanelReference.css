@@ -26,6 +26,11 @@
   background: linear-gradient(135deg, #FFF8EE, #FFFFFF 70%) !important;
 }
 
+html body.management-consistent-ui.ap-list-page .page-body .ap-records-panel > .ap-records-heading {
+  background: #FFFFFF !important;
+  background-image: none !important;
+}
+
 .reference-records-heading {
   min-width: 0;
   display: flex;
@@ -100,6 +105,11 @@
   border-bottom: 1px solid #EEE3D9 !important;
   background: linear-gradient(135deg, #FFF8EE, #FFFFFF 70%) !important;
   scrollbar-width: none;
+}
+
+html body.management-consistent-ui.ap-list-page .page-body .ap-records-panel .ap-tabs-wrap {
+  background: #FFFFFF !important;
+  background-image: none !important;
 }
 
 :is(.ap-list-page .ap-tabs-wrap, .surrender-requests-page .surrender-toolbar .toolbar-tabs)::-webkit-scrollbar {
