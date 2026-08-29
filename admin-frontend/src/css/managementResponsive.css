@@ -4714,29 +4714,6 @@ html body.intake-management-page .page-body
   text-align: center !important;
 }
 
-/* Restore the original desktop Intake Source composition. The form keeps the
-   shared modal shell, but its three mutually exclusive source types belong on
-   one row whenever the modal has tablet/desktop space. */
-@media (min-width: 721px) {
-  html body.management-consistent-ui.intake-management-page
-    #intakeModalBackdrop #sourceSelector.source-selector {
-    width: 100% !important;
-    display: grid !important;
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-    grid-auto-flow: row !important;
-    align-items: stretch !important;
-    gap: 10px !important;
-  }
-
-  html body.management-consistent-ui.intake-management-page
-    #intakeModalBackdrop #sourceSelector.source-selector > .source-opt {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: none !important;
-    grid-column: auto !important;
-  }
-}
-
 /* Intake mobile modal contract: preserve the original centered, rounded
    dialog while keeping every edge inside the safe viewport. Only its body
    scrolls, so the header and actions stay available without changing design. */

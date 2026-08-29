@@ -817,8 +817,8 @@ function openViewModal(id) {
   if (r.source === "Barangay Impound" && r.barangayDetails) {
     const b = r.barangayDetails;
     dynamicHtml = `
-      <div class="view-section">
-        <div class="view-section-title"><i class="bi bi-building"></i> Barangay Turnover Details</div>
+      <div class="form-section view-section">
+        <div class="form-section-title view-section-title"><i class="bi bi-building"></i> Barangay Turnover Details</div>
         <div class="view-grid">
           <div class="view-field"><div class="view-field-lbl">Barangay</div><div class="view-field-val">${b.barangayName||"—"}</div></div>
           <div class="view-field"><div class="view-field-lbl">Officer</div><div class="view-field-val">${b.officerName||"—"}</div></div>
@@ -829,8 +829,8 @@ function openViewModal(id) {
       </div>`;
   } else if (r.source === "Approved Surrender") {
     dynamicHtml = `
-      <div class="view-section">
-        <div class="view-section-title"><i class="bi bi-file-earmark-check"></i> Surrender Reference</div>
+      <div class="form-section view-section">
+        <div class="form-section-title view-section-title"><i class="bi bi-file-earmark-check"></i> Surrender Reference</div>
         <div class="view-grid">
           <div class="view-field"><div class="view-field-lbl">Surrender ID</div><div class="view-field-val" style="font-family:var(--mono)">${r.surrenderRefId||"—"}</div></div>
           <div class="view-field"><div class="view-field-lbl">Owner</div><div class="view-field-val">${r.ownerName||"—"}</div></div>
@@ -843,8 +843,8 @@ function openViewModal(id) {
   let reviewHtml = "";
   if (r.approvedBy) {
     reviewHtml = `
-      <div class="view-section">
-        <div class="view-section-title"><i class="bi bi-clipboard2-check"></i> Review</div>
+      <div class="form-section view-section">
+        <div class="form-section-title view-section-title"><i class="bi bi-clipboard2-check"></i> Review</div>
         <div class="view-grid">
           <div class="view-field"><div class="view-field-lbl">Approved By</div><div class="view-field-val">${r.approvedBy}</div></div>
           <div class="view-field"><div class="view-field-lbl">Approved On</div><div class="view-field-val">${formatDate(r.approvedAt)}</div></div>
@@ -853,14 +853,14 @@ function openViewModal(id) {
   }
   if (r.rejectedReason) {
     reviewHtml = `
-      <div class="view-section">
-        <div class="view-section-title"><i class="bi bi-x-circle"></i> Rejection Reason</div>
+      <div class="form-section view-section">
+        <div class="form-section-title view-section-title"><i class="bi bi-x-circle"></i> Rejection Reason</div>
         <div class="view-field view-full"><div class="view-field-val" style="color:var(--clay)">${r.rejectedReason}</div></div>
       </div>`;
   }
 
   document.getElementById("viewModalBody").innerHTML = `
-    <div class="intake-record-hero">
+    <div class="form-section intake-record-hero">
       <span class="intake-record-hero-icon" aria-hidden="true">${speciesInitial(r.species)}</span>
       <div class="intake-record-hero-copy">
         <span>Intake record · ${r.id}</span>
@@ -873,8 +873,8 @@ function openViewModal(id) {
       </div>
     </div>
 
-    <div class="view-section">
-      <div class="view-section-title"><i class="bi bi-heart-pulse"></i> Animal Information</div>
+    <div class="form-section view-section">
+      <div class="form-section-title view-section-title"><i class="bi bi-heart-pulse"></i> Animal Information</div>
       <div class="view-grid">
         <div class="view-field"><div class="view-field-lbl">Age</div><div class="view-field-val">${r.ageEstimate||"Unknown"}</div></div>
         <div class="view-field"><div class="view-field-lbl">Color</div><div class="view-field-val">${r.color||"Unknown"}</div></div>
@@ -889,8 +889,8 @@ function openViewModal(id) {
       </div>
     </div>
 
-    <div class="view-section">
-      <div class="view-section-title"><i class="bi bi-box-arrow-in-right"></i> Intake Details</div>
+    <div class="form-section view-section">
+      <div class="form-section-title view-section-title"><i class="bi bi-box-arrow-in-right"></i> Intake Details</div>
       <div class="view-grid">
         <div class="view-field"><div class="view-field-lbl">Intake Date</div><div class="view-field-val">${formatDate(r.intakeDate)}</div></div>
         <div class="view-field"><div class="view-field-lbl">Encoded By</div><div class="view-field-val">${r.encodedBy}</div></div>

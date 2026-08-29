@@ -51,6 +51,17 @@ test("Contact Messages keeps its heading copy visible on the white record header
   assert.match(contactStyles, /\.ap-records-heading h2,[\s\S]*?color:\s*#2D2322;/);
 });
 
+test("Contact Messages keeps compact sender emails and statuses on one line", () => {
+  assert.match(
+    contactStyles,
+    /\.cm-message-sender > span:first-child\s*\{[\s\S]*?text-overflow:\s*ellipsis !important;[\s\S]*?white-space:\s*nowrap !important;[\s\S]*?overflow-wrap:\s*normal !important;/,
+  );
+  assert.match(
+    contactStyles,
+    /\.cm-message-sender > \.cm-message-status\s*\{[\s\S]*?flex:\s*0 0 auto !important;[\s\S]*?white-space:\s*nowrap !important;[\s\S]*?word-break:\s*keep-all !important;/,
+  );
+});
+
 test("Animal Intake no longer renders a Status label beside its tabs", () => {
   assert.doesNotMatch(intakeStyles, /\.toolbar-tabs::before\s*\{[\s\S]*?content:\s*["']Status["']/i);
 });

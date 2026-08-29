@@ -326,7 +326,6 @@
 .um-modal-backdrop.open .um-modal { transform: translateY(0) scale(1); }
 
 .intake-modal      { max-width: 800px; }
-.intake-view-modal { max-width: 720px; }
 .um-modal-xs       { max-width: 420px; }
 
 .um-modal-header {
@@ -520,10 +519,6 @@ select.form-inp { cursor: pointer; }
 
 .management-side-modal.intake-view-modal .view-field-val :is(.source-badge,.cond-badge,.status-badge) {
   margin: 0;
-}
-
-.management-side-modal.intake-view-modal .um-modal-footer .btn-ghost-clay:first-child {
-  margin-right: auto;
 }
 
 .intake-id-badge {
@@ -1160,7 +1155,6 @@ select.form-inp { cursor: pointer; }
 .um-modal-backdrop { padding: 20px; background: rgba(31,20,19,.58); backdrop-filter: blur(5px); }
 .um-modal { border: 1px solid rgba(255,255,255,.72); border-radius: 18px; box-shadow: 0 28px 76px rgba(49,23,20,.27); font-size: 12px; }
 .intake-modal { max-width: 900px; }
-.intake-view-modal { max-width: 770px; }
 .um-modal-header { padding: 18px 22px; border-color: var(--brand-border); background: #FFF8EE; }
 .um-modal-header h2 { color: var(--brand-ink); font-size: 18px; font-weight: 800; }
 .modal-subtitle { color: var(--brand-muted); font-size: 11px; }
@@ -1661,43 +1655,14 @@ html body.management-consistent-ui #intakeTableBody td.table-actions {
   margin: 0 !important;
 }
 
-/* Intake View Details: one scoped side-panel layout without stacked legacy cards. */
-#viewModalBackdrop > .intake-view-modal {
-  width: min(780px, calc(100vw - 32px)) !important;
-  max-width: 780px !important;
-}
-
-#viewModalBackdrop .um-modal-header {
-  min-height: 88px !important;
-  align-items: center !important;
-  padding: 20px 26px 17px !important;
-}
-
-#viewModalBackdrop .um-modal-header h2 {
-  font-size: 19px !important;
-}
-
-#viewModalBackdrop .modal-subtitle {
-  margin-top: 5px !important;
-  font-size: 11px !important;
-}
-
-#viewModalBackdrop .um-modal-body {
-  padding: 22px 24px 28px !important;
-  background: #FFF8EE !important;
-}
+/* Intake View Details reuses the Create Intake modal shell and section cards;
+   only the read-only record content has scoped presentation rules. */
 
 #viewModalBackdrop .intake-record-hero {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 13px;
-  margin-bottom: 16px;
-  padding: 16px 18px;
-  border: 1px solid #eadfd4;
-  border-radius: 13px;
-  background: #FFFFFF;
-  box-shadow: 0 8px 22px rgba(54, 40, 34, .05);
 }
 
 #viewModalBackdrop .intake-record-hero-icon {
@@ -1746,36 +1711,6 @@ html body.management-consistent-ui #intakeTableBody td.table-actions {
   flex-wrap: wrap;
 }
 
-#viewModalBackdrop .view-section {
-  margin: 0 0 16px !important;
-  padding: 18px !important;
-  border: 1px solid #eadfd4 !important;
-  border-radius: 13px !important;
-  background: #FFFFFF !important;
-  box-shadow: 0 8px 22px rgba(54, 40, 34, .05) !important;
-}
-
-#viewModalBackdrop .view-section:last-child {
-  margin-bottom: 0 !important;
-}
-
-#viewModalBackdrop .view-section-title {
-  min-height: 28px !important;
-  margin: 0 0 15px !important;
-  padding: 0 0 10px !important;
-  color: #2b2528 !important;
-  font-size: 12px !important;
-  text-transform: none !important;
-}
-
-#viewModalBackdrop .view-section-title > i {
-  width: 27px !important;
-  height: 27px !important;
-  margin: 0 !important;
-  color: #780116 !important;
-  background: #FFF8EE !important;
-}
-
 #viewModalBackdrop .view-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   gap: 13px 15px !important;
@@ -1820,25 +1755,12 @@ html body.management-consistent-ui #intakeTableBody td.table-actions {
   margin: 0 !important;
 }
 
-#viewModalBackdrop .um-modal-footer {
-  min-height: 68px !important;
-  justify-content: flex-end !important;
-  gap: 12px !important;
-  padding: 13px 24px !important;
-}
-
 #viewModalBackdrop .intake-view-footer-actions {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
   flex-wrap: wrap;
-}
-
-#viewModalBackdrop .um-modal-footer button {
-  min-height: 40px !important;
-  padding: 0 17px !important;
-  font-size: 11px !important;
 }
 
 @media (max-width: 720px) {
@@ -1849,11 +1771,6 @@ html body.management-consistent-ui #intakeTableBody td.table-actions {
 
   #intakeTableBody .intake-action-group {
     justify-content: flex-end;
-  }
-
-  #viewModalBackdrop > .intake-view-modal {
-    width: 100% !important;
-    max-width: 100% !important;
   }
 
   #viewModalBackdrop .intake-record-hero {
@@ -1867,10 +1784,6 @@ html body.management-consistent-ui #intakeTableBody td.table-actions {
 
   #viewModalBackdrop .view-grid {
     grid-template-columns: 1fr !important;
-  }
-
-  #viewModalBackdrop .um-modal-footer {
-    align-items: stretch !important;
   }
 
   #viewModalBackdrop .intake-view-footer-actions {
@@ -2170,4 +2083,78 @@ html body.management-consistent-ui #intakeTableBody td.table-actions {
   html body.management-consistent-ui #intakeModalBackdrop #btnSubmitIntake { order: 1; }
   html body.management-consistent-ui #intakeModalBackdrop #btnSaveDraft { order: 2; }
   html body.management-consistent-ui #intakeModalBackdrop #intakeModalCancel { order: 3; }
+}
+
+/* Keep essential Intake fields compact without reserving blank validation
+   space. Populated errors still participate in the form flow normally. */
+#intakeModalBackdrop #intakeForm .form-grid {
+  row-gap: 10px !important;
+}
+
+#intakeModalBackdrop #intakeForm .form-err:empty {
+  display: none !important;
+  min-height: 0 !important;
+}
+
+/* Keep all three Intake Source choices in one equal, aligned row whenever the
+   modal has tablet/desktop space. Only compact phones use the stacked layout. */
+@media (min-width: 601px) {
+  #intakeModalBackdrop #sourceSelector.source-selector {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+
+  #intakeModalBackdrop #sourceSelector.source-selector > .source-opt {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    min-height: 148px !important;
+    height: 100% !important;
+    grid-row: 1 !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto auto 1fr !important;
+    align-content: start !important;
+    align-items: start !important;
+    justify-items: start !important;
+    gap: 6px !important;
+    padding: 16px !important;
+    text-align: left !important;
+  }
+
+  #intakeModalBackdrop #sourceSelector.source-selector > .source-opt:nth-child(1) { grid-column: 1 !important; }
+  #intakeModalBackdrop #sourceSelector.source-selector > .source-opt:nth-child(2) { grid-column: 2 !important; }
+  #intakeModalBackdrop #sourceSelector.source-selector > .source-opt:nth-child(3) { grid-column: 3 !important; }
+
+  #intakeModalBackdrop #sourceSelector.source-selector > .source-opt > .source-opt-icon {
+    width: 36px !important;
+    height: 36px !important;
+    display: grid !important;
+    place-items: center !important;
+    margin: 0 0 2px !important;
+    font-size: 1.2rem !important;
+  }
+
+  #intakeModalBackdrop #sourceSelector.source-selector > .source-opt > :is(
+    .source-opt-label,
+    .source-opt-desc
+  ) {
+    width: 100% !important;
+    min-width: 0 !important;
+    display: block !important;
+    margin: 0 !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  #intakeModalBackdrop #sourceSelector.source-selector > .source-opt > .source-opt-label {
+    line-height: 1.3 !important;
+  }
+
+  #intakeModalBackdrop #sourceSelector.source-selector > .source-opt > .source-opt-desc {
+    line-height: 1.45 !important;
+  }
 }

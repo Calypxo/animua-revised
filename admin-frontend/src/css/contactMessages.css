@@ -1575,6 +1575,30 @@ html body.management-consistent-ui.contact-messages-page .cm-chat-composer #repl
   background: var(--cm-gold-soft);
 }
 
+/* Keep the sender email and status readable in compact inbox rows. The email
+   truncates as one unit, while the status pill never breaks mid-word. */
+html body.management-consistent-ui.contact-messages-page
+  .cm-message-sender > span:first-child {
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+}
+
+html body.management-consistent-ui.contact-messages-page
+  .cm-message-sender > .cm-message-status {
+  max-width: none !important;
+  flex: 0 0 auto !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: nowrap !important;
+  overflow-wrap: normal !important;
+  word-break: keep-all !important;
+}
+
 .contact-messages-page .cm-detail-empty {
   border-color: var(--cm-warm-line);
   background: var(--cm-cream);
