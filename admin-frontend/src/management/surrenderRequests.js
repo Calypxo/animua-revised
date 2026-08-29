@@ -381,6 +381,7 @@ function clearSurrenderFilters() {
     tab.classList.toggle("active", selected);
     tab.setAttribute("aria-selected", String(selected));
   });
+  document.querySelector('.sr-tab[data-tab="all"]')?.scrollIntoView({ block: "nearest", inline: "nearest" });
   applyFilters();
 }
 
@@ -1367,8 +1368,15 @@ async function init() {
     // Tabs
     document.querySelectorAll(".sr-tab").forEach(btn => {
       btn.addEventListener("click",()=>{
-        document.querySelectorAll(".sr-tab").forEach(t=>t.classList.remove("active"));
-        btn.classList.add("active"); activeTab=btn.dataset.tab; applyFilters();
+        document.querySelectorAll(".sr-tab").forEach(t=>{
+          t.classList.remove("active");
+          t.setAttribute("aria-selected", "false");
+        });
+        btn.classList.add("active");
+        btn.setAttribute("aria-selected", "true");
+        activeTab=btn.dataset.tab;
+        applyFilters();
+        btn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
       });
     });
 

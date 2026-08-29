@@ -71,7 +71,7 @@ html body.management-consistent-ui:is(.adoption-applications-page, .surrender-re
   overflow: visible !important;
 }
 
-html body.management-consistent-ui.adoption-applications-page .management-review-tabs-scroll {
+html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .management-review-tabs-scroll {
   width: 100%;
   max-width: 100%;
   overflow-x: auto;
@@ -85,16 +85,16 @@ html body.management-consistent-ui.adoption-applications-page .management-review
   -webkit-overflow-scrolling: touch;
 }
 
-html body.management-consistent-ui.adoption-applications-page .management-review-tabs-scroll::-webkit-scrollbar {
+html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .management-review-tabs-scroll::-webkit-scrollbar {
   height: 4px;
 }
 
-html body.management-consistent-ui.adoption-applications-page .management-review-tabs-scroll::-webkit-scrollbar-thumb {
+html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .management-review-tabs-scroll::-webkit-scrollbar-thumb {
   border-radius: 999px;
   background: rgba(120, 1, 22, .38);
 }
 
-html body.management-consistent-ui.adoption-applications-page .management-review-tabs-scroll .aa-tab {
+html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .management-review-tabs-scroll :is(.aa-tab, .sr-tab) {
   scroll-snap-align: start;
 }
 
