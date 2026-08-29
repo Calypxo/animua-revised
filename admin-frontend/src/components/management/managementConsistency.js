@@ -3,7 +3,12 @@ import "../../css/brandTheme.css";
 import "../../css/managementResponsive.css";
 import "../../css/managementTabs.css";
 import "../../css/managementTypography.css";
+import "../../css/managementImagePreview.css";
 import { enhanceResponsiveFilters } from "./responsiveFilters.js";
+import {
+  enhanceManagementImagePreviews,
+  initializeManagementImagePreview,
+} from "./managementImagePreview.js";
 
 const PAGINATION_SELECTOR = ".um-pagination, .report-pagination";
 const TABLIST_SELECTOR = [
@@ -235,6 +240,7 @@ function normalizeActionButtons(root = document) {
 
 function normalizeInterface(root = document) {
   enhanceResponsiveFilters(root);
+  enhanceManagementImagePreviews(root);
   normalizeSearchControls(root);
   syncResponsiveTables(root);
   normalizePagination(root);
@@ -279,6 +285,7 @@ function bindTabKeyboardNavigation() {
 
 export function initializeManagementConsistency() {
   document.body.classList.add("management-consistent-ui");
+  initializeManagementImagePreview();
   normalizeInterface();
   bindTabKeyboardNavigation();
   bindResponsiveTableSync();

@@ -907,10 +907,11 @@ exports.rejectAdoption = async (req, res) => {
   try {
     const { id } = req.params;
     const { reason } = req.body;
+    const normalizedReason = String(reason || "").trim();
 
-    if (!reason || !reason.trim()) {
+    if (normalizedReason.length < 5) {
       return res.status(400).json({
-        message: "Rejection reason is required.",
+        message: "A clear rejection reason using at least 5 characters is required.",
       });
     }
 
@@ -933,7 +934,7 @@ exports.rejectAdoption = async (req, res) => {
 
     await adoptionRef.update({
       status: "Rejected",
-      rejectedReason: reason.trim(),
+      rejectedReason: normalizedReason,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
@@ -942,7 +943,7 @@ exports.rejectAdoption = async (req, res) => {
       category: "application",
       type: "adoption_rejected",
       title: "Adoption application update",
-      message: `Your adoption application for ${data.pet_label || data.pet_name || "a pet"} was reviewed.`,
+      message: `Your adoption application for ${data.pet_label || data.pet_name || "a pet"} was not approved. View My Submissions to see the shelter's reason.`,
       link: "/pages/public/my-submissions.html",
       referenceId: id,
     });

@@ -3,6 +3,7 @@ import { optimizedPublicImageUrl } from "../../utils/image.js";
 import { ensureUserSession, hasUserSession } from "../../utils/storage.js";
 import {
   mergeSubmissionResults,
+  publicRejectionReason,
   submissionLoadErrorMessage,
 } from "./mySubmissionsState.js";
 
@@ -467,7 +468,7 @@ function getCompatibilityLabel(item) {
   return "Good Match";
 }
 
-function getApplicationMessage(status) {
+function getApplicationMessage(status, item) {
   const normalized = String(status || "").toLowerCase();
 
   if (normalized.includes("expired")) {
@@ -479,7 +480,10 @@ function getApplicationMessage(status) {
   }
 
   if (normalized.includes("reject")) {
-    return "Your application was reviewed and declined. Please contact the shelter if you need more information.";
+    const reason = publicRejectionReason(item?.details, "adoption");
+    return reason
+      ? `Reason for rejection: ${reason}`
+      : "Your application was reviewed and declined. No rejection reason was provided. Please contact the shelter for more information.";
   }
 
   if (normalized.includes("withdraw")) {
@@ -649,7 +653,7 @@ function renderApplicationTimeline(status, submittedDate, decisionDateLabel = su
   `;
 }
 
-function getSurrenderMessage(status) {
+function getSurrenderMessage(status, item) {
   const normalized = String(status || "").toLowerCase();
 
   if (normalized.includes("expired")) {
@@ -661,7 +665,10 @@ function getSurrenderMessage(status) {
   }
 
   if (normalized.includes("reject")) {
-    return "Your surrender request was reviewed and declined. Please contact the shelter if you need more information.";
+    const reason = publicRejectionReason(item?.details, "surrender");
+    return reason
+      ? `Reason for rejection: ${reason}`
+      : "Your surrender request was reviewed and declined. No rejection reason was provided. Please contact the shelter for more information.";
   }
 
   if (normalized.includes("received")) {
@@ -1452,7 +1459,7 @@ async function showSubmissionDetails(item) {
           ${isAccepted ? "" : `
           <div class="application-detail-note surrender-detail-note">
             <i class="fa-solid fa-info"></i>
-            <p>${escapeHtml(getSurrenderMessage(status))}</p>
+            <p>${escapeHtml(getSurrenderMessage(status, item))}</p>
           </div>
           `}
 
@@ -1587,7 +1594,7 @@ async function showSubmissionDetails(item) {
         ${isApproved ? "" : `
         <div class="application-detail-note">
           <i class="fa-solid fa-info"></i>
-          <p>${escapeHtml(getApplicationMessage(status))}</p>
+          <p>${escapeHtml(getApplicationMessage(status, item))}</p>
         </div>
         `}
 

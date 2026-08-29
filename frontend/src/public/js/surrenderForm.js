@@ -897,10 +897,11 @@ function renderRequestHistory(requests) {
     const pending = Boolean(request.offlinePending);
     const petName = request.pet?.name || "Unnamed animal";
     const petMeta = [request.pet?.species, request.pet?.breed].filter(Boolean).join(" · ") || "Animal details not provided";
-    const note = status === "Rejected" ? request.rejectedReason : request.reviewNotes;
+    const note = status === "Rejected" ? request.rejectedReason || request.reviewNotes : request.reviewNotes;
+    const noteLabel = status === "Rejected" ? "Reason for rejection" : "Staff note";
     return `<article class="request-history-card status-${escapeHtml(status.toLowerCase())} ${pending ? "is-offline-pending" : ""}">
       <div class="request-card-top"><div><span class="request-id">${escapeHtml(request.id || "Request")}</span><h3>${escapeHtml(petName)}</h3><p>${escapeHtml(petMeta)}</p></div><span class="request-status-pill"><i class="fa-solid ${pending ? "fa-cloud-arrow-up" : detail.icon}" aria-hidden="true"></i>${pending ? "Pending sync" : detail.label}</span></div>
-      <div class="request-status-guidance"><p>${pending ? "Saved on this device. It will be submitted when internet returns." : detail.text}</p>${status === "Converted" && request.intakeId ? `<span><strong>Intake record:</strong> ${escapeHtml(request.intakeId)}</span>` : ""}${note ? `<span><strong>Staff note:</strong> ${escapeHtml(note)}</span>` : ""}</div>
+      <div class="request-status-guidance"><p>${pending ? "Saved on this device. It will be submitted when internet returns." : detail.text}</p>${status === "Converted" && request.intakeId ? `<span><strong>Intake record:</strong> ${escapeHtml(request.intakeId)}</span>` : ""}${note ? `<span><strong>${noteLabel}:</strong> ${escapeHtml(note)}</span>` : ""}</div>
       <footer><span><i class="fa-regular fa-calendar" aria-hidden="true"></i> ${pending ? "Saved" : "Submitted"} ${escapeHtml(formatDate(request.queuedAt || request.submittedAt || request.createdAt))}</span></footer>
     </article>`;
   }).join("")}</div>`;

@@ -63,9 +63,7 @@ function mapAdoptionFromBackend(a) {
 
     type: compatibility ? "Quiz Match" : "Direct Browse",
     status: a.status || "Pending",
-    submitted: a.submittedAt?.seconds
-      ? new Date(a.submittedAt.seconds * 1000).toISOString().split("T")[0]
-      : "",
+    submitted: a.submittedAt || "",
 
     animal: {
       id: a.animal?.id || a.pet_id,
@@ -191,8 +189,20 @@ function statusBadge(s) {
 
 function formatDate(d) {
   if (!d) return "—";
-  const date = d.includes?.("T") ? new Date(d) : new Date(`${d}T00:00:00`);
-  if (isNaN(date)) return "—";
+  const timestampSeconds = d?._seconds ?? d?.seconds;
+  let date;
+
+  if (timestampSeconds !== undefined && timestampSeconds !== null) {
+    date = new Date(Number(timestampSeconds) * 1000);
+  } else if (d instanceof Date) {
+    date = d;
+  } else if (typeof d === "string") {
+    date = d.includes("T") ? new Date(d) : new Date(`${d}T00:00:00`);
+  } else {
+    date = new Date(d);
+  }
+
+  if (Number.isNaN(date.getTime())) return "—";
   return date.toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" });
 }
 
@@ -828,8 +838,8 @@ async function executeReject() {
   return;
 }
   const reason = document.getElementById("rejectReason")?.value.trim();
-  if (!reason) {
-    document.getElementById("errRejectReason").textContent = "A reason is required.";
+  if (!reason || reason.length < 5) {
+    document.getElementById("errRejectReason").textContent = "Enter a clear reason using at least 5 characters.";
     return;
   }
 

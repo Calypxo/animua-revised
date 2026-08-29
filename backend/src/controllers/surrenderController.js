@@ -454,10 +454,17 @@ async function updateSurrenderStatus(req, res) {
 
     const { id } = req.params;
     const { status, reviewNotes, rejectedReason, dropoffDate } = req.body;
+    const normalizedRejectedReason = String(rejectedReason || "").trim();
 
     if (!isDirectSurrenderStatusAllowed(status)) {
       return res.status(400).json({
         message: "Invalid surrender request status.",
+      });
+    }
+
+    if (status === "Rejected" && normalizedRejectedReason.length < 5) {
+      return res.status(400).json({
+        message: "A clear rejection reason using at least 5 characters is required.",
       });
     }
 
@@ -499,8 +506,8 @@ async function updateSurrenderStatus(req, res) {
       updateData.reviewNotes = reviewNotes;
     }
 
-    if (rejectedReason) {
-      updateData.rejectedReason = rejectedReason;
+    if (status === "Rejected") {
+      updateData.rejectedReason = normalizedRejectedReason;
     }
 
     if (dropoffDate) {
@@ -514,7 +521,9 @@ async function updateSurrenderStatus(req, res) {
       category: "surrender",
       type: `surrender_${String(status).toLowerCase()}`,
       title: "Surrender request update",
-      message: `Your surrender request for ${current.pet?.name || "your pet"} is now ${status}.`,
+      message: status === "Rejected"
+        ? `Your surrender request for ${current.pet?.name || "your pet"} was not approved. View My Submissions to see the shelter's reason.`
+        : `Your surrender request for ${current.pet?.name || "your pet"} is now ${status}.`,
       link: "/pages/public/my-submissions.html",
       referenceId: id,
     });
