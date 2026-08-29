@@ -4707,16 +4707,16 @@ html body.management-consistent-ui .page-body .archive-records-table.management-
   }
 }
 
-/* Intake phone actions: keep the primary record action easy to reach without
-   letting permission-dependent secondary actions squeeze or overflow it. */
-@media (max-width: 599px) {
-  html body.management-consistent-ui.intake-management-page .page-body
+/* Intake card actions: the table enters card mode as high as 1365px, so the
+   action layout must follow that real breakpoint instead of phone width only. */
+@media (max-width: 1365px) {
+  html body.intake-management-page .page-body
     #intakeTableBody > tr > td.management-card-actions {
     width: 100% !important;
     min-width: 0 !important;
   }
 
-  html body.management-consistent-ui.intake-management-page .page-body
+  html body.intake-management-page .page-body
     #intakeTableBody .intake-action-group {
     width: 100% !important;
     min-width: 0 !important;
@@ -4725,7 +4725,7 @@ html body.management-consistent-ui .page-body .archive-records-table.management-
     gap: 8px !important;
   }
 
-  html body.management-consistent-ui.intake-management-page .page-body
+  html body.intake-management-page .page-body
     #intakeTableBody .intake-action-group > .tbl-action-btn {
     width: 100% !important;
     min-width: 0 !important;
@@ -4733,7 +4733,7 @@ html body.management-consistent-ui .page-body .archive-records-table.management-
     flex: 1 1 auto !important;
   }
 
-  html body.management-consistent-ui.intake-management-page .page-body
+  html body.intake-management-page .page-body
     #intakeTableBody .intake-action-group > .management-card-open {
     width: 100% !important;
     max-width: none !important;
@@ -4744,12 +4744,12 @@ html body.management-consistent-ui .page-body .archive-records-table.management-
 }
 
 @media (max-width: 339px) {
-  html body.management-consistent-ui.intake-management-page .page-body
+  html body.intake-management-page .page-body
     #intakeTableBody .intake-action-group {
     grid-template-columns: minmax(0, 1fr) !important;
   }
 
-  html body.management-consistent-ui.intake-management-page .page-body
+  html body.intake-management-page .page-body
     #intakeTableBody .intake-action-group > .tbl-action-btn {
     grid-column: 1 !important;
   }

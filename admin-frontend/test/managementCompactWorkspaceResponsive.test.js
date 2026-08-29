@@ -140,14 +140,14 @@ test("Intake remains one continuous Inventory-style panel on phones", () => {
 
 test("Intake View record fills the mobile action row", () => {
   const intakeActions = responsiveStyles.slice(
-    responsiveStyles.lastIndexOf("/* Intake phone actions:"),
+    responsiveStyles.lastIndexOf("/* Intake card actions:"),
   );
 
   assert.match(
     intakeScript,
     /intake-action-group[\s\S]*?management-card-open management-view-action[\s\S]*?View record/,
   );
-  assert.match(intakeActions, /@media \(max-width: 599px\)/);
+  assert.match(intakeActions, /@media \(max-width: 1365px\)/);
   assert.doesNotMatch(
     intakeActions.slice(0, intakeActions.indexOf("/* Intake mobile modal contract:")),
     /management-card-active/,
