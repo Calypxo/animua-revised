@@ -34,5 +34,5 @@ test("phone cards also use one equal row height without changing the image band"
 });
 
 test("the public page requests the equal-height stylesheet revision", () => {
-  assert.match(markup, /furbabies\.css\?v=equal-ready-pet-cards-20260829/);
+  assert.match(markup, /furbabies\.css\?v=equal-ready-pet-cards-profile-alignment-20260830/);
 });

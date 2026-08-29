@@ -1780,6 +1780,12 @@
   font-weight: 800;
 }
 
+body.submissions-page .application-modal-status.submission-status.rejected {
+  border-color: #efb0aa;
+  background: #fff0ee;
+  color: #b42318;
+}
+
 .surrender-detail-modal .application-timeline,
 .adoption-detail-modal .application-timeline {
   padding: 14px 60px 12px;
@@ -1809,6 +1815,54 @@
   background: var(--surrender-modal-red);
   color: #fff;
   font-size: 0.76rem;
+}
+
+body.submissions-page .rejection-detail-note {
+  grid-template-columns: 36px minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  min-height: 82px;
+  padding: 16px 18px;
+  border-color: #efb0aa;
+  background: #fff4f2;
+}
+
+body.submissions-page .rejection-detail-note > i {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  background: #b42318;
+  color: #fff;
+  font-size: 0.86rem;
+}
+
+body.submissions-page .rejection-detail-copy {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: baseline;
+  gap: 6px 12px;
+}
+
+body.submissions-page .rejection-detail-copy strong {
+  color: #8f1d18;
+  font-size: 0.86rem;
+  font-weight: 850;
+  line-height: 1.45;
+}
+
+body.submissions-page .rejection-detail-copy p {
+  color: #4a2725;
+  font-size: 0.9rem;
+  font-weight: 650;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+  body.submissions-page .rejection-detail-copy {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .surrender-detail-modal .surrender-timeline .application-step strong,
@@ -3426,6 +3480,7 @@ body.submissions-page .compatibility-matches li{grid-template-columns:24px 34px 
   body.submissions-page .adoption-detail-modal .application-detail-hero,
   body.submissions-page .surrender-detail-modal .application-detail-hero {
     grid-template-columns: clamp(120px, 19vw, 148px) minmax(0, 1fr) !important;
+    margin-top: 16px !important;
   }
 
   body.submissions-page .adoption-detail-modal .application-detail-hero img,

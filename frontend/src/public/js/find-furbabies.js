@@ -1478,7 +1478,10 @@ function openProfileModal(pet) {
     aboutPanel.style.removeProperty("height");
     aboutPanel.style.removeProperty("min-height");
     aboutPanel.style.removeProperty("max-height");
-    const minimumAboutHeight = Math.ceil(aboutPanel.scrollHeight);
+    // About starts lower than Personality because it follows the photo. Keep a
+    // compact structural minimum, then size it to the remaining column space so
+    // both cards end on the same row for every pet. Long copy scrolls inside.
+    const minimumAboutHeight = 104;
 
     const alignPanelBottoms = () => {
       if (!window.matchMedia("(min-width: 641px)").matches) {

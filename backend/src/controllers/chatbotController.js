@@ -2421,7 +2421,7 @@ function buildSystemPrompt(context = {}, language = "english") {
       : "Answer in English.",
     "Help users with adoption browsing, compatibility matching, surrender requests, account registration, email OTP verification, login, and general shelter service navigation.",
     "ANIMUA means Animal Unified Approach. It is one system for shelter operations and public services managed through the Angeles City Veterinary Office. Never invent a different expansion of ANIMUA.",
-    "Use simple, everyday words and short sentences. Answer the user's question in the first sentence, then give only the details needed for the next step. Keep most replies to two to four short sentences. Avoid policy-style wording, jargon, long lists, and unnecessary explanations. Sound like a helpful shelter front desk. Do not use markdown formatting, bullets, or bold markers. Do not add a generic follow-up question unless the user needs to choose a next step.",
+    "Use simple, everyday words and short sentences. Answer the user's question in the first sentence, then give only the next essential detail. Prefer one or two short sentences and usually stay under 45 words. State each fact once: do not repeat dates, page names, requirements, warnings, or next steps. Add a third sentence only for an essential safety warning or exception. Avoid policy-style wording, jargon, long lists, and unnecessary explanations. Sound like a helpful shelter front desk. Do not use markdown formatting, bullets, or bold markers. Do not add a generic follow-up question unless the user needs to choose a next step.",
     "ANIMUA no longer has a stray animal reporting feature or stray reporting page. Never tell users to submit stray reports through ANIMUA. For stray or abandoned animals, direct users to the Angeles City Dog Pound or Angeles City Veterinary Office.",
     "Adoption through ANIMUA has no adoption fee. Do not invent other fees or payment requirements.",
     "ANIMUA does not process online donation payments, GCash, bank, card, or payment gateway transactions. For donations, direct users to the Angeles City Veterinary Office for official procedures and current needs.",
@@ -2721,33 +2721,33 @@ function getLocalReply(message, context = {}, language = "english") {
     } else if (quizContext.authenticated && !quizContext.hasPreviousResult) {
       retakeGuidance = localizedReply(
         language,
-        "You have no previous result, so you can take your first quiz now. Open Match Quiz and complete all five sections.",
-        "Wala ka pang previous result, kaya maaari mong sagutan ang first quiz mo ngayon. Buksan ang Match Quiz at kumpletuhin ang lahat ng limang sections."
+        "You can take your first Match Quiz now. Open Match Quiz to begin.",
+        "Maaari mong sagutan ang first Match Quiz mo ngayon. Buksan ang Match Quiz para magsimula."
       );
     } else if (quizContext.authenticated && quizContext.hasPreviousResult && quizContext.canTakeQuiz) {
       retakeGuidance = localizedReply(
         language,
-        "You can retake the quiz now. Open Match Quiz and answer all five sections again. Your previous result will stay in your account history, while the new result will update your current matches.",
-        "Maaari mo nang ulitin ang quiz ngayon. Buksan ang Match Quiz at sagutan muli ang lahat ng limang sections. Mananatili sa account history ang previous result mo, at ia-update ng bagong result ang current matches mo."
+        "You can retake the Match Quiz now. Open Match Quiz to begin; your previous result will remain in your account history.",
+        "Maaari mo nang ulitin ang Match Quiz ngayon. Buksan ang Match Quiz para magsimula; mananatili sa account history ang previous result mo."
       );
     } else if (quizContext.authenticated && quizContext.hasPreviousResult && nextRetakeDate) {
       const daysText = quizContext.remainingDays > 0
         ? localizedReply(
             language,
-            ` That is about ${quizContext.remainingDays} day${quizContext.remainingDays === 1 ? "" : "s"} from now.`,
-            ` Humigit-kumulang ${quizContext.remainingDays} araw pa iyon mula ngayon.`
+            `, about ${quizContext.remainingDays} day${quizContext.remainingDays === 1 ? "" : "s"} from now`,
+            `, humigit-kumulang ${quizContext.remainingDays} araw mula ngayon`
           )
         : "";
       retakeGuidance = localizedReply(
         language,
-        `You can retake the Match Quiz beginning ${nextRetakeDate}.${daysText} On or after that date, open Match Quiz and answer all five sections again. You can also see the date under Next allowed retake in Match Quiz or My Submissions.`,
-        `Maaari mong ulitin ang Match Quiz simula ${nextRetakeDate}.${daysText} Sa araw na iyon o pagkatapos nito, buksan ang Match Quiz at sagutan muli ang lahat ng limang sections. Makikita rin ang date sa Next allowed retake sa Match Quiz o My Submissions.`
+        `You can retake the Match Quiz on ${nextRetakeDate}${daysText}. Open Match Quiz on or after that date to begin.`,
+        `Maaari mong ulitin ang Match Quiz sa ${nextRetakeDate}${daysText}. Buksan ang Match Quiz sa araw na iyon o pagkatapos nito.`
       );
     } else {
       retakeGuidance = localizedReply(
         language,
-        `After you complete the quiz, the normal retake wait is ${cooldownDays} day${cooldownDays === 1 ? "" : "s"}. Sign in and open Match Quiz or My Submissions to see your exact Next allowed retake date.`,
-        `Pagkatapos mong makumpleto ang quiz, ang normal na hintayan bago mag-retake ay ${cooldownDays} araw. Mag-sign in at buksan ang Match Quiz o My Submissions para makita ang eksaktong Next allowed retake date mo.`
+        `The usual Match Quiz retake wait is ${cooldownDays} day${cooldownDays === 1 ? "" : "s"}. Sign in and check Next allowed retake in Match Quiz for your exact date.`,
+        `Ang karaniwang hintayan bago ulitin ang Match Quiz ay ${cooldownDays} araw. Mag-sign in at tingnan ang Next allowed retake sa Match Quiz para sa eksaktong date.`
       );
     }
 
@@ -2757,8 +2757,8 @@ function getLocalReply(message, context = {}, language = "english") {
 
     return localizedReply(
       language,
-      `Sign in and open Match Quiz. Choose English or Tagalog, set your pet preferences, and answer all five sections. Submit the quiz to see your saved matches. ${retakeGuidance}`,
-      `Mag-sign in at buksan ang Match Quiz. Pumili ng English o Tagalog, itakda ang pet preferences, at sagutan ang limang sections. I-submit ang quiz para makita ang saved matches mo. ${retakeGuidance}`
+      `Sign in, open Match Quiz, set your preferences, and answer all five sections. Retakes normally require a ${cooldownDays}-day wait; check Next allowed retake in Match Quiz for your date.`,
+      `Mag-sign in, buksan ang Match Quiz, itakda ang preferences, at sagutan ang limang sections. Karaniwang may ${cooldownDays}-day wait bago mag-retake; tingnan ang Next allowed retake sa Match Quiz para sa date mo.`
     );
   }
 
@@ -3297,7 +3297,7 @@ async function requestGeminiReply(messages) {
     body: JSON.stringify({
       contents: toGeminiContents(messages),
       generationConfig: {
-        maxOutputTokens: 2048,
+        maxOutputTokens: 220,
         temperature: 0.35,
         thinkingConfig: {
           thinkingLevel: "minimal"
@@ -3329,7 +3329,7 @@ async function requestResponsesReply(messages) {
     body: JSON.stringify({
       model: OPENAI_MODEL,
       input: messages,
-      max_output_tokens: 420,
+      max_output_tokens: 220,
       reasoning: {
         effort: "low"
       },
@@ -3365,7 +3365,7 @@ async function requestChatCompletionsReply(messages) {
       model: OPENAI_MODEL,
       messages,
       temperature: 0.35,
-      max_completion_tokens: 420
+      max_completion_tokens: 220
     })
   });
 

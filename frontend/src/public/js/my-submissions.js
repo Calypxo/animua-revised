@@ -489,6 +489,23 @@ function getApplicationMessage(status, item) {
   return "Your application is currently under review. We will contact you once a decision is available.";
 }
 
+function renderRejectionDetailNote(reason) {
+  const message = valueOrFallback(
+    reason,
+    "No rejection reason was provided. Please contact the shelter for more information.",
+  );
+
+  return `
+    <div class="application-detail-note rejection-detail-note">
+      <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+      <div class="rejection-detail-copy">
+        <strong>Reason for rejection</strong>
+        <p>${escapeHtml(message)}</p>
+      </div>
+    </div>
+  `;
+}
+
 function isApprovedDecision(status, type) {
   const normalized = String(status || "").toLowerCase();
   if (type === "surrender") return normalized.includes("approved") || normalized.includes("accepted") || normalized.includes("converted");
@@ -642,7 +659,7 @@ function renderApplicationTimeline(status, submittedDate, decisionDateLabel = su
   const decisionDate = hasDecision ? decisionDateLabel : "Pending";
 
   return `
-    <div class="application-timeline ${hasDecision ? "complete" : ""}">
+    <div class="application-timeline ${hasDecision ? "complete" : ""} ${isRejected ? "is-rejected" : ""}">
       <div class="application-step done">
         <span><i class="fa-solid fa-check"></i></span>
         <strong>Submitted</strong>
@@ -698,7 +715,7 @@ function renderSurrenderTimeline(status, submittedDate, decisionDateLabel = subm
   const decisionDate = hasDecision ? decisionDateLabel : "Pending";
 
   return `
-    <div class="application-timeline surrender-timeline ${hasDecision ? "complete" : ""}">
+    <div class="application-timeline surrender-timeline ${hasDecision ? "complete" : ""} ${isRejected ? "is-rejected" : ""}">
       <div class="application-step done">
         <span><i class="fa-solid fa-check"></i></span>
         <strong>Received</strong>
@@ -711,7 +728,7 @@ function renderSurrenderTimeline(status, submittedDate, decisionDateLabel = subm
       </div>
       <div class="application-step ${hasDecision ? "active done" : ""}">
         <span>${isApproved ? '<i class="fa-solid fa-check"></i>' : isRejected || isExpired ? '<i class="fa-solid fa-xmark"></i>' : "3"}</span>
-        <strong>${isExpired ? "Expired" : "Decision"}</strong>
+        <strong>${isRejected ? "Rejected" : isExpired ? "Expired" : "Decision"}</strong>
         <small>${decisionDate}</small>
       </div>
     </div>
@@ -1433,6 +1450,7 @@ async function showSubmissionDetails(item) {
     const status = cleanStatus(item.status, item.type);
     const displayStatus = submissionDisplayStatus(item, status);
     const isAccepted = isApprovedDecision(status, "surrender");
+    const isRejected = String(status).toLowerCase().includes("reject");
     const submittedDate = formatDate(item.submittedAt);
     const metaParts = [item.sex, item.species, item.age].filter(Boolean);
     const details = item.details || {};
@@ -1446,7 +1464,7 @@ async function showSubmissionDetails(item) {
 
     Swal.fire({
       html: `
-        <section class="application-detail-modal surrender-detail-modal">
+        <section class="application-detail-modal surrender-detail-modal ${isRejected ? "is-rejected" : ""}">
           <header class="application-detail-header">
             <span class="application-detail-accent">
               <i class="fa-regular fa-file-lines" aria-hidden="true"></i>
@@ -1483,7 +1501,9 @@ async function showSubmissionDetails(item) {
 
           ${renderSurrenderTimeline(status, submittedDate, decisionDate)}
 
-          ${isAccepted ? "" : `
+          ${isAccepted ? "" : isRejected
+            ? renderRejectionDetailNote(publicRejectionReason(details, "surrender"))
+            : `
           <div class="application-detail-note surrender-detail-note">
             <i class="fa-solid fa-info"></i>
             <p>${escapeHtml(getSurrenderMessage(status, item))}</p>
@@ -1579,11 +1599,12 @@ async function showSubmissionDetails(item) {
   const petExperience = valueOrFallback(details.other_information?.existing_pets, "Not provided");
   const compatibilityPresentation = applicationCompatibilityPresentation(details);
   const isApproved = isApprovedDecision(status, "adoption");
+  const isRejected = String(status).toLowerCase().includes("reject");
   const decisionDate = formatDate(details.approvedDate || details.approvedAt || details.acceptedDate || details.acceptedAt || details.updatedAt || item.submittedAt);
 
   Swal.fire({
     html: `
-      <section class="application-detail-modal adoption-detail-modal">
+      <section class="application-detail-modal adoption-detail-modal ${isRejected ? "is-rejected" : ""}">
         <header class="application-detail-header">
           <span class="application-detail-accent">
             <i class="fa-regular fa-file-lines" aria-hidden="true"></i>
@@ -1620,7 +1641,9 @@ async function showSubmissionDetails(item) {
 
         ${renderApplicationTimeline(status, submittedDate, decisionDate)}
 
-        ${isApproved ? "" : `
+        ${isApproved ? "" : isRejected
+          ? renderRejectionDetailNote(publicRejectionReason(details, "adoption"))
+          : `
         <div class="application-detail-note">
           <i class="fa-solid fa-info"></i>
           <p>${escapeHtml(getApplicationMessage(status, item))}</p>

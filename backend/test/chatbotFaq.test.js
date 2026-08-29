@@ -281,6 +281,8 @@ test("provider prompt includes official FAQ source-of-truth rules", () => {
   assert.match(prompt, /ANIMUA has no stray\/lost reporting feature/i);
   assert.match(prompt, /answer in English even if the user writes Taglish/i);
   assert.match(prompt, /simple, everyday words and short sentences/i);
+  assert.match(prompt, /Prefer one or two short sentences/i);
+  assert.match(prompt, /do not repeat dates, page names, requirements, warnings, or next steps/i);
 });
 
 test("official FAQ layer answers system questions before AI is needed", async () => {
@@ -403,10 +405,10 @@ test("explains the complete Match Quiz process and configured retake rule in Eng
   );
 
   assert.equal(_test.hasQuizProcessIntent(message), true);
-  assert.match(reply, /Sign in and open Match Quiz/i);
-  assert.match(reply, /choose English or Tagalog/i);
+  assert.match(reply, /Sign in, open Match Quiz/i);
+  assert.match(reply, /set your preferences/i);
   assert.match(reply, /all five sections/i);
-  assert.match(reply, /31 days/i);
+  assert.match(reply, /31-day wait/i);
   assert.match(reply, /Next allowed retake/i);
 });
 
@@ -435,7 +437,8 @@ test("answers a logged-in user's exact quiz retake date in English", () => {
   assert.equal(_test.hasQuizRetakeIntent(message), true);
   assert.match(reply, /September 30, 2026/i);
   assert.match(reply, /12 days/i);
-  assert.match(reply, /My Submissions/i);
+  assert.doesNotMatch(reply, /My Submissions|all five sections/i);
+  assert.ok(reply.length < 180);
 });
 
 test("answers quiz retake availability in Tagalog", () => {
@@ -461,9 +464,10 @@ test("answers quiz retake availability in Tagalog", () => {
   );
 
   assert.equal(_test.hasQuizRetakeIntent(message), true);
-  assert.match(reply, /Maaari mo nang ulitin ang quiz ngayon/i);
+  assert.match(reply, /Maaari mo nang ulitin ang Match Quiz ngayon/i);
   assert.match(reply, /account history/i);
-  assert.match(reply, /current matches/i);
+  assert.doesNotMatch(reply, /current matches|all five sections/i);
+  assert.ok(reply.length < 180);
 });
 
 test("answers a logged-in user's exact quiz retake date in Tagalog", () => {
@@ -491,8 +495,8 @@ test("answers a logged-in user's exact quiz retake date in Tagalog", () => {
   assert.equal(_test.hasQuizRetakeIntent(message), true);
   assert.match(reply, /Setyembre 30, 2026/i);
   assert.match(reply, /12 araw/i);
-  assert.match(reply, /sagutan muli ang lahat ng limang sections/i);
-  assert.match(reply, /My Submissions/i);
+  assert.doesNotMatch(reply, /lahat ng limang sections|My Submissions/i);
+  assert.ok(reply.length < 190);
 });
 
 test("routes application status questions to My Applications instead of animal visits", () => {

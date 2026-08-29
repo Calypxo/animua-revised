@@ -297,7 +297,7 @@
                     <label class="identity-document-upload" for="identityIdFront">
                       <span class="identity-document-preview" id="identityIdFrontPreview"><i class="fa-regular fa-id-card" aria-hidden="true"></i></span>
                       <span class="identity-document-copy">
-                        <strong id="identityIdFrontLabel">Upload front of ID</strong>
+                        <strong><span id="identityIdFrontLabel">Upload front of ID</span> <span class="req" aria-hidden="true">*</span></strong>
                         <small>JPG, PNG, or WebP up to 5 MB. Large photos are optimized automatically.</small>
                       </span>
                     </label>
@@ -309,7 +309,7 @@
                     <label class="identity-document-upload" for="identityIdBack">
                       <span class="identity-document-preview" id="identityIdBackPreview"><i class="fa-regular fa-address-card" aria-hidden="true"></i></span>
                       <span class="identity-document-copy">
-                        <strong id="identityIdBackLabel">Upload back of ID</strong>
+                        <strong><span id="identityIdBackLabel">Upload back of ID</span> <span class="req" aria-hidden="true">*</span></strong>
                         <small>JPG, PNG, or WebP up to 5 MB. Large photos are optimized automatically.</small>
                       </span>
                     </label>
@@ -327,12 +327,12 @@
           <section class="document-form-section surrender-step-panel" data-step="2" aria-labelledby="animalStepTitle" hidden>
             <div class="step-section-heading"><span class="step-section-icon"><i class="fa-solid fa-paw" aria-hidden="true"></i></span><div><span>Step 2</span><h3 id="animalStepTitle">Animal information</h3><p>Share what you know. Use “Unknown” rather than guessing.</p></div></div>
             <div class="surrender-form-grid">
-              <div class="form-group"><label for="petName">Animal's name</label><input type="text" id="petName" name="petName" placeholder="Name or Unknown"></div>
-              <div class="form-group"><label for="species">Species</label><select id="species" name="species"><option value="">Select species</option><option value="Dog">Dog</option><option value="Cat">Cat</option><option value="Unknown">Unknown</option></select></div>
-              <div class="form-group"><label for="breed">Breed</label><input type="text" id="breed" name="breed" placeholder="Breed, mixed breed, or Unknown"></div>
-              <div class="form-group"><label for="petAge">Age or estimate</label><input type="text" id="petAge" name="petAge" placeholder="Example: 2 years or Unknown"></div>
-              <div class="form-group"><label for="petSex">Sex</label><select id="petSex" name="petSex"><option value="">Select sex</option><option value="Male">Male</option><option value="Female">Female</option><option value="Unknown">Unknown</option></select></div>
-              <div class="form-group"><label for="colorMarkings">Color and identifying markings</label><input type="text" id="colorMarkings" name="colorMarkings" placeholder="Example: white coat, brown patch"></div>
+              <div class="form-group"><label for="petName">Animal's name <span class="req" aria-hidden="true">*</span></label><input type="text" id="petName" name="petName" placeholder="Name or Unknown" required aria-describedby="petNameError"><small class="field-error" id="petNameError"></small></div>
+              <div class="form-group"><label for="species">Species <span class="req" aria-hidden="true">*</span></label><select id="species" name="species" required aria-describedby="speciesError"><option value="">Select species</option><option value="Dog">Dog</option><option value="Cat">Cat</option><option value="Unknown">Unknown</option></select><small class="field-error" id="speciesError"></small></div>
+              <div class="form-group"><label for="breed">Breed <span class="req" aria-hidden="true">*</span></label><input type="text" id="breed" name="breed" placeholder="Breed, mixed breed, or Unknown" required aria-describedby="breedError"><small class="field-error" id="breedError"></small></div>
+              <div class="form-group"><label for="petAge">Age or estimate <span class="req" aria-hidden="true">*</span></label><input type="text" id="petAge" name="petAge" placeholder="Example: 2 years or Unknown" required aria-describedby="petAgeError"><small class="field-error" id="petAgeError"></small></div>
+              <div class="form-group"><label for="petSex">Sex <span class="req" aria-hidden="true">*</span></label><select id="petSex" name="petSex" required aria-describedby="petSexError"><option value="">Select sex</option><option value="Male">Male</option><option value="Female">Female</option><option value="Unknown">Unknown</option></select><small class="field-error" id="petSexError"></small></div>
+              <div class="form-group"><label for="colorMarkings">Color and identifying markings <span class="req" aria-hidden="true">*</span></label><input type="text" id="colorMarkings" name="colorMarkings" placeholder="Example: white coat, brown patch, or Unknown" required aria-describedby="colorMarkingsError"><small class="field-error" id="colorMarkingsError"></small></div>
               <div class="form-group full animal-photo-field">
                 <label for="animalPhoto">Animal photo</label>
                 <label class="animal-photo-upload" for="animalPhoto">
@@ -348,14 +348,15 @@
                 <small class="field-error" id="animalPhotoError"></small>
               </div>
               <fieldset class="form-group full choice-fieldset">
-                <legend>Reproductive status</legend><p class="field-help">Choose the closest known answer.</p>
+                <legend>Reproductive status <span class="req" aria-hidden="true">*</span></legend><p class="field-help" id="statusHelp">Choose the closest known answer.</p>
                 <div class="surrender-check-row">
-                  <label class="check-option"><input type="radio" name="status" value="Intact"><span><strong>Intact</strong><small>Not spayed or neutered</small></span></label>
+                  <label class="check-option"><input type="radio" id="statusIntact" name="status" value="Intact" required aria-describedby="statusHelp statusError"><span><strong>Intact</strong><small>Not spayed or neutered</small></span></label>
                   <label class="check-option"><input type="radio" name="status" value="Neutered"><span><strong>Spayed / neutered</strong><small>Procedure completed</small></span></label>
                   <label class="check-option"><input type="radio" name="status" value="Unknown"><span><strong>Unknown</strong><small>Not sure or no record</small></span></label>
                 </div>
+                <small class="field-error" id="statusError"></small>
               </fieldset>
-              <div class="form-group full"><label for="vaccinationHistory">Vaccination and health history</label><textarea id="vaccinationHistory" name="vaccinationHistory" rows="4" placeholder="List known vaccines, health conditions, medicines, or write Unknown."></textarea><small class="field-help">Include recent care or special needs if known.</small></div>
+              <div class="form-group full"><label for="vaccinationHistory">Vaccination and health history <span class="req" aria-hidden="true">*</span></label><textarea id="vaccinationHistory" name="vaccinationHistory" rows="4" placeholder="List known vaccines, health conditions, medicines, or write Unknown." required aria-describedby="vaccinationHistoryHelp vaccinationHistoryError"></textarea><small class="field-help" id="vaccinationHistoryHelp">Include recent care or special needs if known.</small><small class="field-error" id="vaccinationHistoryError"></small></div>
             </div>
             <div class="step-actions"><button type="button" class="btn secondary-btn" data-previous-step="1"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back</button><button type="button" class="btn primary-btn" data-next-step="3">Continue to situation <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button></div>
           </section>
@@ -409,7 +410,7 @@
                   <p>If my request is approved, I voluntarily surrender my animal to the Angeles City Veterinary Office / shelter and understand that this may result in the permanent transfer of responsibility and care for the animal.</p>
                 </div>
               </div>
-              <label class="agreement-option" for="agreeAllTerms"><input type="checkbox" id="agreeAllTerms" required aria-describedby="agreementHelp agreementError"><span><strong id="agreementConsentText" data-consent-tl="Nabasa ko at sumasang-ayon ako." data-consent-en="I have read and agree.">Nabasa ko at sumasang-ayon ako.</strong><small id="agreementHelp">I confirm all information is accurate and understand this request may be approved or rejected after review.</small></span></label>
+              <label class="agreement-option" for="agreeAllTerms"><input type="checkbox" id="agreeAllTerms" required aria-describedby="agreementHelp agreementError"><span><strong><span id="agreementConsentText" data-consent-tl="Nabasa ko at sumasang-ayon ako." data-consent-en="I have read and agree.">Nabasa ko at sumasang-ayon ako.</span> <span class="req" aria-hidden="true">*</span></strong><small id="agreementHelp">I confirm all information is accurate and understand this request may be approved or rejected after review.</small></span></label>
               <small class="field-error agreement-error" id="agreementError"></small>
             </article>
 

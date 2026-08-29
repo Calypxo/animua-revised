@@ -26,7 +26,7 @@ function profileMarkup() {
         </button>
         <div class="profile-modal-shell">
           <div class="profile-modal-title">
-            <span class="profile-title-icon" aria-hidden="true"><i class="fa-regular fa-user"></i></span>
+            <span class="profile-title-icon" aria-hidden="true"><i class="fa-solid fa-circle-user"></i></span>
             <h2 id="profileModalTitle">My Profile</h2>
           </div>
           <section class="profile-summary-card">

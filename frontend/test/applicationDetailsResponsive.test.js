@@ -14,6 +14,7 @@ test("application details use a wider fluid tablet dialog", async () => {
   assert.match(script, /width:\s*"min\(720px, calc\(100vw - 28px\)\)"/);
   assert.match(css, /@media\s*\(min-width:\s*681px\)\s*and\s*\(max-width:\s*1024px\)/);
   assert.match(css, /grid-template-columns:\s*clamp\(120px,\s*19vw,\s*148px\)\s+minmax\(0,\s*1fr\)\s*!important/);
+  assert.match(css, /grid-template-columns:\s*clamp\(120px,\s*19vw,\s*148px\)\s+minmax\(0,\s*1fr\)\s*!important;[\s\S]*?margin-top:\s*16px\s*!important/);
   assert.match(css, /max-height:\s*calc\(100dvh - 32px\)\s*!important/);
 });
 

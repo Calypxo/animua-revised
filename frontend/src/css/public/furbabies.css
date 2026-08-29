@@ -11186,6 +11186,60 @@ body.furbabies-page .pets-grid > .pet-card .pet-card-top h3 {
   }
 }
 
+/* Keep variable backend text within the original desktop profile dimensions.
+   The modal itself remains naturally sized; only content that made a newly
+   published furbaby taller is contained. */
+@media (min-width: 761px) {
+  body.furbabies-page #petProfileModal .profile-title-wrap h2 {
+    display: -webkit-box !important;
+    max-height: 2.04em !important;
+    overflow: hidden !important;
+    overflow-wrap: anywhere !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 2 !important;
+    line-clamp: 2 !important;
+  }
+
+  body.furbabies-page #petProfileModal .profile-meta-card {
+    box-sizing: border-box !important;
+    height: 60px !important;
+    min-height: 60px !important;
+    max-height: 60px !important;
+    overflow: hidden !important;
+  }
+
+  body.furbabies-page #petProfileModal .profile-meta-card strong {
+    display: -webkit-box !important;
+    max-height: 2.4em !important;
+    overflow: hidden !important;
+    overflow-wrap: anywhere !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 2 !important;
+    line-clamp: 2 !important;
+  }
+
+  body.furbabies-page #petProfileModal .profile-section-card {
+    box-sizing: border-box !important;
+    height: 145px !important;
+    min-height: 145px !important;
+    max-height: 145px !important;
+    overflow: hidden !important;
+  }
+
+  body.furbabies-page #petProfileModal .profile-about-card {
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  body.furbabies-page #petProfileModal .profile-short-description {
+    max-height: 88px !important;
+    padding-right: 4px !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+  }
+}
+
 /* Final adoption progress hierarchy:
    desktop uses the complete sidebar, while phones show only one compact counter. */
 @media (min-width: 901px) {
