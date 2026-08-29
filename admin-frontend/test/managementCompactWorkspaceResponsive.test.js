@@ -5,12 +5,13 @@ import { readFile } from "node:fs/promises";
 const readPage = (name) => readFile(new URL(`../pages/${name}`, import.meta.url), "utf8");
 const readStyle = (name) => readFile(new URL(`../src/css/${name}`, import.meta.url), "utf8");
 
-const [compatibilityPage, inventoryPage, intakePage, adoptionScript, intakeScript, compatibilityStyles, inventoryStyles, responsiveStyles, tabStyles] = await Promise.all([
+const [compatibilityPage, inventoryPage, intakePage, adoptionScript, intakeScript, surrenderScript, compatibilityStyles, inventoryStyles, responsiveStyles, tabStyles] = await Promise.all([
   readPage("compatibilityQuiz.html"),
   readPage("inventory.html"),
   readPage("intakeList.html"),
   readFile(new URL("../src/management/adoptionApps.js", import.meta.url), "utf8"),
   readFile(new URL("../src/management/intake.js", import.meta.url), "utf8"),
+  readFile(new URL("../src/management/surrenderRequests.js", import.meta.url), "utf8"),
   readStyle("compatibilityQuiz.css"),
   readStyle("inventory.css"),
   readStyle("managementResponsive.css"),
@@ -145,7 +146,11 @@ test("Intake View record fills the mobile action row", () => {
 
   assert.match(
     intakeScript,
-    /intake-action-group[\s\S]*?management-card-open management-view-action[\s\S]*?View record/,
+    /intake-action-group[\s\S]*?tbl-action-btn management-card-open management-view-action management-view-action--compact[\s\S]*?management-action-text">View record/,
+  );
+  assert.match(
+    surrenderScript,
+    /tbl-action-btn management-card-open management-view-action management-view-action--compact[\s\S]*?management-action-text">View request/,
   );
   assert.match(intakeActions, /@media \(max-width: 720px\)/);
   assert.doesNotMatch(
@@ -167,6 +172,10 @@ test("Intake View record fills the mobile action row", () => {
   assert.match(
     intakeActions,
     /#intakeTableBody \.intake-action-group > \.management-card-open\s*\{[\s\S]*?width:\s*100% !important;[\s\S]*?max-width:\s*none !important;[\s\S]*?grid-column:\s*1 \/ -1 !important;[\s\S]*?justify-self:\s*stretch !important;/,
+  );
+  assert.match(
+    intakeActions,
+    /\.management-view-action > \.management-action-text\s*\{[\s\S]*?display:\s*inline !important;/,
   );
   assert.match(
     intakeActions,

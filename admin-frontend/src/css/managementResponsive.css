@@ -4742,6 +4742,15 @@ html body.management-consistent-ui .page-body .archive-records-table.management-
     grid-column: 1 / -1 !important;
     justify-self: stretch !important;
   }
+
+  html body.intake-management-page .page-body
+    #intakeTableBody .management-card-actions
+    .management-view-action > .management-action-text {
+    display: inline !important;
+    color: inherit !important;
+    font: inherit !important;
+    white-space: nowrap !important;
+  }
 }
 
 @media (min-width: 721px) and (max-width: 1365px) {
