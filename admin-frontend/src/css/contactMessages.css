@@ -1464,8 +1464,11 @@ html body.management-consistent-ui.contact-messages-page .cm-chat-composer #repl
 }
 
 .contact-messages-page .cm-records-panel .ap-tabs-wrap {
-  padding: 18px 24px !important;
   border-bottom-color: rgba(120, 1, 22, 0.14);
+}
+
+.contact-messages-page .cm-records-panel .ap-tabs {
+  margin-top: 18px !important;
 }
 
 .contact-messages-page .cm-records-panel .ap-tab {
