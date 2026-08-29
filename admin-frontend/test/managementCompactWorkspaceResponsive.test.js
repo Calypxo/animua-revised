@@ -147,10 +147,14 @@ test("Intake View record fills the mobile action row", () => {
     intakeScript,
     /intake-action-group[\s\S]*?management-card-open management-view-action[\s\S]*?View record/,
   );
-  assert.match(intakeActions, /@media \(max-width: 1365px\)/);
+  assert.match(intakeActions, /@media \(max-width: 720px\)/);
   assert.doesNotMatch(
-    intakeActions.slice(0, intakeActions.indexOf("/* Intake mobile modal contract:")),
+    intakeActions.slice(0, intakeActions.indexOf("@media (min-width: 721px)")),
     /management-card-active/,
+  );
+  assert.match(
+    intakeActions,
+    /@media \(min-width: 721px\) and \(max-width: 1365px\)[\s\S]*?management-card-active[\s\S]*?#intakeTableBody \.intake-action-group/,
   );
   assert.match(
     intakeActions,
@@ -181,11 +185,11 @@ test("Intake modals stay inside the mobile viewport with usable actions", () => 
   assert.match(intakeModals, /@media \(max-width: 599px\)/);
   assert.match(
     intakeModals,
-    /#intakeModalBackdrop,[\s\S]*?#viewModalBackdrop[\s\S]*?\.management-modal-layer\s*\{[\s\S]*?padding:\s*0 !important;[\s\S]*?overflow:\s*hidden !important;/,
+    /#intakeModalBackdrop,[\s\S]*?#viewModalBackdrop[\s\S]*?\.management-modal-layer\s*\{[\s\S]*?align-items:\s*center !important;[\s\S]*?justify-content:\s*center !important;[\s\S]*?padding:\s*max\(8px, env\(safe-area-inset-top\)\) 8px max\(8px, env\(safe-area-inset-bottom\)\) !important;/,
   );
   assert.match(
     intakeModals,
-    /\.intake-modal\.management-side-modal\s*\{[\s\S]*?width:\s*100dvw !important;[\s\S]*?height:\s*100dvh !important;[\s\S]*?max-height:\s*100dvh !important;/,
+    /\.intake-modal\.management-side-modal\s*\{[\s\S]*?width:\s*100% !important;[\s\S]*?max-width:\s*min\(800px, calc\(100dvw - 16px\)\) !important;[\s\S]*?height:\s*auto !important;[\s\S]*?max-height:\s*calc\(100dvh - 16px\) !important;[\s\S]*?border-radius:\s*16px !important;/,
   );
   assert.match(
     intakeModals,

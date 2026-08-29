@@ -4707,9 +4707,10 @@ html body.management-consistent-ui .page-body .archive-records-table.management-
   }
 }
 
-/* Intake card actions: the table enters card mode as high as 1365px, so the
-   action layout must follow that real breakpoint instead of phone width only. */
-@media (max-width: 1365px) {
+/* Intake card actions: below 720px the module's own CSS always renders cards.
+   Wider layouts receive this treatment only when the responsive table helper
+   has explicitly activated card mode, preserving compact table eye buttons. */
+@media (max-width: 720px) {
   html body.intake-management-page .page-body
     #intakeTableBody > tr > td.management-card-actions {
     width: 100% !important;
@@ -4743,6 +4744,44 @@ html body.management-consistent-ui .page-body .archive-records-table.management-
   }
 }
 
+@media (min-width: 721px) and (max-width: 1365px) {
+  html body.intake-management-page .page-body
+    .management-data-table.management-card-table.management-card-active
+    #intakeTableBody > tr > td.management-card-actions {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  html body.intake-management-page .page-body
+    .management-data-table.management-card-table.management-card-active
+    #intakeTableBody .intake-action-group {
+    width: 100% !important;
+    min-width: 0 !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  html body.intake-management-page .page-body
+    .management-data-table.management-card-table.management-card-active
+    #intakeTableBody .intake-action-group > .tbl-action-btn {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    flex: 1 1 auto !important;
+  }
+
+  html body.intake-management-page .page-body
+    .management-data-table.management-card-table.management-card-active
+    #intakeTableBody .intake-action-group > .management-card-open {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    grid-column: 1 / -1 !important;
+    justify-self: stretch !important;
+  }
+}
+
 @media (max-width: 339px) {
   html body.intake-management-page .page-body
     #intakeTableBody .intake-action-group {
@@ -4755,16 +4794,17 @@ html body.management-consistent-ui .page-body .archive-records-table.management-
   }
 }
 
-/* Intake mobile modal contract: the backdrop and full-screen workflow panel
-   share the same viewport box, while only the modal body scrolls. This avoids
-   the 100vw-plus-backdrop-padding overflow left by the generic dialog rules. */
+/* Intake mobile modal contract: preserve the original centered, rounded
+   dialog while keeping every edge inside the safe viewport. Only its body
+   scrolls, so the header and actions stay available without changing design. */
 @media (max-width: 599px) {
   html body.management-consistent-ui.intake-management-page :is(
     #intakeModalBackdrop,
     #viewModalBackdrop
   ).management-modal-layer {
-    align-items: stretch !important;
-    padding: 0 !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom)) !important;
     overflow: hidden !important;
   }
 
@@ -4772,17 +4812,27 @@ html body.management-consistent-ui .page-body .archive-records-table.management-
     #intakeModalBackdrop,
     #viewModalBackdrop
   ).management-modal-layer > .intake-modal.management-side-modal {
-    width: 100dvw !important;
+    width: 100% !important;
     min-width: 0 !important;
-    max-width: 100dvw !important;
-    height: 100dvh !important;
+    max-width: min(800px, calc(100dvw - 16px)) !important;
+    height: auto !important;
     min-height: 0 !important;
-    max-height: 100dvh !important;
+    max-height: calc(100dvh - 16px) !important;
     margin: 0 !important;
     overflow: hidden !important;
-    border: 0 !important;
-    border-radius: 0 !important;
+    border: 1px solid rgba(255, 255, 255, .78) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 24px 64px rgba(18, 10, 10, .22) !important;
     box-sizing: border-box !important;
+    transform: translate3d(0, 14px, 0) scale(.985) !important;
+    transform-origin: center !important;
+  }
+
+  html body.management-consistent-ui.intake-management-page :is(
+    #intakeModalBackdrop,
+    #viewModalBackdrop
+  ).management-modal-layer.open > .intake-modal.management-side-modal {
+    transform: translate3d(0, 0, 0) scale(1) !important;
   }
 
   html body.management-consistent-ui.intake-management-page :is(
