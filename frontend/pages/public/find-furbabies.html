@@ -20,7 +20,7 @@
   <link rel="stylesheet" href="../../src/css/public/home.css">
   <link rel="preload" as="style" href="../../src/css/global.css?v=profile-stack-restored-20260824" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="../../src/css/global.css?v=profile-stack-restored-20260824"></noscript>
-  <link rel="stylesheet" href="../../src/css/public/furbabies.css?v=yellow-field-focus-20260829">
+  <link rel="stylesheet" href="../../src/css/public/furbabies.css?v=equal-ready-pet-cards-20260829">
   <link rel="stylesheet" href="../../src/css/public/zoom-responsive.css?v=public-zoom-20260825-4">
 </head>
 <body class="home-page furbabies-page">
@@ -402,7 +402,7 @@
       </button>
 
       <div class="adoption-form-header">
-        <span class="adoption-form-logo"><i class="fa-solid fa-paw" aria-hidden="true"></i></span>
+        <img class="adoption-form-logo" src="/images/animua_logo1.svg" alt="" aria-hidden="true" width="240" height="216">
         <div class="adoption-form-title">
           <h2>Animal Adoption Application</h2>
           <p>Please fill out the form honestly. All information will be kept confidential.</p>
@@ -411,6 +411,7 @@
       </div>
 
       <div class="adoption-stepper" aria-label="Adoption application steps">
+        <span class="adoption-step-counter" id="adoptionStepCounter" aria-live="polite">Step 1 of 4</span>
         <button type="button" class="adoption-stepper-item active" data-adoption-step-target="1"><span>1</span><strong>Applicant Information</strong><small>Tell us about yourself.</small></button>
         <button type="button" class="adoption-stepper-item" data-adoption-step-target="2"><span>2</span><strong>Household Information</strong><small>Your family and pets.</small></button>
         <button type="button" class="adoption-stepper-item" data-adoption-step-target="3"><span>3</span><strong>Adoption Readiness</strong><small>A few questions about your readiness.</small></button>
@@ -441,12 +442,12 @@
         </div>
 
         <div class="adoption-grid">
-          <div class="form-group">
+          <div class="form-group adoption-field-full-name">
             <label for="fullName">Full Name *</label>
             <input type="text" id="fullName" name="full_name" placeholder="Enter your full name" readonly required>
           </div>
 
-          <div class="form-group">
+          <div class="form-group adoption-field-birthdate">
             <label for="birthdate">Birthdate *</label>
             <div class="date-picker-field" data-date-picker>
               <input type="text" id="birthdate" name="birthdate" placeholder="Select birthdate" autocomplete="off" inputmode="none" required>
@@ -456,17 +457,17 @@
             </div>
           </div>
 
-          <div class="form-group">
+          <div class="form-group adoption-field-age">
             <label for="age">Age</label>
             <input type="text" id="age" name="age" placeholder="Auto-calculated" readonly required>
           </div>
 
-          <div class="form-group">
+          <div class="form-group adoption-field-address">
             <label for="address">Residential Address *</label>
             <input type="text" id="address" name="address" placeholder="House no., Street, Barangay, City, Province" required>
           </div>
 
-          <div class="form-group">
+          <div class="form-group adoption-field-civil-status">
             <label for="civilStatus">Civil Status *</label>
             <select id="civilStatus" name="civil_status" required>
               <option value="">Select civil status</option>
@@ -477,7 +478,7 @@
             </select>
           </div>
 
-          <div class="form-group">
+          <div class="form-group adoption-field-gender">
             <label for="gender">Gender *</label>
             <select id="gender" name="gender" required>
               <option value="">Select gender</option>
@@ -487,7 +488,7 @@
             </select>
           </div>
 
-          <div class="form-group">
+          <div class="form-group adoption-field-citizenship">
             <label for="citizenship">Citizenship *</label>
             <select id="citizenship" name="citizenship" required>
               <option value="">Select citizenship</option>
@@ -498,14 +499,19 @@
             </select>
           </div>
 
-          <div class="form-group">
+          <div class="form-group adoption-field-contact-number">
             <label for="contactNumber">Contact Number(s) *</label>
             <input type="tel" id="contactNumber" name="contact_number" placeholder="09XXXXXXXXX" inputmode="numeric" pattern="[0-9]*" maxlength="11" required>
           </div>
 
-          <div class="form-group">
+          <div class="form-group adoption-field-occupation">
             <label for="occupation">Occupation *</label>
             <input type="text" id="occupation" name="occupation" placeholder="Enter your occupation" required>
+          </div>
+
+          <div class="form-group adoption-desktop-email-field" data-adoption-field-step="1">
+            <label for="emailAddress">Email Address</label>
+            <input type="email" id="emailAddress" placeholder="you@example.com" readonly>
           </div>
 
           <div class="form-group full">
@@ -656,12 +662,12 @@
         </div>
 
         <p class="form-message" id="formMessage"></p>
+        <div class="form-actions adoption-wizard-actions">
+          <button type="button" class="btn secondary-btn" id="adoptionBackBtn" hidden>Back</button>
+          <button type="button" class="btn primary-btn" id="adoptionNextBtn">Continue <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
+          <button type="submit" class="btn primary-btn" id="adoptionSubmitBtn" hidden>Submit Adoption Application</button>
+        </div>
       </form>
-      <div class="form-actions adoption-wizard-actions">
-        <button type="button" class="btn secondary-btn" id="adoptionBackBtn" hidden>Back</button>
-        <button type="button" class="btn primary-btn" id="adoptionNextBtn">Continue <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
-        <button type="submit" class="btn primary-btn" id="adoptionSubmitBtn" form="adoptionForm" hidden>Submit Adoption Application</button>
-      </div>
       <footer class="adoption-security-note"><i class="fa-solid fa-shield-heart" aria-hidden="true"></i><span>Your information is secure and will only be used for adoption purposes.</span></footer>
     </div>
   </div>

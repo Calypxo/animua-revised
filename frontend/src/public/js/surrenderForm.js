@@ -26,13 +26,6 @@ const ANGELES_BARANGAYS = [
   "Tabun", "Virgen Delos Remedios",
 ];
 
-const STEP_LABELS = {
-  1: "Requester information",
-  2: "Animal information",
-  3: "Reason and situation",
-  4: "Review and agreement",
-};
-
 const FIELD_ERRORS = {
   ownerName: "ownerNameError",
   contactNo: "contactError",
@@ -601,12 +594,6 @@ function showStep(step, options = {}) {
     else link.removeAttribute("aria-current");
   });
 
-  const currentText = document.getElementById("currentStepText");
-  const currentLabel = document.getElementById("currentStepLabel");
-  const progressBar = document.getElementById("formProgressBar");
-  if (currentText) currentText.textContent = String(nextStep);
-  if (currentLabel) currentLabel.textContent = STEP_LABELS[nextStep];
-  if (progressBar) progressBar.style.width = `${nextStep * 25}%`;
   if (nextStep === 4) updateReviewSummary();
   clearFeedback();
 
@@ -688,7 +675,10 @@ async function syncQueuedSurrenderRequests() {
 
 function setSubmitting(submitting) {
   isSubmitting = submitting;
+  const form = document.getElementById("surrenderForm");
   const button = document.getElementById("submitSurrenderBtn");
+  form?.classList.toggle("is-submitting", submitting);
+  form?.setAttribute("aria-busy", String(submitting));
   if (!button) return;
   button.disabled = submitting || !surrenderAcceptingRequests;
   button.setAttribute("aria-busy", String(submitting));
@@ -779,13 +769,9 @@ async function handleSurrenderSubmit(event) {
   clearFeedback();
   try {
     const requestData = buildRequestPayload(loggedInUser);
-    const result = await submitSurrenderRequest(requestData);
-    const requestId = result.request?.id || "Submitted";
+    await submitSurrenderRequest(requestData);
     document.getElementById("surrenderForm")?.classList.add("hidden");
-    document.querySelector(".mobile-form-progress")?.classList.add("hidden");
     const success = document.getElementById("surrenderSuccessPanel");
-    const idDisplay = document.getElementById("submittedRequestId");
-    if (idDisplay) idDisplay.textContent = requestId;
     success?.classList.remove("hidden");
     success?.focus();
     await loadMySurrenderRequests();
@@ -795,10 +781,7 @@ async function handleSurrenderSubmit(event) {
         const requestData = buildRequestPayload(loggedInUser);
         await queuePublicRequest("surrenderRequest", { requestData });
         document.getElementById("surrenderForm")?.classList.add("hidden");
-        document.querySelector(".mobile-form-progress")?.classList.add("hidden");
         const success = document.getElementById("surrenderSuccessPanel");
-        const idDisplay = document.getElementById("submittedRequestId");
-        if (idDisplay) idDisplay.textContent = requestData.id;
         success?.classList.remove("hidden");
         success?.focus();
         showFeedback("Saved offline. Your surrender request will sync when internet returns.", "info");
@@ -915,7 +898,6 @@ function resetForAnotherRequest() {
   const form = document.getElementById("surrenderForm");
   form?.reset();
   form?.classList.remove("hidden");
-  document.querySelector(".mobile-form-progress")?.classList.remove("hidden");
   document.getElementById("surrenderSuccessPanel")?.classList.add("hidden");
   document.querySelectorAll(".field-error").forEach(error => { error.textContent = ""; });
   document.querySelectorAll(".is-invalid").forEach(field => field.classList.remove("is-invalid"));

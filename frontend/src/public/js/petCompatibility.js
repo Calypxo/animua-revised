@@ -1041,9 +1041,22 @@ async function resolveTopMatchPhoto(match) {
 }
 
 /* ── Init ─────────────────────────────────────────── */
+function revealInitializedQuiz() {
+  document.body.classList.remove("quiz-initializing");
+}
+
 async function initializeQuiz() {
-  await ensureUserSession();
   const access = document.getElementById("quizAccessCard");
+  try {
+    await ensureUserSession();
+  } catch (error) {
+    document.getElementById("questionArea").hidden = true;
+    document.querySelector(".quiz-phase-nav")?.setAttribute("hidden", "");
+    access.hidden = false;
+    access.innerHTML = `<h2>Unable to check your quiz status</h2><p>${String(error.message || "Please try again.").replaceAll("<", "&lt;").replaceAll(">", "&gt;")}</p><a href="/pages/public/home.html">Back to home</a>`;
+    revealInitializedQuiz();
+    return;
+  }
   document.body.classList.remove("quiz-locked-result");
   access?.classList.remove("quiz-retake-note");
 
@@ -1123,6 +1136,7 @@ async function initializeQuiz() {
       });
       }
       if (info.latestResult) sessionStorage.setItem("animua_saved_result", JSON.stringify(info.latestResult));
+      revealInitializedQuiz();
       return;
     }
     if (info.hasPreviousResult) {
@@ -1134,6 +1148,7 @@ async function initializeQuiz() {
     }
     restoreQuizDraft();
     renderPhase(currentPhase); updateProgress();
+    revealInitializedQuiz();
   } catch (error) {
     if (isNetworkError(error) && hasUserSession()) {
       await loadQuestionConfiguration().catch((configError) => {
@@ -1147,10 +1162,12 @@ async function initializeQuiz() {
       document.querySelector(".quiz-phase-nav")?.removeAttribute("hidden");
       renderPhase(currentPhase);
       updateProgress();
+      revealInitializedQuiz();
       return;
     }
     document.getElementById("questionArea").hidden = true; access.hidden = false;
     access.innerHTML = `<h2>Unable to open the quiz</h2><p>${error.message}</p><a href="/pages/public/home.html#login">Log in again</a>`;
+    revealInitializedQuiz();
   }
 }
 updateLanguageToggle();

@@ -18,14 +18,27 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="../../src/css/public/public-design-system.css" />
-<link rel="stylesheet" href="../../src/css/public/petCompatibility.css?v=quiz-choice-scroll-20260825" />
+<link rel="stylesheet" href="../../src/css/public/petCompatibility.css?v=quiz-choice-scroll-20260825-active-step-circle-only-20260829-eligibility-loading-20260829-open-status-layout-20260829-clean-result-header-20260829" />
 <link rel="stylesheet" href="../../src/css/public/zoom-responsive.css?v=public-zoom-20260825-4" />
   
 </head>
-<body>
+<body class="quiz-initializing">
 <div class="bg-canvas">
   <div class="bg-blob blob-1"></div>
   <div class="bg-blob blob-2"></div>
+</div>
+
+<div class="quiz-initial-loader" role="status" aria-live="polite">
+  <section class="quiz-initial-card" aria-label="Preparing compatibility matching">
+    <div class="quiz-initial-content">
+      <span class="quiz-initial-status-icon" aria-hidden="true"><i class="bi bi-stars"></i></span>
+      <small>Preparing your match</small>
+      <h1>Checking your quiz status</h1>
+      <p>We’re opening your saved result or the next quiz available for your account.</p>
+      <div class="quiz-initial-progress" aria-hidden="true"><i></i></div>
+      <div class="quiz-initial-note"><i class="bi bi-shield-check" aria-hidden="true"></i><span>Your saved recommendations remain securely linked to your ANIMUA account.</span></div>
+    </div>
+  </section>
 </div>
 
 <div class="quiz-shell">
@@ -148,7 +161,7 @@
   </section>
 </div>
 
-<script type="module" src="/src/public/js/petCompatibility.js"></script>
+<script type="module" src="/src/public/js/petCompatibility.js?v=eligibility-loading-20260829"></script>
 
   <script type="module" src="/src/public/js/pwa-register.js"></script>
 </body>

@@ -110,3 +110,29 @@ test("the backend persists two pickup reschedules and rejects the third", async 
   assert.equal(storedSchedule.rescheduleCount, 2);
   assert.equal(storedSchedule.rescheduleHistory.length, 2);
 });
+
+test("the backend rejects pickup rescheduling after attendance confirmation", async () => {
+  records.clear();
+  updates.length = 0;
+
+  const now = new Date();
+  const nextDate = new Date(now.getTime() + 86400000).toISOString().slice(0, 10);
+  records.set("adoptions/APP-LIMIT", {
+    status: "Approved",
+    applicant: { email: "owner@test.com" },
+    attendanceDeadlineAt: new Date(now.getTime() + 10 * 86400000).toISOString(),
+    arrivalConfirmedAt: now.toISOString(),
+    pickupSchedule: {
+      date: nextDate,
+      time: "09:00",
+      scheduledAt: now.toISOString(),
+    },
+  });
+
+  const response = responseRecorder();
+  await controller.scheduleMyAdoptionPickup(request(nextDate, "10:00"), response);
+
+  assert.equal(response.statusCode, 400);
+  assert.match(response.body.message, /already been confirmed/i);
+  assert.equal(updates.length, 0);
+});

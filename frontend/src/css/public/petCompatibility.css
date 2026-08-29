@@ -11261,3 +11261,268 @@ html body.quiz-locked-result .saved-trait-profile .saved-state-kicker {
     padding-inline: 10px !important;
   }
 }
+
+/* Active quiz step: the filled number circle is the complete indicator. */
+html body:not(.quiz-locked-result) .quiz-phase-nav .phase-step.active {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html body:not(.quiz-locked-result) .quiz-phase-nav .phase-step.active span {
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Eligibility loading: never expose the questionnaire before the server has
+   decided whether this account should see a saved result or a new attempt. */
+.quiz-initial-loader {
+  display: none;
+}
+
+body.quiz-initializing .quiz-shell {
+  display: none !important;
+}
+
+body.quiz-initializing .quiz-initial-loader {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: clamp(20px, 5vw, 48px);
+  color: #17212b;
+  background:
+    radial-gradient(circle at 88% 10%, rgba(241, 192, 69, 0.16), transparent 26rem),
+    radial-gradient(circle at 8% 88%, rgba(120, 1, 22, 0.08), transparent 24rem),
+    #f7f2e8;
+}
+
+body.quiz-initializing .quiz-initial-card {
+  width: min(540px, 100%);
+  overflow: hidden;
+  border: 1px solid rgba(75, 43, 33, 0.14);
+  border-radius: 24px;
+  background: #fffdf8;
+  box-shadow: 0 24px 60px rgba(75, 43, 33, 0.16);
+}
+
+body.quiz-initializing .quiz-initial-brand {
+  min-height: 82px;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  color: #fff;
+  background: linear-gradient(135deg, #5f0112 0%, #780116 58%, #8e2a20 100%);
+}
+
+body.quiz-initializing .quiz-initial-brand-mark {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 50%;
+  color: #780116;
+  background: #f1c045;
+  box-shadow: 0 8px 20px rgba(32, 8, 12, 0.24);
+  font-size: 1.05rem;
+}
+
+body.quiz-initializing .quiz-initial-brand div {
+  min-width: 0;
+}
+
+body.quiz-initializing .quiz-initial-brand small,
+body.quiz-initializing .quiz-initial-brand strong {
+  display: block;
+}
+
+body.quiz-initializing .quiz-initial-brand small {
+  margin-bottom: 2px;
+  color: #f1c045;
+  font: 800 0.62rem/1.1 "Inter", sans-serif;
+  letter-spacing: 0.16em;
+}
+
+body.quiz-initializing .quiz-initial-brand strong {
+  font: 800 0.94rem/1.2 "Inter", sans-serif;
+}
+
+body.quiz-initializing .quiz-initial-brand em {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.9);
+  font: 700 0.58rem/1 "Inter", sans-serif;
+  font-style: normal;
+  white-space: nowrap;
+}
+
+body.quiz-initializing .quiz-initial-brand em i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #f1c045;
+  box-shadow: 0 0 0 4px rgba(241, 192, 69, 0.14);
+}
+
+body.quiz-initializing .quiz-initial-content {
+  display: grid;
+  justify-items: center;
+  padding: clamp(30px, 6vw, 42px) clamp(24px, 7vw, 46px) 30px;
+  text-align: center;
+}
+
+body.quiz-initializing .quiz-initial-status-icon {
+  position: relative;
+  width: 68px;
+  height: 68px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 18px;
+  border: 1px solid rgba(241, 192, 69, 0.58);
+  border-radius: 50%;
+  color: #780116;
+  background: #fff6df;
+  font-size: 1.4rem;
+}
+
+body.quiz-initializing .quiz-initial-status-icon::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border: 2px solid transparent;
+  border-top-color: #780116;
+  border-right-color: #f1c045;
+  border-radius: 50%;
+  animation: quizEligibilitySpin 1100ms linear infinite;
+}
+
+body.quiz-initializing .quiz-initial-content > small {
+  color: #8e2a20;
+  font: 800 0.64rem/1.2 "Inter", sans-serif;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+body.quiz-initializing .quiz-initial-content h1 {
+  margin: 8px 0 9px;
+  color: #17212b;
+  font: 850 clamp(1.35rem, 5vw, 1.7rem)/1.08 "Inter", sans-serif;
+  letter-spacing: -0.035em;
+}
+
+body.quiz-initializing .quiz-initial-content > p {
+  max-width: 410px;
+  margin: 0;
+  color: #5f6368;
+  font: 500 0.82rem/1.55 "Inter", sans-serif;
+}
+
+body.quiz-initializing .quiz-initial-progress {
+  width: min(320px, 88%);
+  height: 6px;
+  overflow: hidden;
+  margin: 24px 0 22px;
+  border-radius: 999px;
+  background: #e5dfd6;
+}
+
+body.quiz-initializing .quiz-initial-progress i {
+  width: 42%;
+  height: 100%;
+  display: block;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #780116, #f1c045);
+  animation: quizEligibilityProgress 1250ms ease-in-out infinite;
+}
+
+body.quiz-initializing .quiz-initial-note {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(75, 43, 33, 0.1);
+  color: #6a625d;
+  font: 600 0.66rem/1.4 "Inter", sans-serif;
+}
+
+body.quiz-initializing .quiz-initial-note > i {
+  color: #8e2a20;
+  font-size: 0.9rem;
+}
+
+@keyframes quizEligibilitySpin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes quizEligibilityProgress {
+  from { transform: translateX(-115%); }
+  to { transform: translateX(250%); }
+}
+
+@media (max-width: 560px) {
+  body.quiz-initializing .quiz-initial-brand {
+    grid-template-columns: 42px minmax(0, 1fr);
+    padding: 15px 17px;
+  }
+
+  body.quiz-initializing .quiz-initial-brand-mark {
+    width: 42px;
+    height: 42px;
+  }
+
+  body.quiz-initializing .quiz-initial-brand em {
+    display: none;
+  }
+
+  body.quiz-initializing .quiz-initial-content {
+    padding-inline: 22px;
+  }
+
+  body.quiz-initializing .quiz-initial-note {
+    align-items: flex-start;
+    text-align: left;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.quiz-initializing .quiz-initial-status-icon::after,
+  body.quiz-initializing .quiz-initial-progress i {
+    animation-duration: 2400ms;
+  }
+}
+
+/* Keep the saved-result banner clean: no decorative paw or corner arc. */
+html body.quiz-locked-result .saved-result-state:not(.is-disabled) > header {
+  background: linear-gradient(140deg, #641018 0%, #74151d 44%, #8a2228 100%) !important;
+}
+
+html body.quiz-locked-result .saved-result-state:not(.is-disabled) > header::before,
+html body.quiz-locked-result .saved-result-state:not(.is-disabled) > header::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* Open loading layout: status content sits directly on the page. */
+body.quiz-initializing .quiz-initial-card {
+  width: min(680px, 100%);
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+body.quiz-initializing .quiz-initial-content {
+  padding: 28px 24px;
+}
