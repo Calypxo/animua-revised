@@ -113,11 +113,35 @@ test("sends pet food donation questions to Contact Us staff", () => {
 
   const reply = _test.getLocalReply(message, { pets: samplePets, events: [] }, "tagalog");
 
-  assert.match(reply, /^Oo\./);
+  assert.match(reply, /^Para sa dog food/);
   assert.match(reply, /message ang staff sa Contact Us/i);
   assert.match(reply, /dog food, cat food/i);
   assert.doesNotMatch(reply, /Find Furbabies/i);
   assert.doesNotMatch(reply, /marked Ready/i);
+});
+
+test("directs a found stray animal to Contact Us without feature history", () => {
+  const reply = _test.getLocalReply(
+    "I found a stray cat here",
+    { pets: [], events: [] },
+    "english"
+  );
+
+  assert.match(reply, /message the staff through Contact Us/i);
+  assert.doesNotMatch(reply, /no longer|reporting feature|reporting page|Dog Pound/i);
+  assert.ok(reply.length < 100);
+});
+
+test("answers how to donate without a leading yes", () => {
+  const reply = _test.getLocalReply(
+    "how can I donate?",
+    { pets: [], events: [] },
+    "english"
+  );
+
+  assert.match(reply, /^For dog food, cat food, or other donations/i);
+  assert.match(reply, /Contact Us/i);
+  assert.doesNotMatch(reply, /^Yes\b/i);
 });
 
 test("answers Taglish vaccination questions without falling back", () => {
@@ -162,6 +186,74 @@ test("answers free vaccine questions directly from matching events", () => {
   assert.match(reply, /Free Anti-Rabies Vaccination Drive/);
   assert.match(reply, /Angeles City Hall/);
   assert.match(reply, /marked free/i);
+  assert.doesNotMatch(reply, /There are no published upcoming events/i);
+});
+
+test("keeps published vaccination events from the Home page announcement source", () => {
+  const announcement = _test.normalizeAnnouncementEvent("vaccination-event", {
+    type: "Upcoming Events",
+    title: "Veterinary Services Brought Closer to Angelenos",
+    eventDate: "2026-09-15",
+    eventTime: "9:00 AM - 3:00 PM",
+    location: "Pulung Maragul Covered Court",
+    caption: "Free vaccination for local pets.",
+    status: "Published",
+    visibleToPublic: true
+  });
+
+  assert.ok(announcement);
+  assert.equal(_test.isPublishedPublicEvent(announcement), true);
+
+  const reply = _test.getLocalReply(
+    "when is the next vaccination and where?",
+    { pets: [], events: [announcement] },
+    "english"
+  );
+
+  assert.match(reply, /Veterinary Services Brought Closer to Angelenos/i);
+  assert.match(reply, /September 15, 2026/i);
+  assert.match(reply, /9:00 AM - 3:00 PM/i);
+  assert.match(reply, /Pulung Maragul Covered Court/i);
+  assert.doesNotMatch(reply, /I do not see a published vaccination/i);
+});
+
+test("does not expose hidden event announcements to the chatbot", () => {
+  const hiddenAnnouncement = _test.normalizeAnnouncementEvent("hidden-event", {
+    type: "Upcoming Events",
+    title: "Private Vaccination Event",
+    eventDate: "2026-09-20",
+    status: "Published",
+    visibleToPublic: false
+  });
+
+  assert.equal(_test.isPublishedPublicEvent(hiddenAnnouncement), false);
+});
+
+test("answers from the same vaccination fallback displayed on the Home page", () => {
+  const fallbackEvent = _test.getHomeFallbackUpcomingEvent();
+  const reply = _test.getLocalReply(
+    "when is the next vaccination and where?",
+    { pets: [], events: [fallbackEvent] },
+    "english"
+  );
+
+  assert.match(reply, /Veterinary Services Brought Closer to Angelenos/i);
+  assert.match(reply, /9:00 AM - 3:00 PM/i);
+  assert.match(reply, /Savannah Phase 1, Savannah Phase 2, and Green Plain Phase 3/i);
+  assert.doesNotMatch(reply, /I do not see a published vaccination/i);
+});
+
+test("answers the generated upcoming-events question even when live context fails", () => {
+  const fallbackContext = _test.getEmptyPublicContext();
+  const reply = _test.getLocalReply(
+    "What upcoming events are available?",
+    fallbackContext,
+    "english"
+  );
+
+  assert.match(reply, /Veterinary Services Brought Closer to Angelenos/i);
+  assert.match(reply, /9:00 AM - 3:00 PM/i);
+  assert.match(reply, /Savannah Phase 1, Savannah Phase 2, and Green Plain Phase 3/i);
   assert.doesNotMatch(reply, /There are no published upcoming events/i);
 });
 
@@ -278,7 +370,7 @@ test("provider prompt includes official FAQ source-of-truth rules", () => {
   assert.match(prompt, /Do not list ready animals unless the user asks who\/which animals are available/i);
   assert.match(prompt, /sign in and check My Applications/i);
   assert.match(prompt, /only qualified Angeles City residents may submit surrender requests/i);
-  assert.match(prompt, /ANIMUA has no stray\/lost reporting feature/i);
+  assert.match(prompt, /stray, found, or abandoned animal.*Contact Us/i);
   assert.match(prompt, /answer in English even if the user writes Taglish/i);
   assert.match(prompt, /simple, everyday words and short sentences/i);
   assert.match(prompt, /Prefer one or two short sentences/i);
@@ -338,7 +430,7 @@ test("answers Tagalog multiple adoption application questions directly", () => {
 
   const reply = _test.getLocalReply(message, { pets: [], events: [] }, "tagalog");
 
-  assert.match(reply, /^Oo\./);
+  assert.match(reply, /^Maaari kang/);
   assert.match(reply, /higit sa isang pet/i);
   assert.match(reply, /ire-review ng shelter/i);
   assert.match(reply, /hindi guaranteed ang approval/i);
@@ -356,7 +448,7 @@ test("answers Tagalog more-than-one pet adoption questions directly", () => {
 
   const reply = _test.getLocalReply(message, { pets: [], events: [] }, "tagalog");
 
-  assert.match(reply, /^Oo\./);
+  assert.match(reply, /^Maaari kang/);
   assert.match(reply, /higit sa isang pet/i);
   assert.match(reply, /ire-review ng shelter/i);
   assert.doesNotMatch(reply, /pumunta sa Find Furbabies/i);
@@ -370,9 +462,35 @@ test("answers three adoption application questions directly", () => {
 
   const reply = _test.getLocalReply(message, { pets: [], events: [] }, "tagalog");
 
-  assert.match(reply, /^Oo\./);
+  assert.match(reply, /^Maaari kang/);
   assert.match(reply, /higit sa isang pet/i);
   assert.doesNotMatch(reply, /buksan ang Find Furbabies/i);
+});
+
+test("tells a user who wants five dogs to apply separately and wait for approval", () => {
+  const message = "I want to adopt 5 dogs";
+
+  assert.equal(_test.hasAdoptionQuantityIntent(message), true);
+  assert.equal(_test.shouldUseLocalReply(message), true);
+  assert.equal(_test.needsPublicContext(message), false);
+
+  const reply = _test.getLocalReply(message, { pets: samplePets, events: [] }, "english");
+
+  assert.match(reply, /separate adoption application for each dog/i);
+  assert.match(reply, /wait for the Angeles City Veterinary Office to review and approve each application/i);
+  assert.doesNotMatch(reply, /Here are Find Furbabies animals/i);
+  assert.doesNotMatch(reply, /Tricolor|Dark brown|Tantan/i);
+});
+
+test("answers adoption quantity questions without a leading yes", () => {
+  const reply = _test.getLocalReply(
+    "how many can I adopt?",
+    { pets: [], events: [] },
+    "english"
+  );
+
+  assert.match(reply, /^You may apply for more than one pet/i);
+  assert.doesNotMatch(reply, /^Yes\b/i);
 });
 
 test("answers Match Quiz questions concisely", () => {
@@ -513,6 +631,18 @@ test("routes application status questions to My Applications instead of animal v
   assert.doesNotMatch(reply, /visiting or meeting an animal/i);
 });
 
+test("answers adoption cancellation after applying with the 14-day attendance rule", () => {
+  const message = "what if I cancel the adoption after I apply?";
+  const reply = _test.getLocalReply(message, { pets: [], events: [] }, "english");
+
+  assert.match(reply, /does not have a cancel or withdraw option/i);
+  assert.match(reply, /14-day attendance rule/i);
+  assert.match(reply, /account suspension/i);
+  assert.match(reply, /only when you are fully ready to adopt/i);
+  assert.doesNotMatch(reply, /After an adoption is approved, follow the official instructions/i);
+  assert.doesNotMatch(reply, /open My Applications/i);
+});
+
 test("still answers real animal visit questions as meet-and-greet guidance", () => {
   const message = "Can I meet the animal before adoption?";
 
@@ -564,6 +694,16 @@ test("answers English non-Angeles surrender eligibility for live-in phrasing", (
   assert.match(reply, /only for qualified Angeles City residents/i);
   assert.match(reply, /another city or municipality/i);
   assert.doesNotMatch(reply, /open the Surrender page/i);
+});
+
+test("keeps the Porac surrender eligibility answer concise", () => {
+  const message = "can I surrender pet? im from Porac";
+  const reply = _test.getLocalReply(message, { pets: [], events: [] }, "english");
+
+  assert.match(reply, /^No\./);
+  assert.match(reply, /only for qualified Angeles City residents/i);
+  assert.match(reply, /local city or municipal veterinary office/i);
+  assert.ok(reply.length < 190);
 });
 
 test("answers common public FAQ questions in English and Tagalog", () => {
@@ -667,6 +807,64 @@ test("answers common public FAQ questions in English and Tagalog", () => {
     for (const pattern of faq.expected) {
       assert.match(reply, pattern, faq.message);
     }
+  }
+});
+
+test("answers the exact Angeles City Veterinary Office location instead of generic navigation", () => {
+  const englishMessage = "where is the angeles city vet?";
+  const tagalogMessage = "Saan ang Angeles City Veterinary Office?";
+
+  assert.equal(_test.hasOfficeLocationIntent(englishMessage), true);
+  assert.equal(_test.shouldUseLocalReply(englishMessage), true);
+
+  const englishReply = _test.getLocalReply(englishMessage, { pets: [], events: [] }, "english");
+  const tagalogReply = _test.getLocalReply(tagalogMessage, { pets: [], events: [] }, "tagalog");
+
+  assert.match(englishReply, /City Hall Building, Pulung Maragul, Angeles City, Pampanga 2009/i);
+  assert.match(englishReply, /inside the Angeles City Hall compound/i);
+  assert.doesNotMatch(englishReply, /public navigation links/i);
+  assert.match(tagalogReply, /City Hall Building, Pulung Maragul, Angeles City, Pampanga 2009/i);
+  assert.doesNotMatch(tagalogReply, /public navigation links/i);
+});
+
+test("provides Tagalog equivalents for the corrected chatbot replies", () => {
+  const fallbackContext = _test.getEmptyPublicContext();
+  const cases = [
+    {
+      message: "May upcoming events ba?",
+      expected: [/Veterinary Services Brought Closer to Angelenos/i, /Savannah Phase 1/i],
+      excluded: /walang published upcoming events/i
+    },
+    {
+      message: "Maaari ba akong mag-surrender? Taga-Porac ako.",
+      expected: [/qualified Angeles City residents/i, /local city o municipal veterinary office/i]
+    },
+    {
+      message: "Paano ako mag-donate?",
+      expected: [/^Para sa dog food/i, /Contact Us/i],
+      excluded: /^Oo\b/i
+    },
+    {
+      message: "May nakita akong stray na pusa",
+      expected: [/Paki-message ang staff sa Contact Us/i],
+      excluded: /reporting feature|reporting page|Dog Pound/i
+    },
+    {
+      message: "Paano kung i-cancel ko ang adoption application pagkatapos kong mag-apply?",
+      expected: [/Walang cancel o withdraw option/i, /14-day attendance rule/i, /account suspension/i, /handa ka nang mag-adopt/i],
+      excluded: /official instructions shown in ANIMUA/i
+    },
+    {
+      message: "Ilang pet ang maaari kong i-adopt?",
+      expected: [/^Maaari kang mag-apply/i, /profile ng bawat pet/i, /hintayin ang approval/i],
+      excluded: /profile ng bawat dog/i
+    }
+  ];
+
+  for (const item of cases) {
+    const reply = _test.getLocalReply(item.message, fallbackContext, "tagalog");
+    for (const pattern of item.expected) assert.match(reply, pattern, item.message);
+    if (item.excluded) assert.doesNotMatch(reply, item.excluded, item.message);
   }
 });
 

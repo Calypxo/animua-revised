@@ -6961,7 +6961,13 @@ body.furbabies-page .pet-actions .btn {
 
 @media (max-width: 1180px) and (min-width: 901px) {
   body.furbabies-page .pets-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  body.furbabies-page .pet-card:last-child:nth-child(odd) {
+    grid-column: auto !important;
+    width: auto !important;
+    justify-self: stretch !important;
   }
 }
 
@@ -11131,6 +11137,22 @@ body.home-page.furbabies-page .adoption-select-options button:is(.is-active, :ho
   body.furbabies-page .pet-actions {
     margin-top: auto !important;
   }
+}
+
+/* Pet profile close control: lock the painted border box to a true circle. */
+body.furbabies-page #petProfileModal .profile-close-btn {
+  width: 36px !important;
+  min-width: 36px !important;
+  max-width: 36px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  aspect-ratio: 1 / 1 !important;
+  flex: 0 0 36px !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  line-height: 1 !important;
+  appearance: none;
 }
 
 /* Ready pets can use a full identifying description as their public label.
