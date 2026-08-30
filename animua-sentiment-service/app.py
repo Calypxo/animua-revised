@@ -32,7 +32,7 @@ app = FastAPI(
     openapi_url=None,
 )
 
-RULES_VERSION = "2026-08-29-context-rules-v3"
+RULES_VERSION = "2026-08-30-context-rules-v4"
 INSUFFICIENT_SOURCE_LABEL = "Input validation (insufficient text)"
 
 sentiment_model = joblib.load(SERVICE_DIR / "sentiment_model.pkl")
@@ -275,13 +275,47 @@ MEDICAL_PHRASES = [
     "hindi makatayo", "nabangga", "malubha",
 ]
 
+OVERCROWDING_DIRECT_PHRASES = [
+    "overcrowded", "overcrowding",
+]
+
+OVERCROWDING_COUNT_PHRASES = [
+    "too many cats", "too many dogs", "too many pets",
+    "too many animals", "too many kittens", "too many puppies",
+    "sobrang dami ng alaga", "sobrang dami ng mga alaga",
+    "sobrang dami ng pusa", "sobrang dami ng mga pusa",
+    "sobrang dami ng aso", "sobrang dami ng mga aso",
+    "maraming alaga", "maraming pusa", "maraming aso",
+    "madaming alaga", "madaming pusa", "madaming aso",
+]
+
+ANIMAL_GROUP_PHRASES = [
+    "cats", "dogs", "pets", "animals", "mga pusa", "mga aso",
+    "mga alaga", "kittens", "puppies", "mga kuting", "mga tuta",
+]
+
+SPACE_CONSTRAINT_PHRASES = [
+    "no space", "not enough space", "need more space",
+    "needs more space", "needed space", "walang space",
+    "kulang ang space", "masikip",
+]
+
+MALFORMED_OVERCROWDING_PATTERN = re.compile(
+    r"(?<!\w)too\s+much\s+(?:cats?|dogs?|pets?|animals?)\s+"
+    r"(?:need(?:s|ed)?|requir(?:e|es|ed))\s+(?:more\s+)?space(?!\w)",
+    flags=re.IGNORECASE,
+)
+
 MEANINGFUL_SHORT_PHRASES = [
     *CRITICAL_MEDICAL_PHRASES,
     *FINANCIAL_PHRASES,
     *ABANDONMENT_PHRASES,
     *RELOCATION_PHRASES,
     *MEDICAL_PHRASES,
-    "nangangagat", "aggressive", "sobrang dami", "walang space",
+    *OVERCROWDING_DIRECT_PHRASES,
+    *OVERCROWDING_COUNT_PHRASES,
+    *SPACE_CONSTRAINT_PHRASES,
+    "nangangagat", "aggressive", "sobrang dami",
     "naospital", "bedridden", "disabled",
 ]
 
@@ -313,6 +347,24 @@ def has_medical_signal(reason):
     return contains_phrase(reason, MEDICAL_PHRASES)
 
 
+def has_overcrowding_signal(reason):
+    if contains_phrase(
+        reason,
+        [*OVERCROWDING_DIRECT_PHRASES, *OVERCROWDING_COUNT_PHRASES],
+    ):
+        return True
+
+    has_group = contains_phrase(reason, ANIMAL_GROUP_PHRASES)
+    has_space_constraint = contains_phrase(reason, SPACE_CONSTRAINT_PHRASES)
+
+    if has_group and has_space_constraint:
+        return True
+
+    # Handles short, imperfect input such as "Too much Cat needed space"
+    # without treating every single-animal request for more space as crowding.
+    return bool(MALFORMED_OVERCROWDING_PATTERN.search(str(reason or "")))
+
+
 def resolve_category(reason, predicted_category):
     if contains_phrase(reason, CRITICAL_MEDICAL_PHRASES):
         return "Medical", "Explicit critical medical symptom"
@@ -332,6 +384,8 @@ def resolve_category(reason, predicted_category):
         return "Relocation", "Explicit relocation constraint"
     if has_medical_signal(reason):
         return "Medical", "Explicit medical symptom"
+    if has_overcrowding_signal(reason):
+        return "Overcrowding", "Explicit overcrowding or space constraint"
     return predicted_category, ""
 
 

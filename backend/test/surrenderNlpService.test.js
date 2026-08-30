@@ -65,3 +65,15 @@ test("fallback preserves the surrender NLP response shape", () => {
   ]);
   assert.equal(result.category, "Financial");
 });
+
+test("fallback recognizes imperfect overcrowding wording without broad false positives", () => {
+  const overcrowding = buildFallbackAnalysis("Too much Cat needed space.");
+  const catFoodStorage = buildFallbackAnalysis(
+    "Too much cat food needed space in storage."
+  );
+
+  assert.equal(overcrowding.category, "Overcrowding");
+  assert.equal(overcrowding.urgencyLabel, "Medium");
+  assert.equal(overcrowding.urgencyScore, 55);
+  assert.equal(catFoodStorage.category, "Other");
+});

@@ -114,6 +114,61 @@ class SurrenderIntegrationTests(unittest.TestCase):
         self.assertTrue(result["categoryAdjusted"])
         self.assertEqual(result["confidence"], 0.58)
 
+    def test_imperfect_english_overcrowding_reason_is_corrected_after_prediction(self):
+        with patch.object(
+            app,
+            "predict_sentiment_and_category",
+            return_value={
+                "sentiment": ("Negative", 0.89),
+                "category": ("Other", 0.60),
+                "source": app.MODEL_SOURCE_LABEL,
+            },
+        ):
+            result = app.analyze_reason("Too much Cat needed space.")
+
+        self.assertEqual(result["category"], "Overcrowding")
+        self.assertEqual(result["urgencyLabel"], "Medium")
+        self.assertEqual(result["urgencyScore"], 55)
+        self.assertEqual(result["modelCategory"], "Other")
+        self.assertTrue(result["categoryAdjusted"])
+        self.assertEqual(
+            result["categoryAdjustmentReason"],
+            "Explicit overcrowding or space constraint",
+        )
+        self.assertEqual(result["confidence"], 0.60)
+
+    def test_ambiguous_space_wording_does_not_force_overcrowding(self):
+        reasons = [
+            "My cat needs more space to exercise.",
+            "I have many questions about cats.",
+            "Too much work; my cat needed space.",
+            "The owner has no space in the schedule for a vet visit.",
+        ]
+
+        for reason in reasons:
+            with self.subTest(reason=reason):
+                category, adjustment_reason = app.resolve_category(
+                    reason,
+                    "Other",
+                )
+
+                self.assertEqual(category, "Other")
+                self.assertEqual(adjustment_reason, "")
+
+    def test_clear_english_and_tagalog_overcrowding_phrases_are_recognized(self):
+        reasons = [
+            "Too many cats, we need more space.",
+            "We have no space for all our pets.",
+            "Sobrang dami ng mga pusa namin at kulang ang space.",
+        ]
+
+        for reason in reasons:
+            with self.subTest(reason=reason):
+                self.assertEqual(
+                    app.apply_category_override(reason, "Other"),
+                    "Overcrowding",
+                )
+
     def test_meaningless_reason_does_not_receive_a_model_guess(self):
         with patch.object(
             app,

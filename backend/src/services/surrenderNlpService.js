@@ -22,13 +22,16 @@ const EMERGENCY_WORDS = [
   "dumudugo", "nabangga", "namamatay", "hindi makatayo",
   "nahihirapang huminga", "walang malay", "nangangagat", "delikado", "kalsada",
 ];
+const MALFORMED_OVERCROWDING_PATTERN =
+  /\btoo\s+much\s+(?:cats?|dogs?|pets?|animals?)\s+(?:need(?:s|ed)?|requir(?:e|es|ed))\s+(?:more\s+)?space\b/i;
 
 const includesAny = (text, words) => words.some((word) => text.includes(word));
 
 function buildFallbackAnalysis(reason) {
   const text = String(reason || "").trim().toLowerCase();
   const match = CATEGORY_RULES.find(([, words]) => includesAny(text, words));
-  const category = match?.[0] || "Other";
+  const category = match?.[0]
+    || (MALFORMED_OVERCROWDING_PATTERN.test(text) ? "Overcrowding" : "Other");
   const emergency = includesAny(text, EMERGENCY_WORDS);
   const keywords = [...new Set(
     [...EMERGENCY_WORDS, ...CATEGORY_RULES.flatMap(([, words]) => words)]
