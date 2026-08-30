@@ -6971,7 +6971,10 @@ body.furbabies-page .pet-actions .btn {
   }
 }
 
-@media (max-width: 1180px) and (min-width: 641px) {
+/* Center an odd final card only while the grid has two columns. Keeping this
+   rule below 901px prevents it from overriding the normal three-column tablet
+   layout above. */
+@media (max-width: 900px) and (min-width: 641px) {
   body.furbabies-page .pet-card:last-child:nth-child(odd) {
     grid-column: 1 / -1 !important;
     width: calc((100% - 22px) / 2) !important;

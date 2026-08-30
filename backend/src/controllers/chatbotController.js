@@ -32,6 +32,23 @@ const OFFICE_INFO = {
   hours: "Monday to Friday, 8:00 AM to 5:00 PM"
 };
 
+const ANGELES_BARANGAY_EVENT_NAMES = [
+  "Agapito del Rosario", "Amsic", "Anunas", "Balibago", "Capaya", "Claro M. Recto",
+  "Cuayan", "Cutcut", "Cutud", "Lourdes Norte", "Lourdes Sur", "Lourdes Sur Este",
+  "Malabanias", "Margot", "Mining", "Ninoy Aquino", "Pampang", "Pandan", "Plaridel",
+  "Pulung Cacutud", "Pulung Maragul", "Pulungbulu", "Salapungan", "San Jose",
+  "San Nicolas", "Santa Teresita", "Santa Trinidad", "Santo Cristo", "Santo Domingo",
+  "Santo Rosario", "Sapalibutad", "Sapangbato", "Sergio Bernal", "Silangan",
+  "Tabun", "Virgen Delos Remedios"
+];
+
+const BARANGAY_EVENT_ALIASES = ANGELES_BARANGAY_EVENT_NAMES.map((name) => ({
+  name,
+  terms: name === "Lourdes Sur Este"
+    ? ["lourdes sur este", "lourdes sur east"]
+    : [name.toLowerCase()]
+}));
+
 const ANIMAL_COLOR_KEYWORDS = [
   { id: "black", english: "black", tagalog: "black/itim", terms: ["black", "itim", "maitim"] },
   { id: "white", english: "white", tagalog: "white/puti", terms: ["white", "puti", "maputi"] },
@@ -113,7 +130,11 @@ function hasTaglishSignal(text = "") {
     "singil",
     "libre",
     "paano",
+    "ano",
+    "anong",
+    "nangyari",
     "kailan",
+    "susunod",
     "sino",
     "pwede",
     "pwedeng",
@@ -680,6 +701,32 @@ function includesAnyPhrase(text, phrases = []) {
   return phrases.some((phrase) => normalized.includes(` ${phrase.toLowerCase()} `));
 }
 
+function getMentionedBarangay(text = "") {
+  const normalized = ` ${String(text).toLowerCase().replace(/[^a-z0-9]+/g, " ")} `;
+
+  return BARANGAY_EVENT_ALIASES
+    .slice()
+    .sort((a, b) => b.name.length - a.name.length)
+    .find((barangay) => barangay.terms.some((term) => normalized.includes(` ${term} `))) || null;
+}
+
+function eventMatchesBarangay(event = {}, barangay = null) {
+  if (!barangay) return false;
+  const eventText = ` ${getEventSearchText(event).replace(/[^a-z0-9]+/g, " ")} `;
+  return barangay.terms.some((term) => eventText.includes(` ${term} `));
+}
+
+function hasBarangayEventIntent(text = "") {
+  if (!getMentionedBarangay(text)) return false;
+
+  return includesAnyWord(text, [
+    "when", "kailan", "next", "upcoming", "event", "events", "schedule",
+    "date", "time", "announcement", "announcements"
+  ]) || includesAnyPhrase(text, [
+    "when will", "when is", "how about", "what about", "may event", "may announcement"
+  ]);
+}
+
 function hasApplicationIntent(text = "") {
   return includesAnyWord(text, ["application", "applications", "apply", "applied", "submit", "submitted", "submitting"]);
 }
@@ -739,6 +786,29 @@ function hasAssistantHelpIntent(text = "") {
 
 function hasStatusIntent(text = "") {
   return includesAnyWord(text, ["status", "check", "track", "view", "update", "updates", "pending", "approved", "rejected"]);
+}
+
+function hasApplicationStatusIntent(text = "") {
+  if (!hasApplicationIntent(text)) return false;
+
+  return hasStatusIntent(text) ||
+    (
+      includesAnyWord(text, ["happen", "happened", "happening", "news", "progress", "nangyari", "kamusta"]) &&
+      includesAnyWord(text, ["my", "mine", "ko", "aking"])
+    ) ||
+    includesAnyPhrase(text, [
+      "what happen to my application",
+      "what happened to my application",
+      "what is happening with my application",
+      "what s happening with my application",
+      "what about my application",
+      "where is my application",
+      "any news on my application",
+      "how is my application",
+      "ano na ang application ko",
+      "ano nangyari sa application ko",
+      "anong nangyari sa application ko"
+    ]);
 }
 
 function hasStatusExplanationIntent(text = "") {
@@ -874,6 +944,7 @@ function hasAnimalListIntent(text = "") {
 }
 
 function hasAnimalAvailabilityIntent(text = "") {
+  if (hasPersonalPetVaccinationRequestIntent(text)) return false;
   if (hasAnimalAttributeSearchIntent(text)) return true;
 
   const mentionsAnimal = hasAnimalMentionIntent(text) || includesAnyPhrase(text, ["find furbabies"]);
@@ -967,14 +1038,51 @@ function hasAccountTroubleIntent(text = "") {
 function hasEventIntent(text = "") {
   return includesAnyWord(text, ["event", "events", "schedule", "activity", "activities"]) ||
     includesAnyPhrase(text, ["vaccination drive", "vaccination event", "upcoming vaccination", "adoption campaign", "community veterinary"]) ||
-    hasVaccinationScheduleIntent(text);
+    hasVaccinationScheduleIntent(text) ||
+    hasBarangayEventIntent(text);
+}
+
+function hasNextEventIntent(text = "") {
+  return hasEventIntent(text) && (
+    includesAnyWord(text, ["next", "susunod"]) ||
+    includesAnyPhrase(text, ["next event", "susunod na event"])
+  );
 }
 
 function hasVaccinationIntent(text = "") {
   return text.includes("vaccine") ||
     text.includes("vaccin") ||
+    text.includes("bakuna") ||
     includesAnyWord(text, ["bakuna", "rabies"]) ||
     includesAnyPhrase(text, ["na vaccine", "na-vaccine", "may bakuna"]);
+}
+
+function hasPersonalPetVaccinationRequestIntent(text = "") {
+  if (!hasAnimalMentionIntent(text) || !hasVaccinationIntent(text)) return false;
+
+  return includesAnyPhrase(text, [
+    "i want to vaccine my",
+    "i want to vaccinate my",
+    "want to vaccine my",
+    "want to vaccinate my",
+    "get my dog vaccinated",
+    "get my cat vaccinated",
+    "get my pet vaccinated",
+    "vaccinate my dog",
+    "vaccinate my cat",
+    "vaccinate my pet",
+    "vaccine my dog",
+    "vaccine my cat",
+    "vaccine my pet",
+    "can you vaccinate my",
+    "can the vet vaccinate my",
+    "pabakunahan ang aso ko",
+    "pabakunahan ang pusa ko",
+    "pabakunahan ang pet ko",
+    "magpabakuna ng aso",
+    "magpabakuna ng pusa",
+    "magpabakuna ng pet"
+  ]);
 }
 
 function hasVaccinationScheduleIntent(text = "") {
@@ -1246,9 +1354,18 @@ function hasApplicationRejectedIntent(text = "") {
 }
 
 function hasApplicationWithdrawIntent(text = "") {
-  return hasApplicationIntent(text) && (
+  return (hasApplicationIntent(text) || hasAdoptionMentionIntent(text)) && (
     includesAnyWord(text, ["cancel", "cancelled", "canceled", "withdraw", "remove", "delete", "stop", "bawiin", "icancel"]) ||
-    includesAnyPhrase(text, ["cancel my application", "withdraw my application", "i-cancel application", "icancel application"])
+    includesAnyPhrase(text, [
+      "cancel my application",
+      "withdraw my application",
+      "cancel my adoption",
+      "withdraw my adoption",
+      "i-cancel application",
+      "i-cancel adoption",
+      "icancel application",
+      "icancel adoption"
+    ])
   );
 }
 
@@ -1348,8 +1465,13 @@ function hasSurrenderIntent(text = "") {
     "surrender",
     "surrendered",
     "surrendering",
+    "magsurrender",
+    "sinurrender",
     "isurrender",
     "isusurrender",
+    "isuko",
+    "isusuko",
+    "susuko",
     "rehome",
     "rehoming",
     "return",
@@ -1434,6 +1556,28 @@ function hasSurrenderIntent(text = "") {
       "sa inyo ang aso",
       "sainyo ang aso"
     ]);
+}
+
+function hasSurrenderCareIntent(text = "") {
+  if (!hasSurrenderIntent(text) || !hasAnimalMentionIntent(text)) return false;
+
+  return includesAnyPhrase(text, [
+    "take care of my",
+    "take care of the",
+    "care for my",
+    "care for the",
+    "look after my",
+    "look after the",
+    "will you take care",
+    "will the shelter take care",
+    "will the shelter care",
+    "aalagaan niyo",
+    "aalagaan ninyo",
+    "aalagaan ba",
+    "alagaan ang pet",
+    "alagaan ang aso",
+    "alagaan ang pusa"
+  ]);
 }
 
 function hasAdoptedAnimalSurrenderIntent(text = "") {
@@ -2361,6 +2505,7 @@ function isOnTopic(message = "") {
     hasLostPetIntent(normalizedMessage) ||
     hasAccountTroubleIntent(normalizedMessage) ||
     hasStatusExplanationIntent(normalizedMessage) ||
+    hasEventIntent(normalizedMessage) ||
     hasPetCareIntent(normalizedMessage) ||
     hasQuizIntent(normalizedMessage) ||
     hasTermsPrivacyIntent(normalizedMessage) ||
@@ -2702,6 +2847,14 @@ function getLocalReply(message, context = {}, language = "english") {
       );
     }
 
+    if (hasSurrenderCareIntent(lower)) {
+      return localizedReply(
+        language,
+        "Yes. Once your surrender request is approved and your pet is accepted, the shelter team will do their best to care for your pet and keep them safe. Submit the Surrender form and wait for official confirmation before bringing your pet to the shelter.",
+        "Oo. Kapag approved ang surrender request at tinanggap ang pet mo, gagawin ng shelter team ang kanilang makakaya para maalagaan at mapanatiling ligtas ang pet mo. Isumite ang Surrender form at hintayin ang official confirmation bago dalhin ang pet sa shelter."
+      );
+    }
+
     if (hasSurrenderAppointmentIntent(lower)) {
       return localizedReply(
         language,
@@ -3029,7 +3182,7 @@ function getLocalReply(message, context = {}, language = "english") {
   }
 
   if (hasApplicationIntent(lower)) {
-    if (hasStatusIntent(lower)) {
+    if (hasApplicationStatusIntent(lower)) {
       return localizedReply(
         language,
         "For adoption application status, sign in to your ANIMUA account and check the official updates shown in My Applications. The chatbot cannot access, approve, or confirm private application records.",
@@ -3065,6 +3218,14 @@ function getLocalReply(message, context = {}, language = "english") {
       language,
       "ANIMUA does not have a pet check-up booking feature in the system. Please message the staff through Contact Us or contact the Angeles City Veterinary Office directly so they can confirm if check-up service is available, what schedule to follow, and what details to bring. For urgent symptoms, contact a licensed veterinarian immediately.",
       "Walang pet check-up booking feature sa ANIMUA system. Paki-message ang staff sa Contact Us o direktang kontakin ang Angeles City Veterinary Office para makumpirma kung available ang check-up service, anong schedule ang susundin, at anong details ang kailangan dalhin. Kung urgent ang symptoms, agad na kumontak sa licensed veterinarian."
+    );
+  }
+
+  if (hasPersonalPetVaccinationRequestIntent(lower)) {
+    return localizedReply(
+      language,
+      "Please contact the shelter staff through Contact Us. They can confirm whether pet vaccination is available, the schedule and requirements, and where to bring your dog.",
+      "Paki-contact ang shelter staff through Contact Us. Makukumpirma nila kung available ang pet vaccination, ang schedule at requirements, at kung saan dadalhin ang aso mo."
     );
   }
 
@@ -3182,6 +3343,35 @@ function getLocalReply(message, context = {}, language = "english") {
   }
 
   if (hasEventIntent(lower)) {
+    const mentionedBarangay = getMentionedBarangay(lower);
+
+    if (mentionedBarangay && hasBarangayEventIntent(lower)) {
+      const barangayEvents = events.filter((event) => eventMatchesBarangay(event, mentionedBarangay));
+      const matchingEvents = hasVaccinationScheduleIntent(lower)
+        ? getMatchingVaccinationEvents(barangayEvents, lower)
+        : barangayEvents;
+
+      if (!matchingEvents.length) {
+        return localizedReply(
+          language,
+          `There is no published event announcement for Barangay ${mentionedBarangay.name} yet. Please check the Home page again later for official updates.`,
+          `Wala pang published event announcement para sa Barangay ${mentionedBarangay.name}. Pakitingnan muli ang Home page para sa official updates.`
+        );
+      }
+
+      return language === "tagalog"
+        ? [
+            `Narito ang published event para sa Barangay ${mentionedBarangay.name}:`,
+            ...matchingEvents.slice(0, 3).map((event) => `- ${formatEvent(event)}`),
+            "Tingnan ang Home page event section para sa buong detalye."
+          ].join("\n")
+        : [
+            `Here is the published event for Barangay ${mentionedBarangay.name}:`,
+            ...matchingEvents.slice(0, 3).map((event) => `- ${formatEvent(event)}`),
+            "Check the Home page event section for full details."
+          ].join("\n");
+    }
+
     if (hasVaccinationScheduleIntent(lower)) {
       const matchingEvents = getMatchingVaccinationEvents(events, lower);
 
@@ -3215,6 +3405,18 @@ function getLocalReply(message, context = {}, language = "english") {
         language,
         "Events are shown in the Home page event section. There are no published upcoming events available right now, so please check the Home page again later or contact the Angeles City Veterinary Office for official confirmation about dates, time, location, requirements, and whether a service is free.",
         "Makikita ang events sa Home page event section. Wala pang published upcoming events na available ngayon, kaya pakitingnan muli ang Home page mamaya o kontakin ang Angeles City Veterinary Office para sa official confirmation tungkol sa date, time, location, requirements, at kung libre ang service."
+      );
+    }
+
+    if (hasNextEventIntent(lower)) {
+      const nextEvent = events
+        .slice()
+        .sort((a, b) => getEventDateValue(a) - getEventDateValue(b))[0];
+
+      return localizedReply(
+        language,
+        `The next published event I can see is ${formatEvent(nextEvent)}. Check the Home page event section for full details.`,
+        `Ang susunod na published event na nakikita ko ay ${formatEvent(nextEvent)}. Tingnan ang Home page event section para sa buong detalye.`
       );
     }
 
@@ -3581,9 +3783,14 @@ exports._test = {
   hasQuizRetakeIntent,
   hasSurrenderAppointmentIntent,
   hasSurrenderAvailabilityIntent,
+  hasSurrenderCareIntent,
   hasSurrenderDocumentIntent,
   hasVisitAnimalIntent,
   hasVaccinationScheduleIntent,
+  hasPersonalPetVaccinationRequestIntent,
+  getMentionedBarangay,
+  hasBarangayEventIntent,
+  hasNextEventIntent,
   hasVetVisitScheduleIntent,
   hasOfficeLocationIntent,
   normalizeEvent,
