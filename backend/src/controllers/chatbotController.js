@@ -3104,10 +3104,10 @@ function getLocalReply(message, context = {}, language = "english") {
       language,
       hasBlockedRescheduleQuestion(lower)
         ? "The Reschedule button may be unavailable because the adoption is not approved, there is no pickup schedule, or you already used both changes. Check My Applications to see the reason."
-        : "You can change an approved adoption pickup twice. Go to My Applications and select Reschedule. Choose a date within your 14-day deadline. The second change is final.",
+        : "You can change an approved adoption pickup twice, up to two times. Go to My Applications and select Reschedule. Each valid change is saved immediately without admin approval. Choose a date within your 14-day deadline. The second change is final. If you cannot attend the final schedule, contact the office because your account may be suspended.",
       hasBlockedRescheduleQuestion(lower)
         ? "Maaaring walang Reschedule button dahil hindi approved ang adoption, wala pang pickup schedule, o nagamit mo na ang dalawang changes. Tingnan ang My Applications para makita ang dahilan."
-        : "Dalawang beses puwedeng baguhin ang approved adoption pickup. Pumunta sa My Applications at piliin ang Reschedule. Pumili ng date na pasok sa 14-day deadline. Final ang pangalawang pagbabago."
+        : "Dalawang beses puwedeng baguhin ang approved adoption pickup. Pumunta sa My Applications at piliin ang Reschedule. Agad nase-save ang bawat valid na pagbabago nang walang admin approval. Pumili ng date na pasok sa 14-day deadline. Final ang pangalawang pagbabago. Kung hindi ka makakadalo sa final schedule, kontakin ang office dahil maaaring ma-suspend ang account mo."
     );
   }
 
