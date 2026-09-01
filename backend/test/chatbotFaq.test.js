@@ -158,6 +158,38 @@ test("answers Taglish vaccination questions without falling back", () => {
   assert.match(reply, /Hindi ko magagarantiya/i);
 });
 
+test("directs personal pet vaccination requests to shelter staff through Contact Us", () => {
+  const message = "I want to vaccine my dog in the vet";
+
+  assert.equal(_test.hasPersonalPetVaccinationRequestIntent(message), true);
+  assert.equal(_test.hasAnimalAvailabilityIntent(message), false);
+  assert.equal(_test.shouldUseLocalReply(message), true);
+  assert.equal(_test.needsPublicContext(message), false);
+
+  const reply = _test.getLocalReply(message, { pets: samplePets, events: [] }, "english");
+
+  assert.match(reply, /^Please contact the shelter staff through Contact Us/i);
+  assert.match(reply, /pet vaccination is available/i);
+  assert.match(reply, /schedule and requirements/i);
+  assert.doesNotMatch(reply, /Find Furbabies animals|Tricolor|Dark brown/i);
+});
+
+test("directs Tagalog personal pet vaccination requests through Contact Us", () => {
+  const message = "Gusto ko pabakunahan ang aso ko sa vet";
+
+  assert.equal(_test.resolveReplyLanguage("", message), "tagalog");
+  assert.equal(_test.hasPersonalPetVaccinationRequestIntent(message), true);
+  assert.equal(_test.hasAnimalAvailabilityIntent(message), false);
+  assert.equal(_test.needsPublicContext(message), false);
+
+  const reply = _test.getLocalReply(message, { pets: samplePets, events: [] }, "tagalog");
+
+  assert.match(reply, /^Paki-contact ang shelter staff through Contact Us/i);
+  assert.match(reply, /pet vaccination/i);
+  assert.match(reply, /schedule at requirements/i);
+  assert.doesNotMatch(reply, /Find Furbabies|Tricolor|Dark brown/i);
+});
+
 test("answers vaccination schedule questions as events, not animal records", () => {
   const message = "when will the vaccine happen?";
 
@@ -255,6 +287,102 @@ test("answers the generated upcoming-events question even when live context fail
   assert.match(reply, /9:00 AM - 3:00 PM/i);
   assert.match(reply, /Savannah Phase 1, Savannah Phase 2, and Green Plain Phase 3/i);
   assert.doesNotMatch(reply, /There are no published upcoming events/i);
+});
+
+test("answers the next-event question with only the earliest published event", () => {
+  const events = [
+    {
+      title: "Second Community Event",
+      date: "2026-09-20",
+      location: "Barangay Tabun Covered Court"
+    },
+    {
+      title: "First Community Event",
+      date: "2026-09-10",
+      location: "Angeles City Hall"
+    }
+  ];
+  const message = "when will the next event?";
+
+  assert.equal(_test.hasNextEventIntent(message), true);
+
+  const reply = _test.getLocalReply(message, { pets: [], events }, "english");
+
+  assert.match(reply, /next published event/i);
+  assert.match(reply, /First Community Event/i);
+  assert.doesNotMatch(reply, /Second Community Event/i);
+});
+
+test("answers the next-event question in Tagalog", () => {
+  const message = "Kailan ang susunod na event?";
+  const events = [{
+    title: "Barangay Pet Wellness Day",
+    date: "2026-09-10",
+    location: "Angeles City Hall"
+  }];
+
+  assert.equal(_test.resolveReplyLanguage("", message), "tagalog");
+  assert.equal(_test.hasNextEventIntent(message), true);
+
+  const reply = _test.getLocalReply(message, { pets: [], events }, "tagalog");
+
+  assert.match(reply, /^Ang susunod na published event/i);
+  assert.match(reply, /Barangay Pet Wellness Day/i);
+});
+
+test("says no announcement yet when a requested barangay has no matching event", () => {
+  const events = [
+    ...sampleEvents,
+    {
+      title: "Barangay Vaccination Day",
+      date: "2026-09-15",
+      location: "Brgy. Tabun Covered Court"
+    }
+  ];
+  const message = "when will be the cutcut?";
+
+  assert.equal(_test.getMentionedBarangay(message)?.name, "Cutcut");
+  assert.equal(_test.hasBarangayEventIntent(message), true);
+  assert.equal(_test.shouldUseLocalReply(message), true);
+  assert.equal(_test.needsPublicContext(message), true);
+
+  const reply = _test.getLocalReply(message, { pets: [], events }, "english");
+
+  assert.match(reply, /no published event announcement for Barangay Cutcut yet/i);
+  assert.doesNotMatch(reply, /Free Anti-Rabies Vaccination Drive|Barangay Vaccination Day/i);
+  assert.doesNotMatch(reply, /mainly here for ANIMUA/i);
+});
+
+test("says no barangay announcement yet in Tagalog", () => {
+  const message = "Kailan naman sa Cutcut?";
+
+  assert.equal(_test.resolveReplyLanguage("", message), "tagalog");
+  assert.equal(_test.hasBarangayEventIntent(message), true);
+
+  const reply = _test.getLocalReply(message, { pets: [], events: sampleEvents }, "tagalog");
+
+  assert.match(reply, /^Wala pang published event announcement para sa Barangay Cutcut/i);
+  assert.doesNotMatch(reply, /Free Anti-Rabies Vaccination Drive/i);
+});
+
+test("returns only announcements matching the requested barangay", () => {
+  const events = [
+    ...sampleEvents,
+    {
+      title: "Barangay Vaccination Day",
+      date: "2026-09-15",
+      location: "Brgy. Tabun Covered Court"
+    }
+  ];
+  const reply = _test.getLocalReply(
+    "when will be in barangay Tabun?",
+    { pets: [], events },
+    "english"
+  );
+
+  assert.match(reply, /published event for Barangay Tabun/i);
+  assert.match(reply, /Barangay Vaccination Day/i);
+  assert.doesNotMatch(reply, /Free Anti-Rabies Vaccination Drive/i);
 });
 
 test("answers Tagalog vaccination schedule questions as events", () => {
@@ -618,29 +746,67 @@ test("answers a logged-in user's exact quiz retake date in Tagalog", () => {
 });
 
 test("routes application status questions to My Applications instead of animal visits", () => {
-  const message = "Where can I see my adoption application status?";
+  [
+    "Where can I see my adoption application status?",
+    "what happen to my application",
+  ].forEach((message) => {
+    assert.equal(_test.resolveReplyLanguage("english", message), "english");
+    assert.equal(_test.shouldUseLocalReply(message), true);
+    assert.equal(_test.hasVisitAnimalIntent(message), false);
 
-  assert.equal(_test.resolveReplyLanguage("english", message), "english");
+    const reply = _test.getLocalReply(message, { pets: [], events: [] }, "english");
+
+    assert.match(reply, /sign in to your ANIMUA account/i);
+    assert.match(reply, /official updates/i);
+    assert.doesNotMatch(reply, /visiting or meeting an animal/i);
+    assert.doesNotMatch(reply, /open Find Furbabies, choose an animal/i);
+  });
+});
+
+test("routes Tagalog application status questions to My Applications", () => {
+  const message = "Ano na ang application ko?";
+
+  assert.equal(_test.resolveReplyLanguage("", message), "tagalog");
   assert.equal(_test.shouldUseLocalReply(message), true);
-  assert.equal(_test.hasVisitAnimalIntent(message), false);
 
-  const reply = _test.getLocalReply(message, { pets: [], events: [] }, "english");
+  const reply = _test.getLocalReply(message, { pets: [], events: [] }, "tagalog");
 
-  assert.match(reply, /sign in to your ANIMUA account/i);
+  assert.match(reply, /status ng adoption application/i);
+  assert.match(reply, /My Applications/i);
   assert.match(reply, /official updates/i);
-  assert.doesNotMatch(reply, /visiting or meeting an animal/i);
+  assert.doesNotMatch(reply, /buksan ang Find Furbabies, pumili ng animal/i);
 });
 
 test("answers adoption cancellation after applying with the 14-day attendance rule", () => {
-  const message = "what if I cancel the adoption after I apply?";
-  const reply = _test.getLocalReply(message, { pets: [], events: [] }, "english");
+  [
+    "what if I cancel the adoption after I apply?",
+    "I want to cancel my adoption",
+  ].forEach((message) => {
+    assert.equal(_test.shouldUseLocalReply(message), true);
 
-  assert.match(reply, /does not have a cancel or withdraw option/i);
+    const reply = _test.getLocalReply(message, { pets: [], events: [] }, "english");
+
+    assert.match(reply, /does not have a cancel or withdraw option/i);
+    assert.match(reply, /14-day attendance rule/i);
+    assert.match(reply, /account suspension/i);
+    assert.match(reply, /only when you are fully ready to adopt/i);
+    assert.doesNotMatch(reply, /After an adoption is approved, follow the official instructions/i);
+    assert.doesNotMatch(reply, /To adopt, go to Find Furbabies/i);
+    assert.doesNotMatch(reply, /open My Applications/i);
+  });
+});
+
+test("answers adoption cancellation in Tagalog", () => {
+  const message = "Gusto ko i-cancel ang adoption ko";
+
+  assert.equal(_test.resolveReplyLanguage("", message), "tagalog");
+
+  const reply = _test.getLocalReply(message, { pets: [], events: [] }, "tagalog");
+
+  assert.match(reply, /^Walang cancel o withdraw option/i);
   assert.match(reply, /14-day attendance rule/i);
   assert.match(reply, /account suspension/i);
-  assert.match(reply, /only when you are fully ready to adopt/i);
-  assert.doesNotMatch(reply, /After an adoption is approved, follow the official instructions/i);
-  assert.doesNotMatch(reply, /open My Applications/i);
+  assert.doesNotMatch(reply, /Para mag-adopt, pumunta sa Find Furbabies/i);
 });
 
 test("still answers real animal visit questions as meet-and-greet guidance", () => {
@@ -1083,6 +1249,36 @@ test("answers surrender availability questions", () => {
 
   assert.match(reply, /qualified Angeles City residents/i);
   assert.match(reply, /requests are paused/i);
+});
+
+test("reassures owners that accepted surrendered pets will receive the shelter's best care", () => {
+  const message = "if I surrender my pet will you take care of my dogs?";
+
+  assert.equal(_test.hasSurrenderCareIntent(message), true);
+  assert.equal(_test.shouldUseLocalReply(message), true);
+
+  const reply = _test.getLocalReply(message, { pets: [], events: [] }, "english");
+
+  assert.match(reply, /^Yes\./);
+  assert.match(reply, /shelter team will do their best/i);
+  assert.match(reply, /care for your pet and keep them safe/i);
+  assert.match(reply, /approved and your pet is accepted/i);
+  assert.doesNotMatch(reply, /^For surrender requests, open the Surrender page/i);
+});
+
+test("reassures owners about surrendered-pet care in Tagalog", () => {
+  const message = "Kapag sinurrender ko ang aso ko, aalagaan ba ninyo?";
+
+  assert.equal(_test.resolveReplyLanguage("", message), "tagalog");
+  assert.equal(_test.hasSurrenderCareIntent(message), true);
+
+  const reply = _test.getLocalReply(message, { pets: [], events: [] }, "tagalog");
+
+  assert.match(reply, /^Oo\./);
+  assert.match(reply, /gagawin ng shelter team ang kanilang makakaya/i);
+  assert.match(reply, /maalagaan at mapanatiling ligtas/i);
+  assert.match(reply, /approved ang surrender request/i);
+  assert.doesNotMatch(reply, /^Para sa surrender request, buksan ang Surrender page/i);
 });
 
 test("answers Tagalog surrender availability questions", () => {

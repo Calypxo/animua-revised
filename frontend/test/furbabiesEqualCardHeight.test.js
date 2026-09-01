@@ -38,8 +38,16 @@ test("tablet pet grids use three columns without centering an odd final card", (
     styles,
     /@media \(max-width: 1180px\) and \(min-width: 901px\)\s*\{[\s\S]*?\.pets-grid\s*\{[\s\S]*?grid-template-columns:\s*repeat\(3, minmax\(0, 1fr\)\)\s*!important;[\s\S]*?\.pet-card:last-child:nth-child\(odd\)\s*\{[\s\S]*?grid-column:\s*auto\s*!important;[\s\S]*?width:\s*auto\s*!important;[\s\S]*?justify-self:\s*stretch\s*!important/,
   );
+  assert.doesNotMatch(
+    styles,
+    /@media \(max-width: 1180px\) and \(min-width: 641px\)\s*\{[\s\S]*?\.pet-card:last-child:nth-child\(odd\)/,
+  );
+  assert.match(
+    styles,
+    /@media \(max-width: 900px\) and \(min-width: 641px\)\s*\{[\s\S]*?\.pet-card:last-child:nth-child\(odd\)\s*\{[\s\S]*?grid-column:\s*1 \/ -1\s*!important/,
+  );
 });
 
 test("the public page requests the current furbabies stylesheet revision", () => {
-  assert.match(markup, /furbabies\.css\?v=profile-close-circle-tablet-three-columns-20260830/);
+  assert.match(markup, /furbabies\.css\?v=tablet-last-card-grid-fix-20260831/);
 });
