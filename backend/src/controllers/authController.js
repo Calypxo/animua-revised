@@ -17,6 +17,11 @@ const {
   createOtpChallenge,
   verifyOtpChallenge,
 } = require("../services/otpChallengeService");
+const {
+  clearFailedLogins,
+  getLoginAttemptState,
+  recordFailedLogin,
+} = require("../services/loginAttemptService");
 
 const IS_INSECURE_MODE = false;
 const RECAPTCHA_SECRET_KEY =
@@ -1006,7 +1011,27 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: "Email and password are required." });
     }
 
-    if (captchaToken) {
+    const attemptState = getLoginAttemptState(req, email);
+
+    if (attemptState.rateLimited) {
+      res.set("Retry-After", String(attemptState.retryAfterSeconds));
+      return res.status(429).json({
+        code: "LOGIN_RATE_LIMITED",
+        message: "Too many failed login attempts. Please wait before trying again.",
+        captchaRequired: true,
+        retryAfterSeconds: attemptState.retryAfterSeconds,
+      });
+    }
+
+    if (attemptState.captchaRequired && !captchaToken) {
+      return res.status(403).json({
+        code: "CAPTCHA_REQUIRED",
+        message: "Please complete the CAPTCHA before logging in.",
+        captchaRequired: true,
+      });
+    }
+
+    if (attemptState.captchaRequired || captchaToken) {
       if (!RECAPTCHA_SECRET_KEY) {
         return res.status(503).json({ message: "Captcha verification is not configured." });
       }
@@ -1015,13 +1040,30 @@ exports.login = async (req, res) => {
 
       if (!captchaResult.success) {
         console.warn("[Login Captcha Failed]", captchaResult["error-codes"] || []);
-        return res.status(403).json({ message: "Captcha verification failed. Please try again." });
+        return res.status(403).json({
+          code: "CAPTCHA_REQUIRED",
+          message: "Captcha verification failed. Please try again.",
+          captchaRequired: true,
+        });
       }
     }
 
     const userDoc = await db.collection("users").doc(email).get();
     if (!userDoc.exists) {
-      return res.status(401).json({ message: "Invalid email or password." });
+      const failedState = recordFailedLogin(req, email);
+      if (failedState.rateLimited) {
+        res.set("Retry-After", String(failedState.retryAfterSeconds));
+      }
+      return res.status(failedState.rateLimited ? 429 : 401).json({
+        code: failedState.rateLimited ? "LOGIN_RATE_LIMITED" : "INVALID_CREDENTIALS",
+        message: failedState.rateLimited
+          ? "Too many failed login attempts. Please wait before trying again."
+          : "Invalid email or password.",
+        captchaRequired: failedState.captchaRequired,
+        ...(failedState.rateLimited
+          ? { retryAfterSeconds: failedState.retryAfterSeconds }
+          : {}),
+      });
     }
 
     const userData = userDoc.data();
@@ -1037,8 +1079,23 @@ exports.login = async (req, res) => {
       : await verifyStoredPassword(password, userData.password);
 
     if (!passwordCheck.isMatch) {
-      return res.status(401).json({ message: "Invalid email or password." });
+      const failedState = recordFailedLogin(req, email);
+      if (failedState.rateLimited) {
+        res.set("Retry-After", String(failedState.retryAfterSeconds));
+      }
+      return res.status(failedState.rateLimited ? 429 : 401).json({
+        code: failedState.rateLimited ? "LOGIN_RATE_LIMITED" : "INVALID_CREDENTIALS",
+        message: failedState.rateLimited
+          ? "Too many failed login attempts. Please wait before trying again."
+          : "Invalid email or password.",
+        captchaRequired: failedState.captchaRequired,
+        ...(failedState.rateLimited
+          ? { retryAfterSeconds: failedState.retryAfterSeconds }
+          : {}),
+      });
     }
+
+    clearFailedLogins(req, email);
 
     if (passwordCheck.needsRehash) {
       const passwordHash = await bcrypt.hash(password, 12);

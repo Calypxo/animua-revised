@@ -62,6 +62,11 @@
             <div class="login-help-row">
               <button type="button" class="forgot-password-link" id="forgotPasswordBtn">Forgot password?</button>
             </div>
+
+            <div class="login-captcha-row" id="login-captcha-row" hidden>
+              <div id="login-recaptcha" class="login-recaptcha"></div>
+              <div class="field-error login-captcha-error" id="login-captcha-error" role="alert"></div>
+            </div>
             
             <button type="submit" class="btn-submit" id="loginBtn"><span class="spinner" id="loginSpinner" aria-hidden="true"></span><span id="loginBtnText">Sign In</span></button>
           </form>

@@ -236,6 +236,10 @@ button {
 
 /* Management account recovery */
 .login-help-row{display:flex;justify-content:flex-end;margin:-1px 0 15px}
+.login-captcha-row[hidden]{display:none!important}
+.login-captcha-row{display:grid;justify-items:center;gap:5px;margin:-4px 0 15px;overflow:hidden}
+.login-recaptcha{max-width:100%;min-height:78px}
+.login-captcha-error{width:100%;margin-top:0;text-align:center}
 .forgot-password-link{min-height:32px;padding:3px 0;border:0;color:var(--red);background:transparent;cursor:pointer;font-size:.76rem;font-weight:700;text-decoration:underline;text-decoration-color:transparent;text-underline-offset:4px;transition:color .2s,text-decoration-color .2s}
 .forgot-password-link:hover{text-decoration-color:currentColor}.forgot-password-link:focus-visible{border-radius:5px}
 .recovery-backdrop[hidden]{display:none!important}

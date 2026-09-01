@@ -13,12 +13,10 @@ const RECAPTCHA_SITE_KEY =
   import.meta.env?.VITE_RECAPTCHA_SITE_KEY ||
   window.ANIMUA_RECAPTCHA_SITE_KEY ||
   "";
-const LOGIN_FAILURE_LIMIT = 3;
 const LOGIN_CAPTCHA_MESSAGE = "Please complete the CAPTCHA before logging in.";
 
 let loginCaptchaWidgetId = null;
 let loginCaptchaRenderPromise = null;
-const failedLoginCounts = new Map();
 
 export async function handleLogin(event) {
   event.preventDefault();
@@ -30,8 +28,9 @@ export async function handleLogin(event) {
 
   const email = emailInput?.value.trim().toLowerCase();
   const password = passwordInput?.value;
-  const captchaRequired = isLoginCaptchaRequired(email);
-  let captchaToken = "";
+  const captchaRow = document.getElementById("login-captcha-row");
+  const captchaRequired = Boolean(captchaRow && !captchaRow.classList.contains("hidden"));
+  const captchaToken = captchaRequired ? getLoginCaptchaToken() : "";
 
   if (!email) {
     closeModal(authModal);
@@ -96,8 +95,6 @@ export async function handleLogin(event) {
 
   if (captchaRequired) {
     showLoginCaptcha();
-    captchaToken = getLoginCaptchaToken();
-
     if (!captchaToken) {
       setLoginCaptchaError(LOGIN_CAPTCHA_MESSAGE);
       return;
@@ -120,7 +117,6 @@ export async function handleLogin(event) {
 
     if (!response.ok) {
       if (response.status === 403 && data.code === "MANAGEMENT_PORTAL_REQUIRED") {
-        clearFailedLogin(email);
         resetLoginCaptcha();
         hideLoginCaptcha();
         await showManagementLoginDialog(authModal);
@@ -130,14 +126,12 @@ export async function handleLogin(event) {
       if (response.status === 403 && data.verificationRequired === true) {
         try {
           await signInWithEmailAndPassword(auth, email, password);
-          clearFailedLogin(email);
           resetLoginCaptcha();
           hideLoginCaptcha();
           showRegistrationVerificationView(authModal);
           await showEmailVerificationScreen(email);
         } catch (verificationError) {
           console.error("[Resume Email Verification Error]", verificationError);
-          recordFailedLogin(email);
           await Swal.fire({
             icon: "error",
             title: "Unable to Resume Verification",
@@ -153,18 +147,26 @@ export async function handleLogin(event) {
         return;
       }
 
-      recordFailedLogin(email);
-      if (shouldShowLoginCaptcha(email, response.status, data)) {
+      if (data.captchaRequired === true || data.code === "CAPTCHA_REQUIRED") {
         showLoginCaptcha();
         resetLoginCaptcha();
+        setLoginCaptchaError(
+          data.code === "CAPTCHA_REQUIRED"
+            ? (data.message || LOGIN_CAPTCHA_MESSAGE)
+            : ""
+        );
       }
 
       Swal.fire({
         icon: "error",
         title: "Login Failed",
         html: `
-          <p>Invalid email or password.</p>
-          <p>Please check your credentials and try again.</p>
+          <p>${response.status === 429
+            ? "Please wait before trying to log in again."
+            : "Invalid email or password."}</p>
+          <p>${response.status === 429
+            ? "CAPTCHA will still be required when the waiting period ends."
+            : "Please check your credentials and try again."}</p>
         `,
         confirmButtonText: "OK",
         customClass: {
@@ -210,7 +212,6 @@ export async function handleLogin(event) {
     const userEmail = account.email || data.email || email;
     const userProfilePhoto = account.profilePhotoDataUrl || "";
 
-    clearFailedLogin(email);
     resetLoginCaptcha();
     hideLoginCaptcha();
 
@@ -241,10 +242,6 @@ export async function handleLogin(event) {
     }
   } catch (error) {
     console.error("[Login Error]", error);
-    recordFailedLogin(email);
-    if (shouldShowLoginCaptcha(email, 0, { message: error.message })) {
-      showLoginCaptcha();
-    }
 
     closeModal(authModal);
     Swal.fire({
@@ -329,38 +326,6 @@ function setSubmitLoading(button, isLoading, loadingText = "Please wait...") {
   button.disabled = false;
   button.removeAttribute("aria-busy");
   delete button.dataset.originalText;
-}
-
-function getFailedLoginCount(email) {
-  return failedLoginCounts.get(email) || 0;
-}
-
-function recordFailedLogin(email) {
-  if (!email) return;
-  failedLoginCounts.set(email, getFailedLoginCount(email) + 1);
-}
-
-function clearFailedLogin(email) {
-  if (!email) return;
-  failedLoginCounts.delete(email);
-}
-
-function isLoginCaptchaRequired(email) {
-  return getFailedLoginCount(email) >= LOGIN_FAILURE_LIMIT;
-}
-
-function isSuspiciousLoginActivity(status, data = {}) {
-  const message = String(data.message || "").toLowerCase();
-  return (
-    status === 429 ||
-    message.includes("suspicious") ||
-    message.includes("too many") ||
-    message.includes("captcha")
-  );
-}
-
-function shouldShowLoginCaptcha(email, status, data) {
-  return isLoginCaptchaRequired(email) || isSuspiciousLoginActivity(status, data);
 }
 
 function showLoginCaptcha() {

@@ -17,6 +17,11 @@ const cors = require("cors");
 
 const app = express();
 app.disable("x-powered-by");
+if (process.env.NODE_ENV === "production") {
+  // Render terminates HTTPS one proxy hop before Express. Trust only that hop
+  // so login-attempt protection keys requests by the real client address.
+  app.set("trust proxy", 1);
+}
 
 const authRoutes = require("./src/routes/authRoutes");
 const userRoutes = require("./src/routes/userRoutes");

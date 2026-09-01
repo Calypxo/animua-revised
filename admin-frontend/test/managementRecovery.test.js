@@ -30,3 +30,16 @@ test("management login includes the complete accessible recovery workflow", asyn
   assert.match(html, /role="dialog"/);
   assert.match(html, /aria-modal="true"/);
 });
+
+test("management login can reveal and submit server-required CAPTCHA", async () => {
+  const [html, script] = await Promise.all([
+    readFile(new URL("../pages/admin-login.html", import.meta.url), "utf8"),
+    readFile(new URL("../src/management/admin-login.js", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(html, /id="login-captcha-row"[^>]*hidden/);
+  assert.match(html, /id="login-recaptcha"/);
+  assert.match(script, /data\.captchaRequired === true/);
+  assert.match(script, /captchaToken/);
+  assert.match(script, /portal:\s*"management"/);
+});

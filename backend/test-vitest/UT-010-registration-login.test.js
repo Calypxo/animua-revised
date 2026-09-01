@@ -1,6 +1,7 @@
 const { EventEmitter } = require("events");
 const bcrypt = require("bcryptjs");
 const { loadWithMocks, responseRecorder, snapshot } = require("./helpers/commonjs");
+const { resetLoginAttemptsForTesting } = require("../src/services/loginAttemptService");
 
 const verifyIdToken=vi.fn(); const userGet=vi.fn(); const userSet=vi.fn(); const userUpdate=vi.fn();
 const doc=vi.fn(()=>({get:userGet,set:userSet,update:userUpdate}));
@@ -11,7 +12,7 @@ const https={request:vi.fn((_url,_options,callback)=>{const request=new EventEmi
 let auth;
 beforeAll(()=>{process.env.RECAPTCHA_SECRET_KEY="unit-secret";auth=loadWithMocks("../src/controllers/authController",{"../src/config/firebase":{db,admin},"https":https,"nodemailer":{createTransport:vi.fn(()=>({}))}});});
 afterAll(()=>{delete process.env.RECAPTCHA_SECRET_KEY;});
-beforeEach(()=>{verifyIdToken.mockReset();userGet.mockReset();userSet.mockReset();userUpdate.mockReset();});
+beforeEach(()=>{verifyIdToken.mockReset();userGet.mockReset();userSet.mockReset();userUpdate.mockReset();resetLoginAttemptsForTesting();});
 
 const registrationBody=(extra={})=>({fullName:"Ana User",email:"ana@test.com",password:"weak-is-accepted-here",firebaseUid:"uid-1",firebaseIdToken:"firebase-token",termsAccepted:true,policyVersion:"1.0",captchaToken:"captcha",...extra});
 
@@ -22,4 +23,5 @@ describe("UT-010 — Registration and Login Decisions",()=>{
   it("Scenario 4 — returns HTTP 409 for an existing fully verified account",async()=>{verifyIdToken.mockResolvedValue({uid:"uid-1",email:"ana@test.com"});userGet.mockResolvedValue(snapshot({email:"ana@test.com"}));const res=responseRecorder();await auth.register({body:registrationBody(),ip:"127.0.0.1"},res);expect(res.statusCode).toBe(409);});
   it("Scenario 5 — returns 401 for a wrong active password and 403 for inactive status",async()=>{const hash=await bcrypt.hash("CorrectPass1!",4);userGet.mockResolvedValueOnce(snapshot({email:"ana@test.com",password:hash,status:"Active",role:"Public",emailVerified:true}));let res=responseRecorder();await auth.login({body:{email:"ana@test.com",password:"WrongPass1!"}},res);expect(res.statusCode).toBe(401);userGet.mockResolvedValueOnce(snapshot({email:"ana@test.com",password:hash,status:"Inactive"}));res=responseRecorder();await auth.login({body:{email:"ana@test.com",password:"CorrectPass1!"}},res);expect(res.statusCode).toBe(403);});
   it("Scenario 6 — rejects a management account on the public portal",async()=>{const hash=await bcrypt.hash("CorrectPass1!",4);userGet.mockResolvedValue(snapshot({email:"admin@test.com",password:hash,status:"Active",role:"Admin",emailVerified:true}));const res=responseRecorder();await auth.login({body:{email:"admin@test.com",password:"CorrectPass1!",portal:"public"}},res);expect(res.statusCode).toBe(403);expect(res.body.code).toBe("MANAGEMENT_PORTAL_REQUIRED");expect(res.cookies).toBeUndefined();});
+  it("Scenario 7 - requires server-verified CAPTCHA after three failed passwords",async()=>{const hash=await bcrypt.hash("CorrectPass1!",4);userGet.mockResolvedValue(snapshot({email:"captcha@test.com",password:hash,status:"Active",role:"Public",emailVerified:true}));const request=(captchaToken="")=>({ip:"203.0.113.10",body:{email:"captcha@test.com",password:"WrongPass1!",captchaToken}});let res;for(let attempt=1;attempt<=3;attempt+=1){res=responseRecorder();await auth.login(request(),res);expect(res.statusCode).toBe(401);expect(res.body.captchaRequired).toBe(attempt>=3);}res=responseRecorder();await auth.login(request(),res);expect(res.statusCode).toBe(403);expect(res.body.code).toBe("CAPTCHA_REQUIRED");expect(userGet).toHaveBeenCalledTimes(3);res=responseRecorder();await auth.login(request("verified-captcha"),res);expect(res.statusCode).toBe(401);expect(userGet).toHaveBeenCalledTimes(4);});
 });
