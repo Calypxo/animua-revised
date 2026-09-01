@@ -28,7 +28,7 @@ images:
 substitutions:
   _MODEL_BUCKET: ${PROJECT_ID}-animua-private-models
   _MODEL_VERSION: roberta-tagalog-finetuned-2026-08-11-v1
-  _IMAGE: asia-southeast1-docker.pkg.dev/${PROJECT_ID}/animua/sentiment-service:rules-2026-08-30-v4
+  _IMAGE: asia-southeast1-docker.pkg.dev/${PROJECT_ID}/animua/sentiment-service:rules-2026-09-02-v5
 
 options:
   dynamicSubstitutions: true

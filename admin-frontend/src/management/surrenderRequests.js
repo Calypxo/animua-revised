@@ -545,6 +545,7 @@ function renderDrawer(r) {
             <span class="nlp-cat-badge cat-other">
               <i class="bi bi-chat-heart-fill"></i>${escapeHtml(r.nlp.sentiment || "Neutral")}
             </span>
+            <small>Tone is separate from review urgency.</small>
           </div>
           <div class="triage-signal triage-confidence">
             <span class="triage-signal-label">Analysis confidence</span>

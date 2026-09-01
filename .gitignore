@@ -20,6 +20,7 @@ build/
 __pycache__/
 *.py[cod]
 animua-sentiment-service/models/
+animua-sentiment-service/evaluation/results/
 cypress.env.json
 cypress/downloads/
 cypress/screenshots/
