@@ -1485,47 +1485,6 @@ html body.management-consistent-ui.dashboard-page .dashboard-panel .panel-head h
 @media (max-width: 1199.98px) {
   .dashboard-chart-frame-main { height: 260px; }
   .dashboard-chart-frame-donut { height: 210px; }
-}
-
-@media (max-width: 767.98px) {
-  .dashboard-welcome {
-    grid-template-columns: 40px minmax(0, 1fr);
-    gap: 12px;
-    padding: 14px 15px;
-    border-radius: 14px;
-  }
-
-  .dashboard-welcome-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 12px;
-  }
-
-  .dashboard-welcome .hero-sub { font-size: .72rem; }
-  .dashboard-row { --bs-gutter-y: .875rem; }
-  .dashboard-panel { padding: 16px; border-radius: 16px; }
-  .dashboard-panel .panel-head { margin-bottom: 13px; padding-bottom: 11px; }
-  .dashboard-chart-frame-main { height: 240px; }
-  .dashboard-chart-frame-donut { height: 190px; }
-  .dashboard-chart-frame-stay { height: 205px; }
-  .dashboard-panel .chart-stat-row > div { min-height: 58px; }
-  .dashboard-animal-search-shell { width: min(190px, 48vw); }
-}
-
-@media (max-width: 575.98px) {
-  .dashboard-panel .panel-head > .d-flex {
-    width: 100%;
-  }
-
-  .dashboard-chart-panel .panel-head > .d-flex {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-
-  .dashboard-chart-panel .chart-legend { grid-column: 1 / -1; }
-  .dashboard-chart-panel .chart-range-select { width: 100%; }
-  .dashboard-recent-panel .panel-head > .d-flex { align-items: stretch !important; }
-  .dashboard-animal-search-shell { width: 100%; min-width: 0; }
 
   html body.management-consistent-ui.dashboard-page .dashboard-recent-panel > .table-responsive {
     width: 100% !important;
@@ -1535,12 +1494,16 @@ html body.management-consistent-ui.dashboard-page .dashboard-panel .panel-head h
   }
 
   html body.management-consistent-ui.dashboard-page #recentAnimalsTable tbody {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-auto-rows: max-content !important;
     gap: 10px !important;
     padding: 0 !important;
     background: transparent !important;
   }
 
   html body.management-consistent-ui.dashboard-page #recentAnimalsTable tbody > tr.dashboard-animal-row {
+    height: auto !important;
+    min-height: 0 !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     grid-template-areas:
       "identity identity"
@@ -1548,6 +1511,7 @@ html body.management-consistent-ui.dashboard-page .dashboard-panel .panel-head h
       "age status"
       "days assessment"
       "actions actions" !important;
+    align-self: start !important;
     gap: 12px 14px !important;
     padding: 14px !important;
     overflow: hidden !important;
@@ -1556,6 +1520,7 @@ html body.management-consistent-ui.dashboard-page .dashboard-panel .panel-head h
 
   html body.management-consistent-ui.dashboard-page #recentAnimalsTable tbody > tr.dashboard-animal-row > td {
     min-width: 0 !important;
+    height: auto !important;
     grid-column: auto !important;
     padding: 0 !important;
     font-size: .74rem !important;
@@ -1614,6 +1579,47 @@ html body.management-consistent-ui.dashboard-page .dashboard-panel .panel-head h
     letter-spacing: .01em !important;
     text-transform: none !important;
   }
+}
+
+@media (max-width: 767.98px) {
+  .dashboard-welcome {
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 12px;
+    padding: 14px 15px;
+    border-radius: 14px;
+  }
+
+  .dashboard-welcome-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+  }
+
+  .dashboard-welcome .hero-sub { font-size: .72rem; }
+  .dashboard-row { --bs-gutter-y: .875rem; }
+  .dashboard-panel { padding: 16px; border-radius: 16px; }
+  .dashboard-panel .panel-head { margin-bottom: 13px; padding-bottom: 11px; }
+  .dashboard-chart-frame-main { height: 240px; }
+  .dashboard-chart-frame-donut { height: 190px; }
+  .dashboard-chart-frame-stay { height: 205px; }
+  .dashboard-panel .chart-stat-row > div { min-height: 58px; }
+  .dashboard-animal-search-shell { width: min(190px, 48vw); }
+}
+
+@media (max-width: 575.98px) {
+  .dashboard-panel .panel-head > .d-flex {
+    width: 100%;
+  }
+
+  .dashboard-chart-panel .panel-head > .d-flex {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .dashboard-chart-panel .chart-legend { grid-column: 1 / -1; }
+  .dashboard-chart-panel .chart-range-select { width: 100%; }
+  .dashboard-recent-panel .panel-head > .d-flex { align-items: stretch !important; }
+  .dashboard-animal-search-shell { width: 100%; min-width: 0; }
 }
 
 @media (max-width: 359.98px) {
