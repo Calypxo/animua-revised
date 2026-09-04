@@ -753,35 +753,12 @@ function hasGoodbyeIntent(text = "") {
 
 function hasAssistantHelpIntent(text = "") {
   const tokens = getMessageTokens(text);
-  const mentionsAnimuaService = includesAnyWord(text, [
-    "animua",
-    "adopt",
-    "adoption",
-    "surrender",
-    "account",
-    "otp",
-    "pet",
-    "pets",
-    "animal",
-    "animals",
-    "dog",
-    "cat",
-    "furbabies",
-    "match",
-    "quiz",
-    "donation",
-    "stray",
-    "event",
-    "events",
-    "contact",
-    "office"
-  ]);
 
   if (includesAnyPhrase(text, ["who are you", "what can you do", "ano ka"])) return true;
   if (includesAnyWord(text, ["assistant"])) return true;
 
   return includesAnyWord(text, ["help", "assist", "tulong"]) &&
-    (tokens.length <= 3 || mentionsAnimuaService);
+    tokens.length <= 3;
 }
 
 function hasStatusIntent(text = "") {
@@ -2318,10 +2295,11 @@ function hasAdoptionHomePreparationIntent(text = "") {
   }
 
   return hasAdoptionMentionIntent(text) && (
-    includesAnyWord(text, ["prepare", "ready", "home", "house", "before", "needs", "supplies", "gamit", "handa", "bahay", "iuwi", "iuuwi"]) ||
+    includesAnyWord(text, ["prepare", "home", "house", "before", "needs", "supplies", "gamit", "handa", "bahay", "iuwi", "iuuwi"]) ||
     includesAnyPhrase(text, [
       "before bringing",
       "before adoption",
+      "get ready to adopt",
       "prepare my home",
       "ready my home",
       "ano ihahanda",
