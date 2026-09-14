@@ -84,7 +84,7 @@ function renderQuestionOverview() {
 
     return `<section class="cq-question-group"><header><div><span>${esc(phaseLabel)}</span><strong>${entries.length} question${entries.length === 1 ? "" : "s"}</strong></div></header><div>${entries.map(({ question, index }, groupIndex) => {
       const questionLabel = esc(question.label || "Untitled question");
-      return `<article class="cq-question-row ${question.active ? "" : "is-inactive"}" data-index="${index}"><span class="cq-question-number">${groupIndex + 1}</span><div class="cq-question-copy"><div><strong>${questionLabel}</strong><span class="cq-question-status">${question.active ? "Active" : "Inactive"}</span></div><p>${esc(question.text || "Question text has not been added yet.")}</p><small>${question.choices?.length || 0} answers <i></i> ${esc(question.traitKey)}</small></div>${canManage ? `<div class="cq-row-actions"><button type="button" data-action="edit" class="cq-edit-action" aria-label="Edit ${questionLabel}"><i class="bi bi-pencil" aria-hidden="true"></i><span>Edit wording</span></button></div>` : ""}</article>`;
+      return `<article class="cq-question-row ${question.active ? "" : "is-inactive"}" data-index="${index}"><span class="cq-question-number">${groupIndex + 1}</span><div class="cq-question-copy"><div><strong>${questionLabel}</strong><span class="cq-question-status">${question.active ? "Active" : "Inactive"}</span></div><p>${esc(question.text || "Question text has not been added yet.")}</p><small>${question.choices?.length || 0} answers <i></i> ${esc(question.traitKey)}</small></div>${canManage ? `<div class="cq-row-actions"><button type="button" data-action="move-up" title="Question order is fixed" aria-label="Move ${questionLabel} up" disabled><i class="bi bi-arrow-up" aria-hidden="true"></i></button><button type="button" data-action="move-down" title="Question order is fixed" aria-label="Move ${questionLabel} down" disabled><i class="bi bi-arrow-down" aria-hidden="true"></i></button><button type="button" data-action="toggle" class="cq-status-action" disabled title="Question status is fixed" aria-label="${question.active ? "Pause" : "Enable"} ${questionLabel}"><i class="bi ${question.active ? "bi-pause-circle" : "bi-play-circle"}" aria-hidden="true"></i><span>${question.active ? "Pause" : "Enable"}</span></button><button type="button" data-action="edit" class="cq-edit-action" aria-label="Edit ${questionLabel}"><i class="bi bi-pencil" aria-hidden="true"></i><span>Edit</span></button></div>` : ""}</article>`;
     }).join("")}</div></section>`;
   }).join("");
 
@@ -93,13 +93,13 @@ function renderQuestionOverview() {
 }
 function renderEditorChoices() {
   const choices = state.editorQuestion?.choices || [];
-  $("editorChoiceList").innerHTML = choices.map((choice, index) => `<div class="cq-editor-choice" data-choice-index="${index}"><span>${index + 1}</span><label><small>Answer wording</small><input data-editor-choice="text" maxlength="160" value="${esc(choice.text)}"></label><label><small>Fixed score</small><input value="${choice.value}" readonly aria-label="Fixed answer score"></label></div>`).join("");
+  $("editorChoiceList").innerHTML = choices.map((choice, index) => `<div class="cq-editor-choice" data-choice-index="${index}"><span>${index + 1}</span><label><small>Answer text</small><input data-editor-choice="text" maxlength="160" value="${esc(choice.text)}"></label><label><small>Score</small><select data-editor-choice="value" disabled aria-label="Fixed answer score">${[1, 2, 3, 4, 5].map(value => `<option value="${value}" ${Number(choice.value) === value ? "selected" : ""}>${value}</option>`).join("")}</select></label><button type="button" data-editor-remove title="Answer choices are fixed" aria-label="Answer choices are fixed" disabled><i class="bi bi-trash3"></i></button></div>`).join("");
 }
 function openQuestionEditor(index) {
   if (!admin() || !Number.isInteger(index) || !state.questions[index]) return;
   state.editorIndex = index;
   state.editorQuestion = clone(state.questions[index]);
-  $("questionEditorTitle").textContent = "Edit question wording";
+  $("questionEditorTitle").textContent = "Edit question";
   $("editorQuestionText").value = state.editorQuestion.text || "";
   $("editorQuestionLabel").value = state.editorQuestion.label || "";
   $("editorQuestionPhase").value = state.editorQuestion.phaseKey;
