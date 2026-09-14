@@ -44,7 +44,6 @@ import {
   buildQuarantineDecisionPayload,
 } from "./animalProfileWorkflow.js";
 import {
-  normalizeBehavioralObservations,
   parseBehavioralNotes,
   serializeBehavioralNotes,
 } from "./behavioralObservations.js";
@@ -81,8 +80,6 @@ let editingMedId = null;
 let currentRole = "";
 let currentUser = null;
 let medicalInventoryItems = [];
-let behavioralObservations = [];
-let behaviorObservationId = 0;
 let behavioralQuestionConfig = null;
 
 async function loadBehavioralQuestionConfig() {
@@ -142,127 +139,39 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
-function createBehaviorObservation(entry = {}) {
-  return {
-    id: ++behaviorObservationId,
-    label: String(entry.label || ""),
-    detail: String(entry.detail || ""),
-  };
-}
-
-function setBehaviorObservationError(message = "") {
-  const error = document.getElementById("behaviorObservationError");
-  if (!error) return;
-  error.textContent = message;
-  error.hidden = !message;
-}
-
-function syncBehaviorObservationDraft() {
-  const field = document.getElementById("behavioralObservationsDraft");
-  if (!field) return;
-  field.value = JSON.stringify(behavioralObservations.map(({ label, detail }) => ({ label, detail })));
-}
-
-function renderBehaviorObservationEditor() {
-  const list = document.getElementById("behaviorObservationList");
-  const addButton = document.getElementById("addBehaviorObservation");
-  if (!list) return;
-
-  if (!behavioralObservations.length) {
-    list.innerHTML = `
-      <div class="behavior-observation-empty">
-        <i class="bi bi-journal-plus" aria-hidden="true"></i>
-        <div><strong>No supplemental behaviors added</strong><span>Add handling, social, or environmental observations specific to this animal.</span></div>
-      </div>`;
-  } else {
-    list.innerHTML = behavioralObservations.map((entry, index) => `
-      <article class="behavior-observation-row" data-observation-id="${entry.id}">
-        <div class="behavior-observation-row-head">
-          <span>Behavior ${index + 1}</span>
-          <button class="behavior-remove-btn" type="button" data-remove-observation="${entry.id}" aria-label="Remove behavior ${index + 1}">
-            <i class="bi bi-trash3" aria-hidden="true"></i><span>Remove</span>
-          </button>
-        </div>
-        <div class="form-group">
-          <label class="form-lbl" for="behaviorObservationLabel-${entry.id}">Behavior name <span class="req">*</span></label>
-          <input class="form-inp" id="behaviorObservationLabel-${entry.id}" data-observation-field="label" maxlength="80" value="${escapeHtml(entry.label)}" placeholder="e.g. Resource guarding" />
-        </div>
-        <div class="form-group">
-          <label class="form-lbl" for="behaviorObservationDetail-${entry.id}">Observation details</label>
-          <textarea class="form-inp form-textarea" id="behaviorObservationDetail-${entry.id}" data-observation-field="detail" maxlength="300" rows="2" placeholder="Describe triggers, frequency, handling guidance, or context…">${escapeHtml(entry.detail)}</textarea>
-        </div>
-      </article>`).join("");
-  }
-
-  if (addButton) addButton.disabled = behavioralObservations.length >= 20;
-  syncBehaviorObservationDraft();
-}
-
-function restoreBehaviorObservationDraft() {
-  const field = document.getElementById("behavioralObservationsDraft");
-  if (!field?.value) return;
-  try {
-    const entries = JSON.parse(field.value);
-    if (!Array.isArray(entries)) return;
-    behavioralObservations = entries.slice(0, 20).map(createBehaviorObservation);
-    renderBehaviorObservationEditor();
-  } catch {
-    syncBehaviorObservationDraft();
-  }
-}
-
-function validateBehaviorObservations() {
-  const normalized = normalizeBehavioralObservations(behavioralObservations);
-  const missingName = normalized.find((entry) => !entry.label && entry.detail);
-  if (missingName) {
-    setBehaviorObservationError("Add a behavior name or remove the incomplete observation.");
-    return null;
-  }
-
-  const names = new Set();
-  for (const entry of normalized.filter((item) => item.label)) {
-    const key = entry.label.toLocaleLowerCase();
-    if (names.has(key)) {
-      setBehaviorObservationError(`“${entry.label}” has been added more than once.`);
-      return null;
-    }
-    names.add(key);
-  }
-
-  setBehaviorObservationError();
-  return normalized.filter((entry) => entry.label);
-}
-
-function bindBehaviorObservationEditor() {
-  document.getElementById("addBehaviorObservation")?.addEventListener("click", () => {
-    if (behavioralObservations.length >= 20) {
-      setBehaviorObservationError("A maximum of 20 supplemental behaviors can be recorded.");
-      return;
-    }
-    const entry = createBehaviorObservation();
-    behavioralObservations.push(entry);
-    setBehaviorObservationError();
-    renderBehaviorObservationEditor();
-    document.getElementById(`behaviorObservationLabel-${entry.id}`)?.focus();
+function syncSpecialNeedsEditor() {
+  const statusField = document.getElementById("specialNeedsStatus");
+  const status = ["yes", "no", "unknown"].includes(statusField.value) ? statusField.value : "unknown";
+  statusField.value = status;
+  document.querySelectorAll('[name="specialNeedsChoice"]').forEach(input => {
+    input.checked = input.value === status;
+    input.toggleAttribute("autofocus", input.checked);
   });
+  const notes = document.getElementById("specialNeedsNotes");
+  notes.required = status === "yes";
+  notes.disabled = status === "no";
+  document.getElementById("specialNeedsNotesGroup").hidden = status === "no";
+  document.getElementById("specialNeedsNotesLabel").textContent = status === "yes" ? "Care instructions" : "Care observations";
+  document.getElementById("specialNeedsNotesRequirement").textContent = status === "yes" ? "Required" : "Optional";
+  notes.placeholder = status === "yes"
+    ? "Describe daily support, medical care, or accommodations an adopter should provide."
+    : "Note any care needs awaiting review, if known.";
+  const hasLegacyRating = animal.behavioralAssessment?.specialNeeds !== undefined || animal.legacySpecialNeedsRating !== undefined;
+  document.getElementById("specialNeedsReviewHint").textContent = status === "yes"
+    ? "Describe the support an adopter will need to provide below."
+    : status === "no"
+      ? "No additional care requirements identified. Update this status if the animal's needs change."
+      : hasLegacyRating
+        ? "A previous numeric rating is on file. Review the animal's care needs to confirm its status."
+        : "Choose a confirmed status after reviewing the animal's care needs.";
+}
 
-  const list = document.getElementById("behaviorObservationList");
-  list?.addEventListener("input", (event) => {
-    const row = event.target.closest("[data-observation-id]");
-    const field = event.target.dataset.observationField;
-    const entry = behavioralObservations.find((item) => item.id === Number(row?.dataset.observationId));
-    if (!entry || !field) return;
-    entry[field] = event.target.value;
-    setBehaviorObservationError();
-    syncBehaviorObservationDraft();
-  });
-
-  list?.addEventListener("click", (event) => {
-    const button = event.target.closest("[data-remove-observation]");
-    if (!button) return;
-    behavioralObservations = behavioralObservations.filter((entry) => entry.id !== Number(button.dataset.removeObservation));
-    setBehaviorObservationError();
-    renderBehaviorObservationEditor();
+function bindSpecialNeedsEditor() {
+  document.querySelectorAll('[name="specialNeedsChoice"]').forEach(input => {
+    input.addEventListener("change", () => {
+      document.getElementById("specialNeedsStatus").value = input.value;
+      syncSpecialNeedsEditor();
+    });
   });
 }
 
@@ -1023,17 +932,35 @@ if (addMedicalButton) {
 function renderBehavioralTab() {
   const el = document.getElementById("behavioralContent");
   const lbl = document.getElementById("behavioralBtnLabel");
-  const careSummary = `<div class="behavioral-result-card"><h4>Special-needs care status</h4><p><strong>${specialNeedsLabel(animal)}</strong></p>${specialNeedsStatus(animal) === "unknown" ? "<p>Care needs require review. Previous numeric ratings do not confirm this status.</p>" : ""}${animal.specialNeedsNotes ? `<p>${escapeHtml(animal.specialNeedsNotes)}</p>` : ""}</div>`;
+  const careStatus = specialNeedsStatus(animal);
+  const careIcons = { unknown: "bi-clock-history", no: "bi-check-circle", yes: "bi-heart-pulse" };
+  const careDescriptions = {
+    unknown: "Review this animal's care needs during its next assessment.",
+    no: "Routine daily care. Update this status if additional needs are identified.",
+    yes: "This animal needs ongoing support or accommodations. Review the care instructions before placement.",
+  };
+  const careSummary = `
+    <section class="care-summary-card" data-care-status="${careStatus}" aria-labelledby="careSummaryTitle">
+      <div class="care-summary-heading">
+        <span class="care-section-icon"><i class="bi bi-heart-pulse" aria-hidden="true"></i></span>
+        <div><h4 id="careSummaryTitle">Special needs</h4><p>Care and support requirements</p></div>
+        <span class="care-status-badge"><i class="bi ${careIcons[careStatus]}" aria-hidden="true"></i>${specialNeedsLabel(animal)}</span>
+      </div>
+      <p class="care-summary-description">${careDescriptions[careStatus]}</p>
+      ${animal.specialNeedsNotes && careStatus !== "no" ? `<div class="care-summary-notes"><h5>${careStatus === "yes" ? "Care instructions" : "Care observations"}</h5><p>${escapeHtml(animal.specialNeedsNotes)}</p></div>` : ""}
+    </section>`;
 
   if (!animal.behavioralAssessment) {
     lbl.textContent = "Add Assessment";
     el.innerHTML = `${careSummary}
-      <div class="behavioral-empty">
-        <i class="bi bi-sliders"></i>
-        <p>No behavioral assessment recorded yet.</p>
-        <p class="empty-state-detail">
-          Record observed behavior to support responsible adopter matching.
-        </p>
+      <div class="behavioral-assessment-empty">
+        <span class="care-section-icon"><i class="bi bi-clipboard2-check" aria-hidden="true"></i></span>
+        <div><span class="assessment-empty-label">Behavior profile</span>
+          <h4>No assessment recorded yet</h4>
+          <p>${can("edit_behavioral") && !["Adopted", "Archived"].includes(animal.status)
+            ? "Select Add Assessment above to record observed traits and support adopter matching."
+            : "A veterinarian or administrator can record observed traits to support adopter matching."}</p>
+        </div>
       </div>`;
     return;
   }
@@ -1312,18 +1239,10 @@ function openBehavioralModal() {
 
   const ba = animal.behavioralAssessment || {};
   const parsedNotes = parseBehavioralNotes(animal.behavioralNotes || "");
-  behavioralObservations = parsedNotes.observations.map(createBehaviorObservation);
   document.getElementById("behavioralNotes").value = parsedNotes.notes;
   document.getElementById("behavioralAssessor").value = signedInUserName();
   document.getElementById("specialNeedsStatus").value = specialNeedsStatus(animal);
   document.getElementById("specialNeedsNotes").value = animal.specialNeedsNotes || "";
-  document.getElementById("specialNeedsReviewHint").textContent =
-    specialNeedsStatus(animal) === "unknown" && (ba.specialNeeds !== undefined || animal.legacySpecialNeedsRating !== undefined)
-      ? "This animal has a previous numeric special-needs rating. Review its care needs and record a status."
-      : "Confirm the animal's care needs before choosing Yes or No.";
-  setBehaviorObservationError();
-  renderBehaviorObservationEditor();
-
   if (!behavioralQuestionConfig?.questions?.length) {
     showToast("error", "Behavioral assessment questions are unavailable. Refresh the page and try again.");
     return;
@@ -1382,7 +1301,6 @@ function openBehavioralModal() {
   });
 
   if (restoreLocalFormDraft("behavioralForm", "behavioral", "behavioralDraftStatus")) {
-    restoreBehaviorObservationDraft();
     activeQuestions.forEach(({ traitKey: key }) => {
       const score = document.getElementById(`slider-${key}`)?.value;
       grid.querySelectorAll(`[data-trait-key="${key}"]`).forEach((button) => {
@@ -1393,6 +1311,7 @@ function openBehavioralModal() {
     });
   }
 
+  syncSpecialNeedsEditor();
   openModal("behavioralModalBackdrop");
 }
 
@@ -1426,15 +1345,15 @@ async function saveBehavioralAssessment() {
     if (selected) answerSelections[question.id] = selected.id;
   });
 
-  const observations = validateBehaviorObservations();
-  if (!observations) return;
+  // Preserve previously recorded observations when saving the simplified assessment.
+  const { observations } = parseBehavioralNotes(animal.behavioralNotes || "");
   const notes = serializeBehavioralNotes(
     observations,
     document.getElementById("behavioralNotes").value
   );
   const assessor = signedInUserName();
   const careStatus = document.getElementById("specialNeedsStatus").value;
-  const careNotes = document.getElementById("specialNeedsNotes").value.trim();
+  const careNotes = careStatus === "no" ? "" : document.getElementById("specialNeedsNotes").value.trim();
   if (careStatus === "yes" && !careNotes) {
     showToast("error", "Describe the animal's special needs and required care.");
     document.getElementById("specialNeedsNotes").focus();
@@ -2182,7 +2101,7 @@ async function init() {
     await loadMedicalInventoryItems();
     bindMedicalInventoryPicker();
     bindMedicalFormValidation();
-    bindBehaviorObservationEditor();
+    bindSpecialNeedsEditor();
 
     renderAllTabs();
 
