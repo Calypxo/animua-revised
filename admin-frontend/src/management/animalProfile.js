@@ -970,11 +970,10 @@ function renderCareSummary(titleId) {
 function renderBehavioralTab() {
   const el = document.getElementById("behavioralContent");
   const lbl = document.getElementById("behavioralBtnLabel");
-  const careSummary = renderCareSummary("behavioralCareTitle");
 
   if (!animal.behavioralAssessment) {
     lbl.textContent = "Add Assessment";
-    el.innerHTML = `${careSummary}
+    el.innerHTML = `
       <div class="behavioral-assessment-empty">
         <span class="care-section-icon"><i class="bi bi-clipboard2-check" aria-hidden="true"></i></span>
         <div><span class="assessment-empty-label">Behavior profile</span>
@@ -999,7 +998,7 @@ function renderBehavioralTab() {
       }))
     : TRAITS.map((item) => ({ ...item, value: Number(ba[item.key] || 0) }));
 
-  el.innerHTML = `${careSummary}
+  el.innerHTML = `
     <div class="behavioral-result-card">
       <div class="behavioral-meta">
         <div class="behavioral-meta-text">

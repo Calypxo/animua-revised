@@ -126,7 +126,7 @@ describe("Fixed compatibility wording and animal special-needs status", () => {
       cy.get("#medicalCareSummary").should("contain.text", "Requires special care").and("contain.text", careNotes);
       cy.get("#medicalRecordsList").should("contain.text", "Special needs recorded:").and("contain.text", careNotes);
       cy.get('[data-tab="behavioral"]').click();
-      cy.get("#behavioralContent").should("contain.text", "Requires special care");
+      cy.get("#behavioralContent .care-summary-card").should("not.exist");
       cy.get("#btnEditBehavioral").click();
       cy.get("#behavioralForm #specialNeedsStatus, #behavioralForm [name=specialNeedsChoice], #slider-specialNeeds, #addBehaviorObservation").should("not.exist");
       cy.intercept("POST", "**/api/animals/care-test/behavioral").as("saveAssessment");
@@ -137,7 +137,7 @@ describe("Fixed compatibility wording and animal special-needs status", () => {
         expect(Object.keys(request.body.traits)).to.have.length(16);
         expect(request.body.notes).to.equal("Observed behaviors:\n- Leash walking\n\nAssessment notes:\nKeep a calm routine.");
       });
-      cy.get("#behavioralContent").should("contain.text", "Requires special care").and("contain.text", careNotes);
+      cy.get("#behavioralContent .care-summary-card").should("not.exist");
       cy.get('[data-tab="medical"]').click();
       cy.get('[data-med-edit="visit"]').click();
       cy.get("#medicalModalTitle").should("have.text", "Edit Medical Record");
@@ -189,16 +189,17 @@ describe("Fixed compatibility wording and animal special-needs status", () => {
       });
     });
 
-    it(`shows an actionable empty assessment and care status at ${width}px`, () => {
+    it(`shows the empty assessment without medical care details at ${width}px`, () => {
       animal.behavioralAssessment = null;
       cy.viewport(width, 720);
       cy.visit("/pages/animalProfile.html?id=care-test");
       cy.get('[data-tab="behavioral"]').click();
-      cy.get("#behavioralContent .care-status-badge").should("have.text", "Not yet assessed");
+      cy.get("#behavioralContent .care-summary-card").should("not.exist");
+      cy.get("#medicalCareSummary .care-status-badge").should("have.text", "Not yet assessed");
       cy.get(".behavioral-assessment-empty").should("contain.text", "Select Add Assessment");
       cy.get("#behavioralContent").should("not.contain.text", "numeric");
       cy.get(".behavioral-assessment-empty").scrollIntoView().screenshot(`animal-assessment-empty-${width}`);
-      cy.get("#behavioralContent .care-summary-card, .behavioral-assessment-empty").each($card => {
+      cy.get(".behavioral-assessment-empty").each($card => {
         const rect = $card[0].getBoundingClientRect();
         expect(rect.left).to.be.at.least(0);
         expect(rect.right).to.be.at.most(width);
