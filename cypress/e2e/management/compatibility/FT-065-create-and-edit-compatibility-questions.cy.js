@@ -32,7 +32,7 @@ describe("Fixed compatibility wording and animal special-needs status", () => {
       cy.visit("/pages/compatibilityQuiz.html");
       cy.get('[data-cq-tab="questions"]').click();
       cy.get("#addQuestionBtn").should("not.exist");
-      cy.get('#questionList [data-action="toggle"], #questionList [data-action="move-up"], #questionList [data-action="move-down"]').should("be.disabled");
+      cy.get('#questionList button:not([data-action="edit"])').should("not.exist");
       cy.get('#questionList [data-action="edit"]').first().click();
       cy.get("#questionEditorDialog .cq-question-modal").should($modal => {
         const rect = $modal[0].getBoundingClientRect();
@@ -40,10 +40,11 @@ describe("Fixed compatibility wording and animal special-needs status", () => {
         expect(rect.right, "modal stays inside right edge").to.be.at.most(width + 0.5);
         if (width > 800) expect(rect.width, "original desktop panel width").to.be.closeTo(860, 1);
       });
-      cy.get("#editorQuestionTrait, #editorQuestionPhase").should("be.disabled");
-      cy.get("#editorAddChoice").should("not.exist");
-      cy.get("[data-editor-remove]").should("be.disabled");
-      cy.get("#editorChoiceList select[disabled]").should("have.length", 5);
+      cy.get("#editorQuestionTrait").should("have.text", "Energy level");
+      cy.get("#editorQuestionPhase").should("have.text", "Lifestyle");
+      cy.get("#editorAddChoice, [data-editor-remove], #questionEditorDialog select").should("not.exist");
+      cy.get("#editorChoiceList .cq-fixed-score").should("have.length", 5);
+      cy.get("#editorChoiceList [data-editor-choice=text]").should("have.length", 5);
       cy.get("#editorQuestionText").clear().type("What energy level fits your household?");
       cy.get('[data-editor-choice="text"]').first().clear().type("A very calm pet");
       cy.get("#questionEditorDialog .um-modal-body").scrollTo("top");

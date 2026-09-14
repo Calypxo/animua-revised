@@ -5,7 +5,17 @@ import { protectPageByModule } from "../auth/authGuard.js"; import { loadSidebar
 const HEADER={variant:"workspace",headingId:"compatibilityTitle",eyebrow:"Adoption Management",title:"Compatibility Quiz",description:"Manage quiz availability, review saved recommendations, and coordinate fair retake access from one protected workspace.",watermarkIcon:"bi-stars",highlights:[{icon:"bi-shield-check",label:"Server-enforced access"},{icon:"bi-clock-history",label:"Retake oversight"},{icon:"bi-database-check",label:"Saved result history"}],queue:{liveLabel:"Matching service active",label:"Result directory",title:"Saved compatibility attempts",valueId:"heroResultCount",unit:"results"},actions:[{id:"reviewResultsBtn",icon:"bi-arrow-down",label:"Review user results"}],summaryLabel:"Compatibility summary",metrics:[{id:"statResults",icon:"bi-ui-checks-grid",label:"Total Attempts"},{id:"statUsers",icon:"bi-people-fill",label:"Matched Users",tone:"amber"},{id:"statLatest",icon:"bi-bookmark-check-fill",label:"Current Results",tone:"blue"},{id:"statAverage",icon:"bi-stars",label:"Average Top Match",tone:"green"},{id:"statCooldown",icon:"bi-calendar2-week-fill",label:"Cooldown Days",tone:"rose"}]};
 const state={results:[],questions:[],savedQuestions:[],editorIndex:null,editorQuestion:null};const $=id=>document.getElementById(id);const esc=v=>String(v ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");const date=v=>v?new Date(v).toLocaleDateString("en-PH",{month:"short",day:"numeric",year:"numeric"}):"Not scheduled";const admin=()=>String(getUserRole()).toLowerCase()==="admin";const initials=n=>String(n||"AU").split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase();
 const clone=value=>JSON.parse(JSON.stringify(value));
-const TRAITS=["energyLevel","exerciseNeeds","independenceLevel","attentionNeeds","playfulness","adaptability","friendlinessToHumans","goodWithKids","goodWithOtherPets","strangerTolerance","noiseLevel","spaceNeeds","climateTolerance","groomingNeeds","trainingDifficulty","healthRiskLevel","affectionLevel","separationAnxiety"];
+const QUESTION_TOPICS = {
+  energyLevel: "Energy level", exerciseNeeds: "Exercise needs",
+  independenceLevel: "Independence", attentionNeeds: "Daily attention",
+  playfulness: "Playfulness", adaptability: "Adaptability",
+  friendlinessToHumans: "Friendliness toward people", goodWithKids: "Comfort around children",
+  goodWithOtherPets: "Comfort around other pets", strangerTolerance: "Comfort around visitors",
+  noiseLevel: "Noise level", spaceNeeds: "Living space",
+  climateTolerance: "Warm-climate care", groomingNeeds: "Grooming commitment",
+  trainingDifficulty: "Training difficulty", healthRiskLevel: "Veterinary care budget",
+  affectionLevel: "Affection", separationAnxiety: "Separation anxiety",
+};
 const PHASE_LABELS={lifestyle:"Lifestyle",social:"Social Environment",care:"Home & Care",affection:"Affection"};
 function toast(message){$("cqToast").querySelector("span").textContent=message;$("cqToast").classList.add("show");setTimeout(()=>$("cqToast").classList.remove("show"),2600)}
 function summary(settings){const scores=state.results.map(r=>Number(r.matches?.[0]?.compatibilityPercent)).filter(Number.isFinite);const values={heroResultCount:state.results.length,statResults:state.results.length,statUsers:new Set(state.results.map(r=>r.userId)).size,statLatest:state.results.filter(r=>r.isLatest).length,statAverage:scores.length?`${(scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(1)}%`:"0%",statCooldown:settings.retakeCooldownDays};Object.entries(values).forEach(([id,v])=>{if($(id))$(id).textContent=v})}
@@ -84,7 +94,7 @@ function renderQuestionOverview() {
 
     return `<section class="cq-question-group"><header><div><span>${esc(phaseLabel)}</span><strong>${entries.length} question${entries.length === 1 ? "" : "s"}</strong></div></header><div>${entries.map(({ question, index }, groupIndex) => {
       const questionLabel = esc(question.label || "Untitled question");
-      return `<article class="cq-question-row ${question.active ? "" : "is-inactive"}" data-index="${index}"><span class="cq-question-number">${groupIndex + 1}</span><div class="cq-question-copy"><div><strong>${questionLabel}</strong><span class="cq-question-status">${question.active ? "Active" : "Inactive"}</span></div><p>${esc(question.text || "Question text has not been added yet.")}</p><small>${question.choices?.length || 0} answers <i></i> ${esc(question.traitKey)}</small></div>${canManage ? `<div class="cq-row-actions"><button type="button" data-action="move-up" title="Question order is fixed" aria-label="Move ${questionLabel} up" disabled><i class="bi bi-arrow-up" aria-hidden="true"></i></button><button type="button" data-action="move-down" title="Question order is fixed" aria-label="Move ${questionLabel} down" disabled><i class="bi bi-arrow-down" aria-hidden="true"></i></button><button type="button" data-action="toggle" class="cq-status-action" disabled title="Question status is fixed" aria-label="${question.active ? "Pause" : "Enable"} ${questionLabel}"><i class="bi ${question.active ? "bi-pause-circle" : "bi-play-circle"}" aria-hidden="true"></i><span>${question.active ? "Pause" : "Enable"}</span></button><button type="button" data-action="edit" class="cq-edit-action" aria-label="Edit ${questionLabel}"><i class="bi bi-pencil" aria-hidden="true"></i><span>Edit</span></button></div>` : ""}</article>`;
+      return `<article class="cq-question-row ${question.active ? "" : "is-inactive"}" data-index="${index}"><span class="cq-question-number">${groupIndex + 1}</span><div class="cq-question-copy"><div><strong>${questionLabel}</strong><span class="cq-question-status">${question.active ? "Active" : "Inactive"}</span></div><p>${esc(question.text || "Question text has not been added yet.")}</p><small>${question.choices?.length || 0} answers <i></i> ${esc(QUESTION_TOPICS[question.traitKey] || question.traitKey)}</small></div>${canManage ? `<div class="cq-row-actions"><button type="button" data-action="edit" class="cq-edit-action" aria-label="Edit ${questionLabel}"><i class="bi bi-pencil" aria-hidden="true"></i><span>Edit</span></button></div>` : ""}</article>`;
     }).join("")}</div></section>`;
   }).join("");
 
@@ -93,7 +103,11 @@ function renderQuestionOverview() {
 }
 function renderEditorChoices() {
   const choices = state.editorQuestion?.choices || [];
-  $("editorChoiceList").innerHTML = choices.map((choice, index) => `<div class="cq-editor-choice" data-choice-index="${index}"><span>${index + 1}</span><label><small>Answer text</small><input data-editor-choice="text" maxlength="160" value="${esc(choice.text)}"></label><label><small>Score</small><select data-editor-choice="value" disabled aria-label="Fixed answer score">${[1, 2, 3, 4, 5].map(value => `<option value="${value}" ${Number(choice.value) === value ? "selected" : ""}>${value}</option>`).join("")}</select></label><button type="button" data-editor-remove title="Answer choices are fixed" aria-label="Answer choices are fixed" disabled><i class="bi bi-trash3"></i></button></div>`).join("");
+  $("editorChoiceList").innerHTML = choices.map((choice, index) => `
+    <div class="cq-editor-choice cq-wording-choice" data-choice-index="${index}">
+      <label><small>Answer ${index + 1}</small><input data-editor-choice="text" maxlength="160" value="${esc(choice.text)}" required></label>
+      <div class="cq-fixed-score" aria-label="Fixed score: ${choice.value} out of 5"><small>Fixed score</small><strong>${choice.value}<span> / 5</span></strong></div>
+    </div>`).join("");
 }
 function openQuestionEditor(index) {
   if (!admin() || !Number.isInteger(index) || !state.questions[index]) return;
@@ -102,9 +116,9 @@ function openQuestionEditor(index) {
   $("questionEditorTitle").textContent = "Edit question";
   $("editorQuestionText").value = state.editorQuestion.text || "";
   $("editorQuestionLabel").value = state.editorQuestion.label || "";
-  $("editorQuestionPhase").value = state.editorQuestion.phaseKey;
+  $("editorQuestionPhase").textContent = PHASE_LABELS[state.editorQuestion.phaseKey] || state.editorQuestion.phaseKey;
   $("editorQuestionHint").value = state.editorQuestion.hint || "";
-  $("editorQuestionTrait").innerHTML = TRAITS.map(trait => `<option value="${trait}" ${state.editorQuestion.traitKey === trait ? "selected" : ""}>${trait}</option>`).join("");
+  $("editorQuestionTrait").textContent = QUESTION_TOPICS[state.editorQuestion.traitKey] || state.editorQuestion.traitKey;
   renderEditorChoices();
   setEditorError();
   const dialog = $("questionEditorDialog");
@@ -121,7 +135,7 @@ function applyFocusedQuestionEdit() {
   question.label = $("editorQuestionLabel").value.trim();
   question.hint = $("editorQuestionHint").value.trim();
   if (!question.text) return setEditorError("Question text cannot be empty.");
-  if (!question.label) return setEditorError("Add a short label for this question.");
+  if (!question.label) return setEditorError("Enter a short title for this question.");
   if (question.choices.some(choice => !String(choice.text || "").trim())) return setEditorError("Every answer choice needs text.");
   state.questions[state.editorIndex] = question;
   closeQuestionEditor();
