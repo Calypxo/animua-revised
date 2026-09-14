@@ -14,15 +14,25 @@ function mockFunction(implementation = () => undefined) {
 
 global.vi = { fn: mockFunction };
 
-function loadController({ existingAdoptions = [], alwaysEmptyDuplicateQuery = false } = {}) {
+function loadController({ existingAdoptions = [], alwaysEmptyDuplicateQuery = false, animalAdoptedDuringSubmission = false } = {}) {
   const created = new Map();
   const createCalls = [];
+  let animalReads = 0;
 
   const db = {
+    runTransaction: async (callback) => {
+      const writes = [];
+      const result = await callback({
+        get: (reference) => reference.get(),
+        create: (reference, data) => writes.push(() => reference.create(data)),
+      });
+      for (const write of writes) await write();
+      return result;
+    },
     collection: mockFunction((name) => ({
       doc: (id) => {
         if (name === "animals") {
-          return { get: mockFunction(async () => snapshot({ status: "Ready", name: "Buddy" }, id)) };
+          return { get: mockFunction(async () => snapshot({ status: animalAdoptedDuringSubmission && ++animalReads > 1 ? "Adopted" : "Ready", name: "Buddy" }, id)) };
         }
         return {
           id,
@@ -113,4 +123,13 @@ test("simultaneous applications for one user and pet create only one record", as
   assert.deepEqual([first.statusCode, second.statusCode].sort(), [201, 409]);
   assert.equal(created.size, 1);
   assert.equal(new Set(createCalls.map(([id]) => id)).size, 1);
+});
+
+test("a form submitted while the animal is finalized cannot create a late pending application", async () => {
+  const { controller, created } = loadController({ animalAdoptedDuringSubmission: true });
+  const response = responseRecorder();
+  await controller.createAdoption(adoptionRequest(), response);
+  assert.equal(response.statusCode, 409);
+  assert.match(response.body.message, /no longer available/i);
+  assert.equal(created.size, 0);
 });

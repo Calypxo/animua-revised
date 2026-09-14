@@ -40,7 +40,7 @@ const fallbackAnalysis = {
 };
 const BACKGROUND_DELAY_MS = 150;
 const analyzeSurrenderReason = mockFunction(() => new Promise((resolve) => {
-  setTimeout(() => resolve(fallbackAnalysis), BACKGROUND_DELAY_MS);
+  setTimeout(() => resolve({ ...fallbackAnalysis, source: "Tagalog RoBERTa Transformer", confidence: 0.94 }), BACKGROUND_DELAY_MS);
 }));
 const createManagementNotification = mockFunction(() => new Promise((resolve) => {
   setTimeout(() => resolve(1), BACKGROUND_DELAY_MS);
@@ -100,8 +100,14 @@ test("surrender submission responds without waiting for remote analysis or notif
   assert.equal(result, res);
   assert.equal(res.statusCode, 201);
   assert.equal(res.body.request.id, "SR-2026-FAST01");
-  assert.deepEqual(res.body.request.nlp, fallbackAnalysis);
+  assert.deepEqual(res.body.request.nlp, { ...fallbackAnalysis, source: "Local rules (RoBERTa analysis pending)" });
+  assert.equal(res.body.request.nlpStatus, "pending");
+  assert.ok(res.body.request.nlpRequestedAt);
   assert.equal(requestWrite.mock.calls.length, 1);
   assert.equal(analyzeSurrenderReason.mock.calls.length, 1);
   assert.equal(createManagementNotification.mock.calls.length, 1);
+  await new Promise(resolve => setTimeout(resolve, BACKGROUND_DELAY_MS + 30));
+  assert.equal(requestUpdate.mock.calls.at(-1)[0].nlpStatus, "completed");
+  assert.equal(requestUpdate.mock.calls.at(-1)[0].nlp.source, "Tagalog RoBERTa Transformer");
+  assert.ok(requestUpdate.mock.calls.at(-1)[0].nlpAnalyzedAt);
 });

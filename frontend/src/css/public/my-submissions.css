@@ -680,7 +680,8 @@
   color: #98372e;
 }
 
-.submission-status.withdrawn {
+.submission-status.withdrawn,
+.submission-status.closed {
   background: #eee4df;
   color: var(--burgundy);
 }

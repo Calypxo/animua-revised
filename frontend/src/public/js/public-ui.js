@@ -3489,7 +3489,7 @@ function showForgotPasswordOtpStep() {
       const popup = Swal.getPopup();
       if (popup) popup.dataset.forgotPasswordOtpStep = "true";
 
-      removePasswordOtpSwalActions();
+      setPasswordOtpSwalActionsHidden(true);
       stylePasswordOtpActionButtons();
       setupPasswordOtpInput();
       startPasswordOtpCooldown();
@@ -3558,17 +3558,11 @@ async function handleForgotPasswordOtpResend() {
 }
 
 function showForgotPasswordNewPasswordStep() {
-  const popup = Swal.getPopup();
   const safeMaskedEmail = escapeHtmlText(maskProfileEmail(pendingForgotPassword?.email || ""));
 
-  setPasswordOtpSwalActionsHidden(false);
-
-  if (popup) {
-    popup.dataset.forgotPasswordNewPasswordStep = "true";
-    popup.classList.remove("change-password-popup--otp", "change-password-popup--loading");
-  }
-
-  Swal.update({
+  // Start a complete dialog so the OTP step's hidden footer and classes cannot
+  // carry over into the password form.
+  Swal.fire({
     html: `
       <div class="change-password-modal">
         <div class="change-password-head">
@@ -3619,10 +3613,27 @@ function showForgotPasswordNewPasswordStep() {
     showConfirmButton: true,
     confirmButtonText: "Reset Password",
     cancelButtonText: "Cancel",
+    reverseButtons: true,
+    showLoaderOnConfirm: true,
+    allowOutsideClick: () => !Swal.isLoading(),
+    allowEscapeKey: () => !Swal.isLoading(),
+    customClass: {
+      popup: "animua-popup change-password-popup forgot-password-popup",
+      htmlContainer: "change-password-html",
+      actions: "change-password-actions",
+      confirmButton: "change-password-confirm",
+      cancelButton: "change-password-cancel"
+    },
+    buttonsStyling: false,
+    didOpen: () => {
+      const popup = Swal.getPopup();
+      if (popup) popup.dataset.forgotPasswordNewPasswordStep = "true";
+      bindForgotPasswordNewPasswordControls();
+      document.getElementById("forgotNewPassword")?.focus();
+    },
+    willClose: stopPasswordOtpCooldown,
     preConfirm: handleForgotPasswordResetConfirm
   });
-
-  bindForgotPasswordNewPasswordControls();
 }
 
 function bindForgotPasswordNewPasswordControls() {
@@ -3796,7 +3807,11 @@ function setupPasswordOtpInput() {
 }
 
 function setPasswordOtpSwalActionsHidden(hidden) {
+  const popup = Swal.getPopup();
   const applyDisplay = () => {
+    // Deferred OTP styling must not hide the next dialog's action buttons.
+    if (!popup || popup !== Swal.getPopup()) return;
+    if (Boolean(popup.querySelector(".password-otp-modal")) !== hidden) return;
     const actions = Swal.getActions();
     const confirmButton = Swal.getConfirmButton();
     const cancelButton = Swal.getCancelButton();
@@ -3814,17 +3829,6 @@ function setPasswordOtpSwalActionsHidden(hidden) {
   applyDisplay();
   window.requestAnimationFrame(applyDisplay);
   window.setTimeout(applyDisplay, 50);
-}
-
-function removePasswordOtpSwalActions() {
-  const removeActions = () => {
-    const popup = Swal.getPopup();
-    popup?.querySelectorAll(".swal2-actions").forEach((actions) => actions.remove());
-  };
-
-  removeActions();
-  window.requestAnimationFrame(removeActions);
-  window.setTimeout(removeActions, 50);
 }
 
 function stylePasswordOtpActionButtons() {

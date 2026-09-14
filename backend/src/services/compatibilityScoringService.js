@@ -1,3 +1,6 @@
+const { getSpecialNeedsStatus } = require("./specialNeedsService");
+const SCORING_VERSION = "behavior-care-status-v2";
+
 const RAW_QUESTION_KEYS = [
   "energyLevel",
   "exerciseNeeds",
@@ -38,10 +41,11 @@ const SCORING_DIMENSIONS = [
   { key: "trainingDifficulty", sources: ["trainingDifficulty"] },
   { key: "affectionLevel", sources: ["affectionLevel"] },
   { key: "separationAnxiety", sources: ["separationAnxiety"] },
-  { key: "specialNeeds", sources: ["healthRiskLevel"] },
 ];
 
 const INFORMATIONAL_QUESTIONS = {
+  healthRiskLevel:
+    "Veterinary budget is saved for adoption review. Special-needs eligibility uses the animal's recorded care status, not a numeric behavior score.",
   climateTolerance:
     "The animal assessment does not record heat or climate suitability, so using this answer for ranking would fabricate animal data.",
 };
@@ -124,9 +128,10 @@ function scoreMatchesLocally(preferences, animals, topK = 5) {
         ageEstimate: animal.ageEstimate,
         age: animal.age || animal.ageEstimate,
         allergyFriendly: animal.allergyFriendly,
-        specialNeeds: assessment.specialNeeds ?? animal.specialNeeds,
         aggressive: assessment.aggressive ?? animal.aggressive,
         ...assessment,
+        specialNeedsStatus: getSpecialNeedsStatus(animal),
+        specialNeedsNotes: animal.specialNeedsNotes || "",
         ...score,
       };
     })
@@ -151,13 +156,16 @@ async function scoreMatches(
     const response = await fetchImpl(matcherUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ preferences, animals, top_k: topK }),
+      body: JSON.stringify({ preferences, animals: animals.map(animal => ({ ...animal, specialNeedsStatus: getSpecialNeedsStatus(animal) })), top_k: topK }),
     });
     if (!response.ok) throw new Error(`Matcher returned ${response.status}`);
     const rawResult = await response.json();
     const result = typeof rawResult === "string" ? JSON.parse(rawResult) : rawResult;
     if (!result || !Array.isArray(result.matches)) {
       throw new Error("Matcher returned an invalid response payload");
+    }
+    if (result.scoringVersion !== SCORING_VERSION) {
+      throw new Error("Matcher scoring version is outdated");
     }
     logger.info("[matchPets] Python matcher used successfully.");
     return result;
@@ -190,14 +198,13 @@ function applyFilters(animals, filters) {
     }
     return !(
       filters.acceptSpecialNeeds === "no" &&
-      Number(
-        animal.behavioralAssessment?.specialNeeds ?? animal.specialNeeds ?? 0
-      ) >= 4
+      getSpecialNeedsStatus(animal) !== "no"
     );
   });
 }
 
 module.exports = {
+  SCORING_VERSION,
   RAW_QUESTION_KEYS,
   SCORING_DIMENSIONS,
   INFORMATIONAL_QUESTIONS,

@@ -27,6 +27,7 @@ function animal(id, value = 3, extra = {}) {
     species: "Dog",
     sex: "Male",
     behavioralAssessment: assessment(value),
+    specialNeedsStatus: "no",
     ...extra,
   };
 }
@@ -83,7 +84,7 @@ test("daily attention and grooming commitment are averaged deterministically", (
 
   const profile = buildUserProfile(input);
   assert.equal(profile.attentionNeeds, 3);
-  assert.equal(profile.specialNeeds, 4);
+  assert.equal(profile.specialNeeds, undefined);
   assert.equal(profile.climateTolerance, undefined);
 });
 
@@ -177,7 +178,7 @@ test("an allergy-friendly requirement accepts only explicitly verified animals",
   assert.deepEqual(eligible.map(({ id }) => id), ["verified", "legacy-verified"]);
 });
 
-test("severe aggression is always excluded and the special-needs threshold remains explicit", () => {
+test("severe aggression is always excluded and special needs use the recorded status", () => {
   const filters = {
     preferredSpecies: "Any",
     preferredSex: "Any",
@@ -193,6 +194,7 @@ test("severe aggression is always excluded and the special-needs threshold remai
       behavioralAssessment: { ...assessment(3), aggressive: 5, specialNeeds: 3 },
     }),
     animal("significant-special-needs", 3, {
+      specialNeedsStatus: "yes",
       behavioralAssessment: { ...assessment(3), aggressive: 4, specialNeeds: 4 },
     }),
   ], filters);

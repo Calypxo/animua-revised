@@ -104,12 +104,17 @@ function handler(type, action) {
         message = "Request restored with a new 14-day attendance deadline.";
       }
 
-      await ref.update(update);
+      // Do not overwrite an application closed by a concurrent finalization.
+      await ref.update(update, ...(snapshot.updateTime ? [{ lastUpdateTime: snapshot.updateTime }] : []));
       const updated = await ref.get();
       return res.json({ message, request: { id: updated.id, ...updated.data() } });
     } catch (error) {
       console.error(`[${type} deadline ${action}]`, error);
-      return res.status(500).json({ message: "Failed to update the attendance deadline workflow." });
+      return res.status(error.code === 9 ? 409 : 500).json({
+        message: error.code === 9
+          ? "This request changed. Refresh before updating its attendance workflow."
+          : "Failed to update the attendance deadline workflow.",
+      });
     }
   };
 }

@@ -2,6 +2,7 @@ const { admin, db } = require("../config/firebase");
 const nodemailer = require("nodemailer");
 const path = require("path");
 const sharp = require("sharp");
+const { getSpecialNeedsStatus } = require("../services/specialNeedsService");
 const {
   buildShelterLabel,
 } = require("../utils/animalIdentity");
@@ -303,6 +304,8 @@ const serializePublicPet = async (doc) => {
     vaccinated: data.vaccinated || "Unknown",
     alteredStatus: data.alteredStatus || "Unknown",
     visibleDefects: data.visibleDefects || "",
+    specialNeedsStatus: getSpecialNeedsStatus(data),
+    specialNeedsNotes: data.specialNeedsNotes || "",
     behavioralAssessment: data.behavioralAssessment || null,
     status: data.status || "Ready",
   };

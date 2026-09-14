@@ -1,5 +1,7 @@
 const { db } = require("../config/firebase");
 const sharp = require("sharp");
+const { prepareSurrenderImage } = require("../services/surrenderImageService");
+const { getSurrenderAnalysisState } = require("../services/surrenderAnalysisState");
 const {
   analyzeSurrenderReason,
   buildFallbackAnalysis,
@@ -229,8 +231,8 @@ async function createSurrenderRequest(req, res) {
     const agreement = body.agreement || {};
     const surrenderReason = body.surrenderReason?.trim();
     const identityDocuments = owner.identityDocuments || {};
-    const identityIdFront = normalizeImageDocument(identityDocuments.front);
-    const identityIdBack = normalizeImageDocument(identityDocuments.back);
+    let identityIdFront = normalizeImageDocument(identityDocuments.front);
+    let identityIdBack = normalizeImageDocument(identityDocuments.back);
 
     if (!surrenderReason) {
       return res.status(400).json({
@@ -277,7 +279,7 @@ async function createSurrenderRequest(req, res) {
       });
     }
 
-    const photoDataUrl = typeof pet.photoDataUrl === "string" ? pet.photoDataUrl.trim() : "";
+    let photoDataUrl = typeof pet.photoDataUrl === "string" ? pet.photoDataUrl.trim() : "";
     if (
       photoDataUrl &&
       (
@@ -290,10 +292,24 @@ async function createSurrenderRequest(req, res) {
       });
     }
 
+    // Older deployed clients can send three individually valid photos whose
+    // combined base64 strings exceed Firestore's 1 MiB document limit.
+    identityIdFront = await prepareSurrenderImage(identityIdFront, "front ID photo");
+    identityIdBack = await prepareSurrenderImage(identityIdBack, "back ID photo");
+    const preparedAnimalPhoto = await prepareSurrenderImage({
+      name: pet.photoName,
+      type: pet.photoType,
+      dataUrl: photoDataUrl,
+    }, "animal photo");
+    photoDataUrl = preparedAnimalPhoto.dataUrl;
+
     // Keep the public submission path fast and reliable. The local analysis is
     // deterministic and available immediately; the remote model enriches the
     // saved request after the user has received a successful response.
-    const nlpResult = buildFallbackAnalysis(surrenderReason);
+    const nlpResult = {
+      ...buildFallbackAnalysis(surrenderReason),
+      source: "Local rules (RoBERTa analysis pending)",
+    };
 
     const requestId = body.id || generateRequestId();
 
@@ -329,8 +345,8 @@ async function createSurrenderRequest(req, res) {
         colorMarkings: pet.colorMarkings || "",
         status: Array.isArray(pet.status) ? pet.status : [],
         vaccinationHistory: pet.vaccinationHistory || "",
-        photoName: photoDataUrl ? String(pet.photoName || "").trim().slice(0, 160) : "",
-        photoType: photoDataUrl ? String(pet.photoType || "").trim().slice(0, 80) : "",
+        photoName: photoDataUrl ? String(preparedAnimalPhoto.name || "").trim().slice(0, 160) : "",
+        photoType: photoDataUrl ? String(preparedAnimalPhoto.type || "").trim().slice(0, 80) : "",
         photoDataUrl,
       },
 
@@ -345,6 +361,8 @@ async function createSurrenderRequest(req, res) {
       },
 
       nlp: nlpResult,
+      nlpStatus: "pending",
+      nlpRequestedAt: new Date().toISOString(),
 
       status: "Pending",
       source: "Public Form",
@@ -360,6 +378,14 @@ async function createSurrenderRequest(req, res) {
       intakeId: null,
       dropoffDate: null,
     };
+
+    // Leave room for Firestore field overhead and subsequent review metadata.
+    if (Buffer.byteLength(JSON.stringify(surrenderRequest), "utf8") > 950_000) {
+      return res.status(400).json({
+        code: "SURRENDER_REQUEST_TOO_LARGE",
+        message: "This request is too large to save. Shorten the written details or choose smaller photos, then try again.",
+      });
+    }
 
     await db
       .collection(COLLECTION_NAME)
@@ -378,9 +404,13 @@ async function createSurrenderRequest(req, res) {
 
     analyzeSurrenderReason(surrenderReason)
       .then(async (enrichedAnalysis) => {
-        if (!enrichedAnalysis || enrichedAnalysis.source === nlpResult.source) return;
+        if (!enrichedAnalysis || /node fallback/i.test(enrichedAnalysis.source || "")) {
+          await db.collection(COLLECTION_NAME).doc(requestId).update({ nlpStatus: "fallback" });
+          return;
+        }
         await db.collection(COLLECTION_NAME).doc(requestId).update({
           nlp: enrichedAnalysis,
+          nlpStatus: "completed",
           nlpAnalyzedAt: new Date().toISOString(),
         });
       })
@@ -392,6 +422,10 @@ async function createSurrenderRequest(req, res) {
     });
   } catch (error) {
     console.error("Create surrender request error:", error);
+
+    if (error.code === "SURRENDER_IMAGE_PROCESSING_FAILED") {
+      return res.status(400).json({ code: error.code, message: error.message });
+    }
 
     return res.status(500).json({
       message: "Failed to submit surrender request.",
@@ -409,7 +443,10 @@ async function getAllSurrenderRequests(req, res) {
       .orderBy("createdAt", "desc")
       .get();
 
-    const requests = snapshot.docs.map((doc) => doc.data());
+    const requests = snapshot.docs.map((doc) => {
+      const record = doc.data();
+      return { ...record, id: doc.id, nlpStatus: getSurrenderAnalysisState(record) };
+    });
 
     return res.json({
       requests,
@@ -421,6 +458,27 @@ async function getAllSurrenderRequests(req, res) {
       message: "Failed to load surrender requests.",
       error: error.message,
     });
+  }
+}
+
+async function getSurrenderAnalysisStatuses(req, res) {
+  const ids = [...new Set(String(req.query?.ids || "").split(","))];
+  if (!ids.length || ids.length > 30 || ids.some(id => !/^[a-zA-Z0-9_-]{1,100}$/.test(id))) {
+    return res.status(400).json({ message: "Provide between 1 and 30 valid request IDs." });
+  }
+  try {
+    const snapshots = await db.getAll(
+      ...ids.map(id => db.collection(COLLECTION_NAME).doc(id)),
+      { fieldMask: ["nlp", "nlpStatus", "nlpRequestedAt", "nlpAnalyzedAt", "createdAt"] },
+    );
+    res.set("Cache-Control", "no-store");
+    return res.json({ requests: snapshots.filter(doc => doc.exists).map(doc => {
+      const record = doc.data();
+      return { id: doc.id, nlp: record.nlp || {}, nlpStatus: getSurrenderAnalysisState(record), nlpAnalyzedAt: record.nlpAnalyzedAt || null };
+    }) });
+  } catch (error) {
+    console.error("Get surrender analysis status error:", error.message);
+    return res.status(500).json({ message: "Unable to refresh surrender analysis." });
   }
 }
 
@@ -459,12 +517,14 @@ async function reanalyzeSurrenderRequest(req, res) {
     const nlpAnalyzedAt = new Date().toISOString();
     await requestRef.update({
       nlp: analysis,
+      nlpStatus: "completed",
       nlpAnalyzedAt,
     });
 
     return res.json({
       message: "Tagalog RoBERTa analysis completed.",
       nlp: analysis,
+      nlpStatus: "completed",
       nlpAnalyzedAt,
     });
   } catch (error) {
@@ -847,6 +907,7 @@ module.exports = {
   updateSurrenderAvailability,
   createSurrenderRequest,
   getAllSurrenderRequests,
+  getSurrenderAnalysisStatuses,
   reanalyzeSurrenderRequest,
   getMySurrenderRequests,
   scheduleMySurrenderAppointment,

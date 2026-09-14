@@ -266,6 +266,49 @@ class SurrenderIntegrationTests(unittest.TestCase):
                 self.assertEqual(final_category, expected)
                 self.assertTrue(adjustment_reason)
 
+    def test_caregiver_limitation_corrects_weak_behavioral_predictions(self):
+        reasons = [
+            "Matanda na po kasi yung nag-aalaga sakanya kaya na n-neglect na po yung pusa",
+            "Matanda na po ang nag aalaga sa kanya kaya hindi na maasikaso ang pusa.",
+            "Yung nag-aalaga sa kanya ay matanda na at hirap sa pag-aalaga.",
+            "Mahina na ang lola ko kaya hindi niya maalagaan ang aso.",
+            "The caregiver is elderly and can no longer provide daily care for the cat.",
+            "The owner is bedridden and cannot care for the pet.",
+        ]
+        for reason in reasons:
+            with self.subTest(reason=reason):
+                category, adjustment = app.resolve_category(reason, "Behavioral", 0.30)
+                self.assertEqual(category, "Owner Incapacity")
+                self.assertEqual(adjustment, "Explicit owner or caregiver incapacity")
+
+    def test_caregiver_rules_do_not_confuse_pet_age_or_override_danger(self):
+        for reason, predicted, expected in [
+            ("Matanda na po yung pusa na inaalagaan ng lola ko.", "Medical", "Medical"),
+            ("The elderly cat is cared for by its owner.", "Medical", "Medical"),
+            ("Hindi naman matanda ang nag-aalaga sa pusa.", "Other", "Other"),
+            ("The owner is not elderly and the dog keeps biting people.", "Behavioral", "Behavioral"),
+            ("Matanda na ang may-ari pero nangangagat ang aso.", "Other", "Behavioral"),
+            ("Matanda na ang nag-aalaga pero dumudugo ang pusa.", "Behavioral", "Medical"),
+        ]:
+            with self.subTest(reason=reason):
+                category, _ = app.resolve_category(reason, predicted, 0.30)
+                self.assertEqual(category, expected)
+        category, _ = app.resolve_category("The caregiver is elderly but relocation is the reason for surrender.", "Relocation", 0.95)
+        self.assertEqual(category, "Relocation")
+
+    def test_caregiver_correction_preserves_raw_prediction_and_confidence(self):
+        reason = "Matanda na po kasi yung nag-aalaga sakanya kaya na n-neglect na po yung pusa"
+        with patch.object(app, "predict_sentiment_and_category", return_value={
+            "sentiment": ("Negative", 0.70), "category": ("Behavioral", 0.30),
+            "source": "Tagalog RoBERTa Transformer",
+        }):
+            result = app.analyze_reason(reason)
+        self.assertEqual(result["category"], "Owner Incapacity")
+        self.assertEqual(result["modelCategory"], "Behavioral")
+        self.assertEqual(result["categoryConfidence"], 0.30)
+        self.assertTrue(result["categoryAdjusted"])
+        self.assertEqual(result["urgencyLabel"], "Medium")
+
     def test_rules_do_not_harm_any_trusted_training_category(self):
         dataset_path = (
             Path(__file__).resolve().parent

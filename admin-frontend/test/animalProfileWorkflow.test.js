@@ -6,10 +6,14 @@ import {
   buildQuarantineDecisionPayload,
 } from "../src/management/animalProfileWorkflow.js";
 
-test("Add Medical is visible to an authorized admin while an animal is in quarantine", () => {
+test("medical care stays available after clearance for authorized users", () => {
   assert.equal(shouldShowAddMedical("Quarantine", true), true);
+  assert.equal(shouldShowAddMedical("Ready", true), true);
   assert.equal(shouldShowAddMedical("Profiling", true), false);
+  assert.equal(shouldShowAddMedical("Adopted", true), false);
+  assert.equal(shouldShowAddMedical("Archived", true), false);
   assert.equal(shouldShowAddMedical("Quarantine", false), false);
+  assert.equal(shouldShowAddMedical("Ready", false), false);
 });
 
 test("inline clearance creates a valid medical-contract payload without opening the medical form", () => {

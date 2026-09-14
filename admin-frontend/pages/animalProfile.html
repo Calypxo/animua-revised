@@ -121,11 +121,12 @@
         <!-- ── TAB: Medical / Quarantine ── -->
         <div class="tab-content" id="tab-medical" role="tabpanel">
           <div class="profile-section-header">
-            <div class="profile-section-title-wrap"><h4 class="tab-section-title">Medical &amp; Quarantine Care</h4><p class="tab-section-sub">Record clinical care, then add one clear quarantine decision when the animal is ready.</p></div>
+            <div class="profile-section-title-wrap"><h4 class="tab-section-title">Medical &amp; Quarantine Care</h4><p class="tab-section-sub" id="medicalTabSubtitle">Record clinical care, then add one clear quarantine decision when the animal is ready.</p></div>
             <button class="btn-primary-clay btn-sm-clay" id="btnAddMedical">
               <i class="bi bi-plus-lg"></i> Add Medical Record
             </button>
           </div>
+          <div id="medicalCareSummary"></div>
           <div id="medicalRecordsList"></div>
 
           <div class="quarantine-status-card mt-4" id="quarantineCard"></div>
@@ -270,21 +271,6 @@
     </div>
     <div class="um-modal-body">
       <form id="behavioralForm">
-        <section class="behavior-observation-editor" aria-labelledby="behaviorObservationTitle">
-          <div class="behavior-observation-heading">
-            <div>
-              <span class="modal-kicker">Supplemental observations</span>
-              <h3 id="behaviorObservationTitle">Observed behaviors</h3>
-              <p>Add animal-specific behaviors and handling details. Protected matching scores above remain unchanged.</p>
-            </div>
-            <button class="btn-ghost-clay behavior-add-btn" id="addBehaviorObservation" type="button">
-              <i class="bi bi-plus-lg" aria-hidden="true"></i> Add Behavior
-            </button>
-          </div>
-          <input id="behavioralObservationsDraft" type="hidden" value="[]" />
-          <div class="behavior-observation-list" id="behaviorObservationList"></div>
-          <p class="behavior-observation-error" id="behaviorObservationError" role="alert" hidden></p>
-        </section>
         <div class="trait-scale-guide" aria-label="Scoring guide"><span><strong>1</strong> Low</span><span><strong>2</strong></span><span><strong>3</strong> Moderate</span><span><strong>4</strong></span><span><strong>5</strong> High</span></div>
         <div class="trait-grid" id="traitGrid"></div>
         <div class="behavioral-form-meta">
@@ -362,7 +348,42 @@
             <textarea class="form-inp form-textarea" id="fMedTreatment" rows="2"
               placeholder="Medications given, dosage, procedures done…"></textarea>
           </div>
-          <details class="medical-optional-section form-full">
+          <details class="medical-optional-section medical-special-needs form-full" id="medicalSpecialNeedsSection" open>
+            <summary><span id="specialNeedsTitle"><i class="bi bi-heart-pulse" aria-hidden="true"></i> Special needs</span><small id="medicalCareStatusLabel">Not yet assessed</small></summary>
+            <div class="medical-special-needs-fields">
+              <p class="medical-care-help">Review ongoing care needs for adopter matching. Changes update this animal's current care profile when you save the record.</p>
+              <input type="hidden" id="medicalCareBaseline" />
+              <input type="hidden" id="specialNeedsStatus" value="unknown" />
+              <fieldset class="care-status-fieldset" aria-describedby="specialNeedsReviewHint">
+                <legend>Care status</legend>
+                <div class="care-status-options">
+                  <label class="care-status-option" data-care-status="unknown">
+                    <input type="radio" name="specialNeedsChoice" value="unknown" checked />
+                    <i class="bi bi-clock-history" aria-hidden="true"></i>
+                    <span><strong>Not yet assessed</strong><small>Care needs await review</small></span>
+                  </label>
+                  <label class="care-status-option" data-care-status="no">
+                    <input type="radio" name="specialNeedsChoice" value="no" />
+                    <i class="bi bi-check-circle" aria-hidden="true"></i>
+                    <span><strong>No known special needs</strong><small>Routine daily care</small></span>
+                  </label>
+                  <label class="care-status-option" data-care-status="yes">
+                    <input type="radio" name="specialNeedsChoice" value="yes" />
+                    <i class="bi bi-heart-pulse" aria-hidden="true"></i>
+                    <span><strong>Requires special care</strong><small>Ongoing support or accommodation</small></span>
+                  </label>
+                </div>
+              </fieldset>
+              <p class="care-status-hint" id="specialNeedsReviewHint" aria-live="polite"></p>
+              <div class="special-needs-notes" id="specialNeedsNotesGroup">
+                <label class="care-notes-label" for="specialNeedsNotes"><span id="specialNeedsNotesLabel">Care observations</span><span class="care-field-requirement" id="specialNeedsNotesRequirement">Optional</span></label>
+                <textarea class="form-inp form-textarea" id="specialNeedsNotes" maxlength="1000" rows="3" aria-describedby="specialNeedsNotesHelp errSpecialNeedsNotes"></textarea>
+                <span class="form-err" id="errSpecialNeedsNotes"></span>
+                <small id="specialNeedsNotesHelp">Shared with prospective adopters. Include practical care guidance only.</small>
+              </div>
+            </div>
+          </details>
+          <details class="medical-optional-section form-full" id="medicalInventorySection">
             <summary><span><i class="bi bi-box-seam"></i> Inventory used</span><small>Optional</small></summary>
             <div class="form-grid medical-optional-fields">
           <div class="form-group">

@@ -1,5 +1,91 @@
 @import "./managementRefresh.css";
 
+/* Keep the original desktop modal; contain the full-width editor on phones. */
+@media (max-width: 800px) {
+  html body.compatibility-management-page.management-consistent-ui #questionEditorDialog.management-modal-layer:not(#management-intake-contract):not(#management-intake-contract-override) {
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  html body.compatibility-management-page.management-consistent-ui #questionEditorDialog.management-modal-layer:not(#management-intake-contract):not(#management-intake-contract-override) > .cq-question-modal {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+}
+
+#questionEditorDialog .cq-focused-form label,
+#questionEditorDialog .cq-editor-choice label {
+  min-width: 0;
+}
+
+#questionEditorDialog .cq-question-context {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin: 0 0 20px;
+  padding: 0 0 16px;
+  border-bottom: 1px solid #eadfd4;
+}
+
+#questionEditorDialog .cq-question-context dt {
+  margin-bottom: 4px;
+  color: #756b67;
+  font-size: 11px;
+}
+
+#questionEditorDialog .cq-question-context dd {
+  margin: 0;
+  color: #362822;
+  font-size: 13px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+#questionEditorDialog .cq-wording-choice {
+  grid-template-columns: minmax(0, 1fr) 76px;
+  gap: 12px;
+  padding: 12px;
+}
+
+#questionEditorDialog .cq-fixed-score {
+  display: grid;
+  gap: 5px;
+  text-align: center;
+}
+
+#questionEditorDialog .cq-fixed-score small {
+  color: #756b67;
+  font-size: 10px;
+}
+
+#questionEditorDialog .cq-fixed-score strong {
+  display: grid;
+  grid-auto-flow: column;
+  place-content: center;
+  min-height: 44px;
+  border: 1px solid #eadfd4;
+  border-radius: 10px;
+  color: #362822;
+  background: #fff;
+  font-size: 13px;
+}
+
+#questionEditorDialog .cq-fixed-score strong span {
+  color: #756b67;
+  white-space: pre;
+  font-weight: 500;
+}
+
+#questionEditorDialog .cq-editor-publish-note {
+  margin: 18px 0 0;
+  color: #756b67;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
 /* Compatibility result details: exact Intake modal shell and measurements.
    Page-local rules keep this design stable after persistent navigation. */
 .compatibility-management-page #resultDialog {

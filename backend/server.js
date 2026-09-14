@@ -104,6 +104,8 @@ app.use("/api/inventory", inventoryRoutes);
 app.get("/api/events", getPublicEvents);
 
 app.get("/", (req, res) => {
+  // Let deployment checks verify the running revision without changing live records.
+  if (process.env.RENDER_GIT_COMMIT) res.set("X-Animua-Revision", process.env.RENDER_GIT_COMMIT);
   res.send("ANIMUA Backend is Live!");
 });
 

@@ -22,7 +22,6 @@ const definitions = [
   ["trainingDifficulty", "home", "Training Difficulty", "How difficult the animal is to train"],
   ["separationAnxiety", "safety", "Separation Anxiety", "Stress when left alone"],
   ["aggressive", "safety", "Aggression", "Level of aggressive behavior (lower is better)"],
-  ["specialNeeds", "safety", "Special Needs", "Presence of special handling or care needs"],
 ];
 
 const BEHAVIOR_DIMENSIONS = Object.freeze(definitions.map(([key, groupKey, label, description]) => ({
@@ -38,7 +37,6 @@ const REQUIRED_TRAITS = Object.freeze([
   "playfulness", "friendlinessToHumans", "goodWithKids", "goodWithOtherPets",
   "strangerTolerance", "noiseLevel", "spaceNeeds", "adaptability",
   "trainingDifficulty", "affectionLevel", "separationAnxiety", "aggressive",
-  "specialNeeds",
 ]);
 const DIMENSION_KEYS = new Set(REQUIRED_TRAITS);
 const GROUP_KEYS = new Set(Object.keys(BEHAVIOR_GROUPS));
@@ -70,6 +68,14 @@ function cloneDefaultQuestions() {
     ...question,
     choices: question.choices.map((choice) => ({ ...choice })),
   }));
+}
+
+// Retire the old numeric special-needs question without discarding edits to
+// the remaining configured questions. Historical assessments remain intact.
+function withoutLegacySpecialNeeds(questions) {
+  return Array.isArray(questions)
+    ? questions.filter(question => question?.traitKey !== "specialNeeds")
+    : questions;
 }
 
 function validateAndNormalizeBehavioralQuestions(input) {
@@ -184,6 +190,7 @@ module.exports = {
   DEFAULT_QUESTIONS,
   MAX_QUESTIONS,
   cloneDefaultQuestions,
+  withoutLegacySpecialNeeds,
   validateAndNormalizeBehavioralQuestions,
   validateBehavioralAnswers,
   buildBehavioralQuestionSnapshot,
