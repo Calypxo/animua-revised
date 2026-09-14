@@ -33,7 +33,7 @@ app = FastAPI(
     openapi_url=None,
 )
 
-RULES_VERSION = "2026-09-02-context-confidence-rules-v5"
+RULES_VERSION = "2026-09-15-caregiver-context-rules-v6"
 INSUFFICIENT_SOURCE_LABEL = "Input validation (insufficient text)"
 CATEGORY_OVERRIDE_MAX_CONFIDENCE = float(
     os.getenv("ANIMUA_CATEGORY_OVERRIDE_MAX_CONFIDENCE", "0.80")
@@ -394,6 +394,27 @@ def has_medical_signal(reason):
     return contains_phrase(reason, MEDICAL_PHRASES)
 
 
+def has_explicit_caregiver_limitation(reason):
+    # Link the limitation to a human caregiver, rather than to an elderly pet.
+    caregiver = r"(?:nag[-\s]?aalaga|tagapag[-\s]?alaga|may[-\s]?ari|lola|lolo|nanay|tatay|magulang|owner|caregiver)"
+    connector = r"(?:na|po|kasi|yung|iyong|ang|si|ay|ko|namin|niya|aming|aking|rin|din|masyado|sa|kanya|sakanya)"
+    limitation = r"(?:matanda|mahina|may\s+sakit|naospital|bedridden|disabled)"
+    patterns = [
+        rf"(?<!\w){limitation}(?:\s+{connector}){{0,8}}\s+{caregiver}(?!\w)",
+        rf"(?<!\w){caregiver}(?:\s+{connector}){{0,8}}\s+{limitation}(?!\w)",
+        r"(?<!\w)(?:owner|caregiver|my\s+(?:mother|father|grandmother|grandfather))\s+(?:(?:is|was|has|become|getting|now|already|too|very)\s+){0,5}(?:elderly|old|frail|bedridden|disabled|hospitalized)(?!\w)",
+        r"(?<!\w)(?:elderly|frail|bedridden|disabled|hospitalized)\s+(?:owner|caregiver)(?!\w)",
+    ]
+    text = str(reason or "")
+    for pattern in patterns:
+        for match in re.finditer(pattern, text, re.IGNORECASE):
+            prefix = text[max(0, match.start() - 40):match.start()]
+            if re.search(r"(?:hindi|di|not)(?:\s+(?:na|po|naman|rin|din))*\s*$", prefix, re.IGNORECASE):
+                continue
+            return True
+    return False
+
+
 def has_owner_incapacity_signal(reason):
     return contains_phrase(
         reason,
@@ -447,8 +468,8 @@ def resolve_category(reason, predicted_category, predicted_confidence=None):
     proposed_category = None
     adjustment_reason = ""
     if (
-        has_owner_incapacity_signal(reason)
-        and predicted_category in {"Owner Incapacity", "Other"}
+        (has_explicit_caregiver_limitation(reason) and not contains_phrase(reason, BEHAVIORAL_PHRASES))
+        or (has_owner_incapacity_signal(reason) and predicted_category in {"Owner Incapacity", "Other"})
     ):
         proposed_category = "Owner Incapacity"
         adjustment_reason = "Explicit owner or caregiver incapacity"

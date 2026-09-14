@@ -1639,6 +1639,10 @@
   text-align: right;
 }
 
+.surrender-requests-page .triage-analysis-status { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; margin-bottom: 16px; border: 1px solid #ead8b0; border-radius: 10px; background: #fff8e8; color: #594a35; }
+.surrender-requests-page .triage-analysis-status > i { flex: 0 0 auto; color: #8a650f; }
+.surrender-requests-page .triage-analysis-status strong { display: block; font-size: .78rem; }
+.surrender-requests-page .triage-analysis-status p { margin: 4px 0 0; font-size: .73rem; line-height: 1.6; }
 .surrender-requests-page .triage-analysis-source {
   display: grid;
   justify-items: end;

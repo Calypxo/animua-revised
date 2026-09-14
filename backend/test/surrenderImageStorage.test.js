@@ -10,6 +10,7 @@ function controllerWithStorage(writes) {
     "../src/config/firebase": {
       db: { collection: () => ({ doc: () => ({
         get: async () => ({ exists: false }),
+        update: async () => {},
         set: async (record) => {
           assert.ok(Buffer.byteLength(JSON.stringify(record)) < 1_048_576);
           writes.push(record);
