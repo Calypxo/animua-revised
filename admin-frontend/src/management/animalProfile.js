@@ -49,6 +49,7 @@ import {
   serializeBehavioralNotes,
 } from "./behavioralObservations.js";
 import { initializeBehavioralQuestionManager } from "./behavioralQuestionManager.js";
+import { specialNeedsStatus, specialNeedsLabel } from "./specialNeeds.js";
 
 const TRAITS = [
   { key: "energyLevel", label: "Energy Level", desc: "Overall energy of the animal" },
@@ -67,7 +68,6 @@ const TRAITS = [
   { key: "affectionLevel", label: "Affection Level", desc: "Desire for closeness and affection" },
   { key: "separationAnxiety", label: "Separation Anxiety", desc: "Stress when left alone" },
   { key: "aggressive", label: "Aggression", desc: "Level of aggressive behavior (lower is better)" },
-  { key: "specialNeeds", label: "Special Needs", desc: "Presence of special handling or care needs" },
 ];
 
 const TRAIT_COLORS = [
@@ -625,7 +625,7 @@ function daysSince(d) {
 
 function countScoredTraits(assessment) {
   if (!assessment) return 0;
-  return Object.keys(assessment).length;
+  return TRAITS.filter(trait => Number.isFinite(Number(assessment[trait.key]))).length;
 }
 
 function statusBadge(status) {
@@ -1023,10 +1023,11 @@ if (addMedicalButton) {
 function renderBehavioralTab() {
   const el = document.getElementById("behavioralContent");
   const lbl = document.getElementById("behavioralBtnLabel");
+  const careSummary = `<div class="behavioral-result-card"><h4>Special-needs care status</h4><p><strong>${specialNeedsLabel(animal)}</strong></p>${specialNeedsStatus(animal) === "unknown" ? "<p>Care needs require review. Previous numeric ratings do not confirm this status.</p>" : ""}${animal.specialNeedsNotes ? `<p>${escapeHtml(animal.specialNeedsNotes)}</p>` : ""}</div>`;
 
   if (!animal.behavioralAssessment) {
     lbl.textContent = "Add Assessment";
-    el.innerHTML = `
+    el.innerHTML = `${careSummary}
       <div class="behavioral-empty">
         <i class="bi bi-sliders"></i>
         <p>No behavioral assessment recorded yet.</p>
@@ -1039,17 +1040,17 @@ function renderBehavioralTab() {
 
   lbl.textContent = "Edit Assessment";
   const ba = animal.behavioralAssessment;
-  const traitCount = Object.keys(ba).length;
+  const traitCount = countScoredTraits(ba);
   const parsedNotes = parseBehavioralNotes(animal.behavioralNotes || "");
   const recordedDimensions = Array.isArray(animal.behavioralQuestionSnapshot)
-    ? animal.behavioralQuestionSnapshot.map((item) => ({
+    ? animal.behavioralQuestionSnapshot.filter(item => item.traitKey !== "specialNeeds").map((item) => ({
         key: item.traitKey,
         label: item.questionTitle || item.behaviorLabel || item.traitKey,
         value: Number(item.value),
       }))
     : TRAITS.map((item) => ({ ...item, value: Number(ba[item.key] || 0) }));
 
-  el.innerHTML = `
+  el.innerHTML = `${careSummary}
     <div class="behavioral-result-card">
       <div class="behavioral-meta">
         <div class="behavioral-meta-text">
@@ -1314,6 +1315,12 @@ function openBehavioralModal() {
   behavioralObservations = parsedNotes.observations.map(createBehaviorObservation);
   document.getElementById("behavioralNotes").value = parsedNotes.notes;
   document.getElementById("behavioralAssessor").value = signedInUserName();
+  document.getElementById("specialNeedsStatus").value = specialNeedsStatus(animal);
+  document.getElementById("specialNeedsNotes").value = animal.specialNeedsNotes || "";
+  document.getElementById("specialNeedsReviewHint").textContent =
+    specialNeedsStatus(animal) === "unknown" && (ba.specialNeeds !== undefined || animal.legacySpecialNeedsRating !== undefined)
+      ? "This animal has a previous numeric special-needs rating. Review its care needs and record a status."
+      : "Confirm the animal's care needs before choosing Yes or No.";
   setBehaviorObservationError();
   renderBehaviorObservationEditor();
 
@@ -1426,9 +1433,18 @@ async function saveBehavioralAssessment() {
     document.getElementById("behavioralNotes").value
   );
   const assessor = signedInUserName();
+  const careStatus = document.getElementById("specialNeedsStatus").value;
+  const careNotes = document.getElementById("specialNeedsNotes").value.trim();
+  if (careStatus === "yes" && !careNotes) {
+    showToast("error", "Describe the animal's special needs and required care.");
+    document.getElementById("specialNeedsNotes").focus();
+    return;
+  }
 
   try {
     await saveBehavioralAssessmentApi(animal.id, {
+      specialNeedsStatus: careStatus,
+      specialNeedsNotes: careNotes,
       traits,
       answerSelections,
       configurationVersion: behavioralQuestionConfig.version,

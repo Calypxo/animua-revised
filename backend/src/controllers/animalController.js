@@ -14,10 +14,12 @@ const {
   BEHAVIOR_DIMENSIONS,
   REQUIRED_TRAITS,
   cloneDefaultQuestions,
+  withoutLegacySpecialNeeds,
   validateAndNormalizeBehavioralQuestions,
   validateBehavioralAnswers,
   buildBehavioralQuestionSnapshot,
 } = require("../services/behavioralQuestionService");
+const { getSpecialNeedsStatus, validateSpecialNeeds } = require("../services/specialNeedsService");
 
 const ANIMAL_COL = "animals";
 const AUDIT_COL  = "auditLogs";
@@ -32,7 +34,7 @@ async function getBehavioralQuestionConfiguration() {
     return { questions: cloneDefaultQuestions(), version: 1, persisted: false };
   }
   const data = snapshot.data() || {};
-  const validated = validateAndNormalizeBehavioralQuestions(data.questions);
+  const validated = validateAndNormalizeBehavioralQuestions(withoutLegacySpecialNeeds(data.questions));
   if (validated.error) {
     console.error("[behavioralQuestionConfig] Stored configuration is invalid:", validated.error);
     return {
@@ -587,9 +589,16 @@ exports.saveBehavioralAssessment = async (req, res) => {
     }
 
     const compatibilityVector = REQUIRED_TRAITS.map((traitKey) => traits[traitKey]);
+    const previousAnimal = doc.data();
+    if (["Adopted", "Archived"].includes(previousAnimal.status)) {
+      return res.status(409).json({ message: "Assessments cannot be changed for adopted or archived animals." });
+    }
+    const care = validateSpecialNeeds(req.body, previousAnimal);
+    if (care.error) return res.status(400).json({ message: care.error });
     const completedAt = new Date().toISOString();
     const questionSnapshot = buildBehavioralQuestionSnapshot(config.questions, traits, answerSelections);
     const assessmentHistoryEntry = {
+      ...care,
       configurationVersion: config.version,
       questionSnapshot,
       traits,
@@ -606,6 +615,10 @@ exports.saveBehavioralAssessment = async (req, res) => {
     };
 
     await db.collection(ANIMAL_COL).doc(id).update({
+      ...care,
+      ...(typeof previousAnimal.behavioralAssessment?.specialNeeds === "number"
+        ? { legacySpecialNeedsRating: previousAnimal.behavioralAssessment.specialNeeds }
+        : {}),
       behavioralAssessment: traits,
       behavioralNotes: notes || "",
       behavioralAssessor: req.user?.fullName || req.user?.email || "Staff",
@@ -614,6 +627,7 @@ exports.saveBehavioralAssessment = async (req, res) => {
       behavioralQuestionSnapshot: questionSnapshot,
       behavioralAssessmentHistory: admin.firestore.FieldValue.arrayUnion(assessmentHistoryEntry),
       compatibilityVector,
+      compatibilityVectorTraits: REQUIRED_TRAITS,
       history: admin.firestore.FieldValue.arrayUnion(historyEntry),
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       updatedBy: req.user?.email || "",
@@ -626,9 +640,11 @@ exports.saveBehavioralAssessment = async (req, res) => {
       targetName: getAnimalDisplayLabel(doc.data(), id),
       performedBy: req.user?.email,
       performedByName: req.user?.fullName,
+      before: { specialNeedsStatus: getSpecialNeedsStatus(previousAnimal), specialNeedsNotes: previousAnimal.specialNeedsNotes || "" },
       after: {
         traitsRecorded: REQUIRED_TRAITS.length,
         configurationVersion: config.version,
+        ...care,
       },
     });
 

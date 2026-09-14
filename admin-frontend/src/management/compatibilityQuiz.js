@@ -36,48 +36,12 @@ function render() {
     : `<tr><td colspan="7"><div class="cq-empty"><i class="bi bi-search"></i><strong>No matching results</strong><small>Adjust the search, attempt status, or match strength filter.</small></div></td></tr>`;
 }
 function setQuestionError(message=""){$("questionConfigError").hidden=!message;$("questionConfigError").textContent=message}
-function renderQuestions(){
-  const canManage=admin();
-  $("questionActions").hidden=!canManage;
-  $("questionList").innerHTML=state.questions.length?state.questions.map((question,index)=>{
-    const choices=Array.isArray(question.choices)?question.choices:[];
-    return `<details class="cq-question-card ${question.active?"is-active":"is-inactive"}" data-index="${index}" ${index===0?"open":""}>
-      <summary><span class="cq-question-number">${index+1}</span><span><strong>${esc(question.label||"Untitled question")}</strong><small>${esc(PHASE_LABELS[question.phaseKey]||question.phaseKey)} · ${esc(question.traitKey)}</small></span><span class="cq-question-status">${question.active?"Active":"Inactive"}</span><i class="bi bi-chevron-down"></i></summary>
-      <div class="cq-question-editor">
-        <div class="cq-question-controls"><button type="button" data-action="move-up" ${!canManage||index===0?"disabled":""}><i class="bi bi-arrow-up"></i>Move up</button><button type="button" data-action="move-down" ${!canManage||index===state.questions.length-1?"disabled":""}><i class="bi bi-arrow-down"></i>Move down</button><label><input type="checkbox" data-field="active" ${question.active?"checked":""} ${!canManage?"disabled":""}>Active in new quizzes</label></div>
-        <div class="cq-question-grid">
-          <label><span>Short label</span><input data-field="label" value="${esc(question.label)}" maxlength="100" ${!canManage?"disabled":""}></label>
-          <label><span>Quiz section</span><select data-field="phaseKey" ${!canManage?"disabled":""}>${Object.entries(PHASE_LABELS).map(([value,label])=>`<option value="${value}" ${question.phaseKey===value?"selected":""}>${label}</option>`).join("")}</select></label>
-          <label><span>Scoring trait</span><select data-field="traitKey" ${!canManage||question.active?"disabled":""}>${TRAITS.map(value=>`<option value="${value}" ${question.traitKey===value?"selected":""}>${value}</option>`).join("")}</select><small>${question.active?"Deactivate before changing the protected trait mapping.":"Select the trait this draft will replace."}</small></label>
-          <label class="cq-question-wide"><span>Question text</span><textarea data-field="text" maxlength="300" ${!canManage?"disabled":""}>${esc(question.text)}</textarea></label>
-          <label class="cq-question-wide"><span>Helper text</span><input data-field="hint" value="${esc(question.hint)}" maxlength="300" ${!canManage?"disabled":""}></label>
-        </div>
-        <div class="cq-choice-head"><div><strong>Answer choices</strong><small>Every choice must retain a score from 1 to 5.</small></div>${canManage?`<button type="button" data-action="add-choice" ${choices.length>=8?"disabled":""}><i class="bi bi-plus-lg"></i>Add answer</button>`:""}</div>
-        <div class="cq-choice-list">${choices.map((choice,choiceIndex)=>`<div class="cq-choice-row" data-choice-index="${choiceIndex}"><span>${choiceIndex+1}</span><label><small>Answer text</small><input data-choice-field="text" value="${esc(choice.text)}" maxlength="160" ${!canManage?"disabled":""}></label><label class="cq-score-field"><small>Score</small><select data-choice-field="value" ${!canManage?"disabled":""}>${[1,2,3,4,5].map(value=>`<option value="${value}" ${Number(choice.value)===value?"selected":""}>${value}</option>`).join("")}</select></label>${canManage?`<button type="button" data-action="remove-choice" title="Remove answer" ${choices.length<=2?"disabled":""}><i class="bi bi-trash3"></i></button>`:""}</div>`).join("")}</div>
-      </div></details>`;
-  }).join(""):`<div class="cq-empty"><strong>No quiz questions found</strong><small>Reload the page or contact an administrator.</small></div>`;
-}
 function validateQuestions(){
   if(!state.questions.length)return "At least one quiz question is required.";
   const active=new Set();
   for(let i=0;i<state.questions.length;i+=1){const q=state.questions[i];if(!String(q.label||"").trim())return `Question ${i+1} needs a short label.`;if(!String(q.text||"").trim())return `Question ${i+1} text cannot be empty.`;if(!Array.isArray(q.choices)||q.choices.length<2)return `Question ${i+1} needs at least two answer choices.`;for(let j=0;j<q.choices.length;j+=1){const choice=q.choices[j];if(!String(choice.text||"").trim())return `Answer ${j+1} in question ${i+1} cannot be empty.`;const score=Number(choice.value);if(!Number.isInteger(score)||score<1||score>5)return `Answer ${j+1} in question ${i+1} needs a score from 1 to 5.`}if(q.active){if(active.has(q.traitKey))return `Only one active question may use ${q.traitKey}.`;active.add(q.traitKey)}}
   return active.size?"":"At least one quiz question must remain active.";
 }
-function updateQuestionState(event){
-  const card=event.target.closest("[data-index]");if(!card)return;const question=state.questions[Number(card.dataset.index)];if(!question)return;
-  if(event.target.dataset.field){const field=event.target.dataset.field;question[field]=field==="active"?event.target.checked:event.target.value;setQuestionError();return}
-  if(event.target.dataset.choiceField){const row=event.target.closest("[data-choice-index]");const choice=question.choices[Number(row.dataset.choiceIndex)];choice[event.target.dataset.choiceField]=event.target.dataset.choiceField==="value"?Number(event.target.value):event.target.value;setQuestionError()}
-}
-function questionAction(event){
-  const button=event.target.closest("[data-action]");if(!button||!admin())return;const card=button.closest("[data-index]");const index=Number(card.dataset.index);const question=state.questions[index];const action=button.dataset.action;
-  if(action==="move-up"&&index>0)[state.questions[index-1],state.questions[index]]=[state.questions[index],state.questions[index-1]];
-  else if(action==="move-down"&&index<state.questions.length-1)[state.questions[index+1],state.questions[index]]=[state.questions[index],state.questions[index+1]];
-  else if(action==="add-choice"&&question.choices.length<8){const next=question.choices.length+1;question.choices.push({id:`${question.id}-choice-${Date.now()}`,text:"",value:3,order:next})}
-  else if(action==="remove-choice"&&question.choices.length>2){const choiceIndex=Number(button.closest("[data-choice-index]").dataset.choiceIndex);question.choices.splice(choiceIndex,1)}else return;
-  renderQuestions();setQuestionError();
-}
-async function saveQuestions(){const error=validateQuestions();if(error){setQuestionError(error);$("questionConfigError").scrollIntoView({behavior:"smooth",block:"center"});return}const button=$("saveQuestionsBtn");button.disabled=true;try{const result=await apiFetch("/match/admin/questions",{method:"PUT",body:JSON.stringify({questions:state.questions})});state.questions=result.questions||[];state.savedQuestions=clone(state.questions);$("quizVersion").value=result.version;renderQuestions();setQuestionError();toast("Quiz questions saved and published.")}catch(error){setQuestionError(error.message)}finally{button.disabled=false}}
-function addQuestion(){const id=`question-${Date.now()}`;state.questions.push({id,traitKey:TRAITS[0],phaseKey:"lifestyle",label:"New question",text:"",hint:"",active:false,order:state.questions.length+1,choices:[{id:`${id}-1`,text:"",value:1,order:1},{id:`${id}-2`,text:"",value:5,order:2}]});renderQuestions();setQuestionError();$("questionList").lastElementChild?.scrollIntoView({behavior:"smooth",block:"center"})}
 function setEditorError(message=""){$("questionEditorError").hidden=!message;$("questionEditorError").textContent=message}
 function hasQuestionChanges(){return JSON.stringify(state.questions)!==JSON.stringify(state.savedQuestions)}
 function refreshDraftState(){$("questionDraftBar").hidden=!admin()||!hasQuestionChanges()}
@@ -108,10 +72,8 @@ function handleWorkspaceTabKeydown(event){
   event.preventDefault();
   showWorkspaceTab(tabs[nextIndex].dataset.cqTab,{focus:true,smooth:true});
 }
-function questionPosition(index,direction){const phase=state.questions[index]?.phaseKey;const candidates=state.questions.map((question,position)=>question.phaseKey===phase?position:-1).filter(position=>position>=0);const current=candidates.indexOf(index);return candidates[current+direction]??-1}
 function renderQuestionOverview() {
   const canManage = admin();
-  $("questionActions").hidden = !canManage;
   $("activeQuestionCount").textContent = state.questions.filter(question => question.active).length;
 
   const groups = Object.entries(PHASE_LABELS).map(([phaseKey, phaseLabel]) => {
@@ -122,22 +84,58 @@ function renderQuestionOverview() {
 
     return `<section class="cq-question-group"><header><div><span>${esc(phaseLabel)}</span><strong>${entries.length} question${entries.length === 1 ? "" : "s"}</strong></div></header><div>${entries.map(({ question, index }, groupIndex) => {
       const questionLabel = esc(question.label || "Untitled question");
-      const toggleLabel = question.active ? "Pause" : "Enable";
-      return `<article class="cq-question-row ${question.active ? "" : "is-inactive"}" data-index="${index}"><span class="cq-question-number">${groupIndex + 1}</span><div class="cq-question-copy"><div><strong>${questionLabel}</strong><span class="cq-question-status">${question.active ? "Active" : "Inactive"}</span></div><p>${esc(question.text || "Question text has not been added yet.")}</p><small>${question.choices?.length || 0} answers <i></i> ${esc(question.traitKey)}</small></div>${canManage ? `<div class="cq-row-actions"><button type="button" data-action="move-up" title="Move up" aria-label="Move ${questionLabel} up" ${questionPosition(index, -1) < 0 ? "disabled" : ""}><i class="bi bi-arrow-up" aria-hidden="true"></i></button><button type="button" data-action="move-down" title="Move down" aria-label="Move ${questionLabel} down" ${questionPosition(index, 1) < 0 ? "disabled" : ""}><i class="bi bi-arrow-down" aria-hidden="true"></i></button><button type="button" data-action="toggle" class="cq-status-action" title="${question.active ? "Deactivate" : "Activate"}" aria-label="${toggleLabel} ${questionLabel}"><i class="bi ${question.active ? "bi-pause-circle" : "bi-play-circle"}" aria-hidden="true"></i><span>${toggleLabel}</span></button><button type="button" data-action="edit" class="cq-edit-action" aria-label="Edit ${questionLabel}"><i class="bi bi-pencil" aria-hidden="true"></i><span>Edit</span></button></div>` : ""}</article>`;
+      return `<article class="cq-question-row ${question.active ? "" : "is-inactive"}" data-index="${index}"><span class="cq-question-number">${groupIndex + 1}</span><div class="cq-question-copy"><div><strong>${questionLabel}</strong><span class="cq-question-status">${question.active ? "Active" : "Inactive"}</span></div><p>${esc(question.text || "Question text has not been added yet.")}</p><small>${question.choices?.length || 0} answers <i></i> ${esc(question.traitKey)}</small></div>${canManage ? `<div class="cq-row-actions"><button type="button" data-action="edit" class="cq-edit-action" aria-label="Edit ${questionLabel}"><i class="bi bi-pencil" aria-hidden="true"></i><span>Edit wording</span></button></div>` : ""}</article>`;
     }).join("")}</div></section>`;
   }).join("");
 
-  $("questionList").innerHTML = groups || `<div class="cq-empty"><strong>No quiz questions found</strong><small>Add a question to begin.</small></div>`;
+  $("questionList").innerHTML = groups || `<div class="cq-empty"><strong>No quiz questions found</strong><small>Reload the page to load the fixed question set.</small></div>`;
   refreshDraftState();
 }
-function renderEditorChoices(){const choices=state.editorQuestion?.choices||[];$("editorAddChoice").disabled=choices.length>=8;$("editorChoiceList").innerHTML=choices.map((choice,index)=>`<div class="cq-editor-choice" data-choice-index="${index}"><span>${index+1}</span><label><small>Answer text</small><input data-editor-choice="text" maxlength="160" value="${esc(choice.text)}"></label><label><small>Score</small><select data-editor-choice="value">${[1,2,3,4,5].map(value=>`<option value="${value}" ${Number(choice.value)===value?"selected":""}>${value}</option>`).join("")}</select></label><button type="button" data-editor-remove title="Remove answer" ${choices.length<=2?"disabled":""}><i class="bi bi-trash3"></i></button></div>`).join("")}
-function openQuestionEditor(index=null){if(!admin())return;const isNew=index===null;const id=`question-${Date.now()}`;state.editorIndex=index;state.editorQuestion=isNew?{id,traitKey:TRAITS[0],phaseKey:"lifestyle",label:"",text:"",hint:"",active:false,order:state.questions.length+1,choices:[{id:`${id}-1`,text:"",value:1,order:1},{id:`${id}-2`,text:"",value:5,order:2}]}:clone(state.questions[index]);$("questionEditorTitle").textContent=isNew?"Add question":"Edit question";$("editorQuestionText").value=state.editorQuestion.text||"";$("editorQuestionLabel").value=state.editorQuestion.label||"";$("editorQuestionPhase").value=state.editorQuestion.phaseKey;$("editorQuestionHint").value=state.editorQuestion.hint||"";$("editorQuestionTrait").innerHTML=TRAITS.map(trait=>`<option value="${trait}" ${state.editorQuestion.traitKey===trait?"selected":""}>${trait}</option>`).join("");$("editorQuestionTrait").disabled=state.editorQuestion.active;$("editorTraitHelp").textContent=state.editorQuestion.active?"Deactivate this question before changing its protected trait.":"Choose the trait used by the matching score.";renderEditorChoices();setEditorError();const dialog=$("questionEditorDialog");dialog.classList.add("open");dialog.setAttribute("aria-hidden","false");document.body.classList.add("modal-open");setTimeout(()=>$("editorQuestionText").focus(),50)}
+function renderEditorChoices() {
+  const choices = state.editorQuestion?.choices || [];
+  $("editorChoiceList").innerHTML = choices.map((choice, index) => `<div class="cq-editor-choice" data-choice-index="${index}"><span>${index + 1}</span><label><small>Answer wording</small><input data-editor-choice="text" maxlength="160" value="${esc(choice.text)}"></label><label><small>Fixed score</small><input value="${choice.value}" readonly aria-label="Fixed answer score"></label></div>`).join("");
+}
+function openQuestionEditor(index) {
+  if (!admin() || !Number.isInteger(index) || !state.questions[index]) return;
+  state.editorIndex = index;
+  state.editorQuestion = clone(state.questions[index]);
+  $("questionEditorTitle").textContent = "Edit question wording";
+  $("editorQuestionText").value = state.editorQuestion.text || "";
+  $("editorQuestionLabel").value = state.editorQuestion.label || "";
+  $("editorQuestionPhase").value = state.editorQuestion.phaseKey;
+  $("editorQuestionHint").value = state.editorQuestion.hint || "";
+  $("editorQuestionTrait").innerHTML = TRAITS.map(trait => `<option value="${trait}" ${state.editorQuestion.traitKey === trait ? "selected" : ""}>${trait}</option>`).join("");
+  renderEditorChoices();
+  setEditorError();
+  const dialog = $("questionEditorDialog");
+  dialog.classList.add("open");
+  dialog.setAttribute("aria-hidden", "false");
+  document.body.classList.add("modal-open");
+  setTimeout(() => $("editorQuestionText").focus(), 50);
+}
 function closeQuestionEditor(){const dialog=$("questionEditorDialog");dialog.classList.remove("open");dialog.setAttribute("aria-hidden","true");state.editorIndex=null;state.editorQuestion=null;document.body.classList.remove("modal-open")}
-function readEditorFields(){const question=state.editorQuestion;question.text=$("editorQuestionText").value.trim();question.label=$("editorQuestionLabel").value.trim();question.phaseKey=$("editorQuestionPhase").value;question.hint=$("editorQuestionHint").value.trim();question.traitKey=$("editorQuestionTrait").value}
-function applyFocusedQuestionEdit(){readEditorFields();const question=state.editorQuestion;if(!question.text)return setEditorError("Question text cannot be empty.");if(!question.label)return setEditorError("Add a short label for this question.");if(question.choices.length<2)return setEditorError("Add at least two answer choices.");if(question.choices.some(choice=>!String(choice.text||"").trim()))return setEditorError("Every answer choice needs text.");const conflict=question.active&&state.questions.some((item,index)=>index!==state.editorIndex&&item.active&&item.traitKey===question.traitKey);if(conflict)return setEditorError(`Another active question already uses ${question.traitKey}.`);const wasNew=state.editorIndex===null;if(wasNew)state.questions.push(question);else state.questions[state.editorIndex]=question;closeQuestionEditor();renderQuestionOverview();setQuestionError();toast(wasNew?"Question added to the draft.":"Question changes added to the draft.")}
-function handleQuestionOverview(event){const button=event.target.closest("[data-action]");if(!button||!admin())return;const row=button.closest("[data-index]");const index=Number(row.dataset.index);const action=button.dataset.action;if(action==="edit")return openQuestionEditor(index);if(action==="toggle"){const question=state.questions[index];if(!question.active&&state.questions.some((item,position)=>position!==index&&item.active&&item.traitKey===question.traitKey)){setQuestionError(`Deactivate the other ${question.traitKey} question before activating this one.`);return}question.active=!question.active}else{const target=questionPosition(index,action==="move-up"?-1:1);if(target<0)return;[state.questions[index],state.questions[target]]=[state.questions[target],state.questions[index]]}renderQuestionOverview();setQuestionError()}
-async function publishQuestionDraft(){const error=validateQuestions();if(error){setQuestionError(error);$("questionConfigError").scrollIntoView({behavior:"smooth",block:"center"});return}const button=$("saveQuestionsBtn");button.disabled=true;try{const result=await apiFetch("/match/admin/questions",{method:"PUT",body:JSON.stringify({questions:state.questions})});state.questions=result.questions||[];state.savedQuestions=clone(state.questions);$("quizVersion").value=result.version;renderQuestionOverview();setQuestionError();toast("Quiz changes published.")}catch(error){setQuestionError(error.message)}finally{button.disabled=false}}
-async function load(){const [s,d,q]=await Promise.all([apiFetch("/match/admin/settings"),apiFetch("/match/admin/results"),apiFetch("/match/admin/questions")]);$("quizEnabled").checked=s.settings.quizEnabled;$("cooldownDays").value=s.settings.retakeCooldownDays;$("quizVersion").value=q.version||s.settings.quizVersion;state.results=d.results||[];state.questions=q.questions||[];state.savedQuestions=clone(state.questions);summary(s.settings);if(!admin()){document.querySelectorAll("#settingsForm input,#settingsForm button").forEach(el=>el.disabled=true);$("settingsRole").textContent="View only"}renderQuestionOverview();render();document.body.classList.remove("loading")}
+function applyFocusedQuestionEdit() {
+  if (!admin() || !state.editorQuestion || state.editorIndex === null) return;
+  const question = state.editorQuestion;
+  question.text = $("editorQuestionText").value.trim();
+  question.label = $("editorQuestionLabel").value.trim();
+  question.hint = $("editorQuestionHint").value.trim();
+  if (!question.text) return setEditorError("Question text cannot be empty.");
+  if (!question.label) return setEditorError("Add a short label for this question.");
+  if (question.choices.some(choice => !String(choice.text || "").trim())) return setEditorError("Every answer choice needs text.");
+  state.questions[state.editorIndex] = question;
+  closeQuestionEditor();
+  renderQuestionOverview();
+  setQuestionError();
+  toast("Wording changes added to the draft.");
+}
+function handleQuestionOverview(event) {
+  const button = event.target.closest('[data-action="edit"]');
+  if (!button || !admin()) return;
+  openQuestionEditor(Number(button.closest("[data-index]").dataset.index));
+}
+async function publishQuestionDraft(){const error=validateQuestions();if(error){setQuestionError(error);$("questionConfigError").scrollIntoView({behavior:"smooth",block:"center"});return}const button=$("saveQuestionsBtn");button.disabled=true;try{const result=await apiFetch("/match/admin/questions",{method:"PUT",body:JSON.stringify({questions:state.questions,version:state.questionVersion})});state.questionVersion=result.version;state.questions=result.questions||[];state.savedQuestions=clone(state.questions);$("quizVersion").value=result.version;renderQuestionOverview();setQuestionError();toast("Quiz changes published.")}catch(error){setQuestionError(error.message)}finally{button.disabled=false}}
+async function load(){const [s,d,q]=await Promise.all([apiFetch("/match/admin/settings"),apiFetch("/match/admin/results"),apiFetch("/match/admin/questions")]);$("quizEnabled").checked=s.settings.quizEnabled;$("cooldownDays").value=s.settings.retakeCooldownDays;$("quizVersion").value=q.version||s.settings.quizVersion;state.results=d.results||[];state.questionVersion=q.version;state.questions=q.questions||[];state.savedQuestions=clone(state.questions);summary(s.settings);if(!admin()){document.querySelectorAll("#settingsForm input,#settingsForm button").forEach(el=>el.disabled=true);$("settingsRole").textContent="View only"}renderQuestionOverview();render();document.body.classList.remove("loading")}
 $("settingsForm").addEventListener("submit",async e=>{e.preventDefault();try{const r=await apiFetch("/match/admin/settings",{method:"PUT",body:JSON.stringify({quizEnabled:$("quizEnabled").checked,retakeCooldownDays:Number($("cooldownDays").value),quizVersion:Number($("quizVersion").value)})});summary(r.settings);toast("Compatibility quiz settings saved.")}catch(x){toast(x.message)}});
 $("resultSearch").addEventListener("input",render);
 $("attemptFilter").addEventListener("change",render);
@@ -148,15 +146,16 @@ document.querySelectorAll("[data-cq-tab]").forEach(button=>{
   button.addEventListener("keydown",handleWorkspaceTabKeydown);
 });
 $("questionList").addEventListener("click",handleQuestionOverview);
-$("addQuestionBtn").addEventListener("click",()=>openQuestionEditor());
 $("saveQuestionsBtn").addEventListener("click",publishQuestionDraft);
 $("cancelQuestionsBtn").addEventListener("click",()=>{state.questions=clone(state.savedQuestions);renderQuestionOverview();setQuestionError();toast("Unpublished changes discarded.")});
 document.querySelectorAll("[data-question-close]").forEach(button=>button.addEventListener("click",closeQuestionEditor));
 $("questionEditorDialog").addEventListener("click",event=>{if(event.target===$("questionEditorDialog"))closeQuestionEditor()});
-$("editorAddChoice").addEventListener("click",()=>{if(!state.editorQuestion||state.editorQuestion.choices.length>=8)return;const next=state.editorQuestion.choices.length+1;state.editorQuestion.choices.push({id:`${state.editorQuestion.id}-choice-${Date.now()}`,text:"",value:3,order:next});renderEditorChoices()});
-$("editorChoiceList").addEventListener("input",event=>{const row=event.target.closest("[data-choice-index]");if(!row||!event.target.dataset.editorChoice)return;const choice=state.editorQuestion.choices[Number(row.dataset.choiceIndex)];choice[event.target.dataset.editorChoice]=event.target.dataset.editorChoice==="value"?Number(event.target.value):event.target.value;setEditorError()});
-$("editorChoiceList").addEventListener("change",event=>{const row=event.target.closest("[data-choice-index]");if(!row||!event.target.dataset.editorChoice)return;state.editorQuestion.choices[Number(row.dataset.choiceIndex)].value=Number(event.target.value)});
-$("editorChoiceList").addEventListener("click",event=>{const button=event.target.closest("[data-editor-remove]");if(!button||state.editorQuestion.choices.length<=2)return;state.editorQuestion.choices.splice(Number(button.closest("[data-choice-index]").dataset.choiceIndex),1);renderEditorChoices()});
+$("editorChoiceList").addEventListener("input", event => {
+  const row = event.target.closest("[data-choice-index]");
+  if (!row || event.target.dataset.editorChoice !== "text" || !state.editorQuestion) return;
+  state.editorQuestion.choices[Number(row.dataset.choiceIndex)].text = event.target.value;
+  setEditorError();
+});
 $("applyQuestionEdit").addEventListener("click",applyFocusedQuestionEdit);
 $("resultsBody").addEventListener("click",e=>{const b=e.target.closest("[data-view]");if(!b)return;const r=state.results.find(x=>x.resultId===b.dataset.view);$("resultDetails").innerHTML=`<div class="cq-detail"><span>${initials(r.userName)}</span><div><small>${r.isLatest?"Current result":"Previous attempt"}</small><h2>${esc(r.userName)}</h2><p>${esc(r.userEmail)} &middot; ${esc(r.resultId)}</p></div><b>v${r.quizVersion||1}</b></div><div class="cq-facts"><p><small>Completed</small><strong>${date(r.completedAt)}</strong></p><p><small>Next retake</small><strong>${date(r.nextRetakeAt)}</strong></p></div><section class="cq-saved-recommendations"><div class="cq-saved-head"><div><small>Compatibility Results</small><h3>Your <em>matches</em> are here.</h3><p>Ranked recommendations saved when this quiz was completed.</p></div><div><strong>${r.matches?.length||0}</strong><span>Matches Found</span></div></div><div class="cq-public-match-list">${(r.matches||[]).map((m,i)=>{const pct=Math.round(Number(m.compatibilityPercent||0));const color=pct>=80?"#1a7a40":pct>=65?"#0d7377":pct>=50?"#f0a500":"#780116";const label=pct>=80?"Excellent Match":pct>=65?"Great Match":pct>=50?"Good Match":"Partial Match";const circumference=163.36;const offset=circumference-(pct/100)*circumference;return `<article class="cq-public-match ${i===0?"is-featured":""}">${i===0?`<div class="cq-recommended"><i class="bi bi-stars"></i> Recommended for You</div>`:""}<div class="cq-public-rank"><span>${i===0?"Best Match":`${i+1}${i===1?"nd":i===2?"rd":"th"} Match`}</span><b>${["🥇","🥈","🥉","4️⃣","5️⃣"][i]||i+1}</b></div><div class="cq-public-match-main"><div class="cq-pet-placeholder"><i class="bi bi-heart-fill"></i></div><div class="cq-public-pet"><h4>${esc(m.animalName||"Shelter animal")}</h4><p>Shelter recommendation</p><small>${esc(m.animalId||"Historical animal record")}</small></div><div class="cq-match-ring"><svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="26"/><circle cx="30" cy="30" r="26" style="stroke:${color};stroke-dasharray:${circumference};stroke-dashoffset:${offset}"/></svg><div><strong>${pct}%</strong><span>match</span></div><small style="color:${color}">${label}</small></div></div></article>`}).join("")||`<div class="cq-no-saved-match"><i class="bi bi-search"></i><p>No animals matched the selected filters.</p></div>`}</div><footer>These results are historical suggestions. Final adoption approval still depends on shelter review and animal availability.</footer></section>${admin()?`<div class="detail-actions"><button data-now>Allow immediate retake</button><input data-date type="datetime-local"><button data-set>Set custom date</button><button data-remove>Remove override</button></div>`:""}`;const dlg=$("resultDialog");dlg.dataset.userId=r.userId;dlg.classList.add("open");dlg.setAttribute("aria-hidden","false");document.body.classList.add("modal-open")});
 $("resultsBody").addEventListener("click",e=>{if(!e.target.closest("[data-view]"))return;const actions=$("resultDetails").querySelector(".detail-actions");if(!actions)return;actions.querySelector("[data-now]")?.classList.add("management-primary-action");actions.querySelector("[data-remove]")?.classList.add("management-tertiary-action");actions.querySelector("[data-date]")?.setAttribute("aria-label","Custom retake date")});

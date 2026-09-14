@@ -54,7 +54,7 @@ class CompatibilityScoringTests(unittest.TestCase):
         answers["healthRiskLevel"] = 4
         profile = build_user_profile(answers)
         self.assertEqual(profile["attentionNeeds"], 3)
-        self.assertEqual(profile["specialNeeds"], 4)
+        self.assertNotIn("specialNeeds", profile)
         self.assertNotIn("climateTolerance", profile)
 
     def test_exact_and_poor_matches_have_equivalent_ranking(self):

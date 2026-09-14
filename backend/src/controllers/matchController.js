@@ -10,6 +10,8 @@ const {
 const {
   DEFAULT_QUESTIONS,
   validateAndNormalizeQuestions,
+  validateQuestionWordingEdits,
+  hasCustomWording,
   validateConfiguredPreferences,
   buildQuestionSnapshot,
 } = require("../services/quizQuestionService");
@@ -56,8 +58,8 @@ async function getSettings(tx) {
   const data = snap.exists ? snap.data() : {};
   return { quizEnabled: typeof data.quizEnabled === "boolean" ? data.quizEnabled : true, retakeCooldownDays: Number.isInteger(data.retakeCooldownDays) ? data.retakeCooldownDays : 30, quizVersion: Number.isInteger(data.quizVersion) ? data.quizVersion : 1, updatedAt: data.updatedAt || null, updatedBy: data.updatedBy || null };
 }
-async function getQuestionConfiguration() {
-  const snap = await QUESTION_CONFIG.get();
+async function getQuestionConfiguration(tx) {
+  const snap = tx ? await tx.get(QUESTION_CONFIG) : await QUESTION_CONFIG.get();
   if (!snap.exists) return { questions: DEFAULT_QUESTIONS, persisted: false };
   const validated = validateAndNormalizeQuestions(snap.data().questions);
   if (validated.error) {
@@ -173,7 +175,7 @@ exports.getQuizQuestions = async (_req, res) => {
   try {
     const config = await getQuestionConfiguration();
     return res.json({
-      questions: json(config.questions.filter((question) => question.active)),
+      questions: json(config.questions.filter((question) => question.active).map(question => ({ ...question, customWording: hasCustomWording(question) }))),
       version: config.version || (await getSettings()).quizVersion,
     });
   } catch (error) {
@@ -192,27 +194,25 @@ exports.getAdminQuestions = async (_req, res) => {
 };
 exports.replaceAdminQuestions = async (req, res) => {
   try {
-    const validated = validateAndNormalizeQuestions(req.body?.questions);
-    if (validated.error) return res.status(400).json({ message: validated.error });
-    const [previousConfig, settings] = await Promise.all([getQuestionConfiguration(), getSettings()]);
-    const version = settings.quizVersion + 1;
-    const updatedBy = { id: req.user.id, email: req.user.email, name: req.user.fullName };
-    const batch = db.batch();
-    batch.set(QUESTION_CONFIG, {
-      questions: validated.questions,
-      version,
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-      updatedBy,
-    }, { merge: true });
-    batch.set(SETTINGS, {
-      quizVersion: version,
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-      updatedBy,
-    }, { merge: true });
-    await batch.commit();
-    await audit(req, "compatibility.questions_updated", QUESTION_CONFIG.id, "Compatibility Quiz Questions", { version: settings.quizVersion, questionCount: previousConfig.questions.length }, { version, questionCount: validated.questions.length });
-    return res.json({ message: "Quiz questions saved.", questions: validated.questions, version });
+    const saved = await db.runTransaction(async tx => {
+      const previousConfig = await getQuestionConfiguration(tx);
+      const settings = await getSettings(tx);
+      const validated = validateQuestionWordingEdits(req.body?.questions, previousConfig.questions);
+      if (validated.error) throw Object.assign(new Error(validated.error), { statusCode: 400 });
+      if (req.body.version !== (previousConfig.version || settings.quizVersion)) {
+        throw Object.assign(new Error("Quiz questions changed. Reload the page before publishing wording edits."), { statusCode: 409 });
+      }
+      const version = Math.max(settings.quizVersion, previousConfig.version || 0) + 1;
+      const updatedBy = { id: req.user.id, email: req.user.email, name: req.user.fullName || req.user.email };
+      const metadata = { version, updatedAt: admin.firestore.FieldValue.serverTimestamp(), updatedBy };
+      tx.set(QUESTION_CONFIG, { questions: validated.questions, ...metadata }, { merge: true });
+      tx.set(SETTINGS, { quizVersion: version, updatedAt: metadata.updatedAt, updatedBy }, { merge: true });
+      return { questions: validated.questions, version, previousVersion: previousConfig.version || settings.quizVersion };
+    });
+    await audit(req, "compatibility.questions_updated", QUESTION_CONFIG.id, "Compatibility Quiz Questions", { version: saved.previousVersion, questionCount: saved.questions.length }, { version: saved.version, questionCount: saved.questions.length });
+    return res.json({ message: "Quiz wording saved.", questions: saved.questions, version: saved.version });
   } catch (error) {
+    if (error.statusCode) return res.status(error.statusCode).json({ message: error.message });
     console.error("[replaceAdminQuestions]", error);
     return res.status(500).json({ message: "Unable to save quiz questions." });
   }

@@ -77,7 +77,7 @@ const answerSections = [
       { source: "preferences", key: "healthRiskLevel", label: "Vet budget", scale: ["Not prepared", "Slightly prepared", "Somewhat prepared", "Prepared", "Fully prepared"] },
       { source: "preferences", key: "affectionLevel", label: "Affection preference", scale: ["Very independent", "Not very affectionate", "Balanced", "Affectionate", "Very cuddly"] },
       { source: "preferences", key: "noiseLevel", label: "Noise tolerance", scale: ["Very little", "Low", "Moderate", "High", "Very high"] },
-      { source: "filters", key: "acceptSpecialNeeds", label: "Significant special-care needs", options: { yes: "Include pets rated 4-5/5", no: "Exclude pets rated 4-5/5" } },
+      { source: "filters", key: "acceptSpecialNeeds", label: "Special needs", options: { yes: "Open to special-needs pets", no: "No known special needs only" } },
     ],
   },
 ];

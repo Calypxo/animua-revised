@@ -47,9 +47,9 @@ const PHASES = [
         ]
       },
       {
-        key: "acceptSpecialNeeds", label: "Significant Special-Care Needs", isFilter: true,
-        text: "Open ka ba sa pets with significant special-care needs (rated 4-5/5)?",
-        hint: "Pets rated 1-3 remain eligible; this filter applies only to ratings 4-5.",
+        key: "acceptSpecialNeeds", label: "Special Needs", isFilter: true,
+        text: "Open ka ba sa pag-adopt ng pet na may special needs?",
+        hint: "If you choose No, only pets assessed as having no known special needs are included.",
         type: "toggle",
         options: [
           { label:"Hindi", value:"no", icon:"bi-x-circle" },
@@ -140,6 +140,7 @@ async function loadQuestionConfiguration() {
       const list = configuredByPhase.get(question.phaseKey) || [];
       list.push({
         id: question.id,
+        customWording: question.customWording === true,
         key: question.traitKey,
         label: question.label,
         text: question.text,
@@ -230,8 +231,8 @@ const QUESTION_COPY = {
       options: { Any: "Any", Male: "Male", Female: "Female" }
     },
     acceptSpecialNeeds: {
-      text: "Are you open to pets with significant special-care needs?",
-      hint: "This only affects pets with higher care needs.",
+      text: "Are you open to adopting a pet with special needs?",
+      hint: "No includes only pets assessed as having no known special needs. Yes also includes pets whose care needs still need assessment.",
       options: { no: "No", yes: "Yes" }
     },
     energyLevel: { hint: "Choose the energy level that fits your home." },
@@ -265,8 +266,8 @@ const QUESTION_COPY = {
       options: { Any: "Kahit ano", Male: "Lalaki", Female: "Babae" }
     },
     acceptSpecialNeeds: {
-      text: "Handa ka ba sa pets na may mas mataas na special-care needs?",
-      hint: "Para lang ito sa pets na nangangailangan ng mas mataas na alaga.",
+      text: "Handa ka bang mag-adopt ng pet na may special needs?",
+      hint: "Kapag Hindi, isasama lang ang mga pet na na-assess na walang kilalang special needs. Kapag Oo, kasama rin ang hindi pa na-assess.",
       options: { no: "Hindi", yes: "Oo" }
     },
     energyLevel: {
@@ -524,6 +525,8 @@ function getPhaseCopy(phase) {
 }
 
 function getQuestionCopy(question) {
+  // Bundled translations must not overwrite wording published by management.
+  if (question.customWording) return {};
   return QUESTION_COPY[quizLanguage]?.[question.key] || {};
 }
 

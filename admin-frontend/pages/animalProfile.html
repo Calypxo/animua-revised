@@ -270,6 +270,19 @@
     </div>
     <div class="um-modal-body">
       <form id="behavioralForm">
+        <section class="behavior-observation-editor" aria-labelledby="specialNeedsTitle">
+          <div class="behavior-observation-heading"><div><h3 id="specialNeedsTitle">Special-needs care status</h3><p>Record whether this animal requires ongoing medical support, accommodation, or special care. This status is separate from behavior scores.</p></div></div>
+          <div class="form-group">
+            <label class="form-lbl" for="specialNeedsStatus">Does this animal have special needs?</label>
+            <select class="form-inp" id="specialNeedsStatus"><option value="unknown">Not yet assessed</option><option value="no">No known special needs</option><option value="yes">Yes, requires special care</option></select>
+            <small class="account-linked-hint" id="specialNeedsReviewHint">Confirm the animal's care needs before choosing Yes or No.</small>
+          </div>
+          <div class="form-group">
+            <label class="form-lbl" for="specialNeedsNotes">Care needs and instructions</label>
+            <textarea class="form-inp form-textarea" id="specialNeedsNotes" maxlength="1000" rows="3" placeholder="Describe ongoing support or accommodations. Required when Yes is selected."></textarea>
+            <small class="account-linked-hint">These care notes are shown to prospective adopters. Keep them relevant to the animal's care.</small>
+          </div>
+        </section>
         <section class="behavior-observation-editor" aria-labelledby="behaviorObservationTitle">
           <div class="behavior-observation-heading">
             <div>
