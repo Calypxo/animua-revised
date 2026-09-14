@@ -107,7 +107,8 @@ function lifecycleUpdate(record, workflow, now = new Date()) {
   const pendingReschedule = String(reschedule.status || "").toLowerCase() === "pending";
   const isExpired = now.getTime() > deadline.getTime();
 
-  if (isExpired && !pendingReschedule) {
+  // A surrender date-change request does not grant an attendance extension.
+  if (isExpired && (!pendingReschedule || workflow === WORKFLOWS.surrender)) {
     return {
       status: "Expired",
       deadlineStatus: "Expired \u2014 No Show",

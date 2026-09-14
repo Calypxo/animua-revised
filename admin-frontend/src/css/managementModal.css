@@ -2003,6 +2003,11 @@ html body.management-consistent-ui .management-confirm-layer:not(#management-int
   gap: 6px !important;
 }
 
+/* Conditional fields must remain hidden even under the shared modal layout. */
+html body.management-consistent-ui .management-confirm-layer:not(#management-intake-contract):not(#management-intake-contract-override) .management-confirm-modal [hidden] {
+  display: none !important;
+}
+
 html body.management-consistent-ui .management-confirm-layer:not(#management-intake-contract):not(#management-intake-contract-override) .management-confirm-modal .form-lbl {
   margin: 0 !important;
   color: var(--management-modal-brown, #362822) !important;

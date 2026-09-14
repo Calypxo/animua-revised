@@ -773,16 +773,26 @@ function renderDrawer(r) {
       </div>`;
   }
 
+  const deadlineTime = new Date(r.attendanceDeadlineAt).getTime();
+  const remainingDays = Math.max(0, Math.ceil((deadlineTime - Date.now()) / 86400000));
+  const attendanceTimeLabel = r.arrivalConfirmedAt ? "Attendance completed"
+    : r.status === "Expired" ? "Request expired"
+    : !Number.isFinite(deadlineTime) ? "Deadline unavailable"
+    : deadlineTime < Date.now() ? "Deadline passed"
+    : `${remainingDays} day(s) remaining`;
   const deadlineSection = ["Approved", "Expired"].includes(r.status) ? `
     <div class="drawer-section deadline-workflow-card ${r.noShowRisk ? "is-risk" : ""}">
       <div class="drawer-section-title"><i class="bi bi-calendar2-check"></i> Attendance Deadline</div>
       <div class="drawer-info-grid">
         <div class="drawer-info-item"><div class="drawer-info-lbl">Deadline</div><div class="drawer-info-val">${formatDate(r.attendanceDeadlineAt)}</div></div>
+        <div class="drawer-info-item"><div class="drawer-info-lbl">Time Remaining</div><div class="drawer-info-val">${attendanceTimeLabel}</div></div>
+        <div class="drawer-info-item"><div class="drawer-info-lbl">Reminder Stage</div><div class="drawer-info-val">${displayValue(r.deadlineReminderStage, "Approved")}</div></div>
         <div class="drawer-info-item"><div class="drawer-info-lbl">Current State</div><div class="drawer-info-val">${displayValue(r.deadlineStatus, "Awaiting appointment")}</div></div>
         <div class="drawer-info-item"><div class="drawer-info-lbl">Drop-off Appointment</div><div class="drawer-info-val">${r.surrenderAppointment?.date ? `${formatDate(r.surrenderAppointment.date)} ${r.surrenderAppointment.time || ""}` : "Not scheduled"}</div></div>
         <div class="drawer-info-item"><div class="drawer-info-lbl">Arrival</div><div class="drawer-info-val">${r.arrivalConfirmedAt ? `Confirmed ${formatDate(r.arrivalConfirmedAt)}` : "Not confirmed"}</div></div>
       </div>
-      ${String(r.surrenderRescheduleRequest?.status || "").toLowerCase() === "pending" ? `
+      <div class="info-banner mt-2">Contact the client when attendance is at risk. Reminder stages are tracking flags, not sent messages. A reschedule requires staff approval and does not extend the deadline. Marking a no-show expires this request; it does not disable the client's account.</div>
+      ${r.status === "Approved" && String(r.surrenderRescheduleRequest?.status || "").toLowerCase() === "pending" ? `
         <div class="info-banner banner-approved mt-2">
           <strong>Drop-off reschedule awaiting review</strong>
           <div class="mt-1">${formatDate(r.surrenderRescheduleRequest.date)} ${r.surrenderRescheduleRequest.time || ""}</div>
@@ -990,7 +1000,7 @@ const attendanceWorkflowConfig = {
   "no-show": {
     title: "Mark as No Show",
     heading: "Close this request for non-attendance",
-    message: "The request will expire and the reason will be kept in its audit history.",
+    message: "The request will expire and the reason will be kept in its audit history. The client's account will remain active. Contact the client before closing the request.",
     icon: "bi-calendar-x-fill",
     button: "Mark No Show",
     danger: true,

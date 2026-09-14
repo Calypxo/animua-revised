@@ -314,6 +314,7 @@
   line-height:1.45;
 }
 .action-alert[hidden] { display:none; }
+#workflowModalBackdrop [hidden] { display: none !important; }
 .action-alert > i { margin-top:2px; font-size:1rem; }
 .action-alert strong,
 .action-alert span { display:block; }

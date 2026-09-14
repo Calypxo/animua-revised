@@ -1,5 +1,6 @@
 const { db } = require("../config/firebase");
 const sharp = require("sharp");
+const { prepareSurrenderImage } = require("../services/surrenderImageService");
 const {
   analyzeSurrenderReason,
   buildFallbackAnalysis,
@@ -229,8 +230,8 @@ async function createSurrenderRequest(req, res) {
     const agreement = body.agreement || {};
     const surrenderReason = body.surrenderReason?.trim();
     const identityDocuments = owner.identityDocuments || {};
-    const identityIdFront = normalizeImageDocument(identityDocuments.front);
-    const identityIdBack = normalizeImageDocument(identityDocuments.back);
+    let identityIdFront = normalizeImageDocument(identityDocuments.front);
+    let identityIdBack = normalizeImageDocument(identityDocuments.back);
 
     if (!surrenderReason) {
       return res.status(400).json({
@@ -277,7 +278,7 @@ async function createSurrenderRequest(req, res) {
       });
     }
 
-    const photoDataUrl = typeof pet.photoDataUrl === "string" ? pet.photoDataUrl.trim() : "";
+    let photoDataUrl = typeof pet.photoDataUrl === "string" ? pet.photoDataUrl.trim() : "";
     if (
       photoDataUrl &&
       (
@@ -289,6 +290,17 @@ async function createSurrenderRequest(req, res) {
         message: "Animal photo must be a JPG, PNG, or WebP image under 650 KB.",
       });
     }
+
+    // Older deployed clients can send three individually valid photos whose
+    // combined base64 strings exceed Firestore's 1 MiB document limit.
+    identityIdFront = await prepareSurrenderImage(identityIdFront, "front ID photo");
+    identityIdBack = await prepareSurrenderImage(identityIdBack, "back ID photo");
+    const preparedAnimalPhoto = await prepareSurrenderImage({
+      name: pet.photoName,
+      type: pet.photoType,
+      dataUrl: photoDataUrl,
+    }, "animal photo");
+    photoDataUrl = preparedAnimalPhoto.dataUrl;
 
     // Keep the public submission path fast and reliable. The local analysis is
     // deterministic and available immediately; the remote model enriches the
@@ -329,8 +341,8 @@ async function createSurrenderRequest(req, res) {
         colorMarkings: pet.colorMarkings || "",
         status: Array.isArray(pet.status) ? pet.status : [],
         vaccinationHistory: pet.vaccinationHistory || "",
-        photoName: photoDataUrl ? String(pet.photoName || "").trim().slice(0, 160) : "",
-        photoType: photoDataUrl ? String(pet.photoType || "").trim().slice(0, 80) : "",
+        photoName: photoDataUrl ? String(preparedAnimalPhoto.name || "").trim().slice(0, 160) : "",
+        photoType: photoDataUrl ? String(preparedAnimalPhoto.type || "").trim().slice(0, 80) : "",
         photoDataUrl,
       },
 
@@ -360,6 +372,14 @@ async function createSurrenderRequest(req, res) {
       intakeId: null,
       dropoffDate: null,
     };
+
+    // Leave room for Firestore field overhead and subsequent review metadata.
+    if (Buffer.byteLength(JSON.stringify(surrenderRequest), "utf8") > 950_000) {
+      return res.status(400).json({
+        code: "SURRENDER_REQUEST_TOO_LARGE",
+        message: "This request is too large to save. Shorten the written details or choose smaller photos, then try again.",
+      });
+    }
 
     await db
       .collection(COLLECTION_NAME)
@@ -392,6 +412,10 @@ async function createSurrenderRequest(req, res) {
     });
   } catch (error) {
     console.error("Create surrender request error:", error);
+
+    if (error.code === "SURRENDER_IMAGE_PROCESSING_FAILED") {
+      return res.status(400).json({ code: error.code, message: error.message });
+    }
 
     return res.status(500).json({
       message: "Failed to submit surrender request.",
