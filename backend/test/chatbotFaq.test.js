@@ -55,6 +55,33 @@ test("answers Tagalog adoptable animal availability questions with the live list
   assert.match(reply, /Find Furbabies/);
 });
 
+test("routes the English Find Furbabies quick action to the live animal list", () => {
+  const message = "Show animals ready for adoption";
+
+  assert.equal(_test.hasAnimalAvailabilityIntent(message), true);
+  assert.equal(_test.hasAdoptionHomePreparationIntent(message), false);
+  assert.equal(_test.needsPublicContext(message), true);
+
+  const reply = _test.getLocalReply(message, { pets: samplePets, events: [] }, "english");
+
+  assert.match(reply, /currently marked Ready/i);
+  assert.match(reply, /ANM-001/);
+  assert.match(reply, /ANM-002/);
+  assert.doesNotMatch(reply, /Before bringing an adopted pet home/i);
+});
+
+test("routes the English Account Help quick action to account and OTP guidance", () => {
+  const message = "Help me with my account or email OTP";
+
+  assert.equal(_test.shouldUseLocalReply(message), true);
+
+  const reply = _test.getLocalReply(message, { pets: [], events: [] }, "english");
+
+  assert.match(reply, /choose Login or Create Account/i);
+  assert.match(reply, /email OTP/i);
+  assert.doesNotMatch(reply, /I am the ANIMUA Assistant/i);
+});
+
 test("answers Tagalog color animal searches with matching Find Furbabies animals", () => {
   const message = "gusto ko ng aso na black";
 
