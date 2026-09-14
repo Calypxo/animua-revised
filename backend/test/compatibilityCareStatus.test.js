@@ -185,6 +185,69 @@ test("editing a medical record updates care and clears obsolete instructions whe
 });
 
 for (const operation of ["addMedicalRecord", "updateMedicalRecord"]) {
+  test(`${operation} assesses a Ready animal without changing its clearance or adoption state`, async () => {
+    for (const specialNeedsStatus of ["yes", "no"]) {
+      const writes = [], audits = [];
+      const clearance = { id: "clearance", type: "Quarantine Clearance", date: "2026-09-01", clearance: "Cleared" };
+      const existing = {
+        status: "Ready", currentStage: "adoption", visibleToPublic: true,
+        quarantineStatus: "Completed", quarantineClearance: "Cleared",
+        quarantineClearedAt: "2026-09-02", readyForAdoptionAt: "2026-09-02",
+        behavioralAssessment: { energyLevel: 3, specialNeeds: 4 },
+        medicalRecords: [{ id: "visit", ...medicalBody }, clearance],
+      };
+      const res = response();
+      const care = { specialNeedsStatus, specialNeedsNotes: specialNeedsStatus === "yes" ? "Daily mobility assistance." : "" };
+      await animalController(existing, writes, audits)[operation]({
+        params: { id: "pet", medicalId: "visit" }, user: careUser,
+        body: { ...medicalBody, ...care, specialNeedsBaseline: { specialNeedsStatus: "unknown", specialNeedsNotes: "" } },
+      }, res);
+      assert.equal(res.statusCode, operation === "addMedicalRecord" ? 201 : 200);
+      assert.equal(writes.length, 1);
+      const saved = { ...existing, ...writes[0] };
+      assert.equal(saved.specialNeedsStatus, specialNeedsStatus);
+      assert.equal(saved.specialNeedsNotes, care.specialNeedsNotes);
+      for (const key of ["status", "currentStage", "visibleToPublic", "quarantineStatus", "quarantineClearance", "quarantineClearedAt", "readyForAdoptionAt", "behavioralAssessment"]) {
+        assert.deepEqual(saved[key], existing[key], `${key} stays unchanged`);
+      }
+      assert.deepEqual(saved.medicalRecords.find(record => record.id === "clearance"), clearance);
+      assert.ok(saved.medicalRecords.some(record => record.specialNeedsStatus === specialNeedsStatus));
+      assert.equal(audits[0].before.specialNeedsStatus, "unknown");
+      assert.equal(audits[0].after.specialNeedsStatus, specialNeedsStatus);
+    }
+  });
+
+  test(`${operation} cannot change quarantine decisions for Ready animals`, async () => {
+    for (const [previousType, nextType] of [
+      ["Checkup", "Quarantine Clearance"],
+      ...(operation === "updateMedicalRecord" ? [["Quarantine Clearance", "Checkup"], ["Quarantine Clearance", undefined]] : []),
+    ]) {
+      const writes = [], audits = [];
+      const existing = { status: "Ready", medicalRecords: [{ id: "visit", ...medicalBody, type: previousType, clearance: "Cleared" }] };
+      const res = response();
+      await animalController(existing, writes, audits)[operation]({
+        params: { id: "pet", medicalId: "visit" }, user: careUser,
+        body: { ...medicalBody, type: nextType, clearance: "Hold" },
+      }, res);
+      assert.equal(res.statusCode, 400);
+      assert.match(res.body.message, /quarantine decisions/i);
+      assert.equal(writes.length, 0);
+      assert.equal(audits.length, 0);
+    }
+  });
+
+  test(`${operation} keeps medical records closed outside shelter care stages`, async () => {
+    for (const status of ["Profiling", "Adopted", "Archived"]) {
+      const writes = [], audits = [];
+      const existing = { status, medicalRecords: [{ id: "visit", ...medicalBody }] };
+      const res = response();
+      await animalController(existing, writes, audits)[operation]({ params: { id: "pet", medicalId: "visit" }, user: careUser, body: medicalBody }, res);
+      assert.equal(res.statusCode, 400);
+      assert.equal(writes.length, 0);
+      assert.equal(audits.length, 0);
+    }
+  });
+
   test(`${operation} preserves current care when only visit details change`, async () => {
     const writes = [];
     const existing = { status: "Quarantine", specialNeedsStatus: "yes", specialNeedsNotes: "Current care.", medicalRecords: [{ id: "visit", ...medicalBody, specialNeedsStatus: "no", specialNeedsNotes: "" }] };

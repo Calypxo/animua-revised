@@ -2726,17 +2726,17 @@
 
 /* Care status is a separate assessment, with explicit choices and practical guidance. */
 .animal-profile-page .care-summary-card {
-  padding: 22px;
-  border: 1px solid #e8dcd1;
-  border-radius: 18px;
-  background: #fff;
+  height: auto;
+  margin-bottom: 18px;
 }
+.animal-profile-page .care-summary-body { display: grid; grid-template-columns: minmax(190px, 1fr) minmax(0, 3fr); gap: 18px; padding: 14px 15px; }
+.animal-profile-page .care-summary-status { min-width: 0; padding-right: 18px; border-right: 1px solid var(--profile-line); }
+.animal-profile-page .care-summary-details { min-width: 0; }
 .animal-profile-page .medical-special-needs-fields { display: grid; gap: 14px; padding: 0 14px 16px; }
 .animal-profile-page .medical-special-needs summary { flex-wrap: wrap; gap: 8px; }
 .animal-profile-page .medical-special-needs summary small { text-transform: none; letter-spacing: 0; font-size: .68rem; }
 .animal-profile-page .medical-care-help { margin: 0; color: #756a64; font-size: .76rem; line-height: 1.6; }
 .animal-profile-page .medical-record-care { margin-top: 12px; padding: 12px 14px; border: 1px solid #eadfd4; border-radius: 10px; background: #fffaf3; overflow-wrap: anywhere; }
-.animal-profile-page .care-summary-heading { display: flex; align-items: center; gap: 13px; }
 .animal-profile-page .care-section-icon {
   width: 44px;
   height: 44px;
@@ -2747,17 +2747,6 @@
   color: #780116;
   background: #fbf0ee;
   font-size: 1.25rem;
-}
-.animal-profile-page .care-summary-heading h4 {
-  margin: 0;
-  color: #2e2522;
-  font: 750 1rem/1.4 "Poppins", sans-serif;
-}
-.animal-profile-page .care-summary-heading p {
-  margin: 3px 0 0;
-  color: #756a64;
-  font-size: .8rem;
-  line-height: 1.5;
 }
 .animal-profile-page .care-status-fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
 .animal-profile-page .care-status-fieldset legend {
@@ -2816,26 +2805,22 @@
 .animal-profile-page .care-field-requirement { color: #756a64; font-size: .7rem; font-weight: 500; }
 .animal-profile-page .special-needs-notes:has(textarea:required) .care-field-requirement { color: #780116; }
 .animal-profile-page .special-needs-notes > small { color: #756a64; font-size: .73rem; line-height: 1.5; }
-.animal-profile-page .care-summary-card { margin-bottom: 18px; background: linear-gradient(110deg, #fffaf3, #fff 70%); }
-.animal-profile-page .care-summary-heading > div { min-width: 0; }
 .animal-profile-page .care-status-badge {
   display: inline-flex;
   align-items: center;
   gap: 7px;
   flex: 0 0 auto;
-  margin-left: auto;
-  padding: 8px 12px;
+  max-width: 100%;
+  padding: 5px 8px;
   border: 1px solid color-mix(in srgb, var(--care-accent) 22%, transparent);
-  border-radius: 999px;
+  border-radius: 5px;
   color: var(--care-accent);
   background: var(--care-tint);
-  font-size: .74rem;
-  font-weight: 650;
+  font-size: .65rem;
+  font-weight: 700;
 }
-.animal-profile-page .care-summary-description { margin: 15px 0 0; color: #756a64; font-size: .82rem; line-height: 1.6; }
-.animal-profile-page .care-summary-notes { margin-top: 16px; padding-top: 15px; border-top: 1px solid #e8dcd1; }
-.animal-profile-page .care-summary-notes h5 { margin: 0 0 7px; color: #3b302a; font-size: .78rem; font-weight: 650; }
-.animal-profile-page .care-summary-notes p { margin: 0; color: #665a53; font-size: .82rem; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
+.animal-profile-page .care-summary-description { margin: 0; color: var(--profile-muted); font-size: .75rem; line-height: 1.65; }
+.animal-profile-page .care-summary-notes { margin: 7px 0 0; color: var(--profile-ink); font-size: .75rem; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
 .animal-profile-page .behavioral-assessment-empty {
   display: flex;
   align-items: center;
@@ -2852,12 +2837,11 @@
 @media (max-width: 600px) {
   :is(#behavioralModalBackdrop, #medicalModalBackdrop).management-modal-layer { padding: 0 !important; overflow: hidden !important; }
   :is(#behavioralModalBackdrop, #medicalModalBackdrop).management-modal-layer > .ap-modal { height: 100dvh !important; max-height: 100dvh !important; overflow: hidden !important; }
-  .animal-profile-page .care-summary-card { padding: 16px; }
+  .animal-profile-page .care-summary-body { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .animal-profile-page .care-summary-status { padding: 0 0 12px; border-right: 0; border-bottom: 1px solid var(--profile-line); }
   .animal-profile-page .care-status-options { grid-template-columns: minmax(0, 1fr); gap: 8px; }
   .animal-profile-page .care-status-option { flex-direction: row; align-items: center; gap: 12px; padding: 13px 37px 13px 13px; }
   #medicalModalBackdrop .care-status-option input[type="radio"] { top: calc(50% - 8px); right: 12px; }
   .animal-profile-page .care-status-option small { margin-top: 2px; }
-  .animal-profile-page .care-summary-heading { flex-wrap: wrap; }
-  .animal-profile-page .care-status-badge { margin: 2px 0 0; }
   .animal-profile-page .behavioral-assessment-empty { align-items: flex-start; gap: 12px; padding: 20px 16px; }
 }

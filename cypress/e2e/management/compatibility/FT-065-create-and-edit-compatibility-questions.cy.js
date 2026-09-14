@@ -22,7 +22,7 @@ describe("Fixed compatibility wording and animal special-needs status", () => {
       }
       if (path.endsWith("/animals/care-test/medical") || path.endsWith("/animals/care-test/medical/visit")) {
         const record = { id: "visit", ...request.body, vet: "Test Admin" };
-        animal.medicalRecords = [record];
+        animal.medicalRecords = [...(animal.medicalRecords || []).filter(item => item.id !== "visit"), record];
         if (request.body.specialNeedsStatus) {
           animal.specialNeedsStatus = request.body.specialNeedsStatus;
           animal.specialNeedsNotes = request.body.specialNeedsNotes;
@@ -74,6 +74,55 @@ describe("Fixed compatibility wording and animal special-needs status", () => {
   });
 
   [1280, 390].forEach(width => {
+    it(`assesses special needs after clearance while keeping the animal Ready at ${width}px`, () => {
+      const clearance = { id: "clearance", type: "Quarantine Clearance", date: "2026-09-01", clearance: "Cleared" };
+      animal.status = "Ready";
+      animal.quarantineClearance = "Cleared";
+      animal.medicalRecords = [clearance, { id: "visit", type: "Checkup", date: "2026-09-01", diagnosis: "Routine checkup", vet: "Test Vet" }];
+      cy.viewport(width, 720);
+      cy.visit("/pages/animalProfile.html?id=care-test");
+      cy.get('[data-tab="medical"]').click();
+      cy.get("#btnAddMedical").should("be.visible");
+      cy.get("#medicalCareSummary").should("contain.text", "Not yet assessed");
+      cy.get("#quarantineCard").should("contain.text", "Quarantine completed");
+      cy.get("[data-clearance-decision]").should("not.exist");
+      cy.get('[data-med-edit="clearance"]').should("not.exist");
+      cy.get("#medicalCareSummary").scrollIntoView().screenshot(`ready-care-unassessed-${width}`);
+      cy.get('[data-med-edit="visit"]').click();
+      cy.get("#medicalModalSubtitle").should("contain.text", "Ready for adoption");
+      cy.get('[name="specialNeedsChoice"][value="no"]').check();
+      cy.intercept("PUT", "**/api/animals/care-test/medical/visit").as("assessReadyCare");
+      cy.get("#medicalModalSave").click();
+      cy.wait("@assessReadyCare").then(({ request }) => {
+        expect(request.body.specialNeedsStatus).to.equal("no");
+        expect(request.body.specialNeedsBaseline.specialNeedsStatus).to.equal("unknown");
+        expect(request.body).not.to.have.property("status");
+        expect(animal.status).to.equal("Ready");
+      });
+      cy.get("#medicalCareSummary").should("contain.text", "No known special needs");
+      cy.get("#btnAddMedical").click();
+      cy.get("#fMedType").select("Checkup");
+      cy.get("#medicalSpecialNeedsSection > summary").click();
+      cy.get('[name="specialNeedsChoice"][value="yes"]').check();
+      cy.get("#specialNeedsNotes").type("Daily mobility assistance and accessible bedding.");
+      cy.intercept("POST", "**/api/animals/care-test/medical").as("addReadyCare");
+      cy.get("#medicalModalSave").click();
+      cy.wait("@addReadyCare").then(({ request }) => {
+        expect(request.body.specialNeedsStatus).to.equal("yes");
+        expect(request.body.specialNeedsBaseline.specialNeedsStatus).to.equal("no");
+        expect(animal.status).to.equal("Ready");
+        expect(animal.medicalRecords.find(record => record.id === "clearance")).to.deep.equal(clearance);
+      });
+      cy.get("#medicalModalBackdrop").should("not.be.visible");
+      cy.reload();
+      cy.get('[data-tab="medical"]').click();
+      cy.get("#medicalCareSummary").should("contain.text", "Requires special care").and("contain.text", "Daily mobility assistance");
+      cy.get("#medicalCareSummary").scrollIntoView().screenshot(`ready-care-assessed-${width}`);
+      cy.get("#btnAddMedical").scrollIntoView().should("be.visible");
+      cy.get("#quarantineCard").should("contain.text", "Quarantine completed").and("contain.text", "Cleared");
+      cy.get("[data-clearance-decision]").should("not.exist");
+    });
+
     it(`records special needs in medical care and keeps behavior separate at ${width}px`, () => {
       const careNotes = "Daily mobility assistance and an accessible sleeping area.";
       cy.viewport(width, 720);

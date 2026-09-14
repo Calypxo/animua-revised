@@ -40,6 +40,7 @@ import {
   clearFormDraft,
 } from "./formDrafts.js";
 import {
+  isMedicalCareAvailable,
   shouldShowAddMedical,
   buildQuarantineDecisionPayload,
 } from "./animalProfileWorkflow.js";
@@ -806,6 +807,9 @@ function renderOverviewTab() {
 
 function renderMedicalTab() {
   document.getElementById("medicalCareSummary").innerHTML = renderCareSummary("medicalCareTitle");
+  document.getElementById("medicalTabSubtitle").textContent = animal.status === "Ready"
+    ? "Continue medical care and assess special needs after clearance. This animal remains Ready for adoption."
+    : "Record clinical care, then add one clear quarantine decision when the animal is ready.";
 
   const addMedicalButton =
   document.getElementById("btnAddMedical");
@@ -862,7 +866,7 @@ if (addMedicalButton) {
               <span class="med-card-date">${formatDate(r.date)}</span>
               <span class="med-card-vet"><i class="bi bi-person-fill me-1"></i>${r.vet || "—"}</span>
               ${
-              animal.status === "Quarantine" && can("edit_medical") && r.type !== "Quarantine Clearance"
+              isMedicalCareAvailable(animal.status) && can("edit_medical") && r.type !== "Quarantine Clearance"
                 ? `
                   <button
                     class="tbl-action-btn"
@@ -909,9 +913,11 @@ if (addMedicalButton) {
   const behaviorComplete = Boolean(animal.behavioralAssessment);
   quarantineCard.innerHTML = `
     <div class="qs-title"><i class="bi bi-shield-plus"></i> Care readiness</div>
-    <p class="quarantine-workflow-help">Medical visits document care. A single <strong>Quarantine Review</strong> records the final decision; update that review if the decision changes.</p>
+    <p class="quarantine-workflow-help">${animal.status === "Ready"
+      ? "Quarantine is complete. Add or edit medical records to keep care needs current without changing adoption readiness."
+      : "Medical visits document care. A single <strong>Quarantine Review</strong> records the final decision; update that review if the decision changes."}</p>
     <div class="care-workflow" aria-label="Animal care readiness workflow">
-      <div class="care-workflow-step is-complete"><i class="bi bi-check-lg"></i><span><strong>In quarantine</strong><small>Care tracking active</small></span></div>
+      <div class="care-workflow-step ${animal.status === "Profiling" ? "" : "is-complete"}"><i class="bi ${animal.status === "Profiling" ? "bi-clock" : "bi-check-lg"}"></i><span><strong>${animal.status === "Ready" ? "Quarantine completed" : animal.status === "Profiling" ? "Awaiting quarantine" : "In quarantine"}</strong><small>${animal.status === "Ready" ? "Ready for adoption" : animal.status === "Profiling" ? "Complete the profile first" : "Care tracking active"}</small></span></div>
       <div class="care-workflow-step ${clinicalRecords.length ? "is-complete" : "is-current"}"><i class="bi ${clinicalRecords.length ? "bi-check-lg" : "bi-clipboard2-pulse"}"></i><span><strong>Medical care</strong><small>${clinicalRecords.length} record${clinicalRecords.length === 1 ? "" : "s"}</small></span></div>
       <div class="care-workflow-step ${clearStatus === "Cleared" ? "is-complete" : "is-current"}"><i class="bi ${clearStatus === "Cleared" ? "bi-check-lg" : "bi-shield-check"}"></i><span><strong>Quarantine decision</strong><small>${cc.label}</small></span></div>
       <div class="care-workflow-step ${behaviorComplete ? "is-complete" : ""}"><i class="bi ${behaviorComplete ? "bi-check-lg" : "bi-sliders"}"></i><span><strong>Behavior assessment</strong><small>${behaviorComplete ? "Complete" : "Pending"}</small></span></div>
@@ -951,19 +957,24 @@ function renderCareSummary(titleId) {
   const careStatus = specialNeedsStatus(animal);
   const careIcons = { unknown: "bi-clock-history", no: "bi-check-circle", yes: "bi-heart-pulse" };
   const careDescriptions = {
-    unknown: "Review this animal's care needs in Add Medical Record under Medical & Quarantine.",
+    unknown: "Assess care needs when adding or editing a medical record.",
     no: "Routine daily care. Update this status if additional needs are identified.",
     yes: "This animal needs ongoing support or accommodations. Review the care instructions before placement.",
   };
   return `
-    <section class="care-summary-card" data-care-status="${careStatus}" aria-labelledby="${titleId}">
-      <div class="care-summary-heading">
-        <span class="care-section-icon"><i class="bi bi-heart-pulse" aria-hidden="true"></i></span>
-        <div><h4 id="${titleId}">Special needs</h4><p>Care and support requirements</p></div>
-        <span class="care-status-badge"><i class="bi ${careIcons[careStatus]}" aria-hidden="true"></i>${specialNeedsLabel(animal)}</span>
+    <section class="info-card care-summary-card" data-care-status="${careStatus}" aria-labelledby="${titleId}">
+      <h5 class="info-card-title" id="${titleId}"><i class="bi bi-heart-pulse me-2" aria-hidden="true"></i>Special needs</h5>
+      <div class="care-summary-body">
+        <div class="care-summary-status">
+          <div class="info-lbl">Care status</div>
+          <span class="care-status-badge"><i class="bi ${careIcons[careStatus]}" aria-hidden="true"></i>${specialNeedsLabel(animal)}</span>
+        </div>
+        <div class="care-summary-details">
+          <div class="info-lbl">${careStatus === "yes" ? "Care instructions" : careStatus === "no" ? "Daily care" : "Care assessment"}</div>
+          <p class="care-summary-description">${careDescriptions[careStatus]}</p>
+          ${animal.specialNeedsNotes && careStatus !== "no" ? `<p class="care-summary-notes">${escapeHtml(animal.specialNeedsNotes)}</p>` : ""}
+        </div>
       </div>
-      <p class="care-summary-description">${careDescriptions[careStatus]}</p>
-      ${animal.specialNeedsNotes && careStatus !== "no" ? `<div class="care-summary-notes"><h5>${careStatus === "yes" ? "Care instructions" : "Care observations"}</h5><p>${escapeHtml(animal.specialNeedsNotes)}</p></div>` : ""}
     </section>`;
 }
 
@@ -1440,10 +1451,10 @@ if (!can(requiredPermission)) {
   return;
 }
 
-  if (animal.status !== "Quarantine") {
+  if (!isMedicalCareAvailable(animal.status)) {
     showToast(
       "warning",
-      "Send the animal to quarantine before adding medical records."
+      "Medical records are available for animals in Quarantine or Ready for adoption."
     );
     return;
   }
@@ -1460,7 +1471,9 @@ if (!can(requiredPermission)) {
   document.getElementById("medicalModalTitle").textContent =
     medId ? "Edit Medical Record" : "Add Medical Record";
   document.getElementById("medicalModalSubtitle").textContent =
-    "Record the visit first; add care details and inventory only when applicable.";
+    animal.status === "Ready"
+      ? "Update medical care and special needs. Saving keeps this animal Ready for adoption and preserves its quarantine clearance."
+      : "Record the visit first; add care details and inventory only when applicable.";
 
   document.getElementById("medicalForm").reset();
   const currentCare = {
@@ -1573,10 +1586,10 @@ async function saveMedicalRecord() {
     return;
   }
 
-  if (animal.status !== "Quarantine") {
+  if (!isMedicalCareAvailable(animal.status)) {
     showToast(
       "warning",
-      "Medical records can only be saved while the animal is in quarantine."
+      "Medical records are available for animals in Quarantine or Ready for adoption."
     );
     return;
   }

@@ -659,6 +659,15 @@ exports.saveBehavioralAssessment = async (req, res) => {
 };
 
 // ── ADD MEDICAL RECORD ────────────────────────────────
+function validateMedicalRecordAccess(animal, type, previousType) {
+  if (!["Quarantine", "Ready"].includes(animal.status)) {
+    throw requestError(400, "Medical records are available for animals in Quarantine or Ready for adoption.");
+  }
+  if (animal.status === "Ready" && (type === "Quarantine Clearance" || previousType === "Quarantine Clearance")) {
+    throw requestError(400, "Quarantine decisions can only be changed while the animal is in Quarantine.");
+  }
+}
+
 function medicalCareUpdate(input, animal) {
   if (!Object.hasOwn(input, "specialNeedsStatus") && !Object.hasOwn(input, "specialNeedsNotes")) return {};
   const baseline = input.specialNeedsBaseline;
@@ -711,12 +720,7 @@ exports.addMedicalRecord = async (req, res) => {
 
       const animal = animalDoc.data();
       const care = medicalCareUpdate(req.body, animal);
-      if (animal.status !== "Quarantine") {
-        throw requestError(
-          400,
-          "Medical records can only be added while the animal is in Quarantine."
-        );
-      }
+      validateMedicalRecordAccess(animal, type);
       if (
         type === "Quarantine Clearance" &&
         (animal.medicalRecords || []).some(
@@ -789,14 +793,16 @@ exports.addMedicalRecord = async (req, res) => {
         ...care,
         medicalRecords,
         history: admin.firestore.FieldValue.arrayUnion(historyEntry),
-        quarantineClearance: latestClearance?.clearance || "Pending",
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         updatedBy: req.user?.email || "",
       };
-      animalUpdates.quarantineClearedAt =
-        latestClearance?.clearance === "Cleared"
-          ? latestClearance.date || date
-          : admin.firestore.FieldValue.delete();
+      if (animal.status === "Quarantine") {
+        animalUpdates.quarantineClearance = latestClearance?.clearance || "Pending";
+        animalUpdates.quarantineClearedAt =
+          latestClearance?.clearance === "Cleared"
+            ? latestClearance.date || date
+            : admin.firestore.FieldValue.delete();
+      }
       if (weight !== undefined && weight !== null && weight !== "") {
         animalUpdates.weight = weight;
       }
@@ -1188,12 +1194,6 @@ exports.updateMedicalRecord = async (req, res) => {
 
       const animal = animalDoc.data();
       const care = medicalCareUpdate(req.body, animal);
-      if (animal.status !== "Quarantine") {
-        throw requestError(
-          400,
-          "Medical records can only be updated while the animal is in Quarantine."
-        );
-      }
 
       const records = [...(animal.medicalRecords || [])];
       const index = records.findIndex((record) => record.id === medicalId);
@@ -1202,6 +1202,7 @@ exports.updateMedicalRecord = async (req, res) => {
       }
 
       const existing = records[index];
+      validateMedicalRecordAccess(animal, type ?? existing.type, existing.type);
       if (
         String(existing.inventoryItemId || "") !==
         String(preflightRecord.inventoryItemId || "")
@@ -1316,15 +1317,16 @@ exports.updateMedicalRecord = async (req, res) => {
         ...care,
         medicalRecords: records,
         history: admin.firestore.FieldValue.arrayUnion(historyEntry),
-        quarantineClearance: latestClearance?.clearance || "Pending",
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         updatedBy: req.user?.email || "",
       };
-      animalUpdates.quarantineClearedAt =
-        latestClearance?.clearance === "Cleared"
-          ? latestClearance.date ||
-            new Date().toISOString().split("T")[0]
-          : admin.firestore.FieldValue.delete();
+      if (animal.status === "Quarantine") {
+        animalUpdates.quarantineClearance = latestClearance?.clearance || "Pending";
+        animalUpdates.quarantineClearedAt =
+          latestClearance?.clearance === "Cleared"
+            ? latestClearance.date || new Date().toISOString().split("T")[0]
+            : admin.firestore.FieldValue.delete();
+      }
       if (
         updatedRecord.weight !== undefined &&
         updatedRecord.weight !== null &&
