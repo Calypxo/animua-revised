@@ -98,6 +98,8 @@ function mapAdoptionFromBackend(a) {
     quizTopMatches: compatibility?.quizTopMatches || null,
 
     rejectedReason: a.rejectedReason || "",
+    closureReason: a.closureReason || "",
+    closedAt: a.closedAt || null,
     adoptionDate: a.adoptionDate || "",
     adoptedName: a.adoptedName || "",
     processedBy: a.processedBy || "",
@@ -183,7 +185,7 @@ const emoji = s => ({Dog:"🐶",Cat:"🐱"}[s]||"🐾");
 const thumbCls = s => ({Dog:"thumb-dog",Cat:"thumb-cat"}[s]||"thumb-other");
 
 function statusBadge(s) {
-  const m = {Pending:{cls:"badge-pending"},Approved:{cls:"badge-approved"},Finalized:{cls:"badge-finalized"},Rejected:{cls:"badge-rejected"},Expired:{cls:"badge-rejected"}}[s]||{cls:"badge-pending"};
+  const m = {Pending:{cls:"badge-pending"},Approved:{cls:"badge-approved"},Finalized:{cls:"badge-finalized"},Rejected:{cls:"badge-rejected"},Expired:{cls:"badge-rejected"},Closed:{cls:"badge-closed"}}[s]||{cls:"badge-pending"};
   return `<span class="status-badge ${m.cls}">${s}</span>`;
 }
 
@@ -556,14 +558,26 @@ function renderDrawerContent(app) {
       </div>
     </div>` : "";
 
+  const closedSection = app.status === "Closed" ? `
+    <div class="drawer-section">
+      <div class="drawer-section-title"><i class="bi bi-archive"></i> Application Closed</div>
+      <div class="no-score-box">
+        <i class="bi bi-info-circle"></i>
+        <p>This animal has been adopted by another applicant. This application was automatically closed, not rejected.<br>Closed on ${formatDate(app.closedAt)}.</p>
+      </div>
+    </div>` : "";
+
   const pickupRescheduleCount = Number(app.pickupSchedule?.rescheduleCount || 0)
     || (app.pickupSchedule?.rescheduledAt ? 1 : 0);
   const pickupRescheduleHistory = Array.isArray(app.pickupSchedule?.rescheduleHistory)
     ? app.pickupSchedule.rescheduleHistory
     : [];
+  const pickupRescheduleUsageLabel = pickupRescheduleCount > 1
+    ? `${pickupRescheduleCount} legacy changes (current limit: 1)`
+    : `${pickupRescheduleCount} of 1`;
   const rescheduleHistoryMarkup = pickupRescheduleHistory.length ? `
     <div class="info-banner banner-approved mt-2">
-      <strong>User rescheduled this pickup ${pickupRescheduleCount} of 2 times.</strong>
+      <strong>User rescheduled this pickup ${pickupRescheduleUsageLabel}.</strong>
       ${pickupRescheduleHistory.map((entry) => `
         <div class="mt-1">
           Reschedule ${entry.number || ""}: ${formatDate(entry.from?.date)} ${entry.from?.time || ""}
@@ -580,7 +594,7 @@ function renderDrawerContent(app) {
         <div class="drawer-info-item"><div class="drawer-info-lbl">Deadline</div><div class="drawer-info-val">${formatDate(app.attendanceDeadlineAt)}</div></div>
         <div class="drawer-info-item"><div class="drawer-info-lbl">Current State</div><div class="drawer-info-val">${app.deadlineStatus || "Awaiting appointment"}</div></div>
         <div class="drawer-info-item"><div class="drawer-info-lbl">Pickup Schedule</div><div class="drawer-info-val">${app.pickupSchedule?.date ? `${formatDate(app.pickupSchedule.date)} ${app.pickupSchedule.time || ""}` : "Not scheduled"}</div></div>
-        <div class="drawer-info-item"><div class="drawer-info-lbl">Reschedules Used</div><div class="drawer-info-val">${pickupRescheduleCount} of 2</div></div>
+        <div class="drawer-info-item"><div class="drawer-info-lbl">Reschedules Used</div><div class="drawer-info-val">${pickupRescheduleUsageLabel}</div></div>
         <div class="drawer-info-item"><div class="drawer-info-lbl">Arrival</div><div class="drawer-info-val">${app.arrivalConfirmedAt ? `Confirmed ${formatDate(app.arrivalConfirmedAt)}` : "Not confirmed"}</div></div>
       </div>
       ${rescheduleHistoryMarkup}
@@ -670,6 +684,7 @@ if (app.status === "Expired") {
       ${animalSection}
       ${deadlineSection}
       ${rejectedSection}
+      ${closedSection}
       ${finalizedSection}
     </div>
     <div class="drawer-footer">${footerBtns}</div>`;
@@ -888,7 +903,7 @@ async function executeFinalize() {
   }
 
   try {
-    await finalizeAdoption(confirmMode.id, {
+    const result = await finalizeAdoption(confirmMode.id, {
       adoptionDate: document.getElementById("fAdoptionDate").value,
       processedBy: document.getElementById("fAdoptionStaff").value.trim() || getUserName() || "Staff",
       adoptedName,
@@ -900,7 +915,9 @@ async function executeFinalize() {
     const app = adoptionApps.find(a => a.id === confirmMode.id);
     if (app) renderDrawerContent(app);
 
-    showToast("success", "🎉 Adoption finalized.");
+    const closedCount = Number(result.closedApplicationCount || 0);
+    showToast(result.notificationFailures ? "warning" : "success",
+      `Adoption finalized.${closedCount ? ` ${closedCount} other application(s) closed.` : ""}${result.notificationFailures ? " Some notifications could not be delivered; please contact the affected applicants." : ""}`);
   } catch (err) {
     console.error("[executeFinalize]", err);
     showToast("error", err.message || "Failed to finalize adoption.");

@@ -47,7 +47,7 @@ export function submissionDisplayStatus(item = {}, fallbackStatus = "") {
   const type = String(item.type || "").trim().toLowerCase();
   const details = item.details || {};
   const normalizedFallback = String(fallbackStatus || "").trim().toLowerCase();
-  const isTerminal = ["converted", "finalized", "expired", "rejected", "withdrawn"]
+  const isTerminal = ["converted", "finalized", "expired", "rejected", "withdrawn", "closed"]
     .some((status) => normalizedFallback.includes(status));
 
   if (!details.arrivalConfirmedAt || isTerminal) return fallbackStatus;

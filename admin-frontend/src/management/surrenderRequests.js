@@ -50,6 +50,8 @@ async function getPublicSubmittedRequests() {
         submittedAt: request.submittedAt || new Date().toISOString().split("T")[0],
         createdAt: request.createdAt || request.submittedAt || null,
         updatedAt: request.updatedAt || null,
+        nlpStatus: request.nlpStatus || (/node fallback|analysis pending/i.test(request.nlp?.source || "") ? "fallback" : "completed"),
+        nlpAnalyzedAt: request.nlpAnalyzedAt || null,
 
         owner: {
           name: ownerName,
@@ -180,6 +182,43 @@ let currentPage = 1;
 const PAGE_SIZE = 8;
 let activeTab   = "all";
 let activeId    = null;
+let analysisRefreshBusy = false;
+let analysisRefreshTimer = null;
+let reanalyzingId = null;
+
+async function refreshSurrenderAnalysis(ids = allRequests.filter(request => request.nlpStatus === "pending").map(request => request.id).slice(0, 30)) {
+  ids = ids.filter(id => id !== reanalyzingId);
+  if (!ids.length || analysisRefreshBusy || document.hidden) return;
+  analysisRefreshBusy = true;
+  try {
+    const response = await fetch(`${SURRENDER_REQUESTS_API_URL}/analysis-status?ids=${encodeURIComponent(ids.join(","))}`, {
+      credentials: "include", cache: "no-store", signal: AbortSignal.timeout(10000),
+    });
+    if (!response.ok) throw new Error(`Analysis refresh returned HTTP ${response.status}.`);
+    const data = await response.json();
+    let changed = false;
+    for (const update of data.requests || []) {
+      const request = allRequests.find(item => item.id === update.id);
+      if (!request || request.id === reanalyzingId) continue;
+      if (request.nlpAnalyzedAt && (!update.nlpAnalyzedAt || new Date(request.nlpAnalyzedAt) > new Date(update.nlpAnalyzedAt))) continue;
+      const nlp = { ...request.nlp, ...update.nlp };
+      if (JSON.stringify(nlp) === JSON.stringify(request.nlp) && request.nlpStatus === update.nlpStatus && request.nlpAnalyzedAt === update.nlpAnalyzedAt) continue;
+      request.nlp = nlp;
+      request.nlpStatus = update.nlpStatus;
+      request.nlpAnalyzedAt = update.nlpAnalyzedAt;
+      changed = true;
+      if (activeId === request.id) renderDrawer(request, true);
+    }
+    if (changed) {
+      renderStats();
+      applyFilters({ preservePage: true });
+    }
+  } catch (error) {
+    console.warn("Surrender analysis refresh:", error.message);
+  } finally {
+    analysisRefreshBusy = false;
+  }
+}
 let confirmMode = null;
 let attendanceWorkflow = null;
 let currentRole = "";
@@ -341,7 +380,7 @@ function renderStats() {
 /* ══════════════════════════════════════════════════════
    FILTER
 ══════════════════════════════════════════════════════ */
-function applyFilters() {
+function applyFilters({ preservePage = false } = {}) {
   const q    = (document.getElementById("searchSR")?.value||"").toLowerCase().trim();
   const urg  = document.getElementById("filterUrgency")?.value||"";
   const cat  = document.getElementById("filterCategory")?.value||"";
@@ -363,7 +402,7 @@ function applyFilters() {
   const resultLabel = document.getElementById("surrenderResultLabel");
   if (resultLabel) resultLabel.textContent = `${filtered.length} record${filtered.length === 1 ? "" : "s"}`;
 
-  currentPage = 1;
+  currentPage = preservePage ? Math.min(currentPage, Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))) : 1;
   renderTable();
   renderPagination();
 }
@@ -469,6 +508,7 @@ function openDrawer(id) {
   document.getElementById("srDrawer")?.setAttribute("aria-hidden", "false");
   document.body.classList.add("management-drawer-open");
   renderDrawer(r);
+  refreshSurrenderAnalysis([id]);
 }
 
 function closeDrawer() {
@@ -479,18 +519,20 @@ function closeDrawer() {
   document.querySelectorAll("tr[data-id]").forEach(r => r.classList.remove("row-active"));
 }
 
-function renderDrawer(r) {
+function renderDrawer(r, analysisOnly = false) {
   const inner = document.getElementById("srDrawerInner");
   if (!inner) return;
 
   const owner = r.owner || {};
   const agreement = r.agreement || {};
+  const analysisPending = r.nlpStatus === "pending";
+  const usesLocalRules = analysisPending || r.nlpStatus === "fallback";
 
   const urgencyScore = Math.max(0, Math.min(100, Number(r.nlp.urgencyScore) || 0));
   const fill = URGENCY_FILL[r.nlp.urgencyLabel] || "fill-low";
   const confPct = Math.max(0, Math.min(100, Math.round((Number(r.nlp.categoryConfidence ?? r.nlp.confidence) || 0) * 100)));
   const insufficientText = /insufficient meaningful text/i.test(String(r.nlp.categoryAdjustmentReason || ""));
-  const confidenceNote = insufficientText
+  const confidenceNote = usesLocalRules ? (analysisPending ? "Analysis in progress" : "Local rules only") : insufficientText
     ? "Insufficient explanation — staff review needed"
     : r.nlp.categoryAdjusted
       ? "Rule-adjusted — verify with the message"
@@ -499,7 +541,9 @@ function renderDrawer(r) {
         : confPct >= 50
           ? "Moderate category match — verify"
           : "Low category match — staff review needed";
-  const confidenceDetail = insufficientText
+  const confidenceDetail = usesLocalRules
+    ? "This preliminary result uses local rules; model confidence is not available yet."
+    : insufficientText
     ? "The submitted reason did not contain enough meaningful text for RoBERTa classification."
     : r.nlp.categoryAdjusted
       ? `RoBERTa suggested ${escapeHtml(r.nlp.modelCategory || "Other")}; ${escapeHtml(r.nlp.categoryAdjustmentReason || "a high-precision rule")} adjusted the displayed category.`
@@ -512,8 +556,7 @@ function renderDrawer(r) {
     Low: "No urgent risk was detected, but staff should still verify the request.",
   }[r.nlp.urgencyLabel] || "Review the owner's message before making a decision.";
   const keywords = Array.isArray(r.nlp.keywords) ? r.nlp.keywords : [];
-  const usesNodeFallback = /node fallback/i.test(String(r.nlp.source || ""));
-  const reanalyzeLabel = usesNodeFallback
+  const reanalyzeLabel = analysisPending ? "Analysis in progress" : usesLocalRules
     ? "Run Tagalog RoBERTa"
     : "Re-run Tagalog RoBERTa";
 
@@ -522,6 +565,7 @@ function renderDrawer(r) {
     <div class="drawer-section drawer-section-analysis">
       <div class="drawer-section-title"><i class="bi bi-clipboard2-heart"></i> Request Triage</div>
       <div class="nlp-analysis-card">
+        ${usesLocalRules ? `<div class="triage-analysis-status" role="status"><i class="bi ${analysisPending ? "bi-hourglass-split" : "bi-info-circle"}" aria-hidden="true"></i><div><strong>${analysisPending ? "RoBERTa analysis in progress" : "Preliminary analysis"}</strong><p>${analysisPending ? "The model may take about a minute to start. Results will update here automatically; no need to run it again." : "RoBERTa did not finish this analysis. The preliminary result is kept; use Run Tagalog RoBERTa to retry."}</p></div></div>` : ""}
         <div class="triage-callout">
           <span class="triage-callout-icon" aria-hidden="true"><i class="bi bi-flag-fill"></i></span>
           <div class="triage-callout-copy">
@@ -545,10 +589,11 @@ function renderDrawer(r) {
             <span class="nlp-cat-badge cat-other">
               <i class="bi bi-chat-heart-fill"></i>${escapeHtml(r.nlp.sentiment || "Neutral")}
             </span>
+            <small>Tone is separate from review urgency.</small>
           </div>
           <div class="triage-signal triage-confidence">
             <span class="triage-signal-label">Analysis confidence</span>
-            <strong>${confPct}%</strong>
+            <strong>${usesLocalRules ? "Not available" : `${confPct}%`}</strong>
             <small class="triage-signal-status">${confidenceNote}</small>
             <p>${confidenceDetail}</p>
           </div>
@@ -580,8 +625,8 @@ function renderDrawer(r) {
           <i class="bi bi-info-circle" aria-hidden="true"></i>
           <span><strong>Decision support only.</strong> Confirm the result against the owner's message before acting.</span>
           <div class="triage-analysis-source">
-            <small>Analyzed by ${escapeHtml(r.nlp.source || "automated text analysis")}</small>
-            <button class="triage-reanalyze-btn" id="reanalyzeSurrenderBtn" type="button" data-default-label="${reanalyzeLabel}">
+            <small>${usesLocalRules ? "Preliminary result from local rules" : `Analyzed by ${escapeHtml(r.nlp.source || "automated text analysis")}`}</small>
+            <button class="triage-reanalyze-btn" id="reanalyzeSurrenderBtn" type="button" data-default-label="${reanalyzeLabel}" ${analysisPending ? 'disabled aria-busy="true"' : ""}>
                 <i class="bi bi-stars" aria-hidden="true"></i>
                 ${reanalyzeLabel}
             </button>
@@ -594,6 +639,13 @@ function renderDrawer(r) {
         <div class="reason-box">"${r.surrenderReason}"</div>
       </div>
     </div>`;
+
+  if (analysisOnly) {
+    const section = inner.querySelector(".drawer-section-analysis");
+    if (section) section.outerHTML = nlpSection;
+    document.getElementById("reanalyzeSurrenderBtn")?.addEventListener("click", () => reanalyzeSurrenderRequest(r.id));
+    return;
+  }
 
   // ── Owner section ─────────────────────────────────────
   const identityIdFrontUrl = safePhotoUrl(owner.identityDocuments?.front?.dataUrl);
@@ -772,16 +824,26 @@ function renderDrawer(r) {
       </div>`;
   }
 
+  const deadlineTime = new Date(r.attendanceDeadlineAt).getTime();
+  const remainingDays = Math.max(0, Math.ceil((deadlineTime - Date.now()) / 86400000));
+  const attendanceTimeLabel = r.arrivalConfirmedAt ? "Attendance completed"
+    : r.status === "Expired" ? "Request expired"
+    : !Number.isFinite(deadlineTime) ? "Deadline unavailable"
+    : deadlineTime < Date.now() ? "Deadline passed"
+    : `${remainingDays} day(s) remaining`;
   const deadlineSection = ["Approved", "Expired"].includes(r.status) ? `
     <div class="drawer-section deadline-workflow-card ${r.noShowRisk ? "is-risk" : ""}">
       <div class="drawer-section-title"><i class="bi bi-calendar2-check"></i> Attendance Deadline</div>
       <div class="drawer-info-grid">
         <div class="drawer-info-item"><div class="drawer-info-lbl">Deadline</div><div class="drawer-info-val">${formatDate(r.attendanceDeadlineAt)}</div></div>
+        <div class="drawer-info-item"><div class="drawer-info-lbl">Time Remaining</div><div class="drawer-info-val">${attendanceTimeLabel}</div></div>
+        <div class="drawer-info-item"><div class="drawer-info-lbl">Reminder Stage</div><div class="drawer-info-val">${displayValue(r.deadlineReminderStage, "Approved")}</div></div>
         <div class="drawer-info-item"><div class="drawer-info-lbl">Current State</div><div class="drawer-info-val">${displayValue(r.deadlineStatus, "Awaiting appointment")}</div></div>
         <div class="drawer-info-item"><div class="drawer-info-lbl">Drop-off Appointment</div><div class="drawer-info-val">${r.surrenderAppointment?.date ? `${formatDate(r.surrenderAppointment.date)} ${r.surrenderAppointment.time || ""}` : "Not scheduled"}</div></div>
         <div class="drawer-info-item"><div class="drawer-info-lbl">Arrival</div><div class="drawer-info-val">${r.arrivalConfirmedAt ? `Confirmed ${formatDate(r.arrivalConfirmedAt)}` : "Not confirmed"}</div></div>
       </div>
-      ${String(r.surrenderRescheduleRequest?.status || "").toLowerCase() === "pending" ? `
+      <div class="info-banner mt-2">Contact the client when attendance is at risk. Reminder stages are tracking flags, not sent messages. A reschedule requires staff approval and does not extend the deadline. Marking a no-show expires this request; it does not disable the client's account.</div>
+      ${r.status === "Approved" && String(r.surrenderRescheduleRequest?.status || "").toLowerCase() === "pending" ? `
         <div class="info-banner banner-approved mt-2">
           <strong>Drop-off reschedule awaiting review</strong>
           <div class="mt-1">${formatDate(r.surrenderRescheduleRequest.date)} ${r.surrenderRescheduleRequest.time || ""}</div>
@@ -914,6 +976,7 @@ function renderDrawer(r) {
 async function reanalyzeSurrenderRequest(id) {
   const button = document.getElementById("reanalyzeSurrenderBtn");
   if (button?.disabled) return;
+  reanalyzingId = id;
 
   if (button) {
     button.disabled = true;
@@ -934,10 +997,11 @@ async function reanalyzeSurrenderRequest(id) {
     const request = allRequests.find(item => item.id === id);
     if (request) {
       request.nlp = { ...request.nlp, ...data.nlp };
+      request.nlpStatus = data.nlpStatus || "completed";
       request.nlpAnalyzedAt = data.nlpAnalyzedAt || null;
       renderStats();
       applyFilters();
-      renderDrawer(request);
+      if (activeId === id) renderDrawer(request, true);
     }
 
     showToast("success", data.message || "Tagalog RoBERTa analysis completed.");
@@ -947,6 +1011,8 @@ async function reanalyzeSurrenderRequest(id) {
       button.disabled = false;
       button.innerHTML = `<i class="bi bi-stars" aria-hidden="true"></i> ${button.dataset.defaultLabel || "Run Tagalog RoBERTa"}`;
     }
+  } finally {
+    reanalyzingId = null;
   }
 }
 
@@ -989,7 +1055,7 @@ const attendanceWorkflowConfig = {
   "no-show": {
     title: "Mark as No Show",
     heading: "Close this request for non-attendance",
-    message: "The request will expire and the reason will be kept in its audit history.",
+    message: "The request will expire and the reason will be kept in its audit history. The client's account will remain active. Contact the client before closing the request.",
     icon: "bi-calendar-x-fill",
     button: "Mark No Show",
     danger: true,
@@ -1357,6 +1423,9 @@ async function init() {
 
     allRequests = [...publicRequests];
     filtered = [...allRequests];
+    analysisRefreshTimer = window.setInterval(() => refreshSurrenderAnalysis(), 5000);
+    window.addEventListener("pagehide", () => window.clearInterval(analysisRefreshTimer), { once: true });
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) refreshSurrenderAnalysis(); });
 
     renderStats();
     applyFilters();

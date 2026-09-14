@@ -243,6 +243,7 @@ function getInventoryItems() {
 }
 
 module.exports = {
+  predictMovement,
   trainInventoryModel,
   getModelStatus,
   getInventoryItems,

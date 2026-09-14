@@ -20,7 +20,7 @@ test("animal photos accept the same 5 MB source limit as ID uploads", async () =
 test("animal photos are optimized before being stored in the surrender payload", async () => {
   const script = await readFile(scriptUrl, "utf8");
 
-  assert.match(script, /const MAX_PROCESSED_IMAGE_SIZE = 400 \* 1024;/);
+  assert.match(script, /const MAX_PROCESSED_IMAGE_SIZE = 220 \* 1024;/);
   assert.match(script, /const fileData = await optimizeImageUpload\(file, \{\s*fallbackName: "animal-photo",\s*label: "animal photo",\s*\}\);/);
   assert.match(script, /animalPhotoData = fileData;/);
 });

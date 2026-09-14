@@ -34,11 +34,8 @@
 <section class="cq-card cq-question-config" id="questionConfigSection">
   <div class="cq-question-config-head">
     <div class="cq-card-head"><span class="cq-card-icon"><i class="bi bi-ui-checks-grid"></i></span><div><small>Quiz content</small><h2>Quiz questions</h2><p>Review the list, then edit one question at a time.</p></div></div>
-    <div class="cq-question-actions" id="questionActions">
-      <button type="button" class="cq-btn-primary" id="addQuestionBtn"><i class="bi bi-plus-lg"></i>Add question</button>
-    </div>
   </div>
-  <div class="cq-question-summary"><div><strong id="activeQuestionCount">0</strong><span>Active questions</span></div><p><i class="bi bi-shield-check"></i>Scores remain protected. Inactive questions are hidden from public users.</p></div>
+  <div class="cq-question-summary"><div><strong id="activeQuestionCount">0</strong><span>Active questions</span></div><p><i class="bi bi-shield-check"></i>Scores remain protected. Edit question and answer wording only.</p></div>
   <div class="cq-config-error" id="questionConfigError" role="alert" hidden></div>
   <div class="cq-draft-bar" id="questionDraftBar" hidden><div><i class="bi bi-pencil-square"></i><span><strong>Unpublished changes</strong><small>Publish when the question list is ready.</small></span></div><div><button type="button" class="cq-btn-secondary" id="cancelQuestionsBtn">Discard</button><button type="button" class="cq-btn-primary" id="saveQuestionsBtn"><i class="bi bi-cloud-arrow-up"></i>Publish changes</button></div></div>
   <div class="cq-question-list" id="questionList"><div class="cq-question-loading"><span class="um-spinner"></span>Loading quiz questions…</div></div>
@@ -106,19 +103,22 @@
 </div>
 <div class="um-modal-backdrop" id="questionEditorDialog" aria-hidden="true">
   <div class="um-modal cq-question-modal management-side-modal" role="dialog" aria-modal="true" aria-labelledby="questionEditorTitle">
-    <div class="um-modal-header"><div><span class="cq-modal-kicker">Quiz question</span><h2 id="questionEditorTitle">Edit question</h2><p class="modal-subtitle">Change one question without leaving the list.</p></div><button class="modal-close-btn" type="button" data-question-close aria-label="Close question editor"><i class="bi bi-x-lg"></i></button></div>
+    <div class="um-modal-header"><div><span class="cq-modal-kicker">Question wording</span><h2 id="questionEditorTitle">Edit question</h2><p class="modal-subtitle">Improve the wording while keeping the same behavior or care topic.</p></div><button class="modal-close-btn" type="button" data-question-close aria-label="Close question editor"><i class="bi bi-x-lg"></i></button></div>
     <div class="um-modal-body">
       <div class="cq-editor-error" id="questionEditorError" role="alert" hidden></div>
+      <dl class="cq-question-context" aria-label="Fixed question details">
+        <div><dt>Linked topic</dt><dd id="editorQuestionTrait"></dd></div>
+        <div><dt>Quiz section</dt><dd id="editorQuestionPhase"></dd></div>
+      </dl>
       <div class="cq-focused-form">
-        <label class="cq-field-wide"><span>Question shown to users</span><textarea id="editorQuestionText" maxlength="300" rows="3"></textarea></label>
-        <label><span>Short label</span><input id="editorQuestionLabel" maxlength="100"></label>
-        <label><span>Quiz section</span><select id="editorQuestionPhase"><option value="lifestyle">Lifestyle</option><option value="social">Social environment</option><option value="care">Home & care</option><option value="affection">Affection</option></select></label>
-        <label><span>Scoring trait</span><select id="editorQuestionTrait"></select><small id="editorTraitHelp">Protected while the question is active.</small></label>
-        <label><span>Helper text <em>Optional</em></span><input id="editorQuestionHint" maxlength="300"></label>
+        <label class="cq-field-wide"><span>Question shown to adopters</span><textarea id="editorQuestionText" maxlength="300" rows="3" required></textarea></label>
+        <label><span>Short title</span><input id="editorQuestionLabel" maxlength="100" required></label>
+        <label><span>Guidance for adopters <em>Optional</em></span><input id="editorQuestionHint" maxlength="300" placeholder="Help adopters understand how to answer"></label>
       </div>
-      <div class="cq-focused-choices"><header><div><strong>Answer choices</strong><small>Use a score from 1 to 5 for each answer.</small></div><button type="button" id="editorAddChoice"><i class="bi bi-plus-lg"></i>Add answer</button></header><div id="editorChoiceList"></div></div>
+      <div class="cq-focused-choices"><header><div><strong>Answer wording</strong><small>Keep each answer's meaning and order. Scores stay fixed.</small></div></header><div id="editorChoiceList"></div></div>
+      <p class="cq-editor-publish-note">Save these edits to your draft, then publish from the question list when ready.</p>
     </div>
-    <div class="um-modal-footer cq-editor-footer"><button class="cq-btn-secondary" type="button" data-question-close>Cancel</button><button class="cq-btn-primary" type="button" id="applyQuestionEdit"><i class="bi bi-check2"></i>Apply to draft</button></div>
+    <div class="um-modal-footer cq-editor-footer"><button class="cq-btn-secondary" type="button" data-question-close>Cancel</button><button class="cq-btn-primary" type="button" id="applyQuestionEdit"><i class="bi bi-check2"></i>Save to draft</button></div>
   </div>
 </div>
 <div id="cqToast" role="status"><i class="bi bi-check-circle-fill"></i><span></span></div><script type="module" src="/src/management/compatibilityQuiz.js"></script>

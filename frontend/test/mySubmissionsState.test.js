@@ -89,6 +89,13 @@ test("terminal workflow statuses remain more important than attendance confirmat
     submissionDisplayStatus({
       type: "adoption",
       details: { arrivalConfirmedAt: "2026-08-29T01:00:00.000Z" },
+    }, "Closed"),
+    "Closed",
+  );
+  assert.equal(
+    submissionDisplayStatus({
+      type: "adoption",
+      details: { arrivalConfirmedAt: "2026-08-29T01:00:00.000Z" },
     }, "Finalized"),
     "Finalized",
   );

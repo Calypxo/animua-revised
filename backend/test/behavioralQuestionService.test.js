@@ -11,7 +11,7 @@ const {
 test("default behavioral questions preserve every existing behavior dimension", () => {
   const result = validateAndNormalizeBehavioralQuestions(structuredClone(DEFAULT_QUESTIONS));
   assert.equal(result.error, undefined);
-  assert.equal(result.questions.length, 17);
+  assert.equal(result.questions.length, 16);
   assert.deepEqual(new Set(result.questions.map((question) => question.traitKey)), new Set(REQUIRED_TRAITS));
 });
 

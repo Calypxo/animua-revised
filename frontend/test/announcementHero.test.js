@@ -79,3 +79,18 @@ test("announcement detail photos keep their frame while prioritizing faces", asy
     /body\.announcements-page \.announcement-detail-photo-button img\s*\{[\s\S]*?object-position:\s*center top\s*!important/,
   );
 });
+
+test("homepage announcement stories do not add status words or repeat their intro", async () => {
+  const script = await readFile(publicUiUrl, "utf8");
+
+  assert.match(
+    script,
+    /const formatStoryTitleHtml = \(title = ""\)[\s\S]*?if \(cleanTitle\.length <= 30\) \{[\s\S]*?return escapeHtml\(cleanTitle\)/,
+  );
+  assert.doesNotMatch(script, /formatStoryTitleHtml\(title, type === "Upcoming Events"/);
+  assert.doesNotMatch(
+    script,
+    /titleHtml: `\$\{escapeHtml\(title\)\}<br><span>\$\{isUpcomingEvent\(event\) \? "upcoming" : "highlight"\}<\/span>`/,
+  );
+  assert.match(script, /storyParagraphs:\s*paragraphs\.slice\(1\)/);
+});

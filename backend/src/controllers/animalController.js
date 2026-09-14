@@ -14,10 +14,12 @@ const {
   BEHAVIOR_DIMENSIONS,
   REQUIRED_TRAITS,
   cloneDefaultQuestions,
+  withoutLegacySpecialNeeds,
   validateAndNormalizeBehavioralQuestions,
   validateBehavioralAnswers,
   buildBehavioralQuestionSnapshot,
 } = require("../services/behavioralQuestionService");
+const { getSpecialNeedsStatus, validateSpecialNeeds } = require("../services/specialNeedsService");
 
 const ANIMAL_COL = "animals";
 const AUDIT_COL  = "auditLogs";
@@ -32,7 +34,7 @@ async function getBehavioralQuestionConfiguration() {
     return { questions: cloneDefaultQuestions(), version: 1, persisted: false };
   }
   const data = snapshot.data() || {};
-  const validated = validateAndNormalizeBehavioralQuestions(data.questions);
+  const validated = validateAndNormalizeBehavioralQuestions(withoutLegacySpecialNeeds(data.questions));
   if (validated.error) {
     console.error("[behavioralQuestionConfig] Stored configuration is invalid:", validated.error);
     return {
@@ -567,6 +569,9 @@ exports.saveBehavioralAssessment = async (req, res) => {
   try {
     const { id } = req.params;
     const { notes } = req.body;
+    if (Object.hasOwn(req.body, "specialNeedsStatus") || Object.hasOwn(req.body, "specialNeedsNotes")) {
+      return res.status(409).json({ message: "Special needs is now managed in Add Medical Record. Refresh the page and save care changes there." });
+    }
     const config = await getBehavioralQuestionConfiguration();
     const submittedVersion = Number(req.body?.configurationVersion);
     if (Number.isInteger(submittedVersion) && submittedVersion !== config.version) {
@@ -587,9 +592,15 @@ exports.saveBehavioralAssessment = async (req, res) => {
     }
 
     const compatibilityVector = REQUIRED_TRAITS.map((traitKey) => traits[traitKey]);
+    const previousAnimal = doc.data();
+    if (["Adopted", "Archived"].includes(previousAnimal.status)) {
+      return res.status(409).json({ message: "Assessments cannot be changed for adopted or archived animals." });
+    }
+    const care = { specialNeedsStatus: getSpecialNeedsStatus(previousAnimal), specialNeedsNotes: previousAnimal.specialNeedsNotes || "" };
     const completedAt = new Date().toISOString();
     const questionSnapshot = buildBehavioralQuestionSnapshot(config.questions, traits, answerSelections);
     const assessmentHistoryEntry = {
+      ...care,
       configurationVersion: config.version,
       questionSnapshot,
       traits,
@@ -606,6 +617,9 @@ exports.saveBehavioralAssessment = async (req, res) => {
     };
 
     await db.collection(ANIMAL_COL).doc(id).update({
+      ...(typeof previousAnimal.behavioralAssessment?.specialNeeds === "number"
+        ? { legacySpecialNeedsRating: previousAnimal.behavioralAssessment.specialNeeds }
+        : {}),
       behavioralAssessment: traits,
       behavioralNotes: notes || "",
       behavioralAssessor: req.user?.fullName || req.user?.email || "Staff",
@@ -614,6 +628,7 @@ exports.saveBehavioralAssessment = async (req, res) => {
       behavioralQuestionSnapshot: questionSnapshot,
       behavioralAssessmentHistory: admin.firestore.FieldValue.arrayUnion(assessmentHistoryEntry),
       compatibilityVector,
+      compatibilityVectorTraits: REQUIRED_TRAITS,
       history: admin.firestore.FieldValue.arrayUnion(historyEntry),
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       updatedBy: req.user?.email || "",
@@ -626,9 +641,11 @@ exports.saveBehavioralAssessment = async (req, res) => {
       targetName: getAnimalDisplayLabel(doc.data(), id),
       performedBy: req.user?.email,
       performedByName: req.user?.fullName,
+      before: { specialNeedsStatus: getSpecialNeedsStatus(previousAnimal), specialNeedsNotes: previousAnimal.specialNeedsNotes || "" },
       after: {
         traitsRecorded: REQUIRED_TRAITS.length,
         configurationVersion: config.version,
+        ...care,
       },
     });
 
@@ -642,6 +659,28 @@ exports.saveBehavioralAssessment = async (req, res) => {
 };
 
 // ── ADD MEDICAL RECORD ────────────────────────────────
+function validateMedicalRecordAccess(animal, type, previousType) {
+  if (!["Quarantine", "Ready"].includes(animal.status)) {
+    throw requestError(400, "Medical records are available for animals in Quarantine or Ready for adoption.");
+  }
+  if (animal.status === "Ready" && (type === "Quarantine Clearance" || previousType === "Quarantine Clearance")) {
+    throw requestError(400, "Quarantine decisions can only be changed while the animal is in Quarantine.");
+  }
+}
+
+function medicalCareUpdate(input, animal) {
+  if (!Object.hasOwn(input, "specialNeedsStatus") && !Object.hasOwn(input, "specialNeedsNotes")) return {};
+  const baseline = input.specialNeedsBaseline;
+  const currentStatus = getSpecialNeedsStatus(animal);
+  const currentNotes = currentStatus === "no" ? "" : String(animal.specialNeedsNotes || "").trim();
+  if (baseline && (baseline.specialNeedsStatus !== currentStatus || baseline.specialNeedsNotes !== currentNotes)) {
+    throw requestError(409, "Special-needs care changed while this record was open. Reopen the medical record and review the current care status.");
+  }
+  const care = validateSpecialNeeds(input, animal);
+  if (care.error) throw requestError(400, care.error);
+  return care;
+}
+
 exports.addMedicalRecord = async (req, res) => {
   try {
     const { id } = req.params;
@@ -680,12 +719,8 @@ exports.addMedicalRecord = async (req, res) => {
       if (!animalDoc.exists) throw requestError(404, "Animal not found.");
 
       const animal = animalDoc.data();
-      if (animal.status !== "Quarantine") {
-        throw requestError(
-          400,
-          "Medical records can only be added while the animal is in Quarantine."
-        );
-      }
+      const care = medicalCareUpdate(req.body, animal);
+      validateMedicalRecordAccess(animal, type);
       if (
         type === "Quarantine Clearance" &&
         (animal.medicalRecords || []).some(
@@ -728,6 +763,7 @@ exports.addMedicalRecord = async (req, res) => {
       }
 
       const record = {
+        ...care,
         id: medId,
         type,
         date,
@@ -754,16 +790,19 @@ exports.addMedicalRecord = async (req, res) => {
           req.user?.fullName || req.user?.email || "System User",
       };
       const animalUpdates = {
+        ...care,
         medicalRecords,
         history: admin.firestore.FieldValue.arrayUnion(historyEntry),
-        quarantineClearance: latestClearance?.clearance || "Pending",
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         updatedBy: req.user?.email || "",
       };
-      animalUpdates.quarantineClearedAt =
-        latestClearance?.clearance === "Cleared"
-          ? latestClearance.date || date
-          : admin.firestore.FieldValue.delete();
+      if (animal.status === "Quarantine") {
+        animalUpdates.quarantineClearance = latestClearance?.clearance || "Pending";
+        animalUpdates.quarantineClearedAt =
+          latestClearance?.clearance === "Cleared"
+            ? latestClearance.date || date
+            : admin.firestore.FieldValue.delete();
+      }
       if (weight !== undefined && weight !== null && weight !== "") {
         animalUpdates.weight = weight;
       }
@@ -778,7 +817,9 @@ exports.addMedicalRecord = async (req, res) => {
           targetName: getAnimalDisplayLabel(animal, id),
           performedBy: req.user?.email,
           performedByName: req.user?.fullName,
+          before: Object.keys(care).length ? { specialNeedsStatus: getSpecialNeedsStatus(animal), specialNeedsNotes: animal.specialNeedsNotes || "" } : {},
           after: {
+            ...care,
             medicalRecordId: medId,
             type,
             inventoryItemId: resolvedInventoryId,
@@ -1152,12 +1193,7 @@ exports.updateMedicalRecord = async (req, res) => {
       if (!animalDoc.exists) throw requestError(404, "Animal not found.");
 
       const animal = animalDoc.data();
-      if (animal.status !== "Quarantine") {
-        throw requestError(
-          400,
-          "Medical records can only be updated while the animal is in Quarantine."
-        );
-      }
+      const care = medicalCareUpdate(req.body, animal);
 
       const records = [...(animal.medicalRecords || [])];
       const index = records.findIndex((record) => record.id === medicalId);
@@ -1166,6 +1202,7 @@ exports.updateMedicalRecord = async (req, res) => {
       }
 
       const existing = records[index];
+      validateMedicalRecordAccess(animal, type ?? existing.type, existing.type);
       if (
         String(existing.inventoryItemId || "") !==
         String(preflightRecord.inventoryItemId || "")
@@ -1244,6 +1281,7 @@ exports.updateMedicalRecord = async (req, res) => {
           : null;
       const updatedRecord = {
         ...existing,
+        ...care,
         type: type ?? existing.type,
         date: date ?? existing.date,
         vet: existing.vet || req.user?.fullName || req.user?.email || "Staff",
@@ -1276,17 +1314,19 @@ exports.updateMedicalRecord = async (req, res) => {
           req.user?.fullName || req.user?.email || "System User",
       };
       const animalUpdates = {
+        ...care,
         medicalRecords: records,
         history: admin.firestore.FieldValue.arrayUnion(historyEntry),
-        quarantineClearance: latestClearance?.clearance || "Pending",
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         updatedBy: req.user?.email || "",
       };
-      animalUpdates.quarantineClearedAt =
-        latestClearance?.clearance === "Cleared"
-          ? latestClearance.date ||
-            new Date().toISOString().split("T")[0]
-          : admin.firestore.FieldValue.delete();
+      if (animal.status === "Quarantine") {
+        animalUpdates.quarantineClearance = latestClearance?.clearance || "Pending";
+        animalUpdates.quarantineClearedAt =
+          latestClearance?.clearance === "Cleared"
+            ? latestClearance.date || new Date().toISOString().split("T")[0]
+            : admin.firestore.FieldValue.delete();
+      }
       if (
         updatedRecord.weight !== undefined &&
         updatedRecord.weight !== null &&
@@ -1306,12 +1346,14 @@ exports.updateMedicalRecord = async (req, res) => {
           performedBy: req.user?.email,
           performedByName: req.user?.fullName,
           before: {
+            ...(Object.keys(care).length ? { specialNeedsStatus: getSpecialNeedsStatus(animal), specialNeedsNotes: animal.specialNeedsNotes || "" } : {}),
             medicalRecordId: medicalId,
             type: existing.type,
             inventoryItemId: oldInventoryId,
             quantityUsed: oldQuantity,
           },
           after: {
+            ...care,
             medicalRecordId: medicalId,
             type: updatedRecord.type,
             inventoryItemId: newInventoryId,

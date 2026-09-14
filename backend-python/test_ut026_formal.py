@@ -46,7 +46,7 @@ class UT026PythonMatcherParity(unittest.TestCase):
         values.update(attentionNeeds=1, groomingNeeds=5, healthRiskLevel=4)
         profile = build_user_profile(values)
         self.assertEqual(profile["attentionNeeds"], 3)
-        self.assertEqual(profile["specialNeeds"], 4)
+        self.assertNotIn("specialNeeds", profile)
         self.assertNotIn("climateTolerance", profile)
 
     def test_scenario_4_exact_close_far_ranking_matches_node(self):

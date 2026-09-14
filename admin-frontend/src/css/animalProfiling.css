@@ -2429,104 +2429,10 @@
 .animal-profile-page .behavioral-form-meta .form-lbl { font-size: .62rem; }
 .animal-profile-page .behavioral-form-meta .form-inp { min-height: 37px; height: 37px; background: #FFFFFF; }
 .animal-profile-page .behavioral-form-meta textarea.form-inp { min-height: 37px; padding-block: 9px; resize: vertical; }
-.animal-profile-page .behavior-observation-editor {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 14px;
-  margin-top: 14px;
-  padding: 18px;
-  border: 1px solid var(--profile-line);
-  border-radius: 15px;
-  background: #FFFFFF;
-  box-shadow: 0 8px 22px rgba(54, 40, 34, .05);
-}
 .animal-profile-page .trait-score-option span,
 .animal-profile-page .trait-score-option small { display: block; }
 .animal-profile-page .trait-score-option span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .animal-profile-page .trait-score-option small { margin-top: 3px; color: inherit; font-size: .52rem; opacity: .72; }
-.animal-profile-page .behavior-observation-heading {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid #eee1d7;
-}
-.animal-profile-page .behavior-observation-heading > div { min-width: 0; }
-.animal-profile-page .behavior-observation-heading h3 {
-  margin: 0;
-  color: var(--profile-ink);
-  font: 800 .84rem/1.25 "Poppins", sans-serif;
-}
-.animal-profile-page .behavior-observation-heading p {
-  max-width: 540px;
-  margin: 5px 0 0;
-  color: #81766e;
-  font: 500 .66rem/1.5 "Poppins", sans-serif;
-}
-.animal-profile-page .behavior-add-btn {
-  min-height: 40px;
-  flex: 0 0 auto;
-  border-color: #e2c16d !important;
-  color: #780116 !important;
-  background: #fff1c9 !important;
-}
-.animal-profile-page .behavior-observation-list {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 11px;
-}
-.animal-profile-page .behavior-observation-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 11px;
-  padding: 15px;
-  border: 1px solid #eadfd4;
-  border-left: 4px solid #780116;
-  border-radius: 13px;
-  background: #fffaf3;
-}
-.animal-profile-page .behavior-observation-row-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-.animal-profile-page .behavior-observation-row-head > span {
-  color: #780116;
-  font: 800 .63rem/1.2 "Poppins", sans-serif;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-}
-.animal-profile-page .behavior-remove-btn {
-  min-height: 34px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 0 10px;
-  border: 1px solid #eadfd4;
-  border-radius: 999px;
-  color: #780116;
-  background: #FFFFFF;
-  font: 750 .61rem/1 "Poppins", sans-serif;
-}
-.animal-profile-page .behavior-remove-btn:hover,
-.animal-profile-page .behavior-remove-btn:focus-visible {
-  border-color: #780116;
-  background: #fff0ef;
-}
-.animal-profile-page .behavior-observation-empty {
-  min-height: 82px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 15px;
-  border: 1px dashed #dfd3cb;
-  border-radius: 13px;
-  color: #81766e;
-  background: #FFF8EE;
-}
-
 .animal-profile-page .medical-inventory-search:focus-within {
   border-color: #f7b538 !important;
   background: #FFFFFF !important;
@@ -2536,29 +2442,6 @@
 .animal-profile-page .medical-inventory-search.invalid {
   border-color: var(--profile-red);
   background: #fff5f3;
-}
-.animal-profile-page .behavior-observation-empty > i {
-  width: 38px;
-  height: 38px;
-  display: grid;
-  place-items: center;
-  flex: 0 0 38px;
-  border-radius: 11px;
-  color: #780116;
-  background: #fff1c9;
-}
-.animal-profile-page .behavior-observation-empty strong,
-.animal-profile-page .behavior-observation-empty span { display: block; }
-.animal-profile-page .behavior-observation-empty strong { color: #362822; font-size: .7rem; }
-.animal-profile-page .behavior-observation-empty span { margin-top: 3px; font-size: .61rem; line-height: 1.45; }
-.animal-profile-page .behavior-observation-error {
-  margin: 0;
-  padding: 10px 12px;
-  border: 1px solid rgba(120, 1, 22, .16);
-  border-radius: 10px;
-  color: #780116;
-  background: #fff0ef;
-  font: 650 .64rem/1.45 "Poppins", sans-serif;
 }
 .animal-profile-page .behavioral-observation-summary {
   margin-top: 12px;
@@ -2587,12 +2470,6 @@
 }
 .animal-profile-page .behavioral-observation-summary article span { color: #362822; font-size: .68rem; font-weight: 800; }
 .animal-profile-page .behavioral-observation-summary article p { margin: 3px 0 0; color: #81766e; font-size: .62rem; line-height: 1.45; }
-@media (max-width: 600px) {
-  .animal-profile-page .behavior-observation-heading { flex-direction: column; }
-  .animal-profile-page .behavior-add-btn { width: 100%; }
-  .animal-profile-page .behavior-observation-editor,
-  .animal-profile-page .behavior-observation-row { padding: 14px; }
-}
 .animal-profile-page .behavioral-modal .um-modal-footer { gap: 8px; padding: 11px 18px; }
 .animal-profile-page .modal-save-hint { display: inline-flex; align-items: center; gap: 6px; margin-right: auto; color: #81766e; font-size: .59rem; font-weight: 650; }
 .animal-profile-page .modal-save-hint i { color: #187b55; }
@@ -2845,4 +2722,126 @@
   .animal-profile-page .trait-score-options { grid-template-columns: minmax(0, 1fr); }
   .animal-profile-page .trait-score-option { height: auto; min-height: 42px; padding: 8px 10px; text-align: left; }
   .animal-profile-page .trait-score-option span { white-space: normal; }
+}
+
+/* Care status is a separate assessment, with explicit choices and practical guidance. */
+.animal-profile-page .care-summary-card {
+  height: auto;
+  margin-bottom: 18px;
+}
+.animal-profile-page .care-summary-body { display: grid; grid-template-columns: minmax(190px, 1fr) minmax(0, 3fr); gap: 18px; padding: 14px 15px; }
+.animal-profile-page .care-summary-status { min-width: 0; padding-right: 18px; border-right: 1px solid var(--profile-line); }
+.animal-profile-page .care-summary-details { min-width: 0; }
+.animal-profile-page .medical-special-needs-fields { display: grid; gap: 14px; padding: 0 14px 16px; }
+.animal-profile-page .medical-special-needs summary { flex-wrap: wrap; gap: 8px; }
+.animal-profile-page .medical-special-needs summary small { text-transform: none; letter-spacing: 0; font-size: .68rem; }
+.animal-profile-page .medical-care-help { margin: 0; color: #756a64; font-size: .76rem; line-height: 1.6; }
+.animal-profile-page .medical-record-care { margin-top: 12px; padding: 12px 14px; border: 1px solid #eadfd4; border-radius: 10px; background: #fffaf3; overflow-wrap: anywhere; }
+.animal-profile-page .care-section-icon {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  color: #780116;
+  background: #fbf0ee;
+  font-size: 1.25rem;
+}
+.animal-profile-page .care-status-fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+.animal-profile-page .care-status-fieldset legend {
+  float: none;
+  width: auto;
+  margin: 0 0 10px;
+  padding: 0;
+  color: #3b302a;
+  font: 650 .82rem/1.5 "Poppins", sans-serif;
+}
+.animal-profile-page .care-status-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.animal-profile-page [data-care-status="unknown"] { --care-accent: #866016; --care-tint: #fff8e8; }
+.animal-profile-page [data-care-status="no"] { --care-accent: #276751; --care-tint: #eff8f2; }
+.animal-profile-page [data-care-status="yes"] { --care-accent: #780116; --care-tint: #fdf1f2; }
+.animal-profile-page .care-status-option {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  margin: 0;
+  padding: 15px;
+  border: 1px solid #e7ddd5;
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color .15s, background .15s, box-shadow .15s;
+}
+.animal-profile-page .care-status-option:hover { border-color: var(--care-accent); background: var(--care-tint); }
+.animal-profile-page .care-status-option:has(input:checked) {
+  border-color: var(--care-accent);
+  background: var(--care-tint);
+  box-shadow: inset 0 0 0 1px var(--care-accent);
+}
+.animal-profile-page .care-status-option:has(input:focus-visible) { outline: 3px solid #eeb450; outline-offset: 3px; }
+#medicalModalBackdrop .care-status-option input[type="radio"] {
+  position: absolute;
+  top: 16px;
+  right: 14px;
+  width: 17px !important;
+  max-width: 17px !important;
+  height: 17px;
+  min-height: 0;
+  margin: 0;
+  accent-color: var(--care-accent);
+  cursor: pointer;
+}
+#medicalModalBackdrop .care-status-option input:focus-visible { outline: none !important; box-shadow: none !important; }
+.animal-profile-page .care-status-option > i { color: var(--care-accent); font-size: 1.2rem; line-height: 1; }
+.animal-profile-page .care-status-option strong { display: block; color: #332a25; font: 650 .8rem/1.5 "Poppins", sans-serif; }
+.animal-profile-page .care-status-option small { display: block; margin-top: 4px; color: #756a64; font-size: .72rem; line-height: 1.5; }
+.animal-profile-page .care-status-hint { margin: -5px 0 0; color: #756a64; font-size: .76rem; line-height: 1.6; }
+.animal-profile-page .special-needs-notes { display: grid; gap: 9px; padding-top: 17px; border-top: 1px solid #eee2d8; }
+#specialNeedsNotesGroup[hidden] { display: none !important; }
+.animal-profile-page .care-notes-label { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0; color: #3b302a; font-size: .82rem; font-weight: 650; }
+.animal-profile-page .care-field-requirement { color: #756a64; font-size: .7rem; font-weight: 500; }
+.animal-profile-page .special-needs-notes:has(textarea:required) .care-field-requirement { color: #780116; }
+.animal-profile-page .special-needs-notes > small { color: #756a64; font-size: .73rem; line-height: 1.5; }
+.animal-profile-page .care-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  max-width: 100%;
+  padding: 5px 8px;
+  border: 1px solid color-mix(in srgb, var(--care-accent) 22%, transparent);
+  border-radius: 5px;
+  color: var(--care-accent);
+  background: var(--care-tint);
+  font-size: .65rem;
+  font-weight: 700;
+}
+.animal-profile-page .care-summary-description { margin: 0; color: var(--profile-muted); font-size: .75rem; line-height: 1.65; }
+.animal-profile-page .care-summary-notes { margin: 7px 0 0; color: var(--profile-ink); font-size: .75rem; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
+.animal-profile-page .behavioral-assessment-empty {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 28px 24px;
+  border: 1px dashed #decec0;
+  border-radius: 16px;
+  background: #fffcf7;
+}
+.animal-profile-page .behavioral-assessment-empty .care-section-icon { background: #fff0d7; }
+.animal-profile-page .assessment-empty-label { color: #876b4d; font-size: .68rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.animal-profile-page .behavioral-assessment-empty h4 { margin: 5px 0 7px; color: #3b302a; font: 700 .94rem/1.5 "Poppins", sans-serif; }
+.animal-profile-page .behavioral-assessment-empty p { max-width: 580px; margin: 0; color: #756a64; font-size: .8rem; line-height: 1.7; }
+@media (max-width: 600px) {
+  :is(#behavioralModalBackdrop, #medicalModalBackdrop).management-modal-layer { padding: 0 !important; overflow: hidden !important; }
+  :is(#behavioralModalBackdrop, #medicalModalBackdrop).management-modal-layer > .ap-modal { height: 100dvh !important; max-height: 100dvh !important; overflow: hidden !important; }
+  .animal-profile-page .care-summary-body { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .animal-profile-page .care-summary-status { padding: 0 0 12px; border-right: 0; border-bottom: 1px solid var(--profile-line); }
+  .animal-profile-page .care-status-options { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .animal-profile-page .care-status-option { flex-direction: row; align-items: center; gap: 12px; padding: 13px 37px 13px 13px; }
+  #medicalModalBackdrop .care-status-option input[type="radio"] { top: calc(50% - 8px); right: 12px; }
+  .animal-profile-page .care-status-option small { margin-top: 2px; }
+  .animal-profile-page .behavioral-assessment-empty { align-items: flex-start; gap: 12px; padding: 20px 16px; }
 }

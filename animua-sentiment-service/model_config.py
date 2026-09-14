@@ -11,6 +11,8 @@ MODEL_NAME = (
 )
 
 DATASET_PATH = SERVICE_DIR / "surrender_sentiment_dataset.csv"
+ADDITIONAL_DATASET_PATH = SERVICE_DIR / "additional_training.csv"
+TRAINING_DATASET_PATHS = (DATASET_PATH, ADDITIONAL_DATASET_PATH)
 TRANSFORMER_MODEL_DIR = SERVICE_DIR / "models" / "roberta"
 
 MODEL_SOURCE_LABEL = "Tagalog RoBERTa Transformer"

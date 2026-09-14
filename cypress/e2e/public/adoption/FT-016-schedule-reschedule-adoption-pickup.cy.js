@@ -1,5 +1,5 @@
 describe("FT-016 — Schedule and Reschedule Adoption Pickup", () => {
-  it("directly saves two reschedules and then disables the action", () => {
+  it("directly saves one reschedule and then disables the action", () => {
     cy.loginClient();
     cy.intercept("GET", "**/api/adoptions/my-applications").as("myAdoptions");
     cy.intercept("GET", "**/api/surrenders/my-requests").as("mySurrenders");
@@ -49,7 +49,7 @@ describe("FT-016 — Schedule and Reschedule Adoption Pickup", () => {
       .and("contain.text", "9:00 AM")
       .and("contain.text", "Pickup Schedule");
     cy.get(".application-detail-modal")
-      .should("contain.text", "Two reschedules available");
+      .should("contain.text", "One reschedule available");
     cy.contains('[data-schedule-kind="adoption"]', "Reschedule").click();
 
     cy.get(".schedule-picker").should("be.visible");
@@ -61,10 +61,10 @@ describe("FT-016 — Schedule and Reschedule Adoption Pickup", () => {
       expect(request.body.time).to.equal("10:00");
       expect(response?.statusCode).to.equal(200);
       expect(response?.body?.message).to.equal(
-        "Pickup rescheduled successfully. You have one reschedule remaining.",
+        "Pickup rescheduled successfully. This is your final pickup schedule.",
       );
-      expect(response?.body?.finalReschedule).to.equal(false);
-      expect(response?.body?.reschedulesRemaining).to.equal(1);
+      expect(response?.body?.finalReschedule).to.equal(true);
+      expect(response?.body?.reschedulesRemaining).to.equal(0);
       expect(response?.body?.pickupSchedule).to.include({
         date: request.body.date,
         time: "10:00",
@@ -76,36 +76,9 @@ describe("FT-016 — Schedule and Reschedule Adoption Pickup", () => {
     });
     cy.get(".application-detail-modal")
       .should("contain.text", "Pickup Rescheduled")
-      .and("contain.text", "one reschedule remaining")
-      .and("contain.text", "Final reschedule available")
+      .and("contain.text", "used your one reschedule")
+      .and("contain.text", "Reschedule limit reached")
       .and("contain.text", "10:00 AM");
-    cy.contains('[data-schedule-kind="adoption"]', "Reschedule")
-      .should("be.enabled")
-      .click();
-
-    cy.get(".schedule-picker")
-      .should("be.visible")
-      .and("contain.text", "This is your final reschedule")
-      .and("contain.text", "account may be suspended");
-    cy.get(".schedule-day:not([disabled])").first().click();
-    cy.get('[data-time-value="17:00"]').click();
-    cy.get(".schedule-picker-save").click();
-    cy.wait("@savePickupSchedule", { timeout: 30000 }).then(({ request, response }) => {
-      expect(request.body.time).to.equal("17:00");
-      expect(response?.statusCode).to.equal(200);
-      expect(response?.body?.finalReschedule).to.equal(true);
-      expect(response?.body?.reschedulesRemaining).to.equal(0);
-      expect(response?.body?.pickupSchedule).to.include({
-        date: request.body.date,
-        time: "17:00",
-        rescheduleCount: 2,
-      });
-      expect(response?.body?.pickupSchedule?.rescheduleHistory).to.have.length(2);
-    });
-    cy.get(".application-detail-modal")
-      .should("contain.text", "Reschedule limit reached")
-      .and("contain.text", "used both reschedules")
-      .and("contain.text", "5:00 PM");
     cy.get('[data-schedule-kind="adoption"]')
       .should("be.disabled")
       .and("have.class", "is-disabled");

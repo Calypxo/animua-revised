@@ -1,4 +1,6 @@
+import csv
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
 import app
@@ -199,6 +201,130 @@ class SurrenderIntegrationTests(unittest.TestCase):
 
         self.assertEqual(financial[0], "Financial")
         self.assertEqual(abandonment[0], "Abandonment Risk")
+
+    def test_owner_incapacity_context_is_not_changed_to_pet_medical(self):
+        reasons = [
+            "Owner po ay may sakit at hindi na kaya ang daily pet care.",
+            "Dahil po ako ay naospital at wala nang mag-aalaga sa alaga.",
+        ]
+
+        for reason in reasons:
+            with self.subTest(reason=reason):
+                category, adjustment_reason = app.resolve_category(
+                    reason,
+                    "Owner Incapacity",
+                    predicted_confidence=0.98,
+                )
+
+                self.assertEqual(category, "Owner Incapacity")
+                self.assertEqual(adjustment_reason, "")
+
+    def test_confident_model_category_survives_noncritical_keyword_conflict(self):
+        category, adjustment_reason = app.resolve_category(
+            "The owner has no money, but relocation is the main surrender reason.",
+            "Relocation",
+            predicted_confidence=0.95,
+        )
+
+        self.assertEqual(category, "Relocation")
+        self.assertEqual(adjustment_reason, "")
+
+    def test_low_confidence_category_can_still_be_corrected(self):
+        category, adjustment_reason = app.resolve_category(
+            "The owner has no money for the pet's food.",
+            "Relocation",
+            predicted_confidence=0.55,
+        )
+
+        self.assertEqual(category, "Financial")
+        self.assertEqual(adjustment_reason, "Explicit financial constraint")
+
+    def test_known_low_confidence_category_misses_are_corrected(self):
+        cases = [
+            (
+                "We have to move out and cannot keep the dog",
+                "Overcrowding",
+                0.3573,
+                "Relocation",
+            ),
+            (
+                "The animal is dangerous and difficult to control",
+                "Medical",
+                0.7581,
+                "Behavioral",
+            ),
+        ]
+
+        for reason, prediction, confidence, expected in cases:
+            with self.subTest(reason=reason):
+                final_category, adjustment_reason = app.resolve_category(
+                    reason,
+                    prediction,
+                    predicted_confidence=confidence,
+                )
+
+                self.assertEqual(final_category, expected)
+                self.assertTrue(adjustment_reason)
+
+    def test_caregiver_limitation_corrects_weak_behavioral_predictions(self):
+        reasons = [
+            "Matanda na po kasi yung nag-aalaga sakanya kaya na n-neglect na po yung pusa",
+            "Matanda na po ang nag aalaga sa kanya kaya hindi na maasikaso ang pusa.",
+            "Yung nag-aalaga sa kanya ay matanda na at hirap sa pag-aalaga.",
+            "Mahina na ang lola ko kaya hindi niya maalagaan ang aso.",
+            "The caregiver is elderly and can no longer provide daily care for the cat.",
+            "The owner is bedridden and cannot care for the pet.",
+        ]
+        for reason in reasons:
+            with self.subTest(reason=reason):
+                category, adjustment = app.resolve_category(reason, "Behavioral", 0.30)
+                self.assertEqual(category, "Owner Incapacity")
+                self.assertEqual(adjustment, "Explicit owner or caregiver incapacity")
+
+    def test_caregiver_rules_do_not_confuse_pet_age_or_override_danger(self):
+        for reason, predicted, expected in [
+            ("Matanda na po yung pusa na inaalagaan ng lola ko.", "Medical", "Medical"),
+            ("The elderly cat is cared for by its owner.", "Medical", "Medical"),
+            ("Hindi naman matanda ang nag-aalaga sa pusa.", "Other", "Other"),
+            ("The owner is not elderly and the dog keeps biting people.", "Behavioral", "Behavioral"),
+            ("Matanda na ang may-ari pero nangangagat ang aso.", "Other", "Behavioral"),
+            ("Matanda na ang nag-aalaga pero dumudugo ang pusa.", "Behavioral", "Medical"),
+        ]:
+            with self.subTest(reason=reason):
+                category, _ = app.resolve_category(reason, predicted, 0.30)
+                self.assertEqual(category, expected)
+        category, _ = app.resolve_category("The caregiver is elderly but relocation is the reason for surrender.", "Relocation", 0.95)
+        self.assertEqual(category, "Relocation")
+
+    def test_caregiver_correction_preserves_raw_prediction_and_confidence(self):
+        reason = "Matanda na po kasi yung nag-aalaga sakanya kaya na n-neglect na po yung pusa"
+        with patch.object(app, "predict_sentiment_and_category", return_value={
+            "sentiment": ("Negative", 0.70), "category": ("Behavioral", 0.30),
+            "source": "Tagalog RoBERTa Transformer",
+        }):
+            result = app.analyze_reason(reason)
+        self.assertEqual(result["category"], "Owner Incapacity")
+        self.assertEqual(result["modelCategory"], "Behavioral")
+        self.assertEqual(result["categoryConfidence"], 0.30)
+        self.assertTrue(result["categoryAdjusted"])
+        self.assertEqual(result["urgencyLabel"], "Medium")
+
+    def test_rules_do_not_harm_any_trusted_training_category(self):
+        dataset_path = (
+            Path(__file__).resolve().parent
+            / "surrender_sentiment_dataset.csv"
+        )
+        with open(dataset_path, "r", encoding="utf-8-sig", newline="") as file:
+            rows = list(csv.DictReader(file))
+
+        for row_number, row in enumerate(rows, start=2):
+            with self.subTest(row=row_number, reason=row["reason"]):
+                final_category, _ = app.resolve_category(
+                    row["reason"],
+                    row["category"],
+                    predicted_confidence=0.99,
+                )
+                self.assertEqual(final_category, row["category"])
 
     def test_health_exposes_rules_version_for_deployment_verification(self):
         status = app.health()

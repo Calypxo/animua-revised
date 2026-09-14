@@ -10,6 +10,7 @@ const {
   updateSurrenderAvailability,
   createSurrenderRequest,
   getAllSurrenderRequests,
+  getSurrenderAnalysisStatuses,
   reanalyzeSurrenderRequest,
   getMySurrenderRequests,
   scheduleMySurrenderAppointment,
@@ -54,6 +55,13 @@ router.get(
   authenticateToken,
   authorizeRole("Admin", "Staff"),
   getAllSurrenderRequests
+);
+
+router.get(
+  "/analysis-status",
+  authenticateToken,
+  authorizeRole("Admin", "Staff"),
+  getSurrenderAnalysisStatuses
 );
 
 router.post(

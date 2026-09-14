@@ -753,35 +753,12 @@ function hasGoodbyeIntent(text = "") {
 
 function hasAssistantHelpIntent(text = "") {
   const tokens = getMessageTokens(text);
-  const mentionsAnimuaService = includesAnyWord(text, [
-    "animua",
-    "adopt",
-    "adoption",
-    "surrender",
-    "account",
-    "otp",
-    "pet",
-    "pets",
-    "animal",
-    "animals",
-    "dog",
-    "cat",
-    "furbabies",
-    "match",
-    "quiz",
-    "donation",
-    "stray",
-    "event",
-    "events",
-    "contact",
-    "office"
-  ]);
 
   if (includesAnyPhrase(text, ["who are you", "what can you do", "ano ka"])) return true;
   if (includesAnyWord(text, ["assistant"])) return true;
 
   return includesAnyWord(text, ["help", "assist", "tulong"]) &&
-    (tokens.length <= 3 || mentionsAnimuaService);
+    tokens.length <= 3;
 }
 
 function hasStatusIntent(text = "") {
@@ -2024,20 +2001,20 @@ function getAdoptionRescheduleAccountReply(adoption, language = "english") {
 
   const explicitCount = Number(schedule.rescheduleCount || 0);
   const usedCount = Math.max(0, explicitCount || (schedule.rescheduledAt ? 1 : 0));
-  const remaining = Math.max(0, 2 - usedCount);
+  const remaining = Math.max(0, 1 - usedCount);
 
   if (!remaining) {
     return localizedReply(
       language,
-      `You have already used both pickup reschedules for ${petName}${reference}. The current pickup schedule is final and the Reschedule option is disabled. If you cannot attend, contact the Angeles City Veterinary Office immediately because your account may be suspended.`,
-      `Nagamit mo na ang parehong pickup reschedules para kay ${petName}${reference}. Final na ang current pickup schedule at disabled na ang Reschedule option. Kung hindi ka makakadalo, kontakin agad ang Angeles City Veterinary Office dahil maaaring ma-suspend ang account mo.`
+      `You have already used your one pickup reschedule for ${petName}${reference}. The current pickup schedule is final and the Reschedule option is disabled. Your account will be disabled if the 14-day attendance deadline passes without a confirmed pickup.`,
+      `Nagamit mo na ang isang pickup reschedule para kay ${petName}${reference}. Final na ang current pickup schedule at disabled na ang Reschedule option. Made-disable ang account mo kapag lumampas ang 14-day attendance deadline nang walang confirmed pickup.`
     );
   }
 
   return localizedReply(
     language,
-    `You have ${remaining === 1 ? "one final pickup reschedule" : "two pickup reschedules"} remaining for ${petName}${reference}. Open My Applications and use Reschedule. Choose today or a later date within the active 14-day attendance deadline; the valid change is saved immediately without a separate review.${remaining === 1 ? " Your next change will be final." : ""}`,
-    `May ${remaining === 1 ? "isang final pickup reschedule" : "dalawang pickup reschedules"} ka pang natitira para kay ${petName}${reference}. Buksan ang My Applications at gamitin ang Reschedule. Pumili ng date ngayong araw o mas huli na pasok sa active 14-day attendance deadline; agad mase-save ang valid change nang walang hiwalay na review.${remaining === 1 ? " Final na ang susunod mong pagbabago." : ""}`
+    `You have one pickup reschedule remaining for ${petName}${reference}. Open My Applications and use Reschedule. Choose today or a later date within the active 14-day attendance deadline; the valid change is saved immediately without a separate review. Your next change will be final.`,
+    `May isang pickup reschedule ka pang natitira para kay ${petName}${reference}. Buksan ang My Applications at gamitin ang Reschedule. Pumili ng date ngayong araw o mas huli na pasok sa active 14-day attendance deadline; agad mase-save ang valid change nang walang hiwalay na review. Final na ang susunod mong pagbabago.`
   );
 }
 
@@ -2318,10 +2295,11 @@ function hasAdoptionHomePreparationIntent(text = "") {
   }
 
   return hasAdoptionMentionIntent(text) && (
-    includesAnyWord(text, ["prepare", "ready", "home", "house", "before", "needs", "supplies", "gamit", "handa", "bahay", "iuwi", "iuuwi"]) ||
+    includesAnyWord(text, ["prepare", "home", "house", "before", "needs", "supplies", "gamit", "handa", "bahay", "iuwi", "iuuwi"]) ||
     includesAnyPhrase(text, [
       "before bringing",
       "before adoption",
+      "get ready to adopt",
       "prepare my home",
       "ready my home",
       "ano ihahanda",
@@ -2689,9 +2667,9 @@ function buildSystemPrompt(context = {}, language = "english") {
     "If the user asks about adoption fees, say adoption through ANIMUA has no adoption fee, but application review is still required.",
     "If the user asks about adoption status, approval timing, pickup schedule, pickup requirements, or rescheduling, tell them to sign in and check My Applications. Never invent a date, time, approval result, or private status.",
     "If the user is logged in and adoption context is provided, use that context for pickup schedule or latest application status. If no private context is provided, do not pretend to know their record.",
-    "For an approved adoption pickup, a user may reschedule in My Applications up to two times. Each valid change saves immediately without staff approval, must be today or later and within the active 14-day attendance deadline, and the second reschedule is final.",
-    "ANIMUA does not provide a cancel or withdraw option for submitted adoption applications. If an application is approved, the applicant must follow the 14-day attendance deadline; failure to comply may lead to account suspension. Remind users to apply only when they are ready to adopt.",
-    "For an approved surrender drop-off appointment, a user may submit only one reschedule request in My Submissions. It must be today or later and within the active 14-day attendance deadline, requires staff approval, and does not replace the official appointment unless approved.",
+    "For an approved adoption pickup, a user may reschedule in My Applications only once. The valid change saves immediately without staff approval, must be today or later and within the active 14-day attendance deadline, and the rescheduled pickup is final.",
+    "ANIMUA does not provide a cancel or withdraw option for submitted adoption applications. If an application is approved, the applicant must follow the 14-day attendance deadline; the account is automatically disabled when the deadline passes without confirmed pickup attendance. Remind users to apply only when they are ready to adopt.",
+    "For an approved surrender drop-off appointment, a user may submit only one reschedule request in My Submissions. It must be today or later and within the active 14-day attendance deadline, requires staff approval, and does not replace the official appointment unless approved. The account is automatically disabled if the deadline passes without confirmed drop-off attendance.",
     "If the user asks what to bring for pickup, say the official list is shown in the adoption application details in My Applications and may include valid ID, adoption agreement, and office instructions.",
     "If the user asks about multiple applications, say they may submit more than one application for different animals, but each is reviewed separately and approval is not guaranteed.",
     "If the user asks about surrender eligibility, say only qualified Angeles City residents may submit surrender requests through ANIMUA. Users from other cities or municipalities should contact their local city or municipal veterinary office, animal welfare office, or nearest shelter.",
@@ -2822,11 +2800,11 @@ function getLocalReply(message, context = {}, language = "english") {
     return localizedReply(
       language,
       hasBlockedRescheduleQuestion(lower)
-        ? "You may have reached the reschedule limit. Adoption pickup: up to 2 changes. Surrender appointment: 1 change. Check My Applications or My Submissions for your current schedule."
-        : "Yes. You can change an adoption pickup twice or a surrender appointment once. Use My Applications or My Submissions to reschedule.",
+        ? "You may have reached the reschedule limit. Adoption pickup: 1 change. Surrender appointment: 1 change. Check My Applications or My Submissions for your current schedule."
+        : "Yes. You can change an adoption pickup once or a surrender appointment once. Use My Applications or My Submissions to reschedule.",
       hasBlockedRescheduleQuestion(lower)
-        ? "Baka naabot mo na ang reschedule limit. Adoption pickup: hanggang 2 changes. Surrender appointment: 1 change lang. Tingnan ang My Applications o My Submissions para sa current schedule mo."
-        : "Oo. Dalawang beses puwedeng baguhin ang adoption pickup, at isang beses ang surrender appointment. Gamitin ang My Applications o My Submissions para mag-reschedule."
+        ? "Baka naabot mo na ang reschedule limit. Adoption pickup: 1 change. Surrender appointment: 1 change lang. Tingnan ang My Applications o My Submissions para sa current schedule mo."
+        : "Oo. Isang beses puwedeng baguhin ang adoption pickup at surrender appointment. Gamitin ang My Applications o My Submissions para mag-reschedule."
     );
   }
 
@@ -3103,11 +3081,11 @@ function getLocalReply(message, context = {}, language = "english") {
     return localizedReply(
       language,
       hasBlockedRescheduleQuestion(lower)
-        ? "The Reschedule button may be unavailable because the adoption is not approved, there is no pickup schedule, or you already used both changes. Check My Applications to see the reason."
-        : "You can change an approved adoption pickup twice. Go to My Applications and select Reschedule. Choose a date within your 14-day deadline. The second change is final.",
+        ? "The Reschedule button may be unavailable because the adoption is not approved, there is no pickup schedule, or you already used your one change. Check My Applications to see the reason."
+        : "You can change an approved adoption pickup once. Go to My Applications and select Reschedule. The valid change is saved immediately without admin approval and must be within your 14-day deadline. The new schedule is final. Your account will be disabled if that deadline passes without a confirmed pickup.",
       hasBlockedRescheduleQuestion(lower)
-        ? "Maaaring walang Reschedule button dahil hindi approved ang adoption, wala pang pickup schedule, o nagamit mo na ang dalawang changes. Tingnan ang My Applications para makita ang dahilan."
-        : "Dalawang beses puwedeng baguhin ang approved adoption pickup. Pumunta sa My Applications at piliin ang Reschedule. Pumili ng date na pasok sa 14-day deadline. Final ang pangalawang pagbabago."
+        ? "Maaaring walang Reschedule button dahil hindi approved ang adoption, wala pang pickup schedule, o nagamit mo na ang isang change. Tingnan ang My Applications para makita ang dahilan."
+        : "Isang beses puwedeng baguhin ang approved adoption pickup. Pumunta sa My Applications at piliin ang Reschedule. Agad mase-save ang valid na pagbabago nang walang admin approval at dapat pasok ito sa 14-day deadline. Final ang bagong schedule. Made-disable ang account kapag lumampas ang deadline nang walang confirmed pickup."
     );
   }
 
@@ -3176,8 +3154,8 @@ function getLocalReply(message, context = {}, language = "english") {
   if (hasApplicationWithdrawIntent(lower)) {
     return localizedReply(
       language,
-      "ANIMUA does not have a cancel or withdraw option for adoption applications. If your application is approved, you must follow the 14-day attendance rule; failure to comply may lead to account suspension. Apply only when you are fully ready to adopt.",
-      "Walang cancel o withdraw option ang ANIMUA para sa adoption applications. Kapag approved ang application mo, kailangan mong sundin ang 14-day attendance rule; ang hindi pagsunod ay maaaring magresulta sa account suspension. Mag-apply lamang kapag handa ka nang mag-adopt."
+      "ANIMUA does not have a cancel or withdraw option for adoption applications. If your application is approved, you must follow the 14-day attendance rule; your account will be disabled if the deadline passes without confirmed pickup attendance. Apply only when you are fully ready to adopt.",
+      "Walang cancel o withdraw option ang ANIMUA para sa adoption applications. Kapag approved ang application mo, kailangan mong sundin ang 14-day attendance rule; made-disable ang account kapag lumampas ang deadline nang walang confirmed pickup. Mag-apply lamang kapag handa ka nang mag-adopt."
     );
   }
 

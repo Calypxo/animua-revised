@@ -176,6 +176,7 @@ function statusClass(status) {
   if (normalized.includes("received")) return "received";
   if (normalized.includes("reject") || normalized.includes("expired")) return "rejected";
   if (normalized.includes("withdraw")) return "withdrawn";
+  if (normalized === "closed") return "closed";
   return "pending";
 }
 
@@ -191,6 +192,7 @@ function iconForStatus(status) {
   if (normalized.includes("reject")) return "fa-solid fa-xmark";
   if (normalized.includes("expired")) return "fa-regular fa-calendar-xmark";
   if (normalized.includes("withdraw")) return "fa-solid fa-ban";
+  if (normalized === "closed") return "fa-solid fa-box-archive";
   return "fa-regular fa-clock";
 }
 
@@ -467,6 +469,10 @@ function valueOrFallback(value, fallback = "Not provided") {
 function getApplicationMessage(status, item) {
   const normalized = String(status || "").toLowerCase();
 
+  if (normalized === "closed") {
+    return `${item?.details?.closureReason || "This animal has been adopted by another applicant, so your application is now closed."} You may apply for another available animal.`;
+  }
+
   if (normalized.includes("expired")) {
     return "This application expired because the 14-day shelter attendance deadline passed without a confirmed arrival. Contact the shelter if you need staff to review or restore it.";
   }
@@ -602,21 +608,15 @@ function getScheduleSavedFeedback(kind, isReschedule = false, rescheduleCount = 
       return {
         type: "warning",
         title: "Schedule Saved",
-        message: "Please attend before the displayed 14-day deadline. You may reschedule up to two times.",
+        message: "Please attend before the displayed 14-day deadline. You may reschedule once.",
       };
     }
 
-    return rescheduleCount >= 2
-      ? {
-          type: "warning",
-          title: "Pickup Rescheduled",
-          message: "You have used both reschedules. This pickup schedule is final. If you cannot attend, your account may be suspended.",
-        }
-      : {
-          type: "warning",
-          title: "Pickup Rescheduled",
-          message: "Your new schedule was saved immediately. You have one reschedule remaining.",
-        };
+    return {
+      type: "warning",
+      title: "Pickup Rescheduled",
+      message: "You have used your one reschedule. This pickup schedule is final. Your account will be disabled if the 14-day attendance deadline passes without a confirmed pickup.",
+    };
   }
 
   const action = kind === "surrender" ? "surrender appointment" : "pickup schedule";
@@ -628,16 +628,12 @@ function getScheduleSavedFeedback(kind, isReschedule = false, rescheduleCount = 
 }
 
 function renderPickupRescheduleWarning(rescheduleCount) {
-  const title = rescheduleCount >= 2
+  const title = rescheduleCount >= 1
     ? "Reschedule limit reached"
-    : rescheduleCount === 1
-      ? "Final reschedule available"
-      : "Two reschedules available";
-  const message = rescheduleCount >= 2
-    ? "You have used both reschedules. This pickup schedule is final. If you cannot attend, your account may be suspended."
-    : rescheduleCount === 1
-      ? "You have one reschedule remaining. Your next pickup schedule will be final. If you cannot attend, your account may be suspended."
-      : "You may change this pickup schedule up to two times. The second reschedule will be your final pickup schedule.";
+    : "One reschedule available";
+  const message = rescheduleCount >= 1
+    ? "You have used your one reschedule. This pickup schedule is final. Your account will be disabled if the 14-day attendance deadline passes without a confirmed pickup."
+    : "You may change this pickup schedule once. The rescheduled pickup will be your final schedule.";
 
   return `
     <div class="schedule-feedback warning final-reschedule-warning">
@@ -653,9 +649,10 @@ function renderApplicationTimeline(status, submittedDate, decisionDateLabel = su
   const isRejected = normalized.includes("reject");
   const isExpired = normalized.includes("expired");
   const isWithdrawn = normalized.includes("withdraw");
-  const hasDecision = isApproved || isRejected || isExpired;
-  const middleLabel = hasDecision ? "Reviewed" : isWithdrawn ? "Withdrawn" : "Under Review";
-  const decisionLabel = isApproved ? "Approved" : isRejected ? "Rejected" : isExpired ? "Expired" : "Decision";
+  const isClosed = normalized === "closed";
+  const hasDecision = isApproved || isRejected || isExpired || isClosed;
+  const middleLabel = isClosed ? "Animal adopted" : hasDecision ? "Reviewed" : isWithdrawn ? "Withdrawn" : "Under Review";
+  const decisionLabel = isClosed ? "Closed" : isApproved ? "Approved" : isRejected ? "Rejected" : isExpired ? "Expired" : "Decision";
   const decisionDate = hasDecision ? decisionDateLabel : "Pending";
 
   return `
@@ -668,10 +665,10 @@ function renderApplicationTimeline(status, submittedDate, decisionDateLabel = su
       <div class="application-step ${hasDecision ? "done" : "active"}">
         <span>${hasDecision ? '<i class="fa-solid fa-check"></i>' : isWithdrawn ? '<i class="fa-solid fa-ban"></i>' : '<i class="fa-solid fa-minus"></i>'}</span>
         <strong>${middleLabel}</strong>
-        <small>${isWithdrawn ? "By user" : submittedDate}</small>
+        <small>${isClosed ? "By another applicant" : isWithdrawn ? "By user" : submittedDate}</small>
       </div>
       <div class="application-step ${hasDecision ? "active done" : ""}">
-        <span>${isApproved ? '<i class="fa-solid fa-check"></i>' : isRejected || isExpired ? '<i class="fa-solid fa-xmark"></i>' : "3"}</span>
+        <span>${isClosed ? '<i class="fa-solid fa-box-archive"></i>' : isApproved ? '<i class="fa-solid fa-check"></i>' : isRejected || isExpired ? '<i class="fa-solid fa-xmark"></i>' : "3"}</span>
         <strong>${decisionLabel}</strong>
         <small>${decisionDate}</small>
       </div>
@@ -791,10 +788,10 @@ function renderAttendanceDeadline(item, kind) {
   const message = isComplete
     ? `Your shelter ${appointmentName} attendance has been confirmed.`
     : isExpired
-      ? "The deadline passed without confirmed attendance. Shelter staff may restore the request after review."
+      ? "The deadline passed without confirmed attendance, so your account has been disabled. Contact the shelter if you need staff to review the request."
       : daysLeft <= 7
-        ? `Reminder: complete your shelter ${appointmentName} within ${daysLeft} day${daysLeft === 1 ? "" : "s"} to keep this request active.`
-        : `Choose and attend a shelter ${appointmentName} date within 14 days of approval.`;
+        ? `Reminder: complete your shelter ${appointmentName} within ${daysLeft} day${daysLeft === 1 ? "" : "s"}. Your account will be disabled if the deadline passes without confirmed attendance.`
+        : `Choose and attend a shelter ${appointmentName} date within 14 days of approval. Your account will be disabled if the deadline passes without confirmed attendance.`;
 
   return `
     <section class="attendance-deadline-card ${isExpired ? "is-expired" : isUrgent ? "is-urgent" : isComplete ? "is-complete" : ""}">
@@ -816,7 +813,7 @@ function renderApprovedAdoptionNextSteps(item) {
   const scheduleDate = getScheduleDate(schedule, details.adoptionDate);
   const hasSchedule = hasScheduleValue(schedule);
   const rescheduleCount = getScheduleRescheduleCount(schedule);
-  const canReschedule = hasSchedule && rescheduleCount < 2 && !arrivalConfirmed;
+  const canReschedule = hasSchedule && rescheduleCount < 1 && !arrivalConfirmed;
   const scheduleLabel = scheduleDate
     ? `${formatScheduleValue(scheduleDate, "Not scheduled")} ${scheduleTimeOrFallback(schedule)}`
     : "Not scheduled yet";
@@ -841,7 +838,7 @@ function renderApprovedAdoptionNextSteps(item) {
             <button
               type="button"
               data-schedule-kind="adoption"
-              ${canReschedule ? "" : 'class="is-disabled" disabled aria-disabled="true" title="Maximum of two reschedules used"'}
+              ${canReschedule ? "" : 'class="is-disabled" disabled aria-disabled="true" title="Maximum of one reschedule used"'}
             >Reschedule</button>
           ` : ""}
         </header>
@@ -1141,7 +1138,7 @@ async function promptForSchedule(kind, item) {
     : item?.details?.pickupSchedule;
   const isReschedule = hasScheduleValue(existingSchedule);
   const rescheduleCount = getScheduleRescheduleCount(existingSchedule);
-  const isFinalPickupReschedule = !isSurrender && isReschedule && rescheduleCount >= 1;
+  const isFinalPickupReschedule = !isSurrender && isReschedule;
   const { minDate, maxDate } = getScheduleWindow(kind, item);
   const title = isSurrender
     ? "Schedule Surrender Appointment"
@@ -1181,7 +1178,7 @@ async function promptForSchedule(kind, item) {
         ${isFinalPickupReschedule ? `
           <div class="schedule-final-reschedule-notice" role="alert">
             <i class="fa-solid fa-triangle-exclamation"></i>
-            <p><strong>This is your final reschedule.</strong>If you cannot attend the new pickup schedule, your account may be suspended.</p>
+            <p><strong>This is your only reschedule.</strong>The new pickup schedule will be final. Your account will be disabled if the 14-day attendance deadline passes without a confirmed pickup.</p>
           </div>
         ` : ""}
 
@@ -1600,7 +1597,7 @@ async function showSubmissionDetails(item) {
   const compatibilityPresentation = applicationCompatibilityPresentation(details);
   const isApproved = isApprovedDecision(status, "adoption");
   const isRejected = String(status).toLowerCase().includes("reject");
-  const decisionDate = formatDate(details.approvedDate || details.approvedAt || details.acceptedDate || details.acceptedAt || details.updatedAt || item.submittedAt);
+  const decisionDate = formatDate(details.closedAt || details.approvedDate || details.approvedAt || details.acceptedDate || details.acceptedAt || details.updatedAt || item.submittedAt);
 
   Swal.fire({
     html: `

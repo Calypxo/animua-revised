@@ -55,7 +55,8 @@ let isSyncingQueuedSurrenders = false;
 const surrenderSelectMenus = [];
 
 const MAX_IMAGE_UPLOAD_SIZE = 5 * 1024 * 1024;
-const MAX_PROCESSED_IMAGE_SIZE = 400 * 1024;
+// Three base64 photos share one Firestore document; reserve space for the form.
+const MAX_PROCESSED_IMAGE_SIZE = 220 * 1024;
 const MAX_PROCESSED_IMAGE_SIDE = 1600;
 
 function getFormValue(id) {
@@ -397,7 +398,9 @@ async function optimizeImageUpload(file, { fallbackName = "photo", label = "phot
   const originalMaxSide = Math.max(image.naturalWidth || image.width, image.naturalHeight || image.height);
   let scale = Math.min(1, MAX_PROCESSED_IMAGE_SIDE / originalMaxSide);
 
-  while (scale > 0.2) {
+  // Always attempt the initial resize, even for 48 MP or larger phone photos.
+  // Bound attempts relative to the resized image, not the original dimensions.
+  for (let attempt = 0; attempt < 9; attempt += 1) {
     const canvas = document.createElement("canvas");
     canvas.width = Math.max(1, Math.round((image.naturalWidth || image.width) * scale));
     canvas.height = Math.max(1, Math.round((image.naturalHeight || image.height) * scale));

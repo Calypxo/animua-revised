@@ -5,6 +5,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 app = FastAPI(title="Animua Python Matcher")
+SCORING_VERSION = "behavior-care-status-v2"
 
 RAW_QUESTION_KEYS = [
     "energyLevel",
@@ -28,8 +29,8 @@ RAW_QUESTION_KEYS = [
 ]
 
 # Keep this ordered contract mathematically equivalent to the Node fallback.
-# climateTolerance is retained as questionnaire context but is not scored
-# because the live animal assessment has no matching trait.
+# Climate readiness and vet budget remain questionnaire context, not scores.
+# Special needs use a separate care status and eligibility filter in Node.
 SCORING_DIMENSIONS = [
     ("energyLevel", ["energyLevel"]),
     ("exerciseNeeds", ["exerciseNeeds"]),
@@ -46,7 +47,6 @@ SCORING_DIMENSIONS = [
     ("trainingDifficulty", ["trainingDifficulty"]),
     ("affectionLevel", ["affectionLevel"]),
     ("separationAnxiety", ["separationAnxiety"]),
-    ("specialNeeds", ["healthRiskLevel"]),
 ]
 
 class MatchRequest(BaseModel):
@@ -163,9 +163,10 @@ def score_matches(payload: MatchRequest):
             "ageEstimate": animal.get("ageEstimate"),
             "age": animal.get("age") or animal.get("ageEstimate"),
             "allergyFriendly": animal.get("allergyFriendly"),
-            "specialNeeds": assessment.get("specialNeeds", animal.get("specialNeeds")),
             "aggressive": assessment.get("aggressive", animal.get("aggressive")),
             **assessment,
+            "specialNeedsStatus": animal.get("specialNeedsStatus", "unknown"),
+            "specialNeedsNotes": animal.get("specialNeedsNotes", ""),
             **score,
         })
 
@@ -173,5 +174,6 @@ def score_matches(payload: MatchRequest):
 
     return {
         "engine": "python",
+        "scoringVersion": SCORING_VERSION,
         "matches": results[: payload.top_k]
     }

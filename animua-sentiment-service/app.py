@@ -1,4 +1,5 @@
 import json
+import os
 import re
 
 import joblib
@@ -32,8 +33,11 @@ app = FastAPI(
     openapi_url=None,
 )
 
-RULES_VERSION = "2026-08-30-context-rules-v4"
+RULES_VERSION = "2026-09-15-caregiver-context-rules-v6"
 INSUFFICIENT_SOURCE_LABEL = "Input validation (insufficient text)"
+CATEGORY_OVERRIDE_MAX_CONFIDENCE = float(
+    os.getenv("ANIMUA_CATEGORY_OVERRIDE_MAX_CONFIDENCE", "0.80")
+)
 
 sentiment_model = joblib.load(SERVICE_DIR / "sentiment_model.pkl")
 category_model = joblib.load(SERVICE_DIR / "category_model.pkl")
@@ -111,6 +115,8 @@ def load_transformer_task(task_name):
             "model": model,
             "id2label": model.config.id2label,
             "source_model": source_model,
+            "dataset": metadata.get("dataset") or {},
+            "split": metadata.get("split") or {},
         }
     except Exception as error:
         print(f"Unable to load Tagalog RoBERTa {task_name} model:", error)
@@ -131,16 +137,35 @@ def transformer_status():
     tasks = {}
     for task_name in EXPECTED_TASK_LABELS:
         missing_assets = missing_transformer_assets(task_name)
+        loaded_task = transformer_models.get(task_name)
+        task_metadata = loaded_task if isinstance(loaded_task, dict) else {}
+        dataset_metadata = task_metadata.get("dataset") or {}
+        split_metadata = task_metadata.get("split") or {}
         tasks[task_name] = {
-            "modelLoaded": transformer_models.get(task_name) is not None,
+            "modelLoaded": loaded_task is not None,
             "assetsAvailable": not missing_assets,
             "missingAssets": missing_assets,
+            "datasetSha256": dataset_metadata.get("canonicalSha256"),
+            "datasetRows": dataset_metadata.get("effectiveRows"),
+            "splitStrategy": split_metadata.get("strategy"),
         }
 
+    dataset_hashes = {
+        task["datasetSha256"]
+        for task in tasks.values()
+        if task["datasetSha256"]
+    }
+    provenance_presence = [
+        bool(task["datasetSha256"])
+        for task in tasks.values()
+    ]
+    provenance_consistent = (
+        all(provenance_presence) or not any(provenance_presence)
+    ) and len(dataset_hashes) <= 1
     ready = all(
         task["modelLoaded"] and task["assetsAvailable"]
         for task in tasks.values()
-    )
+    ) and provenance_consistent
     return ready, tasks
 
 
@@ -247,13 +272,27 @@ CAREGIVER_ABSENCE_PHRASES = [
     "wala nang mag-aalaga", "walang mag-aalaga",
 ]
 
+OWNER_INCAPACITY_SUBJECT_PHRASES = [
+    "owner", "may-ari", "primary caregiver", "caregiver",
+    "ako", "i am", "i was", "my mother", "my father",
+    "nanay ko", "tatay ko", "lolo ko", "lola ko",
+]
+
+OWNER_INCAPACITY_CONDITION_PHRASES = [
+    "naospital", "hospitalized", "in hospital", "may sakit",
+    "is sick", "is ill", "bedridden", "disabled",
+    "health condition", "cannot provide daily care",
+    "cannot care for", "hindi na kaya ang daily pet care",
+    "hindi na kayang mag-alaga", "hindi na kayang alagaan",
+]
+
 ABANDONMENT_PHRASES = [
     *URGENT_ABANDONMENT_PHRASES,
     *CAREGIVER_ABSENCE_PHRASES,
 ]
 
 RELOCATION_PHRASES = [
-    "moving", "relocate", "relocating", "migration", "migrate",
+    "moving", "move out", "relocate", "relocating", "migration", "migrate",
     "moving abroad", "leaving the country", "leaving philippines",
     "aalis kami", "aalis na kami", "lilipat", "lumipat", "paglipat",
     "kami ay aalis", "ako ay aalis", "pamilya namin ay aalis",
@@ -261,6 +300,13 @@ RELOCATION_PHRASES = [
     "mag-aabroad", "ibang bansa", "ibang lugar", "hindi madadala",
     "hindi maisama", "hindi kayang dalhin", "hindi namin kayang dalhin",
     "papuntang ibang bansa", "bawal sa bagong tirahan",
+]
+
+BEHAVIORAL_PHRASES = [
+    "aggressive", "violent behavior", "biting people", "keeps biting",
+    "attacked", "attacking", "dangerous and difficult to control",
+    "difficult to control", "nangangagat", "nangangalmot",
+    "inatake", "delikado", "hindi makontrol",
 ]
 
 MEDICAL_PHRASES = [
@@ -312,6 +358,7 @@ MEANINGFUL_SHORT_PHRASES = [
     *ABANDONMENT_PHRASES,
     *RELOCATION_PHRASES,
     *MEDICAL_PHRASES,
+    *BEHAVIORAL_PHRASES,
     *OVERCROWDING_DIRECT_PHRASES,
     *OVERCROWDING_COUNT_PHRASES,
     *SPACE_CONSTRAINT_PHRASES,
@@ -347,6 +394,37 @@ def has_medical_signal(reason):
     return contains_phrase(reason, MEDICAL_PHRASES)
 
 
+def has_explicit_caregiver_limitation(reason):
+    # Link the limitation to a human caregiver, rather than to an elderly pet.
+    caregiver = r"(?:nag[-\s]?aalaga|tagapag[-\s]?alaga|may[-\s]?ari|lola|lolo|nanay|tatay|magulang|owner|caregiver)"
+    connector = r"(?:na|po|kasi|yung|iyong|ang|si|ay|ko|namin|niya|aming|aking|rin|din|masyado|sa|kanya|sakanya)"
+    limitation = r"(?:matanda|mahina|may\s+sakit|naospital|bedridden|disabled)"
+    patterns = [
+        rf"(?<!\w){limitation}(?:\s+{connector}){{0,8}}\s+{caregiver}(?!\w)",
+        rf"(?<!\w){caregiver}(?:\s+{connector}){{0,8}}\s+{limitation}(?!\w)",
+        r"(?<!\w)(?:owner|caregiver|my\s+(?:mother|father|grandmother|grandfather))\s+(?:(?:is|was|has|become|getting|now|already|too|very)\s+){0,5}(?:elderly|old|frail|bedridden|disabled|hospitalized)(?!\w)",
+        r"(?<!\w)(?:elderly|frail|bedridden|disabled|hospitalized)\s+(?:owner|caregiver)(?!\w)",
+    ]
+    text = str(reason or "")
+    for pattern in patterns:
+        for match in re.finditer(pattern, text, re.IGNORECASE):
+            prefix = text[max(0, match.start() - 40):match.start()]
+            if re.search(r"(?:hindi|di|not)(?:\s+(?:na|po|naman|rin|din))*\s*$", prefix, re.IGNORECASE):
+                continue
+            return True
+    return False
+
+
+def has_owner_incapacity_signal(reason):
+    return contains_phrase(
+        reason,
+        OWNER_INCAPACITY_SUBJECT_PHRASES,
+    ) and contains_phrase(
+        reason,
+        OWNER_INCAPACITY_CONDITION_PHRASES,
+    )
+
+
 def has_overcrowding_signal(reason):
     if contains_phrase(
         reason,
@@ -365,28 +443,78 @@ def has_overcrowding_signal(reason):
     return bool(MALFORMED_OVERCROWDING_PATTERN.search(str(reason or "")))
 
 
-def resolve_category(reason, predicted_category):
+def should_keep_confident_category(
+    predicted_category,
+    proposed_category,
+    predicted_confidence,
+):
+    if predicted_category in {proposed_category, "Other"}:
+        return False
+    if predicted_confidence is None:
+        return False
+
+    try:
+        confidence = float(predicted_confidence)
+    except (TypeError, ValueError):
+        return False
+
+    return confidence >= CATEGORY_OVERRIDE_MAX_CONFIDENCE
+
+
+def resolve_category(reason, predicted_category, predicted_confidence=None):
     if contains_phrase(reason, CRITICAL_MEDICAL_PHRASES):
         return "Medical", "Explicit critical medical symptom"
-    if contains_phrase(reason, FINANCIAL_PHRASES):
-        return "Financial", "Explicit financial constraint"
+
+    proposed_category = None
+    adjustment_reason = ""
+    if (
+        (has_explicit_caregiver_limitation(reason) and not contains_phrase(reason, BEHAVIORAL_PHRASES))
+        or (has_owner_incapacity_signal(reason) and predicted_category in {"Owner Incapacity", "Other"})
+    ):
+        proposed_category = "Owner Incapacity"
+        adjustment_reason = "Explicit owner or caregiver incapacity"
+    elif contains_phrase(reason, FINANCIAL_PHRASES):
+        proposed_category = "Financial"
+        adjustment_reason = "Explicit financial constraint"
+
     has_relocation = contains_phrase(reason, RELOCATION_PHRASES)
     has_abandonment = contains_phrase(reason, ABANDONMENT_PHRASES)
     if (
+        proposed_category is None and
         has_relocation and
         contains_phrase(reason, CAREGIVER_ABSENCE_PHRASES) and
         not contains_phrase(reason, URGENT_ABANDONMENT_PHRASES)
     ):
-        return "Relocation", "Explicit relocation constraint"
-    if has_abandonment:
-        return "Abandonment Risk", "Explicit abandonment risk"
-    if has_relocation:
-        return "Relocation", "Explicit relocation constraint"
-    if has_medical_signal(reason):
-        return "Medical", "Explicit medical symptom"
-    if has_overcrowding_signal(reason):
-        return "Overcrowding", "Explicit overcrowding or space constraint"
-    return predicted_category, ""
+        proposed_category = "Relocation"
+        adjustment_reason = "Explicit relocation constraint"
+    elif proposed_category is None and has_abandonment:
+        proposed_category = "Abandonment Risk"
+        adjustment_reason = "Explicit abandonment risk"
+    elif proposed_category is None and has_relocation:
+        proposed_category = "Relocation"
+        adjustment_reason = "Explicit relocation constraint"
+    elif proposed_category is None and contains_phrase(
+        reason,
+        BEHAVIORAL_PHRASES,
+    ):
+        proposed_category = "Behavioral"
+        adjustment_reason = "Explicit dangerous or uncontrolled behavior"
+    elif proposed_category is None and has_medical_signal(reason):
+        proposed_category = "Medical"
+        adjustment_reason = "Explicit medical symptom"
+    elif proposed_category is None and has_overcrowding_signal(reason):
+        proposed_category = "Overcrowding"
+        adjustment_reason = "Explicit overcrowding or space constraint"
+
+    if proposed_category is None or proposed_category == predicted_category:
+        return predicted_category, ""
+    if should_keep_confident_category(
+        predicted_category,
+        proposed_category,
+        predicted_confidence,
+    ):
+        return predicted_category, ""
+    return proposed_category, adjustment_reason
 
 
 def apply_category_override(reason, predicted_category):
@@ -494,7 +622,11 @@ def analyze_reason(reason):
     sentiment, sentiment_confidence = predictions["sentiment"]
     model_category, category_confidence = predictions["category"]
 
-    category, adjustment_reason = resolve_category(reason, model_category)
+    category, adjustment_reason = resolve_category(
+        reason,
+        model_category,
+        category_confidence,
+    )
     category_adjusted = category != model_category
     if not category_adjusted:
         adjustment_reason = ""
@@ -530,6 +662,7 @@ def home():
         "message": "ANIMUA surrender sentiment service is running.",
         "configuredModel": MODEL_NAME,
         "rulesVersion": RULES_VERSION,
+        "categoryOverrideMaxConfidence": CATEGORY_OVERRIDE_MAX_CONFIDENCE,
         "transformerReady": ready,
         "loadedTasks": {
             task_name: task["modelLoaded"]
@@ -553,6 +686,7 @@ def health():
         "tasks": tasks,
         "activeSource": MODEL_SOURCE_LABEL if ready else FALLBACK_SOURCE_LABEL,
         "rulesVersion": RULES_VERSION,
+        "categoryOverrideMaxConfidence": CATEGORY_OVERRIDE_MAX_CONFIDENCE,
     }
     if not ready:
         return JSONResponse(status_code=503, content=payload)

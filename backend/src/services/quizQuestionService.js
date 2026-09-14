@@ -126,6 +126,27 @@ function validateConfiguredPreferences(input, questions) {
   return { preferences, scoringPreferences };
 }
 
+function hasCustomWording(question) {
+  const original = DEFAULT_QUESTIONS.find(item => item.id === question.id);
+  return !original || ["label", "text", "hint"].some(key => question[key] !== original[key])
+    || question.choices.some((choice, index) => choice.text !== original.choices[index]?.text);
+}
+
+// Existing quizzes and their saved results share stable IDs and score mappings.
+// Management may improve wording, but cannot redesign that scoring contract.
+function validateQuestionWordingEdits(input, previousQuestions) {
+  const protectedError = { error: "Only wording can be edited. Keep the existing questions, sections, behavior links, answer choices, scores, order, and active status." };
+  if (!Array.isArray(input) || input.length !== previousQuestions.length) return protectedError;
+  for (let index = 0; index < previousQuestions.length; index += 1) {
+    const previous = previousQuestions[index];
+    const question = input[index];
+    if (!question || ["id", "traitKey", "phaseKey", "active", "order"].some(key => question[key] !== previous[key])) return protectedError;
+    if (!Array.isArray(question.choices) || question.choices.length !== previous.choices.length) return protectedError;
+    if (question.choices.some((choice, choiceIndex) => !choice || ["id", "value", "order"].some(key => choice[key] !== previous.choices[choiceIndex][key]))) return protectedError;
+  }
+  return validateAndNormalizeQuestions(input);
+}
+
 function buildQuestionSnapshot(questions, preferences, answerSelections = {}) {
   return questions.filter((question) => question.active).map((question) => {
     const value = Number(preferences[question.traitKey]);
@@ -149,6 +170,8 @@ module.exports = {
   MIN_CHOICES,
   MAX_CHOICES,
   validateAndNormalizeQuestions,
+  validateQuestionWordingEdits,
+  hasCustomWording,
   validateConfiguredPreferences,
   buildQuestionSnapshot,
 };

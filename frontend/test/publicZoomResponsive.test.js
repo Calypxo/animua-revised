@@ -32,7 +32,7 @@ test("every public page loads the shared browser-zoom guardrails", async () => {
   for (const { page, markup } of pages) {
     assert.match(
       markup,
-      /src\/css\/public\/zoom-responsive\.css\?v=public-zoom-20260825-4/,
+      /src\/css\/public\/zoom-responsive\.css\?v=public-zoom-[\w-]+/,
       `${page} must load the shared zoom stylesheet`,
     );
   }
@@ -45,9 +45,25 @@ test("wide effective viewports gain fluid shells without cancelling browser zoom
   assert.match(css, /--public-wide-shell:\s*clamp\(1280px,\s*60vw,\s*1600px\)/);
   assert.match(css, /--public-wide-grid-shell:\s*clamp\(1280px,\s*72vw,\s*1920px\)/);
   assert.match(css, /\.container:not\(\.nav-shell\)[\s\S]*?max-width:\s*var\(--public-wide-shell\)\s*!important/);
-  assert.match(css, /\.pets-grid\s*\{[\s\S]*?repeat\(auto-fit,\s*minmax\(280px,\s*1fr\)\)/);
   assert.doesNotMatch(css, /(?:^|[;{\s])zoom\s*:/m);
   assert.doesNotMatch(css, /transform:\s*scale\(/);
+});
+
+test("find and surrender heroes remain centered at browser zoom-out", async () => {
+  const [css, findPage, surrenderPage] = await Promise.all([
+    readFile(zoomStylesUrl, "utf8"),
+    readFile(new URL("../pages/public/find-furbabies.html", import.meta.url), "utf8"),
+    readFile(new URL("../pages/public/surrender.html", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(
+    css,
+    /body\.furbabies-page \.furbabies-hero > \.container,\s*html body\.home-page\.surrender-page \.surrender-page-hero > \.surrender-page-hero-grid\s*\{[\s\S]*?width:\s*min\(calc\(100% - 64px\),\s*var\(--public-wide-shell\)\)\s*!important;[\s\S]*?max-width:\s*var\(--public-wide-shell\)\s*!important;[\s\S]*?margin-inline:\s*auto\s*!important;[\s\S]*?padding-inline:\s*0\s*!important;/,
+  );
+  assert.doesNotMatch(css, /body\.furbabies-page \.finder-left\s*\{[\s\S]*?max-width:\s*900px\s*!important/);
+  assert.doesNotMatch(css, /body\.furbabies-page \.pets-grid\s*\{[\s\S]*?repeat\(auto-fit/);
+  assert.match(findPage, /zoom-responsive\.css\?v=public-zoom-20260915-1/);
+  assert.match(surrenderPage, /zoom-responsive\.css\?v=public-zoom-20260915-1/);
 });
 
 test("the fullscreen homepage keeps its stories below the actions at strong zoom-out", async () => {
@@ -72,8 +88,6 @@ test("desktop public heroes grow with wrapped copy instead of clipping it", asyn
 
   assert.match(css, /@media\s*\(min-width:\s*761px\)[\s\S]*?\.furbabies-hero,[\s\S]*?\.community-cover,[\s\S]*?\.surrender-page-hero\s*\{[\s\S]*?height:\s*auto\s*!important;[\s\S]*?max-height:\s*none\s*!important;/);
   assert.match(css, /\.furbabies-hero\s*>\s*\.container,[\s\S]*?\.community-cover-inner,[\s\S]*?\.surrender-page-hero-grid\s*\{[\s\S]*?height:\s*auto\s*!important;/);
-  assert.match(css, /\.finder-left\s*\{[\s\S]*?max-width:\s*900px\s*!important;/);
-  assert.match(css, /\.finder-left h1\s*\{[\s\S]*?font-size:\s*clamp\(62px,\s*2\.5vw,\s*72px\)\s*!important;[\s\S]*?text-wrap:\s*wrap\s*!important;/);
   assert.match(css, /html body\.home-page\.surrender-page \.surrender-page-hero\s*\{[\s\S]*?height:\s*auto\s*!important;[\s\S]*?min-height:\s*648px\s*!important;[\s\S]*?max-height:\s*none\s*!important;/);
   assert.match(css, /html body\.home-page\.surrender-page \.surrender-page-hero\s*>\s*\.surrender-page-hero-grid\s*\{[\s\S]*?height:\s*auto\s*!important;[\s\S]*?min-height:\s*648px\s*!important;/);
 });

@@ -64,6 +64,17 @@ test("confirmed adoption and surrender attendance remove every reschedule action
   assert.match(script, /Your surrender drop-off has been confirmed\./);
 });
 
+test("adoption pickup allows only one reschedule and warns about automatic deactivation", async () => {
+  const script = await readFile(scriptUrl, "utf8");
+
+  assert.match(script, /const canReschedule = hasSchedule && rescheduleCount < 1 && !arrivalConfirmed/);
+  assert.match(script, /One reschedule available/);
+  assert.match(script, /Maximum of one reschedule used/);
+  assert.match(script, /account will be disabled if the 14-day attendance deadline passes without a confirmed pickup/i);
+  assert.match(script, /account will be disabled if the deadline passes without confirmed attendance/i);
+  assert.doesNotMatch(script, /Two reschedules available|Maximum of two reschedules used/);
+});
+
 test("very narrow and short screens retain dedicated compact layouts", async () => {
   const css = await readFile(cssUrl, "utf8");
 

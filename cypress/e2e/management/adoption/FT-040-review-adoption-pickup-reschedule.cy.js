@@ -27,8 +27,8 @@ describe("FT-040 - View Adoption Pickup Reschedule History", () => {
     cy.get("#aaDrawerInner")
       .should("contain.text", "Appointment Scheduled")
       .and("contain.text", "Reschedules Used")
-      .and("contain.text", "1 of 2")
-      .and("contain.text", "User rescheduled this pickup 1 of 2 times")
+      .and("contain.text", "1 of 1")
+      .and("contain.text", "User rescheduled this pickup 1 of 1")
       .and("not.contain.text", "Pickup reschedule awaiting review");
     cy.get("#drawerApproveRescheduleBtn").should("not.exist");
   });

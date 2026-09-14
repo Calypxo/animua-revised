@@ -1127,12 +1127,12 @@ function mapPetFromBackend(pet) {
     traits: [
       formatAlteredStatus(pet.alteredStatus, pet.sex),
       formatVaccinationStatus(pet.vaccinated),
-      pet.visibleDefects
-        ? "Special care needs"
-        : null,
+      pet.specialNeedsStatus === "yes" ? "Special needs: requires special care"
+        : pet.specialNeedsStatus === "no" ? "No known special needs"
+        : "Special-needs status: not yet assessed",
       ...behaviorLabels(pet.behavioralAssessment),
     ].filter(Boolean),
-    description:
+    description: [
       textOr(pet.publicDescription, "") ||
       [
         pet.conditionNotes,
@@ -1142,6 +1142,8 @@ function mapPetFromBackend(pet) {
       ].filter(Boolean).join(" ") ||
       pet.initialCondition ||
       "",
+      pet.specialNeedsNotes ? `Care instructions: ${pet.specialNeedsNotes}` : "",
+    ].filter(Boolean).join(" "),
     match: "Best for adopters ready to provide a safe, caring, and responsible home.",
     image:
     pet.photoURL ||
