@@ -12,4 +12,6 @@ function getAdoptionFinalizationError(adoption = {}) {
 
 module.exports = {
   getAdoptionFinalizationError,
+  ACTIVE_ADOPTION_STATUSES: ["Pending", "Under Review", "Approved"],
+  ANIMAL_ADOPTED_CLOSURE_REASON: "This animal has been adopted by another applicant. Your application was closed because the animal is no longer available. This is not a rejection of your eligibility to adopt.",
 };

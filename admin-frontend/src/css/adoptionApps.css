@@ -156,6 +156,7 @@
 .badge-approved  { background:#e7f6ed; color:#23734c; }
 .badge-finalized { background:var(--green-soft); color:var(--green); }
 .badge-rejected  { background:var(--clay-soft);  color:var(--clay); }
+.badge-closed    { background:var(--cream); color:var(--stone); }
 
 /* View btn */
 .tbl-action-btn {

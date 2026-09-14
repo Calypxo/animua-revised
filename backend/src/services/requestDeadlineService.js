@@ -162,7 +162,13 @@ async function reconcileWorkflow(type, now = new Date()) {
   await Promise.all(snapshot.docs.map(async (document) => {
     const update = lifecycleUpdate(document.data() || {}, workflow, now);
     if (!Object.keys(update).length) return;
-    await document.ref.update(update);
+    try {
+      await document.ref.update(update, ...(document.updateTime ? [{ lastUpdateTime: document.updateTime }] : []));
+    } catch (error) {
+      // A decision made after this scan (including automatic closure) wins.
+      if (error.code === 9) return;
+      throw error;
+    }
     updated += 1;
     if (update.status === "Expired") expired += 1;
   }));

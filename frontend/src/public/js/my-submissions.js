@@ -176,6 +176,7 @@ function statusClass(status) {
   if (normalized.includes("received")) return "received";
   if (normalized.includes("reject") || normalized.includes("expired")) return "rejected";
   if (normalized.includes("withdraw")) return "withdrawn";
+  if (normalized === "closed") return "closed";
   return "pending";
 }
 
@@ -191,6 +192,7 @@ function iconForStatus(status) {
   if (normalized.includes("reject")) return "fa-solid fa-xmark";
   if (normalized.includes("expired")) return "fa-regular fa-calendar-xmark";
   if (normalized.includes("withdraw")) return "fa-solid fa-ban";
+  if (normalized === "closed") return "fa-solid fa-box-archive";
   return "fa-regular fa-clock";
 }
 
@@ -467,6 +469,10 @@ function valueOrFallback(value, fallback = "Not provided") {
 function getApplicationMessage(status, item) {
   const normalized = String(status || "").toLowerCase();
 
+  if (normalized === "closed") {
+    return `${item?.details?.closureReason || "This animal has been adopted by another applicant, so your application is now closed."} You may apply for another available animal.`;
+  }
+
   if (normalized.includes("expired")) {
     return "This application expired because the 14-day shelter attendance deadline passed without a confirmed arrival. Contact the shelter if you need staff to review or restore it.";
   }
@@ -653,9 +659,10 @@ function renderApplicationTimeline(status, submittedDate, decisionDateLabel = su
   const isRejected = normalized.includes("reject");
   const isExpired = normalized.includes("expired");
   const isWithdrawn = normalized.includes("withdraw");
-  const hasDecision = isApproved || isRejected || isExpired;
-  const middleLabel = hasDecision ? "Reviewed" : isWithdrawn ? "Withdrawn" : "Under Review";
-  const decisionLabel = isApproved ? "Approved" : isRejected ? "Rejected" : isExpired ? "Expired" : "Decision";
+  const isClosed = normalized === "closed";
+  const hasDecision = isApproved || isRejected || isExpired || isClosed;
+  const middleLabel = isClosed ? "Animal adopted" : hasDecision ? "Reviewed" : isWithdrawn ? "Withdrawn" : "Under Review";
+  const decisionLabel = isClosed ? "Closed" : isApproved ? "Approved" : isRejected ? "Rejected" : isExpired ? "Expired" : "Decision";
   const decisionDate = hasDecision ? decisionDateLabel : "Pending";
 
   return `
@@ -668,10 +675,10 @@ function renderApplicationTimeline(status, submittedDate, decisionDateLabel = su
       <div class="application-step ${hasDecision ? "done" : "active"}">
         <span>${hasDecision ? '<i class="fa-solid fa-check"></i>' : isWithdrawn ? '<i class="fa-solid fa-ban"></i>' : '<i class="fa-solid fa-minus"></i>'}</span>
         <strong>${middleLabel}</strong>
-        <small>${isWithdrawn ? "By user" : submittedDate}</small>
+        <small>${isClosed ? "By another applicant" : isWithdrawn ? "By user" : submittedDate}</small>
       </div>
       <div class="application-step ${hasDecision ? "active done" : ""}">
-        <span>${isApproved ? '<i class="fa-solid fa-check"></i>' : isRejected || isExpired ? '<i class="fa-solid fa-xmark"></i>' : "3"}</span>
+        <span>${isClosed ? '<i class="fa-solid fa-box-archive"></i>' : isApproved ? '<i class="fa-solid fa-check"></i>' : isRejected || isExpired ? '<i class="fa-solid fa-xmark"></i>' : "3"}</span>
         <strong>${decisionLabel}</strong>
         <small>${decisionDate}</small>
       </div>
@@ -1600,7 +1607,7 @@ async function showSubmissionDetails(item) {
   const compatibilityPresentation = applicationCompatibilityPresentation(details);
   const isApproved = isApprovedDecision(status, "adoption");
   const isRejected = String(status).toLowerCase().includes("reject");
-  const decisionDate = formatDate(details.approvedDate || details.approvedAt || details.acceptedDate || details.acceptedAt || details.updatedAt || item.submittedAt);
+  const decisionDate = formatDate(details.closedAt || details.approvedDate || details.approvedAt || details.acceptedDate || details.acceptedAt || details.updatedAt || item.submittedAt);
 
   Swal.fire({
     html: `

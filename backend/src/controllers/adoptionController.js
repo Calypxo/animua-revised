@@ -17,6 +17,8 @@ const {
 const { createUserNotification, createManagementNotification } = require("../services/notificationService");
 const {
   getAdoptionFinalizationError,
+  ACTIVE_ADOPTION_STATUSES,
+  ANIMAL_ADOPTED_CLOSURE_REASON,
 } = require("../services/adoptionWorkflowService");
 
 function normalizeApplicantIdentifier(value) {
@@ -99,10 +101,11 @@ function buildRescheduledPickup(existingSchedule, { date, time, changedAt, chang
   };
 }
 
-async function applyLegacyPendingPickupReschedule(adoptionRef, data) {
+async function applyLegacyPendingPickupReschedule(adoptionRef, data, updateTime) {
   const request = data.pickupRescheduleRequest || {};
   const existingSchedule = data.pickupSchedule || {};
   if (
+    data.status !== "Approved" ||
     String(request.status || "").toLowerCase() !== "pending" ||
     !request.date ||
     !request.time ||
@@ -126,13 +129,18 @@ async function applyLegacyPendingPickupReschedule(adoptionRef, data) {
     noShowRisk: false,
   };
 
-  await adoptionRef.update({
-    pickupSchedule,
-    pickupRescheduleRequest: null,
-    deadlineStatus: "Appointment Scheduled",
-    noShowRisk: false,
-    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-  });
+  try {
+    await adoptionRef.update({
+      pickupSchedule,
+      pickupRescheduleRequest: null,
+      deadlineStatus: "Appointment Scheduled",
+      noShowRisk: false,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    }, ...(updateTime ? [{ lastUpdateTime: updateTime }] : []));
+  } catch (error) {
+    if (error.code !== 9) throw error;
+    return (await adoptionRef.get()).data() || data;
+  }
 
   return normalized;
 }
@@ -343,7 +351,15 @@ exports.createAdoption = async (req, res) => {
       adoptionSubmissionDocumentId(req.user, pet_id)
     );
     try {
-      await docRef.create(adoptionData);
+      // Recheck availability in the same transaction as creation, so a form
+      // submitted during finalization cannot leave a new pending application.
+      await db.runTransaction(async (transaction) => {
+        const currentAnimal = await transaction.get(db.collection(ANIMAL_COL).doc(pet_id));
+        if (!currentAnimal.exists || currentAnimal.data().status !== "Ready") {
+          throw pickupScheduleError(409, "This animal is no longer available for adoption applications.");
+        }
+        transaction.create(docRef, adoptionData);
+      });
     } catch (error) {
       if (isAlreadyExistingDocumentError(error)) {
         return res.status(409).json({
@@ -369,8 +385,8 @@ exports.createAdoption = async (req, res) => {
     });
   } catch (error) {
     console.error("[createAdoption]", error.message);
-    res.status(500).json({
-      message: "Failed to submit adoption request.",
+    res.status(error.statusCode || 500).json({
+      message: error.statusCode ? error.message : "Failed to submit adoption request.",
     });
   }
 };
@@ -384,7 +400,7 @@ exports.getAllAdoptions = async (req, res) => {
 
     let adoptions = await Promise.all(
       snapshot.docs.map(async (doc) => {
-        const data = await applyLegacyPendingPickupReschedule(doc.ref, doc.data() || {});
+        const data = await applyLegacyPendingPickupReschedule(doc.ref, doc.data() || {}, doc.updateTime);
 
         let animal = {
           id: data.pet_id || "",
@@ -438,6 +454,9 @@ exports.getAllAdoptions = async (req, res) => {
           compatibility: data.compatibility || null,
           status: data.status || "Pending",
           rejectedReason: data.rejectedReason || "",
+          closureCode: data.closureCode || "",
+          closureReason: data.closureReason || "",
+          closedAt: data.closedAt || null,
           approvedAt: data.approvedAt || null,
           approvedBy: data.approvedBy || "",
           adoptionDate: data.adoptionDate || "",
@@ -474,6 +493,7 @@ exports.getAllAdoptions = async (req, res) => {
       approved: adoptions.filter((item) => item.status === "Approved").length,
       finalized: adoptions.filter((item) => item.status === "Finalized").length,
       rejected: adoptions.filter((item) => item.status === "Rejected").length,
+      closed: adoptions.filter((item) => item.status === "Closed").length,
     };
 
     res.status(200).json({ adoptions, summary });
@@ -501,7 +521,7 @@ exports.getMyAdoptions = async (req, res) => {
     const normalizedAdoptionDocs = await Promise.all(
       snapshot.docs.map(async (doc) => ({
         id: doc.id,
-        data: await applyLegacyPendingPickupReschedule(doc.ref, doc.data() || {}),
+        data: await applyLegacyPendingPickupReschedule(doc.ref, doc.data() || {}, doc.updateTime),
       }))
     );
 
@@ -566,6 +586,9 @@ exports.getMyAdoptions = async (req, res) => {
             compatibility: data.compatibility || null,
             status: data.status || "Pending",
             rejectedReason: data.rejectedReason || "",
+            closureCode: data.closureCode || "",
+            closureReason: data.closureReason || "",
+            closedAt: data.closedAt || null,
             approvedAt: data.approvedAt || null,
             adoptionDate: data.adoptionDate || "",
             pickupSchedule: data.pickupSchedule || null,
@@ -656,7 +679,7 @@ exports.scheduleMyAdoptionPickup = async (req, res) => {
       });
     }
 
-    data = await applyLegacyPendingPickupReschedule(adoptionRef, data);
+    data = await applyLegacyPendingPickupReschedule(adoptionRef, data, adoptionDoc.updateTime);
 
     if (!validateScheduleDate(data, date)) {
       return res.status(400).json({
@@ -891,6 +914,9 @@ exports.getAdoptionById = async (req, res) => {
       compatibility: data.compatibility || null,
       status: data.status || "Pending",
       rejectedReason: data.rejectedReason || "",
+      closureCode: data.closureCode || "",
+      closureReason: data.closureReason || "",
+      closedAt: data.closedAt || null,
       approvedAt: data.approvedAt || null,
       approvedBy: data.approvedBy || "",
       adoptionDate: data.adoptionDate || "",
@@ -933,6 +959,10 @@ exports.approveAdoption = async (req, res) => {
 
     const data = doc.data();
 
+    if (data.status === "Closed") {
+      return res.status(409).json({ message: "Closed applications cannot be approved. The animal has already been adopted." });
+    }
+
     if (data.status === "Rejected") {
       return res.status(400).json({
         message: "Rejected applications cannot be approved.",
@@ -951,7 +981,7 @@ exports.approveAdoption = async (req, res) => {
       ...buildApprovalDeadlineFields(now),
       approvedBy: req.user?.email || "Admin",
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
+    }, ...(doc.updateTime ? [{ lastUpdateTime: doc.updateTime }] : []));
 
     await createUserNotification({
       userEmail: data.applicant?.email || data.account?.email || data.userEmail,
@@ -968,8 +998,8 @@ exports.approveAdoption = async (req, res) => {
     });
   } catch (error) {
     console.error("[approveAdoption]", error.message);
-    res.status(500).json({
-      message: "Failed to approve adoption request.",
+    res.status(error.code === 9 ? 409 : 500).json({
+      message: error.code === 9 ? "This application changed. Refresh before reviewing it again." : "Failed to approve adoption request.",
     });
   }
 };
@@ -997,6 +1027,10 @@ exports.rejectAdoption = async (req, res) => {
 
     const data = doc.data();
 
+    if (data.status === "Closed") {
+      return res.status(409).json({ message: "This application is already closed because the animal was adopted." });
+    }
+
     if (data.status === "Finalized") {
       return res.status(400).json({
         message: "Finalized applications cannot be rejected.",
@@ -1007,7 +1041,7 @@ exports.rejectAdoption = async (req, res) => {
       status: "Rejected",
       rejectedReason: normalizedReason,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
+    }, ...(doc.updateTime ? [{ lastUpdateTime: doc.updateTime }] : []));
 
     await createUserNotification({
       userEmail: data.applicant?.email || data.account?.email || data.userEmail,
@@ -1024,8 +1058,8 @@ exports.rejectAdoption = async (req, res) => {
     });
   } catch (error) {
     console.error("[rejectAdoption]", error.message);
-    res.status(500).json({
-      message: "Failed to reject adoption request.",
+    res.status(error.code === 9 ? 409 : 500).json({
+      message: error.code === 9 ? "This application changed. Refresh before reviewing it again." : "Failed to reject adoption request.",
     });
   }
 };
@@ -1047,100 +1081,123 @@ exports.finalizeAdoption = async (req, res) => {
     }
 
     const adoptionRef = db.collection(ADOPTION_COL).doc(id);
-    const adoptionDoc = await adoptionRef.get();
-
-    if (!adoptionDoc.exists) {
-      return res.status(404).json({
-        message: "Adoption request not found.",
-      });
-    }
-
-    const adoptionData = adoptionDoc.data();
-
-    const finalizationError = getAdoptionFinalizationError(adoptionData);
-    if (finalizationError) {
-      return res.status(400).json({
-        message: finalizationError,
-      });
-    }
-
-    const animalRef = db.collection(ANIMAL_COL).doc(adoptionData.pet_id);
-    const animalDoc = await animalRef.get();
-
-    if (!animalDoc.exists) {
-      return res.status(404).json({
-        message: "Related animal not found.",
-      });
-    }
-
-    const animalData = animalDoc.data();
-
-    if (animalData.status !== "Ready") {
-      return res.status(400).json({
-        message: "Only animals marked Ready can be finalized for adoption.",
-      });
-    }
-
     const finalAdoptionDate = adoptionDate || new Date().toISOString().split("T")[0];
     const finalProcessedBy = processedBy || req.user?.email || "Admin";
+    const closedAt = new Date().toISOString();
 
-    const batch = db.batch();
+    // All reads precede writes. A concurrent finalization or application edit
+    // forces a retry against the latest state instead of leaving partial results.
+    const result = await db.runTransaction(async (transaction) => {
+      const adoptionDoc = await transaction.get(adoptionRef);
+      if (!adoptionDoc.exists) {
+        throw pickupScheduleError(404, "Adoption request not found.");
+      }
+      const adoptionData = adoptionDoc.data();
+      const finalizationError = getAdoptionFinalizationError(adoptionData);
+      if (finalizationError) throw pickupScheduleError(400, finalizationError);
 
-    batch.update(adoptionRef, {
-      status: "Finalized",
-      deadlineStatus: "Completed",
-      deadlineReminderStage: "Completed",
-      noShowRisk: false,
-      adoptionDate: finalAdoptionDate,
-      processedBy: finalProcessedBy,
-      adoptedName: finalAdoptedName,
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      const animalRef = db.collection(ANIMAL_COL).doc(adoptionData.pet_id);
+      const animalDoc = await transaction.get(animalRef);
+      if (!animalDoc.exists) throw pickupScheduleError(404, "Related animal not found.");
+      if (animalDoc.data().status !== "Ready") {
+        throw pickupScheduleError(409, "Only animals marked Ready can be finalized for adoption.");
+      }
+
+      const related = await transaction.get(
+        db.collection(ADOPTION_COL).where("pet_id", "==", adoptionData.pet_id)
+      );
+      const otherApplications = related.docs.filter((document) =>
+        document.id !== id && ACTIVE_ADOPTION_STATUSES.includes(document.data().status)
+      );
+
+      transaction.update(adoptionRef, {
+        status: "Finalized",
+        deadlineStatus: "Completed",
+        deadlineReminderStage: "Completed",
+        noShowRisk: false,
+        adoptionDate: finalAdoptionDate,
+        processedBy: finalProcessedBy,
+        adoptedName: finalAdoptedName,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+      transaction.update(animalRef, {
+        status: "Adopted",
+        currentStage: "adopted",
+        visibleToPublic: false,
+        adoptionStatus: "Adopted",
+        adoptionDate: finalAdoptionDate,
+        name: finalAdoptedName,
+        adoptedName: finalAdoptedName,
+        nameAssignedBy: adoptionData.applicant?.full_name || "",
+        nameAssignedAt: finalAdoptionDate,
+        adopterName: adoptionData.applicant?.full_name || "",
+        adoptionStaff: finalProcessedBy,
+        processedBy: finalProcessedBy,
+        adoptionApplicationId: id,
+        history: admin.firestore.FieldValue.arrayUnion({
+          date: finalAdoptionDate,
+          event: "Adopted",
+          detail: `Adopted by ${adoptionData.applicant?.full_name || "Unknown adopter"} and named ${finalAdoptedName}`,
+          actor: finalProcessedBy,
+        }),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedBy: req.user?.email || "Admin",
+      });
+      for (const document of otherApplications) {
+        transaction.update(document.ref, {
+          status: "Closed",
+          closureCode: "ANIMAL_ADOPTED",
+          closureReason: ANIMAL_ADOPTED_CLOSURE_REASON,
+          statusBeforeClosure: document.data().status,
+          closedAt,
+          closedBy: req.user?.email || "Admin",
+          closedByApplicationId: id,
+          deadlineStatus: "Closed — Animal Adopted",
+          deadlineReminderStage: "Completed",
+          noShowRisk: false,
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+      }
+      return {
+        adoptionData,
+        closedApplications: otherApplications.map((document) => ({ ...document.data(), id: document.id })),
+      };
     });
 
-    batch.update(animalRef, {
-    status: "Adopted",
-    currentStage: "adopted",
-    visibleToPublic: false,
-    adoptionStatus: "Adopted",
-    adoptionDate: finalAdoptionDate,
-    name: finalAdoptedName,
-    adoptedName: finalAdoptedName,
-    nameAssignedBy:
-      adoptionData.applicant?.full_name || "",
-    nameAssignedAt: finalAdoptionDate,
-    adopterName: adoptionData.applicant?.full_name || "",
-    adoptionStaff: finalProcessedBy,
-    processedBy: finalProcessedBy,
-    adoptionApplicationId: id,
-    history: admin.firestore.FieldValue.arrayUnion({
-      date: finalAdoptionDate,
-      event: "Adopted",
-      detail: `Adopted by ${adoptionData.applicant?.full_name || "Unknown adopter"} and named ${finalAdoptedName}`,
-      actor: finalProcessedBy,
-    }),
-    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    updatedBy: req.user?.email || "Admin",
-  });
-
-    await batch.commit();
-
-    await createUserNotification({
-      userEmail: adoptionData.applicant?.email || adoptionData.account?.email || adoptionData.userEmail,
+    // Notification failures must not report a committed adoption as failed.
+    // Send only after the transaction commits, never inside a retrying callback.
+    const notifications = [{
+      userEmail: result.adoptionData.applicant?.email || result.adoptionData.account?.email || result.adoptionData.userEmail,
       category: "application",
       type: "adoption_finalized",
       title: "Adoption finalized",
       message: `${finalAdoptedName} has been finalized for adoption.`,
       link: "/pages/public/my-submissions.html",
       referenceId: id,
-    });
+    }, ...result.closedApplications.map((application) => ({
+      userEmail: application.applicant?.email || application.account?.email || application.userEmail,
+      category: "application",
+      type: "adoption_closed",
+      title: "Adoption application closed",
+      message: `${application.pet_label || application.pet_name || "The animal you applied for"} has been adopted by another applicant. Your application is now closed. You may apply for another available animal.`,
+      link: "/pages/public/my-submissions.html",
+      referenceId: application.id,
+    }))];
+    const notificationResults = await Promise.allSettled(
+      notifications.map((notification) => createUserNotification(notification))
+    );
+    const notificationFailures = notificationResults.filter((entry) => entry.status === "rejected").length;
+    if (notificationFailures) console.warn("[finalizeAdoption] Notification deliveries failed:", notificationFailures);
 
     res.status(200).json({
       message: "Adoption finalized successfully.",
+      closedApplicationCount: result.closedApplications.length,
+      notificationFailures,
     });
   } catch (error) {
     console.error("[finalizeAdoption]", error.message);
-    res.status(500).json({
-      message: "Failed to finalize adoption.",
+    res.status(error.statusCode || 500).json({
+      message: error.statusCode ? error.message : "Failed to finalize adoption.",
     });
   }
 };
