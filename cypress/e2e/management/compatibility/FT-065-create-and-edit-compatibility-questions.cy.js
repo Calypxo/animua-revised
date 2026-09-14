@@ -20,6 +20,15 @@ describe("Fixed compatibility wording and animal special-needs status", () => {
         animal = { ...animal, ...request.body, behavioralNotes: request.body.notes, behavioralAssessment: request.body.traits };
         return request.reply({ message: "Behavioral assessment saved." });
       }
+      if (path.endsWith("/animals/care-test/medical") || path.endsWith("/animals/care-test/medical/visit")) {
+        const record = { id: "visit", ...request.body, vet: "Test Admin" };
+        animal.medicalRecords = [record];
+        if (request.body.specialNeedsStatus) {
+          animal.specialNeedsStatus = request.body.specialNeedsStatus;
+          animal.specialNeedsNotes = request.body.specialNeedsNotes;
+        }
+        return request.reply({ id: "visit", message: "Medical record saved." });
+      }
       if (path.endsWith("/animals/care-test")) return request.reply({ animal });
       if (request.method !== "GET") throw new Error(`Unexpected mutation: ${request.method} ${path}`);
       return request.reply({ results: [], notifications: [], items: [], unreadCount: 0 });
@@ -65,71 +74,119 @@ describe("Fixed compatibility wording and animal special-needs status", () => {
   });
 
   [1280, 390].forEach(width => {
-    it(`reviews, drafts and saves care status without losing observations at ${width}px`, () => {
+    it(`records special needs in medical care and keeps behavior separate at ${width}px`, () => {
       const careNotes = "Daily mobility assistance and an accessible sleeping area.";
       cy.viewport(width, 720);
       cy.visit("/pages/animalProfile.html?id=care-test");
-      cy.get('[data-tab="behavioral"]').click();
-      cy.get("#behavioralContent").should("contain.text", "Not yet assessed");
-      cy.get("#btnEditBehavioral").click();
-      cy.get("#specialNeedsStatus").should("have.value", "unknown");
+      cy.get('[data-tab="medical"]').click();
+      cy.get("#medicalCareSummary").should("contain.text", "Not yet assessed");
+      cy.get("#btnAddMedical").click();
+      cy.get("#fMedType").select("Checkup");
+      cy.get("#medicalForm #specialNeedsStatus").should("have.value", "unknown");
       cy.get('[name="specialNeedsChoice"][value="unknown"]').should("be.checked");
       cy.get("#specialNeedsReviewHint").should("contain.text", "previous numeric");
-      cy.get("#slider-specialNeeds, #addBehaviorObservation, #behaviorObservationList").should("not.exist");
       cy.get('[name="specialNeedsChoice"][value="yes"]').check();
       cy.get("#specialNeedsNotes").should("have.attr", "required");
-      cy.get("#behavioralModalSave").click();
-      cy.get("#toastMsg").should("contain.text", "Describe the animal's special needs");
+      cy.get("#medicalModalSave").click();
+      cy.get("#errSpecialNeedsNotes").should("contain.text", "Describe the animal's special needs");
       cy.get("#specialNeedsNotes").type(careNotes);
       cy.get('[name="specialNeedsChoice"][value="no"]').check();
       cy.get("#specialNeedsNotes").should("be.disabled").and("not.be.visible");
       cy.get('[name="specialNeedsChoice"][value="yes"]').check();
       cy.get("#specialNeedsNotes").should("have.value", careNotes);
-      cy.get("#behavioralModalDraft").click();
+      cy.get("#medicalModalDraft").click();
       cy.reload();
-      cy.get('[data-tab="behavioral"]').click();
-      cy.get("#btnEditBehavioral").click();
+      cy.get('[data-tab="medical"]').click();
+      cy.get("#btnAddMedical").click();
+      cy.get("#fMedType").should("have.value", "Checkup");
       cy.get('[name="specialNeedsChoice"][value="yes"]').should("be.checked");
       cy.get("#specialNeedsNotes").should("have.value", careNotes).and("have.attr", "required");
-      cy.get(".care-status-option").each($option => {
-        const rect = $option[0].getBoundingClientRect();
-        expect(rect.left).to.be.at.least(0);
-        expect(rect.right).to.be.at.most(width);
+      cy.get("#medicalSpecialNeedsSection").scrollIntoView();
+      cy.get("#medicalModalBackdrop").should("have.css", "opacity", "1");
+      cy.get("#medicalModalBackdrop .medical-modal").should($modal => {
+        const rect = $modal[0].getBoundingClientRect();
+        expect(rect.left, "medical form fits the left edge").to.be.at.least(-0.5);
+        expect(rect.right, "medical form fits the right edge").to.be.at.most(width + 0.5);
       });
       cy.get('[name="specialNeedsChoice"]').each($input => {
-        expect($input[0].getBoundingClientRect().width, "radio stays compact on phones").to.be.closeTo(17, 1);
+        expect($input[0].getBoundingClientRect().width, "compact radio control").to.be.closeTo(17, 1);
       });
-      cy.get("#behavioralModalBackdrop .um-modal-body").scrollTo("top");
-      cy.get("#behavioralModalBackdrop").should("have.css", "opacity", "1");
-      cy.get("#behavioralModalBackdrop .behavioral-modal").should($modal => {
-        const rect = $modal[0].getBoundingClientRect();
-        expect(rect.left, "assessment fits the left edge").to.be.at.least(-0.5);
-        expect(rect.right, "assessment fits the right edge").to.be.at.most(width + 0.5);
+      cy.get('[name="specialNeedsChoice"][value="yes"]').focus();
+      cy.get("#specialNeedsTitle").scrollIntoView();
+      cy.screenshot(`medical-special-needs-${width}`, { capture: "viewport", disableTimersAndAnimations: false });
+      cy.intercept("POST", "**/api/animals/care-test/medical").as("addMedical");
+      cy.get("#medicalModalSave").click();
+      cy.wait("@addMedical").then(({ request }) => {
+        expect(request.body.type).to.equal("Checkup");
+        expect(request.body.specialNeedsStatus).to.equal("yes");
+        expect(request.body.specialNeedsNotes).to.equal(careNotes);
+        expect(request.body.specialNeedsBaseline).to.deep.equal({ specialNeedsStatus: "unknown", specialNeedsNotes: "" });
+        expect(request.body).not.to.have.property("traits");
       });
-      cy.screenshot(`animal-special-needs-status-${width}`, { capture: "viewport", disableTimersAndAnimations: false });
+      cy.get("#medicalCareSummary").should("contain.text", "Requires special care").and("contain.text", careNotes);
+      cy.get("#medicalRecordsList").should("contain.text", "Special needs recorded:").and("contain.text", careNotes);
+      cy.get('[data-tab="behavioral"]').click();
+      cy.get("#behavioralContent").should("contain.text", "Requires special care");
+      cy.get("#btnEditBehavioral").click();
+      cy.get("#behavioralForm #specialNeedsStatus, #behavioralForm [name=specialNeedsChoice], #slider-specialNeeds, #addBehaviorObservation").should("not.exist");
       cy.intercept("POST", "**/api/animals/care-test/behavioral").as("saveAssessment");
       cy.get("#behavioralModalSave").click();
       cy.wait("@saveAssessment").then(({ request }) => {
-        expect(request.body.specialNeedsStatus).to.equal("yes");
-        expect(request.body.specialNeedsNotes).to.equal(careNotes);
-        expect(request.body.traits).not.to.have.property("specialNeeds");
+        expect(request.body).not.to.have.property("specialNeedsStatus");
+        expect(request.body).not.to.have.property("specialNeedsNotes");
         expect(Object.keys(request.body.traits)).to.have.length(16);
         expect(request.body.notes).to.equal("Observed behaviors:\n- Leash walking\n\nAssessment notes:\nKeep a calm routine.");
       });
-      cy.get("#behavioralContent .care-summary-card").should("contain.text", "Requires special care").and("contain.text", careNotes);
-      cy.get("#behavioralModalBackdrop").should("have.css", "opacity", "0");
-      cy.get("#behavioralContent .care-summary-card").screenshot(`animal-care-summary-${width}`);
-      cy.get("#btnEditBehavioral").click();
+      cy.get("#behavioralContent").should("contain.text", "Requires special care").and("contain.text", careNotes);
+      cy.get('[data-tab="medical"]').click();
+      cy.get('[data-med-edit="visit"]').click();
+      cy.get("#medicalModalTitle").should("have.text", "Edit Medical Record");
       cy.get('[name="specialNeedsChoice"][value="yes"]').should("be.checked");
-      cy.get("#specialNeedsNotes").should("have.value", careNotes);
       cy.get('[name="specialNeedsChoice"][value="no"]').check();
-      cy.get("#behavioralModalSave").click();
-      cy.wait("@saveAssessment").then(({ request }) => {
+      cy.intercept("PUT", "**/api/animals/care-test/medical/visit").as("editMedical");
+      cy.get("#medicalModalSave").click();
+      cy.wait("@editMedical").then(({ request }) => {
         expect(request.body.specialNeedsStatus).to.equal("no");
         expect(request.body.specialNeedsNotes).to.equal("");
+        expect(request.body.specialNeedsBaseline.specialNeedsStatus).to.equal("yes");
       });
-      cy.get("#behavioralContent .care-summary-card").should("contain.text", "No known special needs");
-      cy.get("#behavioralContent .care-summary-notes").should("not.exist");
+      cy.get("#medicalCareSummary").should("contain.text", "No known special needs");
+      cy.get("#medicalCareSummary .care-summary-notes").should("not.exist");
+      cy.get('[data-med-edit="visit"]').click();
+      cy.get("#fMedDiagnosis").type("Routine checkup completed.");
+      cy.get("#medicalModalSave").click();
+      cy.wait("@editMedical").then(({ request }) => {
+        expect(request.body.diagnosis).to.equal("Routine checkup completed.");
+        expect(request.body).not.to.have.property("specialNeedsStatus");
+        expect(request.body).not.to.have.property("specialNeedsNotes");
+      });
+    });
+
+    it(`refreshes stale care in a medical draft while preserving visit details at ${width}px`, () => {
+      cy.viewport(width, 720);
+      cy.visit("/pages/animalProfile.html?id=care-test");
+      cy.get('[data-tab="medical"]').click();
+      cy.get("#btnAddMedical").click();
+      cy.get("#fMedType").select("Checkup");
+      cy.get("#fMedDiagnosis").type("Draft visit findings.");
+      cy.get('[name="specialNeedsChoice"][value="yes"]').check();
+      cy.get("#specialNeedsNotes").type("Outdated draft care.");
+      cy.get("#medicalModalDraft").click().then(() => {
+        animal.specialNeedsStatus = "no";
+        animal.specialNeedsNotes = "";
+      });
+      cy.reload();
+      cy.get('[data-tab="medical"]').click();
+      cy.get("#btnAddMedical").click();
+      cy.get("#fMedDiagnosis").should("have.value", "Draft visit findings.");
+      cy.get("#specialNeedsStatus").should("have.value", "no");
+      cy.get("#medicalDraftStatus").should("contain.text", "care status refreshed");
+      cy.intercept("POST", "**/api/animals/care-test/medical").as("saveUnchangedCare");
+      cy.get("#medicalModalSave").click();
+      cy.wait("@saveUnchangedCare").then(({ request }) => {
+        expect(request.body).not.to.have.property("specialNeedsStatus");
+        expect(request.body).not.to.have.property("specialNeedsNotes");
+      });
     });
 
     it(`shows an actionable empty assessment and care status at ${width}px`, () => {
@@ -147,8 +204,7 @@ describe("Fixed compatibility wording and animal special-needs status", () => {
         expect(rect.right).to.be.at.most(width);
       });
       cy.get("#btnEditBehavioral").click();
-      cy.get('[name="specialNeedsChoice"][value="unknown"]').should("be.checked");
-      cy.get("#specialNeedsNotes").should("not.have.attr", "required");
+      cy.get("#behavioralForm #specialNeedsStatus, #behavioralForm [name=specialNeedsChoice]").should("not.exist");
     });
   });
 });

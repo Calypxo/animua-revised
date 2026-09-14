@@ -569,6 +569,9 @@ exports.saveBehavioralAssessment = async (req, res) => {
   try {
     const { id } = req.params;
     const { notes } = req.body;
+    if (Object.hasOwn(req.body, "specialNeedsStatus") || Object.hasOwn(req.body, "specialNeedsNotes")) {
+      return res.status(409).json({ message: "Special needs is now managed in Add Medical Record. Refresh the page and save care changes there." });
+    }
     const config = await getBehavioralQuestionConfiguration();
     const submittedVersion = Number(req.body?.configurationVersion);
     if (Number.isInteger(submittedVersion) && submittedVersion !== config.version) {
@@ -593,8 +596,7 @@ exports.saveBehavioralAssessment = async (req, res) => {
     if (["Adopted", "Archived"].includes(previousAnimal.status)) {
       return res.status(409).json({ message: "Assessments cannot be changed for adopted or archived animals." });
     }
-    const care = validateSpecialNeeds(req.body, previousAnimal);
-    if (care.error) return res.status(400).json({ message: care.error });
+    const care = { specialNeedsStatus: getSpecialNeedsStatus(previousAnimal), specialNeedsNotes: previousAnimal.specialNeedsNotes || "" };
     const completedAt = new Date().toISOString();
     const questionSnapshot = buildBehavioralQuestionSnapshot(config.questions, traits, answerSelections);
     const assessmentHistoryEntry = {
@@ -615,7 +617,6 @@ exports.saveBehavioralAssessment = async (req, res) => {
     };
 
     await db.collection(ANIMAL_COL).doc(id).update({
-      ...care,
       ...(typeof previousAnimal.behavioralAssessment?.specialNeeds === "number"
         ? { legacySpecialNeedsRating: previousAnimal.behavioralAssessment.specialNeeds }
         : {}),
@@ -658,6 +659,19 @@ exports.saveBehavioralAssessment = async (req, res) => {
 };
 
 // ── ADD MEDICAL RECORD ────────────────────────────────
+function medicalCareUpdate(input, animal) {
+  if (!Object.hasOwn(input, "specialNeedsStatus") && !Object.hasOwn(input, "specialNeedsNotes")) return {};
+  const baseline = input.specialNeedsBaseline;
+  const currentStatus = getSpecialNeedsStatus(animal);
+  const currentNotes = currentStatus === "no" ? "" : String(animal.specialNeedsNotes || "").trim();
+  if (baseline && (baseline.specialNeedsStatus !== currentStatus || baseline.specialNeedsNotes !== currentNotes)) {
+    throw requestError(409, "Special-needs care changed while this record was open. Reopen the medical record and review the current care status.");
+  }
+  const care = validateSpecialNeeds(input, animal);
+  if (care.error) throw requestError(400, care.error);
+  return care;
+}
+
 exports.addMedicalRecord = async (req, res) => {
   try {
     const { id } = req.params;
@@ -696,6 +710,7 @@ exports.addMedicalRecord = async (req, res) => {
       if (!animalDoc.exists) throw requestError(404, "Animal not found.");
 
       const animal = animalDoc.data();
+      const care = medicalCareUpdate(req.body, animal);
       if (animal.status !== "Quarantine") {
         throw requestError(
           400,
@@ -744,6 +759,7 @@ exports.addMedicalRecord = async (req, res) => {
       }
 
       const record = {
+        ...care,
         id: medId,
         type,
         date,
@@ -770,6 +786,7 @@ exports.addMedicalRecord = async (req, res) => {
           req.user?.fullName || req.user?.email || "System User",
       };
       const animalUpdates = {
+        ...care,
         medicalRecords,
         history: admin.firestore.FieldValue.arrayUnion(historyEntry),
         quarantineClearance: latestClearance?.clearance || "Pending",
@@ -794,7 +811,9 @@ exports.addMedicalRecord = async (req, res) => {
           targetName: getAnimalDisplayLabel(animal, id),
           performedBy: req.user?.email,
           performedByName: req.user?.fullName,
+          before: Object.keys(care).length ? { specialNeedsStatus: getSpecialNeedsStatus(animal), specialNeedsNotes: animal.specialNeedsNotes || "" } : {},
           after: {
+            ...care,
             medicalRecordId: medId,
             type,
             inventoryItemId: resolvedInventoryId,
@@ -1168,6 +1187,7 @@ exports.updateMedicalRecord = async (req, res) => {
       if (!animalDoc.exists) throw requestError(404, "Animal not found.");
 
       const animal = animalDoc.data();
+      const care = medicalCareUpdate(req.body, animal);
       if (animal.status !== "Quarantine") {
         throw requestError(
           400,
@@ -1260,6 +1280,7 @@ exports.updateMedicalRecord = async (req, res) => {
           : null;
       const updatedRecord = {
         ...existing,
+        ...care,
         type: type ?? existing.type,
         date: date ?? existing.date,
         vet: existing.vet || req.user?.fullName || req.user?.email || "Staff",
@@ -1292,6 +1313,7 @@ exports.updateMedicalRecord = async (req, res) => {
           req.user?.fullName || req.user?.email || "System User",
       };
       const animalUpdates = {
+        ...care,
         medicalRecords: records,
         history: admin.firestore.FieldValue.arrayUnion(historyEntry),
         quarantineClearance: latestClearance?.clearance || "Pending",
@@ -1322,12 +1344,14 @@ exports.updateMedicalRecord = async (req, res) => {
           performedBy: req.user?.email,
           performedByName: req.user?.fullName,
           before: {
+            ...(Object.keys(care).length ? { specialNeedsStatus: getSpecialNeedsStatus(animal), specialNeedsNotes: animal.specialNeedsNotes || "" } : {}),
             medicalRecordId: medicalId,
             type: existing.type,
             inventoryItemId: oldInventoryId,
             quantityUsed: oldQuantity,
           },
           after: {
+            ...care,
             medicalRecordId: medicalId,
             type: updatedRecord.type,
             inventoryItemId: newInventoryId,

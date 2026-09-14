@@ -145,8 +145,8 @@ function syncSpecialNeedsEditor() {
   statusField.value = status;
   document.querySelectorAll('[name="specialNeedsChoice"]').forEach(input => {
     input.checked = input.value === status;
-    input.toggleAttribute("autofocus", input.checked);
   });
+  document.getElementById("medicalCareStatusLabel").textContent = specialNeedsLabel({ specialNeedsStatus: status });
   const notes = document.getElementById("specialNeedsNotes");
   notes.required = status === "yes";
   notes.disabled = status === "no";
@@ -166,11 +166,20 @@ function syncSpecialNeedsEditor() {
         : "Choose a confirmed status after reviewing the animal's care needs.";
 }
 
+function getMedicalCareUpdate() {
+  const status = document.getElementById("specialNeedsStatus").value;
+  const notes = status === "no" ? "" : document.getElementById("specialNeedsNotes").value.trim();
+  const baseline = JSON.parse(document.getElementById("medicalCareBaseline").value);
+  if (status === baseline.specialNeedsStatus && notes === baseline.specialNeedsNotes) return {};
+  return { specialNeedsStatus: status, specialNeedsNotes: notes, specialNeedsBaseline: baseline };
+}
+
 function bindSpecialNeedsEditor() {
   document.querySelectorAll('[name="specialNeedsChoice"]').forEach(input => {
     input.addEventListener("change", () => {
       document.getElementById("specialNeedsStatus").value = input.value;
       syncSpecialNeedsEditor();
+      clearMedicalFieldError("specialNeedsNotes");
     });
   });
 }
@@ -284,6 +293,7 @@ const MEDICAL_ERROR_IDS = {
   fMedWeight: "errMedWeight",
   fMedInventorySearch: "errMedInventoryItem",
   fMedQuantityUsed: "errMedQuantityUsed",
+  specialNeedsNotes: "errSpecialNeedsNotes",
 };
 
 function clearMedicalFieldError(fieldId) {
@@ -377,8 +387,14 @@ function validateMedicalRecordForm() {
   }
 
   if (errors.some((fieldId) => fieldId === "fMedInventorySearch" || fieldId === "fMedQuantityUsed")) {
-    const inventoryDetails = document.querySelector(".medical-optional-section");
+    const inventoryDetails = document.getElementById("medicalInventorySection");
     if (inventoryDetails) inventoryDetails.open = true;
+  }
+
+  const careUpdate = getMedicalCareUpdate();
+  if (careUpdate.specialNeedsStatus === "yes" && !careUpdate.specialNeedsNotes) {
+    document.getElementById("medicalSpecialNeedsSection").open = true;
+    addError("specialNeedsNotes", "Describe the animal's special needs and required care.");
   }
 
   if (errors.length) {
@@ -386,7 +402,7 @@ function validateMedicalRecordForm() {
     return null;
   }
 
-  return { type, date, weight, inventoryItemId, quantityUsed };
+  return { type, date, weight, inventoryItemId, quantityUsed, careUpdate };
 }
 
 function bindMedicalFormValidation() {
@@ -789,6 +805,7 @@ function renderOverviewTab() {
 }
 
 function renderMedicalTab() {
+  document.getElementById("medicalCareSummary").innerHTML = renderCareSummary("medicalCareTitle");
 
   const addMedicalButton =
   document.getElementById("btnAddMedical");
@@ -869,6 +886,7 @@ if (addMedicalButton) {
             }
             ${r.weight ? `<p><strong>Weight:</strong> ${r.weight} kg</p>` : ""}
             ${r.notes ? `<p><strong>Notes:</strong> ${r.notes}</p>` : ""}
+            ${r.specialNeedsStatus ? `<div class="medical-record-care"><p><strong>Special needs recorded:</strong> ${specialNeedsLabel(r)}</p>${r.specialNeedsNotes && r.specialNeedsStatus !== "no" ? `<p>${escapeHtml(r.specialNeedsNotes)}</p>` : ""}</div>` : ""}
           </div>
         </div>`;
     }).join("");
@@ -929,26 +947,30 @@ if (addMedicalButton) {
   });
 }
 
-function renderBehavioralTab() {
-  const el = document.getElementById("behavioralContent");
-  const lbl = document.getElementById("behavioralBtnLabel");
+function renderCareSummary(titleId) {
   const careStatus = specialNeedsStatus(animal);
   const careIcons = { unknown: "bi-clock-history", no: "bi-check-circle", yes: "bi-heart-pulse" };
   const careDescriptions = {
-    unknown: "Review this animal's care needs during its next assessment.",
+    unknown: "Review this animal's care needs in Add Medical Record under Medical & Quarantine.",
     no: "Routine daily care. Update this status if additional needs are identified.",
     yes: "This animal needs ongoing support or accommodations. Review the care instructions before placement.",
   };
-  const careSummary = `
-    <section class="care-summary-card" data-care-status="${careStatus}" aria-labelledby="careSummaryTitle">
+  return `
+    <section class="care-summary-card" data-care-status="${careStatus}" aria-labelledby="${titleId}">
       <div class="care-summary-heading">
         <span class="care-section-icon"><i class="bi bi-heart-pulse" aria-hidden="true"></i></span>
-        <div><h4 id="careSummaryTitle">Special needs</h4><p>Care and support requirements</p></div>
+        <div><h4 id="${titleId}">Special needs</h4><p>Care and support requirements</p></div>
         <span class="care-status-badge"><i class="bi ${careIcons[careStatus]}" aria-hidden="true"></i>${specialNeedsLabel(animal)}</span>
       </div>
       <p class="care-summary-description">${careDescriptions[careStatus]}</p>
       ${animal.specialNeedsNotes && careStatus !== "no" ? `<div class="care-summary-notes"><h5>${careStatus === "yes" ? "Care instructions" : "Care observations"}</h5><p>${escapeHtml(animal.specialNeedsNotes)}</p></div>` : ""}
     </section>`;
+}
+
+function renderBehavioralTab() {
+  const el = document.getElementById("behavioralContent");
+  const lbl = document.getElementById("behavioralBtnLabel");
+  const careSummary = renderCareSummary("behavioralCareTitle");
 
   if (!animal.behavioralAssessment) {
     lbl.textContent = "Add Assessment";
@@ -1241,8 +1263,6 @@ function openBehavioralModal() {
   const parsedNotes = parseBehavioralNotes(animal.behavioralNotes || "");
   document.getElementById("behavioralNotes").value = parsedNotes.notes;
   document.getElementById("behavioralAssessor").value = signedInUserName();
-  document.getElementById("specialNeedsStatus").value = specialNeedsStatus(animal);
-  document.getElementById("specialNeedsNotes").value = animal.specialNeedsNotes || "";
   if (!behavioralQuestionConfig?.questions?.length) {
     showToast("error", "Behavioral assessment questions are unavailable. Refresh the page and try again.");
     return;
@@ -1311,7 +1331,6 @@ function openBehavioralModal() {
     });
   }
 
-  syncSpecialNeedsEditor();
   openModal("behavioralModalBackdrop");
 }
 
@@ -1352,18 +1371,8 @@ async function saveBehavioralAssessment() {
     document.getElementById("behavioralNotes").value
   );
   const assessor = signedInUserName();
-  const careStatus = document.getElementById("specialNeedsStatus").value;
-  const careNotes = careStatus === "no" ? "" : document.getElementById("specialNeedsNotes").value.trim();
-  if (careStatus === "yes" && !careNotes) {
-    showToast("error", "Describe the animal's special needs and required care.");
-    document.getElementById("specialNeedsNotes").focus();
-    return;
-  }
-
   try {
     await saveBehavioralAssessmentApi(animal.id, {
-      specialNeedsStatus: careStatus,
-      specialNeedsNotes: careNotes,
       traits,
       answerSelections,
       configurationVersion: behavioralQuestionConfig.version,
@@ -1455,9 +1464,16 @@ if (!can(requiredPermission)) {
     "Record the visit first; add care details and inventory only when applicable.";
 
   document.getElementById("medicalForm").reset();
+  const currentCare = {
+    specialNeedsStatus: specialNeedsStatus(animal),
+    specialNeedsNotes: specialNeedsStatus(animal) === "no" ? "" : String(animal.specialNeedsNotes || "").trim(),
+  };
+  document.getElementById("specialNeedsStatus").value = currentCare.specialNeedsStatus;
+  document.getElementById("specialNeedsNotes").value = currentCare.specialNeedsNotes;
+  document.getElementById("medicalCareBaseline").value = JSON.stringify(currentCare);
   clearMedicalFormErrors();
   document.getElementById("fMedVet").value = signedInUserName();
-  const inventoryDetails = document.querySelector(".medical-optional-section");
+  const inventoryDetails = document.getElementById("medicalInventorySection");
   if (inventoryDetails) inventoryDetails.open = false;
 
   selectMedicalInventoryItem("");
@@ -1533,6 +1549,15 @@ if (quantityInput) {
   );
   syncMedicalInventoryPicker();
   if (inventoryDetails && document.getElementById("fMedInventoryItem")?.value) inventoryDetails.open = true;
+  const draftCare = JSON.parse(document.getElementById("medicalCareBaseline").value);
+  if (draftCare.specialNeedsStatus !== currentCare.specialNeedsStatus || draftCare.specialNeedsNotes !== currentCare.specialNeedsNotes) {
+    document.getElementById("specialNeedsStatus").value = currentCare.specialNeedsStatus;
+    document.getElementById("specialNeedsNotes").value = currentCare.specialNeedsNotes;
+    document.getElementById("medicalCareBaseline").value = JSON.stringify(currentCare);
+    setDraftStatus("medicalDraftStatus", "Visit draft restored; care status refreshed. Review current care needs.");
+  }
+  syncSpecialNeedsEditor();
+  document.getElementById("medicalSpecialNeedsSection").open = document.getElementById("specialNeedsStatus").value !== "no";
   openModal("medicalModalBackdrop");
 }
 
@@ -1562,9 +1587,10 @@ async function saveMedicalRecord() {
     showToast("error", "Please correct the highlighted fields.");
     return;
   }
-  const { type, date, weight, inventoryItemId, quantityUsed } = formValues;
+  const { type, date, weight, inventoryItemId, quantityUsed, careUpdate } = formValues;
 
   const payload = {
+  ...careUpdate,
   type,
   date,
 
@@ -1645,6 +1671,9 @@ async function saveMedicalRecord() {
     renderAllTabs();
   } catch (err) {
     console.error("[saveMedicalRecord]", err);
+    if (err.status === 409) {
+      await refreshAnimal().catch(() => {});
+    }
 
     showToast(
       "error",
