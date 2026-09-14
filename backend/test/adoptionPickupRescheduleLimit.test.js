@@ -71,7 +71,7 @@ function request(date, time) {
   };
 }
 
-test("the backend persists two pickup reschedules and rejects the third", async () => {
+test("the backend persists one pickup reschedule and rejects the second", async () => {
   records.clear();
   updates.length = 0;
 
@@ -92,23 +92,18 @@ test("the backend persists two pickup reschedules and rejects the third", async 
   await controller.scheduleMyAdoptionPickup(request(date(2), "10:00"), first);
   assert.equal(first.statusCode, 200);
   assert.equal(first.body.pickupSchedule.rescheduleCount, 1);
-  assert.equal(first.body.reschedulesRemaining, 1);
+  assert.equal(first.body.reschedulesRemaining, 0);
+  assert.equal(first.body.finalReschedule, true);
+  assert.match(first.body.message, /final pickup schedule/i);
 
   const second = responseRecorder();
   await controller.scheduleMyAdoptionPickup(request(date(3), "13:30"), second);
-  assert.equal(second.statusCode, 200);
-  assert.equal(second.body.pickupSchedule.rescheduleCount, 2);
-  assert.equal(second.body.reschedulesRemaining, 0);
-  assert.equal(second.body.pickupSchedule.rescheduleHistory.length, 2);
-
-  const third = responseRecorder();
-  await controller.scheduleMyAdoptionPickup(request(date(4), "14:30"), third);
-  assert.equal(third.statusCode, 400);
-  assert.match(third.body.message, /only be rescheduled twice/i);
+  assert.equal(second.statusCode, 400);
+  assert.match(second.body.message, /only be rescheduled once/i);
 
   const storedSchedule = records.get("adoptions/APP-LIMIT").pickupSchedule;
-  assert.equal(storedSchedule.rescheduleCount, 2);
-  assert.equal(storedSchedule.rescheduleHistory.length, 2);
+  assert.equal(storedSchedule.rescheduleCount, 1);
+  assert.equal(storedSchedule.rescheduleHistory.length, 1);
 });
 
 test("the backend rejects pickup rescheduling after attendance confirmation", async () => {

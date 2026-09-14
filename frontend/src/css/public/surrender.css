@@ -721,6 +721,35 @@ body.surrender-page .availability-panel-actions .btn {
   }
 }
 
+/* The normal desktop workspace uses two columns. Once availability closes, the
+   progress rail is removed, so explicitly let the remaining panel occupy the
+   full grid instead of falling into the former 260px rail column. */
+body.home-page.surrender-page .surrender-workspace.is-not-accepting {
+  width: min(100%, 900px) !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  min-height: 0 !important;
+}
+
+body.home-page.surrender-page .surrender-workspace.is-not-accepting .surrender-form-wrap {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  grid-column: 1 / -1 !important;
+  padding: clamp(24px, 4vw, 42px) !important;
+}
+
+body.home-page.surrender-page .surrender-workspace.is-not-accepting .surrender-availability-panel {
+  box-sizing: border-box !important;
+  width: 100% !important;
+}
+
+@media (max-width: 560px) {
+  body.home-page.surrender-page .surrender-workspace.is-not-accepting .surrender-form-wrap {
+    padding: 16px !important;
+  }
+}
+
 body.surrender-page .section-label {
   display: inline-flex;
   align-items: center;

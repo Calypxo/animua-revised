@@ -62,6 +62,20 @@ test("an unconfirmed request automatically expires after its 14-day deadline", (
   assert.equal(update.noShowRisk, true);
 });
 
+test("a pending reschedule cannot extend the 14-day attendance deadline", () => {
+  const record = {
+    ...buildApprovalDeadlineFields(new Date("2026-08-01T00:00:00.000Z")),
+    surrenderRescheduleRequest: { status: "Pending", date: "2026-08-20" },
+  };
+  const update = lifecycleUpdate(
+    record,
+    WORKFLOWS.surrender,
+    new Date("2026-08-16T00:00:00.000Z")
+  );
+  assert.equal(update.status, "Expired");
+  assert.equal(update.deadlineStatus, "Expired — No Show");
+});
+
 test("confirmed arrival stops deadline warnings and expiration", () => {
   const record = {
     ...buildApprovalDeadlineFields(new Date("2026-08-01T00:00:00.000Z")),

@@ -815,7 +815,7 @@ test("answers adoption cancellation after applying with the 14-day attendance ru
 
     assert.match(reply, /does not have a cancel or withdraw option/i);
     assert.match(reply, /14-day attendance rule/i);
-    assert.match(reply, /account suspension/i);
+    assert.match(reply, /account will be disabled/i);
     assert.match(reply, /only when you are fully ready to adopt/i);
     assert.doesNotMatch(reply, /After an adoption is approved, follow the official instructions/i);
     assert.doesNotMatch(reply, /To adopt, go to Find Furbabies/i);
@@ -832,7 +832,7 @@ test("answers adoption cancellation in Tagalog", () => {
 
   assert.match(reply, /^Walang cancel o withdraw option/i);
   assert.match(reply, /14-day attendance rule/i);
-  assert.match(reply, /account suspension/i);
+  assert.match(reply, /made-disable ang account/i);
   assert.doesNotMatch(reply, /Para mag-adopt, pumunta sa Find Furbabies/i);
 });
 
@@ -1044,7 +1044,7 @@ test("provides Tagalog equivalents for the corrected chatbot replies", () => {
     },
     {
       message: "Paano kung i-cancel ko ang adoption application pagkatapos kong mag-apply?",
-      expected: [/Walang cancel o withdraw option/i, /14-day attendance rule/i, /account suspension/i, /handa ka nang mag-adopt/i],
+      expected: [/Walang cancel o withdraw option/i, /14-day attendance rule/i, /made-disable ang account/i, /handa ka nang mag-adopt/i],
       excluded: /official instructions shown in ANIMUA/i
     },
     {
@@ -1109,9 +1109,9 @@ test("answers adoption pickup reschedule questions", () => {
   const reply = _test.getLocalReply(message, { pets: [], events: [] }, "english");
 
   assert.match(reply, /Reschedule/i);
-  assert.match(reply, /change an approved adoption pickup twice/i);
+  assert.match(reply, /change an approved adoption pickup once/i);
   assert.match(reply, /14-day deadline/i);
-  assert.match(reply, /second change is final/i);
+  assert.match(reply, /new schedule is final/i);
 });
 
 test("answers Tagalog adoption pickup reschedule questions", () => {
@@ -1123,12 +1123,12 @@ test("answers Tagalog adoption pickup reschedule questions", () => {
   const reply = _test.getLocalReply(message, { pets: [], events: [] }, "tagalog");
 
   assert.match(reply, /Reschedule/i);
-  assert.match(reply, /dalawang beses/i);
+  assert.match(reply, /Isang beses/i);
   assert.match(reply, /14-day deadline/i);
-  assert.match(reply, /Final ang pangalawang pagbabago/i);
+  assert.match(reply, /Final ang bagong schedule/i);
 });
 
-test("answers how many adoption pickup reschedules remain from account context", () => {
+test("explains that the one adoption pickup reschedule has been used", () => {
   const message = "How many pickup reschedules do I have left?";
   const reply = _test.getLocalReply(
     message,
@@ -1149,10 +1149,10 @@ test("answers how many adoption pickup reschedules remain from account context",
     "english"
   );
 
-  assert.match(reply, /one final pickup reschedule/i);
+  assert.match(reply, /used your one pickup reschedule/i);
   assert.match(reply, /Bingo/i);
   assert.match(reply, /APP-2026-RESCHEDULE/i);
-  assert.match(reply, /next change will be final/i);
+  assert.match(reply, /Reschedule option is disabled/i);
 });
 
 test("explains when an adoption pickup has reached its reschedule limit", () => {
@@ -1169,14 +1169,14 @@ test("explains when an adoption pickup has reached its reschedule limit", () => 
         pickupSchedule: {
           date: "2026-09-03",
           time: "13:00",
-          rescheduleCount: 2
+          rescheduleCount: 1
         }
       }]
     },
     "tagalog"
   );
 
-  assert.match(reply, /Nagamit mo na ang parehong pickup reschedules/i);
+  assert.match(reply, /Nagamit mo na ang isang pickup reschedule/i);
   assert.match(reply, /Final na ang current pickup schedule/i);
   assert.match(reply, /disabled na ang Reschedule option/i);
 });
@@ -1219,7 +1219,7 @@ test("distinguishes both rescheduling workflows when the request is ambiguous", 
   const reply = _test.getLocalReply(message, { pets: [], events: [] }, "english");
 
   assert.match(reply, /adoption pickup/i);
-  assert.match(reply, /change an adoption pickup twice/i);
+  assert.match(reply, /change an adoption pickup once/i);
   assert.match(reply, /surrender appointment/i);
   assert.match(reply, /appointment once/i);
 });
@@ -1233,11 +1233,11 @@ test("answers a blocked reschedule question with a short explanation", () => {
   const tagalogReply = _test.getLocalReply(message, { pets: [], events: [] }, "tagalog");
 
   assert.match(englishReply, /reached the reschedule limit/i);
-  assert.match(englishReply, /up to 2 changes/i);
-  assert.match(englishReply, /1 change/i);
+  assert.match(englishReply, /Adoption pickup: 1 change/i);
+  assert.match(englishReply, /Surrender appointment: 1 change/i);
   assert.ok(englishReply.length < 260);
   assert.match(tagalogReply, /Baka naabot mo na/i);
-  assert.match(tagalogReply, /hanggang 2 changes/i);
+  assert.match(tagalogReply, /Adoption pickup: 1 change/i);
   assert.match(tagalogReply, /1 change lang/i);
   assert.ok(tagalogReply.length < 280);
 });

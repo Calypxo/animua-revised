@@ -9,6 +9,7 @@ const { getSignedReadUrl } = require("../services/storageUrlService");
 const ADOPTION_COL = "adoptions";
 const ANIMAL_COL = "animals";
 const SHELTER_LOCATION = "Angeles City Veterinary Office, Brgy. Pampang, Angeles City";
+const MAX_PICKUP_RESCHEDULES = 1;
 const {
   buildApprovalDeadlineFields,
   reconcileRequestDeadlines,
@@ -109,6 +110,26 @@ async function applyLegacyPendingPickupReschedule(adoptionRef, data) {
     (!existingSchedule.date && !existingSchedule.time)
   ) {
     return data;
+  }
+
+  if (getPickupRescheduleCount(existingSchedule) >= MAX_PICKUP_RESCHEDULES) {
+    const rejectedRequest = {
+      ...request,
+      status: "Rejected",
+      reviewedAt: new Date().toISOString(),
+      reviewedBy: "system:reschedule-limit",
+      rejectedReason: "Pickup can only be rescheduled once.",
+    };
+    await adoptionRef.update({
+      pickupRescheduleRequest: rejectedRequest,
+      deadlineStatus: "Appointment Scheduled",
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+    return {
+      ...data,
+      pickupRescheduleRequest: rejectedRequest,
+      deadlineStatus: "Appointment Scheduled",
+    };
   }
 
   const changedAt = request.requestedAt || new Date().toISOString();
@@ -703,8 +724,8 @@ exports.scheduleMyAdoptionPickup = async (req, res) => {
 
       if (alreadyScheduled) {
         const rescheduleCount = getPickupRescheduleCount(existingSchedule);
-        if (rescheduleCount >= 2) {
-          throw pickupScheduleError(400, "Pickup can only be rescheduled twice.");
+        if (rescheduleCount >= MAX_PICKUP_RESCHEDULES) {
+          throw pickupScheduleError(400, "Pickup can only be rescheduled once.");
         }
         pickupSchedule = buildRescheduledPickup(existingSchedule, {
           date,
@@ -737,11 +758,9 @@ exports.scheduleMyAdoptionPickup = async (req, res) => {
     if (scheduleResult.isReschedule) {
       const { pickupSchedule } = scheduleResult;
       return res.status(200).json({
-        message: pickupSchedule.rescheduleCount >= 2
-          ? "Pickup rescheduled successfully. This is your final pickup schedule."
-          : "Pickup rescheduled successfully. You have one reschedule remaining.",
-        finalReschedule: pickupSchedule.rescheduleCount >= 2,
-        reschedulesRemaining: Math.max(0, 2 - pickupSchedule.rescheduleCount),
+        message: "Pickup rescheduled successfully. This is your final pickup schedule.",
+        finalReschedule: true,
+        reschedulesRemaining: Math.max(0, MAX_PICKUP_RESCHEDULES - pickupSchedule.rescheduleCount),
         request: updatedDoc.data(),
         pickupSchedule,
       });
@@ -787,15 +806,20 @@ exports.approveAdoptionReschedule = async (req, res) => {
       });
     }
 
+    const existingSchedule = data.pickupSchedule || {};
+    if (getPickupRescheduleCount(existingSchedule) >= MAX_PICKUP_RESCHEDULES) {
+      return res.status(400).json({
+        message: "Pickup can only be rescheduled once.",
+      });
+    }
+
     const now = new Date().toISOString();
-    const pickupSchedule = {
+    const pickupSchedule = buildRescheduledPickup(existingSchedule, {
       date: request.date,
       time: request.time,
-      location: request.location || SHELTER_LOCATION,
-      scheduledAt: data.pickupSchedule?.scheduledAt || now,
-      rescheduledAt: now,
-      approvedBy: req.user?.email || "Admin",
-    };
+      changedAt: now,
+      changedBy: req.user?.email || "Admin",
+    });
 
     await adoptionRef.update({
       pickupSchedule,

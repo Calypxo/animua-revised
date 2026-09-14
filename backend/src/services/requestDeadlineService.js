@@ -98,6 +98,7 @@ function lifecycleUpdate(record, workflow, now = new Date()) {
   const approved = approvalDate(record);
   const deadline = deadlineDate(record);
   if (!approved || !deadline || record.arrivalConfirmedAt) return {};
+  if (String(record.status || "").toLowerCase() === "expired") return {};
 
   const elapsedDays = Math.max(0, Math.floor((now.getTime() - approved.getTime()) / DAY_MS));
   const schedule = record[workflow.scheduleField] || {};
@@ -107,7 +108,7 @@ function lifecycleUpdate(record, workflow, now = new Date()) {
   const pendingReschedule = String(reschedule.status || "").toLowerCase() === "pending";
   const isExpired = now.getTime() > deadline.getTime();
 
-  if (isExpired && !pendingReschedule) {
+  if (isExpired) {
     return {
       status: "Expired",
       deadlineStatus: "Expired \u2014 No Show",
@@ -151,22 +152,93 @@ function lifecycleUpdate(record, workflow, now = new Date()) {
   return update;
 }
 
+function accountEmail(record = {}) {
+  return String(
+    record.account?.email ||
+    record.applicant?.email ||
+    record.owner?.email ||
+    record.userEmail ||
+    ""
+  ).trim().toLowerCase();
+}
+
+function hasExpiredWithoutArrival(record = {}, update = {}, now = new Date()) {
+  if (record.arrivalConfirmedAt || now.getTime() <= deadlineDate(record).getTime()) return false;
+  const status = String(update.status || record.status || "").toLowerCase();
+  const deadlineStatus = String(update.deadlineStatus || record.deadlineStatus || "").toLowerCase();
+  const noShowRisk = update.noShowRisk === true || record.noShowRisk === true;
+  return status === "expired" && (noShowRisk || deadlineStatus.includes("no show"));
+}
+
+async function disableAccountForNoShow({ record = {}, type, requestId, now = new Date() }) {
+  const email = accountEmail(record);
+  if (!email) return { handled: false, disabled: false, email: "" };
+
+  const userRef = db.collection("users").doc(email);
+  const userSnapshot = await userRef.get();
+  if (!userSnapshot.exists) return { handled: false, disabled: false, email };
+
+  const user = userSnapshot.data() || {};
+  if (user.role && String(user.role).toLowerCase() !== "public") {
+    return { handled: false, disabled: false, email };
+  }
+
+  const disabled = user.status !== "Inactive";
+  if (disabled) {
+    const workflowLabel = type === "surrender" ? "surrender drop-off" : "adoption pickup";
+    await userRef.update({
+      status: "Inactive",
+      sessionVersion: (Number.isInteger(user.sessionVersion) ? user.sessionVersion : 0) + 1,
+      disabledAt: now.toISOString(),
+      disabledBy: "system:attendance-deadline",
+      disabledReason: `The approved 14-day ${workflowLabel} deadline passed without confirmed arrival.`,
+      disabledReference: {
+        type,
+        requestId,
+      },
+      updatedAt: now.toISOString(),
+      updatedBy: "system:attendance-deadline",
+    });
+  }
+
+  return { handled: true, disabled, email };
+}
+
 async function reconcileWorkflow(type, now = new Date()) {
   const workflow = WORKFLOWS[type];
-  if (!workflow) return { checked: 0, updated: 0, expired: 0 };
-  const snapshot = await db.collection(workflow.collection).where("status", "==", "Approved").get();
+  if (!workflow) return { checked: 0, updated: 0, expired: 0, accountsDisabled: 0 };
+  const snapshot = await db
+    .collection(workflow.collection)
+    .where("status", "in", ["Approved", "Expired"])
+    .get();
   let updated = 0;
   let expired = 0;
+  let accountsDisabled = 0;
 
   await Promise.all(snapshot.docs.map(async (document) => {
-    const update = lifecycleUpdate(document.data() || {}, workflow, now);
+    const record = document.data() || {};
+    const update = lifecycleUpdate(record, workflow, now);
+    if (hasExpiredWithoutArrival(record, update, now) && !record.accountDisabledAt) {
+      const accountResult = await disableAccountForNoShow({
+        record,
+        type,
+        requestId: document.id,
+        now,
+      });
+      if (accountResult.handled) {
+        update.accountDisabledAt = now.toISOString();
+        update.accountDisabledEmail = accountResult.email;
+        update.accountDisabledReason = "14-day attendance deadline expired without confirmed arrival.";
+      }
+      if (accountResult.disabled) accountsDisabled += 1;
+    }
     if (!Object.keys(update).length) return;
     await document.ref.update(update);
     updated += 1;
     if (update.status === "Expired") expired += 1;
   }));
 
-  return { checked: snapshot.size, updated, expired };
+  return { checked: snapshot.size, updated, expired, accountsDisabled };
 }
 
 async function reconcileRequestDeadlines(types = Object.keys(WORKFLOWS), now = new Date()) {
@@ -180,7 +252,8 @@ async function reconcileRequestDeadlines(types = Object.keys(WORKFLOWS), now = n
     checked: total.checked + result.checked,
     updated: total.updated + result.updated,
     expired: total.expired + result.expired,
-  }), { checked: 0, updated: 0, expired: 0 });
+    accountsDisabled: total.accountsDisabled + result.accountsDisabled,
+  }), { checked: 0, updated: 0, expired: 0, accountsDisabled: 0 });
 }
 
 module.exports = {
@@ -193,6 +266,9 @@ module.exports = {
   buildApprovalDeadlineFields,
   validateScheduleDate,
   lifecycleUpdate,
+  accountEmail,
+  hasExpiredWithoutArrival,
+  disableAccountForNoShow,
   isFunctionalityTestingEnvironment,
   reconcileRequestDeadlines,
 };

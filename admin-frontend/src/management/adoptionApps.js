@@ -561,9 +561,12 @@ function renderDrawerContent(app) {
   const pickupRescheduleHistory = Array.isArray(app.pickupSchedule?.rescheduleHistory)
     ? app.pickupSchedule.rescheduleHistory
     : [];
+  const pickupRescheduleUsageLabel = pickupRescheduleCount > 1
+    ? `${pickupRescheduleCount} legacy changes (current limit: 1)`
+    : `${pickupRescheduleCount} of 1`;
   const rescheduleHistoryMarkup = pickupRescheduleHistory.length ? `
     <div class="info-banner banner-approved mt-2">
-      <strong>User rescheduled this pickup ${pickupRescheduleCount} of 2 times.</strong>
+      <strong>User rescheduled this pickup ${pickupRescheduleUsageLabel}.</strong>
       ${pickupRescheduleHistory.map((entry) => `
         <div class="mt-1">
           Reschedule ${entry.number || ""}: ${formatDate(entry.from?.date)} ${entry.from?.time || ""}
@@ -580,7 +583,7 @@ function renderDrawerContent(app) {
         <div class="drawer-info-item"><div class="drawer-info-lbl">Deadline</div><div class="drawer-info-val">${formatDate(app.attendanceDeadlineAt)}</div></div>
         <div class="drawer-info-item"><div class="drawer-info-lbl">Current State</div><div class="drawer-info-val">${app.deadlineStatus || "Awaiting appointment"}</div></div>
         <div class="drawer-info-item"><div class="drawer-info-lbl">Pickup Schedule</div><div class="drawer-info-val">${app.pickupSchedule?.date ? `${formatDate(app.pickupSchedule.date)} ${app.pickupSchedule.time || ""}` : "Not scheduled"}</div></div>
-        <div class="drawer-info-item"><div class="drawer-info-lbl">Reschedules Used</div><div class="drawer-info-val">${pickupRescheduleCount} of 2</div></div>
+        <div class="drawer-info-item"><div class="drawer-info-lbl">Reschedules Used</div><div class="drawer-info-val">${pickupRescheduleUsageLabel}</div></div>
         <div class="drawer-info-item"><div class="drawer-info-lbl">Arrival</div><div class="drawer-info-val">${app.arrivalConfirmedAt ? `Confirmed ${formatDate(app.arrivalConfirmedAt)}` : "Not confirmed"}</div></div>
       </div>
       ${rescheduleHistoryMarkup}

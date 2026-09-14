@@ -29,18 +29,31 @@ function approvedRecord() {
     deadlineStatus: "Awaiting Appointment",
     deadlineReminderStage: "Approved",
     noShowRisk: false,
+    account: { email: "client@test.com", role: "Public" },
   };
 }
 
 function reconciliationHarness() {
   const update = vi.fn(async () => {});
+  let user = {
+    email: "client@test.com",
+    role: "Public",
+    status: "Active",
+    sessionVersion: 2,
+  };
+  const userUpdate = vi.fn(async (changes) => { user = { ...user, ...changes }; });
+  const userGet = vi.fn(async () => ({ exists: true, data: () => user }));
   const get = vi.fn(async () => ({
     size: 1,
-    docs: [{ data: () => approvedRecord(), ref: { update } }],
+    docs: [{ id: "REQUEST-1", data: () => approvedRecord(), ref: { update } }],
   }));
   const where = vi.fn(() => ({ get }));
-  const db = { collection: vi.fn(() => ({ where })) };
-  return { db, get, update, where };
+  const db = {
+    collection: vi.fn((name) => name === "users"
+      ? { doc: vi.fn(() => ({ get: userGet, update: userUpdate })) }
+      : { where }),
+  };
+  return { db, get, update, where, userGet, userUpdate, getUser: () => user };
 }
 
 function emptyQueryHarness() {
@@ -125,8 +138,14 @@ describe("Functionality-testing deadline reconciliation guard", () => {
       new Date("2026-08-16T00:00:00.000Z")
     );
 
-    expect(result).toMatchObject({ checked: 1, updated: 1, expired: 1 });
+    expect(result).toMatchObject({ checked: 1, updated: 1, expired: 1, accountsDisabled: 1 });
     expect(harness.update).toHaveBeenCalledOnce();
+    expect(harness.userUpdate).toHaveBeenCalledWith(expect.objectContaining({
+      status: "Inactive",
+      sessionVersion: 3,
+      disabledBy: "system:attendance-deadline",
+    }));
+    expect(harness.getUser().status).toBe("Inactive");
   });
 });
 

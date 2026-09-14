@@ -938,10 +938,10 @@ function setupHomeStories() {
     });
   };
 
-  const formatStoryTitleHtml = (title = "", fallbackSecondLine = "latest") => {
+  const formatStoryTitleHtml = (title = "") => {
     const cleanTitle = String(title || "ANIMUA community update").trim();
     if (cleanTitle.length <= 30) {
-      return `${escapeHtml(cleanTitle)}<br><span>${escapeHtml(fallbackSecondLine)}</span>`;
+      return escapeHtml(cleanTitle);
     }
 
     const words = cleanTitle.split(/\s+/);
@@ -956,7 +956,9 @@ function setupHomeStories() {
       }
     });
 
-    return `${escapeHtml(firstLine)}<br><span>${escapeHtml(secondLine.join(" ") || fallbackSecondLine)}</span>`;
+    return secondLine.length
+      ? `${escapeHtml(firstLine)}<br><span>${escapeHtml(secondLine.join(" "))}</span>`
+      : escapeHtml(firstLine);
   };
 
   const getAnnouncementStoryDate = (item = {}) =>
@@ -1009,7 +1011,7 @@ function setupHomeStories() {
       id: item.id || item.slug || title,
       tag: type === "News & Article" ? "News & Alerts" : type,
       title,
-      titleHtml: formatStoryTitleHtml(title, type === "Upcoming Events" ? "upcoming" : "latest"),
+      titleHtml: formatStoryTitleHtml(title),
       date: formatStoryDate(getAnnouncementStoryDate(item)),
       image,
       imageAlt: `${title} cover`,
@@ -1018,7 +1020,9 @@ function setupHomeStories() {
       source: item.source || "ANIMUA City Government",
       photoCredit: image ? "Official ANIMUA update" : "",
       hashtag: type,
-      storyParagraphs: paragraphs.length ? paragraphs : [intro],
+      // The intro is rendered separately above the story body. Keep only the
+      // remaining paragraphs here so the first description line is not repeated.
+      storyParagraphs: paragraphs.slice(1),
       primary: { label: "View full update", href: announcementStoryHref(item.id || title, type) }
     };
   };
@@ -1484,7 +1488,7 @@ function setupHomeStories() {
     return {
       tag: isUpcomingEvent(event) ? "Upcoming Events" : "Event Highlight",
       title,
-      titleHtml: `${escapeHtml(title)}<br><span>${isUpcomingEvent(event) ? "upcoming" : "highlight"}</span>`,
+      titleHtml: formatStoryTitleHtml(title),
       date: date || "Event",
       image: getEventImage(event),
       imageAlt: title,
