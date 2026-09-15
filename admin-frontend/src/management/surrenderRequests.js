@@ -1113,6 +1113,8 @@ function openAttendanceWorkflow(id, action) {
   document.querySelector("#workflowModalIcon i").className = `bi ${config.icon}`;
   document.getElementById("workflowDaysGroup").hidden = !config.needsDays;
   document.getElementById("workflowReasonGroup").hidden = !config.needsReason;
+  document.getElementById("workflowDays").required = Boolean(config.needsDays);
+  document.getElementById("workflowReason").required = Boolean(config.needsReason);
   document.getElementById("workflowDays").value = config.needsDays ? "7" : "";
   document.getElementById("workflowReason").value = config.defaultReason || "";
   document.getElementById("errWorkflowDays").textContent = "";

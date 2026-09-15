@@ -1,0 +1,36 @@
+.management-consistent-ui .req {
+  color: #a00020;
+  font-weight: 700;
+}
+
+.management-consistent-ui .management-field-error {
+  display: block;
+  margin-top: 6px;
+  color: #a00020;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  font-weight: 500;
+}
+
+.management-consistent-ui .management-field-error[hidden],
+.management-consistent-ui .management-field-error:empty { display: none; }
+
+.management-consistent-ui :is(input, select, textarea)[aria-invalid="true"] {
+  border-color: #a00020;
+}
+
+.inventory-batch-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.inventory-batch-field > span:first-child { font-size: 0.8rem; font-weight: 700; }
+
+.management-consistent-ui .cm-chat-composer > .cm-compose-label {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.management-consistent-ui .cm-chat-composer > .management-field-error {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  margin: 0;
+}

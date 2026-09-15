@@ -4,6 +4,8 @@ import "../../css/managementResponsive.css";
 import "../../css/managementTabs.css";
 import "../../css/managementTypography.css";
 import "../../css/managementImagePreview.css";
+import "../../css/requiredFields.css";
+import { initializeRequiredFields, syncRequiredMarkers } from "./requiredFields.js";
 import { enhanceResponsiveFilters } from "./responsiveFilters.js";
 import {
   enhanceManagementImagePreviews,
@@ -239,6 +241,7 @@ function normalizeActionButtons(root = document) {
 }
 
 function normalizeInterface(root = document) {
+  syncRequiredMarkers(root);
   enhanceResponsiveFilters(root);
   enhanceManagementImagePreviews(root);
   normalizeSearchControls(root);
@@ -285,6 +288,7 @@ function bindTabKeyboardNavigation() {
 
 export function initializeManagementConsistency() {
   document.body.classList.add("management-consistent-ui");
+  initializeRequiredFields();
   initializeManagementImagePreview();
   normalizeInterface();
   bindTabKeyboardNavigation();
@@ -299,5 +303,5 @@ export function initializeManagementConsistency() {
       scheduled = false;
       normalizeInterface();
     });
-  }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
+  }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["class", "required", "disabled", "aria-required"] });
 }

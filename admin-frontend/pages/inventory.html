@@ -245,7 +245,7 @@
     </div>
             <div class="form-group">
               <label class="form-lbl" for="fStockQty">Quantity to Add <span class="req">*</span></label>
-              <input type="number" class="form-inp" id="fStockQty" min="1" placeholder="e.g. 10" />
+              <input type="number" class="form-inp" id="fStockQty" required min="1" placeholder="e.g. 10" />
               <span class="form-err" id="errStockQty"></span>
             </div>
             <div class="form-group">
@@ -267,32 +267,16 @@
         <div id="stockInBatchWrap" style="display:none">
           <div class="form-grid">
             <div class="form-group">
-              <label class="form-lbl" for="fStockDate">Date Received</label>
-              <input type="date" class="form-inp" id="fStockDateBatchMirror" disabled style="display:none" />
-              <input type="date" class="form-inp" id="fStockDateBatch" style="display:none" />
-              <input type="date" class="form-inp" id="fStockDateClone" style="display:none" />
-              <input type="date" class="form-inp" id="fStockDateHiddenMirror" style="display:none" />
-              <input type="date" class="form-inp" id="fStockDateHidden" style="display:none" />
-              <input type="date" class="form-inp" id="fStockDateShadow" style="display:none" />
-              <input type="date" class="form-inp" id="fStockDateGhost" style="display:none" />
-              <input type="date" class="form-inp" id="fStockDatePhantom" style="display:none" />
-              <input type="date" class="form-inp" id="fStockDateEcho" style="display:none" />
-              <input type="date" class="form-inp" id="fStockDateReplay" style="display:none" />
-              <input type="date" class="form-inp" id="fStockDateRef" style="display:none" />
-              <input type="date" class="form-inp" id="fStockDateTemp" style="display:none" />
-              <input type="date" class="form-inp" id="fStockDate" />
+              <label class="form-lbl" for="fStockDateBatch">Date Received</label>
+              <input type="date" class="form-inp" id="fStockDateBatch" />
             </div>
             <div class="form-group">
-              <label class="form-lbl" for="fStockSupplier">Supplier / Source</label>
-              <input type="text" class="form-inp" id="fStockSupplierBatchMirror" disabled style="display:none" />
-              <input type="text" class="form-inp" id="fStockSupplierBatch" style="display:none" />
-              <input type="text" class="form-inp" id="fStockSupplier" placeholder="e.g. BVMO Supply, Donation" />
+              <label class="form-lbl" for="fStockSupplierBatch">Supplier / Source</label>
+              <input type="text" class="form-inp" id="fStockSupplierBatch" placeholder="e.g. BVMO Supply, Donation" />
             </div>
             <div class="form-group form-full">
-              <label class="form-lbl" for="fStockNotes">General Notes</label>
-              <textarea class="form-inp form-textarea" id="fStockNotesBatchMirror" rows="2" disabled style="display:none"></textarea>
-              <textarea class="form-inp form-textarea" id="fStockNotesBatch" rows="2" style="display:none"></textarea>
-              <textarea class="form-inp form-textarea" id="fStockNotes" rows="2" placeholder="Batch number, expiry date, condition…"></textarea>
+              <label class="form-lbl" for="fStockNotesBatch">General Notes</label>
+              <textarea class="form-inp form-textarea" id="fStockNotesBatch" rows="2" placeholder="Batch number, expiry date, condition…"></textarea>
             </div>
 
             <div class="form-group form-full">
@@ -348,7 +332,7 @@
             </div>
             <div class="form-group">
               <label class="form-lbl" for="fOutQty">Quantity Used <span class="req">*</span></label>
-              <input type="number" class="form-inp" id="fOutQty" min="1" placeholder="e.g. 2" />
+              <input type="number" class="form-inp" id="fOutQty" required min="1" placeholder="e.g. 2" />
               <span class="form-err" id="errOutQty"></span>
             </div>
             <div class="form-group">
@@ -384,19 +368,19 @@
         <div id="stockOutBatchWrap" style="display:none">
           <div class="form-grid">
             <div class="form-group">
-              <label class="form-lbl" for="fOutDate">Date Used</label>
-              <input type="date" class="form-inp" id="fOutDate" />
+              <label class="form-lbl" for="fOutDateBatch">Date Used</label>
+              <input type="date" class="form-inp" id="fOutDateBatch" />
             </div>
 
             <div class="form-group form-full">
-              <label class="form-lbl" for="fOutNotes">General Notes</label>
-              <textarea class="form-inp form-textarea" id="fOutNotes" rows="2" placeholder="Additional notes…"></textarea>
+              <label class="form-lbl" for="fOutNotesBatch">General Notes</label>
+              <textarea class="form-inp form-textarea" id="fOutNotesBatch" rows="2" placeholder="Additional notes…"></textarea>
             </div>
 
             <div class="form-group form-full">
               <label class="form-lbl">Items to Record Usage <span class="req">*</span></label>
               <div id="stockOutBatchRows"></div>
-              <span class="form-err" id="errOutQty"></span>
+              <span class="form-err" id="errOutQtyBatch"></span>
             </div>
 
             <div class="form-group form-full">
@@ -432,12 +416,12 @@
         <div class="form-grid">
           <div class="form-group form-full">
             <label class="form-lbl" for="fItemName">Item Name <span class="req">*</span></label>
-            <input type="text" class="form-inp" id="fItemName" />
+            <input type="text" class="form-inp" id="fItemName" required />
             <span class="form-err" id="errItemName"></span>
           </div>
           <div class="form-group">
             <label class="form-lbl" for="fItemCategory">Category <span class="req">*</span></label>
-            <select class="form-inp" id="fItemCategory">
+            <select class="form-inp" id="fItemCategory" required>
               <option value="">Select…</option>
               <option>Antibiotic</option><option>Antiparasitic</option><option>Antifungal</option>
               <option>Anesthetic</option><option>Supplement</option><option>Vaccine</option>
@@ -454,7 +438,7 @@
           </div>
           <div class="form-group">
             <label class="form-lbl" for="fItemCurrentStock">Current Stock <span class="req">*</span></label>
-            <input type="number" class="form-inp" id="fItemCurrentStock" min="0" />
+            <input type="number" class="form-inp" id="fItemCurrentStock" required min="0" />
             <span class="form-err" id="errItemStock"></span>
           </div>
           <div class="form-group">

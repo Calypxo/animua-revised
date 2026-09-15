@@ -1,4 +1,5 @@
 import Swal from "sweetalert2";
+import { syncRequiredMarkers } from "./requiredFields.js";
 
 const MANAGEMENT_ALERT_CLASSES = {
   popup: "animua-management-swal",
@@ -50,6 +51,7 @@ export async function promptManagementText({
   placeholder = "",
   value = "",
   input = "text",
+  inputLabel = "Required information",
   confirmButtonText = "Continue",
   requiredMessage = "This field is required.",
   inputAttributes = {},
@@ -60,9 +62,11 @@ export async function promptManagementText({
     title,
     text,
     input,
+    inputLabel,
     inputValue: value,
     inputPlaceholder: placeholder,
-    inputAttributes,
+    inputAttributes: { ...inputAttributes, required: "true", "aria-required": "true" },
+    didOpen: (popup) => syncRequiredMarkers(popup),
     showCancelButton: true,
     reverseButtons: true,
     focusCancel: false,

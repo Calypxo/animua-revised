@@ -1,3 +1,4 @@
+import { validateFormFields } from "../components/management/requiredFields.js";
 // admin-frontend/src/management/inventory.js
 
 import "../css/inventory.css";
@@ -1156,7 +1157,7 @@ function addStockInBatchRow(prefill = {}) {
   row.style.marginBottom = "10px";
 
   row.innerHTML = `
-    <select class="form-inp batch-stock-item">
+    <label class="inventory-batch-field"><span>Item <span class="req" aria-hidden="true">*</span></span><select required class="form-inp batch-stock-item">
       <option value="">Select item</option>
       ${store
         .map(
@@ -1166,9 +1167,9 @@ function addStockInBatchRow(prefill = {}) {
             </option>`
         )
         .join("")}
-    </select>
+    </select></label>
 
-    <input type="number" min="1" class="form-inp batch-stock-qty" placeholder="Qty" value="${prefill.qty || ""}" />
+    <label class="inventory-batch-field"><span>Quantity <span class="req" aria-hidden="true">*</span></span><input required type="number" min="1" class="form-inp batch-stock-qty" placeholder="Qty" value="${prefill.qty || ""}" /></label>
     <input type="text" class="form-inp batch-stock-note" placeholder="Note (optional)" value="${prefill.note || ""}" />
 
     <button type="button" class="btn-ghost-clay batch-remove-btn">
@@ -1192,7 +1193,7 @@ function addStockOutBatchRow(prefill = {}) {
 
   row.innerHTML = `
     <div class="batch-usage-grid">
-      <select class="form-inp batch-out-item">
+      <label class="inventory-batch-field"><span>Item <span class="req" aria-hidden="true">*</span></span><select required class="form-inp batch-out-item">
         <option value="">Select item</option>
         ${store
           .map(
@@ -1202,15 +1203,15 @@ function addStockOutBatchRow(prefill = {}) {
               </option>`
           )
           .join("")}
-      </select>
+      </select></label>
 
-      <input
+      <label class="inventory-batch-field"><span>Quantity <span class="req" aria-hidden="true">*</span></span><input required
         type="number"
         min="1"
         class="form-inp batch-out-qty"
         placeholder="Qty"
         value="${prefill.qty || ""}"
-      />
+      /></label>
 
       <button type="button" class="btn-ghost-clay batch-remove-btn" title="Remove row">
         <i class="bi bi-trash"></i>
@@ -1250,12 +1251,13 @@ function openBatchStockIn() {
   return;
 }
 
+  document.getElementById("stockInForm").reset();
   stockInMode = "batch";
 
   document.getElementById("stockInTitle").textContent = "Batch Stock In";
-  document.getElementById("fStockDate").value = today();
-  document.getElementById("fStockSupplier").value = "";
-  document.getElementById("fStockNotes").value = "";
+  document.getElementById("fStockDateBatch").value = today();
+  document.getElementById("fStockSupplierBatch").value = "";
+  document.getElementById("fStockNotesBatch").value = "";
   document.getElementById("errStockItem").textContent = "";
   document.getElementById("errStockQty").textContent = "";
   const batchErr = document.getElementById("errStockBatch");
@@ -1281,12 +1283,13 @@ function openBatchStockOut() {
   return;
 }
 
+  document.getElementById("stockOutForm").reset();
   stockOutMode = "batch";
 
   document.getElementById("stockOutSubtitle").textContent = "Record usage for multiple items";
-  document.getElementById("errOutQty").textContent = "";
-  document.getElementById("fOutDate").value = today();
-  document.getElementById("fOutNotes").value = "";
+  document.getElementById("errOutQtyBatch").textContent = "";
+  document.getElementById("fOutDateBatch").value = today();
+  document.getElementById("fOutNotesBatch").value = "";
 
   const singleWrap = document.getElementById("stockOutSingleFields");
   const batchWrap = document.getElementById("stockOutBatchWrap");
@@ -1303,14 +1306,15 @@ function openBatchStockOut() {
 }
 
 async function saveBatchStockIn() {
+  if (!validateFormFields(document.getElementById("stockInBatchWrap"))) return;
   if (!can("stock_in")) {
   showToast("error", "You do not have permission to stock in inventory items.");
   return;
 }
   const rows = [...document.querySelectorAll("#stockInBatchRows .batch-row")];
-  const batchDate = document.getElementById("fStockDate").value || today();
-  const supplier = document.getElementById("fStockSupplier").value.trim();
-  const notes = document.getElementById("fStockNotes").value.trim();
+  const batchDate = document.getElementById("fStockDateBatch").value || today();
+  const supplier = document.getElementById("fStockSupplierBatch").value.trim();
+  const notes = document.getElementById("fStockNotesBatch").value.trim();
   const batchId = `BIN-${Date.now()}`;
 
   if (!rows.length) {
@@ -1367,14 +1371,15 @@ async function saveBatchStockIn() {
 }
 
 async function saveBatchStockOut() {
+  if (!validateFormFields(document.getElementById("stockOutBatchWrap"))) return;
   if (!can("consume_general")) {
   showToast("error", "You do not have permission to record general inventory usage.");
   return;
 }
 
   const rows = [...document.querySelectorAll("#stockOutBatchRows .batch-row")];
-  const batchDate = document.getElementById("fOutDate").value || today();
-  const notes = document.getElementById("fOutNotes").value.trim();
+  const batchDate = document.getElementById("fOutDateBatch").value || today();
+  const notes = document.getElementById("fOutNotesBatch").value.trim();
   const batchId = `BOUT-${Date.now()}`;
 
   if (!rows.length) {
@@ -1449,7 +1454,7 @@ async function saveBatchStockOut() {
     showToast("success", "Batch record usage saved successfully.");
   } catch (error) {
     console.error("[saveBatchStockOut]", error);
-    document.getElementById("errOutQty").textContent =
+    document.getElementById("errOutQtyBatch").textContent =
       error.message || "Failed to record batch usage.";
   }
 }
@@ -1486,6 +1491,7 @@ function openStockIn(prefillId = null) {
 }
 
 async function saveStockIn() {
+  if (!validateFormFields(document.getElementById("stockInSingleFields"))) return;
   if (!can("stock_in")) {
   showToast("error", "You do not have permission to stock in inventory items.");
   return;
@@ -1570,6 +1576,7 @@ function openStockOut(id) {
 }
 
 async function saveStockOut() {
+  if (!validateFormFields(document.getElementById("stockOutSingleFields"))) return;
   if (!can("consume_general")) {
   showToast("error", "You do not have permission to record general inventory usage.");
   return;
@@ -1676,6 +1683,7 @@ if (!can(requiredPermission)) {
   return;
 }
 
+  document.getElementById("itemForm").reset();
   editingItemId = id;
   const item = id ? store.find((i) => i.id === id) : null;
 
@@ -1684,9 +1692,9 @@ if (!can(requiredPermission)) {
   document.getElementById("fItemName").value = item?.name.trim() || "";
   document.getElementById("fItemCategory").value = item?.category || "";
   document.getElementById("fItemUnit").value = item?.unit || "";
-  document.getElementById("fItemCurrentStock").value = item?.currentStock || "";
-  document.getElementById("fItemAvgUsage").value = item?.avgMonthlyUsage || "";
-  document.getElementById("fItemLeadTime").value = item?.leadTimeDays || "";
+  document.getElementById("fItemCurrentStock").value = item?.currentStock ?? "";
+  document.getElementById("fItemAvgUsage").value = item?.avgMonthlyUsage ?? "";
+  document.getElementById("fItemLeadTime").value = item?.leadTimeDays ?? "";
 
   ["errItemName", "errItemCategory", "errItemStock"].forEach((errId) => {
     const el = document.getElementById(errId);
@@ -1697,6 +1705,7 @@ if (!can(requiredPermission)) {
 }
 
 async function saveItem() {
+  if (!validateFormFields(document.getElementById("itemForm"))) return;
   const requiredPermission = editingItemId ? "edit" : "create";
 
 if (!can(requiredPermission)) {
@@ -1713,9 +1722,9 @@ if (!can(requiredPermission)) {
   const name = document.getElementById("fItemName").value.trim();
   const cat = document.getElementById("fItemCategory").value;
   const unit = document.getElementById("fItemUnit").value.trim() || "pcs";
-  const stock = parseInt(document.getElementById("fItemCurrentStock").value, 10) || 0;
-  const avgUsage = parseInt(document.getElementById("fItemAvgUsage").value, 10) || 1;
-  const leadTime = parseInt(document.getElementById("fItemLeadTime").value, 10) || 7;
+  const stock = Number(document.getElementById("fItemCurrentStock").value);
+  const avgUsage = Number(document.getElementById("fItemAvgUsage").value || 1);
+  const leadTime = Number(document.getElementById("fItemLeadTime").value || 7);
 
   let hasError = false;
 

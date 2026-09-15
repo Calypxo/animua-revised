@@ -619,6 +619,8 @@ function openAddModal() {
 
   document.getElementById("passwordGroup").style.display = "";
   document.getElementById("confirmPasswordGroup").style.display = "";
+  document.getElementById("fPassword").required = true;
+  document.getElementById("fConfirmPassword").required = true;
   document.getElementById("fEmail").disabled = false;
 
   document.getElementById("fRole").value = "Staff";
@@ -657,6 +659,8 @@ function openEditModal(id) {
   document.getElementById("fStatus").value     = u.status || "Active";
   document.getElementById("passwordGroup").style.display        = "none";
   document.getElementById("confirmPasswordGroup").style.display = "none";
+  document.getElementById("fPassword").required = false;
+  document.getElementById("fConfirmPassword").required = false;
   resetPasswordVisibility();
   updateAvatarPreview();
   clearFormErrors();
@@ -907,9 +911,10 @@ function validateForm() {
   if (!editingId) {
     const pw=document.getElementById("fPassword").value;
     const cp=document.getElementById("fConfirmPassword").value;
-    if (!pw)        { setErr("errPassword","Password required.");    setInvalid("fPassword"); ok=false; }
+    if (!pw.trim()) { setErr("errPassword","Password required.");    setInvalid("fPassword"); ok=false; }
     else if(pw.length<8){ setErr("errPassword","Min. 8 chars.");     setInvalid("fPassword"); ok=false; }
-    if(pw&&cp!==pw) { setErr("errConfirmPassword","Passwords do not match."); setInvalid("fConfirmPassword"); ok=false; }
+    if (!cp.trim()) { setErr("errConfirmPassword","Confirm password required."); setInvalid("fConfirmPassword"); ok=false; }
+    else if(pw&&cp!==pw) { setErr("errConfirmPassword","Passwords do not match."); setInvalid("fConfirmPassword"); ok=false; }
   }
   if (!ok) document.querySelector("#userForm .form-inp.invalid")?.focus();
   return ok;

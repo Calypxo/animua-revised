@@ -1,3 +1,4 @@
+import { validateFormFields } from "../components/management/requiredFields.js";
 import "../css/announcements.css";
 
 import Swal from "sweetalert2";
@@ -938,6 +939,7 @@ function getFormPayload() {
 
 async function saveAnnouncement(event) {
   event.preventDefault();
+  if (!validateFormFields(getEl("announcementForm"))) return;
 
   const action = state.editingId ? "edit" : "create";
 

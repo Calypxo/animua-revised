@@ -360,7 +360,7 @@ function renderDynamicSection(source) {
           <div class="form-grid">
             <div class="form-group">
               <label class="form-lbl" for="fBarangayName">Barangay Name <span class="req">*</span></label>
-              <select class="form-inp" id="fBarangayName"></select>
+              <select class="form-inp" id="fBarangayName" required></select>
               <span class="form-err" id="errBarangayName"></span>
             </div>
             <details class="source-optional-details form-full">
@@ -395,7 +395,7 @@ function renderDynamicSection(source) {
           <div class="form-grid">
             <div class="form-group">
               <label class="form-lbl" for="fSurrenderRef">Surrender Request ID <span class="req">*</span></label>
-              <input type="text" class="form-inp" id="fSurrenderRef" placeholder="e.g. SR-2025-009" />
+              <input type="text" class="form-inp" id="fSurrenderRef" required placeholder="e.g. SR-2025-009" />
               <span class="form-err" id="errSurrenderRef"></span>
             </div>
             <details class="source-optional-details form-full">
@@ -730,6 +730,7 @@ function validateForm() {
     if (!sr) { setErr("errSurrenderRef", "Surrender reference ID is required."); valid = false; }
   }
 
+  if (!valid) document.querySelector('#intakeForm [aria-invalid="true"]:not([type="hidden"])')?.focus();
   return valid;
 }
 
@@ -1144,10 +1145,21 @@ function closeAll()     {
 /* ══════════════════════════════════════════════════════
    FORM ERROR HELPERS
 ══════════════════════════════════════════════════════ */
-function setErr(id, msg) { const el = document.getElementById(id); if (el) el.textContent = msg; }
+function setErr(id, msg) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = msg;
+  el.hidden = false;
+  const field = el.closest(".form-group")?.querySelector("input, select, textarea");
+  if (field) {
+    field.setAttribute("aria-invalid", "true");
+    field.setAttribute("aria-describedby", id);
+  }
+}
 function clearFormErrors() {
   document.querySelectorAll(".form-err").forEach(e => e.textContent = "");
   document.querySelectorAll(".form-inp.invalid").forEach(e => e.classList.remove("invalid"));
+  document.querySelectorAll('#intakeForm [aria-invalid]').forEach(e => e.removeAttribute("aria-invalid"));
 }
 
 
