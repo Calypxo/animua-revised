@@ -1198,15 +1198,6 @@
   background: #FFF8EE !important;
 }
 
-/* Adoption records now use the same high-contrast register treatment as
-   surrender and intake records. */
-html body.management-consistent-ui.adoption-applications-page .page-body .aa-table-panel .shelter-table thead,
-html body.management-consistent-ui.adoption-applications-page .page-body .aa-table-panel .shelter-table thead th {
-  border-color: #780116 !important;
-  color: #FFFFFF !important;
-  background: #780116 !important;
-}
-
 @media (max-width: 720px) {
   html body.management-consistent-ui.adoption-applications-page .page-body .aa-table-panel .table-responsive {
     margin-inline: 0 !important;

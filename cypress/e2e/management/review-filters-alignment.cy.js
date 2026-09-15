@@ -1,6 +1,6 @@
 // Use the real page markup, styles, and responsive filter enhancement locally.
 // No authentication, application data, or remote writes are needed.
-function mountFilters(kind) {
+function mountFilters(kind, productionStyles = false) {
   const surrender = kind === "surrender";
   const sources = {};
   const files = {
@@ -14,11 +14,22 @@ function mountFilters(kind) {
     responsive: "admin-frontend/src/css/managementResponsive.css",
   };
   Object.entries(files).forEach(([key, path]) => cy.readFile(path).then(source => { sources[key] = source; }));
+  if (productionStyles) {
+    // Vite can emit shared styles before page styles. Check that actual order,
+    // since a source-only fixture can conceal conflicts in the deployed page.
+    cy.readFile(`admin-frontend/dist/pages/${surrender ? "surrenders" : "adoptionApplications"}.html`).then(markup => {
+      sources.productionCss = [];
+      [...markup.matchAll(/<link[^>]+href="(\/assets\/[^" ]+\.css)"/g)].forEach(match => {
+        cy.readFile(`admin-frontend/dist${match[1]}`).then(css => sources.productionCss.push(css));
+      });
+    });
+  }
   cy.then(() => {
     const markup = sources.page.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "")
       .replace(/<link\b[^>]*>/gi, "")
       .replace('class="loading ', 'class="management-consistent-ui ');
-    const css = ["base", "pageStyle", "tables", "queue", "reference", "responsive"].map(key => sources[key]).join("\n");
+    const css = productionStyles ? sources.productionCss.join("\n")
+      : ["base", "pageStyle", "tables", "queue", "reference", "responsive"].map(key => sources[key]).join("\n");
     const script = sources.script.replace(/export function /g, "function ") + "\nenhanceResponsiveFilters();";
     cy.intercept("GET", "**/__review-filters.html", {
       headers: { "content-type": "text/html" },
@@ -27,6 +38,26 @@ function mountFilters(kind) {
     cy.visit("/__review-filters.html");
   });
 }
+
+describe("adoption production styles", () => {
+  it("keeps the table header readable and neutral while aligning filters", () => {
+    cy.viewport(1440, 1000);
+    mountFilters("adoption", true);
+    cy.get(".management-review-table thead th").should("have.length", 7).each($heading => {
+      expect($heading.text().trim()).not.to.equal("");
+      cy.wrap($heading).should("be.visible").and("have.css", "color", "rgb(123, 107, 100)")
+        .and("have.css", "border-bottom-color", "rgb(234, 223, 212)");
+    });
+    cy.get(".mrf-workspace .search-pill-sm, .mrf-workspace select, .mrf-fields > button").should($controls => {
+      const rects = [...$controls].map(control => control.getBoundingClientRect());
+      rects.forEach(rect => {
+        expect(Math.abs(rect.top - rects[0].top)).to.be.at.most(1);
+        expect(Math.abs(rect.bottom - rects[0].bottom)).to.be.at.most(1);
+      });
+    });
+    cy.get(".management-review-table-wrap").screenshot("adoption-neutral-header-production");
+  });
+});
 
 for (const kind of ["surrender", "adoption"]) {
   describe(`${kind} filter layout`, () => {
