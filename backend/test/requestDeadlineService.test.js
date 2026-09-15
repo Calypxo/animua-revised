@@ -24,6 +24,19 @@ test("public schedules must be today or later and no later than the deadline", (
   assert.equal(validateScheduleDate(record, "2026-08-02", now), false);
 });
 
+test("approval near UTC midnight uses the Philippine calendar day", () => {
+  const fields = buildApprovalDeadlineFields(new Date("2026-09-14T17:00:00Z"));
+  assert.equal(fields.attendanceDeadlineAt, "2026-09-29T15:59:59.999Z");
+  assert.equal(validateScheduleDate(fields, "2026-09-14", new Date("2026-09-14T17:00:00Z")), false);
+  assert.equal(validateScheduleDate(fields, "2026-09-15", new Date("2026-09-14T17:00:00Z")), true);
+});
+
+test("requests expire immediately after Philippine end of day in any server timezone", () => {
+  const fields = buildApprovalDeadlineFields(new Date("2026-09-01T01:00:00Z"));
+  assert.notEqual(lifecycleUpdate(fields, WORKFLOWS.surrender, new Date("2026-09-15T15:59:59Z")).status, "Expired");
+  assert.equal(lifecycleUpdate(fields, WORKFLOWS.surrender, new Date("2026-09-15T16:00:00Z")).status, "Expired");
+});
+
 test("day-seven reminder flags an approved request without an appointment", () => {
   const record = buildApprovalDeadlineFields(new Date("2026-08-01T00:00:00.000Z"));
   const update = lifecycleUpdate(

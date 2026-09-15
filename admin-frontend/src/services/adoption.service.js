@@ -2,7 +2,7 @@ import { apiFetch } from "../utils/api.js";
 
 export async function getAllAdoptions(params = {}) {
   const qs = new URLSearchParams(params).toString();
-  return await apiFetch(`/adoptions${qs ? "?" + qs : ""}`);
+  return await apiFetch(`/adoptions${qs ? "?" + qs : ""}`, { cache: "no-store", signal: AbortSignal.timeout(15000) });
 }
 
 export async function getAdoptionById(id) {

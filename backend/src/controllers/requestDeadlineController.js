@@ -73,6 +73,9 @@ function handler(type, action) {
         if (record.status !== "Approved") {
           return res.status(400).json({ message: "Only approved requests can be marked as a no-show." });
         }
+        if (record.arrivalConfirmedAt) {
+          return res.status(400).json({ message: "Arrival has already been confirmed. This request cannot be marked as a no-show." });
+        }
         const reason = String(req.body?.reason || "Missed shelter appointment.").trim();
         update = {
           status: "Expired",

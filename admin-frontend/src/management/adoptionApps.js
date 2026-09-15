@@ -1,5 +1,8 @@
 // admin-frontend/src/management/adoptionApps.js
 import "../css/adoptionApps.css";
+import { getPickupMonitor } from "./adoptionPickupMonitor.js";
+import { syncMoreActions } from "../components/management/moreActions.js";
+import { refreshDrawer } from "../components/management/refreshDrawer.js";
 import "../css/managementTables.css";
 import "../css/reviewQueueRecords.css";
 import "../css/recordsPanelReference.css";
@@ -104,6 +107,7 @@ function mapAdoptionFromBackend(a) {
     adoptedName: a.adoptedName || "",
     processedBy: a.processedBy || "",
     pickupSchedule: a.pickupSchedule || null,
+    approvedAt: a.approvedAt || null,
     pickupRescheduleRequest: a.pickupRescheduleRequest || null,
     attendanceDeadlineAt: a.attendanceDeadlineAt || null,
     deadlineStatus: a.deadlineStatus || "",
@@ -249,7 +253,7 @@ function renderStats() {
 /* ══════════════════════════════════════════════════════
    FILTER
 ══════════════════════════════════════════════════════ */
-function applyFilters() {
+function applyFilters({ preservePage = false } = {}) {
   const q    = (document.getElementById("searchApps")?.value||"").toLowerCase().trim();
   const type = document.getElementById("filterType")?.value||"";
 
@@ -267,7 +271,7 @@ function applyFilters() {
     return true;
   });
 
-  currentPage = 1;
+  currentPage = preservePage ? Math.min(currentPage, Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))) : 1;
   const resultLabel = document.getElementById("adoptionResultLabel");
   if (resultLabel) resultLabel.textContent = `${filtered.length} ${filtered.length === 1 ? "record" : "records"}`;
   renderTable();
@@ -277,6 +281,53 @@ function applyFilters() {
 /* ══════════════════════════════════════════════════════
    TABLE
 ══════════════════════════════════════════════════════ */
+const escapePickupText = value => String(value ?? "").replace(/[&<>"']/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
+
+function pickupMonitorMarkup(app, compact = false) {
+  if (compact) {
+    const stageNote = app.status === "Finalized" ? "Pickup completed"
+      : app.arrivalConfirmedAt ? "Arrival confirmed"
+      : ["Pending", "Under Review"].includes(app.status) ? "Schedule after approval"
+      : ["Closed", "Rejected"].includes(app.status) ? "Pickup not applicable"
+      : "";
+    if (stageNote) return `<small class="pickup-table-note">${stageNote}</small>`;
+  }
+  if (!["Approved", "Expired", "Finalized"].includes(app.status)) return "";
+  const monitor = getPickupMonitor(app);
+  if (compact) {
+    const label = monitor.label === "Final deadline passed" ? monitor.label : monitor.reschedulePending ? "Reschedule pending" : monitor.label.startsWith("Pickup time passed") ? "Pickup time passed" : monitor.label;
+    const date = monitor.scheduled === "Not scheduled" ? "" : `${monitor.scheduled.split(",")[0]} · `;
+    return `<small class="pickup-table-note is-${monitor.tone}" title="${escapePickupText(monitor.scheduled + ' · ' + monitor.label)}">${escapePickupText(date + label)}</small>`;
+  }
+  return `<div class="pickup-monitor is-${monitor.tone}"><small>Selected pickup appointment — expected arrival</small><strong>${escapePickupText(monitor.scheduled)}</strong><span class="pickup-state">${escapePickupText(monitor.label)}</span>${monitor.detail ? `<small>${escapePickupText(monitor.detail)}</small>` : ""}<small>Final attendance deadline: ${escapePickupText(monitor.deadlineLabel)}</small>${monitor.reschedulePending ? '<strong>Legacy reschedule awaiting review</strong>' : ""}</div>`;
+}
+
+let pickupRefreshBusy = false;
+async function refreshPickups() {
+  if (document.hidden || pickupRefreshBusy) return;
+  pickupRefreshBusy = true;
+  try {
+    const data = await getAllAdoptions();
+    const previousActive = adoptionApps.find(app => app.id === activeAppId);
+    adoptionApps = (data.adoptions || []).map(mapAdoptionFromBackend);
+    const active = adoptionApps.find(app => app.id === activeAppId);
+    if (active && JSON.stringify(previousActive) !== JSON.stringify(active)) {
+      refreshDrawer(document.getElementById("aaDrawerInner"), () => renderDrawerContent(active));
+    }
+    const monitor = document.getElementById("drawerPickupMonitor");
+    if (active && monitor) monitor.innerHTML = pickupMonitorMarkup(active);
+    const status = document.getElementById("pickupRefreshStatus");
+    if (status) status.textContent = `Updated ${new Date().toLocaleTimeString("en-PH", { timeZone: "Asia/Manila" })} PHT · Refreshes every minute`;
+  } catch {
+    const status = document.getElementById("pickupRefreshStatus");
+    if (status) status.textContent = "Refresh failed. Showing last loaded records; retrying every minute.";
+  } finally {
+    renderStats();
+    applyFilters({ preservePage: true });
+    pickupRefreshBusy = false;
+  }
+}
+
 function renderTable() {
   const tbody = document.getElementById("appsTableBody");
   if (!tbody) return;
@@ -293,7 +344,7 @@ function renderTable() {
     const thumbnail = optimizedManagementImageUrl(originalPhoto, 128);
     return `
     <tr data-id="${a.id}" class="management-card-row ${a.id===activeAppId?"row-active":""}">
-      <td class="app-id-cell management-review-application-field" data-label="Application">${a.applicationId}</td>
+      <td class="app-id-cell management-review-application-field" data-label="Application"><div class="application-reference"><span>${a.applicationId}</span>${pickupMonitorMarkup(a, true)}</div></td>
       <td class="management-card-primary management-review-card-header management-review-identity management-review-applicant-field" data-label="Applicant">
         <div class="applicant-cell">
           <div class="applicant-avatar">${a.adopter.initials}</div>
@@ -589,7 +640,7 @@ function renderDrawerContent(app) {
 
   const deadlineSection = ["Approved", "Expired"].includes(app.status) ? `
     <div class="drawer-section deadline-workflow-card ${app.noShowRisk ? "is-risk" : ""}">
-      <div class="drawer-section-title"><i class="bi bi-calendar2-check"></i> Attendance Deadline</div>
+      <div class="drawer-section-title"><i class="bi bi-calendar2-check"></i> Final Attendance Deadline</div>
       <div class="drawer-info-grid">
         <div class="drawer-info-item"><div class="drawer-info-lbl">Deadline</div><div class="drawer-info-val">${formatDate(app.attendanceDeadlineAt)}</div></div>
         <div class="drawer-info-item"><div class="drawer-info-lbl">Current State</div><div class="drawer-info-val">${app.deadlineStatus || "Awaiting appointment"}</div></div>
@@ -598,6 +649,7 @@ function renderDrawerContent(app) {
         <div class="drawer-info-item"><div class="drawer-info-lbl">Arrival</div><div class="drawer-info-val">${app.arrivalConfirmedAt ? `Confirmed ${formatDate(app.arrivalConfirmedAt)}` : "Not confirmed"}</div></div>
       </div>
       ${rescheduleHistoryMarkup}
+      <div class="info-banner mt-2">Missed pickup? Contact the adopter. Rescheduling does not extend the final deadline.</div>
       ${app.expirationReason ? `<div class="info-banner banner-rejected mt-2">${app.expirationReason}</div>` : ""}
     </div>` : "";
 
@@ -634,7 +686,7 @@ if (app.status === "Approved") {
             : ""
         }
         <button type="button" class="btn-ghost-clay" id="drawerExtendDeadlineBtn"><i class="bi bi-calendar-plus"></i> Extend deadline</button>
-        <button type="button" class="btn-danger-outline" id="drawerNoShowBtn"><i class="bi bi-calendar-x"></i> Mark no show</button>
+        ${!app.arrivalConfirmedAt ? '<button type="button" class="btn-danger-outline" id="drawerNoShowBtn"><i class="bi bi-calendar-x"></i> Mark no show</button>' : ""}
       </div>
     </details>
     ${
@@ -682,6 +734,11 @@ if (app.status === "Expired") {
       ${compatSection}
       ${adopterSection}
       ${animalSection}
+      ${["Approved", "Expired", "Finalized"].includes(app.status) ? `<section class="drawer-section drawer-pickup-section" aria-label="Pickup monitoring">
+        <div class="drawer-section-title drawer-pickup-heading"><strong><i class="bi bi-calendar2-week" aria-hidden="true"></i> Pickup monitoring</strong><button id="refreshPickups" class="btn-ghost-clay" type="button"><i class="bi bi-arrow-clockwise" aria-hidden="true"></i> Refresh</button></div>
+        <div id="drawerPickupMonitor">${pickupMonitorMarkup(app)}</div>
+        <small id="pickupRefreshStatus" role="status">Philippine time · Refreshes every minute</small>
+      </section>` : ""}
       ${deadlineSection}
       ${rejectedSection}
       ${closedSection}
@@ -695,7 +752,9 @@ if (app.status === "Expired") {
   document.getElementById("drawerApproveBtn")?.addEventListener("click", () => approveApp(app.id));
   document.getElementById("drawerRejectBtn")?.addEventListener("click",  () => openRejectModal(app.id));
   document.getElementById("drawerFinalizeBtn")?.addEventListener("click",() => openFinalizeModal(app.id));
+  syncMoreActions(inner);
   document.getElementById("drawerExtendDeadlineBtn")?.addEventListener("click", () => runAdoptionDeadlineAction(app.id, "deadline/extend"));
+  document.getElementById("refreshPickups")?.addEventListener("click", refreshPickups);
   document.getElementById("drawerArrivalBtn")?.addEventListener("click", () => runAdoptionDeadlineAction(app.id, "arrival"));
   document.getElementById("drawerNoShowBtn")?.addEventListener("click", () => runAdoptionDeadlineAction(app.id, "no-show"));
   document.getElementById("drawerRestoreBtn")?.addEventListener("click", () => runAdoptionDeadlineAction(app.id, "deadline/restore"));
@@ -718,6 +777,7 @@ async function approveApp(id) {
   try {
     await approveAdoption(id);
     await loadAdoptions();
+
 
     const app = adoptionApps.find(a => a.id === id);
     if (app) renderDrawerContent(app);
@@ -954,6 +1014,10 @@ async function init() {
     await loadAdoptions();
 
     // URL params: notification links target one application; animal links retain the existing filter.
+    const pickupTimer = window.setInterval(refreshPickups, 60000);
+    window.addEventListener("pagehide", () => window.clearInterval(pickupTimer), { once: true });
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) refreshPickups(); });
+
     const urlParams = new URLSearchParams(window.location.search);
     const applicationId = urlParams.get("id");
     const urlAnimalId = urlParams.get("animalId");
