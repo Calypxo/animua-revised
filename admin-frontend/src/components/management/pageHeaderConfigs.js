@@ -184,10 +184,11 @@ export const PAGE_HEADER_CONFIGS = Object.freeze({
     imagePosition: "center 35%",
     eyebrow: "Community Engagement",
     title: "Announcements",
-    description: "Publish trusted news and articles, celebrate success stories, and keep the community informed about upcoming events.",
+    description: "Publish trusted news and alerts, share rescue updates, celebrate success stories, and keep the community informed about upcoming events.",
     watermarkIcon: "bi-megaphone-fill",
     highlights: [
-      { icon: "bi-newspaper", label: "News & articles" },
+      { icon: "bi-newspaper", label: "News & alerts" },
+      { icon: "bi-shield-check", label: "Rescue updates" },
       { icon: "bi-heart", label: "Success stories" },
       { icon: "bi-calendar-event", label: "Upcoming events" }
     ],

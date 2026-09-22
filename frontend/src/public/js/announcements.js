@@ -17,15 +17,17 @@ const SUCCESS_ZACH_ADOPTION_IMAGE = new URL(
 ).href;
 
 const FALLBACK_IMAGES = {
-  "News & Article": NEWS_CCA_CAT_RESCUE_IMAGE,
+  "News & Alerts": NEWS_CCA_CAT_RESCUE_IMAGE,
   "Success Stories": SUCCESS_ZACH_ADOPTION_IMAGE,
   "Upcoming Events": HIGHLIGHT_UPCOMING_EVENT_IMAGE,
+  "Rescue": NEWS_CCA_CAT_RESCUE_IMAGE,
 };
 
 const TYPES = {
-  "News & Article": { icon: "fa-regular fa-newspaper", slug: "news", label: "News & Article" },
-  "Success Stories": { icon: "fa-solid fa-heart", slug: "success", label: "Rescue Story" },
+  "News & Alerts": { icon: "fa-regular fa-newspaper", slug: "news", label: "News & Alerts" },
+  "Success Stories": { icon: "fa-solid fa-heart", slug: "success", label: "Success Story" },
   "Upcoming Events": { icon: "fa-regular fa-calendar-check", slug: "event", label: "Event" },
+  "Rescue": { icon: "fa-solid fa-shield-dog", slug: "rescue", label: "Rescue" },
 };
 
 const state = {
@@ -79,8 +81,9 @@ async function getSwal() {
 function normalizeType(value) {
   const type = String(value || "").toLowerCase().trim();
   if (type.includes("event")) return "Upcoming Events";
-  if (type.includes("success") || type.includes("rescue")) return "Success Stories";
-  return "News & Article";
+  if (type.includes("rescue")) return "Rescue";
+  if (type.includes("success")) return "Success Stories";
+  return "News & Alerts";
 }
 
 function toDate(value) {
@@ -457,8 +460,8 @@ async function showAnnouncementDetail(item) {
     ? `${window.location.origin}${window.location.pathname}?story=${encodeURIComponent(storyId)}`
     : window.location.href;
   const postedTime = displayText(item.eventTime) || "Official update";
-  const priority = type === "Upcoming Events" ? "Event" : type === "Success Stories" ? "Story" : "Medium";
-  const detailLabel = type === "News & Article" ? "News & Alerts" : TYPES[type].label;
+  const priority = type === "Upcoming Events" ? "Event" : type === "Success Stories" ? "Story" : type === "Rescue" ? "Rescue" : "Medium";
+  const detailLabel = TYPES[type].label;
   const titleClass = title.length > 58 ? " is-long-title" : "";
   const fallbackImage = FALLBACK_IMAGES[type] || NEWS_CCA_CAT_RESCUE_IMAGE;
   const optimizedDetailImage = optimizedPublicImageUrl(image, 900) || image;

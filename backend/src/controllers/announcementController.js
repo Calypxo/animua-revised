@@ -12,11 +12,27 @@ function isManagementRole(role) {
   return ["Admin", "Staff", "Veterinarian"].includes(role);
 }
 
-function normalizeAnnouncementType(value) {
+function isRescueAnnouncement(data = {}) {
+  const searchableText = [
+    data.title,
+    data.caption,
+    data.description,
+    data.body,
+    data.content,
+    data.summary,
+    ...(Array.isArray(data.details) ? data.details : []),
+    ...(Array.isArray(data.storyParagraphs) ? data.storyParagraphs : []),
+  ].join(" ").toLowerCase();
+
+  return /\b(?:rescue|rescued|rescuing|rescues)\b|(?:pag|na)-rescue|nailigtas/.test(searchableText);
+}
+
+function normalizeAnnouncementType(value, data = {}) {
   const type = String(value || "").toLowerCase().trim();
   if (type.includes("event")) return "Upcoming Events";
   if (type.includes("success")) return "Success Stories";
-  return "News & Article";
+  if (type.includes("rescue") || isRescueAnnouncement(data)) return "Rescue";
+  return "News & Alerts";
 }
 
 function normalizeAnnouncementStatus(value) {
@@ -32,7 +48,7 @@ function normalizeAnnouncementText(value = "") {
 function normalizeAnnouncement(data = {}) {
   const payload = {
     title: normalizeAnnouncementText(data.title),
-    type: normalizeAnnouncementType(data.type),
+    type: normalizeAnnouncementType(data.type, data),
     caption: normalizeAnnouncementText(data.caption),
     eventDate: normalizeAnnouncementText(data.eventDate),
     location: normalizeAnnouncementText(data.location),
@@ -139,7 +155,7 @@ exports.getPublicAnnouncements = async (req, res) => {
         return {
           id: item.id,
           title: normalizeAnnouncementText(item.title),
-          type: normalizeAnnouncementType(item.type),
+          type: normalizeAnnouncementType(item.type, item),
           caption: normalizeAnnouncementText(item.caption),
           description: normalizeAnnouncementText(item.description),
           body: normalizeAnnouncementText(item.body),
@@ -195,7 +211,7 @@ exports.getAllAnnouncements = async (req, res) => {
         const data = doc.data();
         return serializeAnnouncementImage(doc.id, normalizeSerializedAnnouncement({
           ...data,
-          type: normalizeAnnouncementType(data.type),
+          type: normalizeAnnouncementType(data.type, data),
           status: normalizeAnnouncementStatus(data.status),
           visibleToPublic: data.visibleToPublic !== false,
         }));

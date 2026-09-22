@@ -334,7 +334,7 @@ describe("Public visibility is checked before signing", () => {
 
   it("signs only published, public announcements", async () => {
     const docs = [
-      { id: "PUBLIC", data: () => ({ status: "Published", visibleToPublic: true, imagePath: "announcements/PUBLIC/cover.jpg" }) },
+      { id: "PUBLIC", data: () => ({ status: "Published", visibleToPublic: true, type: "News & Article", title: "Stray cat rescue operation", imagePath: "announcements/PUBLIC/cover.jpg" }) },
       { id: "DRAFT", data: () => ({ status: "Draft", visibleToPublic: true, imagePath: "announcements/DRAFT/cover.jpg" }) },
       { id: "HIDDEN", data: () => ({ status: "Published", visibleToPublic: false, imagePath: "announcements/HIDDEN/cover.jpg" }) },
     ];
@@ -349,6 +349,7 @@ describe("Public visibility is checked before signing", () => {
     await controller.getPublicAnnouncements({}, res);
     expect(res.statusCode).toBe(200);
     expect(res.body.announcements.map((item) => item.id)).toEqual(["PUBLIC"]);
+    expect(res.body.announcements[0].type).toBe("Rescue");
     expect(signed.getSignedReadUrl).toHaveBeenCalledOnce();
     expect(signed.getSignedReadUrl).toHaveBeenCalledWith(expect.objectContaining({
       path: "announcements/PUBLIC/cover.jpg",
