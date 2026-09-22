@@ -151,7 +151,7 @@
       </div>
       <div class="form-group adoption-modal-form-section" id="rejectReasonWrap">
         <label class="form-lbl" for="rejectReason">Reason for rejection <span class="req" aria-hidden="true">*</span></label>
-        <textarea class="form-inp form-textarea mt-1" id="rejectReason" rows="3"
+        <textarea class="form-inp form-textarea mt-1" id="rejectReason" required rows="3"
           placeholder="Explain why this application is being rejected…" aria-required="true" aria-describedby="rejectReasonHint errRejectReason"></textarea>
         <small class="adoption-field-hint" id="rejectReasonHint">Use a concise, factual explanation that staff can reference later.</small>
         <span class="form-err" id="errRejectReason" aria-live="polite"></span>
@@ -187,7 +187,7 @@
       <div class="adoption-modal-form-section adoption-finalize-fields">
         <div class="form-group adoption-field-wide">
           <label class="form-lbl" for="fAdoptedName">Adopter-given animal name <span class="req" aria-hidden="true">*</span></label>
-          <input type="text" class="form-inp mt-1" id="fAdoptedName"
+          <input type="text" class="form-inp mt-1" id="fAdoptedName" required
             maxlength="60" placeholder="Name chosen by the adopter" aria-required="true" aria-describedby="errAdoptedName" />
           <span class="form-err" id="errAdoptedName" aria-live="polite"></span>
         </div>

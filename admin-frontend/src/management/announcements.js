@@ -1,3 +1,4 @@
+import { validateFormFields } from "../components/management/requiredFields.js";
 import "../css/announcements.css";
 
 import Swal from "sweetalert2";
@@ -82,9 +83,10 @@ function renderHeaderStats() {
   setHeaderValue("insightPublished", published);
   setHeaderValue("insightDrafts", drafts);
   setHeaderValue("insightPublic", publicPosts);
-  setHeaderValue("categoryNewsCount", countType("News & Article"));
+  setHeaderValue("categoryNewsCount", countType("News & Alerts"));
   setHeaderValue("categorySuccessCount", countType("Success Stories"));
   setHeaderValue("categoryEventCount", countType("Upcoming Events"));
+  setHeaderValue("categoryRescueCount", countType("Rescue"));
 }
 
 function normalize(value) {
@@ -98,8 +100,15 @@ function normalizeText(value = "") {
 function normalizePostType(value) {
   const type = normalize(value);
   if (type.includes("event")) return "Upcoming Events";
+  if (type.includes("rescue")) return "Rescue";
   if (type.includes("success")) return "Success Stories";
-  return "News & Article";
+  return "News & Alerts";
+}
+
+function isRescuePostContent(...values) {
+  return /\b(?:rescue|rescued|rescuing|rescues)\b|(?:pag|na)-rescue|nailigtas/i.test(
+    values.join(" ")
+  );
 }
 
 function escapeHtml(value = "") {
@@ -406,6 +415,7 @@ function showToast(message, type = "success") {
 function getTypeClass(type) {
   const normalizedType = normalizePostType(type);
   if (normalizedType === "Upcoming Events") return "type-event";
+  if (normalizedType === "Rescue") return "type-rescue";
   if (normalizedType === "Success Stories") return "type-success";
   return "type-news";
 }
@@ -728,7 +738,7 @@ function resetForm() {
   clearImageSelection();
 
   getEl("announcementForm").reset();
-  getEl("fType").value = "News & Article";
+  getEl("fType").value = "News & Alerts";
   getEl("fStatus").value = "Published";
   getEl("fVisibleToPublic").value = "true";
   updateMediaPreview("");
@@ -873,7 +883,7 @@ function removeAnnouncementImage() {
   }
 }
 
-function openCreateModal(defaultType = "News & Article") {
+function openCreateModal(defaultType = "News & Alerts") {
   if (!can("create")) {
     showToast("You do not have permission to create announcements.", "warning");
     return;
@@ -925,10 +935,16 @@ function closeModal() {
 }
 
 function getFormPayload() {
+  const title = normalizeText(getEl("fTitle").value);
+  const caption = normalizeText(getEl("fCaption").value);
+  const selectedType = normalizePostType(getEl("fType").value);
+
   return {
-    title: normalizeText(getEl("fTitle").value),
-    type: normalizePostType(getEl("fType").value),
-    caption: normalizeText(getEl("fCaption").value),
+    title,
+    type: selectedType === "News & Alerts" && isRescuePostContent(title, caption)
+      ? "Rescue"
+      : selectedType,
+    caption,
     eventDate: normalizeText(getEl("fEventDate").value),
     location: normalizeText(getEl("fLocation").value),
     status: getEl("fStatus").value,
@@ -938,6 +954,7 @@ function getFormPayload() {
 
 async function saveAnnouncement(event) {
   event.preventDefault();
+  if (!validateFormFields(getEl("announcementForm"))) return;
 
   const action = state.editingId ? "edit" : "create";
 

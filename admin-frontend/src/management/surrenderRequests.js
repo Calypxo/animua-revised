@@ -14,6 +14,9 @@ import { loadSidebar, navigateManagementPage } from "../components/management/si
 import { getUserName }           from "../utils/storage.js";
 import { API_BASE_URL }          from "../utils/api.js";
 import { compareSurrenderUrgency } from "./surrenderRequestSorting.js";
+import { getAppointmentMonitor } from "./surrenderAppointmentMonitor.js";
+import { syncMoreActions } from "../components/management/moreActions.js";
+import { refreshDrawer } from "../components/management/refreshDrawer.js";
 import { installManagementImageFallbacks } from "../utils/image.js";
 
 renderPageHeader(PAGE_HEADER_CONFIGS.surrenders);
@@ -24,11 +27,13 @@ const SURRENDER_AVAILABILITY_API_URL =
   `${SURRENDER_REQUESTS_API_URL}/availability`;
 
 
-async function getPublicSubmittedRequests() {
+async function getPublicSubmittedRequests({ throwOnError = false } = {}) {
   try {
     const response = await fetch(SURRENDER_REQUESTS_API_URL, {
       method: "GET",
       credentials: "include",
+      cache: "no-store",
+      signal: AbortSignal.timeout(15000),
     });
 
     const data = await response.json();
@@ -168,6 +173,7 @@ async function getPublicSubmittedRequests() {
     });
   } catch (error) {
     console.error("Failed to load surrender requests from backend:", error);
+    if (throwOnError) throw error;
     return [];
   }
 }
@@ -427,6 +433,42 @@ function clearSurrenderFilters() {
 /* ══════════════════════════════════════════════════════
    TABLE
 ══════════════════════════════════════════════════════ */
+function appointmentMarkup(r, compact = false) {
+  const monitor = getAppointmentMonitor(r);
+  if (monitor.state === "inactive" && !["Expired", "Converted"].includes(r.status) && !r.arrivalConfirmedAt) return "";
+  if (compact) {
+    const label = monitor.label === "Final deadline passed" ? monitor.label : monitor.reschedulePending ? "Reschedule pending" : monitor.label.startsWith("Appointment passed") ? "Appointment passed" : monitor.label;
+    const date = monitor.scheduled === "Not scheduled" ? "" : `${monitor.scheduled.split(",")[0]} · `;
+    return `<small class="appointment-table-note is-${monitor.tone}">${escapeHtml(date + label)}</small>`;
+  }
+  return `<div class="appointment-monitor is-${monitor.tone}"><small>Selected appointment: expected arrival</small><strong class="appointment-date">${escapeHtml(monitor.scheduled)}</strong><span class="appointment-state">${escapeHtml(monitor.label)}</span>${monitor.detail ? `<small>${escapeHtml(monitor.detail)}</small>` : ""}${r.status === "Approved" ? `<small>Final attendance deadline: ${escapeHtml(monitor.deadlineLabel)}</small>` : ""}${monitor.reschedulePending ? '<strong class="appointment-reschedule">Reschedule awaiting review</strong>' : ""}</div>`;
+}
+
+let appointmentRefreshBusy = false;
+async function refreshAppointments() {
+  if (document.hidden || appointmentRefreshBusy) return;
+  appointmentRefreshBusy = true;
+  const refreshStatus = document.getElementById("appointmentRefreshStatus");
+  try {
+    const requests = await getPublicSubmittedRequests({ throwOnError: true });
+    const previousActive = allRequests.find(r => r.id === activeId);
+    allRequests = requests;
+    if (refreshStatus) refreshStatus.textContent = `Updated ${new Date().toLocaleTimeString("en-PH", { timeZone: "Asia/Manila" })} PHT · Refreshes every minute`;
+    const active = allRequests.find(r => r.id === activeId);
+    if (active && JSON.stringify(previousActive) !== JSON.stringify(active)) {
+      refreshDrawer(document.getElementById("srDrawerInner"), () => renderDrawer(active));
+    }
+    const monitor = document.getElementById("drawerAppointmentMonitor");
+    if (active && monitor) monitor.innerHTML = appointmentMarkup(active);
+  } catch {
+    if (refreshStatus) refreshStatus.textContent = "Refresh failed. Showing last loaded records; retrying every minute.";
+  } finally {
+    renderStats();
+    applyFilters({ preservePage: true });
+    appointmentRefreshBusy = false;
+  }
+}
+
 function renderTable() {
   const tbody = document.getElementById("srTableBody");
   if (!tbody) return;
@@ -460,7 +502,7 @@ function renderTable() {
       </td>
       <td class="surrender-category-field" data-label="Category">${catBadge(r.nlp.category)}</td>
       <td class="surrender-urgency-field" data-label="Urgency"><span class="urgency-badge ${urgencyCls(r.nlp.urgencyLabel)}">${r.nlp.urgencyLabel}</span></td>
-      <td data-label="Submitted" class="submitted-date surrender-submitted-field">${formatDate(r.submittedAt)}</td>
+      <td data-label="Submitted / Appointment" class="submitted-date surrender-submitted-field"><small>Submitted ${formatDate(r.submittedAt)}</small>${appointmentMarkup(r, true)}</td>
       <td class="surrender-status-field" data-label="Status">${statusBadge(r.status)}</td>
       <td class="management-card-actions surrender-actions-field" data-label="Actions">
         <button type="button" class="tbl-action-btn management-card-open management-view-action management-view-action--compact" data-action="view" data-id="${r.id}" title="View request" aria-label="View surrender request details">
@@ -833,16 +875,16 @@ function renderDrawer(r, analysisOnly = false) {
     : `${remainingDays} day(s) remaining`;
   const deadlineSection = ["Approved", "Expired"].includes(r.status) ? `
     <div class="drawer-section deadline-workflow-card ${r.noShowRisk ? "is-risk" : ""}">
-      <div class="drawer-section-title"><i class="bi bi-calendar2-check"></i> Attendance Deadline</div>
+      <div class="drawer-section-title"><i class="bi bi-calendar2-check"></i> Final Attendance Deadline</div>
       <div class="drawer-info-grid">
         <div class="drawer-info-item"><div class="drawer-info-lbl">Deadline</div><div class="drawer-info-val">${formatDate(r.attendanceDeadlineAt)}</div></div>
-        <div class="drawer-info-item"><div class="drawer-info-lbl">Time Remaining</div><div class="drawer-info-val">${attendanceTimeLabel}</div></div>
+        <div class="drawer-info-item"><div class="drawer-info-lbl">Time left in attendance window</div><div class="drawer-info-val">${attendanceTimeLabel}</div></div>
         <div class="drawer-info-item"><div class="drawer-info-lbl">Reminder Stage</div><div class="drawer-info-val">${displayValue(r.deadlineReminderStage, "Approved")}</div></div>
         <div class="drawer-info-item"><div class="drawer-info-lbl">Current State</div><div class="drawer-info-val">${displayValue(r.deadlineStatus, "Awaiting appointment")}</div></div>
         <div class="drawer-info-item"><div class="drawer-info-lbl">Drop-off Appointment</div><div class="drawer-info-val">${r.surrenderAppointment?.date ? `${formatDate(r.surrenderAppointment.date)} ${r.surrenderAppointment.time || ""}` : "Not scheduled"}</div></div>
         <div class="drawer-info-item"><div class="drawer-info-lbl">Arrival</div><div class="drawer-info-val">${r.arrivalConfirmedAt ? `Confirmed ${formatDate(r.arrivalConfirmedAt)}` : "Not confirmed"}</div></div>
       </div>
-      <div class="info-banner mt-2">Contact the client when attendance is at risk. Reminder stages are tracking flags, not sent messages. A reschedule requires staff approval and does not extend the deadline. Marking a no-show expires this request; it does not disable the client's account.</div>
+      <div class="info-banner mt-2">Missed drop-off? Contact the client. Rescheduling needs staff approval and does not extend the final deadline.</div>
       ${r.status === "Approved" && String(r.surrenderRescheduleRequest?.status || "").toLowerCase() === "pending" ? `
         <div class="info-banner banner-approved mt-2">
           <strong>Drop-off reschedule awaiting review</strong>
@@ -952,6 +994,11 @@ function renderDrawer(r, analysisOnly = false) {
       ${extraPetDetailsSection}
       ${docsSection}
       ${submissionSection}
+      <section class="drawer-appointment-section" aria-label="Appointment monitoring">
+        <div class="drawer-appointment-heading"><strong><i class="bi bi-calendar2-week" aria-hidden="true"></i> Appointment monitoring</strong><button id="refreshAppointments" class="btn-ghost-clay" type="button" aria-label="Refresh appointment"><i class="bi bi-arrow-clockwise" aria-hidden="true"></i> Refresh</button></div>
+        <div id="drawerAppointmentMonitor">${appointmentMarkup(r)}</div>
+        <small id="appointmentRefreshStatus" role="status">Philippine time ? Refreshes every minute</small>
+      </section>
       ${deadlineSection}
       ${statusSection}
     </div>
@@ -963,6 +1010,8 @@ function renderDrawer(r, analysisOnly = false) {
   document.getElementById("drawerCloseBtn")?.addEventListener("click",  closeDrawer);
   document.getElementById("drawerApproveBtn")?.addEventListener("click",()=> openApproveModal(r.id));
   document.getElementById("drawerRejectBtn")?.addEventListener("click", ()=> openRejectModal(r.id));
+  document.getElementById("refreshAppointments")?.addEventListener("click", refreshAppointments);
+  syncMoreActions(document.getElementById("srDrawerInner"));
   document.getElementById("drawerExtendDeadlineBtn")?.addEventListener("click", () => openAttendanceWorkflow(r.id, "deadline/extend"));
   document.getElementById("drawerArrivalBtn")?.addEventListener("click", () => openAttendanceWorkflow(r.id, "arrival"));
   document.getElementById("drawerNoShowBtn")?.addEventListener("click", () => openAttendanceWorkflow(r.id, "no-show"));
@@ -1113,6 +1162,8 @@ function openAttendanceWorkflow(id, action) {
   document.querySelector("#workflowModalIcon i").className = `bi ${config.icon}`;
   document.getElementById("workflowDaysGroup").hidden = !config.needsDays;
   document.getElementById("workflowReasonGroup").hidden = !config.needsReason;
+  document.getElementById("workflowDays").required = Boolean(config.needsDays);
+  document.getElementById("workflowReason").required = Boolean(config.needsReason);
   document.getElementById("workflowDays").value = config.needsDays ? "7" : "";
   document.getElementById("workflowReason").value = config.defaultReason || "";
   document.getElementById("errWorkflowDays").textContent = "";
@@ -1423,6 +1474,9 @@ async function init() {
 
     allRequests = [...publicRequests];
     filtered = [...allRequests];
+    const appointmentTimer = window.setInterval(refreshAppointments, 60000);
+    window.addEventListener("pagehide", () => window.clearInterval(appointmentTimer), { once: true });
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) refreshAppointments(); });
     analysisRefreshTimer = window.setInterval(() => refreshSurrenderAnalysis(), 5000);
     window.addEventListener("pagehide", () => window.clearInterval(analysisRefreshTimer), { once: true });
     document.addEventListener("visibilitychange", () => { if (!document.hidden) refreshSurrenderAnalysis(); });

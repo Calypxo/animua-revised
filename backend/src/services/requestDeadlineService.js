@@ -3,6 +3,12 @@ const { db } = require("../config/firebase");
 const DAY_MS = 24 * 60 * 60 * 1000;
 const DEADLINE_DAYS = 14;
 const WARNING_DAY = 7;
+const SHELTER_OFFSET_MS = 8 * 60 * 60 * 1000;
+
+function shelterDay(date, endOfDay = false) {
+  const day = new Date(date.getTime() + SHELTER_OFFSET_MS).toISOString().slice(0, 10);
+  return new Date(`${day}T${endOfDay ? "23:59:59.999" : "00:00:00.000"}+08:00`);
+}
 
 function isFunctionalityTestingEnvironment(env = process.env) {
   return String(env.APP_ENVIRONMENT || "").trim().toLowerCase() === "functionality-testing";
@@ -38,7 +44,7 @@ function toDate(value) {
   const parsed = typeof seconds === "number"
     ? new Date(seconds * 1000)
     : /^\d{4}-\d{2}-\d{2}$/.test(String(value))
-      ? new Date(`${value}T00:00:00`)
+      ? new Date(`${value}T00:00:00+08:00`)
       : new Date(value);
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
@@ -62,14 +68,12 @@ function approvalDate(record = {}) {
 function deadlineDate(record = {}) {
   const deadline = toDate(record.attendanceDeadlineAt)
     || addDays(approvalDate(record) || new Date(), DEADLINE_DAYS);
-  deadline.setHours(23, 59, 59, 999);
-  return deadline;
+  return shelterDay(deadline, true);
 }
 
 function buildApprovalDeadlineFields(now = new Date()) {
   const approvedAt = toDate(now) || new Date();
-  const deadline = addDays(approvedAt, DEADLINE_DAYS);
-  deadline.setHours(23, 59, 59, 999);
+  const deadline = shelterDay(addDays(approvedAt, DEADLINE_DAYS), true);
   return {
     approvedAt: approvedAt.toISOString(),
     attendanceDeadlineAt: deadline.toISOString(),
@@ -88,10 +92,7 @@ function validateScheduleDate(record, dateValue, now = new Date()) {
   const deadline = deadlineDate(record);
   const today = toDate(now);
   if (!scheduleDate || !deadline || !today) return false;
-  scheduleDate.setHours(0, 0, 0, 0);
-  deadline.setHours(23, 59, 59, 999);
-  today.setHours(0, 0, 0, 0);
-  return scheduleDate >= today && scheduleDate <= deadline;
+  return shelterDay(scheduleDate) >= shelterDay(today) && shelterDay(scheduleDate) <= deadline;
 }
 
 function lifecycleUpdate(record, workflow, now = new Date()) {
@@ -102,8 +103,8 @@ function lifecycleUpdate(record, workflow, now = new Date()) {
 
   const elapsedDays = Math.max(0, Math.floor((now.getTime() - approved.getTime()) / DAY_MS));
   const schedule = record[workflow.scheduleField] || {};
-  const scheduleDate = toDate(schedule.date);
-  if (scheduleDate) scheduleDate.setHours(23, 59, 59, 999);
+  const scheduled = toDate(schedule.date);
+  const scheduleDate = scheduled ? shelterDay(scheduled, true) : null;
   const reschedule = record[workflow.rescheduleField] || {};
   const pendingReschedule = String(reschedule.status || "").toLowerCase() === "pending";
   const isExpired = now.getTime() > deadline.getTime();

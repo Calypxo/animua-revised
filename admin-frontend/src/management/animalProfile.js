@@ -1,3 +1,4 @@
+import { validateFormFields } from "../components/management/requiredFields.js";
 import { API_BASE_URL } from "../utils/api.js";
 import {
   installManagementImageFallbacks,
@@ -393,7 +394,8 @@ function validateMedicalRecordForm() {
   }
 
   const careUpdate = getMedicalCareUpdate();
-  if (careUpdate.specialNeedsStatus === "yes" && !careUpdate.specialNeedsNotes) {
+  if (document.getElementById("specialNeedsStatus").value === "yes"
+      && !document.getElementById("specialNeedsNotes").value.trim()) {
     document.getElementById("medicalSpecialNeedsSection").open = true;
     addError("specialNeedsNotes", "Describe the animal's special needs and required care.");
   }
@@ -422,6 +424,9 @@ function syncMedicalInventoryPicker() {
   const hint = document.getElementById("medicalInventorySelectionHint");
   const clear = document.getElementById("clearMedicalInventory");
   const selected = selectedMedicalInventoryItem();
+
+  const quantity = document.getElementById("fMedQuantityUsed");
+  if (quantity) quantity.required = Boolean(selected);
 
   if (!selected && hidden) hidden.value = "";
   if (search) search.value = selected?.name?.trim() || "";
@@ -1906,6 +1911,7 @@ function openEditModal() {
 }
 
 async function saveEditProfile() {
+  if (!validateFormFields(document.getElementById("editProfileForm"))) return;
   if (!can("edit_basic")) {
     showToast(
       "error",

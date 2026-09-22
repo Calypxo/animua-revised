@@ -162,3 +162,25 @@ test("drop-off rescheduling remains unavailable after attendance confirmation", 
   assert.match(response.body.message, /already been confirmed/i);
   assert.equal(updates.length, 0);
 });
+
+test("a surrender date change stays pending until staff approves and cannot be changed twice", async () => {
+  record.status = "Approved";
+  record.surrenderAppointment = { date: "2026-09-05", time: "09:00" };
+  const deadline = record.attendanceDeadlineAt;
+  const request = { params: { id: "SR-ACCEPTED" }, user: { email: "owner@test.com" }, body: { date: "2026-09-06", time: "10:00" } };
+  const pending = responseRecorder();
+  await controller.scheduleMySurrenderAppointment(request, pending);
+  assert.equal(pending.statusCode, 200);
+  assert.equal(pending.body.requiresApproval, true);
+  assert.equal(record.surrenderAppointment.date, "2026-09-05");
+  assert.equal(record.surrenderRescheduleRequest.status, "Pending");
+  const approved = responseRecorder();
+  await controller.approveSurrenderReschedule({ ...request, user: { email: "staff@test.com" } }, approved);
+  assert.equal(approved.statusCode, 200);
+  assert.equal(record.surrenderAppointment.date, "2026-09-06");
+  assert.equal(record.attendanceDeadlineAt, deadline);
+  const second = responseRecorder();
+  await controller.scheduleMySurrenderAppointment({ ...request, body: { date: "2026-09-07", time: "11:00" } }, second);
+  assert.equal(second.statusCode, 400);
+  assert.equal(record.surrenderAppointment.date, "2026-09-06");
+});

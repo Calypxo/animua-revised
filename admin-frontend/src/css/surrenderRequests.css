@@ -1911,3 +1911,33 @@
     overflow-x: clip !important;
   }
 }
+.appointment-monitor {
+  display: grid;
+  gap: 5px;
+  margin-top: 8px;
+  padding: 0;
+  color: var(--ink-2, #443b36);
+  white-space: normal;
+  overflow-wrap: anywhere;
+  font-size: .72rem;
+  line-height: 1.5;
+}
+.appointment-date { font-weight: 700; }
+.appointment-state { justify-self: start; max-width: 100%; padding: 4px 8px; border-radius: 8px; background: var(--cream-3, #f1e9e1); color: var(--stone, #65534d); font-size: .65rem; font-weight: 700; }
+.appointment-monitor small { color: var(--stone, #81746d); font-size: .65rem; }
+.appointment-monitor.is-danger .appointment-state { background: var(--clay-soft, #f8ecee); color: var(--clay, #780116); }
+.appointment-monitor.is-warning .appointment-state { background: var(--amber-soft, #fff4dc); color: var(--amber, #725000); }
+.appointment-reschedule { color: var(--clay, #780116); font-size: .65rem; }
+#drawerAppointmentMonitor:not(:empty) { margin: 16px 0; padding: 16px; border: 1px solid var(--border, #eadfd4); border-radius: 14px; background: var(--cream, #fffaf5); }
+#drawerAppointmentMonitor .appointment-monitor { margin: 0; }
+
+/* Keep queue rows compact; the complete follow-up information lives in the modal. */
+.appointment-table-note { display: block; margin-top: 4px; font-size: .65rem; line-height: 1.4; font-weight: 600; color: var(--stone, #81746d); }
+.appointment-table-note.is-danger { color: var(--clay, #780116); }
+.appointment-table-note.is-warning { color: var(--amber, #725000); }
+.drawer-appointment-section { margin: 16px 0; padding: 16px; border: 1px solid var(--border, #eadfd4); border-radius: 14px; background: var(--cream, #fffaf5); }
+.drawer-appointment-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; color: var(--clay, #780116); font-size: .8rem; }
+.drawer-appointment-heading strong { display: flex; gap: 8px; align-items: center; }
+.drawer-appointment-heading button { font-size: .72rem; }
+.drawer-appointment-section #drawerAppointmentMonitor { margin: 12px 0; padding: 0; border: 0; background: none; }
+.drawer-appointment-section > small { color: var(--stone, #81746d); font-size: .65rem; }

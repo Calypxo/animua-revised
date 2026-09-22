@@ -1,3 +1,4 @@
+import { validateFormFields } from "../components/management/requiredFields.js";
 import {
   getBehavioralQuestions,
   saveBehavioralQuestions,
@@ -165,7 +166,7 @@ function openEditor(index) {
   document.getElementById("behaviorQuestionGroup").innerHTML = groups.map((item) => `<option value="${escapeHtml(item.key)}">${escapeHtml(item.label)}</option>`).join("");
   document.getElementById("behaviorQuestionGroup").value = question.groupKey;
   document.getElementById("behaviorQuestionActive").checked = question.active;
-  document.getElementById("behaviorAnswerFields").innerHTML = question.choices.map((choice, choiceIndex) => `<label><span>Score ${choice.value}</span><input class="form-inp" data-answer-index="${choiceIndex}" maxlength="120" value="${escapeHtml(choice.text)}" /></label>`).join("");
+  document.getElementById("behaviorAnswerFields").innerHTML = question.choices.map((choice, choiceIndex) => `<label><span>Score ${choice.value}</span><input class="form-inp" data-answer-index="${choiceIndex}" required maxlength="120" value="${escapeHtml(choice.text)}" /></label>`).join("");
   document.getElementById("behaviorQuestionError").textContent = "";
   document.getElementById("behaviorQuestionModalBackdrop").classList.add("open");
 }
@@ -178,6 +179,7 @@ function closeEditor({ discardNew = false } = {}) {
 }
 
 function applyEditor() {
+  if (!validateFormFields(document.getElementById("behaviorQuestionForm"))) return;
   const question = questions[editingIndex];
   if (!question) return;
   const label = document.getElementById("behaviorQuestionLabel").value.trim();

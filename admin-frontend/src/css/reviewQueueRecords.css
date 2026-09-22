@@ -111,6 +111,22 @@ html body.management-consistent-ui:is(.adoption-applications-page, .surrender-re
   background: #fff8ee !important;
 }
 
+/* Responsive filters move Search outside this container. The workspace now
+   owns the toolbar inset; a second inset here offsets the remaining controls. */
+@media (min-width: 600px) {
+  html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .mrf-workspace .management-review-filters {
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+  }
+
+  html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .mrf-workspace :is(.search-pill-sm, .filter-select, .reference-clear-filters, .aa-clear-filters) {
+    box-sizing: border-box !important;
+    height: 42px !important;
+    min-height: 42px !important;
+  }
+}
+
 html body.management-consistent-ui:is(.adoption-applications-page, .surrender-requests-page) .page-body .management-review-section-head {
   min-height: 72px !important;
   margin: 0 !important;

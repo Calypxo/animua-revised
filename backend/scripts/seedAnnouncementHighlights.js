@@ -9,7 +9,7 @@ const IMAGE_ROOT = path.resolve(__dirname, "../../frontend/src/assets/images");
 const HIGHLIGHTS = [
   {
     id: "highlight-news-nepo-stray-cats",
-    type: "News & Article",
+    type: "Rescue",
     title: "Pag-rescue sa stray cats, nagpapatuloy sa Angeles City",
     caption: "Ipinagpatuloy ng Angeles City Veterinary Office ang stray cat rescue operation sa Nepo Mart bilang bahagi ng kanilang programa para sa animal welfare.",
     details: [
@@ -24,7 +24,7 @@ const HIGHLIGHTS = [
   },
   {
     id: "highlight-news-cca-cat-rescue",
-    type: "News & Article",
+    type: "Rescue",
     title: "Stray cat rescue at CCA",
     caption: "Nagsagawa ng stray cat rescue operation ang Angeles City Veterinary Office sa City College of Angeles upang mapangalagaan ang mga ligaw na pusa.",
     details: [
@@ -39,7 +39,7 @@ const HIGHLIGHTS = [
   },
   {
     id: "highlight-news-balibago-dog-rescue",
-    type: "News & Article",
+    type: "Rescue",
     title: "Aso na-rescue sa Balibago",
     caption: "Sa gitna ng search and rescue operations sa gumuhong ginagawang gusali sa Balibago, isang aso ang nailigtas at inilipat sa ligtas na pangangalaga.",
     details: [
@@ -160,13 +160,23 @@ async function uploadSeedImage(item) {
 
 async function seedAnnouncementHighlights() {
   let created = 0;
+  let updated = 0;
   let skipped = 0;
 
   for (const item of HIGHLIGHTS) {
     const ref = db.collection(ANNOUNCEMENT_COL).doc(item.id);
     const existing = await ref.get();
     if (existing.exists) {
-      skipped += 1;
+      if (existing.data()?.type !== item.type) {
+        await ref.update({
+          type: item.type,
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          updatedBy: "content-migration@animua.local",
+        });
+        updated += 1;
+      } else {
+        skipped += 1;
+      }
       continue;
     }
 
@@ -201,7 +211,7 @@ async function seedAnnouncementHighlights() {
     created += 1;
   }
 
-  console.log(`Announcement highlights ready: ${created} created, ${skipped} already present.`);
+  console.log(`Announcement highlights ready: ${created} created, ${updated} recategorized, ${skipped} already current.`);
 }
 
 seedAnnouncementHighlights()

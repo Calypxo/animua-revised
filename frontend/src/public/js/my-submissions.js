@@ -608,7 +608,7 @@ function getScheduleSavedFeedback(kind, isReschedule = false, rescheduleCount = 
       return {
         type: "warning",
         title: "Schedule Saved",
-        message: "Please attend before the displayed 14-day deadline. You may reschedule once.",
+        message: "Arrive at your selected pickup date and time. The final attendance deadline is the last day allowed under this approval. You may change your pickup once within that deadline; changing the date does not restart the 14 days.",
       };
     }
 
@@ -623,7 +623,7 @@ function getScheduleSavedFeedback(kind, isReschedule = false, rescheduleCount = 
   return {
     type: "warning",
     title: "Schedule Saved",
-    message: `Please attend your ${action} before the displayed 14-day deadline. One reschedule request is allowed and requires staff approval.`,
+    message: `Please arrive on your selected ${action} date and time. The final attendance deadline is the last day allowed, not an alternative appointment. If you cannot attend, contact the shelter. One reschedule requires staff approval and does not restart the 14 days.`,
   };
 }
 
@@ -797,9 +797,11 @@ function renderAttendanceDeadline(item, kind) {
     <section class="attendance-deadline-card ${isExpired ? "is-expired" : isUrgent ? "is-urgent" : isComplete ? "is-complete" : ""}">
       <span><i class="fa-regular ${isExpired ? "fa-calendar-xmark" : "fa-calendar-check"}"></i></span>
       <div>
-        <small>14-day attendance deadline</small>
+        <small>Final attendance deadline</small>
         <strong>${escapeHtml(formatDate(deadline))}</strong>
         <p>${escapeHtml(message)}</p>
+        ${kind === "adoption" && !isComplete && !isExpired ? "<p>Arrive at your selected pickup appointment. This final deadline is the last day allowed under your approval. You may change the pickup date once within this deadline without separate staff approval. If you cannot attend, contact the shelter; changing the date does not restart the 14 days.</p>" : ""}
+        ${kind === "surrender" && !isComplete && !isExpired ? "<p>Your appointment is the date and time you must arrive. This final deadline is the last day allowed under your approval. If you cannot attend your appointment, contact the shelter; one reschedule requires staff approval and must remain within this deadline.</p>" : ""}
       </div>
       <b>${escapeHtml(stateLabel)}</b>
     </section>
@@ -1146,7 +1148,7 @@ async function promptForSchedule(kind, item) {
       ? "Reschedule Pet Pickup"
       : "Schedule Pet Pickup";
   const subtitle = isSurrender
-    ? `Choose an available date and time to bring ${escapeHtml(item?.name || "your pet")} to the shelter.`
+    ? `Choose one date and time to bring ${escapeHtml(item?.name || "your pet")} to the shelter, on or before your final attendance deadline. Plan to arrive at this appointment. The 14 days start at approval and do not restart when you choose or change a date.`
     : `Choose an available date and time to pick up ${escapeHtml(item?.name || "your pet")} from the shelter.`;
   const initialDate = new Date();
   initialDate.setDate(initialDate.getDate() + 1);

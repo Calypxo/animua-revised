@@ -19,7 +19,7 @@ describe("FT-069 - Create and Edit Announcement", () => {
     cy.get("#btnNewAnnouncement").click();
     cy.get("#fTitle").type(TITLE);
     cy.get("#fCaption").type(CREATED);
-    cy.get("#fType").select("News & Article");
+    cy.get("#fType").select("News & Alerts");
     cy.get("#fStatus").select("Draft");
     cy.get("#fVisibleToPublic").select("false");
     cy.get('#announcementForm button[type="submit"], button[form="announcementForm"]').last().click();

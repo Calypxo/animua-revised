@@ -1198,15 +1198,6 @@
   background: #FFF8EE !important;
 }
 
-/* Adoption records now use the same high-contrast register treatment as
-   surrender and intake records. */
-html body.management-consistent-ui.adoption-applications-page .page-body .aa-table-panel .shelter-table thead,
-html body.management-consistent-ui.adoption-applications-page .page-body .aa-table-panel .shelter-table thead th {
-  border-color: #780116 !important;
-  color: #FFFFFF !important;
-  background: #780116 !important;
-}
-
 @media (max-width: 720px) {
   html body.management-consistent-ui.adoption-applications-page .page-body .aa-table-panel .table-responsive {
     margin-inline: 0 !important;
@@ -1573,3 +1564,20 @@ html body.management-consistent-ui.adoption-applications-page :is(#rejectModalBa
     box-sizing: border-box !important;
   }
 }
+
+/* Pickup monitoring follows the adoption drawer's existing section styles. */
+.adoption-applications-page .application-reference { min-width: 0; max-width: 100%; text-align: left; }
+.adoption-applications-page .pickup-table-note { display: block; margin-top: 4px; max-width: 100%; color: var(--stone, #81746d); font: 500 .65rem/1.4 var(--font, "Poppins", sans-serif); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.adoption-applications-page .pickup-table-note.is-danger { color: var(--clay, #780116); }
+.adoption-applications-page .pickup-table-note.is-warning { color: var(--amber, #725000); }
+.drawer-pickup-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.drawer-pickup-heading strong { display: flex; align-items: center; gap: 8px; }
+.drawer-pickup-heading strong i { color: var(--clay, #780116); }
+.drawer-pickup-heading button { font: 600 .72rem/1.4 var(--font, "Poppins", sans-serif); }
+.pickup-monitor { display: grid; gap: 7px; color: var(--management-modal-ink, #1f2329); font-size: .78rem; line-height: 1.5; overflow-wrap: anywhere; }
+.pickup-monitor > strong:first-of-type { padding: 11px 13px; border: 1px solid #dfd3cb; border-radius: 10px; background: #fff; font-size: .75rem; font-weight: 500; }
+.pickup-monitor small { color: #504845; font-size: .7rem; }
+.pickup-state { justify-self: start; max-width: 100%; padding: 4px 9px; border-radius: 999px; background: var(--cream-3, #f1e9e1); color: var(--stone, #65534d); font-size: .67rem; font-weight: 700; }
+.pickup-monitor.is-danger .pickup-state { background: var(--clay-soft, #f8ecee); color: var(--clay, #780116); }
+.pickup-monitor.is-warning .pickup-state { background: var(--amber-soft, #fff4dc); color: var(--amber, #725000); }
+.drawer-pickup-section > small { display: block; margin-top: 12px; color: var(--stone, #81746d); font-size: .65rem; line-height: 1.5; }

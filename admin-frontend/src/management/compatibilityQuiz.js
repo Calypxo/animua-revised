@@ -1,3 +1,4 @@
+import { validateFormFields } from "../components/management/requiredFields.js";
 import "../css/compatibilityQuiz.css";
 import "../css/managementTables.css";
 import "../css/recordsPanelReference.css";
@@ -130,6 +131,7 @@ function openQuestionEditor(index) {
 function closeQuestionEditor(){const dialog=$("questionEditorDialog");dialog.classList.remove("open");dialog.setAttribute("aria-hidden","true");state.editorIndex=null;state.editorQuestion=null;document.body.classList.remove("modal-open")}
 function applyFocusedQuestionEdit() {
   if (!admin() || !state.editorQuestion || state.editorIndex === null) return;
+  if (!validateFormFields($("questionEditorDialog"))) return;
   const question = state.editorQuestion;
   question.text = $("editorQuestionText").value.trim();
   question.label = $("editorQuestionLabel").value.trim();
