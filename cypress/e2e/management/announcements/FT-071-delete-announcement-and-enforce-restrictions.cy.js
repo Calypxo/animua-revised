@@ -17,7 +17,7 @@ describe("FT-071 - Delete Announcement and Enforce Restrictions", () => {
     cy.get("#btnNewAnnouncement").click();
     cy.get("#fTitle").type(TITLE);
     cy.get("#fCaption").type(CAPTION);
-    cy.get("#fType").select("News & Article");
+    cy.get("#fType").select("News & Alerts");
     cy.get("#fStatus").select("Published");
     cy.get("#fVisibleToPublic").select("true");
     cy.get('button[form="announcementForm"]').click();

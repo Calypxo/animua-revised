@@ -1109,7 +1109,7 @@ body.management-consistent-ui #announcementModalBackdrop .publishing-select-shel
 
 .announcement-category-rail {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
   padding: 17px;
   border: 1px solid #eadfd7;
@@ -1139,6 +1139,7 @@ body.management-consistent-ui #announcementModalBackdrop .publishing-select-shel
 .category-story-ring { grid-row: 1 / 3; width: 54px; height: 54px; display: grid; place-items: center; border: 3px solid #780116; border-radius: 50%; color: #780116; background: #FFF8EE; font-size: 1.08rem; box-shadow: 0 0 0 3px #FFFFFF, 0 0 0 4px #FFF8EE; }
 .category-story-ring.is-success { color: #167556; border-color: #29a676; background: #e9f7f0; box-shadow: 0 0 0 3px #FFFFFF, 0 0 0 4px #bfe8d5; }
 .category-story-ring.is-event { color: #9a6500; border-color: #f7b538; background: #fff5d9; box-shadow: 0 0 0 3px #FFFFFF, 0 0 0 4px #ffe5a5; }
+.category-story-ring.is-rescue { color: #245c8f; border-color: #4d8fc7; background: #eaf4fb; box-shadow: 0 0 0 3px #FFFFFF, 0 0 0 4px #c8e2f3; }
 .category-story strong { align-self: end; color: #2b2523; font-size: .91rem; }
 .category-story small { align-self: start; margin-top: 3px; color: #9a8d86; font-size: .68rem; }
 
@@ -1192,6 +1193,7 @@ body.management-consistent-ui #announcementModalBackdrop .publishing-select-shel
 .type-news, .type-announcement { color: #780116; background: #FFF8EE; }
 .type-success { color: #167556; background: #e9f7f0; }
 .type-event { color: #946000; background: #fff4d8; }
+.type-rescue { color: #245c8f; background: #eaf4fb; }
 .post-body h3 { margin-bottom: 9px; color: #231f22; font-size: 1.28rem; line-height: 1.2; }
 .post-body p { color: #645b56; font-size: .83rem; line-height: 1.65; }
 .event-info span { color: #72500e; background: #FFF8EE; }
@@ -1955,7 +1957,7 @@ body.management-consistent-ui .event-calendar-event-copy > small {
    surfaces, avoiding a card nested inside another card. */
 body.management-consistent-ui .page-body .announcement-category-rail {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
   padding: 0;
   overflow: visible;
@@ -1994,7 +1996,7 @@ body.management-consistent-ui .page-body .category-story.is-active {
 }
 
 body.management-consistent-ui .page-body .category-story-ring,
-body.management-consistent-ui .page-body .category-story-ring:is(.is-success, .is-event) {
+body.management-consistent-ui .page-body .category-story-ring:is(.is-success, .is-event, .is-rescue) {
   grid-column: 1;
   grid-row: 1 / 3;
   width: 42px;
@@ -2092,7 +2094,7 @@ body.management-consistent-ui .page-body .announcement-category-rail {
   width: 100%;
   max-width: 100%;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   grid-auto-flow: row;
   gap: clamp(12px, 3vw, 28px);
   align-items: start;
@@ -2127,7 +2129,7 @@ body.management-consistent-ui .page-body .category-story.is-active {
 }
 
 body.management-consistent-ui .page-body .category-story-ring,
-body.management-consistent-ui .page-body .category-story-ring:is(.is-success, .is-event) {
+body.management-consistent-ui .page-body .category-story-ring:is(.is-success, .is-event, .is-rescue) {
   grid-column: 1;
   grid-row: 1;
   width: clamp(58px, 6vw, 72px);
@@ -2310,7 +2312,7 @@ body.management-consistent-ui .page-body .social-channel {
 body.management-consistent-ui .page-body .announcement-category-rail {
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   grid-auto-flow: row;
   gap: 0;
   align-items: stretch;
@@ -2377,7 +2379,7 @@ body.management-consistent-ui .page-body .category-story.is-active {
 }
 
 body.management-consistent-ui .page-body .category-story-ring,
-body.management-consistent-ui .page-body .category-story-ring:is(.is-success, .is-event) {
+body.management-consistent-ui .page-body .category-story-ring:is(.is-success, .is-event, .is-rescue) {
   grid-column: 1;
   grid-row: 1 / 3;
   width: 36px;

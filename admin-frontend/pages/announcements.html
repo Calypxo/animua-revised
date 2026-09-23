@@ -74,9 +74,9 @@
           </div>
 
           <div class="announcement-category-rail" aria-label="Content categories">
-            <button class="category-story" type="button" data-category-type="News & Article" aria-pressed="false">
+            <button class="category-story" type="button" data-category-type="News & Alerts" aria-pressed="false">
               <span class="category-story-ring"><i class="bi bi-newspaper"></i></span>
-              <strong>News &amp; Article</strong>
+              <strong>News &amp; Alerts</strong>
               <small><span id="categoryNewsCount">0</span> posts</small>
               <i class="bi bi-arrow-right category-story-arrow" aria-hidden="true"></i>
             </button>
@@ -90,6 +90,12 @@
               <span class="category-story-ring is-event"><i class="bi bi-calendar2-heart-fill"></i></span>
               <strong>Upcoming Events</strong>
               <small><span id="categoryEventCount">0</span> posts</small>
+              <i class="bi bi-arrow-right category-story-arrow" aria-hidden="true"></i>
+            </button>
+            <button class="category-story" type="button" data-category-type="Rescue" aria-pressed="false">
+              <span class="category-story-ring is-rescue"><i class="bi bi-shield-fill-check"></i></span>
+              <strong>Rescue</strong>
+              <small><span id="categoryRescueCount">0</span> posts</small>
               <i class="bi bi-arrow-right category-story-arrow" aria-hidden="true"></i>
             </button>
           </div>
@@ -106,9 +112,10 @@
                   <span class="sr-only">Filter by type</span>
                   <select id="filterType">
                     <option value="">All content</option>
-                    <option value="News & Article">News &amp; Article</option>
+                    <option value="News & Alerts">News &amp; Alerts</option>
                     <option value="Success Stories">Success Stories</option>
                     <option value="Upcoming Events">Upcoming Events</option>
+                    <option value="Rescue">Rescue</option>
                   </select>
                 </label>
                 <label>
@@ -265,9 +272,10 @@
               <label class="composer-control composer-type-control form-group">
                 <span class="form-lbl">Post Type</span>
                 <select class="form-inp" id="fType">
-                  <option value="News & Article">News &amp; Article</option>
+                  <option value="News & Alerts">News &amp; Alerts</option>
                   <option value="Success Stories">Success Stories</option>
                   <option value="Upcoming Events">Upcoming Events</option>
+                  <option value="Rescue">Rescue</option>
                 </select>
               </label>
 

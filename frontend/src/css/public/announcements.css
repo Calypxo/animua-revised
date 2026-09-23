@@ -419,6 +419,11 @@ body.announcements-page main {
   display: none;
 }
 
+.announcement-type.type-rescue {
+  color: #245c8f;
+  background: #eaf4fb;
+}
+
 .announcement-card-body h2,
 .announcement-card-body h3 {
   display: -webkit-box;

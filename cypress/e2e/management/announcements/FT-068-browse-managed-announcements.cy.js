@@ -12,7 +12,7 @@ describe("FT-068 - Browse Managed Announcements", () => {
       .should("contain.text", "FT Published Announcement")
       .and("contain.text", "Synthetic public announcement")
       .and("contain.text", "Published")
-      .and("contain.text", "News & Article")
+      .and("contain.text", "News & Alerts")
       .and("contain.text", "Visible on the public community page");
     cy.get('[data-announcement-id="FT_ANNOUNCEMENT_DRAFT"]')
       .should("contain.text", "FT Draft Announcement")

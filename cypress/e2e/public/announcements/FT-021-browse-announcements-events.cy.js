@@ -9,7 +9,7 @@ describe("FT-021 — Browse Announcements and Events", () => {
       );
       expect(announcement).to.include({
         title: "FT Published Announcement",
-        type: "News & Article",
+        type: "News & Alerts",
         caption: "Synthetic public announcement",
       });
     });

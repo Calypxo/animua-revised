@@ -12,7 +12,7 @@
 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Follow ANIMUA news and articles, success stories, and upcoming animal-welfare events in Angeles City." />
+  <meta name="description" content="Follow ANIMUA news and alerts, rescue updates, success stories, and upcoming animal-welfare events in Angeles City." />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="image" href="../../src/assets/images/optimized/announcements/announcements-header-1280.jpg" imagesrcset="../../src/assets/images/optimized/announcements/announcements-header-960.jpg 960w, ../../src/assets/images/optimized/announcements/announcements-header-1280.jpg 1280w, ../../src/assets/images/optimized/announcements/announcements-header-1672.jpg 1672w" imagesizes="100vw" fetchpriority="high">
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'">
@@ -156,9 +156,10 @@
                 <span class="sr-only">Filter by topic</span>
                 <select id="announcementType" class="announcement-topic-native" tabindex="-1" aria-hidden="true">
                   <option value="">All topics</option>
-                  <option value="News & Article">News &amp; Article</option>
+                  <option value="News & Alerts">News &amp; Alerts</option>
                   <option value="Success Stories">Success Stories</option>
                   <option value="Upcoming Events">Upcoming Events</option>
+                  <option value="Rescue">Rescue</option>
                 </select>
                 <button type="button" class="announcement-topic-toggle" id="announcementTypeToggle" aria-haspopup="listbox" aria-expanded="false">
                   <span id="announcementTypeLabel">All topics</span>
@@ -166,9 +167,10 @@
                 </button>
                 <div class="announcement-topic-menu" id="announcementTypeMenu" role="listbox" aria-label="Filter by topic">
                   <button type="button" role="option" data-topic-value="" aria-selected="true">All topics</button>
-                  <button type="button" role="option" data-topic-value="News & Article" aria-selected="false">News &amp; Article</button>
+                  <button type="button" role="option" data-topic-value="News & Alerts" aria-selected="false">News &amp; Alerts</button>
                   <button type="button" role="option" data-topic-value="Success Stories" aria-selected="false">Success Stories</button>
                   <button type="button" role="option" data-topic-value="Upcoming Events" aria-selected="false">Upcoming Events</button>
+                  <button type="button" role="option" data-topic-value="Rescue" aria-selected="false">Rescue</button>
                 </div>
               </label>
             </div>
@@ -184,7 +186,7 @@
           <section class="more-from-shelter" aria-labelledby="moreShelterHeading">
             <h2 id="moreShelterHeading">More from the shelter</h2>
             <div class="shelter-action-grid">
-              <button type="button" class="shelter-action-card" data-public-type="News & Article">
+              <button type="button" class="shelter-action-card" data-public-type="News & Alerts">
                 <span aria-hidden="true"><i class="fa-solid fa-bullhorn"></i></span>
                 <strong>Official Announcements</strong>
                 <small>Important shelter policies, service updates, and public notices.</small>
@@ -224,7 +226,7 @@
             </div>
             <div class="quick-topic-list" aria-label="Quick topic filters">
               <button type="button" data-topic-search="adoption">Adoption</button>
-              <button type="button" data-public-type="Success Stories">Rescue Stories</button>
+              <button type="button" data-public-type="Rescue">Rescue</button>
               <button type="button" data-topic-search="shelter">Shelter Updates</button>
               <button type="button" data-public-type="Upcoming Events">Events</button>
               <button type="button" data-topic-search="health">Health &amp; Wellness</button>
