@@ -5,7 +5,7 @@ const zlib = require("node:zlib");
 
 function inspectFtReportDownload({ fileName } = {}) {
   const safeName = String(fileName || "");
-  if (!/^animua-(?:intake|barangay|status|adoption|medical|inventory|surrender)-report-\d{4}-\d{2}-\d{2}\.xlsx$/.test(safeName)) {
+  if (!/^ANIMUA_(?:Animal_Intake|Barangay_Stray_Intake|Animal_Status|Adoption|Medical_&_Quarantine|Inventory_Usage|Surrender_Requests)_Report_(?:(?:from_|through_)?\d{4}-\d{2}-\d{2})(?:_to_\d{4}-\d{2}-\d{2})?\.xlsx$/.test(safeName)) {
     throw new Error("Batch 10 report inspection requires an exact ANIMUA report filename.");
   }
   const downloadRoot = path.resolve(__dirname, "cypress", "downloads");

@@ -19,7 +19,9 @@
     "vitest": "^4.1.10"
   },
   "dependencies": {
+    "exceljs": "^4.4.0",
     "firebase": "^12.12.0",
+    "pdfmake": "^0.3.11",
     "sweetalert2": "^11.26.24"
   }
 }

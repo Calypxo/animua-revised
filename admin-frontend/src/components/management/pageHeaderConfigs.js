@@ -248,7 +248,7 @@ export const PAGE_HEADER_CONFIGS = Object.freeze({
     ],
     queue: { liveLabel: "Reporting service active", label: "Current report", title: "Records in the selected view", valueId: "heroReportCount", unit: "records" },
     actions: [
-      { id: "btnPrint", icon: "bi-printer-fill", label: "Print / PDF" },
+      { id: "btnPrint", icon: "bi-file-earmark-pdf-fill", label: "Export PDF" },
       { id: "btnExcel", icon: "bi-file-earmark-excel-fill", label: "Export Excel", variant: "secondary" }
     ],
     summaryLabel: "Reporting snapshot",

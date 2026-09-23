@@ -2,7 +2,7 @@ import "../css/reports.css";
 import "../css/managementTables.css";
 import "../css/recordsPanelReference.css";
 import { protectManagementPage } from "../auth/authGuard.js";
-import { getUserName } from "../utils/storage.js";
+import { getUserName, getUserRole } from "../utils/storage.js";
 import { renderTopbarUser } from "../components/management/topbarUser.js";
 import { loadSidebar } from "../components/management/sidebarLoader.js";
 import { renderPageHeader } from "../components/management/pageHeader.js";
@@ -10,16 +10,8 @@ import { PAGE_HEADER_CONFIGS } from "../components/management/pageHeaderConfigs.
 import { showManagementNotice } from "../components/management/managementAlerts.js";
 import { apiFetch } from "../utils/api.js";
 import { BARANGAYS } from "../utils/barangays.js";
-
-const CONFIG = {
-  intake: { label: "Animal Intake", description: "Incoming animals and intake conversion", icon: "bi-box-arrow-in-down", tone: "amber", dimension: "status", dimensionLabel: "Intake status", columns: [["date", "Intake Date"], ["id", "Intake ID"], ["animal", "Description"], ["source", "Source"], ["species", "Species"], ["status", "Intake Status"], ["conversion", "Conversion"], ["location", "Location"]] },
-  barangay: { label: "Barangay Stray Intake", description: "Barangay impounds and stray-animal origins", icon: "bi-geo-alt-fill", tone: "teal", dimension: "barangay", dimensionLabel: "Barangay origin", columns: [["date", "Intake Date"], ["id", "Intake ID"], ["barangay", "Barangay"], ["animal", "Description"], ["species", "Species"], ["condition", "Initial Condition"], ["status", "Intake Status"], ["location", "Pickup Location"], ["officer", "Barangay Officer"]] },
-  status: { label: "Animal Status", description: "Care stages and adoption readiness", icon: "bi-heart-pulse-fill", tone: "blue", dimension: "status", dimensionLabel: "Care stage", columns: [["date", "Intake Date"], ["id", "Animal ID"], ["animal", "Description"], ["species", "Species"], ["status", "Current Status"], ["clearance", "Clearance"], ["assessment", "Behavioral Assessment"]] },
-  adoption: { label: "Adoption", description: "Applications, approvals, and placements", icon: "bi-balloon-heart-fill", tone: "rose", dimension: "status", dimensionLabel: "Application status", columns: [["date", "Submitted"], ["id", "Application ID"], ["animalId", "Animal ID"], ["animal", "Shelter Description"], ["applicant", "Applicant"], ["contact", "Contact"], ["source", "Source"], ["status", "Status"], ["adoptionDate", "Adoption Date"], ["adoptedName", "Adopter-Given Name"]] },
-  medical: { label: "Medical & Quarantine", description: "Clinical activity and animal clearance", icon: "bi-clipboard2-pulse-fill", tone: "green", dimension: "type", dimensionLabel: "Clinical activity", columns: [["date", "Date"], ["animalId", "Animal ID"], ["animal", "Description"], ["type", "Record Type"], ["veterinarian", "Veterinarian"], ["diagnosis", "Diagnosis"], ["treatment", "Treatment"], ["inventoryItem", "Inventory Used"], ["quantityUsed", "Qty"], ["clearance", "Clearance"]] },
-  inventory: { label: "Inventory Usage", description: "Consumed stock and remaining supply", icon: "bi-box-seam-fill", tone: "stone", dimension: "stockStatus", dimensionLabel: "Stock condition", columns: [["date", "Usage Date"], ["inventoryItem", "Item"], ["quantityUsed", "Qty Used"], ["unit", "Unit"], ["remainingStock", "Remaining"], ["stockStatus", "Stock Status"], ["animalId", "Animal ID"], ["animal", "Description"], ["type", "Procedure"], ["veterinarian", "Veterinarian"]] },
-  surrender: { label: "Surrender Requests", description: "Owner requests, urgency, and outcomes", icon: "bi-file-earmark-text-fill", tone: "teal", dimension: "status", dimensionLabel: "Request status", columns: [["date", "Submitted"], ["id", "Request ID"], ["owner", "Owner"], ["barangay", "Barangay"], ["animal", "Animal Description"], ["species", "Species"], ["category", "NLP Category"], ["urgency", "Urgency"], ["status", "Status"]] },
-};
+import { REPORT_CONFIG as CONFIG, summaryCards, dimensionCounts } from "../utils/reports/reportConfig.js";
+import { buildReportData, formatReportingPeriod } from "../utils/reports/buildReportData.js";
 
 const CHART_COLORS = ["#780116", "#D1601E", "#186534", "#0A1D4B", "#B86A00", "#0D6E6E", "#8C8481"];
 let payload = { available: [], reports: {}, generatedAt: new Date().toISOString() };
@@ -28,7 +20,11 @@ let trendChart;
 let breakdownChart;
 let activePage = 1;
 const pageSize = 12;
-let printing = false;
+let exporting = false;
+let loading = false;
+let reportReady = false;
+let appliedPeriod = null;
+let loadVersion = 0;
 
 const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[char]));
 const text = (value) => value === null || value === undefined || value === "" ? "—" : String(value);
@@ -41,18 +37,6 @@ function workspace() {
   document.querySelector(".page-body").innerHTML = `
     <div class="reports-workspace">
       <div id="pageHeaderMount"></div>
-      <section class="print-report-header" aria-hidden="true">
-        <div class="print-letterhead"><div><span>ANIMUA</span><strong>Angeles City Shelter Management</strong></div><small>Operational Intelligence Report</small></div>
-        <div class="print-title-block"><span>Management Report</span><h1 id="printReportTitle">Operational Report</h1><p id="printReportMeta"></p></div>
-        <div class="print-scope-grid">
-          <div><span>Reporting period</span><strong id="printPeriod">Not specified</strong></div>
-          <div><span>Barangay scope</span><strong id="printBarangay">All barangays</strong></div>
-          <div><span>Prepared by</span><strong id="printPreparedBy">Management User</strong></div>
-          <div><span>Records reviewed</span><strong id="printRecordTotal">0</strong></div>
-        </div>
-        <div class="print-management-brief"><span>Purpose and scope</span><p id="printReportNarrative"></p><strong id="printReportFinding"></strong></div>
-      </section>
-      <footer class="print-document-footer" aria-hidden="true"><span>ANIMUA Shelter Management · Internal operational report</span><span>Generated from live shelter records</span></footer>
       <section class="report-command-card" aria-labelledby="reportControlsTitle">
         <div class="command-card-heading"><span class="command-icon" aria-hidden="true"><i class="bi bi-sliders"></i></span><div><span>Report controls</span><h2 id="reportControlsTitle">Focus the operational view</h2><p>Use a quick period or set exact dates, then search inside the selected dataset.</p></div></div>
         <div class="report-preset-row" aria-label="Quick reporting periods">
@@ -75,7 +59,7 @@ function workspace() {
       <section class="report-catalog-section"><div class="section-heading"><div><span class="section-kicker">Report catalog</span><h2>Choose a live operational dataset</h2></div><span class="live-data-pill"><i></i> Live shelter data</span></div><div class="report-tabs" id="liveReportTabs" role="tablist" aria-label="Operational report datasets"></div></section>
       <section class="report-overview-section" aria-labelledby="reportOverviewTitle">
         <div class="section-heading report-overview-heading"><div><span class="section-kicker">Management snapshot</span><h2 id="reportOverviewTitle">What the current report is showing</h2></div><span class="current-dataset-pill" id="currentDatasetLabel">Live report</span></div>
-        <div class="report-overview-grid report-print-summary"><div class="report-summary-grid" id="reportSummary"></div><aside class="report-insight-card" id="reportInsight"></aside></div>
+        <div class="report-overview-grid"><div class="report-summary-grid" id="reportSummary"></div><aside class="report-insight-card" id="reportInsight"></aside></div>
       </section>
       <section class="report-analytics-grid" aria-label="Report visual analysis">
         <article class="rpt-card report-chart-card">
@@ -96,11 +80,26 @@ function workspace() {
 }
 
 function periodLabel() {
-  const from = document.getElementById("dateFrom")?.value;
-  const to = document.getElementById("dateTo")?.value;
-  if (!from && !to) return "All available records";
-  const format = (value) => value ? new Date(`${value}T00:00:00`).toLocaleDateString("en-PH", { year: "numeric", month: "short", day: "numeric" }) : "earliest record";
-  return `${format(from)} – ${format(to)}`;
+  return formatReportingPeriod(appliedPeriod?.from, appliedPeriod?.to);
+}
+
+function selectedPeriodIsApplied() {
+  return appliedPeriod
+    && document.getElementById("dateFrom").value === appliedPeriod.from
+    && document.getElementById("dateTo").value === appliedPeriod.to;
+}
+
+function syncExportButtons() {
+  const disabled = exporting || loading || !reportReady || !CONFIG[active] || !selectedPeriodIsApplied();
+  for (const id of ["btnPrint", "btnExcel"]) {
+    const button = document.getElementById(id);
+    if (!button) continue;
+    button.disabled = Boolean(disabled);
+    button.setAttribute("aria-busy", String(exporting));
+    button.title = exporting ? "Generating report…"
+      : !selectedPeriodIsApplied() ? "Apply the selected period before exporting."
+      : !reportReady ? "Load a report before exporting." : "";
+  }
 }
 
 function setPresetActive(value) {
@@ -125,22 +124,42 @@ function applyPreset(value) {
 }
 
 async function load() {
+  const version = ++loadVersion;
   const from = document.getElementById("dateFrom").value;
   const to = document.getElementById("dateTo").value;
-  if (from && to && from > to) throw new Error("The From date cannot be later than the To date.");
+  reportReady = false;
+  loading = false;
+  syncExportButtons();
+  if (from && to && from > to) {
+    document.getElementById("btnApply")?.classList.remove("is-loading");
+    document.getElementById("reportDataPanel")?.setAttribute("aria-busy", "false");
+    throw new Error("The From date cannot be later than the To date.");
+  }
   const query = new URLSearchParams();
   if (from) query.set("from", from);
   if (to) query.set("to", to);
+  loading = true;
+  syncExportButtons();
   document.getElementById("btnApply")?.classList.add("is-loading");
   document.getElementById("reportDataPanel")?.setAttribute("aria-busy", "true");
   try {
-    payload = await apiFetch(`/reports${query.size ? `?${query.toString()}` : ""}`);
+    const result = await apiFetch(`/reports${query.size ? `?${query.toString()}` : ""}`);
+    if (version !== loadVersion) return;
+    payload = result;
+    appliedPeriod = { from, to };
+    reportReady = true;
     if (!payload.available.includes(active)) active = payload.available[0] || "";
     tabs();
     render();
+  } catch (error) {
+    if (version === loadVersion) throw error;
   } finally {
-    document.getElementById("btnApply")?.classList.remove("is-loading");
-    document.getElementById("reportDataPanel")?.setAttribute("aria-busy", "false");
+    if (version === loadVersion) {
+      loading = false;
+      syncExportButtons();
+      document.getElementById("btnApply")?.classList.remove("is-loading");
+      document.getElementById("reportDataPanel")?.setAttribute("aria-busy", "false");
+    }
   }
 }
 
@@ -219,56 +238,15 @@ function cellMarkup(key, value) {
   return safe;
 }
 
-function countWhere(list, key, matcher) {
-  return list.filter((row) => matcher.test(String(row[key] || ""))).length;
-}
-
-function summaryCards(list) {
-  const config = CONFIG[active];
-  const cards = [{ label: "Visible records", value: list.length, icon: "bi-list-check", tone: config.tone }];
-  if (active === "intake") {
-    const converted = list.filter((row) => row.conversion === "Converted").length;
-    cards.push({ label: "Converted to profile", value: converted, icon: "bi-arrow-repeat", tone: "green" }, { label: "Conversion rate", value: `${list.length ? Math.round((converted / list.length) * 100) : 0}%`, icon: "bi-percent", tone: "blue" });
-  } else if (active === "status") {
-    cards.push({ label: "Adoption ready", value: countWhere(list, "status", /^ready$/i), icon: "bi-house-heart", tone: "green" }, { label: "In quarantine", value: countWhere(list, "status", /quarantine/i), icon: "bi-shield-plus", tone: "rose" });
-  } else if (active === "adoption") {
-    const finalized = countWhere(list, "status", /finalized|adopted/i);
-    cards.push({ label: "Finalized placements", value: finalized, icon: "bi-balloon-heart", tone: "green" }, { label: "Placement share", value: `${list.length ? Math.round((finalized / list.length) * 100) : 0}%`, icon: "bi-percent", tone: "blue" });
-  } else if (active === "medical") {
-    cards.push({ label: "Cleared records", value: countWhere(list, "clearance", /clear|approved/i), icon: "bi-shield-check", tone: "green" }, { label: "Animals treated", value: new Set(list.map((row) => row.animalId).filter(Boolean)).size, icon: "bi-heart-pulse", tone: "blue" });
-  } else if (active === "inventory") {
-    cards.push({ label: "Total quantity used", value: list.reduce((sum, row) => sum + Number(row.quantityUsed || 0), 0), icon: "bi-box-arrow-up", tone: "amber" }, { label: "Critical stock links", value: countWhere(list, "stockStatus", /critical/i), icon: "bi-exclamation-triangle", tone: "rose" });
-  } else if (active === "surrender") {
-    cards.push({ label: "Urgent requests", value: countWhere(list, "urgency", /urgent|high|critical/i), icon: "bi-exclamation-diamond", tone: "rose" }, { label: "Pending review", value: countWhere(list, "status", /pending|review/i), icon: "bi-hourglass-split", tone: "amber" });
-  } else if (active === "barangay") {
-    const groups = dimensionCounts(list);
-    cards.push({ label: "Barangays represented", value: groups.length, icon: "bi-pin-map", tone: "teal" }, { label: groups[0] ? `Highest: ${groups[0][0]}` : "Highest barangay", value: groups[0]?.[1] || 0, icon: "bi-geo-alt-fill", tone: "rose" });
-  }
-  const allCells = list.length * config.columns.length;
-  const completed = list.reduce((total, row) => total + config.columns.filter(([key]) => text(row[key]) !== "—").length, 0);
-  cards.push({ label: "Data completeness", value: `${allCells ? Math.round((completed / allCells) * 100) : 0}%`, icon: "bi-database-check", tone: "stone" });
-  return cards.slice(0, 4);
-}
-
 function renderSummary(list) {
-  document.getElementById("reportSummary").innerHTML = summaryCards(list).map((card) => `<article class="rpt-kpi tone-${card.tone}"><span class="rpt-kpi-icon"><i class="bi ${card.icon}"></i></span><div><div class="rpt-kpi-val">${esc(card.value)}</div><div class="rpt-kpi-lbl">${esc(card.label)}</div></div></article>`).join("");
-}
-
-function dimensionCounts(list) {
-  const config = CONFIG[active];
-  const counts = new Map();
-  list.forEach((row) => {
-    const label = text(row[config.dimension]);
-    counts.set(label, (counts.get(label) || 0) + 1);
-  });
-  return [...counts.entries()].sort((left, right) => right[1] - left[1]);
+  document.getElementById("reportSummary").innerHTML = summaryCards(active, list).map((card) => `<article class="rpt-kpi tone-${card.tone}"><span class="rpt-kpi-icon"><i class="bi ${card.icon}"></i></span><div><div class="rpt-kpi-val">${esc(card.value)}</div><div class="rpt-kpi-lbl">${esc(card.label)}</div></div></article>`).join("");
 }
 
 function renderInsight(list) {
   const config = CONFIG[active];
-  const cards = summaryCards(list);
+  const cards = summaryCards(active, list);
   const completeness = cards.find((card) => card.label === "Data completeness")?.value || "0%";
-  const topGroup = dimensionCounts(list)[0];
+  const topGroup = dimensionCounts(active, list)[0];
   const signal = topGroup ? `${topGroup[0]} is the largest ${config.dimensionLabel.toLowerCase()} group (${topGroup[1]} of ${list.length}).` : "No dominant group is available for this view.";
   document.getElementById("reportInsight").innerHTML = `<span class="insight-icon"><i class="bi bi-stars"></i></span><div><span class="section-kicker">Management insight</span><h3>${esc(config.label)} at a glance</h3><p>${list.length ? `${esc(signal)} Use the trend and breakdown below to identify changes that need follow-up.` : "No live records match this period and search combination."}</p><div class="completeness-row"><span><i style="width:${esc(completeness)}"></i></span><strong>${esc(completeness)}</strong><small>data completeness</small></div></div>`;
 }
@@ -293,7 +271,7 @@ function timeline(list) {
 function renderCharts(list) {
   const config = CONFIG[active];
   const time = timeline(list);
-  const breakdown = dimensionCounts(list).slice(0, 7);
+  const breakdown = dimensionCounts(active, list).slice(0, 7);
   const barangayRanking = active === "barangay";
   trendChart = chart("reportTrendChart", trendChart, {
     type: "line",
@@ -313,22 +291,6 @@ function renderCharts(list) {
   document.getElementById("breakdownTotal").textContent = list.length;
   document.querySelector(".report-doughnut-wrap")?.classList.toggle("is-ranking", barangayRanking);
   document.getElementById("reportChartLegend").innerHTML = breakdown.length ? breakdown.map(([label, count], index) => `<div><i style="background:${CHART_COLORS[index]}"></i><span><strong>${esc(label)}</strong><small>${count} · ${list.length ? Math.round((count / list.length) * 100) : 0}%</small></span></div>`).join("") : `<p class="text-muted mb-0">No categories to display.</p>`;
-}
-
-function renderPrintHeader(list) {
-  const config = CONFIG[active];
-  document.getElementById("printReportTitle").textContent = `${config.label} Operational Report`;
-  const barangay = document.getElementById("barangayFilter")?.value;
-  document.getElementById("printReportMeta").textContent = `${periodLabel()} · ${barangay || "All barangays"} · ${list.length} record${list.length === 1 ? "" : "s"} · Generated ${new Date(payload.generatedAt).toLocaleString("en-PH")}`;
-  const topGroup = dimensionCounts(list)[0];
-  document.getElementById("printPeriod").textContent = periodLabel();
-  document.getElementById("printBarangay").textContent = barangay || "All barangays";
-  document.getElementById("printPreparedBy").textContent = getUserName() || "Shelter Management";
-  document.getElementById("printRecordTotal").textContent = list.length;
-  document.getElementById("printReportNarrative").textContent = `This report summarizes ${config.description.toLowerCase()} using live shelter records within the selected reporting period and barangay scope. Barangay values come from the structured intake or owner record; pickup location remains a separate, more specific field.`;
-  document.getElementById("printReportFinding").textContent = topGroup
-    ? `Primary finding: ${topGroup[0]} accounts for ${topGroup[1]} record${topGroup[1] === 1 ? "" : "s"} (${list.length ? Math.round((topGroup[1] / list.length) * 100) : 0}%) in the current ${config.dimensionLabel.toLowerCase()} breakdown.`
-    : "Primary finding: No matching records were available for analysis.";
 }
 
 function paginationItems(totalPages) {
@@ -364,13 +326,13 @@ function reportPrimaryKey(config) {
 
 function render() {
   const config = CONFIG[active];
-  if (!config) return;
+  if (!config || !reportReady) return;
   syncBarangayFilter();
   const list = rows();
   const totalPages = Math.max(1, Math.ceil(list.length / pageSize));
   activePage = Math.min(activePage, totalPages);
   const firstRecord = list.length ? (activePage - 1) * pageSize + 1 : 0;
-  const pageRows = printing ? list : list.slice(firstRecord - 1, firstRecord - 1 + pageSize);
+  const pageRows = list.slice(firstRecord - 1, firstRecord - 1 + pageSize);
   const allCount = Object.values(payload.reports).reduce((total, records) => total + (Array.isArray(records) ? records.length : 0), 0);
   [["reportSourceCount", payload.available.length], ["reportAllCount", allCount], ["reportVisibleCount", list.length], ["heroReportCount", list.length]].forEach(([id, value]) => { const element = document.getElementById(id); if (element) element.textContent = value; });
   document.getElementById("activePeriodLabel").textContent = periodLabel();
@@ -383,74 +345,65 @@ function render() {
   document.getElementById("reportHead").innerHTML = config.columns.map(([key, label]) => `<th class="report-column-${esc(key)}" scope="col">${esc(label)}</th>`).join("");
   const primaryKey = reportPrimaryKey(config);
   document.getElementById("reportBody").innerHTML = list.length ? pageRows.map((row) => `<tr class="management-card-row report-record-card">${config.columns.map(([key, label]) => `<td class="report-cell report-cell-${esc(key)} ${key === primaryKey ? "management-card-primary report-card-identity" : ""}"><span class="management-mobile-label" aria-hidden="true">${esc(label)}</span><span class="report-cell-value">${cellMarkup(key, row[key])}</span></td>`).join("")}</tr>`).join("") : `<tr><td colspan="${config.columns.length}"><div class="report-empty-state"><span><i class="bi bi-bar-chart"></i></span><strong>No matching report records</strong><small>Adjust the date range, barangay, or search to broaden this dataset.</small></div></td></tr>`;
-  const lastRecord = printing ? list.length : Math.min(firstRecord + pageRows.length - 1, list.length);
+  const lastRecord = Math.min(firstRecord + pageRows.length - 1, list.length);
   document.getElementById("reportTableFooter").textContent = list.length
-    ? `Showing ${printing ? 1 : firstRecord}–${lastRecord} of ${list.length} filtered records (${(payload.reports[active] || []).length} total in ${config.label}).`
+    ? `Showing ${firstRecord}–${lastRecord} of ${list.length} filtered records (${(payload.reports[active] || []).length} total in ${config.label}).`
     : "No records match the current date, barangay, and search filters.";
-  document.getElementById("reportPagination").hidden = printing;
-  if (!printing) renderPagination(list.length);
+  renderPagination(list.length);
   renderSummary(list);
   renderInsight(list);
   renderCharts(list);
-  renderPrintHeader(list);
+  syncExportButtons();
 }
 
-function worksheetWidths(columns, list) {
-  return columns.map(([key, label]) => ({ wch: Math.min(42, Math.max(12, label.length + 2, ...list.slice(0, 250).map((row) => text(row[key]).length + 2))) }));
-}
-
-async function exportExcel() {
-  const config = CONFIG[active];
-  const list = rows();
-  if (!config || !list.length) return;
-  if (typeof XLSX === "undefined") {
+async function exportSelectedReport(format) {
+  if (exporting || loading || !reportReady || !CONFIG[active] || !selectedPeriodIsApplied()) return;
+  exporting = true;
+  syncExportButtons();
+  const button = document.getElementById(format === "pdf" ? "btnPrint" : "btnExcel");
+  const originalContent = button.innerHTML;
+  button.innerHTML = '<i class="bi bi-hourglass-split" aria-hidden="true"></i><span>Generating…</span>';
+  try {
+    const list = rows();
+    const report = buildReportData({
+      reportType: active,
+      config: CONFIG[active],
+      records: list,
+      summary: summaryCards(active, list),
+      breakdown: dimensionCounts(active, list),
+      dateFrom: appliedPeriod.from,
+      dateTo: appliedPeriod.to,
+      generatedBy: getUserName() || getUserRole(),
+      filters: [
+        { label: "Barangay", value: document.getElementById("barangayFilter").value },
+        { label: "Search", value: document.getElementById("reportSearch").value.trim() },
+      ],
+    });
+    if (format === "pdf") {
+      const { exportReportToPDF } = await import("../utils/reports/pdfExporter.js");
+      await exportReportToPDF(report);
+    } else {
+      const { exportReportToExcel } = await import("../utils/reports/excelExporter.js");
+      await exportReportToExcel(report);
+    }
+  } catch (error) {
+    console.error("Report export failed", error);
     await showManagementNotice({
       icon: "error",
-      title: "Excel export unavailable",
-      text: "Please check the connection and try the export again.",
+      title: `${format === "pdf" ? "PDF" : "Excel"} export failed`,
+      text: "We couldn't generate this report. Please try again. If the problem continues, reload the Reports page.",
       confirmButtonText: "Close",
     });
-    return;
+  } finally {
+    exporting = false;
+    button.innerHTML = originalContent;
+    syncExportButtons();
   }
-  const cards = summaryCards(list);
-  const workbook = XLSX.utils.book_new();
-  workbook.Props = { Title: `${config.label} Operational Report`, Subject: periodLabel(), Author: "ANIMUA Shelter Management", CreatedDate: new Date() };
-
-  const summaryRows = [
-    ["ANIMUA SHELTER MANAGEMENT"],
-    [`${config.label} Operational Report`],
-    ["Reporting period", periodLabel()],
-    ["Generated", new Date(payload.generatedAt).toLocaleString("en-PH")],
-    ["Data source", "Live shelter management records"],
-    ["Barangay filter", document.getElementById("barangayFilter").value || "All barangays"],
-    ["Search filter", document.getElementById("reportSearch").value.trim() || "None"],
-    [],
-    ["MANAGEMENT SNAPSHOT"],
-    ["Metric", "Value"],
-    ...cards.map((card) => [card.label, card.value]),
-    [],
-    [config.dimensionLabel.toUpperCase(), "Records", "Share"],
-    ...dimensionCounts(list).map(([label, count]) => [label, count, list.length ? count / list.length : 0]),
-  ];
-  const summarySheet = XLSX.utils.aoa_to_sheet(summaryRows);
-  summarySheet["!cols"] = [{ wch: 34 }, { wch: 24 }, { wch: 16 }];
-  summarySheet["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 2 } }, { s: { r: 1, c: 0 }, e: { r: 1, c: 2 } }];
-  const shareStart = 12 + cards.length;
-  for (let row = shareStart; row < summaryRows.length; row += 1) {
-    const cell = summarySheet[`C${row + 1}`];
-    if (cell) cell.z = "0%";
-  }
-  XLSX.utils.book_append_sheet(workbook, summarySheet, "Management Summary");
-
-  const recordRows = [config.columns.map(([, label]) => label), ...list.map((row) => config.columns.map(([key]) => text(row[key])))];
-  const recordsSheet = XLSX.utils.aoa_to_sheet(recordRows);
-  recordsSheet["!cols"] = worksheetWidths(config.columns, list);
-  recordsSheet["!autofilter"] = { ref: `A1:${XLSX.utils.encode_col(config.columns.length - 1)}${list.length + 1}` };
-  XLSX.utils.book_append_sheet(workbook, recordsSheet, "Filtered Records");
-  XLSX.writeFile(workbook, `animua-${active}-report-${localDate()}.xlsx`, { compression: true });
 }
 
 function showError(errorValue) {
+  reportReady = false;
+  syncExportButtons();
   console.error(errorValue);
   const body = document.getElementById("reportBody");
   if (body) body.innerHTML = `<tr><td colspan="${CONFIG[active]?.columns.length || 1}"><div class="report-empty-state is-error"><span><i class="bi bi-cloud-slash"></i></span><strong>Unable to load this report</strong><small>${esc(errorValue.message)}</small></div></td></tr>`;
@@ -461,8 +414,8 @@ function bindControls() {
   document.getElementById("btnClear").addEventListener("click", () => { activePage = 1; document.getElementById("reportSearch").value = ""; document.getElementById("barangayFilter").value = ""; applyPreset("all"); });
   document.getElementById("reportSearch").addEventListener("input", () => { activePage = 1; render(); });
   document.getElementById("barangayFilter").addEventListener("change", () => { activePage = 1; render(); });
-  document.getElementById("dateFrom").addEventListener("change", () => setPresetActive(""));
-  document.getElementById("dateTo").addEventListener("change", () => setPresetActive(""));
+  document.getElementById("dateFrom").addEventListener("change", () => { setPresetActive(""); syncExportButtons(); });
+  document.getElementById("dateTo").addEventListener("change", () => { setPresetActive(""); syncExportButtons(); });
   document.querySelectorAll("[data-period]").forEach((button) => button.addEventListener("click", () => applyPreset(button.dataset.period)));
   document.getElementById("reportPagination").addEventListener("click", (event) => {
     const button = event.target.closest("button[data-page]");
@@ -471,10 +424,8 @@ function bindControls() {
     render();
     document.querySelector(".report-data-card")?.scrollIntoView({ behavior: "smooth", block: "start" });
   });
-  document.getElementById("btnExcel").addEventListener("click", exportExcel);
-  document.getElementById("btnPrint").addEventListener("click", () => window.print());
-  window.addEventListener("beforeprint", () => { printing = true; render(); });
-  window.addEventListener("afterprint", () => { printing = false; render(); });
+  document.getElementById("btnExcel").addEventListener("click", () => exportSelectedReport("excel"));
+  document.getElementById("btnPrint").addEventListener("click", () => exportSelectedReport("pdf"));
 }
 
 async function init() {
