@@ -12,22 +12,66 @@ The system brings animal information, public requests, and shelter supplies into
 
 ## Public portal
 
-| Feature | Overview |
-| --- | --- |
-| **Find Furbabies** | Browse adoptable dogs and cats, search animal profiles, and view photos, characteristics, and care information. |
-| **Compatibility quiz** | Answer lifestyle and care questions in English or Tagalog to discover animals that may fit the adopter's household. |
-| **Adoption and surrender requests** | Submit a request and follow its review status, appointments, and next steps. |
+### Home page
+
+The home page introduces ANIMUA and gives residents a starting point for browsing animals, taking the compatibility quiz, reading shelter updates, and learning about the adoption process. Featured stories connect visitors with new furbabies, rescue updates, success stories, and upcoming events.
+
+![ANIMUA home page with animal browsing, compatibility matching, and featured community updates](docs/screenshots/public-home.jpg)
+
+### Find Furbabies and adoption
+
+Residents can search adoptable dogs and cats, filter by species, and view photos, identifying details, health information, and behavioral traits. Each profile provides a closer look at the animal and an entry point to the adoption application, where applicants can provide supporting information and documents for shelter review.
 
 <details>
-<summary>View public portal screenshots</summary>
+<summary>View animal browsing and profile screenshots</summary>
 
-**Find Furbabies**
+**Browse adoptable animals**
 
 ![Public animal browsing with profiles and adoption actions](docs/screenshots/find-furbabies.jpg)
 
-**Pet compatibility quiz**
+**Explore an animal's profile**
+
+![Animal profile showing a photo, identifying details, care information, traits, and adoption action](docs/screenshots/public-animal-profile.jpg)
+
+</details>
+
+### Pet compatibility quiz
+
+The guided quiz is available in English and Tagalog. It considers lifestyle, household, living space, and care preferences to recommend suitable shelter animals. Residents can revisit saved results and use their recommendations when exploring adoption options.
+
+<details>
+<summary>View the compatibility quiz</summary>
 
 ![Compatibility quiz with English and Tagalog language options](docs/screenshots/compatibility-quiz.jpg)
+
+</details>
+
+### Surrender requests and My Applications
+
+- **Surrender page:** explains the shelter review process and lets residents provide animal details, photos, and a surrender reason. Requests are reviewed according to the animal's needs and shelter availability.
+- **My Applications:** brings adoption and surrender submissions together, with status updates, reference numbers, request details, and appointment or pickup information when applicable.
+
+<details>
+<summary>View surrender guidance and application tracking</summary>
+
+**Surrender guidance**
+
+![Public surrender page explaining how requests are submitted, assessed, and reviewed](docs/screenshots/public-surrender.jpg)
+
+**My Applications**
+
+![My Applications page showing illustrative adoption and surrender requests and their statuses](docs/screenshots/my-applications.jpg)
+
+</details>
+
+### Announcements and assistance
+
+The announcements page shares news and alerts, rescue updates, adoption success stories, and upcoming events. Visitors can search posts and filter by topic. Contact conversations let residents follow up with shelter personnel, while the animal welfare chatbot provides another way to ask for guidance.
+
+<details>
+<summary>View announcements and upcoming events</summary>
+
+![Public announcements page with rescue updates, topic filters, and upcoming events](docs/screenshots/public-announcements.jpg)
 
 </details>
 
@@ -35,7 +79,7 @@ The system brings animal information, public requests, and shelter supplies into
 
 ### Animal profiling
 
-Maintain each animal's identifying details, photos, intake source, housing, and care status. Behavioral assessments, medical records, and quarantine monitoring help personnel determine readiness for adoption.
+Record incoming animals and convert intake records into profiles. Maintain identifying details, photos, intake source, housing, and care status. Behavioral assessments, medical records, quarantine monitoring, and veterinary clearance help personnel determine readiness for adoption.
 
 ![Animal profiling workspace showing animal records and lifecycle stages](docs/screenshots/animal-profiling.jpg)
 
@@ -51,4 +95,12 @@ Monitor food, medicine, and other shelter supplies. Track stock additions and us
 
 ![Inventory management workspace showing supplies, stock levels, and forecasts](docs/screenshots/inventory-management.jpg)
 
-*Screenshots show illustrative animal and inventory records.*
+### Adoption coordination and daily operations
+
+Shelter personnel review adoption applications, coordinate pickup, and finalize placements. Dashboard summaries, PDF and Excel reports, announcements, contact messages, archived records, and audit history support the team's daily work. Management access follows assigned roles and permissions.
+
+## How the portals work together
+
+A surrender approved by the shelter can become an intake record and then an animal profile. Personnel complete assessments and care before marking the animal ready for adoption. Residents can then discover the animal, explore compatibility, and submit an application, while shelter personnel manage review and placement.
+
+*Screenshots show illustrative animal, application, community, and inventory records.*
