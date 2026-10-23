@@ -5,7 +5,7 @@ not read from or write to the production Firebase project.
 
 ## Prerequisites
 
-- Node.js and the project dependencies
+- Node.js 24.22.1 or a newer 24.x release, and the project dependencies
 - Firebase CLI
 - Java JDK 21 or newer
 

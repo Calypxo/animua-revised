@@ -10,6 +10,14 @@ ANIMUA is an animal adoption and shelter management system developed for the Ang
 
 The system brings animal information, public requests, and shelter supplies into one place, helping the team follow each animal's journey from arrival to adoption.
 
+## Node.js runtime
+
+Use **Node.js 24.22.1 or a newer 24.x release** for the root tools, backend, public frontend, and management frontend. Version 24.22.1 includes the [CVE-2026-111497 Brotli security fix](https://nodejs.org/en/blog/vulnerability/october-2026-security-releases). The `.node-version` and `.nvmrc` files pin the development runtime; each package rejects unsupported Node versions during npm installation.
+
+Install the patched runtime from [Node.js](https://nodejs.org/en/blog/release/v24.22.1), restart terminals and running Node processes, and confirm `node --version` before installing dependencies or building.
+
+For the Render backend, set any existing `NODE_VERSION` environment variable to `24.22.1` (it overrides repository version files), then redeploy and confirm the Node version in the build logs. Update Node on any other build or hosting environment and restart or redeploy its services as well. Updating repository files alone does not patch an already running server. See [Render's Node version settings](https://render.com/docs/node-version).
+
 ## Public portal
 
 ### Home page

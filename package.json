@@ -1,4 +1,7 @@
 {
+  "engines": {
+    "node": ">=24.22.1 <25"
+  },
   "scripts": {
     "build": "npm run build:firebase",
     "build:firebase": "npm --prefix frontend run build && npm --prefix admin-frontend run build",
